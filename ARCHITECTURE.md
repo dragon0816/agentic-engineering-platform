@@ -8,7 +8,7 @@ This repository unifies the proven capabilities currently spread across five sou
 
 Core rule:
 
-> Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. n8n coordinates **WHEN**. Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Evaluation proves behaviour remains acceptable.
+> Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. n8n coordinates **WHEN**. Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
 
 ## 2. Target architecture
 
@@ -29,15 +29,19 @@ User / Telegram / Web UI / Event
 | Knowledge |       | Skills    |      | Workflows  |
 | retrieval |       | procedure |      | deterministic|
 +-----------+       +-----------+      +------+-----+
-                                              |
-                                      +-------v-------+
-                                      | Tool / MCP    |
-                                      | Capability    |
-                                      +-------+-------+
-                                              |
-                         +--------------------+------------------+
-                         |                    |                  |
-                    Host Bridge          APIs/Git          Office/DUT/etc.
+      |                 |                     |
+      +--------+--------+                     |
+               |                              |
+               v                              v
+       +---------------+              +---------------+
+       | Model Router  |              | Tool / MCP    |
+       +-------+-------+              | Capability    |
+               |                      +-------+-------+
+        +------+------+                       |
+        |      |      |          +-------------+----------------+
+        v      v      v          |             |                |
+     OpenAI  Ollama  Company  Host Bridge   APIs/Git      Office/DUT/etc.
+      /other  local   gateway
 
 Cross-cutting: Evaluation · Guardrails · Observability · Configuration · Secrets
 ```
@@ -53,13 +57,15 @@ Request
 
 Do not put an LLM in front of operations that already have a reliable deterministic route. This preserves the strongest property already present in `telegram-local-agent`: cheap deterministic routing before LLM parsing.
 
+Request routing and model routing are separate decisions. The Agent Gateway decides whether reasoning is needed and which capability/workflow should own the request. Only when a model call is required does the Model Router choose a model that satisfies the task requirements and policy.
+
 ## 4. Platform boundaries
 
 ### Agent platform
-Owns conversation/request context, intent resolution, planning, tool selection, bounded reasoning loops, approvals and agent lifecycle. It must not embed Windows/Office automation or workflow-specific business logic.
+Owns conversation/request context, intent resolution, planning, tool selection, bounded reasoning loops, approvals and agent lifecycle. It must not embed Windows/Office automation, provider-specific model APIs or workflow-specific business logic.
 
 ### Skills
-Human- and model-readable procedures, domain rules, constraints, examples and acceptance criteria. A skill is not the executable implementation. Skills may reference tools/workflows but should not hide side effects.
+Human- and model-readable procedures, domain rules, constraints, examples and acceptance criteria. A skill is not the executable implementation. Skills may reference tools/workflows but should not hide side effects. Skills may declare model capability requirements such as reasoning level, tool calling, vision, context size or local-only processing; they should not normally hard-code a specific provider/model.
 
 ### Tools
 Atomic executable capabilities with typed inputs/outputs and explicit side-effect classification. Tools should be independently testable. Existing plain async tool functions are a useful migration source, but their contracts should become explicit.
@@ -76,11 +82,57 @@ Event/business orchestration: schedules, triggers, coarse branching, notificatio
 ### Knowledge platform
 Owns Drop -> Raw -> Wiki and retrieval. Raw sources are immutable. Document ingestion must preserve provenance. Phase 1+ should extend ingestion to extract text, tables and images from PDF/PPT/DOCX and preserve page/slide/image relationships in Raw Markdown before curation into Wiki.
 
-### Model gateway
-Provider abstraction and company/internal-model access belong in infrastructure, separate from knowledge and evaluation. The existing LiteLLM gateway is a migration source for this boundary.
+### Model interface
+The rest of the platform depends on one provider-neutral model contract rather than directly importing OpenAI, Ollama, LiteLLM or another provider SDK. The contract should represent platform needs such as text generation, structured output, tool calling, streaming and multimodal input without leaking provider-specific request objects into agent/knowledge code.
+
+### Model router
+Chooses a model only when a model is actually required. Selection is based on declared requirements and policy, for example:
+
+```yaml
+requirements:
+  reasoning: high
+  tool_calling: true
+  vision: false
+  local_only: true
+```
+
+Routing policy may additionally consider availability, latency, cost/quota, privacy/data classification and evaluation results. Model routing must be observable so evaluations can compare providers/models for the same cases.
+
+### Provider adapters / model gateway
+Provider adapters implement the common model interface for OpenAI-compatible APIs, Ollama, company/internal gateways and future providers. Provider-specific authentication, wire formats and compatibility workarounds stay here. The existing LiteLLM gateway is a migration source, not the abstraction consumed directly by the rest of the platform.
+
+A provider/model change should normally be configuration, not a code change in Agent, Skill, Workflow or Knowledge.
+
+Example configuration:
+
+```yaml
+models:
+  local_reasoning:
+    provider: ollama
+    model: qwen3:8b
+    capabilities: [text, tools]
+    local_only: true
+
+  company_reasoning:
+    provider: company_gateway
+    model: gpt-5.5
+    capabilities: [text, tools, structured_output]
+
+  cloud_coding:
+    provider: openai
+    model: <configured-model>
+    capabilities: [text, tools, structured_output]
+
+routes:
+  default: local_reasoning
+  coding: cloud_coding
+  knowledge: company_reasoning
+```
+
+Configuration names such as `cloud_coding` are stable logical aliases; concrete model IDs may change without changing callers.
 
 ### Evaluation / harness
-Owns benchmark cases, expected outcomes, graders, regression tests and trace-based quality checks. Every new agent capability requires evaluation coverage. Deterministic workflow tests and probabilistic agent evaluation are separate test classes.
+Owns benchmark cases, expected outcomes, graders, regression tests and trace-based quality checks. Every new agent capability requires evaluation coverage. Deterministic workflow tests and probabilistic agent evaluation are separate test classes. Model evaluation should be able to run the same case set across multiple configured model aliases and compare quality, latency, reliability and usage/cost without changing the Agent implementation.
 
 ## 5. Proposed repository layout
 
@@ -107,7 +159,13 @@ agentic-engineering-platform/
 │   │   ├── ingestion/
 │   │   ├── processing/
 │   │   └── retrieval/
-│   ├── gateway/
+│   ├── models/
+│   │   ├── interface/
+│   │   ├── router/
+│   │   └── providers/
+│   │       ├── ollama/
+│   │       ├── openai_compatible/
+│   │       └── company_gateway/
 │   └── common/
 ├── skills/
 ├── workflows/
@@ -118,6 +176,7 @@ agentic-engineering-platform/
 ├── evaluation/
 │   ├── cases/
 │   ├── graders/
+│   ├── model_comparison/
 │   └── regression/
 ├── integrations/
 │   └── n8n/
@@ -148,29 +207,31 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 
 1. Existing source repositories remain unchanged during migration until replacement behaviour is validated.
 2. Deterministic routes take precedence over LLM reasoning.
-3. Side-effecting operations must have explicit policy and approval classification.
-4. Workflows must be independently executable/testable where practical.
-5. Raw knowledge is immutable; generated/curated knowledge preserves provenance.
-6. Secrets never live in committed configuration.
-7. New capabilities require regression/evaluation cases.
-8. Migration is incremental; do not perform a five-repository big-bang merge.
-9. Observability must record route/plan/tool/workflow outcome without logging secrets.
-10. Agent loops are bounded and must surface a structured failure/needs-input result rather than spin indefinitely.
+3. Agent/Skill/Workflow/Knowledge code must not depend directly on a concrete LLM provider SDK; use the model interface.
+4. Model selection is policy/configuration driven and observable; logical model aliases are preferred over hard-coded model IDs.
+5. Side-effecting operations must have explicit policy and approval classification.
+6. Workflows must be independently executable/testable where practical.
+7. Raw knowledge is immutable; generated/curated knowledge preserves provenance.
+8. Secrets never live in committed configuration.
+9. New capabilities require regression/evaluation cases.
+10. Migration is incremental; do not perform a five-repository big-bang merge.
+11. Observability must record route/plan/model/tool/workflow outcome without logging secrets.
+12. Agent loops are bounded and must surface a structured failure/needs-input result rather than spin indefinitely.
 
 ## 8. Migration strategy
 
 Phase 0: architecture, contracts, migration inventory.
 
-Phase 1: common contracts + platform skeleton + CI/evaluation baseline.
+Phase 1: common contracts + **model interface/router/provider adapter contracts** + platform skeleton + CI/evaluation baseline.
 
-Phase 2: agent runtime/routing/skills/tools/MCP.
+Phase 2: agent runtime/routing/skills/tools/MCP using the provider-neutral model interface.
 
 Phase 3: deterministic workflow + Host Bridge integration.
 
-Phase 4: knowledge Drop -> Raw -> Wiki, including multimodal ingestion/provenance.
+Phase 4: knowledge Drop -> Raw -> Wiki, including multimodal ingestion/provenance through model capability requirements rather than a hard-coded vision provider.
 
-Phase 5: model gateway and external integrations.
+Phase 5: provider adapters/model gateway and external integrations.
 
-Phase 6: guardrails, approvals, tracing and full evaluation harness.
+Phase 6: guardrails, approvals, tracing and full evaluation harness, including cross-model comparison.
 
 Phase 7: end-to-end validation and controlled deprecation of source repositories.
