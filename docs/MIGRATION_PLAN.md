@@ -1,10 +1,12 @@
 # Migration Plan
 
-Status: Phase 0 draft
+Status: Phase 1 foundation
 
 ## Objective
 
 Consolidate capabilities from the existing repositories into `agentic-engineering-platform` through contract-first, test-backed migration. This is not a source-tree merge.
+
+The target is a **multi-user, contribution-driven engineering automation platform**. Team members can develop, validate, publish, discover, reuse and evolve Tasks, Workflows, Skills, Knowledge and Agent profiles. Platform capability grows through contributions without requiring changes to the core runtime.
 
 ## Source disposition
 
@@ -29,11 +31,13 @@ No source repository modifications.
 
 ## Phase 1 — Foundation
 
-Create repository skeleton and shared contracts. Establish `pyproject.toml`, test runner, lint/type checks and CI. Define core models such as `RequestContext`, `RouteDecision`, `CapabilitySpec`, `CapabilityResult`, `WorkflowRun`, `ApprovalRequest`, `KnowledgeSource` and trace identifiers.
+Create repository skeleton and shared contracts. Establish `pyproject.toml`, test runner, lint/type checks and CI. Define core models such as `RequestContext`, `RouteDecision`, `CapabilitySpec`, `CapabilityResult`, `WorkflowRun`, `ApprovalRequest`, `KnowledgeSource`, `TaskManifest`, `WorkflowManifest`, `AgentProfile`, package/registry metadata and trace identifiers.
+
+Define the first Platform Registry contracts for contribution lifecycle: owner, semantic version, lifecycle state (`draft`, `validated`, `published`, `deprecated`), dependencies, compatibility, permissions/approval classification and discoverability. Define Bridge/worker registration contracts so execution nodes can advertise installed capabilities and local resources. Registry/distribution must remain separate from execution authorization.
 
 Before implementation migration, add characterization tests around selected source behaviours.
 
-Exit criteria: skeleton installs cleanly; CI passes; contracts are documented; no production side effects.
+Exit criteria: skeleton installs cleanly; CI passes; contracts are documented; a side-effect-free sample Task can be represented by a manifest and discovered through an in-memory registry; Bridge/worker capability advertisement has a typed contract; no production side effects.
 
 ## Phase 2 — Agent and capability layer
 
@@ -58,11 +62,11 @@ Adopt the `rs_workflow_system` separation:
 orchestrator -> Host Bridge router -> service/job -> local capability
 ```
 
-Preserve the ability to run jobs independently of n8n. Build an adapter so Agent can invoke the same workflow contract that n8n invokes. Do not fork separate 'agent workflows' and 'n8n workflows' for the same operation.
+Preserve the ability to run jobs independently of n8n. The primary path is Agent/CLI -> Workflow or Capability contract -> Host Bridge/job. n8n is an optional event/business automation adapter that may invoke the same contract for schedules, triggers, notifications or SaaS integration. Do not fork separate Agent, CLI and n8n implementations for the same operation.
 
 Selectively migrate business workflows from `n8n_work_flow`; where both repositories solve the same problem, prefer the Host Bridge/service/job architecture and retain older scripts only as behavioural references/tests.
 
-Exit criteria: one representative engineering workflow can be triggered by deterministic command, Agent and n8n through one underlying contract.
+Exit criteria: one representative engineering workflow can be triggered by deterministic command and Agent through one underlying contract; when n8n integration is enabled, it invokes that same contract without becoming a runtime dependency.
 
 ## Phase 4 — Knowledge platform
 
@@ -140,7 +144,7 @@ Do **not** start by copying all source files. The first migrated behaviour shoul
 ## Open decisions for later phases
 
 - exact agent runtime/SDK implementation;
-- whether n8n remains required for all scheduled workflows or only business/event automation;
+- which business/event integrations justify enabling the optional n8n adapter;
 - storage/index technology for knowledge retrieval;
 - approval UX across Telegram/Web/other channels;
 - deployment topology for gateway, Agent runtime and Host Bridge;
