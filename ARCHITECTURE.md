@@ -10,7 +10,48 @@ Core rule:
 
 > Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. n8n coordinates **WHEN**. Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
 
-## 2. Target architecture
+## 2. Core requirements
+
+### Multi-user and contribution-driven platform
+
+The platform is designed as a **multi-user, contribution-driven engineering automation platform**. Team members can develop, validate, publish, discover, reuse and evolve **Tasks, Workflows, Skills, Knowledge and Agent profiles**. Platform capability grows through team contributions **without requiring changes to the core runtime**.
+
+The platform therefore provides shared mechanisms for ownership, versioning, validation, review and approval, publishing, discovery, dependency management, permissions and lifecycle management.
+
+A contribution is developed and validated in an isolated workspace before it becomes a shared platform asset:
+
+```text
+Engineer A        Engineer B        Engineer C
+    |                 |                 |
+    +------- develop / contribute ------+
+                      |
+                      v
+              Platform Registry
+        +-------------+-------------+
+        |             |             |
+        v             v             v
+      Tasks       Workflows       Skills
+        |             |             |
+        +-------------+-------------+
+                      |
+             Knowledge / Agents
+                      |
+                      v
+                Shared Platform
+                      |
+          +-----------+-----------+
+          |           |           |
+          v           v           v
+       Bridge A    Bridge B    Bridge C
+```
+
+The **Platform Registry** is the shared control plane for published assets and their metadata. It is distinct from execution. A **Host Bridge / worker** advertises installed capabilities and local resources and executes Tasks/Workflows close to Windows COM, browsers, DUTs, instruments, files or other local dependencies.
+
+Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
+
+**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
+
+## 3. Target architecture
 
 ```text
 User / Telegram / Web UI / Event
@@ -58,7 +99,7 @@ Cross-cutting: Evaluation · Guardrails · Observability · Configuration · Sec
 
 The platform is **one agent runtime with N agent profiles**, not N independent frameworks. Agent profiles share the model layer, knowledge, capability registry, workflow engine, policy and observability.
 
-## 3. Routing policy
+## 4. Routing policy
 
 ```text
 Request
@@ -78,7 +119,7 @@ Model Router: Which configured model satisfies this model call?
 Workflow:     How exactly is the deterministic operation executed?
 ```
 
-## 4. Platform boundaries
+## 5. Platform boundaries
 
 ### Agent Gateway
 The platform entry point. Owns request normalization, deterministic-first routing, top-level policy/approval checks, trace/session creation and selection of the owning agent when reasoning is needed. The Gateway should not contain specialist domain prompts or detailed workflow logic.
@@ -193,7 +234,7 @@ Owns benchmark cases, expected outcomes, graders, regression tests and trace-bas
 
 Multi-agent evaluation must additionally verify correct owner selection, allowed delegation targets, bounded delegation, context passed to specialists and prohibited cross-agent capabilities.
 
-## 5. Proposed repository layout
+## 6. Proposed repository layout
 
 ```text
 agentic-engineering-platform/
@@ -251,7 +292,7 @@ agentic-engineering-platform/
 
 `agents/`, `skills/`, `workflows/` and `knowledge/` deliberately live outside Python package code so operational/domain configuration can evolve without requiring application-code changes.
 
-## 6. Source-system findings
+## 7. Source-system findings
 
 ### telegram-local-agent
 Strong migration candidates: deterministic-first three-tier routing, skill registry, tool registry, MCP registry, channel abstraction, file handling and local Ollama support. Its own project brief explicitly warns against replacing deterministic routes with an LLM-first pipeline. Main refactor: separate channel/runtime concerns from capability contracts and add formal tests/guardrails.
@@ -268,7 +309,7 @@ Current repository contains multiple concerns: model gateway, coding agent, benc
 ### customized_llm_proxy
 At the inspected `main` revision its repository tree SHA matches `knowledge_management`, and the visible content is effectively the same combined gateway/agent/bench/vault codebase. Treat it as overlapping lineage until commit history establishes a reason to preserve a separate implementation. Do not duplicate it into the new platform.
 
-## 7. Non-negotiable engineering rules
+## 8. Non-negotiable engineering rules
 
 1. Existing source repositories remain unchanged during migration until replacement behaviour is validated.
 2. Deterministic routes take precedence over LLM reasoning.
@@ -285,8 +326,13 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 13. Migration is incremental; do not perform a five-repository big-bang merge.
 14. Observability must record route/agent/delegation/plan/model/tool/workflow outcome without logging secrets.
 15. Agent loops are bounded and must surface a structured failure/needs-input result rather than spin indefinitely.
+16. Team contributions must be publishable/discoverable through stable contracts without requiring core-runtime changes.
+17. Shared assets must carry owner, version, lifecycle, dependency and permission metadata.
+18. Registry/distribution is separate from execution authorization; publishing never implies unrestricted execution.
+19. Bridges/workers execute locally and advertise installed capabilities/resources; the central registry is a control plane, not the mandatory execution host.
+20. n8n is optional event/business automation integration; Agent, n8n and CLI must reuse the same underlying Workflow/Capability contracts.
 
-## 8. Migration strategy
+## 9. Migration strategy
 
 Phase 0: architecture, contracts, migration inventory, including multi-agent extension points.
 
