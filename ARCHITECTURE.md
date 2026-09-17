@@ -18,33 +18,45 @@ User / Telegram / Web UI / Event
               v
 +-------------------------------+
 | Agent Gateway                 |
-| intent / planning / context   |
-| policy / approval / tracing   |
+| intent / context / policy     |
+| approval / tracing / routing  |
 +---------------+---------------+
                 |
-      +---------+---------+------------------+
-      |                   |                  |
-      v                   v                  v
-+-----------+       +-----------+      +------------+
-| Knowledge |       | Skills    |      | Workflows  |
-| retrieval |       | procedure |      | deterministic|
-+-----------+       +-----------+      +------+-----+
-      |                 |                     |
-      +--------+--------+                     |
-               |                              |
-               v                              v
-       +---------------+              +---------------+
-       | Model Router  |              | Tool / MCP    |
-       +-------+-------+              | Capability    |
-               |                      +-------+-------+
-        +------+------+                       |
-        |      |      |          +-------------+----------------+
-        v      v      v          |             |                |
-     OpenAI  Ollama  Company  Host Bridge   APIs/Git      Office/DUT/etc.
-      /other  local   gateway
+                v
+        +---------------+
+        | Agent Registry|
+        +-------+-------+
+                |
+        +-------+-------------------------+
+        |                                 |
+        v                                 v
++-------------------+             +-------------------+
+| Engineering Agent |             | Future Specialists|
+| Phase 1 default   |<----------->| coding/knowledge… |
++---------+---------+ delegation  +---------+---------+
+          |                                   |
+          +---------------+-------------------+
+                          |
+              +-----------+-----------+
+              |           |           |
+              v           v           v
+          Knowledge     Skills     Workflows
+              |           |           |
+              +-----+-----+           |
+                    |                 v
+                    v            Tool / MCP
+              Model Router       Capability
+                    |                 |
+             +------+------+     Host Bridge / APIs /
+             |      |      |     Git / Office / DUT
+             v      v      v
+          OpenAI  Ollama  Company
+           /other  local   gateway
 
 Cross-cutting: Evaluation · Guardrails · Observability · Configuration · Secrets
 ```
+
+The platform is **one agent runtime with N agent profiles**, not N independent frameworks. Agent profiles share the model layer, knowledge, capability registry, workflow engine, policy and observability.
 
 ## 3. Routing policy
 
@@ -52,17 +64,62 @@ Cross-cutting: Evaluation · Guardrails · Observability · Configuration · Sec
 Request
   |-- known command / exact tool --> deterministic dispatch
   |-- known workflow -------------> workflow engine
-  `-- ambiguous / complex --------> agent reasoning
+  `-- ambiguous / complex --------> agent selection + reasoning
 ```
 
 Do not put an LLM in front of operations that already have a reliable deterministic route. This preserves the strongest property already present in `telegram-local-agent`: cheap deterministic routing before LLM parsing.
 
-Request routing and model routing are separate decisions. The Agent Gateway decides whether reasoning is needed and which capability/workflow should own the request. Only when a model call is required does the Model Router choose a model that satisfies the task requirements and policy.
+Request routing, agent selection and model routing are separate decisions:
+
+```text
+Gateway:      Does this require an agent? Which agent owns it?
+Agent:        What should be done and should work be delegated?
+Model Router: Which configured model satisfies this model call?
+Workflow:     How exactly is the deterministic operation executed?
+```
 
 ## 4. Platform boundaries
 
-### Agent platform
-Owns conversation/request context, intent resolution, planning, tool selection, bounded reasoning loops, approvals and agent lifecycle. It must not embed Windows/Office automation, provider-specific model APIs or workflow-specific business logic.
+### Agent Gateway
+The platform entry point. Owns request normalization, deterministic-first routing, top-level policy/approval checks, trace/session creation and selection of the owning agent when reasoning is needed. The Gateway should not contain specialist domain prompts or detailed workflow logic.
+
+### Agent runtime
+One shared execution engine for all agent profiles. Owns bounded reasoning loops, context assembly, skill use, capability invocation, delegation/handoff mechanics and structured completion/failure states. Adding a new agent should normally add configuration/profile content rather than another runtime implementation.
+
+### Agent registry and profiles
+The registry contains available agents and their bounded responsibilities. Each profile declares description, skills, allowed capabilities, knowledge scope, model requirements, delegation targets and policy constraints.
+
+Example:
+
+```yaml
+agents:
+  engineering:
+    description: General engineering task coordinator
+    skills: [debug, validation, release]
+    capabilities: [git_read, log_parser, workflow_runner]
+    knowledge: [engineering_wiki]
+    model_requirements:
+      reasoning: high
+      tool_calling: true
+    may_delegate_to: [coding, knowledge]
+
+  coding:
+    description: Software implementation specialist
+    skills: [coding, code_review, unit_test]
+    capabilities: [git, shell, pytest]
+    model_requirements:
+      reasoning: high
+      tool_calling: true
+```
+
+Phase 1 implements only the `engineering` profile. `coding`, `knowledge`, `rf_expert` and other specialists are extension points, not Phase 1 requirements.
+
+### Delegation vs handoff
+Use **delegation / agent-as-tool** when the current agent remains responsible for the user's task and needs a bounded specialist result. The parent sends a structured subtask, receives a structured result, and continues orchestration.
+
+Use **handoff** only when ownership of the conversation/task should move to another specialist. Handoff transfers the active owner and relevant context. Do not use handoff merely to call a specialist function.
+
+Agent-to-agent communication must use explicit task/result contracts rather than unconstrained free-form conversations. Delegation depth, total turns and retries are bounded to prevent agent loops.
 
 ### Skills
 Human- and model-readable procedures, domain rules, constraints, examples and acceptance criteria. A skill is not the executable implementation. Skills may reference tools/workflows but should not hide side effects. Skills may declare model capability requirements such as reasoning level, tool calling, vision, context size or local-only processing; they should not normally hard-code a specific provider/model.
@@ -134,6 +191,8 @@ Configuration names such as `cloud_coding` are stable logical aliases; concrete 
 ### Evaluation / harness
 Owns benchmark cases, expected outcomes, graders, regression tests and trace-based quality checks. Every new agent capability requires evaluation coverage. Deterministic workflow tests and probabilistic agent evaluation are separate test classes. Model evaluation should be able to run the same case set across multiple configured model aliases and compare quality, latency, reliability and usage/cost without changing the Agent implementation.
 
+Multi-agent evaluation must additionally verify correct owner selection, allowed delegation targets, bounded delegation, context passed to specialists and prohibited cross-agent capabilities.
+
 ## 5. Proposed repository layout
 
 ```text
@@ -142,10 +201,16 @@ agentic-engineering-platform/
 ├── ARCHITECTURE.md
 ├── README.md
 ├── pyproject.toml
+├── agents/
+│   └── engineering.yaml
 ├── src/
 │   ├── agent/
+│   │   ├── gateway/
 │   │   ├── runtime/
+│   │   ├── registry/
 │   │   ├── routing/
+│   │   ├── delegation/
+│   │   ├── handoff/
 │   │   ├── guardrails/
 │   │   └── approvals/
 │   ├── capabilities/
@@ -184,7 +249,7 @@ agentic-engineering-platform/
 └── tests/
 ```
 
-`skills/`, `workflows/` and `knowledge/` deliberately live outside Python package code so operational/domain content can evolve without requiring application-code changes.
+`agents/`, `skills/`, `workflows/` and `knowledge/` deliberately live outside Python package code so operational/domain configuration can evolve without requiring application-code changes.
 
 ## 6. Source-system findings
 
@@ -207,24 +272,27 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 
 1. Existing source repositories remain unchanged during migration until replacement behaviour is validated.
 2. Deterministic routes take precedence over LLM reasoning.
-3. Agent/Skill/Workflow/Knowledge code must not depend directly on a concrete LLM provider SDK; use the model interface.
-4. Model selection is policy/configuration driven and observable; logical model aliases are preferred over hard-coded model IDs.
-5. Side-effecting operations must have explicit policy and approval classification.
-6. Workflows must be independently executable/testable where practical.
-7. Raw knowledge is immutable; generated/curated knowledge preserves provenance.
-8. Secrets never live in committed configuration.
-9. New capabilities require regression/evaluation cases.
-10. Migration is incremental; do not perform a five-repository big-bang merge.
-11. Observability must record route/plan/model/tool/workflow outcome without logging secrets.
-12. Agent loops are bounded and must surface a structured failure/needs-input result rather than spin indefinitely.
+3. One shared agent runtime supports multiple bounded agent profiles; do not create a separate framework per specialist.
+4. Agent profiles must explicitly declare allowed skills/capabilities/knowledge/delegation targets.
+5. Agent-to-agent delegation uses structured contracts and bounded depth/turns/retries.
+6. Agent/Skill/Workflow/Knowledge code must not depend directly on a concrete LLM provider SDK; use the model interface.
+7. Model selection is policy/configuration driven and observable; logical model aliases are preferred over hard-coded model IDs.
+8. Side-effecting operations must have explicit policy and approval classification.
+9. Workflows must be independently executable/testable where practical.
+10. Raw knowledge is immutable; generated/curated knowledge preserves provenance.
+11. Secrets never live in committed configuration.
+12. New capabilities require regression/evaluation cases.
+13. Migration is incremental; do not perform a five-repository big-bang merge.
+14. Observability must record route/agent/delegation/plan/model/tool/workflow outcome without logging secrets.
+15. Agent loops are bounded and must surface a structured failure/needs-input result rather than spin indefinitely.
 
 ## 8. Migration strategy
 
-Phase 0: architecture, contracts, migration inventory.
+Phase 0: architecture, contracts, migration inventory, including multi-agent extension points.
 
-Phase 1: common contracts + **model interface/router/provider adapter contracts** + platform skeleton + CI/evaluation baseline.
+Phase 1: common contracts + model interface/router/provider adapter contracts + **single Engineering Agent profile/runtime** + platform skeleton + CI/evaluation baseline. Multi-agent contracts may exist, but no specialist-agent zoo is implemented.
 
-Phase 2: agent runtime/routing/skills/tools/MCP using the provider-neutral model interface.
+Phase 2: agent routing/skills/tools/MCP and the first justified specialist agents using the same runtime/registry/delegation contracts.
 
 Phase 3: deterministic workflow + Host Bridge integration.
 
@@ -232,6 +300,6 @@ Phase 4: knowledge Drop -> Raw -> Wiki, including multimodal ingestion/provenanc
 
 Phase 5: provider adapters/model gateway and external integrations.
 
-Phase 6: guardrails, approvals, tracing and full evaluation harness, including cross-model comparison.
+Phase 6: guardrails, approvals, tracing and full evaluation harness, including cross-model and multi-agent evaluation.
 
 Phase 7: end-to-end validation and controlled deprecation of source repositories.
