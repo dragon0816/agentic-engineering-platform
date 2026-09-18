@@ -51,6 +51,95 @@ Publishing an asset does not automatically grant execution permission. Registry/
 
 **n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
 
+### Personal engineering workspace and capability growth
+
+Each engineer works through a **Personal Engineering Workspace** composed of the engineer, a Personal AI Agent and a Host Bridge/worker. The Bridge is the engineer's local executable toolbox: it can expose personal/team Tools and Tasks plus local resources such as files, shells, browsers, Office/COM automation, DUTs and instruments. The Personal AI Agent reasons over the engineer's request and may combine local Bridge capabilities with shared Skills, Workflows and Knowledge discovered from the Platform Registry.
+
+~~~text
+                              Team Platform
+                    +---------------------------+
+                    |     Platform Registry     |
+                    | Tasks / Workflows / Skills|
+                    | Knowledge / Agent profiles|
+                    +-------------^-------------+
+                                  |
+                         publish / discover
+                                  |
+          +-----------------------+-----------------------+
+          |                       |                       |
++---------+---------+   +---------+---------+   +---------+---------+
+| Engineer A        |   | Engineer B        |   | Engineer C        |
+| Personal AI Agent |   | Personal AI Agent |   | Personal AI Agent |
+|        <->        |   |        <->        |   |        <->        |
+| Bridge A          |   | Bridge B          |   | Bridge C          |
+| Tools / Tasks     |   | Tools / Tasks     |   | Tools / Tasks     |
+| Local resources  |   | Local resources  |   | Local resources  |
++-------------------+   +-------------------+   +-------------------+
+~~~
+
+The engineer/agent/Bridge relationship is intentionally local while reusable capability is intentionally shareable. A Bridge may contain capabilities that remain private to one engineer, capabilities installed from the team registry, and capabilities being developed for later publication.
+
+### Continuous capability learning / Engineering Capability Flywheel
+
+Real work is a source of reusable engineering capability. During problem solving, an engineer and Personal AI Agent may discover a repeatable procedure, automation or decision pattern. The platform should be able to capture this as a **candidate asset** rather than losing it in a chat transcript or one-off script.
+
+~~~text
+Engineer work
+     |
+     v
+Personal AI Agent <-> Bridge / local tools
+     |
+     v
+Solve real engineering problem
+     |
+     v
+Capture successful experience / pattern
+     |
+     +----------------+----------------+
+     |                |                |
+     v                v                v
+Skill Candidate   Task Candidate   Workflow Candidate
+     |                |                |
+     +----------------+----------------+
+                      |
+                      v
+             Validate / Evaluate
+                      |
+                      v
+                Human Review
+                      |
+                      v
+                  Publish
+                      |
+                      v
+              Platform Registry
+                      |
+                      v
+        Discover / reuse by the team
+                      |
+                      v
+             Better team agents
+                      |
+                      +--------------------> more work -> repeat
+~~~
+
+This creates an **Engineering Capability Flywheel**: individual work improves the individual's agent/toolbox; validated contributions improve the shared platform; shared capabilities improve other engineers' agents; their work produces further contributions. The platform, team and individual engineering work therefore evolve together.
+
+Capability learning is **not unrestricted self-modification**. An Agent may propose or draft a new Skill, Task or Workflow, but a candidate must not become a trusted shared capability merely because an LLM generated it. The normal lifecycle is:
+
+~~~text
+experience -> candidate -> draft -> validation/evaluation -> human review
+           -> published -> observed usage -> improvement -> new version
+~~~
+
+Production-impacting capabilities may require stronger approval and validation gates. Publication and execution authorization remain separate.
+
+### Contribution provenance and lifecycle
+
+To support this growth model, registry assets should preserve enough metadata to answer who created a capability, why it exists, how it was validated and how it has evolved. Common metadata should support, where applicable: author and contributors; semantic version and lifecycle status; source/provenance; validation and human-review status; dependencies and runtime/Bridge compatibility; required permissions and approval classification; evaluation references/results; usage/observability references; and deprecation/replacement information.
+
+Usage statistics are evidence for maintenance and evaluation, not automatic proof that a capability is correct. Improvements are released as explicit versions so teams can validate, roll back and reproduce prior behaviour.
+
 ## 3. Target architecture
 
 ```text
@@ -331,6 +420,9 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 18. Registry/distribution is separate from execution authorization; publishing never implies unrestricted execution.
 19. Bridges/workers execute locally and advertise installed capabilities/resources; the central registry is a control plane, not the mandatory execution host.
 20. n8n is optional event/business automation integration; Agent, n8n and CLI must reuse the same underlying Workflow/Capability contracts.
+21. Agents may propose new reusable assets from work experience, but shared publication requires explicit validation/evaluation and applicable human review.
+22. Published assets preserve author/contributor provenance, version/lifecycle and validation metadata so capability evolution is auditable and reversible.
+23. Personal Bridges may mix private, installed shared and in-development capabilities; publication to the Platform Registry is an explicit lifecycle transition.
 
 ## 9. Migration strategy
 
