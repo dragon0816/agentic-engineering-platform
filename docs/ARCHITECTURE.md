@@ -140,6 +140,68 @@ To support this growth model, registry assets should preserve enough metadata to
 
 Usage statistics are evidence for maintenance and evaluation, not automatic proof that a capability is correct. Improvements are released as explicit versions so teams can validate, roll back and reproduce prior behaviour.
 
+
+### Scoped asset identity and ownership
+
+Shared assets use a stable scoped identity rather than a flat department-specific name. The scope is called a **namespace** because it may represent a team, department, project, site, shared platform area or private workspace.
+
+```yaml
+namespace: rf-team
+name: wifi-release-validation
+version: 1.2.0
+owner:
+  type: team
+  id: rf-team
+visibility: team
+```
+
+`namespace` identifies the asset scope, `owner` identifies who is accountable for it, and `visibility` controls discovery. These are separate concepts. A stable namespace also allows assets from separate department servers to be imported, federated or referenced later without ambiguous names or dependencies.
+
+### Agent-assisted contribution and layered review
+
+Contribution must not assume that every contributor writes code. A Personal Engineering Agent may use local Skills and Bridge capabilities to turn successful real work into a Skill, Task or Workflow candidate. The candidate remains untrusted until validation and review.
+
+```text
+Real work -> Personal Agent -> candidate -> automated validation
+                                     |
+                                     v
+                              business review
+                           (department owner)
+                                     |
+                                     v
+                              technical policy
+                         (risk/capability checks)
+                                     |
+                                     v
+                                  publish
+```
+
+Business review answers whether the procedure represents the department's intended work. Technical policy answers whether the requested capabilities, data access and side effects are allowed. Low-risk candidates may pass technical policy automatically; privileged, cross-scope or high-impact candidates may require technical review. Publication never grants runtime execution authorization.
+
+### Execution dependencies and local-first contract
+
+Local-first behavior is explicit metadata, not an implicit runtime guess. Tasks and Workflows declare local capability requirements and any required central services. A capability whose required central dependencies are unavailable returns a structured unavailable/needs-connectivity result rather than silently changing behavior.
+
+```yaml
+execution:
+  mode: local
+dependencies:
+  central_required: false
+requires:
+  capabilities:
+    - filesystem.read
+  services: []
+```
+
+Already-installed assets may continue locally when `central_required: false` and all required local capabilities and authorization are available.
+
+### Secret boundary
+
+Registry assets never contain secret values. They may declare symbolic secret requirements through provider-neutral references such as `SecretRef(name="github_token")`. Resolution belongs to the execution environment through a Bridge/runtime secret resolver. The concrete backend may later be an OS credential store, environment-backed development provider or enterprise vault; Phase 1 does not choose that infrastructure.
+
+Secret references are metadata requirements, not authorization. A Bridge must still decide whether the requesting identity is permitted to resolve and use the secret for the requested operation.
+
+
 ## 3. Target architecture
 
 The deployment model is explicitly split into two planes:
