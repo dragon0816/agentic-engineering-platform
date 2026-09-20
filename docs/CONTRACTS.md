@@ -196,15 +196,20 @@ engine to clear capacity for a retried external request.
 `WorkflowEngine.inspect(run_id)` returns a `ResumePlan` for a retained run (None
 for unknown or evicted runs): one `StepStateRecord` per declared step, in order,
 classified from recorded evidence only. `completed` is a terminal success whose
-result is retained; `never_started` means no handler ran — the run stopped before
-dispatching the step, or the Bridge rejected it before the handler
-(`permission_denied`, `invalid_input`, `capability_not_installed`,
-`missing_local_capability`, `needs_connectivity`, `secret_resolution_unavailable`,
-`unsafe_retry`, `workflow_input_missing`); everything else is `uncertain` — a
-handler that ran and failed (`handler_error`, `transient_failure`, `timeout`,
-`invalid_output`) or was interrupted mid-dispatch (`workflow_aborted`,
-`workflow_error`). Records carry indices and codes, never payloads. `next_step`
-is the first non-completed step, or None when nothing remains.
+result is retained. `never_started` means no handler ran: the Bridge records
+`CapabilityResult.handler_invoked` (and `StepAttempt.handler_invoked`) the moment
+it invokes a handler, so a step whose every attempt was rejected before that
+point (authorization, input validation, dependency or installation checks) or
+that the engine never dispatched (`workflow_input_missing`) had no effect.
+Everything else is `uncertain`: any attempt invoked the handler without a
+terminal success (`handler_error`, `transient_failure`, `timeout`,
+`invalid_output`, a later denial after an earlier attempt ran), or the run was
+interrupted at that step (`workflow_aborted`, `workflow_error`). A live run
+reports `status: running` with its in-flight step `uncertain` and no code; the
+caller-wait overlay is not evidence. Records carry indices and codes, never
+payloads. `next_step` is the first non-completed step, or None when nothing
+remains. `inspect(context, run_id)` requires the requesting context: runs owned
+by another actor/namespace are indistinguishable from unknown ones (None).
 
 `WorkflowEngine.resume(context, run_id, policy=ResumePolicy(...))` continues a
 **finished** run as a new run from `next_step`, sharing history, log and
@@ -217,11 +222,15 @@ option, never model output or manifest metadata: `reject` (default) returns
 step only when its host-installed capability is classified `read`;
 `replay_side_effects` explicitly accepts a possible duplicate side effect.
 
-Resumption grants nothing. The requesting actor and namespace must match the
-original run (`failed/permission_denied` otherwise), the workflow's pre-flight
-checks rerun, every remaining step is re-authorized by `LocalPolicy` before a run
-record exists and again at dispatch, and a running (`run_active`), complete
-(`run_complete`), unknown or evicted run cannot be resumed. Pre-flight rejections
+Resumption grants nothing. Runs owned by another actor/namespace return None
+like unknown or evicted runs; the retained manifest that drove the run is
+reused and must still be installed; the workflow's pre-flight checks rerun,
+including `StepInput` references into completed results; every remaining step is
+re-authorized by `LocalPolicy` before a run record exists and again at dispatch;
+and a running (`run_active`) or complete (`run_complete`) run cannot be resumed.
+A run can be continued once: a second resume of the same original fails
+`needs_input/already_resumed` (resume its continuation instead), so a retried
+host call cannot re-execute never-started side effects. Pre-flight rejections
 create no run record. Idempotency keys are neither consulted nor consumed by
 resumption; a keyed re-submission still returns the original run. This is
 in-memory resumption within one engine instance — no durable step state, crash

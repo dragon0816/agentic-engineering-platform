@@ -119,11 +119,13 @@ small commits, PR and handoff. No production side effects are exercised.
 
 ## Requirements and acceptance (slice 5 — bounded resumable state)
 
-1. Every declared step of a finished run is classified from recorded evidence as
-   `completed` (terminal success), `never_started` (no handler ran: a pre-dispatch
-   rejection or a Bridge failure raised before the handler) or `uncertain` (a
-   handler ran or was interrupted without terminal success). `inspect(run_id)`
-   returns this `ResumePlan`; it carries codes and indices, never payloads.
+1. Every declared step of a run is classified from recorded evidence as
+   `completed` (terminal success), `never_started` (no handler ran — the Bridge
+   records `handler_invoked` on every result and attempt, so this is evidence,
+   not a code table) or `uncertain` (any attempt invoked a handler without
+   terminal success, or the run was interrupted at that step). A live run
+   reports `running`. `inspect(context, run_id)` returns this `ResumePlan` only
+   to the owning actor/namespace; it carries codes and indices, never payloads.
 2. `resume(context, run_id, policy)` continues a finished run as a **new** run from
    its first non-completed step. Completed steps are never repeated; their
    recorded results feed later step inputs. The original run is immutable history
@@ -136,8 +138,11 @@ small commits, PR and handoff. No production side effects are exercised.
 4. Resumption adds no authority: the requesting actor and namespace must match the
    original run, every remaining step is re-authorized by `LocalPolicy` before a
    run exists and again at dispatch, and the workflow's pre-flight checks rerun.
-   Running, complete, unknown, evicted and foreign runs cannot be resumed;
-   pre-flight rejections create no run record.
+   Running and complete runs are rejected; unknown, evicted and other actors'
+   runs are indistinguishable (None). A run can be continued once — resume its
+   continuation afterwards — so a retried host call never re-executes
+   never-started side effects. Pre-flight rejections, including `StepInput`
+   references into completed results, create no run record.
 5. Resumption is in-memory only: it shares the 50-run history, bounded logs and
    caller-wait timeout semantics, never consults or consumes idempotency keys and
    provides no persistence, crash recovery or durable step-state store.

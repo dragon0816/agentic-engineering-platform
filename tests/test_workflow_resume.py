@@ -11,7 +11,12 @@ from test_engine import context, manifest
 from test_workflow_inputs import flow_for, runner_for, step
 
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+from capabilities.runtime import (
+    CapabilityGrant,
+    InstalledCapabilities,
+    LocalPolicy,
+    TransientCapabilityError,
+)
 from common.assets import ExecutionDependencies, WorkflowManifest
 from common.base import Contract
 from common.execution import RequestContext, ResumePlan, ResumePolicy, TraceIdentifiers
@@ -113,7 +118,7 @@ def test_inspect_classifies_completed_uncertain_and_never_started() -> None:
     runner = runner_for(flow, handler)
     result = run(runner, flow)
     assert result.run.status == "failed" and result.run.failure.code == "handler_error"
-    plan = runner.inspect(result.run.run_id)
+    plan = runner.inspect(context(), result.run.run_id)
     assert plan is not None
     assert [(s.state, s.code) for s in plan.steps] == [
         ("completed", None),
@@ -121,7 +126,7 @@ def test_inspect_classifies_completed_uncertain_and_never_started() -> None:
         ("never_started", None),
     ]
     assert plan.next_step == 1
-    assert runner.inspect("run-missing") is None
+    assert runner.inspect(context(), "run-missing") is None
 
 
 def test_denied_step_had_no_effect_and_resumes_after_a_grant() -> None:
@@ -137,7 +142,7 @@ def test_denied_step_had_no_effect_and_resumes_after_a_grant() -> None:
     runner = WorkflowEngine(workflows, bridge)
     denied = run(runner, flow)
     assert denied.run.failure.code == "permission_denied"
-    plan = runner.inspect(denied.run.run_id)
+    plan = runner.inspect(context(), denied.run.run_id)
     assert plan is not None
     assert [s.state for s in plan.steps] == ["never_started", "never_started"]
     assert plan.steps[0].code == "permission_denied"
@@ -233,7 +238,7 @@ def test_cancelled_run_leaves_the_interrupted_step_uncertain() -> None:
         final = await runner.wait(snapshot.run.run_id)
         assert final is not None and final.run.failure is not None
         assert final.run.failure.code == "workflow_aborted"
-        plan = runner.inspect(snapshot.run.run_id)
+        plan = runner.inspect(context(), snapshot.run.run_id)
         assert plan is not None
         assert plan.steps[0].state == "uncertain" and plan.steps[0].code == "workflow_aborted"
         rejected = await runner.resume(context(), snapshot.run.run_id)
@@ -248,7 +253,7 @@ def test_missing_run_input_is_never_started() -> None:
     runner = runner_for(flow)
     rejected = run(runner, flow)
     assert rejected.run.failure.code == "workflow_input_missing"
-    assert runner.inspect(rejected.run.run_id) is None  # preflight: no run existed
+    assert runner.inspect(context(), rejected.run.run_id) is None  # preflight: no run existed
 
 
 def test_complete_unknown_evicted_and_foreign_runs_cannot_resume() -> None:
@@ -265,9 +270,9 @@ def test_complete_unknown_evicted_and_foreign_runs_cannot_resume() -> None:
         channel="test",
         message="resume",
     )
-    foreign = asyncio.run(runner.resume(other, done.run.run_id))
-    assert foreign is not None and foreign.run.failure is not None
-    assert foreign.run.failure.code == "permission_denied"
+    # Another actor cannot tell the run apart from an unknown one.
+    assert asyncio.run(runner.resume(other, done.run.run_id)) is None
+    assert runner.inspect(other, done.run.run_id) is None
     for _ in range(MAX_RUNS_KEPT):
         run(runner, flow)
     assert resume(runner, done.run.run_id) is None
@@ -283,3 +288,96 @@ def test_resume_does_not_consult_or_consume_idempotency_keys() -> None:
     replay = run(runner, flow, idempotency_key="release-1")
     assert replay.run.run_id == failed.run.run_id and replay.run.status == "failed"
     assert handler.count == 2
+
+
+class TransientOnce(Handler):
+    def __init__(self) -> None:
+        super().__init__()
+        self.count = 0
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        self.count += 1
+        if self.count == 1:
+            raise TransientCapabilityError("private error payload")
+        return await super().__call__(context, inputs)
+
+
+def test_a_run_can_be_continued_only_once() -> None:
+    writer = FailOn()
+    runner, flow = mixed_engine(FailOn(), writer)
+    runner.bridge.policy = LocalPolicy(())
+    denied = run(runner, flow)
+    assert denied.run.failure.code == "permission_denied"
+    runner.bridge.policy = LocalPolicy((grant(), write_grant()))
+    first = resume(runner, denied.run.run_id)
+    assert first is not None and first.run.status == "succeeded"
+    assert writer.count == 1
+    again = resume(runner, denied.run.run_id)
+    assert again is not None and again.run.status == "needs_input"
+    assert again.run.failure.code == "already_resumed"
+    assert writer.count == 1
+    assert runner.get(again.run.run_id) is None
+
+
+def test_missing_prior_result_path_is_rejected_before_a_run_exists() -> None:
+    flow = flow_for(
+        [
+            spec().identity.model_dump(),
+            step({"source": "step", "step_index": 0, "path": ["missing"]}),
+        ]
+    )
+    runner = runner_for(flow)
+    failed = run(runner, flow)
+    assert failed.run.failure.code == "workflow_input_missing"
+    assert failed.run.completed_steps == 1
+    plan = runner.inspect(context(), failed.run.run_id)
+    assert plan is not None and plan.steps[1].state == "never_started"
+    kept = len(runner._runs)
+    rejected = resume(runner, failed.run.run_id)
+    assert rejected is not None and rejected.run.status == "needs_input"
+    assert rejected.run.failure.code == "workflow_input_missing"
+    assert len(runner._runs) == kept
+
+
+def test_inspect_reports_a_live_run_as_running() -> None:
+    async def scenario() -> None:
+        flow = flow_for([spec().identity.model_dump()])
+        runner = runner_for(flow, Slow())
+        snapshot = await runner.execute(
+            context(), flow.metadata.identity, {"count": 1}, timeout_seconds=0.01
+        )
+        assert snapshot.run.failure is not None
+        assert snapshot.run.failure.code == "workflow_timeout"
+        plan = runner.inspect(context(), snapshot.run.run_id)
+        assert plan is not None and plan.status == "running"
+        assert plan.steps[0].state == "uncertain" and plan.steps[0].code is None
+        runner._tasks[snapshot.run.run_id].cancel()
+        await runner.wait(snapshot.run.run_id)
+
+    asyncio.run(scenario())
+
+
+def test_handler_evidence_survives_a_later_pre_handler_rejection() -> None:
+    async def scenario() -> None:
+        data = step({"source": "run", "path": ["count"]})
+        data["retry"] = {"max_attempts": 2, "delay_ms": 200}
+        flow = flow_for([data])
+        handler = TransientOnce()
+        runner = runner_for(flow, handler)
+        task = asyncio.create_task(
+            runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
+        )
+        await asyncio.sleep(0.02)
+        # Revoked during the retry delay: attempt 2 is denied before any handler,
+        # but attempt 1 already ran, so the step's effect is uncertain.
+        runner.bridge.policy = LocalPolicy(())
+        result = await task
+        assert result.run.failure is not None
+        assert result.run.failure.code == "permission_denied"
+        assert handler.count == 1
+        plan = runner.inspect(context(), result.run.run_id)
+        assert plan is not None
+        assert plan.steps[0].state == "uncertain" and plan.steps[0].code == "permission_denied"
+        assert [a.handler_invoked for a in result.attempts] == [True, False]
+
+    asyncio.run(scenario())

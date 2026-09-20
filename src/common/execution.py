@@ -21,6 +21,7 @@ class StepAttempt(Contract):
     attempt: int = Field(ge=1, le=3, strict=True)
     status: Literal["succeeded", "failed", "needs_input", "unavailable"]
     code: Symbol | None = None
+    handler_invoked: StrictBool = False
 
     @model_validator(mode="after")
     def outcome_code(self) -> Self:
@@ -98,6 +99,8 @@ class CapabilityResult(Contract):
     data: JsonValue = None
     failure: Failure | None = None
     warnings: tuple[Text, ...] = ()
+    # Evidence for effect classification: True once the Bridge invoked the handler.
+    handler_invoked: StrictBool = False
 
     @model_validator(mode="after")
     def result_consistency(self) -> Self:

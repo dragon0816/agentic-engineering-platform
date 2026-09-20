@@ -65,6 +65,7 @@ class BridgeExecutor:
         *,
         unavailable: bool = False,
         retryable: bool = False,
+        invoked: bool = False,
     ) -> CapabilityResult:
         return self._finish(
             call,
@@ -74,6 +75,7 @@ class BridgeExecutor:
                 failure=Failure(
                     code=code, message="Capability invocation did not complete", retryable=retryable
                 ),
+                handler_invoked=invoked,
             ),
         )
 
@@ -104,19 +106,25 @@ class BridgeExecutor:
                 binding.handler(call.context, inputs), self.timeout_seconds
             )
         except TimeoutError:
-            return self._failure(call, "timeout")
+            return self._failure(call, "timeout", invoked=True)
         except TransientCapabilityError:
             return self._failure(
-                call, "transient_failure", retryable=binding.spec.side_effect == "read"
+                call,
+                "transient_failure",
+                retryable=binding.spec.side_effect == "read",
+                invoked=True,
             )
         except Exception:
             # Exception text may contain credentials or input data; never trace it.
-            return self._failure(call, "handler_error")
+            return self._failure(call, "handler_error", invoked=True)
         try:
             checked = binding.output_model.model_validate(output, strict=True)
             result = CapabilityResult(
-                trace=call.context.trace, status="succeeded", data=checked.model_dump(mode="json")
+                trace=call.context.trace,
+                status="succeeded",
+                data=checked.model_dump(mode="json"),
+                handler_invoked=True,
             )
         except (ValidationError, TypeError, ValueError):
-            return self._failure(call, "invalid_output")
+            return self._failure(call, "invalid_output", invoked=True)
         return self._finish(call, result)

@@ -35,16 +35,29 @@ explicit policy, without persistence or backend guarantees. Requirements are in
   remaining steps before creating a run and again at dispatch, requires matching
   actor/namespace, rejects running/complete runs, returns None for unknown or
   evicted runs, and never touches idempotency keys. `_drive` gained a start index.
-- 14 resume tests covering contracts, every classification and policy branch,
+- 18 resume tests covering contracts, every classification and policy branch,
   re-authorization after a later grant, result chaining without re-running,
-  repeated resumption, cancellation, eviction and key independence.
+  repeated resumption, cancellation, eviction, key independence, once-only
+  continuation, prior-result pre-flight, live-run inspection and handler
+  evidence surviving a later pre-handler denial.
 - Docs: phase spec slice 5, migration slice-5 decision, `docs/CONTRACTS.md`
   "Phase 3 bounded resumption", README, fixtures README.
+- PR #12 opened; pre-merge review applied (commit after `c2bed5b`):
+  classification is now evidence-based — the Bridge records `handler_invoked`
+  on every `CapabilityResult`/`StepAttempt` instead of the engine keeping a
+  failure-code table; a run can be continued once (`needs_input/already_resumed`
+  afterwards) so a retried host call cannot re-execute never-started side
+  effects; `inspect` takes the requesting context and, like `resume`, returns
+  None for other actors' runs (indistinguishable from unknown); a live run is
+  reported as `running` rather than the caller-wait overlay; `StepInput`
+  references into completed results are pre-flighted so no doomed run record is
+  created; the retained manifest drives both plan and continuation; launch logic
+  is shared by `execute` and `resume`.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #12 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
@@ -62,15 +75,17 @@ explicit policy, without persistence or backend guarantees. Requirements are in
 - ADAPT the source's pending/never-run distinction into an effect classification;
   resumption itself is new platform semantics (the source has none), never a
   source-parity claim.
-- Classification uses recorded evidence only: a step is `uncertain` unless a
-  terminal success was recorded or a pre-handler rejection code proves no handler
-  ran. Uncertainty is never resolved by guessing; only an explicit host policy
-  may replay it, and read-only replay is gated by the installed capability's
-  side-effect classification, not by manifests or publication metadata.
+- Classification uses recorded evidence only: the Bridge marks `handler_invoked`
+  at dispatch time, and a step is `uncertain` unless a terminal success was
+  recorded or no attempt ever invoked a handler. Uncertainty is never resolved by
+  guessing; only an explicit host policy may replay it, and read-only replay is
+  gated by the installed capability's side-effect classification, not by
+  manifests or publication metadata.
 - Resumption grants nothing and creates a new run; the original run is immutable
-  history. It shares the 50-run history, bounded logs and caller-wait timeout
-  semantics, and ignores idempotency keys by design (a keyed re-submission still
-  returns the original run).
+  history and can be continued exactly once (linear, like the source's step
+  table). It shares the 50-run history, bounded logs and caller-wait timeout
+  semantics, ignores idempotency keys by design (a keyed re-submission still
+  returns the original run), and never reveals other actors' runs.
 - No persistence: keys, history and resumability all end with the engine
   instance. Durable state needs its own approved contract before any backend.
 
@@ -80,7 +95,7 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 267 tests (249 prior + 4 step-table characterization + 14 resume)
+# PASS: 271 tests (249 prior + 4 step-table characterization + 18 resume)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -111,7 +126,7 @@ or n8n instance was invoked; inert doubles only.
 
 ## Next Recommended Action
 
-Open the PR for `phase-3/resumable-state` against `main`, run the review, apply
-confirmed findings and let the owner merge. Then decide the next slice with the
-owner: either a Gateway resume trigger (small, same contracts) or the durable
-step-state contract, which must be scoped explicitly before any persistence code.
+The owner reviews and merges PR #12 (`phase-3/resumable-state`). Then decide the
+next slice with the owner: either a Gateway resume trigger (small, same
+contracts) or the durable step-state contract, which must be scoped explicitly
+before any persistence code.

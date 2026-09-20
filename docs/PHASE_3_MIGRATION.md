@@ -112,17 +112,19 @@ reason; the failed row records exception text; and the source offers **no resume
 Decision: **ADAPT** the pending/never-run distinction into a typed effect
 classification and add resumption as new platform semantics, not source parity:
 
-- `never_started` corresponds to the source's `pending` rows, extended with Bridge
-  failure codes that are raised before any handler runs (authorization, input
-  validation, dependency and installation checks). `completed` is a terminal
-  success. Everything else — a handler that ran and failed, timed out, returned
-  invalid output, or was interrupted mid-dispatch — is `uncertain`, because the
-  engine cannot know what effect it had.
+- `never_started` corresponds to the source's `pending` rows, extended to steps
+  the Bridge rejected before invoking any handler. The Bridge records
+  `handler_invoked` on each result and attempt at dispatch time, so the
+  classification is evidence, not a maintained list of failure codes.
+  `completed` is a terminal success. Everything else — any attempt whose handler
+  ran without terminal success, or an interruption at that step — is
+  `uncertain`, because the engine cannot know what effect it had.
 - The source's "no re-entry" rule is preserved for completed steps: resumption
-  never repeats them and reuses their recorded results. Re-entry of an uncertain
-  step is the one deliberate extension, gated by an explicit host `ResumePolicy`
-  and re-authorization of every remaining step; publication and manifests cannot
-  grant it.
+  never repeats them and reuses their recorded results, and a run itself can be
+  continued only once (its continuation is what gets resumed next). Re-entry of
+  an uncertain step is the one deliberate extension, gated by an explicit host
+  `ResumePolicy` and re-authorization of every remaining step; publication and
+  manifests cannot grant it.
 - Exception text is never recorded (unchanged platform rule); classifications carry
   failure codes only.
 - Resumption is bounded to the in-memory run history; there is no durable step
