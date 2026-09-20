@@ -1,0 +1,183 @@
+import asyncio
+
+
+import html
+
+
+import logging
+
+
+import re
+
+
+from typing import Awaitable, Callable, Optional
+
+
+logger = logging.getLogger(__name__)
+
+
+def h(text: str) -> str:
+    return html.escape(str(text))
+
+
+_KEYWORD_ROUTES: list[tuple[str, list[str]]] = [
+    (
+        "run_testing",
+        [
+            r"^/?run\s+\S+\s+\S+\s+\S+\s+\S+",
+            r"(?:測試|test)\s*.{0,30}(?:版本|version)",
+            r"(?:版本|version).{0,30}(?:設定|config)",
+        ],
+    ),
+    (
+        "release_package",
+        [
+            r"^/?release\s+",                        # /release ... 或 release ...
+            r"(?:發布|發行|release).{0,20}(?:套件|package|repo)",
+        ],
+    ),
+    (
+        "build_package",
+        [
+            r"^/?build\s+",                          # /build ...
+            r"(?:打包|封裝|build.{0,10}package)",
+        ],
+    ),
+]
+
+
+def _detect_skill_by_keywords(message: str) -> Optional[str]:
+    for skill_name, patterns in _KEYWORD_ROUTES:
+        for pat in patterns:
+            if re.search(pat, message, re.IGNORECASE):
+                return skill_name
+    return None
+
+
+class TaskRouter:
+
+
+    def __init__(self, skill_registry, mcp_registry, ollama_client, tool_registry, config: dict, rag_manager=None):
+        self.skills       = skill_registry
+        self.mcps         = mcp_registry
+        self.llm          = ollama_client
+        self.tools        = tool_registry
+        self.rag          = rag_manager
+        self.config       = config
+        self.language     = config.get("agent", {}).get("language", "zh-TW")
+        self.task_timeout = config.get("agent", {}).get("task_timeout", 300)
+
+
+    async def route(
+        self,
+        user_message: str,
+        send_message: Optional[Callable[[str], Awaitable[None]]] = None,
+        user_info: Optional[dict] = None,
+        _files: Optional[list] = None,
+    ) -> str:
+        # ── 1. dot-command：skill_name.function [args] ──
+        dot_result = await self._try_dot_command(
+            user_message, send_message, user_info, _files
+        )
+        if dot_result is not None:
+            return dot_result
+
+        # ── 2. 關鍵字預判 ──
+        quick_skill = _detect_skill_by_keywords(user_message)
+        if quick_skill:
+            logger.info(f"關鍵字預判路由至技能: {quick_skill}（略過 LLM）")
+            return await self._dispatch_skill(
+                user_message, quick_skill, {}, send_message, user_info, _files
+            )
+
+        # ── 3. LLM 解析（RAG 注入相關 skill context） ──
+        available_skills = self.skills.list_skills()
+        available_mcps   = self.mcps.list_mcps()
+
+        rag_context = ""
+        if self.rag:
+            relevant = await self.rag.retrieve(user_message, top_k=3)
+            rag_context = self.rag.format_context(relevant)
+            logger.debug(f"[RAG] 注入技能: {[s['name'] for s in relevant]}")
+
+        parsed     = await self.llm.parse_task(
+            user_message=user_message,
+            available_skills=available_skills,
+            available_mcps=available_mcps,
+            language=self.language,
+            rag_context=rag_context,
+        )
+        logger.info(f"LLM 解析: type={parsed.get('type')}, target={parsed.get('target')}")
+
+        task_type  = parsed.get("type", "general")
+        target     = parsed.get("target")
+        parameters = parsed.get("parameters", {})
+
+        if task_type == "query":
+            return await self._handle_query(target)
+
+        if task_type == "skill":
+            return await self._dispatch_skill(
+                user_message, target, parameters, send_message, user_info, _files
+            )
+
+        if task_type == "mcp":
+            params = dict(parameters)
+            if user_info:
+                params["_user"] = user_info
+            return await self._handle_mcp(user_message, target, params)
+
+        direct_response = parsed.get("direct_response", "")
+        if direct_response:
+            return direct_response
+
+        return await self.llm._general_response(user_message, self.language)
+
+
+    async def _try_dot_command(
+        self,
+        user_message: str,
+        send_message: Optional[Callable[[str], Awaitable[None]]],
+        user_info: Optional[dict],
+        _files: Optional[list] = None,
+    ) -> Optional[str]:
+        """處理 skill_name.function [args] 格式，找到技能就直接執行"""
+        m = re.match(
+            r'^([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][a-zA-Z0-9_]*)(?:\s+(.*))?$',
+            user_message.strip(),
+        )
+        if not m:
+            return None
+
+        skill_name = m.group(1)
+        func_name  = m.group(2)
+        raw_args   = (m.group(3) or "").strip()
+
+        skill = self.skills.get_skill(skill_name)
+        if not skill:
+            return None  # 未知技能，繼續後續流程
+
+        # 將 dot-command 的 function 名稱對應到 tool 函式名
+        tool_name = skill["commands"].get(func_name)
+        if not tool_name:
+            # function 不在 commands 裡，試著直接用 func_name 當 tool 名
+            tool_name = func_name
+
+        logger.info(f"dot-command: {skill_name}.{func_name} → tool={tool_name} args={raw_args!r}")
+
+        parameters: dict = {
+            "action":  func_name,
+            "_config": self.config,
+        }
+        if raw_args:
+            parameters["args"]  = raw_args
+            parameters["path"]  = raw_args.split()[0]   # 大多數工具的第一段是路徑
+            parameters["query"] = raw_args              # web_search 用
+            parameters["url"]   = raw_args              # fetch_page 用
+        if user_info:
+            parameters["_user"] = user_info
+        if _files:
+            parameters["_files"] = _files
+
+        task = f"{func_name} {raw_args}".strip()
+        return await self._execute_tool(skill, tool_name, task, parameters, send_message)
