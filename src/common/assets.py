@@ -1,9 +1,9 @@
 """Scoped assets, governance and explicit execution dependency metadata."""
 
 import re
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import StrictBool, field_validator, model_validator
+from pydantic import Field, StrictBool, StrictStr, field_validator, model_validator
 
 from common.base import Contract, Sha256, Slug, Symbol, Text
 
@@ -193,13 +193,44 @@ class TaskManifest(ExecutableManifest):
     capability: AssetIdentity
 
 
+PathPart = StrictStr | Annotated[int, Field(ge=0, strict=True)]
+
+
+class RunInput(Contract):
+    """Select an exact path in this run's arguments; empty path selects the root."""
+
+    source: Literal["run"]
+    path: tuple[PathPart, ...] = ()
+
+
+class StepInput(Contract):
+    """Select only validated data from an earlier, successful step in this run."""
+
+    source: Literal["step"]
+    step_index: int = Field(ge=0, strict=True)
+    path: tuple[PathPart, ...] = ()
+
+
+class WorkflowStep(RegistryContract):
+    capability: AssetIdentity
+    inputs: dict[Symbol, Annotated[RunInput | StepInput, Field(discriminator="source")]]
+
+
 class WorkflowManifest(ExecutableManifest):
     kind: Literal["workflow"] = "workflow"
-    steps: tuple[AssetIdentity, ...]
+    steps: tuple[AssetIdentity | WorkflowStep, ...]
 
     @field_validator("steps")
     @classmethod
-    def nonempty_steps(cls, value: tuple[AssetIdentity, ...]) -> tuple[AssetIdentity, ...]:
+    def nonempty_steps(
+        cls, value: tuple[AssetIdentity | WorkflowStep, ...]
+    ) -> tuple[AssetIdentity | WorkflowStep, ...]:
         if not value:
             raise ValueError("a workflow must declare at least one step")
+        for index, step in enumerate(value):
+            if isinstance(step, WorkflowStep) and any(
+                isinstance(ref, StepInput) and ref.step_index >= index
+                for ref in step.inputs.values()
+            ):
+                raise ValueError("step inputs may reference only earlier steps")
         return value

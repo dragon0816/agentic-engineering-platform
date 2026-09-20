@@ -57,14 +57,39 @@ Source decisions are recorded in `docs/PHASE_3_MIGRATION.md`.
    no new source excerpt is required. All existing tests, lint, strict types,
    packaging and CI must continue to pass.
 
+## Requirements and acceptance (slice 3 — step inputs)
+
+1. Preserve identity-only steps and their unchanged run-argument pass-through.
+   An explicit step instead declares a capability and a closed input mapping.
+   Each input selects run arguments or a prior step's validated result data using
+   a tuple of exact object keys / zero-based array indices. No expressions,
+   implicit merging, templates, literal credentials or secret resolution.
+2. Reject self/future/negative step references and malformed selectors at manifest
+   validation. Missing run input is `needs_input/workflow_input_missing` before
+   creating a run; missing result data stops the existing run with the same code,
+   without invoking that step or subsequent steps. JSON null is a present value.
+3. Every resolved step still passes through Bridge input/output validation and
+   LocalPolicy. Mapping never changes authority, dependencies or trace identity.
+4. Snapshot run arguments and copy selected values so caller/handler/snapshot
+   mutation cannot alter subsequent inputs. Logs and failure messages omit values
+   and paths. Existing timeout, cancellation and bounded history behavior stays.
+5. Tests precede implementation and cover legacy compatibility, serialization,
+   invalid manifests, chaining across different contracts, denied/failed steps,
+   missing paths, null/arrays and Gateway integration with inert capabilities.
+
+Implementation plan: extend `common/assets.py`; add contract/runtime tests in
+`tests/test_workflow_inputs.py`; add deterministic resolution in
+`workflow/engine.py`; exercise Gateway composition; then full verification,
+commit and handoff. This adds no new production side effects or infrastructure.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
   excerpt and tests, then implement the engine against them.
 - Slice 2: add the Gateway dispatch contract with regression and evaluation
   coverage.
-- Later Phase 3 slices: step argument chaining and per-step inputs,
-  retry/idempotency, resumable state, progress streaming, and the optional n8n
+- Slice 3: explicit per-step inputs and prior-result chaining.
+- Later Phase 3 slices: retry/idempotency, resumable state, progress streaming, and the optional n8n
   adapter invoking the same Gateway/engine contracts.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,

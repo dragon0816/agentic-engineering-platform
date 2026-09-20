@@ -10,11 +10,13 @@ import asyncio
 import functools
 import math
 import uuid
+from copy import deepcopy
+from typing import Literal
 
 from pydantic import JsonValue
 
 from capabilities.runtime import CapabilityInvocation
-from common.assets import AssetIdentity, WorkflowManifest
+from common.assets import AssetIdentity, PathPart, RunInput, WorkflowManifest, WorkflowStep
 from common.base import Contract, Text
 from common.execution import (
     CapabilityResult,
@@ -52,7 +54,8 @@ class InstalledWorkflows:
         self._workflows[key] = checked
 
     def get(self, identity: AssetIdentity) -> WorkflowManifest | None:
-        return self._workflows.get(identity.key)
+        manifest = self._workflows.get(identity.key)
+        return manifest.model_copy(deep=True) if manifest is not None else None
 
 
 class _RunRecord:
@@ -78,7 +81,7 @@ class _RunRecord:
 
     def snapshot(self) -> WorkflowRunSnapshot:
         if self.final is not None:
-            return self.final
+            return self.final.model_copy(deep=True)
         return WorkflowRunSnapshot(
             run=WorkflowRun(
                 run_id=self.run_id,
@@ -89,12 +92,31 @@ class _RunRecord:
                 failure=self.failure,
             ),
             log=tuple(self.log),
-            step_results=tuple(self.step_results),
+            step_results=tuple(result.model_copy(deep=True) for result in self.step_results),
         )
 
 
 def _step_label(identity: AssetIdentity) -> str:
     return f"{identity.namespace}/{identity.name}@{identity.version}"
+
+
+class _MissingInput(Exception):
+    """Contains no path or payload, including when converted to a failure."""
+
+
+def _select(value: JsonValue, path: tuple[PathPart, ...]) -> JsonValue:
+    for part in path:
+        if isinstance(part, str) and isinstance(value, dict) and part in value:
+            value = value[part]
+        elif isinstance(part, int) and isinstance(value, list) and part < len(value):
+            value = value[part]
+        else:
+            raise _MissingInput
+    return deepcopy(value)
+
+
+def _target(step: AssetIdentity | WorkflowStep) -> AssetIdentity:
+    return step.capability if isinstance(step, WorkflowStep) else step
 
 
 class WorkflowEngine:
@@ -146,8 +168,18 @@ class WorkflowEngine:
             for service in manifest.dependencies.central_services
         ):
             return self._rejected(target, checked, "needs_connectivity")
-        if any(self.bridge.installed.get(step) is None for step in manifest.steps):
+        if any(self.bridge.installed.get(_target(step)) is None for step in manifest.steps):
             return self._rejected(target, checked, "capability_not_installed")
+
+        run_arguments = deepcopy(arguments or {})
+        try:
+            for step in manifest.steps:
+                if isinstance(step, WorkflowStep):
+                    for ref in step.inputs.values():
+                        if isinstance(ref, RunInput):
+                            _select(run_arguments, ref.path)
+        except _MissingInput:
+            return self._rejected(target, checked, "workflow_input_missing", "needs_input")
 
         record = _RunRecord(target, checked.trace)
         self._runs[record.run_id] = record
@@ -157,7 +189,7 @@ class WorkflowEngine:
             # garbage-collect it mid-run and the run would never complete.
             del self._runs[next(iter(self._runs))]
         record.append_log(f"start workflow {_step_label(target)}")
-        task = asyncio.create_task(self._drive(record, manifest, checked, dict(arguments or {})))
+        task = asyncio.create_task(self._drive(record, manifest, checked, run_arguments))
         self._tasks[record.run_id] = task
         task.add_done_callback(functools.partial(self._discard_task, record.run_id))
         done, _ = await asyncio.wait({task}, timeout=timeout_seconds)
@@ -176,14 +208,18 @@ class WorkflowEngine:
         self._tasks.pop(run_id, None)
 
     def _rejected(
-        self, workflow: AssetIdentity, context: RequestContext, code: str
+        self,
+        workflow: AssetIdentity,
+        context: RequestContext,
+        code: str,
+        status: Literal["unavailable", "needs_input"] = "unavailable",
     ) -> WorkflowRunSnapshot:
         return WorkflowRunSnapshot(
             run=WorkflowRun(
                 run_id=f"run-{uuid.uuid4().hex}",
                 workflow=workflow,
                 trace=context.trace,
-                status="unavailable",
+                status=status,
                 failure=Failure(code=code, message="Workflow was not started"),
             )
         )
@@ -196,14 +232,35 @@ class WorkflowEngine:
         arguments: dict[str, JsonValue],
     ) -> None:
         try:
-            for step in manifest.steps:
+            for index, step in enumerate(manifest.steps):
+                try:
+                    inputs = (
+                        {
+                            name: _select(
+                                arguments
+                                if isinstance(ref, RunInput)
+                                else record.step_results[ref.step_index].data,
+                                ref.path,
+                            )
+                            for name, ref in step.inputs.items()
+                        }
+                        if isinstance(step, WorkflowStep)
+                        else deepcopy(arguments)
+                    )
+                except _MissingInput:
+                    record.status = "needs_input"
+                    record.failure = Failure(
+                        code="workflow_input_missing", message="Workflow input is unavailable"
+                    )
+                    record.append_log(f"step {index + 1} needs_input workflow_input_missing")
+                    return
                 result = await self.bridge.execute(
-                    CapabilityInvocation(context=context, target=step, arguments=arguments)
+                    CapabilityInvocation(context=context, target=_target(step), arguments=inputs)
                 )
                 record.step_results.append(result)
                 code = result.failure.code if result.failure is not None else None
                 record.append_log(
-                    f"step {len(record.step_results)} {_step_label(step)} {result.status}"
+                    f"step {len(record.step_results)} {_step_label(_target(step))} {result.status}"
                     + (f" {code}" if code else "")
                 )
                 if result.status != "succeeded":

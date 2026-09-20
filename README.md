@@ -39,6 +39,13 @@ it does not install release/build/test implementations or authorize production a
 See [Phase 2 scope](docs/phases/PHASE_2_AGENT_CAPABILITIES.md) and
 [migration decisions](docs/PHASE_2_MIGRATION.md).
 
+Phase 3 adds `agent.gateway.Gateway` and `workflow.engine.WorkflowEngine`.
+Workflows can pass all run arguments to legacy steps or explicitly select inputs
+from run arguments and earlier validated step outputs. Each step still requires
+its own Bridge authorization. See [workflow input contracts](docs/CONTRACTS.md#phase-3-workflow-inputs)
+and `tests/test_gateway_inputs.py` for a complete inert Gateway-to-Bridge chain.
+Run history is in memory; retries, resumability and production jobs remain deferred.
+
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not

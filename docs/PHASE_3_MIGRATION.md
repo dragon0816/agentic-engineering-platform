@@ -65,3 +65,15 @@ Intentional differences:
 
 Rollback: remove `src/workflow/engine.py` and the Phase 3 tests/fixtures; Phase 1/2
 contracts and the source repository remain untouched. No production parity claim.
+## Slice 3 source-first decision
+
+Decision: **ADAPT** the existing engine, retaining the characterized runner
+semantics. Re-inspected the pinned `jobrunner.py` excerpt in
+`tests/fixtures/source_jobrunner.txt`: `_job_callable` invokes
+`module.run(dict(params or {}), run.append_log)`; parameter transformation inside
+a job belongs to job code, not a declarative runner mapping contract. There is
+no mapping implementation in that runner boundary to wrap. Add a small typed
+selector at the manifest/engine boundary, while reusing Bridge dispatch and the
+existing characterization suite. This is not migration of production job logic
+or a claim of source-job parity; the source remains unchanged. Rolling back the
+new structured steps leaves identity-only workflow manifests supported.
