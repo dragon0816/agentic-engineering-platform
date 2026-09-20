@@ -28,14 +28,35 @@ Source decisions are recorded in `docs/PHASE_3_MIGRATION.md`.
    log cap and ghost-run paths with inert doubles. All existing tests, lint,
    strict types, packaging and CI must continue to pass.
 
+## Requirements and acceptance (slice 2 — Gateway dispatch)
+
+1. One `Gateway.handle` contract dispatches a routed request: needs-input
+   outcomes return unexecuted, capability targets dispatch through
+   `BridgeExecutor`, workflow targets through `WorkflowEngine`. The result pairs
+   the routing outcome with exactly the execution its decision names.
+2. The Gateway adds no authority and contains no domain logic: step and
+   capability authorization stay in `LocalPolicy`, workflow pre-flights in the
+   engine. A denied route fails exactly as it would when invoked directly.
+3. Deterministic and model-selected routes dispatch through the same contract;
+   deterministic triggers never invoke a model. Route arguments pass through
+   unchanged and no attachment content is read.
+4. Evaluation cases prove a deterministic command (dot form and keyword form)
+   triggers a workflow run with no model call. This satisfies the Roadmap
+   Phase 3 exit criterion's deterministic-command and Agent trigger paths; the
+   n8n adapter remains a later slice against this same contract.
+5. This slice composes behaviors already characterized in Phases 2 and 3;
+   no new source excerpt is required. All existing tests, lint, strict types,
+   packaging and CI must continue to pass.
+
 ## Incremental sequence
 
-- Pin and inspect the source; commit a reproducible characterization excerpt and
-  tests, then implement the engine against them.
-- Later Phase 3 slices (not this one): step argument chaining and per-step inputs,
-  retry/idempotency, resumable state, progress streaming, deterministic-command
-  and Agent triggers through one contract, and the optional n8n adapter invoking
-  that same contract.
+- Slice 1: pin and inspect the source; commit a reproducible characterization
+  excerpt and tests, then implement the engine against them.
+- Slice 2: add the Gateway dispatch contract with regression and evaluation
+  coverage.
+- Later Phase 3 slices: step argument chaining and per-step inputs,
+  retry/idempotency, resumable state, progress streaming, and the optional n8n
+  adapter invoking the same Gateway/engine contracts.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks
