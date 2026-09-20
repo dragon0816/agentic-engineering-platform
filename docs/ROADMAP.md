@@ -33,11 +33,11 @@ No source repository modifications.
 
 Create repository skeleton and shared contracts. Establish `pyproject.toml`, test runner, lint/type checks and CI. Define core models such as `RequestContext`, `RouteDecision`, `CapabilitySpec`, `CapabilityResult`, `WorkflowRun`, `ApprovalRequest`, `KnowledgeSource`, `TaskManifest`, `WorkflowManifest`, `AgentProfile`, package/registry metadata and trace identifiers.
 
-Define the first Platform Registry contracts for contribution lifecycle: owner, semantic version, lifecycle state (`draft`, `validated`, `published`, `deprecated`), dependencies, compatibility, permissions/approval classification and discoverability. Define Bridge/worker registration contracts so execution nodes can advertise installed capabilities and local resources. Registry/distribution must remain separate from execution authorization.
+Define the first Platform Registry contracts for contribution lifecycle: scoped asset identity (`namespace`, `name`, semantic version), owner, visibility, lifecycle state (`draft`, `validated`, `published`, `deprecated`), dependencies, compatibility, layered business/technical approval metadata, permissions/risk classification and discoverability. Define local-vs-central execution dependency metadata and provider-neutral `SecretRef` requirements without implementing a production secret backend. Define Bridge/worker registration contracts so execution nodes can advertise installed capabilities and local resources. Registry/distribution must remain separate from execution authorization.
 
 Before implementation migration, add characterization tests around selected source behaviours.
 
-Exit criteria: skeleton installs cleanly; CI passes; contracts are documented; a side-effect-free sample Task can be represented by a manifest and discovered through an in-memory registry; Bridge/worker capability advertisement has a typed contract; no production side effects.
+Exit criteria: skeleton installs cleanly; CI passes; contracts are documented; a side-effect-free sample Task can be represented by a scoped/versioned manifest and discovered through an in-memory registry; Bridge/worker capability advertisement has a typed contract; local-vs-central dependency and secret-reference contracts are validated; business approval and technical policy are represented as separate metadata concerns; no production side effects.
 
 ## Phase 2 — Agent and capability layer
 
@@ -85,7 +85,7 @@ Drop originals
   -> retrieval/query
 ```
 
-Preserve immutable raw/source semantics, dry-run/apply separation, backups, source provenance, conflict decisions and static lint. Add the currently missing query layer and image-aware ingestion.
+Preserve immutable raw/source semantics, dry-run/apply separation, backups, source provenance, conflict decisions and static lint. Add the currently missing query layer and image-aware ingestion. Define an explicit migration adapter/path for existing Obsidian vault content, existing Raw data, images and metadata so provenance/immutability rules can be adopted without treating existing knowledge as a greenfield corpus.
 
 Exit criteria: PDF/PPT/DOCX sample corpus round-trips to Raw with traceable source/page/slide/image relationships; Wiki generation cannot mutate Raw; query answers can cite source provenance.
 
