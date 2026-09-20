@@ -2,12 +2,15 @@
 
 ## Current phase and branch
 
-Phase 2 — Agent and capability layer. Two slices exist:
-`phase-2/implementation` (routing/dispatch/MCP, under review as PR #5) and
-`phase-2/file-tool-adapter` (first production source tool adaptation, stacked
-on the PR #5 branch tip; open its PR against `main` after PR #4 and PR #5 merge).
-The original Phase 2 slice: branch `phase-2/implementation`, based on Phase 1
-commit `006e5b6`.
+Phase 2 — Agent and capability layer. The routing/dispatch/MCP slice and the
+Phase 1 baseline are merged into `main` (`b21b8e9`, `7888366`). The active branch
+is `phase-2/file-tool-adapter` (first production source tool adaptation), whose
+review PR targets `main`.
+
+PR history: Phase 1 merged as PR #4. The Phase 2 slice was reviewed as PR #5;
+GitHub auto-closed #5 when its stacked base branch was deleted on the #4 merge,
+so the identical branch tip was merged as PR #6. Review evidence and follow-ups
+for both slices live in the PR #4 and PR #5 comment threads.
 Phase 1 PR #4 remains open and unmerged. Phase 2 is stacked
 [PR #5](https://github.com/dragon0816/agentic-engineering-platform/pull/5) against
 `phase-1/implementation`; retarget after the Phase 1 merge is handled by a human.
@@ -156,18 +159,15 @@ and run against the pinned source excerpt before the adapter was implemented.
 
 ## Next Recommended Action
 
-The repository owner merges PR #4 (merge commit, subject style "Merge Phase 1 …"),
-retargets PR #5 to `main` (automatic if the `phase-1/implementation` branch is
-deleted on merge), confirms CI on the retargeted PR and merges PR #5. Review
-evidence is posted on both PRs. Coding agents must not perform these merges;
-merge attempts from this session were blocked by permission policy by design.
+Review and merge the `phase-2/file-tool-adapter` PR (source
+`tools/file_tools.py::read_file` adapted as `filesystem/read-file` behind the
+shared Bridge policy path; see `docs/PHASE_2_MIGRATION.md`). The owner authorized
+`gh pr merge` for this project via `.claude/settings.local.json`, but adapter
+merges should still follow a posted review.
 
-The next adapter slice is already implemented and verified on
-`phase-2/file-tool-adapter` (source `tools/file_tools.py::read_file` adapted as
-`filesystem/read-file` behind the shared Bridge policy path; see
-`docs/PHASE_2_MIGRATION.md`). After PR #4 and PR #5 merge, open its PR against
-`main` — the branch is stacked on the PR #5 tip, so only the two adapter commits
-will appear in the diff. Follow-up candidates recorded in PR #4/#5 review comments
-remain open (e.g. bounded `BridgeExecutor` event log, SkillRegistry re-parse cost,
-MCP install round-trips, Review `not_required` semantics, generic top-level
-package names).
+After that, either continue Phase 2 with the next production tool adaptation
+(remaining `file_tools` functions or another tool module, characterization first)
+or begin Phase 3 (workflow platform) per the Roadmap. Follow-up candidates
+recorded in the PR #4/#5 review comments remain open (bounded `BridgeExecutor`
+event log, SkillRegistry re-parse cost, MCP install round-trips, Review
+`not_required` semantics, generic top-level package names).
