@@ -193,6 +193,38 @@ small commits, PR and handoff. No production side effects are exercised.
    semantics first; regression tests cover contract validation, live and finished
    streams, ownership, lag, capacity, cancellation and Gateway pass-through.
 
+## Requirements and acceptance (slice 8 — optional offline n8n adapter)
+
+Owner selected this direction after PR #14 merged. Persistence remains unscoped.
+
+1. An optional Python adapter accepts a closed `N8nSubmission` (stable operation
+   id plus JSON arguments). Trusted host configuration binds one exact workflow
+   version and a stable binding id. The host supplies authenticated RequestContext
+   separately; payloads cannot supply actor, target, policy, resume or transport.
+2. Add `Gateway.execute_workflow` as the shared exact-target entry point. Routed
+   workflows and the adapter both call it, preserving the engine/Bridge contracts.
+   Adapter submission never parses commands, calls a model, adds permissions or
+   implements engineering logic. Return the existing WorkflowRunSnapshot unchanged.
+3. Derive an engine idempotency key from binding id and operation id. Re-delivery
+   of the same intent joins/returns the same run; changed arguments/context/target
+   conflict. New operation ids are new work. No adapter-level retry, resume, cache
+   or idempotency store. Existing engine-lifetime/capacity limits remain explicit.
+4. Adapter inspect/watch reuse Gateway owner checks and restrict results to the
+   bound workflow. Unknown, other-owner and other-workflow ids remain undisclosed.
+   Progress remains bounded and payload-free; consumers must close streams.
+5. Characterize the pinned n8n source graph: trigger -> parameters -> Bridge
+   dispatch -> success/failure branch. No HTTP, n8n runtime, production job, model,
+   notification, transport or secret is connected. Package an offline submission
+   example and document the host seam, status mapping and deployment limitations.
+6. Tests first: input validation, direct/routed/n8n path parity, explicit binding,
+   denial/dependencies, duplicate/conflicting/concurrent submissions, timeout,
+   changed identity, owner isolation and progress through inert handlers. Full
+   regression/lint/types/build and Windows/Linux CI must pass.
+
+Plan: pin a source-graph projection and regression tests; add optional
+`integrations.n8n` and shared Gateway exact-workflow dispatch; document the offline
+host wiring; verify, commit, PR and handoff. No persistence code in this slice.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -204,6 +236,7 @@ small commits, PR and handoff. No production side effects are exercised.
 - Slice 5: bounded in-memory resumption with explicit uncertain-effect policy.
 - Slice 6: Gateway run-control entry points (`inspect`/`resume`).
 - Slice 7: bounded progress streaming (`watch`).
+- Slice 8: optional offline n8n submission adapter through Gateway.
 - Later Phase 3 slices: durable step-state/persistence contracts and the
   optional n8n adapter invoking the same Gateway/engine contracts.
 

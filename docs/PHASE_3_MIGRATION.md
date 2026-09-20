@@ -158,3 +158,26 @@ into bounded in-process progress streams; the ops transport is not migrated:
 
 Rollback: remove `watch`, `_Watcher`, `RunProgress` and the emit calls; runs behave
 exactly as before. Source repositories remain unchanged.
+## Slice 8 source-first decision
+
+Inspected `workflows/13_release_package.json` at the pinned
+`rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43` revision. The graph
+is manual trigger -> parameters -> one Bridge HTTP POST -> IF -> success/failure
+summary. The body selects `release_package`, passes `params`, caller workflow /
+execution metadata and wait options; the IF requires both `ok === true` and
+`data.status === 'success'`. No HTTP-node automatic retry is enabled. Pinned
+projection and checksum: `tests/fixtures/source_n8n_release.json` and its README.
+
+Decision: **ADAPT** this dispatch/status boundary, preferring the newer Host Bridge
+lineage over historical `n8n_work_flow` prototypes. Preserve parameter pass-through,
+one underlying workflow execution path, no business logic in the adapter and success
+branching only on terminal success. Do not migrate the production release job, HTTP
+headers/URLs, worker selection, notifications or a live n8n graph.
+
+Intentional changes: exact workflow binding replaces payload-selected job; trusted
+RequestContext replaces untrusted identity metadata; stable operation ids map to
+existing engine idempotency. Gateway returns shared WorkflowRunSnapshot directly:
+consumers branch on `run.status == 'succeeded'`, not source `ok/data.status`. A caller
+timeout is not terminal evidence; use inspect/watch rather than creating new work.
+The adapter is an offline host seam, not a server or installed n8n node. Rollback:
+remove optional `integrations.n8n` and its fixtures; ordinary Gateway paths remain.

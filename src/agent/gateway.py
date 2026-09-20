@@ -9,10 +9,11 @@ deterministic ones, so a trigger's origin never changes what may execute.
 import asyncio
 from typing import Literal, Self
 
-from pydantic import TypeAdapter, model_validator
+from pydantic import JsonValue, TypeAdapter, model_validator
 
 from agent.routing import RequestRouter, RoutingOutcome
 from capabilities.runtime import CapabilityInvocation
+from common.assets import AssetIdentity
 from common.base import Contract
 from common.execution import (
     CapabilityResult,
@@ -101,26 +102,43 @@ class Gateway:
             )
             return GatewayResult(routing=outcome, capability=result)
         if decision.kind == "workflow" and decision.target is not None:
-            if workflow_timeout_seconds is None:
-                # The engine owns the default caller-wait timeout.
-                snapshot = await self.engine.execute(
-                    context,
-                    decision.target,
-                    outcome.arguments,
-                    idempotency_key=workflow_idempotency_key,
-                )
-            else:
-                snapshot = await self.engine.execute(
-                    context,
-                    decision.target,
-                    outcome.arguments,
-                    timeout_seconds=workflow_timeout_seconds,
-                    idempotency_key=workflow_idempotency_key,
-                )
+            snapshot = await self.execute_workflow(
+                context,
+                decision.target,
+                outcome.arguments,
+                workflow_timeout_seconds=workflow_timeout_seconds,
+                workflow_idempotency_key=workflow_idempotency_key,
+            )
             return GatewayResult(routing=outcome, workflow=snapshot)
         # needs_input: nothing executes. A resolved decision without a target is
         # impossible by contract and would fail GatewayResult validation loudly.
         return GatewayResult(routing=outcome)
+
+    async def execute_workflow(
+        self,
+        request: RequestContext,
+        workflow: AssetIdentity,
+        arguments: dict[str, JsonValue] | None = None,
+        *,
+        workflow_timeout_seconds: float | None = None,
+        workflow_idempotency_key: IdempotencyKey | None = None,
+    ) -> WorkflowRunSnapshot:
+        """Exact-target host entry point shared by routed workflows and integrations.
+
+        No routing/model call and no added authority. The engine owns validation,
+        execution policy, idempotency and the default caller-wait timeout.
+        """
+        if workflow_timeout_seconds is None:
+            return await self.engine.execute(
+                request, workflow, arguments, idempotency_key=workflow_idempotency_key
+            )
+        return await self.engine.execute(
+            request,
+            workflow,
+            arguments,
+            timeout_seconds=workflow_timeout_seconds,
+            idempotency_key=workflow_idempotency_key,
+        )
 
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
         """Classify a retained run's steps for its owner; never executes anything.
