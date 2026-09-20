@@ -51,3 +51,27 @@ Drop contains originals. Raw preserves extracted text/tables/images plus source 
 ## Definition of done for a migrated capability
 
 A migration is not complete because code was copied. It is complete when the contract is explicit, tests/evaluation pass, observability exists, failure behaviour is defined, required approvals are enforced, and the source implementation can be deprecated without losing a verified capability.
+
+
+## Coding-agent-neutral development workflow
+
+Codex, Claude Code and human contributors are replaceable workers. GitHub and committed repository artifacts are the persistent project state; never rely on one coding agent's conversation history.
+
+Required implementation sequence:
+
+```text
+Architecture -> Requirements -> Contracts -> Tests -> Implementation
+             -> Verification -> Commit -> Handoff
+```
+
+Before modifying implementation code, read `ARCHITECTURE.md`, `docs/MIGRATION_PLAN.md`, the active phase specification and `HANDOFF.md`.
+
+Use repository procedures under `.agents/skills/`:
+- `architecture-guard` before implementation or architectural changes;
+- `implementation-planning` to convert requirements into small implementation slices;
+- `contract-development` for shared platform contracts;
+- `code-change-verification` before completion/commit/handoff;
+- `migration` when adapting source-repository behavior;
+- `handoff` whenever ownership may transfer between Codex, Claude Code or a human.
+
+`CLAUDE.md` is the Claude Code entry point and must remain aligned with these shared rules. Do not create a separate architecture or workflow specifically for one coding agent.
