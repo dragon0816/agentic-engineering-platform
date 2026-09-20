@@ -286,8 +286,9 @@ new events are dropped and the next delivered event has `lagged: true`, meaning
 the consumer should re-`inspect` rather than trust continuity. The terminal
 event always arrives (older queued events are dropped to make room), so a
 consumer cannot hang. At most 16 watchers per run; a further `watch` returns a
-single `rejected/watch_capacity` event, and a consumer that stops iterating
-(`aclose`, cancellation or garbage collection) releases its slot. Streams are
+single `rejected/watch_capacity` event. The returned `ProgressStream` is an
+async iterator with `aclose()`; ending it, closing it or dropping it — even
+before the first iteration — releases its slot. Streams are
 in-memory and end with the run; there is no persistence, replay history,
 transport or dashboard. `Gateway.watch` validates the `RunId` shape like
 `inspect`/`resume`: malformed ids fail loudly, well-formed typos are unknown.

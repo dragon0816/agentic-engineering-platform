@@ -12,7 +12,6 @@ import hashlib
 import json
 import math
 import uuid
-from collections.abc import AsyncIterator
 from copy import deepcopy
 from typing import Literal
 
@@ -82,6 +81,39 @@ class _Watcher:
         if self.queue.full():
             self.queue.get_nowait()
         self.queue.put_nowait(None)
+
+
+class ProgressStream:
+    """Async iterator over one watcher. Ending, closing or dropping it — even
+    before the first iteration — releases the watcher's slot for the run."""
+
+    def __init__(self, watcher: _Watcher, holder: list[_Watcher] | None = None) -> None:
+        self._watcher = watcher
+        self._holder = holder
+
+    def __aiter__(self) -> "ProgressStream":
+        return self
+
+    async def __anext__(self) -> RunProgress:
+        item = await self._watcher.queue.get()
+        if item is None:
+            self._release()
+            raise StopAsyncIteration
+        return item
+
+    async def aclose(self) -> None:
+        self._release()
+
+    def _release(self) -> None:
+        holder, self._holder = self._holder, None
+        if holder is not None and self._watcher in holder:
+            holder.remove(self._watcher)
+
+    def __del__(self) -> None:
+        try:
+            self._release()
+        except Exception:
+            pass
 
 
 class WorkflowRunSnapshot(Contract):
@@ -586,7 +618,7 @@ class WorkflowEngine:
                 pass
         record.watchers.clear()
 
-    def watch(self, context: RequestContext, run_id: str) -> AsyncIterator[RunProgress] | None:
+    def watch(self, context: RequestContext, run_id: str) -> ProgressStream | None:
         """Bounded progress stream for the run's owner; None for unknown runs.
 
         A finished run yields one terminal snapshot. A live run yields a snapshot
@@ -607,25 +639,15 @@ class WorkflowEngine:
         watcher = _Watcher(self.watch_queue_size)
         record.watchers.append(watcher)
         watcher.deliver(self._progress(record, "snapshot", advance=False))
-        return self._stream(record, watcher)
+        return ProgressStream(watcher, record.watchers)
 
     @staticmethod
-    async def _replay(event: RunProgress) -> AsyncIterator[RunProgress]:
-        yield event
-
-    @staticmethod
-    async def _stream(record: _RunRecord, watcher: _Watcher) -> AsyncIterator[RunProgress]:
-        try:
-            while True:
-                item = await watcher.queue.get()
-                if item is None:
-                    return
-                yield item
-        finally:
-            # A consumer that stops early (aclose, cancellation, garbage
-            # collection) releases its slot and queue for the rest of the run.
-            if watcher in record.watchers:
-                record.watchers.remove(watcher)
+    def _replay(event: RunProgress) -> ProgressStream:
+        """A one-event stream that describes existing state and holds no slot."""
+        watcher = _Watcher(2)
+        watcher.deliver(event)
+        watcher.close()
+        return ProgressStream(watcher)
 
     def _rejected(
         self,

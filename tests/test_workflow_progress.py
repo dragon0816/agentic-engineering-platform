@@ -188,10 +188,15 @@ def test_watcher_capacity_is_reported_and_closed_streams_release_it() -> None:
         assert all(stream is not None for stream in streams)
         rejected = await collect(runner.watch(context(), run_id))
         assert [(e.event, e.code) for e in rejected] == [("rejected", "watch_capacity")]
-        # Abandoning a stream releases its slot for the rest of the run.
-        for stream in streams[1:]:
+        # Abandoning streams — closed before or after iterating, or simply
+        # dropped — releases their slots for the rest of the run.
+        assert streams[1] is not None
+        await streams[1].__anext__()
+        await streams[1].aclose()
+        for stream in streams[2:-1]:
             assert stream is not None
             await stream.aclose()
+        del streams[-1]
         replacement = runner.watch(context(), run_id)
         assert replacement is not None
         handler.release.set()

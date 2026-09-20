@@ -37,8 +37,10 @@ ever changing a run's outcome. Requirements: `docs/phases/PHASE_3_WORKFLOW.md`
   cancellation, queue-size guard, Gateway pass-through.
 - Docs: phase spec slice 7, migration slice-7 decision, `docs/CONTRACTS.md`
   "Phase 3 progress streaming", README.
-- PR #14 opened; pre-merge review applied: a consumer that stops iterating now
-  releases its watcher slot (`_stream` finally); a finished run's terminal
+- PR #14 opened; pre-merge review applied: streams are `ProgressStream`
+  objects whose end, `aclose()` or garbage collection releases the watcher slot
+  even before the first iteration (an async generator's `finally` would not run
+  for a never-started consumer); a finished run's terminal
   snapshot carries its failure code; `Gateway.watch` validates `RunId` like
   `inspect`/`resume`; the unreachable `started` event was removed (a watcher
   cannot exist before a run id does); `_emit` isolates each watcher so one
