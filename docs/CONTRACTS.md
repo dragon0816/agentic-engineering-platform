@@ -137,3 +137,56 @@ or exception text. Run snapshots contain validated outputs and require the same
 caller access controls as capability results. Caller-wait timeout semantics remain
 unchanged: execution continues and the eventual result replaces the timeout state.
 History remains in memory (50 runs), with bounded logs (5000 lines plus marker).
+
+## Phase 3 retry and duplicate-submission boundaries
+
+`WorkflowStep.retry` is a `RetryPolicy`: `max_attempts` (strict integer 1–3,
+default 1) and fixed `delay_ms` (strict integer 0–10000, default 100). Legacy
+identity-only steps always run once. The engine preflights any multi-attempt plan
+against host-installed `CapabilitySpec.side_effect`; only `read` is eligible.
+Write/execute/external-side-effect plans fail `unavailable/unsafe_retry` before
+starting a run. A published workflow cannot assert its own retry safety.
+
+A trusted handler may raise `TransientCapabilityError`. The Bridge sanitizes it
+to `failed/transient_failure`, with `Failure.retryable=true` only for reads.
+The engine retries only this failure, within the declared limit. Unknown errors,
+timeouts (including potentially still-running offloaded work), invalid input/output,
+policy denial, missing dependencies and needs-input never retry. The Bridge itself
+still invokes handlers once per call. Every attempt repeats authorization and
+validation with a separate copy of the same selected inputs. Successful prior
+steps are never repeated; output references see only each step's terminal result.
+`WorkflowRunSnapshot.attempts` contains typed `StepAttempt` metadata (zero-based
+step index, one-based attempt, status, optional failure code), never payloads.
+
+`WorkflowEngine.execute(..., idempotency_key=...)` optionally suppresses duplicate
+submissions. Keys are 1–128 ASCII letters/digits or `_.:-`, scoped by requesting
+actor and namespace **within one engine instance on one event loop**. Same key
+reuses the same in-flight or finished run if exact workflow identity, arguments
+and non-trace RequestContext match. Object key order is ignored; other differences
+fail `needs_input/idempotency_conflict` without execution. The returned run and
+results retain the original trace. A key is not a permission grant: replay checks
+current authorization for all workflow capabilities before/after waiting. Denied
+replay returns no cached data. The host must authenticate actors as before.
+
+Keys are reserved before execution without an intervening await. Preflight
+rejections do not consume keys. Failures/cancellation and history eviction never
+release a key, since earlier steps or interrupted handlers may have caused effects.
+The table retains up to 50 entries for the engine lifetime; a new keyed submission
+at capacity fails `unavailable/idempotency_capacity`. Existing keys still work,
+and unkeyed submissions remain independent new runs. There is no expiry or silent
+eviction. Data fingerprints and keys are not logged. Caller-wait timeouts leave the
+original run alive; a duplicate may join it with its own wait timeout.
+
+`Gateway.handle(..., workflow_idempotency_key=...)` forwards this host/caller
+option for workflow routes. It is never taken from model arguments or asset
+metadata. Supplying it to a direct capability route fails
+`unavailable/idempotency_not_supported` without dispatch; unresolved routes remain
+unexecuted. Gateway routing itself is not cached; changed model-selected intent
+conflicts rather than starting different work under the same workflow key.
+
+This is bounded in-memory duplicate suppression, **not durable exactly-once
+execution** or backend idempotency. Restarting/replacing the engine loses keys;
+using a new/no key intentionally permits a new execution. No automatic workflow
+retry, side-effecting retry, crash recovery, cross-process coordination, persistent
+storage or production idempotency backend is provided. Do not silently restart an
+engine to clear capacity for a retried external request.

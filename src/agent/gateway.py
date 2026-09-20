@@ -14,7 +14,7 @@ from pydantic import model_validator
 from agent.routing import RequestRouter, RoutingOutcome
 from capabilities.runtime import CapabilityInvocation
 from common.base import Contract
-from common.execution import CapabilityResult, RequestContext
+from common.execution import CapabilityResult, Failure, IdempotencyKey, RequestContext
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import WorkflowEngine, WorkflowRunSnapshot
 
@@ -43,7 +43,11 @@ class Gateway:
         self.engine = engine
 
     async def handle(
-        self, request: RequestContext, *, workflow_timeout_seconds: float | None = None
+        self,
+        request: RequestContext,
+        *,
+        workflow_timeout_seconds: float | None = None,
+        workflow_idempotency_key: IdempotencyKey | None = None,
     ) -> GatewayResult:
         context = RequestContext.model_validate(request)
         # Routing is synchronous and the model client owns blocking I/O, so it
@@ -51,6 +55,18 @@ class Gateway:
         outcome = await asyncio.to_thread(self.router.route, context)
         decision = outcome.decision
         if decision.kind == "capability" and decision.target is not None:
+            if workflow_idempotency_key is not None:
+                return GatewayResult(
+                    routing=outcome,
+                    capability=CapabilityResult(
+                        trace=context.trace,
+                        status="unavailable",
+                        failure=Failure(
+                            code="idempotency_not_supported",
+                            message="Idempotency keys require a workflow route",
+                        ),
+                    ),
+                )
             result = await self.bridge.execute(
                 CapabilityInvocation(
                     context=context, target=decision.target, arguments=outcome.arguments
@@ -60,13 +76,19 @@ class Gateway:
         if decision.kind == "workflow" and decision.target is not None:
             if workflow_timeout_seconds is None:
                 # The engine owns the default caller-wait timeout.
-                snapshot = await self.engine.execute(context, decision.target, outcome.arguments)
+                snapshot = await self.engine.execute(
+                    context,
+                    decision.target,
+                    outcome.arguments,
+                    idempotency_key=workflow_idempotency_key,
+                )
             else:
                 snapshot = await self.engine.execute(
                     context,
                     decision.target,
                     outcome.arguments,
                     timeout_seconds=workflow_timeout_seconds,
+                    idempotency_key=workflow_idempotency_key,
                 )
             return GatewayResult(routing=outcome, workflow=snapshot)
         # needs_input: nothing executes. A resolved decision without a target is

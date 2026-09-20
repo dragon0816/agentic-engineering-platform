@@ -1,14 +1,32 @@
 """Execution intent and result messages; no execution engine or authorization server."""
 
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, JsonValue, StrictBool, model_validator
+from pydantic import Field, JsonValue, StrictBool, StringConstraints, model_validator
 
 from common.assets import AssetIdentity
 from common.base import Contract, Slug, Symbol, Text
 
 SideEffect = Literal["read", "write", "execute", "external_side_effect"]
 RunStatus = Literal["pending", "running", "succeeded", "failed", "needs_input", "unavailable"]
+IdempotencyKey = Annotated[
+    str, StringConstraints(strict=True, min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_.:-]+$")
+]
+
+
+class StepAttempt(Contract):
+    """Attempt metadata only; step_results retain one terminal result per step."""
+
+    step_index: int = Field(ge=0, strict=True)
+    attempt: int = Field(ge=1, le=3, strict=True)
+    status: Literal["succeeded", "failed", "needs_input", "unavailable"]
+    code: Symbol | None = None
+
+    @model_validator(mode="after")
+    def outcome_code(self) -> Self:
+        if (self.status == "succeeded") != (self.code is None):
+            raise ValueError("non-success attempts require a code; success forbids one")
+        return self
 
 
 class TraceIdentifiers(Contract):

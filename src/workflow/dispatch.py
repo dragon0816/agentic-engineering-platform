@@ -6,7 +6,12 @@ from typing import Literal
 
 from pydantic import ValidationError
 
-from capabilities.runtime import CapabilityInvocation, InstalledCapabilities, LocalPolicy
+from capabilities.runtime import (
+    CapabilityInvocation,
+    InstalledCapabilities,
+    LocalPolicy,
+    TransientCapabilityError,
+)
 from common.assets import AssetIdentity
 from common.base import Contract, Symbol
 from common.execution import CapabilityResult, Failure, TraceIdentifiers
@@ -54,14 +59,21 @@ class BridgeExecutor:
         return result
 
     def _failure(
-        self, call: CapabilityInvocation, code: str, *, unavailable: bool = False
+        self,
+        call: CapabilityInvocation,
+        code: str,
+        *,
+        unavailable: bool = False,
+        retryable: bool = False,
     ) -> CapabilityResult:
         return self._finish(
             call,
             CapabilityResult(
                 trace=call.context.trace,
                 status="unavailable" if unavailable else "failed",
-                failure=Failure(code=code, message="Capability invocation did not complete"),
+                failure=Failure(
+                    code=code, message="Capability invocation did not complete", retryable=retryable
+                ),
             ),
         )
 
@@ -93,6 +105,10 @@ class BridgeExecutor:
             )
         except TimeoutError:
             return self._failure(call, "timeout")
+        except TransientCapabilityError:
+            return self._failure(
+                call, "transient_failure", retryable=binding.spec.side_effect == "read"
+            )
         except Exception:
             # Exception text may contain credentials or input data; never trace it.
             return self._failure(call, "handler_error")

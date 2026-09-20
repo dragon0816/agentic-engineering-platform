@@ -211,9 +211,17 @@ class StepInput(Contract):
     path: tuple[PathPart, ...] = ()
 
 
+class RetryPolicy(Contract):
+    """Opt-in bounded retries; the installed capability decides whether it is safe."""
+
+    max_attempts: int = Field(default=1, ge=1, le=3, strict=True)
+    delay_ms: int = Field(default=100, ge=0, le=10000, strict=True)
+
+
 class WorkflowStep(RegistryContract):
     capability: AssetIdentity
     inputs: dict[Symbol, Annotated[RunInput | StepInput, Field(discriminator="source")]]
+    retry: RetryPolicy = RetryPolicy()
 
 
 class WorkflowManifest(ExecutableManifest):

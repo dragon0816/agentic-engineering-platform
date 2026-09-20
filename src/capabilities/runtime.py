@@ -11,6 +11,14 @@ from common.base import Contract, Symbol, Text
 from common.execution import ExecutionAuthorization, RequestContext
 
 
+class TransientCapabilityError(Exception):
+    """Trusted handlers may flag a transient failure; exception text is never exposed.
+
+    This is retryable only for installed read capabilities. It does not assert
+    idempotency or authorize any additional execution.
+    """
+
+
 class CapabilityInvocation(Contract):
     context: RequestContext
     target: AssetIdentity

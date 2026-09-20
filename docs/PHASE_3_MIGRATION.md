@@ -77,3 +77,22 @@ selector at the manifest/engine boundary, while reusing Bridge dispatch and the
 existing characterization suite. This is not migration of production job logic
 or a claim of source-job parity; the source remains unchanged. Rolling back the
 new structured steps leaves identity-only workflow manifests supported.
+
+## Slice 4 source-first decision
+
+Re-inspected full `host-bridge/app/services/jobrunner.py` and `host-bridge/jobs/_steps.py`
+at the same pinned `896046e8fe2170d21f9213e56e5ce2f93c05ba43` revision.
+`_job_callable` calls `module.run` once, `_wrap` records and rethrows failures,
+and `_steps.run` records failure and rethrows rather than retrying. Repeated
+`run_sync` submissions each create a new UUID/run; there is no idempotency-key
+contract at that runner boundary. No production job or older n8n retry loop is
+imported. Existing pinned excerpt covers the behavior under adaptation.
+
+Decision: **ADAPT**, with source characterization preserving single-attempt
+default and independent unkeyed submissions. Add opt-in read-only transient
+retries and bounded duplicate submission suppression above the existing Bridge;
+these are new platform semantics, not claims of source parity. Preserve failure
+propagation, first-failed-step termination and nonfinal caller timeout behavior.
+Do not infer retry safety for write/execute/external effects from publication or
+an idempotency key. Durable backend idempotency remains future work. Rollback is
+removing optional retry/key fields; source repositories remain unchanged.
