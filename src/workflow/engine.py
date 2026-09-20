@@ -32,8 +32,11 @@ from common.execution import (
     Failure,
     IdempotencyKey,
     RequestContext,
+    ResumePlan,
+    ResumePolicy,
     RunStatus,
     StepAttempt,
+    StepStateRecord,
     TraceIdentifiers,
     WorkflowRun,
 )
@@ -42,6 +45,19 @@ from workflow.dispatch import BridgeExecutor
 MAX_RUNS_KEPT = 50
 MAX_LOG_LINES = 5000
 MAX_IDEMPOTENCY_KEYS = 50
+# Bridge/engine failure codes raised before any handler ran: the step had no effect.
+NEVER_STARTED_CODES = frozenset(
+    {
+        "permission_denied",
+        "invalid_input",
+        "capability_not_installed",
+        "missing_local_capability",
+        "needs_connectivity",
+        "secret_resolution_unavailable",
+        "unsafe_retry",
+        "workflow_input_missing",
+    }
+)
 
 
 class WorkflowRunSnapshot(Contract):
@@ -74,10 +90,25 @@ class InstalledWorkflows:
 class _RunRecord:
     """Mutable run state owned by the event loop; snapshots are frozen contracts."""
 
-    def __init__(self, workflow: AssetIdentity, trace: TraceIdentifiers) -> None:
+    def __init__(
+        self,
+        workflow: AssetIdentity,
+        trace: TraceIdentifiers,
+        *,
+        manifest: WorkflowManifest | None = None,
+        arguments: dict[str, JsonValue] | None = None,
+        actor: str = "",
+        namespace: str = "",
+        resumed_from: str | None = None,
+    ) -> None:
         self.run_id = f"run-{uuid.uuid4().hex}"
         self.workflow = workflow
         self.trace = trace
+        self.manifest = manifest
+        self.arguments: dict[str, JsonValue] = arguments if arguments is not None else {}
+        self.actor = actor
+        self.namespace = namespace
+        self.resumed_from = resumed_from
         self.status: RunStatus = "running"
         self.completed_steps = 0
         self.failure: Failure | None = None
@@ -104,6 +135,7 @@ class _RunRecord:
                 status=self.status,
                 completed_steps=self.completed_steps,
                 failure=self.failure,
+                resumed_from=self.resumed_from,
             ),
             log=tuple(self.log),
             step_results=tuple(result.model_copy(deep=True) for result in self.step_results),
@@ -212,33 +244,18 @@ class WorkflowEngine:
         # the source's load-before-create order.
         if manifest is None:
             return self._rejected(target, checked, "workflow_not_installed")
-        if manifest.secrets:
-            return self._rejected(target, checked, "secret_resolution_unavailable")
-        if not set(manifest.dependencies.local_capabilities).issubset(self.bridge.installed.names):
-            return self._rejected(target, checked, "missing_local_capability")
-        if any(
-            service.required and service.name not in self.bridge.services
-            for service in manifest.dependencies.central_services
-        ):
-            return self._rejected(target, checked, "needs_connectivity")
-        if any(self.bridge.installed.get(_target(step)) is None for step in manifest.steps):
-            return self._rejected(target, checked, "capability_not_installed")
+        rejection = self._preflight(manifest, run_arguments)
+        if rejection is not None:
+            return self._rejected(target, checked, *rejection)
 
-        for step in manifest.steps:
-            if isinstance(step, WorkflowStep) and step.retry.max_attempts > 1:
-                binding = self.bridge.installed.get(step.capability)
-                if binding is None or binding.spec.side_effect != "read":
-                    return self._rejected(target, checked, "unsafe_retry")
-        try:
-            for step in manifest.steps:
-                if isinstance(step, WorkflowStep):
-                    for ref in step.inputs.values():
-                        if isinstance(ref, RunInput):
-                            _select(run_arguments, ref.path)
-        except _MissingInput:
-            return self._rejected(target, checked, "workflow_input_missing", "needs_input")
-
-        record = _RunRecord(target, checked.trace)
+        record = _RunRecord(
+            target,
+            checked.trace,
+            manifest=manifest,
+            arguments=run_arguments,
+            actor=checked.actor,
+            namespace=checked.namespace,
+        )
         if key is not None:
             # No await before reservation/task creation: duplicate submissions on
             # this event loop see this same record, even before execution starts.
@@ -255,14 +272,154 @@ class WorkflowEngine:
         task.add_done_callback(functools.partial(self._discard_task, record.run_id))
         return await self._wait_record(record, timeout_seconds)
 
-    def _replay_allowed(self, context: RequestContext, manifest: WorkflowManifest | None) -> bool:
+    def _replay_allowed(
+        self, context: RequestContext, manifest: WorkflowManifest | None, start: int = 0
+    ) -> bool:
         if manifest is None:
             return False
-        for step in manifest.steps:
+        for step in manifest.steps[start:]:
             binding = self.bridge.installed.get(_target(step))
             if binding is None or not self.bridge.policy.authorize(context, binding.spec).allowed:
                 return False
         return True
+
+    def _preflight(
+        self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]
+    ) -> tuple[str, Literal["unavailable", "needs_input"]] | None:
+        """Statically checkable rejections, in the source's load-before-create order."""
+        if manifest.secrets:
+            return ("secret_resolution_unavailable", "unavailable")
+        if not set(manifest.dependencies.local_capabilities).issubset(self.bridge.installed.names):
+            return ("missing_local_capability", "unavailable")
+        if any(
+            service.required and service.name not in self.bridge.services
+            for service in manifest.dependencies.central_services
+        ):
+            return ("needs_connectivity", "unavailable")
+        if any(self.bridge.installed.get(_target(step)) is None for step in manifest.steps):
+            return ("capability_not_installed", "unavailable")
+        for step in manifest.steps:
+            if isinstance(step, WorkflowStep) and step.retry.max_attempts > 1:
+                binding = self.bridge.installed.get(step.capability)
+                if binding is None or binding.spec.side_effect != "read":
+                    return ("unsafe_retry", "unavailable")
+        try:
+            for step in manifest.steps:
+                if isinstance(step, WorkflowStep):
+                    for ref in step.inputs.values():
+                        if isinstance(ref, RunInput):
+                            _select(run_arguments, ref.path)
+        except _MissingInput:
+            return ("workflow_input_missing", "needs_input")
+        return None
+
+    def inspect(self, run_id: str) -> ResumePlan | None:
+        """Classify each declared step's effect; None for unknown or evicted runs."""
+        record = self._runs.get(run_id)
+        return self._plan(record) if record is not None else None
+
+    def _plan(self, record: _RunRecord) -> ResumePlan:
+        total = len(record.manifest.steps) if record.manifest is not None else 0
+        done = record.completed_steps
+        states: list[StepStateRecord] = []
+        for index in range(total):
+            if index < done:
+                states.append(StepStateRecord(step_index=index, state="completed"))
+            elif index > done:
+                states.append(StepStateRecord(step_index=index, state="never_started"))
+            elif index < len(record.step_results):
+                # The step was dispatched and ended with a terminal Bridge result.
+                failure = record.step_results[index].failure
+                code = failure.code if failure is not None else None
+                state = "never_started" if code in NEVER_STARTED_CODES else "uncertain"
+                states.append(StepStateRecord(step_index=index, state=state, code=code))
+            else:
+                # The run stopped before recording a result for this step: either
+                # a pre-dispatch input rejection or an interruption mid-dispatch.
+                code = record.failure.code if record.failure is not None else None
+                state = "never_started" if code in NEVER_STARTED_CODES else "uncertain"
+                states.append(StepStateRecord(step_index=index, state=state, code=code))
+        return ResumePlan(
+            run_id=record.run_id,
+            workflow=record.workflow,
+            status=record.status,
+            steps=tuple(states),
+            next_step=done if done < total else None,
+        )
+
+    async def resume(
+        self,
+        context: RequestContext,
+        run_id: str,
+        policy: ResumePolicy | None = None,
+        *,
+        timeout_seconds: float = 300,
+    ) -> WorkflowRunSnapshot | None:
+        """Continue a finished run from its first non-completed step as a new run.
+
+        Completed steps are never repeated; their recorded results feed later
+        step inputs. An uncertain-effect step is replayed only as the explicit
+        policy allows. Idempotency keys are neither consulted nor consumed.
+        Returns None for unknown or evicted runs.
+        """
+        if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+            raise ValueError("timeout must be finite and positive")
+        checked = RequestContext.model_validate(context)
+        chosen = ResumePolicy.model_validate(policy) if policy is not None else ResumePolicy()
+        record = self._runs.get(run_id)
+        if record is None:
+            return None
+        target = record.workflow
+        if record.final is None:
+            return self._rejected(target, checked, "run_active")
+        if checked.actor != record.actor or checked.namespace != record.namespace:
+            return self._rejected(target, checked, "permission_denied", "failed")
+        plan = self._plan(record)
+        if plan.next_step is None:
+            return self._rejected(target, checked, "run_complete")
+        manifest = self.workflows.get(target)
+        if manifest is None:
+            return self._rejected(target, checked, "workflow_not_installed")
+        arguments = deepcopy(record.arguments)
+        rejection = self._preflight(manifest, arguments)
+        if rejection is not None:
+            return self._rejected(target, checked, *rejection)
+        step = manifest.steps[plan.next_step]
+        if plan.steps[plan.next_step].state == "uncertain":
+            binding = self.bridge.installed.get(_target(step))
+            replayable = chosen.uncertain == "replay_side_effects" or (
+                chosen.uncertain == "replay_read_only"
+                and binding is not None
+                and binding.spec.side_effect == "read"
+            )
+            if not replayable:
+                return self._rejected(target, checked, "uncertain_side_effect", "needs_input")
+        if not self._replay_allowed(checked, manifest, plan.next_step):
+            return self._rejected(target, checked, "permission_denied", "failed")
+
+        resumed = _RunRecord(
+            target,
+            checked.trace,
+            manifest=manifest,
+            arguments=arguments,
+            actor=checked.actor,
+            namespace=checked.namespace,
+            resumed_from=record.run_id,
+        )
+        resumed.completed_steps = plan.next_step
+        resumed.step_results = [
+            result.model_copy(deep=True) for result in record.step_results[: plan.next_step]
+        ]
+        self._runs[resumed.run_id] = resumed
+        while len(self._runs) > MAX_RUNS_KEPT:
+            del self._runs[next(iter(self._runs))]
+        resumed.append_log(f"resume run {record.run_id} from step {plan.next_step + 1}")
+        task = asyncio.create_task(
+            self._drive(resumed, manifest, checked, arguments, start=plan.next_step)
+        )
+        self._tasks[resumed.run_id] = task
+        task.add_done_callback(functools.partial(self._discard_task, resumed.run_id))
+        return await self._wait_record(resumed, timeout_seconds)
 
     async def _wait_record(self, record: _RunRecord, timeout_seconds: float) -> WorkflowRunSnapshot:
         task = self._tasks.get(record.run_id)
@@ -306,9 +463,11 @@ class WorkflowEngine:
         manifest: WorkflowManifest,
         context: RequestContext,
         arguments: dict[str, JsonValue],
+        start: int = 0,
     ) -> None:
         try:
-            for index, step in enumerate(manifest.steps):
+            for index in range(start, len(manifest.steps)):
+                step = manifest.steps[index]
                 try:
                     inputs = (
                         {

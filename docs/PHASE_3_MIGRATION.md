@@ -65,6 +65,7 @@ Intentional differences:
 
 Rollback: remove `src/workflow/engine.py` and the Phase 3 tests/fixtures; Phase 1/2
 contracts and the source repository remain untouched. No production parity claim.
+
 ## Slice 3 source-first decision
 
 Decision: **ADAPT** the existing engine, retaining the characterized runner
@@ -96,3 +97,36 @@ propagation, first-failed-step termination and nonfinal caller timeout behavior.
 Do not infer retry safety for write/execute/external effects from publication or
 an idempotency key. Durable backend idempotency remains future work. Rollback is
 removing optional retry/key fields; source repositories remain unchanged.
+
+## Slice 5 source-first decision
+
+Inspected `host-bridge/jobs/_steps.py` at the same pinned revision and pinned it
+as `tests/fixtures/source_steps.txt` (the module without its docstring; checksums
+in the fixtures README). Characterized: steps are linear and a finished, failed or
+skipped step can never be entered again; after a failing step the remaining
+declared steps stay `pending` and `never_run()` lists them; skipping requires a
+reason; the failed row records exception text; and the source offers **no resume**
+— a failed run is terminal, and the runner's only step-state use is logging
+"declared but never run" after success.
+
+Decision: **ADAPT** the pending/never-run distinction into a typed effect
+classification and add resumption as new platform semantics, not source parity:
+
+- `never_started` corresponds to the source's `pending` rows, extended with Bridge
+  failure codes that are raised before any handler runs (authorization, input
+  validation, dependency and installation checks). `completed` is a terminal
+  success. Everything else — a handler that ran and failed, timed out, returned
+  invalid output, or was interrupted mid-dispatch — is `uncertain`, because the
+  engine cannot know what effect it had.
+- The source's "no re-entry" rule is preserved for completed steps: resumption
+  never repeats them and reuses their recorded results. Re-entry of an uncertain
+  step is the one deliberate extension, gated by an explicit host `ResumePolicy`
+  and re-authorization of every remaining step; publication and manifests cannot
+  grant it.
+- Exception text is never recorded (unchanged platform rule); classifications carry
+  failure codes only.
+- Resumption is bounded to the in-memory run history; there is no durable step
+  state, crash recovery or persistence, matching the source, which has none.
+
+Rollback: remove `inspect`/`resume`, the resume contracts and the step-table
+fixture; runs remain terminal as before. Source repositories remain unchanged.

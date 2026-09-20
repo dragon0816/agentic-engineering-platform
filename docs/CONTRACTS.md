@@ -190,3 +190,39 @@ using a new/no key intentionally permits a new execution. No automatic workflow
 retry, side-effecting retry, crash recovery, cross-process coordination, persistent
 storage or production idempotency backend is provided. Do not silently restart an
 engine to clear capacity for a retried external request.
+
+## Phase 3 bounded resumption
+
+`WorkflowEngine.inspect(run_id)` returns a `ResumePlan` for a retained run (None
+for unknown or evicted runs): one `StepStateRecord` per declared step, in order,
+classified from recorded evidence only. `completed` is a terminal success whose
+result is retained; `never_started` means no handler ran — the run stopped before
+dispatching the step, or the Bridge rejected it before the handler
+(`permission_denied`, `invalid_input`, `capability_not_installed`,
+`missing_local_capability`, `needs_connectivity`, `secret_resolution_unavailable`,
+`unsafe_retry`, `workflow_input_missing`); everything else is `uncertain` — a
+handler that ran and failed (`handler_error`, `transient_failure`, `timeout`,
+`invalid_output`) or was interrupted mid-dispatch (`workflow_aborted`,
+`workflow_error`). Records carry indices and codes, never payloads. `next_step`
+is the first non-completed step, or None when nothing remains.
+
+`WorkflowEngine.resume(context, run_id, policy=ResumePolicy(...))` continues a
+**finished** run as a new run from `next_step`, sharing history, log and
+caller-wait timeout semantics with `execute`. Completed steps are never repeated;
+their recorded results feed later `StepInput` references. The original run is
+immutable history and the new `WorkflowRun.resumed_from` names it, so resumed
+runs can be resumed again. `ResumePolicy.uncertain` is a trusted caller/host
+option, never model output or manifest metadata: `reject` (default) returns
+`needs_input/uncertain_side_effect`; `replay_read_only` replays the uncertain
+step only when its host-installed capability is classified `read`;
+`replay_side_effects` explicitly accepts a possible duplicate side effect.
+
+Resumption grants nothing. The requesting actor and namespace must match the
+original run (`failed/permission_denied` otherwise), the workflow's pre-flight
+checks rerun, every remaining step is re-authorized by `LocalPolicy` before a run
+record exists and again at dispatch, and a running (`run_active`), complete
+(`run_complete`), unknown or evicted run cannot be resumed. Pre-flight rejections
+create no run record. Idempotency keys are neither consulted nor consumed by
+resumption; a keyed re-submission still returns the original run. This is
+in-memory resumption within one engine instance — no durable step state, crash
+recovery, persistence or Gateway trigger is provided.

@@ -47,7 +47,9 @@ and `tests/test_gateway_inputs.py` for a complete inert Gateway-to-Bridge chain.
 Explicit steps may opt into bounded retries for typed transient read failures.
 Caller-supplied workflow idempotency keys suppress duplicate submissions within
 one engine instance; they are not durable exactly-once guarantees. Run history is
-in memory; resumability and production jobs remain deferred.
+in memory. Finished runs can be inspected and resumed from their first
+non-completed step under an explicit uncertain-effect policy, still in memory;
+durable state and production jobs remain deferred.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
