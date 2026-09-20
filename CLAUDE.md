@@ -5,19 +5,19 @@ Claude Code is a replaceable coding worker in this repository. GitHub and commit
 ## Required startup sequence
 
 Before modifying code:
-1. Read `ARCHITECTURE.md`.
+1. Read `docs/ARCHITECTURE.md`.
 2. Read `AGENTS.md` for shared repository engineering rules.
-3. Read `docs/MIGRATION_PLAN.md`.
-4. Read the active phase specification, currently `docs/PHASE_1_FOUNDATION.md`.
+3. Read `docs/ROADMAP.md`.
+4. Read the active phase specification, currently `docs/phases/PHASE_1_FOUNDATION.md`.
 5. Read `HANDOFF.md`.
 6. Inspect `git status`, recent commits and the current diff.
 7. Use the applicable procedures under `.agents/skills/`.
 
 ## Source of truth
 
-`ARCHITECTURE.md` is the architectural source of truth. Do not redesign the architecture during an implementation task unless the task explicitly requests an architecture change.
+`docs/ARCHITECTURE.md` is the architectural source of truth. Do not redesign the architecture during an implementation task unless the task explicitly requests an architecture change.
 
-`docs/PHASE_1_FOUNDATION.md` defines the current implementation scope. `HANDOFF.md` records resumable execution state, not architecture.
+`docs/phases/PHASE_1_FOUNDATION.md` defines the current implementation scope. `HANDOFF.md` records resumable execution state, not architecture.
 
 ## Required workflow
 
