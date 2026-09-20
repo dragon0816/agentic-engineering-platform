@@ -11,7 +11,9 @@ from unittest.mock import AsyncMock
 import pytest
 
 FIXTURES = Path(__file__).parent / "fixtures"
-CASES: list[dict[str, Any]] = json.loads((FIXTURES / "routing_cases.json").read_text())
+CASES: list[dict[str, Any]] = json.loads(
+    (FIXTURES / "routing_cases.json").read_text(encoding="utf-8")
+)
 
 
 def source_router() -> tuple[Any, AsyncMock]:

@@ -107,6 +107,9 @@ git diff --check
 The new routing and dispatch tests were first run before implementation and failed
 on missing modules as expected. Subsequent lint/type findings were fixed; no check
 failure was waived. GitHub CI status will be recorded before PR delivery.
+The first Phase 2 CI run exposed a Windows locale-dependent JSON read in the
+source-characterization harness (three Chinese cases failed). The read now explicitly
+uses UTF-8; the existing multilingual cases are the regression coverage.
 
 ## Known issues / limitations
 
