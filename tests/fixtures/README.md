@@ -61,3 +61,17 @@ No formatting or implementation edits should be applied to the excerpt.
 
 Tests attach a table and drive it with inert bodies; nothing outside the test
 process is touched.
+## Pinned n8n dispatch graph projection
+
+Source: `dragon0816/rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43`,
+`workflows/13_release_package.json`. Full source bytes SHA-256:
+`8dfb7400cfa9c4ff9daa91ab2c66b853b13e6b03edbd7acab5061c76a94e540f`.
+
+`source_n8n_release.json` retains the source graph's `connections`, HTTP node
+name/type/method/jsonBody (and retryOnFail if present), and IF node name/type/
+conditions. Values are copied without expression edits; JSON formatting is
+normalized to UTF-8/LF, two-space indentation. Projection SHA-256:
+`4135789e5a71efba67206f1729d73a0a47e44ef3e61f3855925630765d9e27a5`.
+URLs, headers, parameter defaults, credentials and unrelated node UI properties
+are excluded. Tests inspect this declarative graph; no JS expression or n8n node
+is executed. This is a source-behavior reference, not an importable workflow.

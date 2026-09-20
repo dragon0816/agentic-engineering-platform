@@ -1,0 +1,101 @@
+{
+  "nodes": [
+    {
+      "name": "Bridge: release_package",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "jsonBody": "={{ JSON.stringify({ workflowId: $workflow.id, executionId: $execution.id, workflowName: $workflow.name, workerId: '__WORKER_ID__' || undefined, job: 'release_package', timeoutSec: 2400, async: false, block: true, params: { companyName: $json.companyName, chipsetId: $json.chipsetId, info: $json.info, generalTestcaseVersion: $json.generalTestcaseVersion, chipsetVersion: $json.chipsetVersion, testPlans: $json.testPlans, configurations: $json.configurations, overlays: $json.overlays, dryRun: $json.dryRun } }) }}"
+      }
+    },
+    {
+      "name": "job 成功?",
+      "type": "n8n-nodes-base.if",
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ok",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.ok === true }}",
+              "rightValue": ""
+            },
+            {
+              "id": "status",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.data?.status }}",
+              "rightValue": "success"
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "手動執行": {
+      "main": [
+        [
+          {
+            "node": "執行參數",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "執行參數": {
+      "main": [
+        [
+          {
+            "node": "Bridge: release_package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bridge: release_package": {
+      "main": [
+        [
+          {
+            "node": "job 成功?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "job 成功?": {
+      "main": [
+        [
+          {
+            "node": "產出摘要",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "失敗摘要",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

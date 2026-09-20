@@ -53,6 +53,11 @@ through `Gateway.inspect`/`Gateway.resume` or the engine directly, and owners ca
 follow a run's progress through bounded `watch` streams;
 durable state and production jobs remain deferred.
 
+The optional [n8n adapter](integrations/n8n/README.md) accepts operation IDs and
+arguments for a host-bound workflow through `Gateway.execute_workflow`; normal
+routed workflows share this entry point. Offline tests cover delivery deduplication,
+policy and progress. No n8n runtime, HTTP endpoint or production connection is installed.
+
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not
