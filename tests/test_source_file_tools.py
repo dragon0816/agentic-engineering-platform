@@ -66,6 +66,13 @@ def test_source_encoding_fallback_reaches_big5_and_latin1(tmp_path: Path) -> Non
     assert "<pre>" in result
 
 
+def test_source_keeps_a_utf8_bom_in_the_content(tmp_path: Path) -> None:
+    """utf-8 precedes utf-8-sig in the fallback list, so the BOM is never stripped."""
+    target = tmp_path / "bom.txt"
+    target.write_bytes("﻿data".encode())
+    assert "<pre>﻿data</pre>" in source_tools().read_file(path=str(target))
+
+
 def test_source_truncates_to_max_lines(tmp_path: Path) -> None:
     target = tmp_path / "long.log"
     target.write_text("\n".join(f"line-{n}" for n in range(1, 151)), encoding="utf-8")

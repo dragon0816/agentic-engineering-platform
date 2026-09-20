@@ -1,0 +1,31 @@
+[
+  {
+    "metadata": {
+      "identity": {
+        "namespace": "filesystem",
+        "name": "file-read-skill",
+        "version": "1.0.0"
+      },
+      "owner": {
+        "type": "team",
+        "id": "migration"
+      },
+      "visibility": "private",
+      "lifecycle": "draft"
+    },
+    "alias": "files",
+    "instructions": "Read a bounded local text file through the governed filesystem/read-file capability. Provide an explicit path; paths are never guessed from natural language and reads stay inside the host-configured root.",
+    "commands": [
+      {
+        "name": "read",
+        "target": {
+          "namespace": "filesystem",
+          "name": "read-file",
+          "version": "1.0.0"
+        }
+      }
+    ],
+    "rules": [],
+    "default_command": "read"
+  }
+]
