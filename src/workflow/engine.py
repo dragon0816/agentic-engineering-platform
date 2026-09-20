@@ -8,21 +8,32 @@ explicitly installed manifests and every step is authorized by the Bridge.
 
 import asyncio
 import functools
+import hashlib
+import json
 import math
 import uuid
 from copy import deepcopy
 from typing import Literal
 
-from pydantic import JsonValue
+from pydantic import JsonValue, TypeAdapter
 
 from capabilities.runtime import CapabilityInvocation
-from common.assets import AssetIdentity, PathPart, RunInput, WorkflowManifest, WorkflowStep
+from common.assets import (
+    AssetIdentity,
+    PathPart,
+    RetryPolicy,
+    RunInput,
+    WorkflowManifest,
+    WorkflowStep,
+)
 from common.base import Contract, Text
 from common.execution import (
     CapabilityResult,
     Failure,
+    IdempotencyKey,
     RequestContext,
     RunStatus,
+    StepAttempt,
     TraceIdentifiers,
     WorkflowRun,
 )
@@ -30,6 +41,7 @@ from workflow.dispatch import BridgeExecutor
 
 MAX_RUNS_KEPT = 50
 MAX_LOG_LINES = 5000
+MAX_IDEMPOTENCY_KEYS = 50
 
 
 class WorkflowRunSnapshot(Contract):
@@ -38,6 +50,7 @@ class WorkflowRunSnapshot(Contract):
     run: WorkflowRun
     log: tuple[Text, ...] = ()
     step_results: tuple[CapabilityResult, ...] = ()
+    attempts: tuple[StepAttempt, ...] = ()
 
 
 class InstalledWorkflows:
@@ -70,6 +83,7 @@ class _RunRecord:
         self.failure: Failure | None = None
         self.log: list[str] = []
         self.step_results: list[CapabilityResult] = []
+        self.attempts: list[StepAttempt] = []
 
         self.final: WorkflowRunSnapshot | None = None
 
@@ -93,6 +107,7 @@ class _RunRecord:
             ),
             log=tuple(self.log),
             step_results=tuple(result.model_copy(deep=True) for result in self.step_results),
+            attempts=tuple(self.attempts),
         )
 
 
@@ -127,6 +142,9 @@ class WorkflowEngine:
         self.bridge = bridge
         self._runs: dict[str, _RunRecord] = {}
         self._tasks: dict[str, asyncio.Task[None]] = {}
+        # Never evict a key silently: even an evicted failed run may have effects.
+        # Scoped to this engine's lifetime and one event loop, not durable storage.
+        self._submissions: dict[tuple[str, str, str], tuple[str, _RunRecord]] = {}
 
     def get(self, run_id: str) -> WorkflowRunSnapshot | None:
         """None means unknown or evicted; only the last MAX_RUNS_KEPT runs are kept."""
@@ -149,12 +167,47 @@ class WorkflowEngine:
         arguments: dict[str, JsonValue] | None = None,
         *,
         timeout_seconds: float = 300,
+        idempotency_key: IdempotencyKey | None = None,
     ) -> WorkflowRunSnapshot:
         if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
             raise ValueError("timeout must be finite and positive")
         checked = RequestContext.model_validate(context)
         target = AssetIdentity.model_validate(workflow)
         manifest = self.workflows.get(target)
+        run_arguments = deepcopy(arguments or {})
+        key = None
+        signature = ""
+        if idempotency_key is not None:
+            token = TypeAdapter(IdempotencyKey).validate_python(idempotency_key)
+            key = (checked.actor, checked.namespace, token)
+            # JSON distinguishes booleans/integers and normalizes object key order.
+            intent = {
+                "workflow": target.model_dump(mode="json"),
+                "context": checked.model_dump(mode="json", exclude={"trace"}),
+                "arguments": run_arguments,
+            }
+            signature = hashlib.sha256(
+                json.dumps(
+                    intent,
+                    sort_keys=True,
+                    ensure_ascii=True,
+                    allow_nan=False,
+                    separators=(",", ":"),
+                ).encode()
+            ).hexdigest()
+            previous = self._submissions.get(key)
+            if previous is not None:
+                if previous[0] != signature:
+                    return self._rejected(target, checked, "idempotency_conflict", "needs_input")
+                if not self._replay_allowed(checked, manifest):
+                    return self._rejected(target, checked, "permission_denied", "failed")
+                snapshot = await self._wait_record(previous[1], timeout_seconds)
+                # Authorization may change while joining an active run.
+                if not self._replay_allowed(checked, manifest):
+                    return self._rejected(target, checked, "permission_denied", "failed")
+                return snapshot
+            if len(self._submissions) >= MAX_IDEMPOTENCY_KEYS:
+                return self._rejected(target, checked, "idempotency_capacity")
         # Pre-flight failures never create a run record (no ghost runs), matching
         # the source's load-before-create order.
         if manifest is None:
@@ -171,7 +224,11 @@ class WorkflowEngine:
         if any(self.bridge.installed.get(_target(step)) is None for step in manifest.steps):
             return self._rejected(target, checked, "capability_not_installed")
 
-        run_arguments = deepcopy(arguments or {})
+        for step in manifest.steps:
+            if isinstance(step, WorkflowStep) and step.retry.max_attempts > 1:
+                binding = self.bridge.installed.get(step.capability)
+                if binding is None or binding.spec.side_effect != "read":
+                    return self._rejected(target, checked, "unsafe_retry")
         try:
             for step in manifest.steps:
                 if isinstance(step, WorkflowStep):
@@ -182,6 +239,10 @@ class WorkflowEngine:
             return self._rejected(target, checked, "workflow_input_missing", "needs_input")
 
         record = _RunRecord(target, checked.trace)
+        if key is not None:
+            # No await before reservation/task creation: duplicate submissions on
+            # this event loop see this same record, even before execution starts.
+            self._submissions[key] = (signature, record)
         self._runs[record.run_id] = record
         while len(self._runs) > MAX_RUNS_KEPT:
             # Only the record is evicted. The driving task stays strongly
@@ -192,6 +253,21 @@ class WorkflowEngine:
         task = asyncio.create_task(self._drive(record, manifest, checked, run_arguments))
         self._tasks[record.run_id] = task
         task.add_done_callback(functools.partial(self._discard_task, record.run_id))
+        return await self._wait_record(record, timeout_seconds)
+
+    def _replay_allowed(self, context: RequestContext, manifest: WorkflowManifest | None) -> bool:
+        if manifest is None:
+            return False
+        for step in manifest.steps:
+            binding = self.bridge.installed.get(_target(step))
+            if binding is None or not self.bridge.policy.authorize(context, binding.spec).allowed:
+                return False
+        return True
+
+    async def _wait_record(self, record: _RunRecord, timeout_seconds: float) -> WorkflowRunSnapshot:
+        task = self._tasks.get(record.run_id)
+        if task is None:
+            return record.snapshot()
         done, _ = await asyncio.wait({task}, timeout=timeout_seconds)
         if not done:
             # Bounds only the caller's wait: the task keeps running and its
@@ -212,7 +288,7 @@ class WorkflowEngine:
         workflow: AssetIdentity,
         context: RequestContext,
         code: str,
-        status: Literal["unavailable", "needs_input"] = "unavailable",
+        status: Literal["unavailable", "needs_input", "failed"] = "unavailable",
     ) -> WorkflowRunSnapshot:
         return WorkflowRunSnapshot(
             run=WorkflowRun(
@@ -254,9 +330,7 @@ class WorkflowEngine:
                     )
                     record.append_log(f"step {index + 1} needs_input workflow_input_missing")
                     return
-                result = await self.bridge.execute(
-                    CapabilityInvocation(context=context, target=_target(step), arguments=inputs)
-                )
+                result = await self._execute_step(record, index, step, context, inputs)
                 record.step_results.append(result)
                 code = result.failure.code if result.failure is not None else None
                 record.append_log(
@@ -284,3 +358,46 @@ class WorkflowEngine:
         finally:
             if record.final is None:
                 record.final = record.snapshot()
+
+    async def _execute_step(
+        self,
+        record: _RunRecord,
+        index: int,
+        step: AssetIdentity | WorkflowStep,
+        context: RequestContext,
+        inputs: dict[str, JsonValue],
+    ) -> CapabilityResult:
+        retry = step.retry if isinstance(step, WorkflowStep) else RetryPolicy()
+        for attempt in range(1, retry.max_attempts + 1):
+            if retry.max_attempts > 1:
+                binding = self.bridge.installed.get(_target(step))
+                if binding is None or binding.spec.side_effect != "read":
+                    return CapabilityResult(
+                        trace=context.trace,
+                        status="unavailable",
+                        failure=Failure(code="unsafe_retry", message="Retry plan is unavailable"),
+                    )
+            result = await self.bridge.execute(
+                CapabilityInvocation(
+                    context=context, target=_target(step), arguments=deepcopy(inputs)
+                )
+            )
+            failure = result.failure
+            record.attempts.append(
+                StepAttempt(
+                    step_index=index,
+                    attempt=attempt,
+                    status=result.status,
+                    code=failure.code if failure is not None else None,
+                )
+            )
+            if (
+                failure is None
+                or not failure.retryable
+                or failure.code != "transient_failure"
+                or attempt == retry.max_attempts
+            ):
+                return result
+            record.append_log(f"step {index + 1} attempt {attempt} failed transient_failure; retry")
+            await asyncio.sleep(retry.delay_ms / 1000)
+        raise AssertionError("validated retry policy always permits an attempt")

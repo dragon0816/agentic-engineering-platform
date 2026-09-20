@@ -82,6 +82,41 @@ Implementation plan: extend `common/assets.py`; add contract/runtime tests in
 `workflow/engine.py`; exercise Gateway composition; then full verification,
 commit and handoff. This adds no new production side effects or infrastructure.
 
+## Requirements and acceptance (slice 4 — bounded retries and duplicate submission)
+
+1. Legacy and explicit steps default to one attempt. Explicit steps may request
+   1–3 attempts with a fixed 0–10000 ms delay (default 100 ms). Only host-installed
+   `read` capabilities may request retries; reject other retry plans before any
+   step executes. A trusted handler must raise `TransientCapabilityError` to mark
+   a failure retryable. Timeouts, unknown exceptions, validation, missing inputs,
+   authorization and dependency failures never retry.
+2. Each attempt uses the same selected inputs and the same Bridge authorization
+   path. Never repeat successful prior steps. Keep one terminal result per step
+   for output references, plus bounded attempt metadata (no payloads). Caller
+   timeout/cancellation behavior remains unchanged.
+3. Optional idempotency keys belong to the caller/Gateway/engine, not model output
+   or workflow metadata. Scope keys by actor and namespace in one engine instance.
+   Same key and same workflow, arguments and non-trace request context reuse the
+   original run (including original trace). Changed execution intent fails closed.
+   Concurrent submissions and resubmission after caller timeout never start another
+   task. Cached results require current authorization for all workflow capabilities.
+4. Retain key records for the engine lifetime, including failures/cancellation and
+   runs evicted from normal history. Bound the key table (50 by default); reject
+   new keyed runs at capacity instead of silently evicting keys and risking replay.
+   This is in-memory duplicate suppression, not durable exactly-once execution or
+   backend idempotency. No key means a deliberate new run; no automatic whole-run
+   retries, persistence, key expiry, distributed coordination or recovery.
+5. Add source characterization for one-call-on-failure and independent repeated
+   submissions, then contract/runtime tests for retry limits, safety/policy checks,
+   chaining, payload ownership, concurrent duplicates, conflicts, history eviction,
+   caller timeouts, denied replay and Gateway pass-through. Verify all existing
+   contracts and cross-platform CI.
+
+Plan: document source disposition; tests first; additive contracts in `assets.py`
+and `execution.py`, typed transient error in capability runtime, retry marking in
+Bridge, bounded engine orchestration, Gateway key pass-through; full verification,
+small commits, PR and handoff. No production side effects are exercised.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -89,7 +124,8 @@ commit and handoff. This adds no new production side effects or infrastructure.
 - Slice 2: add the Gateway dispatch contract with regression and evaluation
   coverage.
 - Slice 3: explicit per-step inputs and prior-result chaining.
-- Later Phase 3 slices: retry/idempotency, resumable state, progress streaming, and the optional n8n
+- Slice 4: bounded read retries and in-memory duplicate submission suppression.
+- Later Phase 3 slices: resumable state, progress streaming, and the optional n8n
   adapter invoking the same Gateway/engine contracts.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,

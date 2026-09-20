@@ -132,3 +132,18 @@ def test_source_caps_the_log_with_one_truncation_marker() -> None:
         run.append_log(f"line-{n}")
     assert len(run.log) == module.MAX_LOG_LINES + 1
     assert run.log[-1].endswith(f"… log truncated ({module.MAX_LOG_LINES} lines)")
+
+
+def test_source_does_not_retry_or_deduplicate_submissions() -> None:
+    calls: list[Any] = []
+
+    def fail(params: Any, log: Any) -> dict[str, Any]:
+        calls.append(params)
+        raise RuntimeError("transient-looking error still has no automatic retry")
+
+    module = source_runner(job_module(fail))
+    first = module.run_sync("sample", {"value": 1}, timeout_sec=10)
+    assert first["status"] == "failed" and len(calls) == 1
+    second = module.run_sync("sample", {"value": 1}, timeout_sec=10)
+    assert second["status"] == "failed" and len(calls) == 2
+    assert first["runId"] != second["runId"]

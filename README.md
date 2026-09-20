@@ -44,7 +44,10 @@ Workflows can pass all run arguments to legacy steps or explicitly select inputs
 from run arguments and earlier validated step outputs. Each step still requires
 its own Bridge authorization. See [workflow input contracts](docs/CONTRACTS.md#phase-3-workflow-inputs)
 and `tests/test_gateway_inputs.py` for a complete inert Gateway-to-Bridge chain.
-Run history is in memory; retries, resumability and production jobs remain deferred.
+Explicit steps may opt into bounded retries for typed transient read failures.
+Caller-supplied workflow idempotency keys suppress duplicate submissions within
+one engine instance; they are not durable exactly-once guarantees. Run history is
+in memory; resumability and production jobs remain deferred.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
