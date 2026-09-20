@@ -12,7 +12,7 @@ Phase 1 — Foundation
 
 ## Goal
 
-Implement the minimal provider-neutral, side-effect-free foundation defined in `docs/PHASE_1_FOUNDATION.md`.
+Implement the minimal provider-neutral, side-effect-free foundation defined in `docs/phases/PHASE_1_FOUNDATION.md`.
 
 ## Completed
 
@@ -29,7 +29,7 @@ Implement the minimal provider-neutral, side-effect-free foundation defined in `
 
 ## Remaining
 
-Follow `docs/PHASE_1_FOUNDATION.md` in small verified slices.
+Follow `docs/phases/PHASE_1_FOUNDATION.md` in small verified slices.
 
 ## Architecture invariants
 
