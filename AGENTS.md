@@ -64,7 +64,7 @@ Architecture -> Requirements -> Contracts -> Tests -> Implementation
              -> Verification -> Commit -> Handoff
 ```
 
-Before modifying implementation code, read `ARCHITECTURE.md`, `docs/MIGRATION_PLAN.md`, the active phase specification and `HANDOFF.md`.
+Before modifying implementation code, read `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, the active phase specification and `HANDOFF.md`.
 
 Use repository procedures under `.agents/skills/`:
 - `architecture-guard` before implementation or architectural changes;
