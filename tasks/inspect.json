@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "identity": {"namespace": "sample", "name": "inspect", "version": "1.0.0"},
+    "owner": {"type": "team", "id": "engineering"},
+    "visibility": "public",
+    "lifecycle": "published",
+    "contributors": ["sample-author"],
+    "provenance": [{"source": "repository:tasks/inspect.json", "author": "sample-author"}],
+    "validation_refs": ["tests/test_registry.py"],
+    "evaluation_refs": ["evaluation/cases/discover-task.json"]
+  },
+  "description": "Discover and advertise sample metadata in memory; no execution.",
+  "capability": {"namespace": "sample", "name": "inspect", "version": "1.0.0"},
+  "execution": {"mode": "local"},
+  "dependencies": {
+    "local_capabilities": ["sample.inspect"],
+    "central_services": [],
+    "central_required": false
+  },
+  "input_contract": "sample.inspect.input.v1",
+  "output_contract": "sample.inspect.output.v1"
+}
