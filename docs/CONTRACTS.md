@@ -61,7 +61,7 @@ No source command parser or runtime is migrated in Phase 1.
   `direct` uses the named Skill's rules/default. `RequestRouter.route` uses at most
   one `ModelClient.generate` on unmatched text and validates the proposed target
   against the installed catalog. Workflow results are route intent; the Phase 3
-  workflow executor is not implemented. A route has no authority to execute.
+  Gateway dispatches them to the workflow engine. A route has no authority to execute.
 - `InstalledCapabilities.register` binds a reviewed `CapabilitySpec`, async handler,
   input/output model classes and explicit dependencies. No module loading or code
   supplied by a Registry asset is accepted. This is an execution-plane catalog,
@@ -91,3 +91,49 @@ No source command parser or runtime is migrated in Phase 1.
 
 All changes are additive to Phase 1. Source fidelity and intentional security changes
 are documented in `PHASE_2_MIGRATION.md`; production source paths remain active.
+
+## Phase 3 workflow inputs
+
+`InstalledWorkflows` installs exact scoped versions, independently of Registry
+publication. `WorkflowEngine` dispatches ordered steps through `BridgeExecutor`;
+each step retains input/output validation, dependencies and execution authorization.
+`Gateway.handle` uses this same engine for deterministic and model-selected routes.
+
+`WorkflowManifest.steps` accepts either an existing `AssetIdentity` (all run
+arguments passed through) or a `WorkflowStep` with `capability` and required
+`inputs`. Explicit inputs replace, rather than merge with, the run arguments;
+`inputs: {}` sends no fields. Input names are capability input field names.
+Each value is a discriminated reference:
+
+```json
+{
+  "capability": {"namespace": "sample", "name": "count", "version": "1.0.0"},
+  "inputs": {
+    "count": {"source": "step", "step_index": 0, "path": ["count"]}
+  }
+}
+```
+
+This step consumes `data.count` from step 0 of the current run. Only earlier
+successful steps may be referenced. To select run arguments instead, use
+`{"source": "run", "path": ["items", 0, "count"]}`. Strings are exact object
+keys (dots/slashes have no special meaning); nonnegative strict integers are
+zero-based array indices. Empty or omitted `path` selects the whole source.
+JSON null is present data and still must satisfy the target capability contract.
+Literal values, expressions, cross-run references and secret resolution are not
+supported; ordinary configuration values belong in run arguments.
+
+All run references are checked before starting any step. Missing keys, out-of-range
+indices or wrong container types return `needs_input/workflow_input_missing` with
+no stored run. Missing output paths stop the running workflow with that code;
+prior completed steps/results remain, and the unresolved step is not dispatched.
+Wrong selected value types still return the Bridge's `failed/invalid_input`.
+No later step runs after failure. `needs_input` is a terminal state for this run,
+not resumability or permission to automatically retry prior side effects.
+
+Run arguments, installed manifests and returned snapshots have separate ownership;
+selected values are copied. Logs contain no input paths, arguments, result payloads
+or exception text. Run snapshots contain validated outputs and require the same
+caller access controls as capability results. Caller-wait timeout semantics remain
+unchanged: execution continues and the eventual result replaces the timeout state.
+History remains in memory (50 runs), with bounded logs (5000 lines plus marker).
