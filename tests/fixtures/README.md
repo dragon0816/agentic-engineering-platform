@@ -47,3 +47,17 @@ No formatting or implementation edits should be applied to the excerpt.
 
 The excerpt runs real (inert) callables on its own thread pool inside the tests;
 no job module, network, ops dashboard or host capability is touched.
+
+## Pinned step-table characterization
+
+Same `rs_workflow_system` commit. File: `host-bridge/jobs/_steps.py`. UTF-8,
+LF-normalized full source SHA-256:
+`426713d63b954269b534d3182621a253e4c164b7b98af2b2e6e0276ad3428642`.
+
+`source_steps.txt` retains the whole module verbatim except its module docstring
+(source lines 1–39); it is self-contained stdlib code. Excerpt SHA-256 (UTF-8/LF):
+`fb7e1e3754f4783dbf32edb93cf79698eff1d415ed6058487ff8eb3d4ec334a5`.
+No formatting or implementation edits should be applied to the excerpt.
+
+Tests attach a table and drive it with inert bodies; nothing outside the test
+process is touched.

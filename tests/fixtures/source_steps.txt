@@ -1,0 +1,350 @@
+from __future__ import annotations
+
+import contextvars
+import json
+import logging
+import re
+import threading
+import time
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from typing import Any, Callable, Iterator, Mapping, Sequence
+
+LogFn = Callable[[str], None]
+
+ID_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+#: Three to eight steps, one verb each (BRIDGE_API 6.6). Fewer is not worth
+#: declaring; more is usually a loop that should live inside one step.
+MIN_STEPS = 3
+MAX_STEPS = 8
+#: A step's `result` is a summary for people, not a data channel. Above this
+#: it is cut and the log says so.
+RESULT_MAX_BYTES = 4096
+STATUSES = ("pending", "running", "success", "failed", "skipped")
+
+_fallback_log = logging.getLogger("jobs.steps")
+
+_current: contextvars.ContextVar[StepTable | None] = contextvars.ContextVar(
+    "jobs_steps_current", default=None)
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+
+# --------------------------------------------------------------------------
+# the declaration
+# --------------------------------------------------------------------------
+
+
+def validate(declared: Any, where: str = "STEPS") -> list[dict[str, Any]]:
+    """Normalise a module's ``STEPS`` to ``[{id, title, optional}]``.
+
+    ``None`` or an empty list is "not declared" and returns ``[]``: the job
+    keeps the old behaviour and its run snapshot carries ``steps: []``. Any
+    other shape problem raises, so the runner reports it in ``GET /jobs``
+    beside the job's name rather than by a chart that never fills in.
+    """
+    if declared is None:
+        return []
+    if not isinstance(declared, (list, tuple)):
+        raise TypeError(f"{where} must be a list of {{id, title}} dicts")
+    if len(declared) == 0:
+        return []
+    if len(declared) < MIN_STEPS:
+        raise ValueError(
+            f"{where} declares {len(declared)} step(s); a job declares "
+            f"{MIN_STEPS} to {MAX_STEPS} steps, or none at all")
+    if len(declared) > MAX_STEPS:
+        raise ValueError(
+            f"{where} declares {len(declared)} steps; more than {MAX_STEPS} "
+            "usually means a loop was unrolled -- keep the loop inside one "
+            "step and say how many it handled in that step's result")
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for i, entry in enumerate(declared):
+        if not isinstance(entry, Mapping):
+            raise TypeError(f"{where}[{i}] must be a dict with id and title")
+        step_id = entry.get("id")
+        if not isinstance(step_id, str) or not ID_RE.match(step_id):
+            raise ValueError(
+                f"{where}[{i}].id {step_id!r} must match {ID_RE.pattern}")
+        if step_id in seen:
+            raise ValueError(f"{where}: id {step_id!r} is declared twice")
+        seen.add(step_id)
+        title = entry.get("title")
+        if not isinstance(title, str) or not title.strip():
+            raise ValueError(f"{where}[{i}] ({step_id}) needs a title")
+        optional = entry.get("optional", False)
+        if not isinstance(optional, bool):
+            raise ValueError(f"{where}[{i}] ({step_id}).optional must be true or false")
+        out.append({"id": step_id, "title": title.strip(), "optional": optional})
+    return out
+
+
+# --------------------------------------------------------------------------
+# the table one run holds
+# --------------------------------------------------------------------------
+
+
+def _encode_result(value: Any, step_id: str, log: LogFn) -> Any:
+    """JSON-safe copy of a step's result, cut to ``RESULT_MAX_BYTES``."""
+    if not isinstance(value, Mapping):
+        raise TypeError(f"step {step_id}: result must be a dict, not {type(value).__name__}")
+    text = json.dumps(value, ensure_ascii=False, default=str)
+    size = len(text.encode("utf-8"))
+    if size <= RESULT_MAX_BYTES:
+        return json.loads(text)
+    # Cut the serialised text rather than pick keys to drop: the cut is
+    # visible as such, and a result that needed cutting was not a summary.
+    keep = text.encode("utf-8")[: RESULT_MAX_BYTES - 200].decode("utf-8", errors="ignore")
+    log(f"step {step_id}: result truncated ({size} bytes > {RESULT_MAX_BYTES})")
+    return {"truncated": True, "bytes": size, "text": keep}
+
+
+class StepTable:
+    """One run's steps, in declared order, with their live status.
+
+    Thread-safe: the worker thread moves steps while the HTTP thread reads
+    :meth:`snapshot` for ``GET /jobs/run/{runId}``. ``on_change`` is called
+    after every transition, outside the lock, with the table -- the runner
+    uses it to post the run snapshot to ops.
+
+    ``declared=None`` makes an *open* table: ids are accepted as they come and
+    only the double-run rule applies. That is what ``attach(log)`` without a
+    declaration gives a CLI; the runner always passes the declaration.
+    """
+
+    def __init__(
+        self,
+        declared: Sequence[Mapping[str, Any]] | None,
+        *,
+        log: LogFn | None = None,
+        on_change: Callable[[StepTable], None] | None = None,
+    ) -> None:
+        self._open = declared is None
+        self._log: LogFn = log or (lambda m: _fallback_log.info("%s", m))
+        self._on_change = on_change
+        self._lock = threading.Lock()
+        self._rows: dict[str, dict[str, Any]] = {}
+        self._started: dict[str, float] = {}
+        self._running: str | None = None
+        for entry in validate(list(declared or [])):
+            self._rows[entry["id"]] = self._blank(entry)
+
+    @staticmethod
+    def _blank(entry: Mapping[str, Any]) -> dict[str, Any]:
+        return {
+            "id": entry["id"],
+            "title": entry["title"],
+            "optional": bool(entry.get("optional", False)),
+            "status": "pending",
+            "startedAt": None,
+            "finishedAt": None,
+            "durationMs": None,
+            "result": None,
+            "error": None,
+            "reason": None,
+        }
+
+    # -- reading ----------------------------------------------------------
+
+    def declared(self) -> list[dict[str, Any]]:
+        """``[{id, title, optional}]`` -- the shape ``GET /jobs`` lists."""
+        with self._lock:
+            return [{"id": r["id"], "title": r["title"], "optional": r["optional"]}
+                    for r in self._rows.values()]
+
+    def snapshot(self) -> list[dict[str, Any]]:
+        """Every step, declared order, pending ones included (6.6 回報)."""
+        with self._lock:
+            return [dict(r) for r in self._rows.values()]
+
+    def status(self, step_id: str) -> str | None:
+        with self._lock:
+            row = self._rows.get(step_id)
+            return row["status"] if row else None
+
+    def never_run(self) -> list[str]:
+        """Ids still ``pending`` -- declared, never entered, never skipped."""
+        with self._lock:
+            return [r["id"] for r in self._rows.values() if r["status"] == "pending"]
+
+    # -- transitions --------------------------------------------------------
+
+    def _row(self, step_id: str, verb: str) -> dict[str, Any]:
+        """The row for ``step_id``, or the ``TypeError`` the contract names."""
+        row = self._rows.get(step_id)
+        if row is None:
+            if not self._open:
+                known = ", ".join(self._rows) or "nothing"
+                raise TypeError(
+                    f"step {step_id!r} is not declared in STEPS ({known}); "
+                    "the declaration is the only source of steps")
+            row = self._blank({"id": step_id, "title": step_id})
+            self._rows[step_id] = row
+        if row["status"] != "pending":
+            raise TypeError(
+                f"step {step_id!r} cannot be {verb}: it is already "
+                f"{row['status']} (steps are linear, not a loop)")
+        return row
+
+    def start(self, step_id: str) -> None:
+        with self._lock:
+            if self._running is not None:
+                raise TypeError(
+                    f"step {step_id!r} started while step {self._running!r} is "
+                    "still running; steps run one after another")
+            row = self._row(step_id, "started")
+            row["status"] = "running"
+            row["startedAt"] = _now()
+            self._started[step_id] = time.perf_counter()
+            self._running = step_id
+        self._log(f"step {step_id}: start")
+        self._changed()
+
+    def finish(self, step_id: str, error: BaseException | None = None) -> None:
+        with self._lock:
+            row = self._rows.get(step_id)
+            if row is None or row["status"] != "running":
+                raise TypeError(f"step {step_id!r} is not running")
+            elapsed = int((time.perf_counter() - self._started.pop(step_id, 0.0)) * 1000)
+            row["finishedAt"] = _now()
+            row["durationMs"] = elapsed
+            if error is None:
+                row["status"] = "success"
+            else:
+                row["status"] = "failed"
+                row["error"] = str(error) or type(error).__name__
+            if self._running == step_id:
+                self._running = None
+            result = row["result"]
+        if error is None:
+            suffix = f" {json.dumps(result, ensure_ascii=False)}" if result is not None else ""
+            self._log(f"step {step_id}: done in {elapsed} ms{suffix}")
+        else:
+            self._log(f"step {step_id}: failed after {elapsed} ms: {str(error) or type(error).__name__}")
+        self._changed()
+
+    def skip(self, step_id: str, reason: str) -> None:
+        if not isinstance(reason, str) or not reason.strip():
+            raise TypeError(f"step {step_id!r}: skip needs a reason; it is shown on the chart")
+        with self._lock:
+            row = self._row(step_id, "skipped")
+            row["status"] = "skipped"
+            row["reason"] = reason.strip()
+        self._log(f"step {step_id}: skipped ({reason.strip()})")
+        self._changed()
+
+    def set_result(self, step_id: str, value: Any) -> None:
+        encoded = _encode_result(value, step_id, self._log)
+        with self._lock:
+            row = self._rows.get(step_id)
+            if row is None or row["status"] != "running":
+                raise TypeError(f"step {step_id!r} is not running, so it cannot report a result")
+            row["result"] = encoded
+
+    def _changed(self) -> None:
+        if self._on_change is None:
+            return
+        try:
+            self._on_change(self)
+        except Exception:  # noqa: BLE001 - reporting must never fail the step
+            _fallback_log.debug("step change hook failed", exc_info=True)
+
+
+# --------------------------------------------------------------------------
+# attaching a table to the current thread
+# --------------------------------------------------------------------------
+
+
+def attach(target: StepTable | LogFn,
+           steps: Sequence[Mapping[str, Any]] | None = None) -> contextvars.Token:
+    """Make ``target`` the table :func:`run` and :func:`skip` mark.
+
+    The runner passes the :class:`StepTable` it built for the run. A CLI
+    ``main()`` passes its ``log`` and the module's ``STEPS``; with ``steps``
+    omitted the table is open (any id, still no double runs). Returns a token
+    for :func:`detach`; a ``main()`` that can be called twice in one process
+    (tests do) must detach in a ``finally``.
+    """
+    table = target if isinstance(target, StepTable) else StepTable(steps, log=target)
+    return _current.set(table)
+
+
+def detach(token: contextvars.Token) -> None:
+    _current.reset(token)
+
+
+def current() -> StepTable | None:
+    """The table attached to this thread, if any."""
+    return _current.get()
+
+
+# --------------------------------------------------------------------------
+# what a job calls
+# --------------------------------------------------------------------------
+
+
+class Step:
+    """What ``with STEP.run(id) as s`` hands back: ``s.result(dict)``."""
+
+    __slots__ = ("id", "_table", "_loose")
+
+    def __init__(self, step_id: str, table: StepTable | None) -> None:
+        self.id = step_id
+        self._table = table
+        self._loose: Any = None
+
+    def result(self, value: Mapping[str, Any]) -> None:
+        """This step's output, a summary for people. Capped at 4 KB."""
+        if self._table is not None:
+            self._table.set_result(self.id, value)
+        else:
+            self._loose = _encode_result(value, self.id, lambda m: _fallback_log.info("%s", m))
+
+
+@contextmanager
+def run(step_id: str) -> Iterator[Step]:
+    """Enter = start, leave = success, raise = **this step** failed.
+
+    The exception travels on unchanged, so the run fails as it always did and
+    the steps after this one stay ``pending``.
+    """
+    table = _current.get()
+    if table is None:
+        # Nobody holds a table: a test calling run() directly, or a thread the
+        # job spawned. Say what happened and check nothing.
+        step = Step(step_id, None)
+        started = time.perf_counter()
+        _fallback_log.info("step %s: start", step_id)
+        try:
+            yield step
+        except BaseException as exc:
+            _fallback_log.info("step %s: failed after %d ms: %s", step_id,
+                               int((time.perf_counter() - started) * 1000), exc)
+            raise
+        suffix = (f" {json.dumps(step._loose, ensure_ascii=False)}"  # noqa: SLF001
+                  if step._loose is not None else "")  # noqa: SLF001
+        _fallback_log.info("step %s: done in %d ms%s", step_id,
+                           int((time.perf_counter() - started) * 1000), suffix)
+        return
+    table.start(step_id)
+    step = Step(step_id, table)
+    try:
+        yield step
+    except BaseException as exc:
+        table.finish(step_id, error=exc)
+        raise
+    table.finish(step_id)
+
+
+def skip(step_id: str, reason: str) -> None:
+    """Skip a step, saying why; the reason is what the chart shows."""
+    table = _current.get()
+    if table is None:
+        if not isinstance(reason, str) or not reason.strip():
+            raise TypeError(f"step {step_id!r}: skip needs a reason; it is shown on the chart")
+        _fallback_log.info("step %s: skipped (%s)", step_id, reason.strip())
+        return
+    table.skip(step_id, reason)
