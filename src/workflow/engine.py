@@ -7,6 +7,7 @@ explicitly installed manifests and every step is authorized by the Bridge.
 """
 
 import asyncio
+import functools
 import math
 import uuid
 
@@ -67,6 +68,8 @@ class _RunRecord:
         self.log: list[str] = []
         self.step_results: list[CapabilityResult] = []
 
+        self.final: WorkflowRunSnapshot | None = None
+
     def append_log(self, message: str) -> None:
         if len(self.log) < MAX_LOG_LINES:
             self.log.append(message)
@@ -74,6 +77,8 @@ class _RunRecord:
             self.log.append(f"… log truncated ({MAX_LOG_LINES} lines)")
 
     def snapshot(self) -> WorkflowRunSnapshot:
+        if self.final is not None:
+            return self.final
         return WorkflowRunSnapshot(
             run=WorkflowRun(
                 run_id=self.run_id,
@@ -110,7 +115,9 @@ class WorkflowEngine:
         """Join a run that outlived its caller-wait timeout and return its final state."""
         task = self._tasks.get(run_id)
         if task is not None:
-            await task
+            # Never re-raise a cancelled or failed driving task into the joiner;
+            # the run record carries the outcome.
+            await asyncio.wait({task})
         return self.get(run_id)
 
     async def execute(
@@ -126,26 +133,33 @@ class WorkflowEngine:
         checked = RequestContext.model_validate(context)
         target = AssetIdentity.model_validate(workflow)
         manifest = self.workflows.get(target)
-        # Pre-flight failures never create a run record (no ghost runs).
+        # Pre-flight failures never create a run record (no ghost runs), matching
+        # the source's load-before-create order.
         if manifest is None:
             return self._rejected(target, checked, "workflow_not_installed")
         if manifest.secrets:
             return self._rejected(target, checked, "secret_resolution_unavailable")
+        if not set(manifest.dependencies.local_capabilities).issubset(self.bridge.installed.names):
+            return self._rejected(target, checked, "missing_local_capability")
         if any(
             service.required and service.name not in self.bridge.services
             for service in manifest.dependencies.central_services
         ):
             return self._rejected(target, checked, "needs_connectivity")
+        if any(self.bridge.installed.get(step) is None for step in manifest.steps):
+            return self._rejected(target, checked, "capability_not_installed")
 
         record = _RunRecord(target, checked.trace)
         self._runs[record.run_id] = record
         while len(self._runs) > MAX_RUNS_KEPT:
-            evicted = next(iter(self._runs))
-            del self._runs[evicted]
-            self._tasks.pop(evicted, None)
+            # Only the record is evicted. The driving task stays strongly
+            # referenced in _tasks until it finishes, or the event loop could
+            # garbage-collect it mid-run and the run would never complete.
+            del self._runs[next(iter(self._runs))]
         record.append_log(f"start workflow {_step_label(target)}")
         task = asyncio.create_task(self._drive(record, manifest, checked, dict(arguments or {})))
         self._tasks[record.run_id] = task
+        task.add_done_callback(functools.partial(self._discard_task, record.run_id))
         done, _ = await asyncio.wait({task}, timeout=timeout_seconds)
         if not done:
             # Bounds only the caller's wait: the task keeps running and its
@@ -158,13 +172,21 @@ class WorkflowEngine:
             record.append_log(f"caller wait exceeded {timeout_seconds}s")
         return record.snapshot()
 
+    def _discard_task(self, run_id: str, _task: "asyncio.Task[None]") -> None:
+        self._tasks.pop(run_id, None)
+
     def _rejected(
         self, workflow: AssetIdentity, context: RequestContext, code: str
     ) -> WorkflowRunSnapshot:
-        record = _RunRecord(workflow, context.trace)
-        record.status = "unavailable"
-        record.failure = Failure(code=code, message="Workflow was not started")
-        return record.snapshot()
+        return WorkflowRunSnapshot(
+            run=WorkflowRun(
+                run_id=f"run-{uuid.uuid4().hex}",
+                workflow=workflow,
+                trace=context.trace,
+                status="unavailable",
+                failure=Failure(code=code, message="Workflow was not started"),
+            )
+        )
 
     async def _drive(
         self,
@@ -196,3 +218,12 @@ class WorkflowEngine:
             # Exception text may contain arguments or payloads; never record it.
             record.status = "failed"
             record.failure = Failure(code="workflow_error", message="Workflow did not complete")
+        except BaseException:
+            # Cancellation must still leave a final recorded state, as the
+            # source's BaseException handler did, then propagate.
+            record.status = "failed"
+            record.failure = Failure(code="workflow_aborted", message="Workflow was interrupted")
+            raise
+        finally:
+            if record.final is None:
+                record.final = record.snapshot()

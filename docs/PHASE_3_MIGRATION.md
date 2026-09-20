@@ -27,7 +27,10 @@ engine regression test:
   (5000 lines plus exactly one truncation marker).
 - A caller-wait timeout bounds only how long the caller waits; the run keeps
   executing and its final state overwrites the timeout state.
-- An unknown workflow/job leaves no ghost run record.
+- An unknown workflow/job leaves no ghost run record. The engine extends this
+  load-before-create order to every statically checkable pre-flight: declared
+  secrets, missing local capabilities, required central services and uninstalled
+  step capabilities all reject before a run exists.
 - Structured failure information on the run rather than raised into the caller's
   result path; recording/observability must never change a run's outcome.
 
@@ -51,6 +54,9 @@ Intentional differences:
   codes only; step arguments, payloads and exception text never enter logs.
 - Non-dict result wrapping (`{"value": …}`) is not migrated; step outputs are
   validated typed contracts.
+- `startedAt`/`finishedAt`/`durationMs` run timestamps are dropped from run
+  tracking in this slice; timing belongs to trace/observability and persistence
+  work in later slices rather than the in-memory run record.
 - Ops mirroring, step tables, options menus, x-ui schemas, reference-set
   publishing and worker identity are dashboard concerns, not migrated. Trace
   events on the Bridge remain the observability hook.

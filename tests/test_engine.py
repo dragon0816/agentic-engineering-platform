@@ -129,7 +129,7 @@ def test_denied_step_ends_the_run_with_its_code() -> None:
     assert handler.calls == []
 
 
-def test_missing_step_capability_is_unavailable() -> None:
+def test_missing_step_capability_is_rejected_before_a_run_exists() -> None:
     runner, flow = engine(install_capability=False)
     snapshot = asyncio.run(
         runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
@@ -137,6 +137,61 @@ def test_missing_step_capability_is_unavailable() -> None:
     assert snapshot.run.status == "unavailable"
     assert snapshot.run.failure is not None
     assert snapshot.run.failure.code == "capability_not_installed"
+    assert runner.get(snapshot.run.run_id) is None
+
+
+def test_workflow_dependencies_are_preflighted_without_ghost_runs() -> None:
+    runner, _ = engine()
+    scenarios = [
+        ({"local_capabilities": ["excel"], "central_required": False}, "missing_local_capability"),
+        (
+            {
+                "central_services": [{"name": "registry", "required": True}],
+                "central_required": True,
+            },
+            "needs_connectivity",
+        ),
+    ]
+    for index, (dependencies, code) in enumerate(scenarios):
+        flow = manifest(
+            [spec().identity],
+            metadata={
+                "identity": {"namespace": "sample", "name": f"dep-{index}", "version": "1.0.0"},
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "private",
+                "lifecycle": "draft",
+            },
+            dependencies=dependencies,
+        )
+        runner.workflows.register(flow)
+        snapshot = asyncio.run(
+            runner.execute(context(), flow.metadata.identity, timeout_seconds=10)
+        )
+        assert snapshot.run.status == "unavailable"
+        assert snapshot.run.failure is not None
+        assert snapshot.run.failure.code == code
+        assert runner.get(snapshot.run.run_id) is None
+
+
+def test_cancelled_run_records_a_final_state() -> None:
+    class Slow(Handler):
+        async def __call__(self, context: RequestContext, inputs: Any) -> Any:
+            await asyncio.sleep(30)
+            return await super().__call__(context, inputs)
+
+    async def scenario() -> None:
+        runner, flow = engine(Slow(), steps=1)
+        snapshot = await runner.execute(
+            context(), flow.metadata.identity, {"count": 1}, timeout_seconds=0.01
+        )
+        runner._tasks[snapshot.run.run_id].cancel()
+        final = await runner.wait(snapshot.run.run_id)
+        assert final is not None
+        assert final.run.status == "failed"
+        assert final.run.failure is not None
+        assert final.run.failure.code == "workflow_aborted"
+
+    asyncio.run(scenario())
 
 
 def test_caller_wait_timeout_is_not_the_final_state() -> None:
