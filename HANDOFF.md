@@ -1,79 +1,78 @@
-# Handoff — Phase 3 bounded retries and duplicate submissions
+# Handoff — Phase 3 bounded resumable state
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-3/retry-idempotency`, based on `main` at `f6b7587`.
-Implementation commit: `c4c8b35`.
-PR: https://github.com/dragon0816/agentic-engineering-platform/pull/11 (open, unmerged).
+Branch: `phase-3/resumable-state`, based on `main` at `be8c968`.
+PR #10 (step inputs) and PR #11 (retries/idempotency) are both merged into `main`;
+the previous handoff's "PR #11 open" statement was reconciled against GitHub at
+takeover.
 
 ## Goal
 
-Complete Phase 3 slice 4: opt-in bounded read retries and in-memory idempotency
-keys, without enabling repeated production side effects. Requirements and source
-inspection are in `docs/phases/PHASE_3_WORKFLOW.md` and `docs/PHASE_3_MIGRATION.md`.
+Complete Phase 3 slice 5: inspect a finished run's step states and resume it from
+its first non-completed step, replaying an uncertain-effect step only under an
+explicit policy, without persistence or backend guarantees. Requirements are in
+`docs/phases/PHASE_3_WORKFLOW.md` (slice 5); source decisions in
+`docs/PHASE_3_MIGRATION.md` (slice 5 section).
 
 ## Completed
 
-- Merged PR #10 after verifying its exact head and four passing PR CI jobs:
-  https://github.com/dragon0816/agentic-engineering-platform/pull/10
-  Merge commit: `f6b75878f60e25e0f8d171668027b5cd65598a15`.
-- Re-inspected pinned rs_workflow_system runner and step helper. Added source
-  characterization proving failures are not retried and repeated unkeyed
-  submissions create independent runs. Source repositories remain untouched.
-- Added RetryPolicy (1–3 attempts, fixed 0–10000 ms delay) to explicit steps.
-  Default/legacy execution still attempts once. Multi-attempt side-effecting
-  plans are rejected before the workflow starts.
-- Added sanitized TransientCapabilityError handling. Only read failures of this
-  exact kind are retryable; unknown errors/timeouts/validation/policy/dependency
-  failures do not retry. Every attempt goes through Bridge policy and validation.
-- StepAttempt metadata records outcomes without payloads. Each step keeps one
-  terminal result for chaining; successful prior steps are never repeated.
-- Added optional workflow idempotency keys. Same actor/namespace/key and same
-  execution intent join or return the original run, including after caller wait
-  timeout, terminal failure/cancellation and history eviction. Original trace is
-  preserved. Changed intent fails closed; current authorization gates replay.
-- Keys are retained for the engine lifetime, up to 50; capacity rejects new keyed
-  runs instead of evicting keys. Preflight rejections do not consume keys.
-- Gateway forwards caller workflow keys. A keyed direct capability route is
-  rejected without dispatch rather than silently ignoring the key.
-- Added 50 characterization/contract/runtime/Gateway cases: 249 total tests.
-  Existing deterministic routing/evaluation and chained Gateway proofs still pass.
-  New tests use inert handlers even for write/execute/external-effect classifications.
-- Updated README, shared contracts, Phase 3 scope and migration decisions.
+- Takeover reconciliation: local `main` verified at `be8c968` (249 tests, ruff,
+  mypy) before starting.
+- Pinned `host-bridge/jobs/_steps.py` from the same `rs_workflow_system` commit as
+  `tests/fixtures/source_steps.txt` (checksums in the fixtures README) and added
+  4 characterization tests: linear steps with no re-entry, pending-after-failure /
+  `never_run()`, skip-needs-reason, and no resume transition in the source.
+- Contracts (`common/execution.py`, additive): `WorkflowRun.resumed_from`,
+  `StepState`/`StepStateRecord`, `ResumePolicy` (`uncertain`: `reject` default,
+  `replay_read_only`, `replay_side_effects`) and `ResumePlan` with a
+  linear-progress validator.
+- Engine (`workflow/engine.py`): records keep manifest/arguments/actor/namespace;
+  `_preflight` factored out of `execute` unchanged; `inspect(run_id)` classifies
+  steps from recorded evidence (Bridge codes raised before a handler ran are
+  `never_started`; anything after a handler ran or an interruption is
+  `uncertain`); `resume(context, run_id, policy)` starts a new run from the first
+  non-completed step, copies completed results for input chaining, re-authorizes
+  remaining steps before creating a run and again at dispatch, requires matching
+  actor/namespace, rejects running/complete runs, returns None for unknown or
+  evicted runs, and never touches idempotency keys. `_drive` gained a start index.
+- 14 resume tests covering contracts, every classification and policy branch,
+  re-authorization after a later grant, result chaining without re-running,
+  repeated resumption, cancellation, eviction and key independence.
+- Docs: phase spec slice 5, migration slice-5 decision, `docs/CONTRACTS.md`
+  "Phase 3 bounded resumption", README, fixtures README.
 
 ## In Progress
 
-- No implementation work remains in this slice. PR #11 is open for review;
-  final PR merge checks are visible on GitHub.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available.
 
 ## Remaining
 
-- Review and merge the new retry/idempotency PR after verification. Only PR #10
-  was authorized for merge in this session; this new slice remains reviewable.
-- Next Phase 3 slices: resumable state, progress streaming, optional n8n adapter
-  through the same execution contracts. No production jobs, transport, database,
-  durable idempotency backend or side-effecting automatic retries are implemented.
+- Review and merge the resumable-state PR. Merges follow a posted review per
+  repository convention.
+- Later Phase 3 slices: durable step-state/persistence contracts (a separate,
+  explicitly scoped decision), progress streaming, a Gateway resume trigger, and
+  the optional n8n adapter through the same execution contracts.
 - Earlier deferred reviews remain: bounded Bridge event history, SkillRegistry
-  parse cost, MCP installation round trips, Review not_required semantics and
-  generic top-level package names. Do not broaden this slice to address them all.
+  parse cost, MCP installation round trips, Review `not_required` semantics,
+  generic top-level package names, repeated RequestContext validation.
 
 ## Architecture decisions made
 
-- ADAPT existing runner/Bridge behavior; opt-in retry and keyed submission are new
-  platform semantics. Default single attempt and unkeyed independent runs preserve
-  the characterized source behavior. No job code or n8n business logic is imported.
-- Registry publication/manifest metadata never grant runtime authority. Retry
-  eligibility comes from trusted installed capability classification and a typed
-  handler failure; every attempt is independently authorized.
-- Idempotency means bounded duplicate suppression within one engine on one event
-  loop, NOT durable exactly-once effects. Keys are caller options, not model output.
-  Fingerprints include exact workflow, arguments and all non-trace request context;
-  object key ordering is ignored, changed context/data conflicts. Keys/hashes are
-  never logged. Replays check permissions before and after joining an active run.
-- Keep key records even when runs fail or are evicted: earlier steps or interrupted
-  handlers may have caused effects. Do not automatically clear capacity/restart
-  the engine, retry the whole workflow or infer write safety from a key.
-- Existing caller-wait timeout, cancellation tracking, 50-run history and bounded
-  logs remain. Attempt metadata has at most three records per declared step.
+- ADAPT the source's pending/never-run distinction into an effect classification;
+  resumption itself is new platform semantics (the source has none), never a
+  source-parity claim.
+- Classification uses recorded evidence only: a step is `uncertain` unless a
+  terminal success was recorded or a pre-handler rejection code proves no handler
+  ran. Uncertainty is never resolved by guessing; only an explicit host policy
+  may replay it, and read-only replay is gated by the installed capability's
+  side-effect classification, not by manifests or publication metadata.
+- Resumption grants nothing and creates a new run; the original run is immutable
+  history. It shares the 50-run history, bounded logs and caller-wait timeout
+  semantics, and ignores idempotency keys by design (a keyed re-submission still
+  returns the original run).
+- No persistence: keys, history and resumability all end with the engine
+  instance. Durable state needs its own approved contract before any backend.
 
 ## Exact verification commands and results
 
@@ -81,54 +80,38 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 249 tests
+# PASS: 267 tests (249 prior + 4 step-table characterization + 14 resume)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
-# PASS: 62 files already formatted, including ignored local scratch files
+# PASS: 64 files
 .venv/Scripts/python.exe -m mypy
-# PASS: 41 source/test files
+# PASS: 43 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
-# PASS: sdist and wheel
-.scratch/wheel-env/Scripts/python.exe -m pip install --no-deps --force-reinstall dist/agentic_engineering_platform-0.1.0-py3-none-any.whl
-# PASS
-.scratch/wheel-env/Scripts/python.exe -I -c "import agent.gateway, workflow.engine; from common.assets import RetryPolicy; from common.execution import StepAttempt; from capabilities.runtime import TransientCapabilityError; policy = RetryPolicy(max_attempts=3); assert RetryPolicy.model_validate_json(policy.model_dump_json()) == policy; assert StepAttempt(step_index=0, attempt=1, status='succeeded').code is None; print(workflow.engine.__file__); print('retry contracts and packaged runtime passed')"
-# PASS: imports from wheel-env/Lib/site-packages, contract round-trip passed
+# PASS: sdist and wheel; source_steps.txt ships in the sdist
 git diff --check
 # PASS
 ```
 
-Tests were written first: initial collection failed on the absent transient-error
-contract; after adding contracts, 17 runtime tests failed and 11 passed before
-engine implementation. Final full suite passes. Local tests require elevation
-because of existing temporary directory ACLs; optional pytest cache is disabled.
-CI runs ordinary pytest on fresh workers. No production service/model/job invoked.
-
-Remote implementation verification:
-`gh api repos/dragon0816/agentic-engineering-platform/actions/runs/35522943129/jobs --jq '.jobs[] | {name,status,conclusion}'`
-confirmed successful Windows/Linux jobs on Python 3.11/3.12 for implementation
-`c4c8b355f4b965772dea4075cd5a633a970fbb5e`.
-Run: https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35522943129
-This handoff-only follow-up triggers fresh checks; PR #11 contains the final
-merge-check status and links for the latest head.
+Characterization tests ran green against the pinned excerpt before the engine was
+changed; one resume test fixture was corrected during development (a read handler
+that was wrongly configured to fail). No production service, transport, model, job
+or n8n instance was invoked; inert doubles only.
 
 ## Known issues / limitations
 
-- Keys disappear when the engine process/instance is replaced. No crash recovery,
-  shared store, expiry, key release or distributed lock is provided. New/no keys
-  intentionally permit new runs. Key-table capacity is fail-closed by design.
-- Write/execute/external side effects cannot opt into automatic retries. Durable
-  backend idempotency requires a separate explicit contract and implementation.
-- Caller timeouts do not preempt blocking or offloaded work. Snapshot outputs
-  require caller access controls if a future transport exposes them.
-- User/Claude's untracked `.claude/` directory remains untouched/uncommitted.
+- In-memory only: evicted or engine-replaced runs cannot be inspected or resumed.
+- `uncertain` is deliberately conservative; a read-only handler interrupted before
+  doing anything is still `uncertain` and needs `replay_read_only`.
+- The Gateway has no resume trigger yet; resumption is an engine API for hosts.
+- Local pytest needs `-p no:cacheprovider` because of temporary-directory ACLs on
+  this machine; CI runs ordinary pytest.
 
 ## Next Recommended Action
 
-Review the retry/idempotency PR. After merge, define a bounded resumable-state
-contract and inspect source progress/step-state behavior before coding: distinguish
-completed, never-started and uncertain-effect steps, and require explicit policy
-for resuming without replaying an uncertain side effect. Start with inert tests;
-do not add production persistence or backend guarantees without approved scope.
+Open the PR for `phase-3/resumable-state` against `main`, run the review, apply
+confirmed findings and let the owner merge. Then decide the next slice with the
+owner: either a Gateway resume trigger (small, same contracts) or the durable
+step-state contract, which must be scoped explicitly before any persistence code.
