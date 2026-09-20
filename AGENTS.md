@@ -21,7 +21,10 @@ Build a multi-user, contribution-driven agentic engineering platform without sac
 11. **Contributions are first-class platform assets.** Tasks, Workflows, Skills, Knowledge and Agent profiles need stable manifests/contracts so they can evolve without core-runtime changes.
 12. **Registry is control plane, Bridge is execution plane.** Publishing/discovery/versioning are centralized concerns; local Bridges/workers execute capabilities near required resources.
 13. **Publishing does not grant execution permission.** Distribution, authorization and approval are separate concerns.
-14. **Shared assets are governed.** Require owner, version, lifecycle, dependencies, compatibility and permission metadata appropriate to the asset type.
+14. **Shared assets are governed.** Require scoped identity/namespace, owner, version, visibility, lifecycle, dependencies, compatibility and permission metadata appropriate to the asset type.
+15. **Business approval and technical policy are distinct.** Department/domain owners validate business correctness; technical policy validates capability risk, data access, cross-scope use and side effects. Automate low-risk checks where practical.
+16. **Local-first behavior is contractual.** Tasks/Workflows declare local capability and central-service dependencies; do not guess connectivity requirements at runtime.
+17. **Secrets are references, never asset content.** Shared assets may declare `SecretRef` requirements, but resolution and authorization belong to the execution environment.
 
 ## Migration rules
 
