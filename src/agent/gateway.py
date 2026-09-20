@@ -7,16 +7,43 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import model_validator
 
 from agent.routing import RequestRouter, RoutingOutcome
 from capabilities.runtime import CapabilityInvocation
 from common.base import Contract
-from common.execution import CapabilityResult, Failure, IdempotencyKey, RequestContext
+from common.execution import (
+    CapabilityResult,
+    Failure,
+    IdempotencyKey,
+    RequestContext,
+    ResumePlan,
+    ResumePolicy,
+    RunId,
+)
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import WorkflowEngine, WorkflowRunSnapshot
+
+
+class RunControlResult(Contract):
+    """Host-triggered run control. `run_id` echoes the request; a continuation's
+    own id is only in `workflow.run.run_id`. Both payload fields None means the
+    run is unknown to this caller (missing, evicted or owned by another actor)."""
+
+    action: Literal["inspect", "resume"]
+    run_id: RunId
+    plan: ResumePlan | None = None
+    workflow: WorkflowRunSnapshot | None = None
+
+    @model_validator(mode="after")
+    def payload_matches_action(self) -> Self:
+        if self.action == "inspect" and self.workflow is not None:
+            raise ValueError("inspect never executes a run")
+        if self.action == "resume" and self.plan is not None:
+            raise ValueError("resume reports the continuation, not a plan")
+        return self
 
 
 class GatewayResult(Contract):
@@ -94,3 +121,37 @@ class Gateway:
         # needs_input: nothing executes. A resolved decision without a target is
         # impossible by contract and would fail GatewayResult validation loudly.
         return GatewayResult(routing=outcome)
+
+    def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
+        """Classify a retained run's steps for its owner; never executes anything.
+
+        Synchronous like the in-memory engine lookup it wraps. The engine validates
+        the request context and enforces ownership; the result is validated once,
+        when constructed.
+        """
+        return RunControlResult(
+            action="inspect", run_id=run_id, plan=self.engine.inspect(request, run_id)
+        )
+
+    async def resume(
+        self,
+        request: RequestContext,
+        run_id: RunId,
+        *,
+        policy: ResumePolicy | None = None,
+        workflow_timeout_seconds: float | None = None,
+    ) -> RunControlResult:
+        """Continue a finished run through the same engine contract as routed workflows.
+
+        The policy is a host/caller option and is never derived from the request
+        message or a model. Run control is not a Skill route, so no model-selected
+        route can trigger it; ownership and authorization stay in the engine.
+        """
+        if workflow_timeout_seconds is None:
+            # The engine owns the default caller-wait timeout.
+            snapshot = await self.engine.resume(request, run_id, policy)
+        else:
+            snapshot = await self.engine.resume(
+                request, run_id, policy, timeout_seconds=workflow_timeout_seconds
+            )
+        return RunControlResult(action="resume", run_id=run_id, workflow=snapshot)

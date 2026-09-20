@@ -151,6 +151,25 @@ small commits, PR and handoff. No production side effects are exercised.
    classification, policy branch, re-authorization, chaining, repeated resumption,
    cancellation, eviction and key independence with inert doubles.
 
+## Requirements and acceptance (slice 6 — Gateway run control)
+
+1. `Gateway.inspect(request, run_id)` and `Gateway.resume(request, run_id,
+   policy=...)` are the host-facing run-control entry points, so CLI, Agent
+   runtime and a future n8n adapter trigger resumption through the same Gateway
+   and engine contracts as routed workflows. Results are a typed
+   `RunControlResult`; both payload fields None means the run is unknown to
+   this caller (missing, evicted or owned by another actor).
+2. The Gateway adds no authority and no parsing: ownership, pre-flight and
+   per-step re-authorization stay in the engine, and `ResumePolicy` is a
+   host/caller option never derived from the request message or a model.
+3. Run control is not a Skill route. No deterministic or model-selected route
+   can inspect or resume a run; a model proposing such a route fails closed as
+   before, and routed workflow arguments cannot smuggle a resumption.
+4. Regression tests cover the result contract, inspect-then-resume with policy,
+   no-authority (denied then granted), other-actor indistinguishability, message
+   and model isolation. This composes already-characterized behavior; no new
+   source excerpt is required.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -160,9 +179,10 @@ small commits, PR and handoff. No production side effects are exercised.
 - Slice 3: explicit per-step inputs and prior-result chaining.
 - Slice 4: bounded read retries and in-memory duplicate submission suppression.
 - Slice 5: bounded in-memory resumption with explicit uncertain-effect policy.
+- Slice 6: Gateway run-control entry points (`inspect`/`resume`).
 - Later Phase 3 slices: durable step-state/persistence contracts, progress
-  streaming, a Gateway resume trigger, and the optional n8n adapter invoking the
-  same Gateway/engine contracts.
+  streaming, and the optional n8n adapter invoking the same Gateway/engine
+  contracts.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks
