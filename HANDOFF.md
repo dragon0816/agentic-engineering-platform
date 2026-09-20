@@ -44,9 +44,15 @@ characterized source behavior. Scope and acceptance are recorded in
 ## In Progress
 
 Implementation and verification are complete for this slice; the branch is pushed
-and stacked review PR #5 (base `phase-1/implementation`) is open. Delivery for this
-slice is complete; only human review remains. No production service, transport,
-model or capability was invoked.
+and stacked review PR #5 (base `phase-1/implementation`) is open. Claude Code
+reviewed both PRs on 2026-09-20 and posted findings as PR comments; three confirmed
+PR #5 findings were fixed in commit `2b0b7a8` (dot-command fail-closed divergence
+pinned by tests and the migration record; distinct `mcp_duplicate_tool_names`
+failure; `no_default_command` failure code). Remaining review findings are recorded
+on the PRs as follow-ups. Merging was attempted per the owner's instruction but is
+blocked for coding agents by the permission policy (self-approval); the owner must
+merge PR #4, retarget PR #5 to `main`, then merge PR #5. No production service,
+transport, model or capability was invoked.
 
 ## Remaining
 
@@ -124,6 +130,9 @@ Takeover reconciliation on 2026-09-20 (commit `6214f1a`): re-ran pytest (112 pas
 confirmed CI success on the branch tip. Found the stacked PR had not actually been
 opened despite the previous handoff describing it as the final step, and opened PR #5.
 
+After review fixes (commit `2b0b7a8`): pytest 116 passed (4 new regression tests),
+ruff check/format, mypy and `git diff --check` all pass locally.
+
 ## Known issues / limitations
 
 - Cooperative deadlines are not hard process isolation; do not install blocking or
@@ -137,7 +146,10 @@ opened despite the previous handoff describing it as the final step, and opened 
 
 ## Next Recommended Action
 
-Human review of stacked PR #5 against `docs/phases/PHASE_2_AGENT_CAPABILITIES.md` and
-the source-characterization record, plus resolution of Phase 1 PR #4 (merge, then
-retarget #5 to `main`). After that, select one real source capability for a separate
-characterization-backed adapter; preserve the shared Bridge policy path.
+The repository owner merges PR #4 (merge commit, subject style "Merge Phase 1 …"),
+retargets PR #5 to `main` (automatic if the `phase-1/implementation` branch is
+deleted on merge), confirms CI on the retargeted PR and merges PR #5. Review
+evidence is posted on both PRs. Coding agents must not perform these merges.
+After both merges, select one real source capability for a separate
+characterization-backed adapter from the latest `main`; preserve the shared
+Bridge policy path.
