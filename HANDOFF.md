@@ -22,6 +22,10 @@ Implement the minimal provider-neutral, side-effect-free foundation defined in `
 - Personal Engineering Agent and Bridge responsibility split.
 - Engineering Capability Flywheel and contribution lifecycle.
 - Coding-agent-neutral development workflow and handoff design.
+- Scoped asset identity (`namespace`/owner/visibility) and cross-server-safe naming baseline.
+- Agent-assisted contribution model with department business review plus technical/policy risk checks.
+- Explicit local-vs-central execution dependency contract.
+- Provider-neutral secret-reference boundary; no secret values in Registry assets.
 
 ## In progress
 
@@ -40,6 +44,10 @@ Follow `docs/phases/PHASE_1_FOUNDATION.md` in small verified slices.
 - Publishing does not grant execution permission.
 - Contributions evolve without normal core-runtime changes.
 - Model/provider and coding-agent implementations are replaceable.
+- Namespace, owner and visibility are separate concepts.
+- Business approval does not replace technical/policy authorization.
+- Local-first execution depends on declared dependencies and available authorization.
+- Secret values remain in the execution environment.
 - n8n is optional integration infrastructure.
 
 ## Verification
