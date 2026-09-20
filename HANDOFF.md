@@ -42,8 +42,9 @@ characterized source behavior. Scope and acceptance are recorded in
 
 ## In Progress
 
-Final branch publication, GitHub CI observation and stacked PR creation.
-No production service, transport, model or capability has been invoked.
+Implementation and verification are complete for this slice; the branch is pushed.
+Opening the stacked review PR is the final delivery step. Locate it by head branch
+`phase-2/implementation`. No production service, transport, model or capability was invoked.
 
 ## Remaining
 
@@ -106,10 +107,15 @@ git diff --check
 
 The new routing and dispatch tests were first run before implementation and failed
 on missing modules as expected. Subsequent lint/type findings were fixed; no check
-failure was waived. GitHub CI status will be recorded before PR delivery.
+failure was waived.
 The first Phase 2 CI run exposed a Windows locale-dependent JSON read in the
 source-characterization harness (three Chinese cases failed). The read now explicitly
 uses UTF-8; the existing multilingual cases are the regression coverage.
+
+All four Windows/Linux, Python 3.11/3.12 CI jobs passed on implementation commit
+`352faefd515fa88cd645583ee4f617796a7271fe`:
+[Platform verification run 35509190087](https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35509190087).
+The following handoff-only commit changes no implementation or verification configuration.
 
 ## Known issues / limitations
 
