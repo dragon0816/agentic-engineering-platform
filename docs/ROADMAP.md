@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phase 1 — Foundation active
+Status: Phase 2 — Agent and capability layer active
 
 ## Objective
 

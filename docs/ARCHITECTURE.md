@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Architecture
 
-Status: Approved architecture baseline; Phase 1 foundation active
+Status: Approved architecture baseline; Phase 2 agent and capability layer active
 
 ## 1. Purpose
 

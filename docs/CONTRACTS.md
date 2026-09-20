@@ -47,3 +47,44 @@ availability checks and compatibility resolution are deferred.
 `DeterministicRouter.resolve` returns a known route or `None`; callers must try it
 before model selection. It has no model dependency. A route is intent, not authority.
 No source command parser or runtime is migrated in Phase 1.
+
+## Phase 2 installed routing and execution boundaries
+
+- `AttachmentRef` adds optional opaque file context to `RequestContext`. No path
+  resolution, upload or automatic attachment inclusion in model prompts occurs.
+- `SkillManifest` holds governed procedure text, command bindings, ordered keyword
+  rules and an explicit default. `SkillRegistry` accepts host-installed manifests;
+  one alias per namespace selects an exact version. Regex rules are trusted install
+  configuration, not arbitrary untrusted Registry/model input. They require review
+  for excessive matching cost; no regex sandbox is provided.
+- `CommandRouter.match/resolve` applies source dot-command/keyword precedence;
+  `direct` uses the named Skill's rules/default. `RequestRouter.route` uses at most
+  one `ModelClient.generate` on unmatched text and validates the proposed target
+  against the installed catalog. Workflow results are route intent; the Phase 3
+  workflow executor is not implemented. A route has no authority to execute.
+- `InstalledCapabilities.register` binds a reviewed `CapabilitySpec`, async handler,
+  input/output model classes and explicit dependencies. No module loading or code
+  supplied by a Registry asset is accepted. This is an execution-plane catalog,
+  separate from the Team Platform's `InMemoryTaskRegistry`.
+- `LocalPolicy` uses trusted host-configured actor/asset `CapabilityGrant` records.
+  Permission and policy references must cover the capability's declared requirements;
+  required execution approval needs a separate host approval reference. The host
+  authenticates the context actor; this in-process policy is not an authentication
+  server, signed approval verifier or security boundary against hostile Python code.
+  Grants must never be parsed from tool arguments, model output or published metadata.
+- `BridgeExecutor.execute` revalidates invocation context, enforces policy, checks
+  declared local/central availability, then validates typed inputs and invokes the
+  handler. Missing secrets fail as unavailable (no resolver). Host-supplied service
+  availability is a snapshot, not an active probe. There are no automatic retries.
+  Async timeout uses cooperative cancellation; it cannot undo a side effect or
+  preempt blocking/suppressed-cancellation code. No production handlers are shipped.
+- `ExecutionEvent` stores trace/target/status/error code only, never arguments,
+  attachment content, provider errors or returned data. Results retain caller traces.
+- `MCPAdapter` wraps a host-supplied `MCPClient` with bounded discovery and explicit
+  per-tool binding. Wire transport/session/auth configuration remains outside platform
+  contracts. `MCPTool.input_schema` is remote metadata; the host selects reviewed local
+  model classes for validation rather than executing or trusting remote schemas.
+  Callbacks run only through authorized Bridge dispatch. Client errors are sanitized.
+
+All changes are additive to Phase 1. Source fidelity and intentional security changes
+are documented in `PHASE_2_MIGRATION.md`; production source paths remain active.
