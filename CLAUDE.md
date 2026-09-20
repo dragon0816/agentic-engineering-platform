@@ -8,7 +8,7 @@ Before modifying code:
 1. Read `docs/ARCHITECTURE.md`.
 2. Read `AGENTS.md` for shared repository engineering rules.
 3. Read `docs/ROADMAP.md`.
-4. Read the active phase specification, currently `docs/phases/PHASE_1_FOUNDATION.md`.
+4. Read the active phase specification, currently `docs/phases/PHASE_3_WORKFLOW.md`.
 5. Read `HANDOFF.md`.
 6. Inspect `git status`, recent commits and the current diff.
 7. Use the applicable procedures under `.agents/skills/`.
