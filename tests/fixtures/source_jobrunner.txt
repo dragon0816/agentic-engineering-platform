@@ -1,0 +1,282 @@
+import importlib
+import logging
+import re
+import sys
+import threading
+import time
+import urllib.parse
+import uuid
+from collections import OrderedDict
+from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+from types import ModuleType
+from typing import Any
+
+
+log = logging.getLogger("bridge.jobs")
+
+
+MAX_RUNS_KEPT = 50
+MAX_LOG_LINES = 5000
+MAX_WORKERS = 4
+
+
+OPTIONS_WORKERS = 2
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+
+@dataclass(frozen=True)
+class Caller:
+    """Which n8n workflow asked for this run.
+
+    A job is invoked by name and has no way to know this, so without it
+    `ops.task_run.workflow_id/_name` stay NULL and the dashboard's per-workflow
+    charts have nothing to label their slices with.
+    """
+
+    workflow_id: str | None = None
+    workflow_name: str | None = None
+    #: The ops account that started it, when a person did (D128). Decides whose
+    #: own workflow settings the job reads; empty reads the shared ones.
+    requested_by: str | None = None
+
+
+@dataclass
+class JobRun:
+    runId: str
+    job: str
+    status: str = "running"  # running | success | failed | timeout
+    #: api (called over HTTP) | cli (standalone); resolved by telemetry when None.
+    triggerType: str | None = None
+    workflowId: str | None = None
+    workflowName: str | None = None
+    requestedBy: str | None = None
+    startedAt: str = field(default_factory=_now)
+    finishedAt: str | None = None
+    durationMs: int | None = None
+    result: dict[str, Any] | None = None
+    error: dict[str, Any] | None = None
+    log: list[str] = field(default_factory=list)
+    #: The run's step table (a `jobs._steps.StepTable`, BRIDGE_API 6.6), built
+    #: from the job's declared `STEPS` when the run is created so the very first
+    #: snapshot already lists every step as `pending`. None only for a run
+    #: created without a declaration in hand.
+    steps: Any = None
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+
+    def append_log(self, message: str) -> None:
+        line = f"{_now()} {message}"
+        with self._lock:
+            if len(self.log) < MAX_LOG_LINES:
+                self.log.append(line)
+            elif len(self.log) == MAX_LOG_LINES:
+                self.log.append("… log truncated ({} lines)".format(MAX_LOG_LINES))
+        log.info("[job %s] %s", self.job, message)
+
+    def snapshot(self) -> dict[str, Any]:
+        # The step table has its own lock and is read *inside* this one, so the
+        # order is always run lock -> table lock; a step transition never holds
+        # the table lock while asking for a run snapshot.
+        with self._lock:
+            return {
+                "runId": self.runId,
+                "job": self.job,
+                "status": self.status,
+                "triggerType": self.triggerType,
+                "workflowId": self.workflowId,
+                "workflowName": self.workflowName,
+                "startedAt": self.startedAt,
+                "finishedAt": self.finishedAt,
+                "durationMs": self.durationMs,
+                "result": self.result,
+                "error": self.error,
+                "log": list(self.log),
+                "steps": self.steps.snapshot() if self.steps is not None else [],
+            }
+
+
+class JobRegistry:
+    """In-memory ring buffer of the last `MAX_RUNS_KEPT` runs."""
+
+    def __init__(self) -> None:
+        self._runs: OrderedDict[str, JobRun] = OrderedDict()
+        self._lock = threading.Lock()
+        self._pool = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix="jobrun")
+        self._options_pool = ThreadPoolExecutor(
+            max_workers=OPTIONS_WORKERS, thread_name_prefix="jobopt")
+
+    def create(
+        self,
+        job: str,
+        trigger_type: str | None = None,
+        caller: Caller | None = None,
+        steps: list[dict[str, Any]] | None = None,
+    ) -> JobRun:
+        caller = caller or Caller()
+        run = JobRun(
+            runId=uuid.uuid4().hex,
+            job=job,
+            triggerType=trigger_type,
+            workflowId=caller.workflow_id,
+            workflowName=caller.workflow_name,
+            requestedBy=caller.requested_by or None,
+        )
+        # Every transition posts the whole run snapshot to ops (6.6: "每一步
+        # 狀態改變時 runner 就送一次 run 快照"), through the same best-effort
+        # `_report` the start and finish use.
+        run.steps = _steps_module().StepTable(
+            list(steps or []),
+            log=run.append_log,
+            on_change=lambda _table: _report("report_run_progress", run.snapshot()),
+        )
+        with self._lock:
+            self._runs[run.runId] = run
+            while len(self._runs) > MAX_RUNS_KEPT:
+                self._runs.popitem(last=False)
+        return run
+
+    def get(self, run_id: str) -> JobRun:
+        with self._lock:
+            run = self._runs.get(run_id)
+        if run is None:
+            raise JobNotFound(
+                f"unknown runId {run_id!r} (only the last {MAX_RUNS_KEPT} runs are kept)",
+                detail={"runId": run_id},
+            )
+        return run
+
+    def all(self) -> list[JobRun]:
+        with self._lock:
+            return list(self._runs.values())
+
+    def submit(self, run: JobRun, fn: Callable[[], dict[str, Any]]) -> Future:
+        return self._pool.submit(self._wrap, run, fn)
+
+    def submit_options(self, fn: Callable[..., Any], *args: Any) -> Future:
+        return self._options_pool.submit(fn, *args)
+
+    @staticmethod
+    def _wrap(run: JobRun, fn: Callable[[], dict[str, Any]]) -> dict[str, Any]:
+        started = time.perf_counter()
+        # The step table is attached *here*, on the worker thread: a thread
+        # starts with an empty contextvars context on this Python, so setting
+        # it on the request thread that queued the run would reach nothing.
+        token = _attach_steps(run)
+        caller_token = _attach_caller(run)
+        try:
+            result = fn()
+            if result is not None and not isinstance(result, dict):
+                result = {"value": result}
+            # Only after a normal return: on a failure the failed step already
+            # says why the rest stayed pending.
+            for step_id in _never_run(run):
+                run.append_log(f"step {step_id} declared but never run")
+            with run._lock:  # noqa: SLF001 - same module, deliberate
+                run.status = "success"
+                run.result = result or {}
+                run.finishedAt = _now()
+                run.durationMs = int((time.perf_counter() - started) * 1000)
+            # After the status is final, so a table that cannot be published
+            # is a line in the log and not a failed run (BRIDGE_API 6.5).
+            _publish_tables(run)
+            _report("report_run_finished", run.snapshot())
+            # After the finish report is queued, so ops has (or is about to
+            # have) the result that names these files -- found by running it:
+            # uploaded first, ops answered "this run declared no such file".
+            _publish_files(run)
+            return run.result
+        except BaseException as exc:  # noqa: BLE001 - record everything
+            code = getattr(exc, "code", None) or type(exc).__name__
+            with run._lock:  # noqa: SLF001
+                run.status = "failed"
+                run.error = {"code": code, "message": str(exc)}
+                run.finishedAt = _now()
+                run.durationMs = int((time.perf_counter() - started) * 1000)
+            _report("report_run_finished", run.snapshot())
+            log.exception("job %s failed", run.job)
+            raise
+        finally:
+            _detach_steps(token)
+            _detach_caller(caller_token)
+
+
+def _job_callable(
+    module: ModuleType, name: str, params: dict[str, Any], run: JobRun
+) -> Callable[[], dict[str, Any]]:
+    def invoke() -> dict[str, Any]:
+        run.append_log(f"start job {name}")
+        out = module.run(dict(params or {}), run.append_log)
+        run.append_log(f"job {name} finished")
+        return out or {}
+
+    return invoke
+
+
+def run_sync(
+    name: str,
+    params: dict[str, Any],
+    timeout_sec: int,
+    trigger_type: str | None = None,
+    caller: Caller | None = None,
+) -> dict[str, Any]:
+    """Run a job and wait. Raises TIMEOUT (504) if it outlives `timeout_sec`."""
+    # Load before creating a run record so JOB_NOT_FOUND never leaves a ghost run.
+    module = load_job(name)
+    run = registry.create(name, trigger_type, caller, steps=validate_steps(module, name))
+    _report("report_run_started", run.snapshot())
+    future = registry.submit(run, _job_callable(module, name, params, run))
+    try:
+        future.result(timeout=timeout_sec)
+    except FutureTimeout:
+        with run._lock:  # noqa: SLF001
+            run.status = "timeout"
+            run.error = {"code": "TIMEOUT", "message": f"job exceeded timeoutSec={timeout_sec}"}
+        # The thread keeps running (D16), so this is not necessarily the final
+        # state — the run row is upserted again when the thread actually ends.
+        _report("report_run_finished", run.snapshot())
+        raise Timeout(
+            f"job {name!r} exceeded timeoutSec={timeout_sec}; "
+            f"it keeps running in the background, poll /jobs/run/{run.runId}",
+            detail={"job": name, "runId": run.runId, "timeoutSec": timeout_sec},
+        ) from None
+    except Exception:  # noqa: BLE001 - already recorded on the run by _wrap
+        pass
+
+    snap = run.snapshot()
+    return {
+        "job": snap["job"],
+        "runId": snap["runId"],
+        # Which machine actually ran it. Event-driven workflows read this to
+        # pin their follow-up work to the same desk (D66).
+        "workerId": worker_id(),
+        "status": snap["status"],
+        "durationMs": snap["durationMs"],
+        "result": snap["result"],
+        "error": snap["error"],
+        "log": snap["log"],
+    }
+
+
+def run_async(
+    name: str,
+    params: dict[str, Any],
+    trigger_type: str | None = None,
+    caller: Caller | None = None,
+) -> dict[str, Any]:
+    """Start a job in the background and return its runId immediately."""
+    module = load_job(name)
+    run = registry.create(name, trigger_type, caller, steps=validate_steps(module, name))
+    _report("report_run_started", run.snapshot())
+    registry.submit(run, _job_callable(module, name, params, run))
+    return {"runId": run.runId, "job": name, "status": run.status}
+
+
+def get_run(run_id: str) -> dict[str, Any]:
+    return registry.get(run_id).snapshot()

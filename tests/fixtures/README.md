@@ -29,3 +29,21 @@ No formatting or implementation edits should be applied to the excerpt.
 
 Unlike the routing oracle, `read_file` characterization exercises the excerpt against
 pytest-managed temporary files; it performs no writes outside the test directory.
+
+## Pinned job-runner characterization
+
+Source commit: `dragon0816/rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43`.
+File: `host-bridge/app/services/jobrunner.py`. UTF-8, LF-normalized full source
+SHA-256:
+`a40b112986744df5b1ea01535c2b64aec2b15083f97abe94802fa524291c7baa`.
+
+`source_jobrunner.txt` retains verbatim source lines for the stdlib imports, the
+module logger and run limits, `_now`, `Caller`, `JobRun`, `JobRegistry`,
+`_job_callable`, `run_sync`, `run_async` and `get_run`. Discovery, step-table,
+x-ui, options, telemetry and publishing helpers are excluded and replaced by inert
+test doubles. Excerpt SHA-256 (UTF-8/LF):
+`8f7edd5b111e0bd144d896c4c9c4a3468e4fa9baf81fa14eba62a24fdef9a399`.
+No formatting or implementation edits should be applied to the excerpt.
+
+The excerpt runs real (inert) callables on its own thread pool inside the tests;
+no job module, network, ops dashboard or host capability is touched.
