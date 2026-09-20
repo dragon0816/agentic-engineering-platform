@@ -142,51 +142,117 @@ Usage statistics are evidence for maintenance and evaluation, not automatic proo
 
 ## 3. Target architecture
 
-```text
-User / Telegram / Web UI / Event
-              |
-              v
-+-------------------------------+
-| Agent Gateway                 |
-| intent / context / policy     |
-| approval / tracing / routing  |
-+---------------+---------------+
-                |
-                v
-        +---------------+
-        | Agent Registry|
-        +-------+-------+
-                |
-        +-------+-------------------------+
-        |                                 |
-        v                                 v
-+-------------------+             +-------------------+
-| Engineering Agent |             | Future Specialists|
-| Phase 1 default   |<----------->| coding/knowledge… |
-+---------+---------+ delegation  +---------+---------+
-          |                                   |
-          +---------------+-------------------+
-                          |
-              +-----------+-----------+
-              |           |           |
-              v           v           v
-          Knowledge     Skills     Workflows
-              |           |           |
-              +-----+-----+           |
-                    |                 v
-                    v            Tool / MCP
-              Model Router       Capability
-                    |                 |
-             +------+------+     Host Bridge / APIs /
-             |      |      |     Git / Office / DUT
-             v      v      v
-          OpenAI  Ollama  Company
-           /other  local   gateway
+The deployment model is explicitly split into two planes:
 
-Cross-cutting: Evaluation · Guardrails · Observability · Configuration · Secrets
-```
+1. **Team Platform Plane** — shared control plane for team assets, governance, discovery, distribution, evaluation and observability.
+2. **Personal Engineering / Execution Plane** — one per engineer, normally running on the engineer's own Bridge computer. It contains the user-facing UI, Personal Engineering Agent and local Bridge capabilities.
 
-The platform is **one agent runtime with N agent profiles**, not N independent frameworks. Agent profiles share the model layer, knowledge, capability registry, workflow engine, policy and observability.
+**Reasoning is personal and distributed; capabilities and knowledge are shared and continuously evolved by the team.**
+
+~~~text
+                         TEAM PLATFORM PLANE
+                  Shared Team Platform / Server
+
+              +----------------------------------+
+              | Platform Registry                |
+              | Tasks / Workflows / Skills       |
+              | Knowledge / Agent Profiles       |
+              | Versions / Owners / Permissions  |
+              +----------------+-----------------+
+                               |
+              Package Repository / Evaluation
+              Observability / Team Governance
+                               |
+                    publish / discover / sync
+                               |
+          +--------------------+--------------------+
+          |                    |                    |
+          v                    v                    v
+
+                 PERSONAL ENGINEERING / EXECUTION PLANES
+
++----------------------+ +----------------------+ +----------------------+
+| Engineer A PC        | | Engineer B PC        | | Engineer C PC        |
+|                      | |                      | |                      |
+| Web UI / CLI         | | Web UI / CLI         | | Web UI / CLI         |
+|       |              | |       |              | |       |              |
+|       v              | |       v              | |       v              |
+| Personal Engineering | | Personal Engineering | | Personal Engineering |
+| Agent A              | | Agent B              | | Agent C              |
+|       |              | |       |              | |       |              |
+|       v              | |       v              | |       v              |
+| Bridge A             | | Bridge B             | | Bridge C             |
+| Tools / Tasks        | | Tools / Tasks        | | Tools / Tasks        |
+| DUT / Instrument     | | DUT / Instrument     | | DUT / Instrument     |
+| Files / Office / Git | | Files / Office / Git | | Files / Office / Git |
++----------------------+ +----------------------+ +----------------------+
+~~~
+
+### Personal Engineering Agent
+
+The **Engineering Agent is not primarily a central-server agent**. Each engineer normally runs a Personal Engineering Agent on the same computer/network execution boundary as that engineer's Bridge. The agent is the engineer's AI work partner and owns reasoning, planning, context assembly, Skill/Knowledge use, capability selection and bounded delegation.
+
+The Engineering Agent does **not** directly own hardware or operating-system execution. It requests deterministic Tasks/Workflows/Tools through the Bridge and receives structured results.
+
+~~~text
+Engineer request
+      |
+      v
+Personal Engineering Agent
+      |
+      +--> discover/use Knowledge
+      +--> discover/use Skills
+      +--> select Task / Workflow
+      +--> reason / plan / request approval
+      |
+      v
+Local Bridge
+      |
+      +--> Files / Shell / Git
+      +--> Office / COM / Browser
+      +--> DUT / Instrument
+      +--> local engineering tools
+~~~
+
+This separation keeps reasoning replaceable while preserving reliable local execution boundaries.
+
+### Team Platform Plane
+
+The shared Team Platform is primarily a **control plane**, not the default location where every engineer's reasoning executes. It owns shared capability/knowledge management such as:
+
+- Platform Registry and package distribution;
+- shared Skills, Tasks, Workflows, Knowledge and Agent Profiles;
+- ownership, versions, lifecycle and permissions;
+- evaluation and validation records;
+- team observability and governance;
+- discovery, installation, update and publishing services.
+
+A future centralized/service agent may exist for use cases such as scheduled background work or team-wide services, but it must use the same Agent/Workflow/Capability contracts. It is not a prerequisite for Personal Engineering Agents.
+
+### Local-first resilience
+
+The Personal Engineering Plane should continue operating with already-installed capabilities when the Team Platform is temporarily unavailable, provided the requested operation has no required central dependency.
+
+~~~text
+Team Platform unavailable
+        X
+        |
+Engineer -> Personal Agent -> Local Bridge -> installed Skill/Task/Workflow
+                                      |
+                                      v
+                               local resources
+~~~
+
+During such a period, discovery, publishing, team synchronization and centrally required services may be unavailable, but local engineering work should not fail merely because the Registry cannot be reached.
+
+### Shared runtime, distributed profiles
+
+The platform still uses **one agent runtime architecture with N agent profiles**, not N independently implemented agent frameworks. Personal Engineering Agents instantiate the shared runtime with engineer/team-specific configuration, installed capabilities, local context and permissions.
+
+Agent Profiles are shared/versioned through the Platform Registry; Agent Runtime instances are normally distributed to Personal Engineering Planes.
+
+Cross-cutting concerns across both planes include Evaluation, Guardrails, Observability, Configuration, Secrets, Identity and Policy.
+
 
 ## 4. Routing policy
 
@@ -423,6 +489,9 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 21. Agents may propose new reusable assets from work experience, but shared publication requires explicit validation/evaluation and applicable human review.
 22. Published assets preserve author/contributor provenance, version/lifecycle and validation metadata so capability evolution is auditable and reversible.
 23. Personal Bridges may mix private, installed shared and in-development capabilities; publication to the Platform Registry is an explicit lifecycle transition.
+24. Personal Engineering Agents normally run in the engineer's Personal Engineering/Execution Plane; the shared Team Platform is the control plane and is not the default host for personal reasoning.
+25. Personal Engineering Agents own reasoning/planning/capability selection; Bridges own local deterministic execution and resource access.
+26. Installed local capabilities should remain usable during temporary Team Platform outages when no central dependency is required.
 
 ## 9. Migration strategy
 
