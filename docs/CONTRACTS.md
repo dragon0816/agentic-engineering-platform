@@ -235,3 +235,23 @@ create no run record. Idempotency keys are neither consulted nor consumed by
 resumption; a keyed re-submission still returns the original run. This is
 in-memory resumption within one engine instance — no durable step state, crash
 recovery, persistence or Gateway trigger is provided.
+
+## Phase 3 Gateway run control
+
+`Gateway.inspect(request, run_id)` and `Gateway.resume(request, run_id,
+policy=ResumePolicy(...), workflow_timeout_seconds=...)` are the host-facing
+entry points for run control, so CLI, Agent runtime and a future n8n adapter
+continue runs through the same Gateway and engine contracts as routed workflows.
+Both return a `RunControlResult` (`action`, `run_id`, `plan` for inspect,
+`workflow` snapshot for resume); both payload fields None means the run is
+unknown to this caller — missing, evicted or owned by another actor — exactly
+as the engine reports it.
+
+The Gateway adds no authority and parses nothing: ownership, pre-flight checks
+and per-step re-authorization stay in the engine, and `ResumePolicy` is a
+host/caller option that is never derived from the request message or a model.
+Run control is not a Skill route: `Gateway.handle` cannot inspect or resume a
+run, a model proposing such a route fails closed like any other invalid
+proposal, and routed workflow arguments are ordinary step inputs. The `run_id`
+is validated only for shape (1–128 characters); a mistyped id is unknown, not an
+error.

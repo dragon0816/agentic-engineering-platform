@@ -1,93 +1,59 @@
-# Handoff — Phase 3 bounded resumable state
+# Handoff — Phase 3 Gateway run control
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-3/resumable-state`, based on `main` at `be8c968`.
-PR #10 (step inputs) and PR #11 (retries/idempotency) are both merged into `main`;
-the previous handoff's "PR #11 open" statement was reconciled against GitHub at
-takeover.
+Branch: `phase-3/gateway-resume`, based on `main` at `c726a05` (PR #12 merged).
 
 ## Goal
 
-Complete Phase 3 slice 5: inspect a finished run's step states and resume it from
-its first non-completed step, replaying an uncertain-effect step only under an
-explicit policy, without persistence or backend guarantees. Requirements are in
-`docs/phases/PHASE_3_WORKFLOW.md` (slice 5); source decisions in
-`docs/PHASE_3_MIGRATION.md` (slice 5 section).
+Complete Phase 3 slice 6: host-facing run control through the Gateway so that
+CLI, Agent runtime and a future n8n adapter inspect and resume runs through the
+same Gateway and engine contracts as routed workflows, without giving routing or
+models any way to trigger a resumption. Requirements: `docs/phases/PHASE_3_WORKFLOW.md`
+(slice 6). No new source excerpt: this composes already-characterized behavior.
 
 ## Completed
 
-- Takeover reconciliation: local `main` verified at `be8c968` (249 tests, ruff,
-  mypy) before starting.
-- Pinned `host-bridge/jobs/_steps.py` from the same `rs_workflow_system` commit as
-  `tests/fixtures/source_steps.txt` (checksums in the fixtures README) and added
-  4 characterization tests: linear steps with no re-entry, pending-after-failure /
-  `never_run()`, skip-needs-reason, and no resume transition in the source.
-- Contracts (`common/execution.py`, additive): `WorkflowRun.resumed_from`,
-  `StepState`/`StepStateRecord`, `ResumePolicy` (`uncertain`: `reject` default,
-  `replay_read_only`, `replay_side_effects`) and `ResumePlan` with a
-  linear-progress validator.
-- Engine (`workflow/engine.py`): records keep manifest/arguments/actor/namespace;
-  `_preflight` factored out of `execute` unchanged; `inspect(run_id)` classifies
-  steps from recorded evidence (Bridge codes raised before a handler ran are
-  `never_started`; anything after a handler ran or an interruption is
-  `uncertain`); `resume(context, run_id, policy)` starts a new run from the first
-  non-completed step, copies completed results for input chaining, re-authorizes
-  remaining steps before creating a run and again at dispatch, requires matching
-  actor/namespace, rejects running/complete runs, returns None for unknown or
-  evicted runs, and never touches idempotency keys. `_drive` gained a start index.
-- 18 resume tests covering contracts, every classification and policy branch,
-  re-authorization after a later grant, result chaining without re-running,
-  repeated resumption, cancellation, eviction, key independence, once-only
-  continuation, prior-result pre-flight, live-run inspection and handler
-  evidence surviving a later pre-handler denial.
-- Docs: phase spec slice 5, migration slice-5 decision, `docs/CONTRACTS.md`
-  "Phase 3 bounded resumption", README, fixtures README.
-- PR #12 opened; pre-merge review applied (commit after `c2bed5b`):
-  classification is now evidence-based — the Bridge records `handler_invoked`
-  on every `CapabilityResult`/`StepAttempt` instead of the engine keeping a
-  failure-code table; a run can be continued once (`needs_input/already_resumed`
-  afterwards) so a retried host call cannot re-execute never-started side
-  effects; `inspect` takes the requesting context and, like `resume`, returns
-  None for other actors' runs (indistinguishable from unknown); a live run is
-  reported as `running` rather than the caller-wait overlay; `StepInput`
-  references into completed results are pre-flighted so no doomed run record is
-  created; the retained manifest drives both plan and continuation; launch logic
-  is shared by `execute` and `resume`.
+- `src/agent/gateway.py`: `RunControlResult` (`action`, lenient `run_id`, `plan`
+  for inspect, `workflow` snapshot for resume; validator forbids a payload that
+  does not match the action) and `Gateway.inspect` / `Gateway.resume`, which
+  validate the request context and delegate to `WorkflowEngine.inspect` /
+  `WorkflowEngine.resume`. `ResumePolicy` and the caller-wait timeout are host
+  options; the engine keeps its default timeout when none is given.
+- 6 regression tests (`tests/test_gateway_resume.py`): result contract,
+  inspect-then-resume with policy and `resumed_from`/trace checks, policy never
+  read from the message, no authority (denied, then granted), other actors and
+  unknown runs indistinguishable, and no routed request — including a model
+  proposing a `resume` route or smuggling a run id into workflow arguments — can
+  continue a run.
+- Docs: phase spec slice 6 requirements and sequence, `docs/CONTRACTS.md`
+  "Phase 3 Gateway run control", README.
 
 ## In Progress
 
-- PR #12 is open with the review posted; CI results for the final head are
-  recorded on the PR.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available.
 
 ## Remaining
 
-- Review and merge the resumable-state PR. Merges follow a posted review per
-  repository convention.
-- Later Phase 3 slices: durable step-state/persistence contracts (a separate,
-  explicitly scoped decision), progress streaming, a Gateway resume trigger, and
-  the optional n8n adapter through the same execution contracts.
+- Review and merge the Gateway run-control PR after the posted review.
+- Later Phase 3 slices: the durable step-state/persistence contract (must be
+  scoped explicitly with the owner before any persistence code), progress
+  streaming, and the optional n8n adapter invoking the same Gateway/engine
+  contracts.
 - Earlier deferred reviews remain: bounded Bridge event history, SkillRegistry
   parse cost, MCP installation round trips, Review `not_required` semantics,
   generic top-level package names, repeated RequestContext validation.
 
 ## Architecture decisions made
 
-- ADAPT the source's pending/never-run distinction into an effect classification;
-  resumption itself is new platform semantics (the source has none), never a
-  source-parity claim.
-- Classification uses recorded evidence only: the Bridge marks `handler_invoked`
-  at dispatch time, and a step is `uncertain` unless a terminal success was
-  recorded or no attempt ever invoked a handler. Uncertainty is never resolved by
-  guessing; only an explicit host policy may replay it, and read-only replay is
-  gated by the installed capability's side-effect classification, not by
-  manifests or publication metadata.
-- Resumption grants nothing and creates a new run; the original run is immutable
-  history and can be continued exactly once (linear, like the source's step
-  table). It shares the 50-run history, bounded logs and caller-wait timeout
-  semantics, ignores idempotency keys by design (a keyed re-submission still
-  returns the original run), and never reveals other actors' runs.
-- No persistence: keys, history and resumability all end with the engine
-  instance. Durable state needs its own approved contract before any backend.
+- Run control is a host-facing Gateway API, not a Skill route or a
+  `RouteDecision` kind: no deterministic or model-selected route can inspect or
+  resume a run, so a model can never choose to replay an uncertain effect. The
+  Gateway parses nothing and adds no authority; ownership, pre-flight and
+  re-authorization stay in the engine.
+- `RunControlResult` reports "unknown to this caller" (both payloads None) for
+  missing, evicted and other actors' runs alike, preserving the engine's
+  indistinguishability rule at the entry point.
 
 ## Exact verification commands and results
 
@@ -95,38 +61,31 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 271 tests (249 prior + 4 step-table characterization + 18 resume)
+# PASS: 277 tests (271 prior + 6 Gateway run control)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
-# PASS: 64 files
+# PASS: 65 files
 .venv/Scripts/python.exe -m mypy
-# PASS: 43 source/test files
-.venv/Scripts/python.exe -m pip check
-# PASS
+# PASS: 44 source/test files
 .venv/Scripts/python.exe -m build
-# PASS: sdist and wheel; source_steps.txt ships in the sdist
+# PASS: sdist and wheel
 git diff --check
 # PASS
 ```
 
-Characterization tests ran green against the pinned excerpt before the engine was
-changed; one resume test fixture was corrected during development (a read handler
-that was wrongly configured to fail). No production service, transport, model, job
-or n8n instance was invoked; inert doubles only.
+No production service, transport, model, job or n8n instance was invoked; inert
+doubles only. Local pytest uses `-p no:cacheprovider` because of temporary
+directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- In-memory only: evicted or engine-replaced runs cannot be inspected or resumed.
-- `uncertain` is deliberately conservative; a read-only handler interrupted before
-  doing anything is still `uncertain` and needs `replay_read_only`.
-- The Gateway has no resume trigger yet; resumption is an engine API for hosts.
-- Local pytest needs `-p no:cacheprovider` because of temporary-directory ACLs on
-  this machine; CI runs ordinary pytest.
+- Run control is in-memory like the engine: evicted runs are unknown.
+- There is no HTTP/CLI surface yet; hosts call the Gateway API directly.
 
 ## Next Recommended Action
 
-The owner reviews and merges PR #12 (`phase-3/resumable-state`). Then decide the
-next slice with the owner: either a Gateway resume trigger (small, same
-contracts) or the durable step-state contract, which must be scoped explicitly
-before any persistence code.
+Open the PR for `phase-3/gateway-resume` against `main`, run the review, apply
+confirmed findings and let the owner merge. Then scope the durable step-state
+contract with the owner before writing any persistence code, or pick progress
+streaming / the n8n adapter if durability is deferred.
