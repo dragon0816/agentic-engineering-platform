@@ -5,6 +5,8 @@ description: Migrate proven behavior from source repositories without losing inv
 
 # Migration
 
+Read `docs/SOURCE_REPOSITORIES.md` before implementing any capability that may already exist in a source repository.
+
 1. Treat source repositories as reference implementations; do not modify them from this migration.
 2. Document current behavior, contract and invariants.
 3. Add characterization/regression coverage for behavior that must survive.
@@ -14,3 +16,7 @@ description: Migrate proven behavior from source repositories without losing inv
 7. Preserve deterministic execution paths and approval semantics.
 8. Verify parity before deprecating a source implementation.
 9. Keep rollback possible until acceptance criteria pass.
+
+## Required source-first decision
+
+For overlapping capabilities, explicitly choose and record one strategy: `REUSE`, `WRAP`, `ADAPT`, `MIGRATE`, or `REWRITE`. A rewrite requires a documented reason. Do not implement from memory when the source repository can be inspected.
