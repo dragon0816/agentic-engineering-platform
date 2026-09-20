@@ -38,13 +38,22 @@ Source decisions are recorded in `docs/PHASE_3_MIGRATION.md`.
    capability authorization stay in `LocalPolicy`, workflow pre-flights in the
    engine. A denied route fails exactly as it would when invoked directly.
 3. Deterministic and model-selected routes dispatch through the same contract;
-   deterministic triggers never invoke a model. Route arguments pass through
-   unchanged and no attachment content is read.
-4. Evaluation cases prove a deterministic command (dot form and keyword form)
-   triggers a workflow run with no model call. This satisfies the Roadmap
-   Phase 3 exit criterion's deterministic-command and Agent trigger paths; the
-   n8n adapter remains a later slice against this same contract.
-5. This slice composes behaviors already characterized in Phases 2 and 3;
+   deterministic triggers never invoke a model, and the synchronous model client
+   never runs on the event loop. Route arguments pass through unchanged and no
+   attachment content is read: a capability that accepts raw dot-command
+   arguments declares an `args` field on its input contract, and closed input
+   contracts fail closed on unexpected arguments (no guessing, per the Phase 2
+   migration record).
+4. Keyword-triggered execution is preserved source behavior and stays
+   policy-gated: routing grants nothing, so an incidental keyword match can only
+   execute what the actor's LocalPolicy grants already allow, and production
+   side-effecting workflows must bind approval-required capabilities.
+5. Evaluation cases prove a deterministic command (dot form and keyword form)
+   triggers a workflow run with no model call and no forbidden side effect.
+   This satisfies the Roadmap Phase 3 exit criterion's deterministic-command and
+   Agent trigger paths; the n8n adapter remains a later slice against this same
+   contract.
+6. This slice composes behaviors already characterized in Phases 2 and 3;
    no new source excerpt is required. All existing tests, lint, strict types,
    packaging and CI must continue to pass.
 

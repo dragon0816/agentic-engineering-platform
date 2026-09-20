@@ -6,6 +6,7 @@ engine. Model-selected routes dispatch through exactly the same contract as
 deterministic ones, so a trigger's origin never changes what may execute.
 """
 
+import asyncio
 from typing import Self
 
 from pydantic import model_validator
@@ -42,10 +43,12 @@ class Gateway:
         self.engine = engine
 
     async def handle(
-        self, request: RequestContext, *, workflow_timeout_seconds: float = 300
+        self, request: RequestContext, *, workflow_timeout_seconds: float | None = None
     ) -> GatewayResult:
         context = RequestContext.model_validate(request)
-        outcome = self.router.route(context)
+        # Routing is synchronous and the model client owns blocking I/O, so it
+        # must never run on the event loop where driving tasks live.
+        outcome = await asyncio.to_thread(self.router.route, context)
         decision = outcome.decision
         if decision.kind == "capability" and decision.target is not None:
             result = await self.bridge.execute(
@@ -55,12 +58,16 @@ class Gateway:
             )
             return GatewayResult(routing=outcome, capability=result)
         if decision.kind == "workflow" and decision.target is not None:
-            snapshot = await self.engine.execute(
-                context,
-                decision.target,
-                dict(outcome.arguments),
-                timeout_seconds=workflow_timeout_seconds,
-            )
+            if workflow_timeout_seconds is None:
+                # The engine owns the default caller-wait timeout.
+                snapshot = await self.engine.execute(context, decision.target, outcome.arguments)
+            else:
+                snapshot = await self.engine.execute(
+                    context,
+                    decision.target,
+                    outcome.arguments,
+                    timeout_seconds=workflow_timeout_seconds,
+                )
             return GatewayResult(routing=outcome, workflow=snapshot)
         # needs_input: nothing executes. A resolved decision without a target is
         # impossible by contract and would fail GatewayResult validation loudly.

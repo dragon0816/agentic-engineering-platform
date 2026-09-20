@@ -22,8 +22,10 @@ from workflow.engine import InstalledWorkflows, WorkflowEngine
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class Empty(Contract):
-    pass
+class Probe(Contract):
+    """Raw dot-command arguments are accepted only when the input contract declares them."""
+
+    args: str = ""
 
 
 class Report(Contract):
@@ -100,7 +102,7 @@ def gateway(handler: Handler, model: FakeModel | None = None, *, granted: bool =
         skills.register(SkillManifest.model_validate(data))
     installed = InstalledCapabilities()
     installed.register(
-        capability_spec(), handler, Empty, Report, ExecutionDependencies(central_required=False)
+        capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
     )
     grants = (
         (
@@ -137,6 +139,7 @@ def test_phase3_evaluation_cases_trigger_workflows_without_model() -> None:
         assert result.routing.decision == case.expected_route
         assert result.routing.origin == "deterministic"
         assert model.calls == []
+        assert capability_spec().side_effect not in case.forbidden_side_effects
         assert result.capability is None
         assert result.workflow is not None
         assert result.workflow.run.status == "succeeded"
@@ -206,6 +209,9 @@ def test_route_arguments_pass_through_unchanged() -> None:
             return await super().__call__(context, inputs)
 
     handler = Echo()
-    result = asyncio.run(gateway(handler).handle(request("release.check")))
+    result = asyncio.run(gateway(handler).handle(request("release.check  notes.txt now ")))
     assert result.capability is not None and result.capability.status == "succeeded"
-    assert handler.seen == [Empty()]
+    assert handler.seen == [Probe(args="notes.txt now")]
+    no_args = asyncio.run(gateway(handler).handle(request("release.check")))
+    assert no_args.capability is not None and no_args.capability.status == "succeeded"
+    assert handler.seen[-1] == Probe()
