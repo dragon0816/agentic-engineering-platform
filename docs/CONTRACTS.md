@@ -260,3 +260,27 @@ proposal, and routed workflow arguments are ordinary step inputs. `run_id` is a
 `RunId` (the same `Symbol` shape the engine generates, shared from
 `common/execution.py` for CLI/n8n adapters): a mistyped but well-formed id is
 unknown, not an error, while malformed input fails validation loudly.
+
+## Phase 3 progress streaming
+
+`WorkflowEngine.watch(context, run_id)` and `Gateway.watch(request, run_id)`
+return an async iterator of `RunProgress` events for the run's owner, or None when
+the run is unknown to this caller (missing, evicted or owned by another actor).
+A live run yields a `snapshot` of its current state, then `started` (only if the
+watcher was attached before launch), `step_started`/`step_finished` per step and
+finally `finished` with the terminal status and code; the stream then ends. A
+finished run yields exactly one `snapshot` with its terminal state.
+
+Events carry `sequence` (monotonic per run), `run_id`, `workflow`, `event`,
+`status`, `completed_steps`, optional `step_index` and `code`, and `lagged`. They
+never carry arguments, payloads or exception text, and a live run is always
+`running` (the caller-wait timeout overlay is not evidence).
+
+Reporting never changes a run's outcome. Each watcher has a bounded queue
+(`WorkflowEngine(watch_queue_size=256)` by default, minimum 2); when it is full,
+new events are dropped and the next delivered event has `lagged: true`, meaning
+the consumer should re-`inspect` rather than trust continuity. The terminal
+event always arrives (older queued events are dropped to make room), so a
+consumer cannot hang. At most 16 watchers per run; a further `watch` returns a
+single `rejected/watch_capacity` event. Streams are in-memory and end with the
+run; there is no persistence, replay history, transport or dashboard.

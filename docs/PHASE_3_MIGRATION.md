@@ -132,3 +132,29 @@ classification and add resumption as new platform semantics, not source parity:
 
 Rollback: remove `inspect`/`resume`, the resume contracts and the step-table
 fixture; runs remain terminal as before. Source repositories remain unchanged.
+
+## Slice 7 source-first decision
+
+Re-inspected the pinned `jobs/_steps.py` excerpt (`tests/fixtures/source_steps.txt`)
+and the runner: `StepTable.on_change` is called after every transition, outside
+the lock, and the runner posts the whole run snapshot to the ops dashboard on each
+change; `_changed` swallows hook exceptions and `_report` never raises, so
+reporting can never fail a step or change a run's outcome. Characterized by
+`test_source_reports_every_transition_and_never_fails_a_step_over_reporting`.
+
+Decision: **ADAPT** the "report every transition, never fail the run" semantics
+into bounded in-process progress streams; the ops transport is not migrated:
+
+- Typed `RunProgress` events replace whole-run snapshot dicts; they carry
+  identities, statuses, step indices and codes only, consistent with the log and
+  trace rules, and a live run reports `running`.
+- Best-effort delivery is made explicit instead of implicit: each watcher has a
+  bounded queue, a full queue drops the event and marks `lagged` on the next one
+  delivered, and the terminal event always arrives. The source's dashboard client
+  also "queues and drops rather than waiting"; the adaptation tells the consumer.
+- Watchers are owner-scoped like `inspect`/`resume` and bounded per run;
+  capacity is reported as a `rejected/watch_capacity` event, never a silent drop.
+- No persistence, replay, transport or dashboard; streams end with the run.
+
+Rollback: remove `watch`, `_Watcher`, `RunProgress` and the emit calls; runs behave
+exactly as before. Source repositories remain unchanged.

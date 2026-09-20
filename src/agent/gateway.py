@@ -7,6 +7,7 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
+from collections.abc import AsyncIterator
 from typing import Literal, Self
 
 from pydantic import model_validator
@@ -22,6 +23,7 @@ from common.execution import (
     ResumePlan,
     ResumePolicy,
     RunId,
+    RunProgress,
 )
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import WorkflowEngine, WorkflowRunSnapshot
@@ -155,3 +157,12 @@ class Gateway:
                 request, run_id, policy, timeout_seconds=workflow_timeout_seconds
             )
         return RunControlResult(action="resume", run_id=run_id, workflow=snapshot)
+
+    def watch(self, request: RequestContext, run_id: RunId) -> AsyncIterator[RunProgress] | None:
+        """Bounded progress stream for the run's owner through the same engine contract.
+
+        None means the run is unknown to this caller. The stream carries
+        identities, statuses and codes only, never payloads, and never blocks
+        the run; the Gateway adds no authority.
+        """
+        return self.engine.watch(request, run_id)

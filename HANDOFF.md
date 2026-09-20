@@ -1,70 +1,67 @@
-# Handoff — Phase 3 Gateway run control
+# Handoff — Phase 3 progress streaming
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-3/gateway-resume`, based on `main` at `c726a05` (PR #12 merged).
+Branch: `phase-3/progress-streaming`, based on `main` at `0bc5556` (PR #13 merged).
 
 ## Goal
 
-Complete Phase 3 slice 6: host-facing run control through the Gateway so that
-CLI, Agent runtime and a future n8n adapter inspect and resume runs through the
-same Gateway and engine contracts as routed workflows, without giving routing or
-models any way to trigger a resumption. Requirements: `docs/phases/PHASE_3_WORKFLOW.md`
-(slice 6). No new source excerpt: this composes already-characterized behavior.
+Complete Phase 3 slice 7: bounded progress streams so a run's owner can follow
+every state change through the same engine/Gateway contracts, without reporting
+ever changing a run's outcome. Requirements: `docs/phases/PHASE_3_WORKFLOW.md`
+(slice 7); source decision: `docs/PHASE_3_MIGRATION.md` (slice 7).
 
 ## Completed
 
-- `src/agent/gateway.py`: `RunControlResult` (`action`, lenient `run_id`, `plan`
-  for inspect, `workflow` snapshot for resume; validator forbids a payload that
-  does not match the action) and `Gateway.inspect` / `Gateway.resume`, which
-  validate the request context and delegate to `WorkflowEngine.inspect` /
-  `WorkflowEngine.resume`. `ResumePolicy` and the caller-wait timeout are host
-  options; the engine keeps its default timeout when none is given.
-- 6 regression tests (`tests/test_gateway_resume.py`): result contract,
-  inspect-then-resume with policy and `resumed_from`/trace checks, policy never
-  read from the message, no authority (denied, then granted), other actors and
-  unknown runs indistinguishable, and no routed request — including a model
-  proposing a `resume` route or smuggling a run id into workflow arguments — can
-  continue a run.
-- Docs: phase spec slice 6 requirements and sequence, `docs/CONTRACTS.md`
-  "Phase 3 Gateway run control", README.
-- PR #13 opened; pre-merge review applied: results are constructed once so the
-  contract validator actually runs (no `model_copy(update=...)`); `RunId` is the
-  engine's `Symbol` shape shared from `common/execution.py`, so malformed ids
-  fail loudly instead of being echoed back; `inspect` is synchronous like the
-  lookup it wraps; the Gateway no longer re-validates the context the engine
-  validates; the "no routed resumption" test asserts concrete outcomes
-  (`invalid_model_route`, a fresh run id, and the original still resumable);
-  the contract text states that `run_id` echoes the request while the
-  continuation id lives in `workflow.run.run_id`. Declined: merging the timeout
-  branches with `**kwargs` — mypy rejects the dict type against the non-float
-  keyword parameters.
+- Characterized the source `StepTable.on_change` semantics on the existing pinned
+  excerpt: every transition is reported with the table, and a raising hook never
+  fails the step (`test_source_reports_every_transition_and_never_fails_a_step_over_reporting`).
+- Contract (`common/execution.py`, additive): `ProgressEvent` and `RunProgress`
+  (`sequence`, `run_id`, `workflow`, `event`, `status`, `completed_steps`,
+  `step_index`, `code`, `lagged`) with shape validation; identities, statuses and
+  codes only.
+- Engine: `_Watcher` bounded queues; `_emit` at launch (`started`), before/after
+  each step (`step_started`/`step_finished`) and at completion (`finished`, then
+  end-of-stream); `watch(context, run_id)` returns an async iterator for the
+  owner — a live run yields a `snapshot` then changes then `finished`; a finished
+  run yields one terminal `snapshot`; unknown/evicted/other actors' runs return
+  None. A full queue drops events and marks `lagged` on the next delivered one;
+  the terminal event always arrives (older queued events are dropped to make
+  room) so a consumer cannot hang. At most 16 watchers per run; excess
+  subscriptions get one `rejected/watch_capacity` event. `WorkflowEngine(
+  watch_queue_size=256)` (minimum 2). Emission is wrapped so reporting can never
+  change a run's outcome; a live run reports `running`.
+- `Gateway.watch(request, run_id)` passes through with no added authority.
+- 16 progress tests (`tests/test_workflow_progress.py`): contract validation and
+  round trip, live stream ordering/sequence/no payloads, finished snapshot,
+  ownership, slow consumer (lag + guaranteed terminal), watcher capacity,
+  cancellation, queue-size guard, Gateway pass-through.
+- Docs: phase spec slice 7, migration slice-7 decision, `docs/CONTRACTS.md`
+  "Phase 3 progress streaming", README.
 
 ## In Progress
 
-- PR #13 is open with the review posted; CI results for the final head are
-  recorded on the PR.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available.
 
 ## Remaining
 
-- Review and merge the Gateway run-control PR after the posted review.
+- Review and merge the progress-streaming PR after the posted review.
 - Later Phase 3 slices: the durable step-state/persistence contract (must be
-  scoped explicitly with the owner before any persistence code), progress
-  streaming, and the optional n8n adapter invoking the same Gateway/engine
-  contracts.
+  scoped explicitly with the owner before any persistence code) and the optional
+  n8n adapter invoking the same Gateway/engine contracts (it could consume
+  `watch` streams for notifications).
 - Earlier deferred reviews remain: bounded Bridge event history, SkillRegistry
   parse cost, MCP installation round trips, Review `not_required` semantics,
   generic top-level package names, repeated RequestContext validation.
 
 ## Architecture decisions made
 
-- Run control is a host-facing Gateway API, not a Skill route or a
-  `RouteDecision` kind: no deterministic or model-selected route can inspect or
-  resume a run, so a model can never choose to replay an uncertain effect. The
-  Gateway parses nothing and adds no authority; ownership, pre-flight and
-  re-authorization stay in the engine.
-- `RunControlResult` reports "unknown to this caller" (both payloads None) for
-  missing, evicted and other actors' runs alike, preserving the engine's
-  indistinguishability rule at the entry point.
+- ADAPT the source's "report every transition, never fail the run" semantics into
+  in-process bounded streams; the ops dashboard transport is not migrated.
+- Best-effort delivery is explicit, not silent: bounded queues, `lagged` marking,
+  guaranteed terminal delivery, bounded watchers with a typed capacity rejection.
+- Streams are owner-scoped like `inspect`/`resume`, carry no payloads, report a
+  live run as `running`, and end with the run. No persistence or replay history.
 
 ## Exact verification commands and results
 
@@ -72,31 +69,35 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 277 tests (271 prior + 6 Gateway run control)
+# PASS: 294 tests (277 prior + 1 characterization + 16 progress)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
-# PASS: 65 files
+# PASS: 66 files
 .venv/Scripts/python.exe -m mypy
-# PASS: 44 source/test files
+# PASS: 45 source/test files
 .venv/Scripts/python.exe -m build
 # PASS: sdist and wheel
 git diff --check
 # PASS
 ```
 
-No production service, transport, model, job or n8n instance was invoked; inert
-doubles only. Local pytest uses `-p no:cacheprovider` because of temporary
-directory ACLs on this machine; CI runs ordinary pytest.
+The characterization test was added before the engine changes. No production
+service, transport, model, job or n8n instance was invoked; inert doubles only.
+Local pytest uses `-p no:cacheprovider` because of temporary-directory ACLs on
+this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- Run control is in-memory like the engine: evicted runs are unknown.
-- There is no HTTP/CLI surface yet; hosts call the Gateway API directly.
+- Streams are in-memory and end with the run; there is no replay of events
+  emitted before a watcher attached (the initial `snapshot` covers the gap).
+- Events are emitted only for run-level state changes; retry attempts are
+  visible in `WorkflowRunSnapshot.attempts`, not as stream events.
+- Timing-sensitive tests use short sleeps (20 ms handlers); CI has passed them
+  so far, but a heavily loaded runner could reorder the first live event.
 
 ## Next Recommended Action
 
-Open the PR for `phase-3/gateway-resume` against `main`, run the review, apply
-confirmed findings and let the owner merge. Then scope the durable step-state
-contract with the owner before writing any persistence code, or pick progress
-streaming / the n8n adapter if durability is deferred.
+Open the PR for `phase-3/progress-streaming` against `main`, run the review,
+apply confirmed findings and let the owner merge. Then choose with the owner
+between the durable step-state contract (scope first) and the n8n adapter.

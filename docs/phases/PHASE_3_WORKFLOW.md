@@ -170,6 +170,27 @@ small commits, PR and handoff. No production side effects are exercised.
    and model isolation. This composes already-characterized behavior; no new
    source excerpt is required.
 
+## Requirements and acceptance (slice 7 — progress streaming)
+
+1. `WorkflowEngine.watch(context, run_id)` (and `Gateway.watch`) returns a bounded
+   progress stream of typed `RunProgress` events for the run's owner: a snapshot
+   of the current state, then every state change (`started`, `step_started`,
+   `step_finished`), then the terminal `finished` event. A finished run yields
+   one terminal snapshot. Unknown, evicted and other actors' runs return None.
+2. Events carry identities, statuses, step indices and failure codes only —
+   never arguments, payloads or exception text — and report a live run as
+   `running` (the caller-wait overlay is not evidence).
+3. Reporting never changes a run's outcome (preserved from the source's
+   `on_change`/ops mirroring): each watcher has a bounded queue, a slow consumer
+   never blocks the run, dropped events are surfaced as `lagged` on the next
+   delivered event instead of silently, and the terminal event always arrives so
+   a consumer cannot hang. Watchers per run are bounded; excess subscriptions get
+   a single `rejected/watch_capacity` event rather than an unbounded queue.
+4. Streams are in-memory and end with the run; no persistence, replay history,
+   transport or dashboard is provided. Characterize the source `on_change`
+   semantics first; regression tests cover contract validation, live and finished
+   streams, ownership, lag, capacity, cancellation and Gateway pass-through.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -180,9 +201,9 @@ small commits, PR and handoff. No production side effects are exercised.
 - Slice 4: bounded read retries and in-memory duplicate submission suppression.
 - Slice 5: bounded in-memory resumption with explicit uncertain-effect policy.
 - Slice 6: Gateway run-control entry points (`inspect`/`resume`).
-- Later Phase 3 slices: durable step-state/persistence contracts, progress
-  streaming, and the optional n8n adapter invoking the same Gateway/engine
-  contracts.
+- Slice 7: bounded progress streaming (`watch`).
+- Later Phase 3 slices: durable step-state/persistence contracts and the
+  optional n8n adapter invoking the same Gateway/engine contracts.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks

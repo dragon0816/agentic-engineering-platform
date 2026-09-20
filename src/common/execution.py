@@ -175,6 +175,39 @@ class ResumePlan(Contract):
         return self
 
 
+ProgressEvent = Literal[
+    "snapshot", "started", "step_started", "step_finished", "finished", "rejected"
+]
+
+
+class RunProgress(Contract):
+    """One progress notification: identities, statuses and codes only, never payloads.
+
+    `sequence` is monotonic per run. `lagged` means the consumer's bounded queue
+    dropped earlier events; re-inspect the run rather than trusting continuity.
+    """
+
+    sequence: int = Field(ge=0, strict=True)
+    run_id: RunId
+    workflow: AssetIdentity
+    event: ProgressEvent
+    status: RunStatus
+    completed_steps: int = Field(ge=0, strict=True)
+    step_index: int | None = Field(default=None, ge=0, strict=True)
+    code: Symbol | None = None
+    lagged: StrictBool = False
+
+    @model_validator(mode="after")
+    def event_shape(self) -> Self:
+        if self.event in {"step_started", "step_finished"} and self.step_index is None:
+            raise ValueError("step events name their step")
+        if self.event == "finished" and self.status == "running":
+            raise ValueError("a finished event carries the terminal status")
+        if self.event == "rejected" and self.code is None:
+            raise ValueError("rejections carry a code")
+        return self
+
+
 class ApprovalRequest(Contract):
     approval_id: Symbol
     trace: TraceIdentifiers
