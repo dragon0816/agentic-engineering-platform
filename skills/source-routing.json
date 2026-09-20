@@ -1,0 +1,128 @@
+[
+  {
+    "metadata": {
+      "identity": {
+        "namespace": "legacy",
+        "name": "run-testing",
+        "version": "1.0.0"
+      },
+      "owner": {
+        "type": "team",
+        "id": "migration"
+      },
+      "visibility": "private",
+      "lifecycle": "draft"
+    },
+    "alias": "run_testing",
+    "instructions": "Routing-only migration fixture. No production capability is installed or authorized.",
+    "commands": [
+      {
+        "name": "run",
+        "target": {
+          "namespace": "legacy",
+          "name": "run-testing",
+          "version": "1.0.0"
+        }
+      }
+    ],
+    "rules": [
+      {
+        "pattern": "^/?run\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+",
+        "command": "run"
+      },
+      {
+        "pattern": "(?:測試|test)\\s*.{0,30}(?:版本|version)",
+        "command": "run"
+      },
+      {
+        "pattern": "(?:版本|version).{0,30}(?:設定|config)",
+        "command": "run"
+      }
+    ],
+    "default_command": "run"
+  },
+  {
+    "metadata": {
+      "identity": {
+        "namespace": "legacy",
+        "name": "release-package",
+        "version": "1.0.0"
+      },
+      "owner": {
+        "type": "team",
+        "id": "migration"
+      },
+      "visibility": "private",
+      "lifecycle": "draft"
+    },
+    "alias": "release_package",
+    "instructions": "Routing-only migration fixture. No production capability is installed or authorized.",
+    "commands": [
+      {
+        "name": "publish",
+        "target": {
+          "namespace": "legacy",
+          "name": "release-package",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "name": "release",
+        "target": {
+          "namespace": "legacy",
+          "name": "release-package",
+          "version": "1.0.0"
+        }
+      }
+    ],
+    "rules": [
+      {
+        "pattern": "^/?release\\s+",
+        "command": "release"
+      },
+      {
+        "pattern": "(?:發布|發行|release).{0,20}(?:套件|package|repo)",
+        "command": "release"
+      }
+    ],
+    "default_command": "release"
+  },
+  {
+    "metadata": {
+      "identity": {
+        "namespace": "legacy",
+        "name": "build-package",
+        "version": "1.0.0"
+      },
+      "owner": {
+        "type": "team",
+        "id": "migration"
+      },
+      "visibility": "private",
+      "lifecycle": "draft"
+    },
+    "alias": "build_package",
+    "instructions": "Routing-only migration fixture. No production capability is installed or authorized.",
+    "commands": [
+      {
+        "name": "build",
+        "target": {
+          "namespace": "legacy",
+          "name": "build-package",
+          "version": "1.0.0"
+        }
+      }
+    ],
+    "rules": [
+      {
+        "pattern": "^/?build\\s+",
+        "command": "build"
+      },
+      {
+        "pattern": "(?:打包|封裝|build.{0,10}package)",
+        "command": "build"
+      }
+    ],
+    "default_command": "build"
+  }
+]

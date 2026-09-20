@@ -2,112 +2,154 @@
 
 ## Current phase and branch
 
-Phase 1 — Foundation. Branch: `phase-1/implementation`. PR target: `main`.
-The implementation slice is complete locally. Do not merge without human review.
+Phase 2 — Agent and capability layer, first reviewable implementation slice.
+Branch: `phase-2/implementation`, based on Phase 1 commit `006e5b6`.
+Phase 1 PR #4 remains open and unmerged. Phase 2 is stacked
+[PR #5](https://github.com/dragon0816/agentic-engineering-platform/pull/5) against
+`phase-1/implementation`; retarget after the Phase 1 merge is handled by a human.
+Do not merge either PR automatically.
+
+## Goal
+
+Implement the Roadmap's provider-neutral routing/capability layer while preserving
+characterized source behavior. Scope and acceptance are recorded in
+`docs/phases/PHASE_2_AGENT_CAPABILITIES.md`; source decisions are in
+`docs/PHASE_2_MIGRATION.md`.
 
 ## Completed
 
-- Python 3.11+ package skeleton with the architecture's six module boundaries.
-- Provider-neutral request/route, capability/result, workflow run, approval,
-  knowledge provenance, Task/Workflow manifest, engineering profile, package/Registry,
-  Bridge, model, evaluation and trace contracts.
-- Scoped SemVer identity, separate owner/visibility, lifecycle/provenance,
-  dependencies/compatibility, separate business review and technical policy,
-  local/central requirements, SecretRef and default-deny runtime authorization records.
-- In-memory Task Registry: exact lookup, duplicate rejection, stable filtered
-  discovery, ingress revalidation and snapshot isolation; no executable imports.
-- Sample manifest -> Registry -> discovery -> installed Bridge advertisement.
-  Tests block file access, sockets and subprocesses during the proof.
-- External JSON samples, one engineering profile, evaluation case and contract docs.
-- Source inspection/dispositions recorded in `docs/PHASE_1_PLAN.md`.
-- 52 tests; Ruff, strict mypy, packaging and dependency checks.
-- GitHub Actions: Ubuntu/Windows with Python 3.11/3.12.
-- Editable install and clean-environment wheel installation/import check.
+- Reconciled repository/PR state; Phase 1 baseline: 52 passing tests.
+- Pinned `telegram-local-agent` commit `4b40a215909e4fdd4b65519d70669a84e9abd43d`;
+  inspected routing, Skill/Tool registries, MCP and file manager. Source unchanged.
+- Committed a checksum-verified, test-only routing excerpt and 13 source
+  characterization tests before adding the adapted runtime.
+- Added opaque attachments to the existing channel-neutral RequestContext.
+- Added governed Skill procedures, exact version/namespace alias installation,
+  command mappings, ordered keyword routes and direct Skill/default selection.
+- Deterministic routing precedes one optional provider-neutral model selection.
+  Model targets must be installed; invalid/unknown routes return typed needs-input.
+  Workflow selection remains intent; no workflow engine is implemented.
+- Explicit local capability bindings with typed async handlers/input/output models.
+- Default-deny trusted local policy: exact actor/asset match, required permissions,
+  technical policy references and separate execution approval reference.
+- Bridge dispatch checks authorization, local/central dependencies, inputs, outputs
+  and cooperative timeouts. Secret-dependent calls fail unavailable without a resolver.
+- MCP discovery/call adapter uses an injected client and reviewed host bindings;
+  discovery never grants execution authority. MCP calls use the same Bridge checks.
+- Trace events contain identity/status/error codes, never payloads or raw exceptions.
+- Added regression/evaluation cases, end-to-end inert dispatch tests and documentation.
+- Expanded CI to Phase 2 branches; all six Python packages ship typing markers;
+  source distributions include regression fixtures and Skill sample data.
 
 ## In Progress
 
-No implementation remains in progress. The branch is pushed and CI passed.
-Opening the PR against main is the final delivery step; locate it by head branch
-`phase-1/implementation`. Do not merge it.
+Implementation and verification are complete for this slice; the branch is pushed
+and stacked review PR #5 (base `phase-1/implementation`) is open. Claude Code
+reviewed both PRs on 2026-09-20 and posted findings as PR comments; three confirmed
+PR #5 findings were fixed in commit `2b0b7a8` (dot-command fail-closed divergence
+pinned by tests and the migration record; distinct `mcp_duplicate_tool_names`
+failure; `no_default_command` failure code). Remaining review findings are recorded
+on the PRs as follow-ups. Merging was attempted per the owner's instruction but is
+blocked for coding agents by the permission policy (self-approval); the owner must
+merge PR #4, retarget PR #5 to `main`, then merge PR #5. No production service,
+transport, model or capability was invoked.
 
 ## Remaining
 
-- Human review of the Phase 1 API and merge decision.
-- Phase 2: pinned-source characterization tests, then a narrow routing adapter.
-- All production runtimes, Registry/storage, authorization/approval enforcement,
-  secret resolution, UI, provider integrations, DUT/instrument control, n8n,
-  specialist agents and large migrations remain outside this phase.
+- Review this slice and resolve its Phase 1 PR dependency before merging.
+- Concrete MCP transport/session/auth adapters and model providers remain external;
+  only injected fakes are exercised. No live integration/parity is claimed.
+- Upload/persistence/file resolution, production source tools, full workflow engine,
+  channel/UI servers, secret resolution, production identity/RBAC and specialist
+  agents remain separate work. No source capability is deprecated by this slice.
+- Characterize the specific production source tool selected for the next adapter;
+  do not treat command routing parity as end-to-end production parity.
 
 ## Architecture decisions made
 
-- Follow the active phase specification: interfaces plus a metadata-only proof;
-  no reasoning loop or execution engine. No architecture redesign was needed.
-- Closed Pydantic validation, frozen metadata, JSON boundary serialization and
-  Registry snapshots. Identity is exact namespace/name/full SemVer; no latest solver.
-- Namespace, owner and visibility remain independent. Visibility is fixture filtering,
-  not production access control. Review claims are not authenticated signatures.
-- Business review, technical policy and runtime authorization are separate;
-  publication and Bridge advertisement never grant execution permission.
-- Required central services must agree with `central_required`. The proof requires
-  no central service or secrets and verifies installed local capabilities.
-- SecretRef is symbolic only. Recognizable-secret scanning is a practical guard,
-  not a comprehensive secret detection product.
-- ADAPT neutral source boundaries; REWRITE only metadata Registry storage because
-  source registries import executable code and serve a different plane. No production
-  source behavior was copied, replaced or deprecated. See the plan for source trees.
+- ADAPT source command precedence, aliases and raw args into typed route intent;
+  WRAP MCP list/call behind a client protocol; retain source production implementations.
+- Unknown explicit commands fail closed. No implicit function-name execution, fuzzy
+  cross-scope selection, auto-import, guessed path/url/query arguments or silent kwargs
+  dropping. These intentional differences are documented in the migration record.
+- Skill manifests are procedures and bindings; executable handlers are installed
+  explicitly in the Personal Engineering/Bridge plane. Team Registry stays metadata-only.
+- Namespace, owner, visibility, publication, review and runtime permission stay separate.
+  Neither technical approval metadata nor discovery authorizes execution.
+- LocalPolicy grants are trusted host configuration, never request/model/asset data.
+  Host code must authenticate the actor. This is not a production authentication server
+  or a security boundary against hostile in-process Python code.
+- Regex rules are trusted reviewed installation configuration, not untrusted user/model
+  input. No regex sandbox is provided. Model prompts include installed Skill guidance,
+  but no attachment names/refs/content automatically.
+- Model routing makes at most one call; the synchronous provider owns its I/O timeout.
+  Async execution timeouts require cooperative cancellation and cannot undo side effects.
+- No automatic retry of handlers. Availability is a host-provided snapshot, not a probe.
 
 ## Exact verification commands and results
 
-Repository root, Windows, Python 3.12.14; Pydantic 2.13.5, pytest 9.1.1,
-Ruff 0.16.8 and mypy 1.20.2:
+Run from repository root with the existing .venv (Windows, Python 3.12.14).
 
 ```powershell
-.venv/Scripts/python.exe -m pip install -e '.[dev]'
-# PASS: editable package and tools installed
-.venv/Scripts/python.exe -m pytest
-# PASS: 52 tests, no warnings
+.venv/Scripts/python.exe -m pytest tests/test_source_routing.py -q
+# PASS: 13 source characterization tests
+.venv/Scripts/python.exe -m pytest -q
+# PASS: 112 tests, including all 52 Phase 1 tests
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 20 source/test files
-.venv/Scripts/python.exe -m build
-# PASS: sdist and wheel (wheel built from sdist)
+# PASS: 29 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS: no broken requirements
-.venv/Scripts/python.exe -m venv .scratch/wheel-env
-.scratch/wheel-env/Scripts/python.exe -m pip install dist/agentic_engineering_platform-0.1.0-py3-none-any.whl
-# PASS: clean installation
+.venv/Scripts/python.exe -m build
+# PASS: source distribution and wheel
 .scratch/wheel-env/Scripts/python.exe -m pip install --no-deps --force-reinstall dist/agentic_engineering_platform-0.1.0-py3-none-any.whl
-# PASS: final rebuilt wheel installed
-.scratch/wheel-env/Scripts/python.exe -I -c "import agent.registry, capabilities.contracts, common.assets, knowledge.contracts, models.contracts, workflow.proof; print(agent.registry.__file__)"
-# PASS: imports from wheel-env/Lib/site-packages, not source tree
+# PASS: non-editable wheel installed
+.scratch/wheel-env/Scripts/python.exe -I -c "import agent.routing, agent.skills, capabilities.runtime, capabilities.mcp, workflow.dispatch; print(agent.routing.__file__)"
+# PASS: imports resolve from wheel-env/Lib/site-packages
 git diff --check
 # PASS
 ```
 
-GitHub CI passed on implementation commit `0c51a3a9645c1b6b10603b299a209cfa374539b8`:
-[Foundation verification run 35501715373](https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35501715373).
-The subsequent handoff-only commit changes no implementation or verification configuration.
+The new routing and dispatch tests were first run before implementation and failed
+on missing modules as expected. Subsequent lint/type findings were fixed; no check
+failure was waived.
+The first Phase 2 CI run exposed a Windows locale-dependent JSON read in the
+source-characterization harness (three Chinese cases failed). The read now explicitly
+uses UTF-8; the existing multilingual cases are the regression coverage.
 
-Initial sandbox network-restricted install/build attempts failed, then passed with
-approved network access. Initial lint/type findings were fixed. A sandbox read of
-the elevated wheel failed; approved final wheel reinstall/import checks passed.
-No failures were waived. Final architecture review found no provider SDK,
-filesystem/network/process execution, secret backend or production side effects in src.
+All four Windows/Linux, Python 3.11/3.12 CI jobs passed on implementation commit
+`352faefd515fa88cd645583ee4f617796a7271fe`:
+[Platform verification run 35509190087](https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35509190087).
+The following handoff-only commit changes no implementation or verification configuration.
 
-## Known issues / limits
+Takeover reconciliation on 2026-09-20 (commit `6214f1a`): re-ran pytest (112 passed),
+`ruff check`, `ruff format --check`, `mypy` and `git diff --check` locally — all pass;
+confirmed CI success on the branch tip. Found the stacked PR had not actually been
+opened despite the previous handoff describing it as the final step, and opened PR #5.
 
-- In-memory Registry is unauthenticated; do not expose it as a team service.
-- Arbitrary secrets disguised as normal prose cannot be reliably detected.
-- Contracts are version 0.1; no compatibility resolver, signed review verification
-  or execution enforcement is claimed.
-- Source characterization is still required before migration. Foundation tests do
-  not claim source behavioral parity.
+After review fixes (commit `2b0b7a8`): pytest 116 passed (4 new regression tests),
+ruff check/format, mypy and `git diff --check` all pass locally.
+
+## Known issues / limitations
+
+- Cooperative deadlines are not hard process isolation; do not install blocking or
+  cancellation-suppressing production handlers without a stronger execution boundary.
+- Runtime approval references are preconfigured policy evidence, not signed or
+  per-request cryptographic approvals. Production identity/approval infrastructure is absent.
+- No provider/MCP transport is installed by default. Adapter clients must enforce their
+  protocol, local-only model requirements and transport authentication themselves.
+- No full source migration, production side effect, source retirement or live-device
+  verification is claimed. In-memory Registry remains unauthenticated.
 
 ## Next Recommended Action
 
-Review the Phase 1 PR against `docs/phases/PHASE_1_FOUNDATION.md`. After review and
-human-controlled merge, start Phase 2 with characterization tests for deterministic
-routing in `telegram-local-agent/core/task_router.py`.
+The repository owner merges PR #4 (merge commit, subject style "Merge Phase 1 …"),
+retargets PR #5 to `main` (automatic if the `phase-1/implementation` branch is
+deleted on merge), confirms CI on the retargeted PR and merges PR #5. Review
+evidence is posted on both PRs. Coding agents must not perform these merges.
+After both merges, select one real source capability for a separate
+characterization-backed adapter from the latest `main`; preserve the shared
+Bridge policy path.

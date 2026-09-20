@@ -18,6 +18,16 @@ class TraceIdentifiers(Contract):
     parent_span_id: Symbol | None = None
 
 
+class AttachmentRef(Contract):
+    """Opaque channel-neutral attachment metadata; resolution belongs to the Bridge."""
+
+    file_id: Symbol
+    filename: Text
+    resource_ref: Symbol
+    size_bytes: int = Field(ge=0, strict=True)
+    media_type: Text
+
+
 class RequestContext(Contract):
     trace: TraceIdentifiers
     actor: Symbol
@@ -25,6 +35,7 @@ class RequestContext(Contract):
     message: Text
     channel: Symbol
     session_id: Symbol | None = None
+    attachments: tuple[AttachmentRef, ...] = ()
 
 
 class RouteDecision(Contract):
