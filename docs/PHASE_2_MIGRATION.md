@@ -36,8 +36,39 @@ both the original excerpt and the adapted routing layer.
   can summarize deterministic tool results with Ollama; that is deliberately omitted.
 - A host policy grant, input validation and explicit execution approval (when required)
   are checked at every dispatch, including MCP. No publication/review bypass exists.
-- Provider and transport implementations, source production tools, HTML channel output,
+- Provider and transport implementations, source production tools (except
+  `tools/file_tools.py::read_file`, adapted below), HTML channel output,
   reload/config discovery and file persistence are not migrated or deprecated.
+
+## First production tool adaptation — `tools/file_tools.py::read_file`
+
+Decision: ADAPT into `src/capabilities/files.py` as the read-only
+`filesystem/read-file` capability dispatched through the shared Bridge policy path
+(default-deny grant with permissions, policy reference and execution approval
+reference). `tests/fixtures/source_file_tools.txt` pins a verbatim excerpt (imports,
+`read_file`, `_fmt_size`, `_extract_path`); the fixtures README records full-source
+and excerpt checksums. Regression tests compare adapter outcomes against the pinned
+source oracle on the same files.
+
+Preserved: the source check order (existence, file kind, extension allowlist,
+500 KB size cap), the exact encoding fallback chain (`utf-8`, `utf-8-sig`, `big5`,
+`gbk`, `latin-1`) and `max_lines` truncation. Informative non-crash outcomes remain
+results, adapted from channel strings to a typed outcome enum. The terminal latin-1
+fallback decodes any byte sequence, so the source's undecodable branch is unreachable
+and has no adapted outcome. Because `utf-8` precedes `utf-8-sig`, a UTF-8 BOM is
+retained in the decoded content exactly as in the source; the quirk is pinned by
+tests rather than silently fixed.
+
+Intentional differences: no `_extract_path` natural-language path guessing (an
+explicit validated `path` is required); reads are confined to a host-configured
+`allowed_root` (trusted host configuration, checked before existence so nothing
+about outside paths is revealed — the source read any host path); `max_lines` gains
+an upper bound of 10,000 (the source accepted any value); blocking filesystem I/O
+runs in a worker thread so the Bridge's cooperative timeout stays effective; no
+HTML/emoji channel formatting; no silent `**kwargs` acceptance; and unexpected OS
+errors surface as the typed `handler_error` failure without exception text. The
+remaining `file_tools` functions and other production tool modules are not migrated
+by this slice.
 
 Rollback: remove the new routing/dispatch modules and retain Phase 1 contracts. Source
 repositories remain untouched. These changes do not establish full production parity.

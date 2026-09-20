@@ -1,0 +1,17 @@
+[
+  {
+    "case_id": "phase2-read-file-dot-command",
+    "category": "deterministic",
+    "request": {
+      "trace": {"trace_id": "trace-files", "request_id": "request-read", "span_id": "span-read"},
+      "actor": "engineer", "namespace": "filesystem", "channel": "evaluation",
+      "message": "files.read C:/notes/summary.txt"
+    },
+    "expected_route": {
+      "kind": "capability", "target": {"namespace": "filesystem", "name": "read-file", "version": "1.0.0"},
+      "reason": "Known installed route"
+    },
+    "forbidden_side_effects": ["write", "execute", "external_side_effect"],
+    "assertions": ["no_model_call", "no_execution", "exact_scoped_target"]
+  }
+]

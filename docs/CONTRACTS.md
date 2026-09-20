@@ -77,7 +77,10 @@ No source command parser or runtime is migrated in Phase 1.
   handler. Missing secrets fail as unavailable (no resolver). Host-supplied service
   availability is a snapshot, not an active probe. There are no automatic retries.
   Async timeout uses cooperative cancellation; it cannot undo a side effect or
-  preempt blocking/suppressed-cancellation code. No production handlers are shipped.
+  preempt blocking/suppressed-cancellation code. The one shipped production handler
+  (`filesystem/read-file`) therefore offloads its blocking filesystem I/O to a worker
+  thread and confines reads to a host-configured root; any future production handler
+  must do the equivalent.
 - `ExecutionEvent` stores trace/target/status/error code only, never arguments,
   attachment content, provider errors or returned data. Results retain caller traces.
 - `MCPAdapter` wraps a host-supplied `MCPClient` with bounded discovery and explicit

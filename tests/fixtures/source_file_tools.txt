@@ -1,0 +1,80 @@
+import glob
+import os
+from pathlib import Path
+
+
+def read_file(path="", task="", max_lines=100, **kwargs) -> str:
+    if not path:
+        path = _extract_path(task) or ""
+    if not path:
+        return "❌ 請提供檔案路徑"
+
+    TEXT_EXTENSIONS = {
+        ".txt", ".md", ".py", ".js", ".ts", ".json", ".yaml", ".yml",
+        ".toml", ".ini", ".cfg", ".env", ".html", ".css", ".xml",
+        ".csv", ".log", ".sh", ".bat", ".ps1", ".sql", ".rs", ".go",
+        ".java", ".c", ".cpp", ".h", ".rb", ".php",
+    }
+    try:
+        p = Path(path)
+        if not p.exists():
+            return f"檔案不存在：{path}"
+        if not p.is_file():
+            return f"這不是一個檔案：{path}"
+
+        if p.suffix.lower() not in TEXT_EXTENSIONS:
+            return (
+                f"⚠️ 無法讀取二進位檔案：{p.name}（{_fmt_size(p.stat().st_size)}）\n"
+                f"支援格式：{', '.join(sorted(TEXT_EXTENSIONS))}"
+            )
+        if p.stat().st_size > 500_000:
+            return f"⚠️ 檔案太大（{_fmt_size(p.stat().st_size)}），請指定較小的檔案"
+
+        content = None
+        for enc in ["utf-8", "utf-8-sig", "big5", "gbk", "latin-1"]:
+            try:
+                content = p.read_text(encoding=enc)
+                break
+            except UnicodeDecodeError:
+                continue
+        if content is None:
+            return "❌ 無法解碼檔案（嘗試了多種編碼）"
+
+        lines      = content.splitlines()
+        total      = len(lines)
+        max_lines  = int(max_lines)
+        truncated  = ""
+        if total > max_lines:
+            content   = "\n".join(lines[:max_lines])
+            truncated = f"\n\n... 檔案共 {total} 行，僅顯示前 {max_lines} 行"
+
+        return (
+            f"📄 <b>{p.name}</b>（{_fmt_size(p.stat().st_size)}，{total} 行）\n\n"
+            f"<pre>{content}</pre>{truncated}"
+        )
+    except PermissionError:
+        return f"❌ 無權讀取：{path}"
+    except Exception as e:
+        return f"❌ 讀取失敗：{e}"
+
+
+def _fmt_size(size: int) -> str:
+    for unit in ["B", "KB", "MB", "GB"]:
+        if size < 1024:
+            return f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} TB"
+
+
+def _extract_path(task: str) -> str:
+    """從自然語言中嘗試抓出路徑"""
+    import re
+    for pat in [
+        r'[A-Z]:[\\\/][^\s，。,]+',
+        r'\/[^\s，。,]+',
+        r'[\w\-]+(?:[\\\/][\w\-\.]+)+',
+    ]:
+        m = re.search(pat, task)
+        if m:
+            return m.group().rstrip("/\\,。，")
+    return ""
