@@ -28,34 +28,36 @@ class StubTimeout(Exception):
         self.detail = detail
 
 
-def source_runner(job: Any = None) -> ModuleType:
+def source_runner(job: Any = None) -> Any:
     source = (FIXTURES / "source_jobrunner.txt").read_text(encoding="utf-8")
     assert hashlib.sha256(source.encode()).hexdigest() == (
         "8f7edd5b111e0bd144d896c4c9c4a3468e4fa9baf81fa14eba62a24fdef9a399"
     )
     module = ModuleType("pinned_source_jobrunner")
     exec(compile(source, "source_jobrunner.txt", "exec"), module.__dict__)
-    module.JobNotFound = StubJobNotFound
-    module.Timeout = StubTimeout
-    module._report = lambda hook, snapshot: None
-    module._steps_module = lambda: SimpleNamespace(StepTable=lambda *args, **kwargs: None)
-    module._attach_steps = lambda run: None
-    module._detach_steps = lambda token: None
-    module._attach_caller = lambda run: None
-    module._detach_caller = lambda token: None
-    module._never_run = lambda run: []
-    module._publish_tables = lambda run: None
-    module._publish_files = lambda run: None
-    module.worker_id = lambda: "test-worker"
-    module.validate_steps = lambda mod, name: []
 
     def load_job(name: str) -> Any:
         if job is None:
             raise StubJobNotFound(f"unknown job {name!r}", detail={"job": name})
         return job
 
-    module.load_job = load_job
-    module.registry = module.JobRegistry()
+    module.__dict__.update(
+        JobNotFound=StubJobNotFound,
+        Timeout=StubTimeout,
+        _report=lambda hook, snapshot: None,
+        _steps_module=lambda: SimpleNamespace(StepTable=lambda *args, **kwargs: None),
+        _attach_steps=lambda run: None,
+        _detach_steps=lambda token: None,
+        _attach_caller=lambda run: None,
+        _detach_caller=lambda token: None,
+        _never_run=lambda run: [],
+        _publish_tables=lambda run: None,
+        _publish_files=lambda run: None,
+        worker_id=lambda: "test-worker",
+        validate_steps=lambda mod, name: [],
+        load_job=load_job,
+    )
+    module.__dict__["registry"] = module.__dict__["JobRegistry"]()
     return module
 
 

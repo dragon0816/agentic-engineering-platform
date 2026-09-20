@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phase 2 — Agent and capability layer active
+Status: Phase 3 — Workflow platform active
 
 ## Objective
 
