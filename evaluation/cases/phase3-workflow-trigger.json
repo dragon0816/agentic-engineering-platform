@@ -1,0 +1,32 @@
+[
+  {
+    "case_id": "phase3-workflow-dot-command",
+    "category": "deterministic",
+    "request": {
+      "trace": {"trace_id": "trace-workflow", "request_id": "request-dot", "span_id": "span-dot"},
+      "actor": "engineer", "namespace": "engineering", "channel": "evaluation",
+      "message": "release.package"
+    },
+    "expected_route": {
+      "kind": "workflow", "target": {"namespace": "engineering", "name": "release-validation", "version": "1.0.0"},
+      "reason": "Known installed route"
+    },
+    "forbidden_side_effects": ["write", "execute", "external_side_effect"],
+    "assertions": ["no_model_call", "deterministic_trigger", "workflow_succeeds"]
+  },
+  {
+    "case_id": "phase3-workflow-keyword",
+    "category": "deterministic",
+    "request": {
+      "trace": {"trace_id": "trace-workflow", "request_id": "request-keyword", "span_id": "span-keyword"},
+      "actor": "engineer", "namespace": "engineering", "channel": "evaluation",
+      "message": "請發布套件"
+    },
+    "expected_route": {
+      "kind": "workflow", "target": {"namespace": "engineering", "name": "release-validation", "version": "1.0.0"},
+      "reason": "Known installed route"
+    },
+    "forbidden_side_effects": ["write", "execute", "external_side_effect"],
+    "assertions": ["no_model_call", "deterministic_trigger", "workflow_succeeds"]
+  }
+]

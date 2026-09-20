@@ -1,0 +1,46 @@
+[
+  {
+    "metadata": {
+      "identity": {
+        "namespace": "engineering",
+        "name": "release-workflow-skill",
+        "version": "1.0.0"
+      },
+      "owner": {
+        "type": "team",
+        "id": "migration"
+      },
+      "visibility": "private",
+      "lifecycle": "draft"
+    },
+    "alias": "release",
+    "instructions": "Trigger the governed release-validation workflow. The workflow grants no authority: every step is authorized by the local Bridge policy.",
+    "commands": [
+      {
+        "name": "package",
+        "kind": "workflow",
+        "target": {
+          "namespace": "engineering",
+          "name": "release-validation",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "name": "check",
+        "kind": "capability",
+        "target": {
+          "namespace": "engineering",
+          "name": "validate-release",
+          "version": "1.0.0"
+        }
+      }
+    ],
+    "rules": [
+      {
+        "pattern": "(?:發布|發行|release).{0,20}(?:套件|package)",
+        "command": "package"
+      }
+    ],
+    "default_command": "package"
+  }
+]

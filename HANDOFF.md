@@ -2,45 +2,46 @@
 
 ## Current phase and branch
 
-Phase 3 — Workflow platform, first slice (deterministic workflow engine).
-Branch: `phase-3/workflow-engine`, based on `main` commit `c45515e`.
+Phase 3 — Workflow platform, second slice (Gateway dispatch through one contract).
+Branch: `phase-3/gateway-dispatch`, based on `main` commit `ac2e312`.
 `main` contains the merged Phase 1 baseline (PR #4), the Phase 2
-routing/dispatch/MCP slice (PR #6, which superseded auto-closed PR #5) and the
-`filesystem/read-file` adapter (PR #7). Review evidence for those slices lives
-in the PR #4, #5 and #7 comment threads.
+routing/dispatch/MCP slice (PR #6, which superseded auto-closed PR #5), the
+`filesystem/read-file` adapter (PR #7) and the Phase 3 workflow engine (PR #8).
+Review evidence lives in the PR #4, #5, #7 and #8 comment threads.
 
 ## Goal
 
-Adapt the run-tracking and execution semantics of the pinned `rs_workflow_system`
-Host Bridge job runner into a typed deterministic `WorkflowEngine` that executes
-installed `WorkflowManifest` steps through the shared Bridge policy path. Scope
-and acceptance: `docs/phases/PHASE_3_WORKFLOW.md`; source decisions:
+Wire routed requests to execution through one Gateway contract so deterministic
+commands and model-selected (Agent) routes trigger the same capability/workflow
+paths, satisfying the Roadmap Phase 3 exit criterion's trigger requirement. Scope
+and acceptance: `docs/phases/PHASE_3_WORKFLOW.md` (slice 2); source decisions:
 `docs/PHASE_3_MIGRATION.md`.
 
 ## Completed
 
-- Pinned `rs_workflow_system` commit `896046e8fe2170d21f9213e56e5ce2f93c05ba43`;
-  inspected the job runner, routers and services. Source unchanged.
-- Committed a checksum-verified excerpt of the job runner's run-tracking core and
-  7 characterization tests (bounded history/logs, caller-wait timeout that never
-  finalizes a run, no ghost runs, structured failure recording, non-dict result
-  wrapping) before implementing.
-- Implemented `src/workflow/engine.py`: `InstalledWorkflows` (explicit exact-version
-  installation, no discovery or code import) and `WorkflowEngine` (sequential step
-  dispatch through `BridgeExecutor`, per-step LocalPolicy authorization, pre-flight
-  secret/connectivity checks without ghost runs, 50-run history, 5000-line capped
-  logs with one truncation marker, caller-wait timeout overwritten by the final
-  state, logs free of arguments/payloads/exception text).
-- 10 engine regression tests mirror the characterized semantics with inert doubles.
-- Updated ROADMAP/ARCHITECTURE status lines and the CLAUDE.md active-phase pointer
-  to Phase 3.
+- Slice 1 (merged as PR #8): characterized and adapted the pinned
+  `rs_workflow_system` job runner (`896046e`) into `src/workflow/engine.py` —
+  explicit workflow installation, sequential step dispatch through
+  `BridgeExecutor` with per-step LocalPolicy authorization, comprehensive
+  pre-flight checks without ghost runs, 50-run history, 5000-line capped logs,
+  caller-wait timeouts overwritten by the final state, and final-state recording
+  on cancellation. CI branch filter extended to `phase-*/**`.
+- Slice 2 (this branch): `src/agent/gateway.py` — `Gateway.handle` pairs a
+  routing outcome with exactly the execution its decision names (needs-input
+  returns unexecuted; capability via Bridge; workflow via engine), enforced by
+  the `GatewayResult` contract validator. The Gateway adds no authority and
+  holds no domain logic; a denied route fails exactly as a direct invocation.
+- Added the `release` Skill manifest (workflow and capability command bindings)
+  and `evaluation/cases/phase3-workflow-trigger.json`: a dot command and a
+  Chinese keyword each trigger a workflow run deterministically with zero model
+  calls; a model-selected route is proven to dispatch through the same contract.
+- 7 gateway regression tests; phase spec extended with slice 2 requirements.
 
 ## Remaining
 
 - Later Phase 3 slices: step argument chaining and per-step inputs,
-  retry/idempotency, resumable state, progress streaming, wiring deterministic
-  command and Agent workflow routes to the engine through one contract, and the
-  optional n8n adapter invoking that same contract.
+  retry/idempotency, resumable state, progress streaming, and the optional n8n
+  adapter invoking the same Gateway/engine contracts.
 - Host Bridge HTTP surface, terminal/excel/email/browser capability adapters,
   production jobs, scheduling and persistence are not migrated.
 - Follow-ups recorded in PR #4/#5 review comments remain open (bounded
@@ -67,24 +68,23 @@ Run from repository root with the existing .venv (Windows, Python 3.12.14).
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q
-# PASS: 155 tests (138 prior + 7 job-runner characterization + 10 engine)
+# PASS: 164 tests (157 prior + 7 gateway)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 35 source/test files
+# PASS: 37 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
-# PASS; source_jobrunner.txt ships in the sdist
+# PASS; the release Skill manifest and phase3 evaluation cases ship in the sdist
 git diff --check
 # PASS
 ```
 
-Characterization tests were written and run against the pinned excerpt before the
-engine was implemented. No production service, transport, model, job or n8n
-instance was invoked; tests use inert doubles only.
+No production service, transport, model, job or n8n instance was invoked; tests
+use inert doubles only.
 
 ## Known issues / limitations
 
@@ -97,8 +97,7 @@ instance was invoked; tests use inert doubles only.
 
 ## Next Recommended Action
 
-Open the review PR for `phase-3/workflow-engine` against `main`, run the review,
-and after merge continue with the next Phase 3 slice: wire `RouteDecision`
-workflow intents from the Phase 2 router to `WorkflowEngine.execute` through one
-contract, with an evaluation case proving a deterministic command triggers a
-workflow without a model call.
+Review and merge the `phase-3/gateway-dispatch` PR against `main`. After merge,
+continue Phase 3 with step argument chaining and per-step inputs (the engine
+currently passes the same run arguments to every step), then retry/idempotency
+and resumable state per the phase specification.
