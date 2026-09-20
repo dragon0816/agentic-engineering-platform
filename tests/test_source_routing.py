@@ -71,3 +71,11 @@ def test_source_unknown_explicit_skill_falls_through() -> None:
     router, model = source_router()
     asyncio.run(router.route("unknown.command"))
     model.assert_awaited_once()
+
+
+def test_source_dot_shaped_unknown_skill_can_keyword_route() -> None:
+    """A failed dot lookup retries the keyword table before any model in the source."""
+    router, model = source_router()
+    asyncio.run(router.route("build.package"))
+    model.assert_not_awaited()
+    assert router._dispatch_skill.call_args.args[1] == "build_package"

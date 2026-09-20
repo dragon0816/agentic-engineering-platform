@@ -62,7 +62,9 @@ def test_adapted_routes_match_source_without_model(case: dict[str, Any]) -> None
     assert model.calls == []
 
 
-@pytest.mark.parametrize("message", ["unknown.command", "run_testing.unknown"])
+# "build.package" pins an intentional source difference: the source retried a failed
+# dot lookup against the keyword table; the adaptation fails closed on the same message.
+@pytest.mark.parametrize("message", ["unknown.command", "run_testing.unknown", "build.package"])
 def test_unknown_explicit_command_never_falls_through(message: str) -> None:
     model = FakeModel()
     result = RequestRouter(CommandRouter(skills()), model=model).route(request(message))
@@ -147,6 +149,17 @@ def test_direct_skill_selection_uses_declared_default() -> None:
     result = CommandRouter(skills()).direct(request("ambiguous"), "run_testing")
     assert result.decision.target is not None
     assert result.decision.target.name == "run-testing"
+
+
+def test_direct_selection_without_default_or_rule_match_needs_input() -> None:
+    registry = SkillRegistry()
+    data = skills().discover("legacy")[0].model_dump()
+    data["rules"] = []
+    data["default_command"] = None
+    registry.register(SkillManifest.model_validate(data))
+    result = CommandRouter(registry).direct(request("unrelated"), data["alias"])
+    assert result.decision.kind == "needs_input"
+    assert result.failure is not None and result.failure.code == "no_default_command"
 
 
 def test_workflow_route_remains_intent_without_model_selection() -> None:

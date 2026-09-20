@@ -84,10 +84,11 @@ class CommandRouter:
             ),
             skill.default_command,
         )
-        command = next((item for item in skill.commands if item.name == name), None)
-        return (
-            selected(context, command, {}) if command else needs_input(context, "unknown_command")
-        )
+        if name is None:
+            return needs_input(context, "no_default_command")
+        # Manifest validation guarantees rules and default_command reference declared commands.
+        command = next(item for item in skill.commands if item.name == name)
+        return selected(context, command, {})
 
     def candidates(self, namespace: str) -> tuple[CommandBinding, ...]:
         return tuple(

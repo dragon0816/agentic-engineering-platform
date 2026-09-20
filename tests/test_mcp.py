@@ -82,6 +82,16 @@ def test_mcp_error_is_a_failed_capability_result() -> None:
     assert asyncio.run(bridge.execute(invocation())).status == "failed"
 
 
+def test_duplicate_advertised_tool_names_are_a_distinct_failure() -> None:
+    class Duplicated(FakeMCP):
+        async def list_tools(self) -> tuple[MCPTool, ...]:
+            tool = MCPTool(name="count", description="Pure remote fixture", input_schema={})
+            return (tool, tool)
+
+    result = asyncio.run(MCPAdapter(Duplicated()).discover())
+    assert result.failure is not None and result.failure.code == "mcp_duplicate_tool_names"
+
+
 def test_discovery_timeout_is_bounded() -> None:
     class Slow(FakeMCP):
         async def list_tools(self) -> tuple[MCPTool, ...]:

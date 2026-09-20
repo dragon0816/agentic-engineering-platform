@@ -48,9 +48,6 @@ class MCPAdapter:
         try:
             tools = await asyncio.wait_for(self.client.list_tools(), self.timeout_seconds)
             checked = TypeAdapter(tuple[MCPTool, ...]).validate_python(tools)
-            if len({tool.name for tool in checked}) != len(checked):
-                raise ValueError("duplicate remote tool names")
-            return MCPDiscovery(tools=checked)
         except TimeoutError:
             return MCPDiscovery(
                 failure=Failure(code="mcp_discovery_timeout", message="MCP discovery timed out")
@@ -61,6 +58,14 @@ class MCPAdapter:
                     code="mcp_discovery_failed", message="MCP discovery did not complete"
                 )
             )
+        if len({tool.name for tool in checked}) != len(checked):
+            return MCPDiscovery(
+                failure=Failure(
+                    code="mcp_duplicate_tool_names",
+                    message="MCP advertisement repeated a tool name",
+                )
+            )
+        return MCPDiscovery(tools=checked)
 
     async def install(
         self,

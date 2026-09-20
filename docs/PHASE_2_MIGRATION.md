@@ -24,6 +24,10 @@ both the original excerpt and the adapted routing layer.
   dot-command whitespace handling, raw args and actor/file context.
 - Unknown explicit skills/commands fail closed as needs-input rather than LLM fallback
   or implicit function-name execution. Scoped target selection must be unambiguous.
+  This includes dot-shaped messages: the source retried e.g. `build.package` against
+  the keyword table after a failed skill lookup and could deterministically route it;
+  the adaptation returns needs-input so an explicit-command-shaped typo can never
+  silently select a different skill. Both behaviors are pinned by regression tests.
 - No fuzzy selection across namespaces or versions. Install a specific alias per namespace.
 - Do not guess `path`, `url` or `query` from raw arguments, silently drop unexpected
   parameters, or copy config/user dictionaries into tool arguments. Host-provided
