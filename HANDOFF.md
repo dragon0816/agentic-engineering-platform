@@ -26,8 +26,9 @@ The implementation slice is complete locally. Do not merge without human review.
 
 ## In Progress
 
-Push the verified branch, observe CI and open a PR against main. Record CI below
-before opening the PR; do not merge it.
+No implementation remains in progress. The branch is pushed and CI passed.
+Opening the PR against main is the final delivery step; locate it by head branch
+`phase-1/implementation`. Do not merge it.
 
 ## Remaining
 
@@ -82,9 +83,13 @@ Ruff 0.16.8 and mypy 1.20.2:
 # PASS: final rebuilt wheel installed
 .scratch/wheel-env/Scripts/python.exe -I -c "import agent.registry, capabilities.contracts, common.assets, knowledge.contracts, models.contracts, workflow.proof; print(agent.registry.__file__)"
 # PASS: imports from wheel-env/Lib/site-packages, not source tree
- git diff --check
+git diff --check
 # PASS
 ```
+
+GitHub CI passed on implementation commit `0c51a3a9645c1b6b10603b299a209cfa374539b8`:
+[Foundation verification run 35501715373](https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35501715373).
+The subsequent handoff-only commit changes no implementation or verification configuration.
 
 Initial sandbox network-restricted install/build attempts failed, then passed with
 approved network access. Initial lint/type findings were fixed. A sandbox read of
