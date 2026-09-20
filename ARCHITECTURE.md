@@ -493,6 +493,29 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 25. Personal Engineering Agents own reasoning/planning/capability selection; Bridges own local deterministic execution and resource access.
 26. Installed local capabilities should remain usable during temporary Team Platform outages when no central dependency is required.
 
+### Coding-agent-neutral development
+
+The development process follows the same replaceability principle as the runtime model layer: **coding agents are replaceable workers; the repository is persistent project state**. Codex, Claude Code and human engineers may alternate on the same implementation without depending on private conversation history.
+
+Architecture, phase specifications, stable contracts, tests, repository Skills, commits and `HANDOFF.md` define the durable development context. Agent-specific entry files such as `AGENTS.md` and `CLAUDE.md` point to the same source-of-truth documents and engineering procedures rather than maintaining divergent workflows.
+
+~~~text
+                 GitHub Repository
+                       |
+      Architecture / Contracts / Tests
+             Skills / HANDOFF
+                       |
+          +------------+------------+
+          |            |            |
+        Codex      Claude Code     Human
+          |            |            |
+          +------------+------------+
+                       |
+                same branch / PR
+~~~
+
+A coding-agent handoff is complete only when repository state is reproducible, verification status is explicit and the next action is recorded. Conversation memory is never required to resume development.
+
 ## 9. Migration strategy
 
 Phase 0: architecture, contracts, migration inventory, including multi-agent extension points.
