@@ -4,7 +4,8 @@
 
 Phase 2 — Agent and capability layer, first reviewable implementation slice.
 Branch: `phase-2/implementation`, based on Phase 1 commit `006e5b6`.
-Phase 1 PR #4 remains open and unmerged. Phase 2 is a stacked PR against
+Phase 1 PR #4 remains open and unmerged. Phase 2 is stacked
+[PR #5](https://github.com/dragon0816/agentic-engineering-platform/pull/5) against
 `phase-1/implementation`; retarget after the Phase 1 merge is handled by a human.
 Do not merge either PR automatically.
 
@@ -42,9 +43,10 @@ characterized source behavior. Scope and acceptance are recorded in
 
 ## In Progress
 
-Implementation and verification are complete for this slice; the branch is pushed.
-Opening the stacked review PR is the final delivery step. Locate it by head branch
-`phase-2/implementation`. No production service, transport, model or capability was invoked.
+Implementation and verification are complete for this slice; the branch is pushed
+and stacked review PR #5 (base `phase-1/implementation`) is open. Delivery for this
+slice is complete; only human review remains. No production service, transport,
+model or capability was invoked.
 
 ## Remaining
 
@@ -117,6 +119,11 @@ All four Windows/Linux, Python 3.11/3.12 CI jobs passed on implementation commit
 [Platform verification run 35509190087](https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35509190087).
 The following handoff-only commit changes no implementation or verification configuration.
 
+Takeover reconciliation on 2026-09-20 (commit `6214f1a`): re-ran pytest (112 passed),
+`ruff check`, `ruff format --check`, `mypy` and `git diff --check` locally — all pass;
+confirmed CI success on the branch tip. Found the stacked PR had not actually been
+opened despite the previous handoff describing it as the final step, and opened PR #5.
+
 ## Known issues / limitations
 
 - Cooperative deadlines are not hard process isolation; do not install blocking or
@@ -130,6 +137,7 @@ The following handoff-only commit changes no implementation or verification conf
 
 ## Next Recommended Action
 
-Review the Phase 2 stacked PR against the phase specification and source-characterization
-record. After human review and resolution of PR #4, select one real source capability
-for a separate characterization-backed adapter; preserve the shared Bridge policy path.
+Human review of stacked PR #5 against `docs/phases/PHASE_2_AGENT_CAPABILITIES.md` and
+the source-characterization record, plus resolution of Phase 1 PR #4 (merge, then
+retarget #5 to `main`). After that, select one real source capability for a separate
+characterization-backed adapter; preserve the shared Bridge policy path.
