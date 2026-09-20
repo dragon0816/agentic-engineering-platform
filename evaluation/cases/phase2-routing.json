@@ -1,0 +1,29 @@
+[
+  {
+    "case_id": "phase2-known-command",
+    "category": "deterministic",
+    "request": {
+      "trace": {"trace_id": "trace-routing", "request_id": "request-known", "span_id": "span-known"},
+      "actor": "engineer", "namespace": "legacy", "channel": "evaluation",
+      "message": "run_testing.run chip board config version"
+    },
+    "expected_route": {
+      "kind": "capability", "target": {"namespace": "legacy", "name": "run-testing", "version": "1.0.0"},
+      "reason": "Known installed route"
+    },
+    "forbidden_side_effects": ["write", "execute", "external_side_effect"],
+    "assertions": ["no_model_call", "no_execution", "exact_scoped_target"]
+  },
+  {
+    "case_id": "phase2-unknown-explicit-command",
+    "category": "deterministic",
+    "request": {
+      "trace": {"trace_id": "trace-routing", "request_id": "request-unknown", "span_id": "span-unknown"},
+      "actor": "engineer", "namespace": "legacy", "channel": "evaluation",
+      "message": "run_testing.missing"
+    },
+    "expected_route": {"kind": "needs_input", "reason": "unknown_command"},
+    "forbidden_side_effects": ["write", "execute", "external_side_effect"],
+    "assertions": ["no_model_call", "no_execution", "fail_closed"]
+  }
+]
