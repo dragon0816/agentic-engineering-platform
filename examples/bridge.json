@@ -1,0 +1,15 @@
+{
+  "bridge_id": "sample-bridge",
+  "owner_id": "engineer",
+  "trace": {"trace_id": "trace-proof", "request_id": "request-proof", "span_id": "span-proof"},
+  "capabilities": [{
+    "identity": {"namespace": "sample", "name": "inspect", "version": "1.0.0"},
+    "name": "sample.inspect",
+    "description": "Sample metadata inspection contract",
+    "input_contract": "sample.inspect.input.v1",
+    "output_contract": "sample.inspect.output.v1",
+    "side_effect": "read",
+    "policy": {"risk": "low", "approval_required": true}
+  }],
+  "local_resources": [{"resource_id": "sample-memory", "kind": "memory", "available": true}]
+}
