@@ -1,103 +1,123 @@
-# Development Handoff
+# Handoff — Phase 3 workflow step inputs
 
-## Current phase and branch
-
-Phase 3 — Workflow platform, second slice (Gateway dispatch through one contract).
-Branch: `phase-3/gateway-dispatch`, based on `main` commit `ac2e312`.
-`main` contains the merged Phase 1 baseline (PR #4), the Phase 2
-routing/dispatch/MCP slice (PR #6, which superseded auto-closed PR #5), the
-`filesystem/read-file` adapter (PR #7) and the Phase 3 workflow engine (PR #8).
-Review evidence lives in the PR #4, #5, #7 and #8 comment threads.
+Updated: 2026-09-21 (Asia/Taipei).
+Branch: `phase-3/step-inputs`, based on `main` at `25a3105` (Gateway PR #9 already merged).
+Implementation commit: `dec744b`.
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/10 (open, not merged).
 
 ## Goal
 
-Wire routed requests to execution through one Gateway contract so deterministic
-commands and model-selected (Agent) routes trigger the same capability/workflow
-paths, satisfying the Roadmap Phase 3 exit criterion's trigger requirement. Scope
-and acceptance: `docs/phases/PHASE_3_WORKFLOW.md` (slice 2); source decisions:
-`docs/PHASE_3_MIGRATION.md`.
+Complete Phase 3 slice 3: explicit per-step inputs and prior-result chaining,
+following `docs/phases/PHASE_3_WORKFLOW.md`. Preserve the existing Gateway,
+Bridge policy, source-characterized runner semantics and legacy manifests.
 
 ## Completed
 
-- Slice 1 (merged as PR #8): characterized and adapted the pinned
-  `rs_workflow_system` job runner (`896046e`) into `src/workflow/engine.py` —
-  explicit workflow installation, sequential step dispatch through
-  `BridgeExecutor` with per-step LocalPolicy authorization, comprehensive
-  pre-flight checks without ghost runs, 50-run history, 5000-line capped logs,
-  caller-wait timeouts overwritten by the final state, and final-state recording
-  on cancellation. CI branch filter extended to `phase-*/**`.
-- Slice 2 (this branch): `src/agent/gateway.py` — `Gateway.handle` pairs a
-  routing outcome with exactly the execution its decision names (needs-input
-  returns unexecuted; capability via Bridge; workflow via engine), enforced by
-  the `GatewayResult` contract validator. The Gateway adds no authority and
-  holds no domain logic; a denied route fails exactly as a direct invocation.
-- Added the `release` Skill manifest (workflow and capability command bindings)
-  and `evaluation/cases/phase3-workflow-trigger.json`: a dot command and a
-  Chinese keyword each trigger a workflow run deterministically with zero model
-  calls; a model-selected route is proven to dispatch through the same contract.
-- 7 gateway regression tests; phase spec extended with slice 2 requirements.
+- Reconciled Claude's handoff with actual GitHub state: Phase 1/2, filesystem
+  adapter, workflow engine and Gateway PRs are already merged. Baseline: 164 tests.
+- Added `WorkflowStep`, `RunInput` and `StepInput` contracts. Identity-only steps
+  still receive all run arguments; explicit steps receive only their mapped fields.
+- Exact object-key / zero-based array-index selectors support run arguments or
+  earlier successful step result data. Empty paths select the whole source.
+  Invalid/self/future references are rejected before installation.
+- Missing run references return needs-input before a stored run exists. Missing
+  result references stop the run before the unresolved capability is dispatched.
+  Null remains a present value; Bridge validates the selected value's type.
+- Each step still enforces Bridge authorization, dependencies and input/output
+  validation. Chaining does not grant execution authority or resolve secrets.
+- Isolated manifest, argument and snapshot ownership so callers or handlers
+  cannot mutate inputs used by subsequent steps, including after a wait timeout.
+- Added 35 contract/runtime/integration cases (199 total tests). Gateway tests
+  exercise different contracts, deterministic dot/keyword triggers, model-selected
+  routing and denial of the second step. Existing evaluation cases are executed
+  against the composed chain with inert handlers and zero production side effects.
+- Updated contracts, Phase 3 requirements/plan, source-first decision and README.
+
+## In Progress
+
+- None in this implementation slice. PR #10 is ready for review; it has not been merged.
 
 ## Remaining
 
-- Later Phase 3 slices: step argument chaining and per-step inputs,
-  retry/idempotency, resumable state, progress streaming, and the optional n8n
-  adapter invoking the same Gateway/engine contracts.
-- Host Bridge HTTP surface, terminal/excel/email/browser capability adapters,
-  production jobs, scheduling and persistence are not migrated.
-- Follow-ups recorded in PR #4/#5 review comments remain open (bounded
-  `BridgeExecutor` event log, SkillRegistry re-parse cost, MCP install
-  round-trips, Review `not_required` semantics, generic top-level package names).
+- Review/merge this slice after remote verification.
+- Next Phase 3 slices: retry/idempotency, resumability, progress streaming and the
+  optional n8n adapter invoking the same Gateway/engine contracts.
+- No Host Bridge HTTP server, terminal/Excel/email/browser adapter, production job,
+  scheduler, database or persistence was added. Production source paths stay active.
+- Prior deferred reviews remain: bounded Bridge execution event history, repeated
+  SkillRegistry parsing, MCP installation round trips, Review `not_required`
+  semantics and generic top-level package names. Do not broaden this PR for them.
 
 ## Architecture decisions made
 
-- ADAPT job-runner run-tracking semantics; explicit installed manifests replace
-  `jobs/` directory scanning, lazy import and mtime reload. The engine never
-  imports job code.
-- Steps are governed capabilities: every step is independently authorized by
-  LocalPolicy through BridgeExecutor; the workflow itself grants no authority.
-- Caller-wait timeouts bound only the caller's wait (preserved from the source);
-  a timed-out run reports `failed`/`workflow_timeout` until the driving task
-  records the final state. Cooperative asyncio tasks replace threads; cancellation
-  is not attempted.
-- Logs carry identities, statuses and codes only; step results carry validated
-  outputs for the caller. Ops mirroring/step tables/x-ui are not migrated.
+- ADAPT the installed workflow engine, preserving the pinned runner behavior.
+  `_job_callable` in `tests/fixtures/source_jobrunner.txt` calls job code with
+  params; that boundary has no declarative input mapping to wrap. This slice adds
+  typed selection only, not migration or reimplementation of production job logic.
+- Structured steps coexist with identity-only steps; no implicit field merging,
+  expression evaluation, templates, static literal values or secret resolution.
+  Configuration values are supplied as run arguments. References stay within the
+  same run and target validated result data, never status/authorization metadata.
+- Input failures use `needs_input/workflow_input_missing`, with no payload or path
+  in errors/logs. This is terminal for a run, not an automatic retry/resume signal.
+- Registry publication, routing, business review and runtime authorization remain
+  separate. The engine dispatches every step through the same Bridge policy path.
+- Caller-wait timeout does not cancel execution; final outcomes overwrite it.
+  History/log bounds and cancellation handling from earlier slices are preserved.
 
 ## Exact verification commands and results
 
-Run from repository root with the existing .venv (Windows, Python 3.12.14).
+Run from repository root, Windows/Python 3.12.14:
 
 ```powershell
-.venv/Scripts/python.exe -m pytest -q
-# PASS: 164 tests (157 prior + 7 gateway)
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
+# PASS: 199 tests
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
-# PASS
+# PASS: 60 files already formatted (includes local ignored scratch files)
 .venv/Scripts/python.exe -m mypy
-# PASS: 37 source/test files
+# PASS: 39 source/test files
 .venv/Scripts/python.exe -m pip check
-# PASS
+# PASS: no broken requirements
 .venv/Scripts/python.exe -m build
-# PASS; the release Skill manifest and phase3 evaluation cases ship in the sdist
+# PASS: sdist and wheel
+.scratch/wheel-env/Scripts/python.exe -m pip install --no-deps --force-reinstall dist/agentic_engineering_platform-0.1.0-py3-none-any.whl
+# PASS: installed into the existing isolated wheel environment
+.scratch/wheel-env/Scripts/python.exe -I -c "import common.assets, workflow.engine, agent.gateway; from common.assets import WorkflowStep; s = WorkflowStep.model_validate({'capability': {'namespace': 'sample', 'name': 'count', 'version': '1.0.0'}, 'inputs': {'count': {'source': 'run', 'path': ['count']}}}); assert WorkflowStep.model_validate_json(s.model_dump_json()) == s; print(common.assets.__file__); print('wheel imports and structured step round-trip passed')"
+# PASS: imports came from wheel-env/Lib/site-packages, round trip passed
 git diff --check
 # PASS
 ```
 
-No production service, transport, model, job or n8n instance was invoked; tests
-use inert doubles only.
+Tests were written before implementation: after correcting the test fixture,
+10 expected failures and 13 passes confirmed structured steps were unsupported.
+The baseline normal pytest invocation passed 164 tests but reported a cache-write
+warning. The existing temp/cache directory ACLs require elevated test execution
+locally; final verification disables only the optional pytest cache provider.
+CI continues to run ordinary pytest on fresh Windows/Linux workers.
+
+Remote implementation verification:
+`gh api repos/dragon0816/agentic-engineering-platform/actions/runs/35521571558/jobs --jq '.jobs[] | {name,status,conclusion}'`
+confirmed all four jobs completed successfully: Windows/Linux, Python 3.11/3.12.
+Run: https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35521571558
+(implementation `dec744b9c9aa9c721159e90d1d9600a40450baa0`). This handoff-only
+follow-up triggers a fresh PR check; inspect PR #10 for the latest merge checks.
 
 ## Known issues / limitations
 
-- Cooperative deadlines are not process isolation; a blocking step handler still
-  freezes its task. Production handlers must offload blocking work (see
-  `docs/CONTRACTS.md` and the `filesystem/read-file` precedent).
-- Run history and logs are in-memory only; persistence/resumability is a later
-  Phase 3 slice.
-- The same run arguments go to every step; chaining is deliberately deferred.
+- Run records and logs are in memory only. Cooperative asyncio timeouts are not
+  process isolation; production handlers must offload blocking I/O.
+- References cannot perform transforms, fallbacks, retries or cross-run lookup.
+  Manifest input/output contract labels remain descriptive; installed capability
+  model classes enforce the actual per-step types.
+- Snapshots include validated outputs; they require appropriate caller access
+  controls if a future transport exposes them. Logs deliberately omit payloads.
+- User/Claude's untracked `.claude/` directory was preserved and is not committed.
 
 ## Next Recommended Action
 
-Review and merge the `phase-3/gateway-dispatch` PR against `main`. After merge,
-continue Phase 3 with step argument chaining and per-step inputs (the engine
-currently passes the same run arguments to every step), then retry/idempotency
-and resumable state per the phase specification.
+Review the step-inputs PR and merge after CI passes. Then plan a bounded
+retry/idempotency contract before implementation: characterize the relevant source
+behavior, define which read versus side-effecting capabilities may be retried and
+how duplicate side effects are prevented. Do not enable generic automatic retries.
