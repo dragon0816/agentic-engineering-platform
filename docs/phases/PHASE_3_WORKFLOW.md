@@ -117,6 +117,40 @@ and `execution.py`, typed transient error in capability runtime, retry marking i
 Bridge, bounded engine orchestration, Gateway key pass-through; full verification,
 small commits, PR and handoff. No production side effects are exercised.
 
+## Requirements and acceptance (slice 5 — bounded resumable state)
+
+1. Every declared step of a run is classified from recorded evidence as
+   `completed` (terminal success), `never_started` (no handler ran — the Bridge
+   records `handler_invoked` on every result and attempt, so this is evidence,
+   not a code table) or `uncertain` (any attempt invoked a handler without
+   terminal success, or the run was interrupted at that step). A live run
+   reports `running`. `inspect(context, run_id)` returns this `ResumePlan` only
+   to the owning actor/namespace; it carries codes and indices, never payloads.
+2. `resume(context, run_id, policy)` continues a finished run as a **new** run from
+   its first non-completed step. Completed steps are never repeated; their
+   recorded results feed later step inputs. The original run is immutable history
+   and the new run records `resumed_from`.
+3. An uncertain step is replayed only under an explicit `ResumePolicy`: the
+   default rejects with `needs_input/uncertain_side_effect`; `replay_read_only`
+   replays only when the host-installed capability is classified `read`;
+   `replay_side_effects` is an explicit acceptance of a possible duplicate side
+   effect. Publication metadata and workflow manifests cannot grant replay.
+4. Resumption adds no authority: the requesting actor and namespace must match the
+   original run, every remaining step is re-authorized by `LocalPolicy` before a
+   run exists and again at dispatch, and the workflow's pre-flight checks rerun.
+   Running and complete runs are rejected; unknown, evicted and other actors'
+   runs are indistinguishable (None). A run can be continued once — resume its
+   continuation afterwards — so a retried host call never re-executes
+   never-started side effects. Pre-flight rejections, including `StepInput`
+   references into completed results, create no run record.
+5. Resumption is in-memory only: it shares the 50-run history, bounded logs and
+   caller-wait timeout semantics, never consults or consumes idempotency keys and
+   provides no persistence, crash recovery or durable step-state store.
+6. Characterize the pinned source step table (linear steps, no re-entry, pending
+   after failure, no resume) before implementing; regression tests cover every
+   classification, policy branch, re-authorization, chaining, repeated resumption,
+   cancellation, eviction and key independence with inert doubles.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -125,8 +159,10 @@ small commits, PR and handoff. No production side effects are exercised.
   coverage.
 - Slice 3: explicit per-step inputs and prior-result chaining.
 - Slice 4: bounded read retries and in-memory duplicate submission suppression.
-- Later Phase 3 slices: resumable state, progress streaming, and the optional n8n
-  adapter invoking the same Gateway/engine contracts.
+- Slice 5: bounded in-memory resumption with explicit uncertain-effect policy.
+- Later Phase 3 slices: durable step-state/persistence contracts, progress
+  streaming, a Gateway resume trigger, and the optional n8n adapter invoking the
+  same Gateway/engine contracts.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks

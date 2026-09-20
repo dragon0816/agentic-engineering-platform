@@ -21,6 +21,7 @@ class StepAttempt(Contract):
     attempt: int = Field(ge=1, le=3, strict=True)
     status: Literal["succeeded", "failed", "needs_input", "unavailable"]
     code: Symbol | None = None
+    handler_invoked: StrictBool = False
 
     @model_validator(mode="after")
     def outcome_code(self) -> Self:
@@ -98,6 +99,8 @@ class CapabilityResult(Contract):
     data: JsonValue = None
     failure: Failure | None = None
     warnings: tuple[Text, ...] = ()
+    # Evidence for effect classification: True once the Bridge invoked the handler.
+    handler_invoked: StrictBool = False
 
     @model_validator(mode="after")
     def result_consistency(self) -> Self:
@@ -113,12 +116,60 @@ class WorkflowRun(Contract):
     status: RunStatus
     completed_steps: int = Field(default=0, ge=0, strict=True)
     failure: Failure | None = None
+    resumed_from: Symbol | None = None
 
     @model_validator(mode="after")
     def failure_state(self) -> Self:
         failed = self.status in {"failed", "needs_input", "unavailable"}
         if failed != (self.failure is not None):
             raise ValueError("failure detail must match workflow state")
+        return self
+
+
+StepState = Literal["completed", "never_started", "uncertain"]
+
+
+class StepStateRecord(Contract):
+    """Effect classification of one declared step in a run; never payloads."""
+
+    step_index: int = Field(ge=0, strict=True)
+    state: StepState
+    code: Symbol | None = None
+
+    @model_validator(mode="after")
+    def completed_without_code(self) -> Self:
+        if self.state == "completed" and self.code is not None:
+            raise ValueError("completed steps carry no failure code")
+        return self
+
+
+class ResumePolicy(Contract):
+    """Trusted caller/host option, never model output or workflow metadata.
+
+    `reject` never replays a step whose effect is uncertain; `replay_read_only`
+    replays it only when the installed capability is classified `read`;
+    `replay_side_effects` explicitly accepts a possible duplicate side effect.
+    """
+
+    uncertain: Literal["reject", "replay_read_only", "replay_side_effects"] = "reject"
+
+
+class ResumePlan(Contract):
+    """What resuming a run would redo; `next_step` is None when nothing remains."""
+
+    run_id: Symbol
+    workflow: AssetIdentity
+    status: RunStatus
+    steps: tuple[StepStateRecord, ...]
+    next_step: int | None = None
+
+    @model_validator(mode="after")
+    def linear_progress(self) -> Self:
+        if [step.step_index for step in self.steps] != list(range(len(self.steps))):
+            raise ValueError("step states must be listed once each in declared order")
+        remaining = [step.step_index for step in self.steps if step.state != "completed"]
+        if (remaining[0] if remaining else None) != self.next_step:
+            raise ValueError("next_step must be the first step that is not completed")
         return self
 
 

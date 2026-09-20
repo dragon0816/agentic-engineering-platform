@@ -23,6 +23,7 @@ from common.assets import (
     PathPart,
     RetryPolicy,
     RunInput,
+    StepInput,
     WorkflowManifest,
     WorkflowStep,
 )
@@ -32,8 +33,12 @@ from common.execution import (
     Failure,
     IdempotencyKey,
     RequestContext,
+    ResumePlan,
+    ResumePolicy,
     RunStatus,
     StepAttempt,
+    StepState,
+    StepStateRecord,
     TraceIdentifiers,
     WorkflowRun,
 )
@@ -74,10 +79,27 @@ class InstalledWorkflows:
 class _RunRecord:
     """Mutable run state owned by the event loop; snapshots are frozen contracts."""
 
-    def __init__(self, workflow: AssetIdentity, trace: TraceIdentifiers) -> None:
+    def __init__(
+        self,
+        workflow: AssetIdentity,
+        trace: TraceIdentifiers,
+        *,
+        manifest: WorkflowManifest | None = None,
+        arguments: dict[str, JsonValue] | None = None,
+        actor: str = "",
+        namespace: str = "",
+        resumed_from: str | None = None,
+    ) -> None:
         self.run_id = f"run-{uuid.uuid4().hex}"
         self.workflow = workflow
         self.trace = trace
+        self.manifest = manifest
+        self.arguments: dict[str, JsonValue] = arguments if arguments is not None else {}
+        self.actor = actor
+        self.namespace = namespace
+        self.resumed_from = resumed_from
+        # Runs are linear: once continued, the continuation is what gets resumed.
+        self.continued_by: str | None = None
         self.status: RunStatus = "running"
         self.completed_steps = 0
         self.failure: Failure | None = None
@@ -104,6 +126,7 @@ class _RunRecord:
                 status=self.status,
                 completed_steps=self.completed_steps,
                 failure=self.failure,
+                resumed_from=self.resumed_from,
             ),
             log=tuple(self.log),
             step_results=tuple(result.model_copy(deep=True) for result in self.step_results),
@@ -212,23 +235,85 @@ class WorkflowEngine:
         # the source's load-before-create order.
         if manifest is None:
             return self._rejected(target, checked, "workflow_not_installed")
+        rejection = self._preflight(manifest, run_arguments)
+        if rejection is not None:
+            return self._rejected(target, checked, *rejection)
+
+        record = _RunRecord(
+            target,
+            checked.trace,
+            manifest=manifest,
+            arguments=run_arguments,
+            actor=checked.actor,
+            namespace=checked.namespace,
+        )
+        if key is not None:
+            # No await before reservation/task creation: duplicate submissions on
+            # this event loop see this same record, even before execution starts.
+            self._submissions[key] = (signature, record)
+        return await self._launch(
+            record,
+            manifest,
+            checked,
+            run_arguments,
+            timeout_seconds,
+            opening=f"start workflow {_step_label(target)}",
+        )
+
+    async def _launch(
+        self,
+        record: _RunRecord,
+        manifest: WorkflowManifest,
+        context: RequestContext,
+        arguments: dict[str, JsonValue],
+        timeout_seconds: float,
+        *,
+        start: int = 0,
+        opening: str,
+    ) -> WorkflowRunSnapshot:
+        self._runs[record.run_id] = record
+        while len(self._runs) > MAX_RUNS_KEPT:
+            # Only the record is evicted. The driving task stays strongly
+            # referenced in _tasks until it finishes, or the event loop could
+            # garbage-collect it mid-run and the run would never complete.
+            del self._runs[next(iter(self._runs))]
+        record.append_log(opening)
+        task = asyncio.create_task(self._drive(record, manifest, context, arguments, start=start))
+        self._tasks[record.run_id] = task
+        task.add_done_callback(functools.partial(self._discard_task, record.run_id))
+        return await self._wait_record(record, timeout_seconds)
+
+    def _replay_allowed(
+        self, context: RequestContext, manifest: WorkflowManifest | None, start: int = 0
+    ) -> bool:
+        if manifest is None:
+            return False
+        for step in manifest.steps[start:]:
+            binding = self.bridge.installed.get(_target(step))
+            if binding is None or not self.bridge.policy.authorize(context, binding.spec).allowed:
+                return False
+        return True
+
+    def _preflight(
+        self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]
+    ) -> tuple[str, Literal["unavailable", "needs_input"]] | None:
+        """Statically checkable rejections, in the source's load-before-create order."""
         if manifest.secrets:
-            return self._rejected(target, checked, "secret_resolution_unavailable")
+            return ("secret_resolution_unavailable", "unavailable")
         if not set(manifest.dependencies.local_capabilities).issubset(self.bridge.installed.names):
-            return self._rejected(target, checked, "missing_local_capability")
+            return ("missing_local_capability", "unavailable")
         if any(
             service.required and service.name not in self.bridge.services
             for service in manifest.dependencies.central_services
         ):
-            return self._rejected(target, checked, "needs_connectivity")
+            return ("needs_connectivity", "unavailable")
         if any(self.bridge.installed.get(_target(step)) is None for step in manifest.steps):
-            return self._rejected(target, checked, "capability_not_installed")
-
+            return ("capability_not_installed", "unavailable")
         for step in manifest.steps:
             if isinstance(step, WorkflowStep) and step.retry.max_attempts > 1:
                 binding = self.bridge.installed.get(step.capability)
                 if binding is None or binding.spec.side_effect != "read":
-                    return self._rejected(target, checked, "unsafe_retry")
+                    return ("unsafe_retry", "unavailable")
         try:
             for step in manifest.steps:
                 if isinstance(step, WorkflowStep):
@@ -236,33 +321,141 @@ class WorkflowEngine:
                         if isinstance(ref, RunInput):
                             _select(run_arguments, ref.path)
         except _MissingInput:
+            return ("workflow_input_missing", "needs_input")
+        return None
+
+    def _owned(self, context: RequestContext, run_id: str) -> _RunRecord | None:
+        """Unknown, evicted and other actors' runs are indistinguishable to a caller."""
+        record = self._runs.get(run_id)
+        if record is None or (record.actor, record.namespace) != (context.actor, context.namespace):
+            return None
+        return record
+
+    def inspect(self, context: RequestContext, run_id: str) -> ResumePlan | None:
+        """Classify each declared step's effect from recorded evidence only."""
+        record = self._owned(RequestContext.model_validate(context), run_id)
+        return self._plan(record) if record is not None else None
+
+    def _plan(self, record: _RunRecord) -> ResumePlan:
+        total = len(record.manifest.steps) if record.manifest is not None else 0
+        done = record.completed_steps
+        active = record.final is None
+        states: list[StepStateRecord] = []
+        for index in range(total):
+            if index != done:
+                state: StepState = "completed" if index < done else "never_started"
+                states.append(StepStateRecord(step_index=index, state=state))
+                continue
+            # The step the run stopped at or is still executing. A handler counts
+            # as run if any attempt or the terminal result says so; the caller-wait
+            # overlay on a live run is not evidence of anything.
+            invoked = any(a.handler_invoked for a in record.attempts if a.step_index == index)
+            if index < len(record.step_results):
+                result = record.step_results[index]
+                invoked = invoked or result.handler_invoked
+                code = result.failure.code if result.failure is not None else None
+                state = "uncertain" if invoked else "never_started"
+            elif active:
+                code, state = None, "uncertain"
+            else:
+                code = record.failure.code if record.failure is not None else None
+                pre_dispatch = code == "workflow_input_missing" and not invoked
+                state = "never_started" if pre_dispatch else "uncertain"
+            states.append(StepStateRecord(step_index=index, state=state, code=code))
+        return ResumePlan(
+            run_id=record.run_id,
+            workflow=record.workflow,
+            status="running" if active else record.status,
+            steps=tuple(states),
+            next_step=done if done < total else None,
+        )
+
+    async def resume(
+        self,
+        context: RequestContext,
+        run_id: str,
+        policy: ResumePolicy | None = None,
+        *,
+        timeout_seconds: float = 300,
+    ) -> WorkflowRunSnapshot | None:
+        """Continue a finished run from its first non-completed step as a new run.
+
+        Completed steps are never repeated; their recorded results feed later
+        step inputs. An uncertain-effect step is replayed only as the explicit
+        policy allows. A run can be continued once; resume its continuation
+        afterwards. Idempotency keys are neither consulted nor consumed.
+        Returns None for unknown, evicted or other actors' runs.
+        """
+        if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+            raise ValueError("timeout must be finite and positive")
+        checked = RequestContext.model_validate(context)
+        chosen = ResumePolicy.model_validate(policy) if policy is not None else ResumePolicy()
+        record = self._owned(checked, run_id)
+        if record is None:
+            return None
+        target = record.workflow
+        manifest = record.manifest
+        if record.final is None:
+            return self._rejected(target, checked, "run_active")
+        if record.continued_by is not None:
+            return self._rejected(target, checked, "already_resumed", "needs_input")
+        # The retained manifest drove this run; the fresh lookup only proves the
+        # exact version is still installed.
+        if manifest is None or self.workflows.get(target) is None:
+            return self._rejected(target, checked, "workflow_not_installed")
+        plan = self._plan(record)
+        start = plan.next_step
+        if start is None:
+            return self._rejected(target, checked, "run_complete")
+        arguments = deepcopy(record.arguments)
+        rejection = self._preflight(manifest, arguments)
+        if rejection is not None:
+            return self._rejected(target, checked, *rejection)
+        try:
+            # References into completed results are checkable before a run exists.
+            for step in manifest.steps[start:]:
+                if isinstance(step, WorkflowStep):
+                    for ref in step.inputs.values():
+                        if isinstance(ref, StepInput) and ref.step_index < start:
+                            _select(record.step_results[ref.step_index].data, ref.path)
+        except _MissingInput:
             return self._rejected(target, checked, "workflow_input_missing", "needs_input")
+        if plan.steps[start].state == "uncertain":
+            binding = self.bridge.installed.get(_target(manifest.steps[start]))
+            replayable = chosen.uncertain == "replay_side_effects" or (
+                chosen.uncertain == "replay_read_only"
+                and binding is not None
+                and binding.spec.side_effect == "read"
+            )
+            if not replayable:
+                return self._rejected(target, checked, "uncertain_side_effect", "needs_input")
+        if not self._replay_allowed(checked, manifest, start):
+            return self._rejected(target, checked, "permission_denied", "failed")
 
-        record = _RunRecord(target, checked.trace)
-        if key is not None:
-            # No await before reservation/task creation: duplicate submissions on
-            # this event loop see this same record, even before execution starts.
-            self._submissions[key] = (signature, record)
-        self._runs[record.run_id] = record
-        while len(self._runs) > MAX_RUNS_KEPT:
-            # Only the record is evicted. The driving task stays strongly
-            # referenced in _tasks until it finishes, or the event loop could
-            # garbage-collect it mid-run and the run would never complete.
-            del self._runs[next(iter(self._runs))]
-        record.append_log(f"start workflow {_step_label(target)}")
-        task = asyncio.create_task(self._drive(record, manifest, checked, run_arguments))
-        self._tasks[record.run_id] = task
-        task.add_done_callback(functools.partial(self._discard_task, record.run_id))
-        return await self._wait_record(record, timeout_seconds)
-
-    def _replay_allowed(self, context: RequestContext, manifest: WorkflowManifest | None) -> bool:
-        if manifest is None:
-            return False
-        for step in manifest.steps:
-            binding = self.bridge.installed.get(_target(step))
-            if binding is None or not self.bridge.policy.authorize(context, binding.spec).allowed:
-                return False
-        return True
+        resumed = _RunRecord(
+            target,
+            checked.trace,
+            manifest=manifest,
+            arguments=arguments,
+            actor=checked.actor,
+            namespace=checked.namespace,
+            resumed_from=record.run_id,
+        )
+        resumed.completed_steps = start
+        resumed.step_results = [
+            result.model_copy(deep=True) for result in record.step_results[:start]
+        ]
+        # Linked before any await so a concurrent second resume sees it.
+        record.continued_by = resumed.run_id
+        return await self._launch(
+            resumed,
+            manifest,
+            checked,
+            arguments,
+            timeout_seconds,
+            start=start,
+            opening=f"resume run {record.run_id} from step {start + 1}",
+        )
 
     async def _wait_record(self, record: _RunRecord, timeout_seconds: float) -> WorkflowRunSnapshot:
         task = self._tasks.get(record.run_id)
@@ -306,9 +499,11 @@ class WorkflowEngine:
         manifest: WorkflowManifest,
         context: RequestContext,
         arguments: dict[str, JsonValue],
+        start: int = 0,
     ) -> None:
         try:
-            for index, step in enumerate(manifest.steps):
+            for index in range(start, len(manifest.steps)):
+                step = manifest.steps[index]
                 try:
                     inputs = (
                         {
@@ -389,6 +584,7 @@ class WorkflowEngine:
                     attempt=attempt,
                     status=result.status,
                     code=failure.code if failure is not None else None,
+                    handler_invoked=result.handler_invoked,
                 )
             )
             if (

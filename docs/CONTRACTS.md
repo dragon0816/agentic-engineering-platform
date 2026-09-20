@@ -190,3 +190,48 @@ using a new/no key intentionally permits a new execution. No automatic workflow
 retry, side-effecting retry, crash recovery, cross-process coordination, persistent
 storage or production idempotency backend is provided. Do not silently restart an
 engine to clear capacity for a retried external request.
+
+## Phase 3 bounded resumption
+
+`WorkflowEngine.inspect(run_id)` returns a `ResumePlan` for a retained run (None
+for unknown or evicted runs): one `StepStateRecord` per declared step, in order,
+classified from recorded evidence only. `completed` is a terminal success whose
+result is retained. `never_started` means no handler ran: the Bridge records
+`CapabilityResult.handler_invoked` (and `StepAttempt.handler_invoked`) the moment
+it invokes a handler, so a step whose every attempt was rejected before that
+point (authorization, input validation, dependency or installation checks) or
+that the engine never dispatched (`workflow_input_missing`) had no effect.
+Everything else is `uncertain`: any attempt invoked the handler without a
+terminal success (`handler_error`, `transient_failure`, `timeout`,
+`invalid_output`, a later denial after an earlier attempt ran), or the run was
+interrupted at that step (`workflow_aborted`, `workflow_error`). A live run
+reports `status: running` with its in-flight step `uncertain` and no code; the
+caller-wait overlay is not evidence. Records carry indices and codes, never
+payloads. `next_step` is the first non-completed step, or None when nothing
+remains. `inspect(context, run_id)` requires the requesting context: runs owned
+by another actor/namespace are indistinguishable from unknown ones (None).
+
+`WorkflowEngine.resume(context, run_id, policy=ResumePolicy(...))` continues a
+**finished** run as a new run from `next_step`, sharing history, log and
+caller-wait timeout semantics with `execute`. Completed steps are never repeated;
+their recorded results feed later `StepInput` references. The original run is
+immutable history and the new `WorkflowRun.resumed_from` names it, so resumed
+runs can be resumed again. `ResumePolicy.uncertain` is a trusted caller/host
+option, never model output or manifest metadata: `reject` (default) returns
+`needs_input/uncertain_side_effect`; `replay_read_only` replays the uncertain
+step only when its host-installed capability is classified `read`;
+`replay_side_effects` explicitly accepts a possible duplicate side effect.
+
+Resumption grants nothing. Runs owned by another actor/namespace return None
+like unknown or evicted runs; the retained manifest that drove the run is
+reused and must still be installed; the workflow's pre-flight checks rerun,
+including `StepInput` references into completed results; every remaining step is
+re-authorized by `LocalPolicy` before a run record exists and again at dispatch;
+and a running (`run_active`) or complete (`run_complete`) run cannot be resumed.
+A run can be continued once: a second resume of the same original fails
+`needs_input/already_resumed` (resume its continuation instead), so a retried
+host call cannot re-execute never-started side effects. Pre-flight rejections
+create no run record. Idempotency keys are neither consulted nor consumed by
+resumption; a keyed re-submission still returns the original run. This is
+in-memory resumption within one engine instance — no durable step state, crash
+recovery, persistence or Gateway trigger is provided.
