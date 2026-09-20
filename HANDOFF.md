@@ -37,11 +37,20 @@ ever changing a run's outcome. Requirements: `docs/phases/PHASE_3_WORKFLOW.md`
   cancellation, queue-size guard, Gateway pass-through.
 - Docs: phase spec slice 7, migration slice-7 decision, `docs/CONTRACTS.md`
   "Phase 3 progress streaming", README.
+- PR #14 opened; pre-merge review applied: a consumer that stops iterating now
+  releases its watcher slot (`_stream` finally); a finished run's terminal
+  snapshot carries its failure code; `Gateway.watch` validates `RunId` like
+  `inspect`/`resume`; the unreachable `started` event was removed (a watcher
+  cannot exist before a run id does); `_emit` isolates each watcher so one
+  failure cannot starve the rest; `watch_queue_size` is guarded on assignment
+  and in `_Watcher`; replays and rejections no longer advance `sequence`; the
+  timing-dependent tests now gate handlers on an `asyncio.Event` instead of
+  sleeping.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #14 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
@@ -93,8 +102,8 @@ this machine; CI runs ordinary pytest.
   emitted before a watcher attached (the initial `snapshot` covers the gap).
 - Events are emitted only for run-level state changes; retry attempts are
   visible in `WorkflowRunSnapshot.attempts`, not as stream events.
-- Timing-sensitive tests use short sleeps (20 ms handlers); CI has passed them
-  so far, but a heavily loaded runner could reorder the first live event.
+- Progress tests gate handlers on an `asyncio.Event`, so event order does not
+  depend on scheduler timing.
 
 ## Next Recommended Action
 

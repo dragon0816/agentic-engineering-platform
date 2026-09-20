@@ -175,9 +175,7 @@ class ResumePlan(Contract):
         return self
 
 
-ProgressEvent = Literal[
-    "snapshot", "started", "step_started", "step_finished", "finished", "rejected"
-]
+ProgressEvent = Literal["snapshot", "step_started", "step_finished", "finished", "rejected"]
 
 
 class RunProgress(Contract):

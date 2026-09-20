@@ -174,9 +174,10 @@ small commits, PR and handoff. No production side effects are exercised.
 
 1. `WorkflowEngine.watch(context, run_id)` (and `Gateway.watch`) returns a bounded
    progress stream of typed `RunProgress` events for the run's owner: a snapshot
-   of the current state, then every state change (`started`, `step_started`,
+   of the current state, then every state change (`step_started`,
    `step_finished`), then the terminal `finished` event. A finished run yields
-   one terminal snapshot. Unknown, evicted and other actors' runs return None.
+   one terminal snapshot carrying its status and code. Unknown, evicted and
+   other actors' runs return None; malformed ids fail validation.
 2. Events carry identities, statuses, step indices and failure codes only —
    never arguments, payloads or exception text — and report a live run as
    `running` (the caller-wait overlay is not evidence).
@@ -185,7 +186,8 @@ small commits, PR and handoff. No production side effects are exercised.
    never blocks the run, dropped events are surfaced as `lagged` on the next
    delivered event instead of silently, and the terminal event always arrives so
    a consumer cannot hang. Watchers per run are bounded; excess subscriptions get
-   a single `rejected/watch_capacity` event rather than an unbounded queue.
+   a single `rejected/watch_capacity` event rather than an unbounded queue, and
+   a consumer that stops iterating releases its slot.
 4. Streams are in-memory and end with the run; no persistence, replay history,
    transport or dashboard is provided. Characterize the source `on_change`
    semantics first; regression tests cover contract validation, live and finished

@@ -10,7 +10,7 @@ import asyncio
 from collections.abc import AsyncIterator
 from typing import Literal, Self
 
-from pydantic import model_validator
+from pydantic import TypeAdapter, model_validator
 
 from agent.routing import RequestRouter, RoutingOutcome
 from capabilities.runtime import CapabilityInvocation
@@ -165,4 +165,5 @@ class Gateway:
         identities, statuses and codes only, never payloads, and never blocks
         the run; the Gateway adds no authority.
         """
-        return self.engine.watch(request, run_id)
+        # Malformed ids fail loudly here like inspect/resume; typos are unknown runs.
+        return self.engine.watch(request, TypeAdapter(RunId).validate_python(run_id))

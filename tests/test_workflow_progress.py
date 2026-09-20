@@ -29,9 +29,19 @@ def other_actor_context() -> RequestContext:
     )
 
 
-class Paced(Handler):
+class Gated(Handler):
+    """Each call waits until the test releases it, so event order is deterministic."""
+
+    def __init__(self, *, fail_first: bool = False) -> None:
+        super().__init__()
+        self.release = asyncio.Event()
+        self.fail_first = fail_first
+
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-        await asyncio.sleep(0.02)
+        await self.release.wait()
+        if self.fail_first and not self.calls:
+            self.calls.append(context)
+            raise RuntimeError("private error payload")
         return await super().__call__(context, inputs)
 
 
@@ -40,12 +50,22 @@ async def collect(stream: AsyncIterator[RunProgress] | None) -> list[RunProgress
     return [event async for event in stream]
 
 
+async def start_gated(steps: int, handler: Gated) -> tuple[WorkflowEngine, str]:
+    flow = flow_for([spec().identity.model_dump()] * steps)
+    runner = runner_for(flow, handler)
+    started = await runner.execute(
+        context(), flow.metadata.identity, {"count": 4141}, timeout_seconds=0.001
+    )
+    assert started.run.failure is not None and started.run.failure.code == "workflow_timeout"
+    return runner, started.run.run_id
+
+
 def base_event(**changes: Any) -> dict[str, Any]:
     return {
         "sequence": 1,
         "run_id": "run-1",
         "workflow": spec().identity.model_dump(),
-        "event": "started",
+        "event": "snapshot",
         "status": "running",
         "completed_steps": 0,
         **changes,
@@ -59,6 +79,7 @@ def base_event(**changes: Any) -> dict[str, Any]:
         {"event": "step_finished"},
         {"event": "finished"},
         {"event": "rejected"},
+        {"event": "started"},
         {"sequence": -1},
         {"step_index": -1},
         {"lagged": 1},
@@ -78,43 +99,55 @@ def test_progress_contract_round_trips() -> None:
 
 def test_live_run_streams_every_change_then_ends() -> None:
     async def scenario() -> None:
-        flow = flow_for([spec().identity.model_dump()] * 2)
-        runner = runner_for(flow, Paced())
-        started = await runner.execute(
-            context(), flow.metadata.identity, {"count": 4141}, timeout_seconds=0.001
-        )
-        events = await collect(runner.watch(context(), started.run.run_id))
-        assert events[0].event == "snapshot" and events[0].status == "running"
-        assert [e.event for e in events[1:]] == [
-            "step_finished",
-            "step_started",
-            "step_finished",
-            "finished",
+        handler = Gated()
+        runner, run_id = await start_gated(2, handler)
+        stream = runner.watch(context(), run_id)
+        handler.release.set()
+        events = await collect(stream)
+        assert [(e.event, e.step_index) for e in events] == [
+            ("snapshot", None),
+            ("step_finished", 0),
+            ("step_started", 1),
+            ("step_finished", 1),
+            ("finished", None),
         ]
-        assert [e.step_index for e in events[1:-1]] == [0, 1, 1]
+        assert events[0].status == "running" and events[0].completed_steps == 0
         assert events[-1].status == "succeeded" and events[-1].completed_steps == 2
-        assert [e.sequence for e in events] == sorted(e.sequence for e in events)
-        assert len({e.sequence for e in events}) == len(events)
+        sequences = [e.sequence for e in events]
+        assert sequences == sorted(sequences) and len(set(sequences)) == len(sequences)
         assert not any(e.lagged for e in events)
-        assert all(e.run_id == started.run.run_id for e in events)
+        assert all(e.run_id == run_id for e in events)
         for event in events:
             assert "4141" not in event.model_dump_json()
             assert "4142" not in event.model_dump_json()
-        final = await runner.wait(started.run.run_id)
+        final = await runner.wait(run_id)
         assert final is not None and final.step_results[0].data == {"count": 4142}
 
     asyncio.run(scenario())
 
 
-def test_finished_run_yields_one_terminal_snapshot() -> None:
+def test_finished_run_yields_one_terminal_snapshot_with_its_code() -> None:
     async def scenario() -> None:
         flow = flow_for([spec().identity.model_dump()])
         runner = runner_for(flow)
         done = await runner.execute(context(), flow.metadata.identity, {"count": 1})
-        for _ in range(2):
-            events = await collect(runner.watch(context(), done.run.run_id))
-            assert [e.event for e in events] == ["snapshot"]
-            assert events[0].status == "succeeded" and events[0].completed_steps == 1
+        replays = [await collect(runner.watch(context(), done.run.run_id)) for _ in range(2)]
+        for events in replays:
+            assert [(e.event, e.status, e.code) for e in events] == [
+                ("snapshot", "succeeded", None)
+            ]
+        # Replays describe existing state: the sequence does not advance.
+        assert replays[0][0].sequence == replays[1][0].sequence
+
+        handler = Gated(fail_first=True)
+        handler.release.set()
+        runner = runner_for(flow, handler)
+        failed = await runner.execute(context(), flow.metadata.identity, {"count": 1})
+        assert failed.run.status == "failed"
+        events = await collect(runner.watch(context(), failed.run.run_id))
+        assert [(e.event, e.status, e.code) for e in events] == [
+            ("snapshot", "failed", "handler_error")
+        ]
 
     asyncio.run(scenario())
 
@@ -132,14 +165,12 @@ def test_unknown_and_foreign_runs_have_no_stream() -> None:
 
 def test_slow_consumer_never_blocks_the_run_and_still_gets_the_end() -> None:
     async def scenario() -> None:
-        flow = flow_for([spec().identity.model_dump()] * 3)
-        runner = runner_for(flow, Paced())
+        handler = Gated()
+        runner, run_id = await start_gated(3, handler)
         runner.watch_queue_size = 2
-        started = await runner.execute(
-            context(), flow.metadata.identity, {"count": 1}, timeout_seconds=0.001
-        )
-        stream = runner.watch(context(), started.run.run_id)
-        final = await runner.wait(started.run.run_id)
+        stream = runner.watch(context(), run_id)
+        handler.release.set()
+        final = await runner.wait(run_id)
         assert final is not None and final.run.status == "succeeded"
         events = await collect(stream)
         assert events[-1].event == "finished" and events[-1].status == "succeeded"
@@ -149,38 +180,35 @@ def test_slow_consumer_never_blocks_the_run_and_still_gets_the_end() -> None:
     asyncio.run(scenario())
 
 
-def test_watcher_capacity_is_reported_not_silently_dropped() -> None:
+def test_watcher_capacity_is_reported_and_closed_streams_release_it() -> None:
     async def scenario() -> None:
-        flow = flow_for([spec().identity.model_dump()])
-        runner = runner_for(flow, Paced())
-        started = await runner.execute(
-            context(), flow.metadata.identity, {"count": 1}, timeout_seconds=0.001
-        )
-        streams = [runner.watch(context(), started.run.run_id) for _ in range(MAX_WATCHERS_PER_RUN)]
+        handler = Gated()
+        runner, run_id = await start_gated(1, handler)
+        streams = [runner.watch(context(), run_id) for _ in range(MAX_WATCHERS_PER_RUN)]
         assert all(stream is not None for stream in streams)
-        rejected = await collect(runner.watch(context(), started.run.run_id))
+        rejected = await collect(runner.watch(context(), run_id))
         assert [(e.event, e.code) for e in rejected] == [("rejected", "watch_capacity")]
-        final = await runner.wait(started.run.run_id)
+        # Abandoning a stream releases its slot for the rest of the run.
+        for stream in streams[1:]:
+            assert stream is not None
+            await stream.aclose()
+        replacement = runner.watch(context(), run_id)
+        assert replacement is not None
+        handler.release.set()
+        final = await runner.wait(run_id)
         assert final is not None and final.run.status == "succeeded"
         assert (await collect(streams[0]))[-1].event == "finished"
+        assert (await collect(replacement))[-1].event == "finished"
 
     asyncio.run(scenario())
 
 
 def test_cancelled_run_still_ends_its_streams() -> None:
-    class Stuck(Handler):
-        async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-            await asyncio.sleep(30)
-            return await super().__call__(context, inputs)
-
     async def scenario() -> None:
-        flow = flow_for([spec().identity.model_dump()])
-        runner = runner_for(flow, Stuck())
-        started = await runner.execute(
-            context(), flow.metadata.identity, {"count": 1}, timeout_seconds=0.01
-        )
-        stream = runner.watch(context(), started.run.run_id)
-        runner._tasks[started.run.run_id].cancel()
+        handler = Gated()  # never released: the step is stuck until cancelled
+        runner, run_id = await start_gated(1, handler)
+        stream = runner.watch(context(), run_id)
+        runner._tasks[run_id].cancel()
         events = await collect(stream)
         assert events[-1].event == "finished"
         assert events[-1].status == "failed" and events[-1].code == "workflow_aborted"
@@ -188,10 +216,14 @@ def test_cancelled_run_still_ends_its_streams() -> None:
     asyncio.run(scenario())
 
 
-def test_engine_requires_room_for_terminal_delivery() -> None:
+def test_queue_size_is_guarded_on_construction_and_assignment() -> None:
     flow = flow_for([spec().identity.model_dump()])
+    runner = runner_for(flow)
     with pytest.raises(ValueError):
-        WorkflowEngine(runner_for(flow).workflows, runner_for(flow).bridge, watch_queue_size=1)
+        WorkflowEngine(runner.workflows, runner.bridge, watch_queue_size=1)
+    with pytest.raises(ValueError):
+        runner.watch_queue_size = 1
+    runner.watch_queue_size = 2
 
 
 def test_gateway_watch_passes_through_without_authority() -> None:
@@ -203,5 +235,7 @@ def test_gateway_watch_passes_through_without_authority() -> None:
         events = await collect(gw.watch(request("watch"), run_id))
         assert [e.event for e in events] == ["snapshot"] and events[0].status == "succeeded"
         assert gw.watch(request("watch"), "run-missing") is None
+        with pytest.raises(ValidationError):
+            gw.watch(request("watch"), "not a symbol!")
 
     asyncio.run(scenario())

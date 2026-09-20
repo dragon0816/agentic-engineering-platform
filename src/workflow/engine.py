@@ -59,6 +59,8 @@ class _Watcher:
     the terminal event always arrives, so a consumer can never hang."""
 
     def __init__(self, size: int) -> None:
+        if size < 2:
+            raise ValueError("watch queues need room for a terminal event and its end marker")
         self.queue: asyncio.Queue[RunProgress | None] = asyncio.Queue(maxsize=size)
         self.lagged = False
 
@@ -202,8 +204,6 @@ class WorkflowEngine:
         *,
         watch_queue_size: int = WATCH_QUEUE_SIZE,
     ) -> None:
-        if watch_queue_size < 2:
-            raise ValueError("watch queues need room for a terminal event and its end marker")
         self.workflows = workflows
         self.bridge = bridge
         self.watch_queue_size = watch_queue_size
@@ -212,6 +212,16 @@ class WorkflowEngine:
         # Never evict a key silently: even an evicted failed run may have effects.
         # Scoped to this engine's lifetime and one event loop, not durable storage.
         self._submissions: dict[tuple[str, str, str], tuple[str, _RunRecord]] = {}
+
+    @property
+    def watch_queue_size(self) -> int:
+        return self._watch_queue_size
+
+    @watch_queue_size.setter
+    def watch_queue_size(self, size: int) -> None:
+        if size < 2:
+            raise ValueError("watch queues need room for a terminal event and its end marker")
+        self._watch_queue_size = size
 
     def get(self, run_id: str) -> WorkflowRunSnapshot | None:
         """None means unknown or evicted; only the last MAX_RUNS_KEPT runs are kept."""
@@ -322,7 +332,6 @@ class WorkflowEngine:
             # garbage-collect it mid-run and the run would never complete.
             del self._runs[next(iter(self._runs))]
         record.append_log(opening)
-        self._emit(record, "started")
         task = asyncio.create_task(self._drive(record, manifest, context, arguments, start=start))
         self._tasks[record.run_id] = task
         task.add_done_callback(functools.partial(self._discard_task, record.run_id))
@@ -528,9 +537,12 @@ class WorkflowEngine:
         *,
         step_index: int | None = None,
         code: str | None = None,
+        advance: bool = True,
     ) -> RunProgress:
         # The caller-wait overlay on a live run is not evidence: report running.
-        record.sequence += 1
+        # Replays and rejections describe existing state and do not advance it.
+        if advance:
+            record.sequence += 1
         return RunProgress(
             sequence=record.sequence,
             run_id=record.run_id,
@@ -550,15 +562,19 @@ class WorkflowEngine:
         step_index: int | None = None,
         code: str | None = None,
     ) -> None:
-        """Best effort by contract: reporting never changes a run's outcome."""
+        """Best effort by contract: reporting never changes a run's outcome, and one
+        misbehaving watcher never starves the others."""
         if not record.watchers:
             return
         try:
             progress = self._progress(record, event, step_index=step_index, code=code)
-            for watcher in record.watchers:
-                watcher.deliver(progress, terminal=event == "finished")
         except Exception:
-            pass
+            return
+        for watcher in list(record.watchers):
+            try:
+                watcher.deliver(progress, terminal=event == "finished")
+            except Exception:
+                pass
 
     def _finish_watchers(self, record: _RunRecord) -> None:
         code = record.failure.code if record.failure is not None else None
@@ -582,25 +598,34 @@ class WorkflowEngine:
         if record is None:
             return None
         if record.final is not None:
-            return self._replay(self._progress(record, "snapshot"))
+            code = record.failure.code if record.failure is not None else None
+            return self._replay(self._progress(record, "snapshot", code=code, advance=False))
         if len(record.watchers) >= MAX_WATCHERS_PER_RUN:
-            return self._replay(self._progress(record, "rejected", code="watch_capacity"))
+            return self._replay(
+                self._progress(record, "rejected", code="watch_capacity", advance=False)
+            )
         watcher = _Watcher(self.watch_queue_size)
         record.watchers.append(watcher)
-        watcher.deliver(self._progress(record, "snapshot"))
-        return self._stream(watcher)
+        watcher.deliver(self._progress(record, "snapshot", advance=False))
+        return self._stream(record, watcher)
 
     @staticmethod
     async def _replay(event: RunProgress) -> AsyncIterator[RunProgress]:
         yield event
 
     @staticmethod
-    async def _stream(watcher: _Watcher) -> AsyncIterator[RunProgress]:
-        while True:
-            item = await watcher.queue.get()
-            if item is None:
-                return
-            yield item
+    async def _stream(record: _RunRecord, watcher: _Watcher) -> AsyncIterator[RunProgress]:
+        try:
+            while True:
+                item = await watcher.queue.get()
+                if item is None:
+                    return
+                yield item
+        finally:
+            # A consumer that stops early (aclose, cancellation, garbage
+            # collection) releases its slot and queue for the rest of the run.
+            if watcher in record.watchers:
+                record.watchers.remove(watcher)
 
     def _rejected(
         self,
