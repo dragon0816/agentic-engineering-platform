@@ -25,6 +25,10 @@ Implement minimal typed contracts for:
 - `WorkflowManifest`
 - `AgentProfile`
 - registry asset metadata
+- scoped asset identity (`namespace`, `name`, `version`), ownership and visibility
+- layered approval/policy metadata separating business approval from technical risk policy
+- execution dependency metadata for local capabilities, central services and `central_required`
+- provider-neutral `SecretRef` requirements (references only; no secret storage backend)
 - Bridge/worker registration and capability advertisement
 - model request/response and model requirement abstractions
 - evaluation case schema
@@ -37,6 +41,10 @@ Registry asset metadata must support owner/contributors, semantic version, lifec
 - Team Platform Plane is the shared control plane.
 - Personal Engineering / Execution Plane hosts the normal Personal Engineering Agent and Bridge.
 - Registry/distribution and execution authorization are separate.
+- Namespace, ownership and visibility are separate concepts; do not hard-code department as the only scope type.
+- Business approval and technical/policy approval are separate concerns. Low-risk technical checks may be automated.
+- Local-first behavior is declared through execution dependency metadata rather than inferred ad hoc.
+- Registry assets may declare secret references but never contain secret values; resolution belongs to the execution environment.
 - Bridge contracts describe execution capabilities but Phase 1 performs no production side effects.
 - Known deterministic routes bypass LLM reasoning.
 - Platform modules depend on provider-neutral model contracts.
@@ -48,7 +56,7 @@ Registry asset metadata must support owner/contributors, semantic version, lifec
 
 Provide one side-effect-free sample Task represented by a `TaskManifest`, register it in an in-memory registry, discover it by contract, advertise it from a sample Bridge/worker registration and verify behavior through tests.
 
-This proof demonstrates the control-plane/execution-plane contracts without building a production registry or Bridge runtime.
+This proof demonstrates the control-plane/execution-plane contracts without building a production registry or Bridge runtime. Tests must also cover scoped asset identity, validation of approval/risk metadata, local-vs-central dependency declarations, and rejection of embedded secret values where practical.
 
 ## Required engineering quality
 
@@ -63,6 +71,9 @@ This proof demonstrates the control-plane/execution-plane contracts without buil
 ## Out of scope
 
 - production database/registry service;
+- RBAC server, federation, department-management UI or multi-server synchronization;
+- production secret backend or vault integration;
+- approval dashboard or full approval workflow engine;
 - Web/Desktop UI;
 - real DUT/instrument control;
 - full Personal Agent reasoning loop;
