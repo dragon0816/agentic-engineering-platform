@@ -49,7 +49,8 @@ Caller-supplied workflow idempotency keys suppress duplicate submissions within
 one engine instance; they are not durable exactly-once guarantees. Run history is
 in memory. Finished runs can be inspected and resumed from their first
 non-completed step under an explicit uncertain-effect policy, still in memory,
-through `Gateway.inspect`/`Gateway.resume` or the engine directly;
+through `Gateway.inspect`/`Gateway.resume` or the engine directly, and owners can
+follow a run's progress through bounded `watch` streams;
 durable state and production jobs remain deferred.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),

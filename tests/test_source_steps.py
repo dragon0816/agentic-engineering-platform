@@ -80,3 +80,23 @@ def test_source_skip_needs_a_reason_and_leaves_never_run() -> None:
     table.skip("render", "no draft requested")
     assert table.status("render") == "skipped"
     assert table.never_run() == ["load", "price"]
+
+
+def test_source_reports_every_transition_and_never_fails_a_step_over_reporting() -> None:
+    module = source_steps()
+    seen: list[list[str]] = []
+
+    def on_change(table: Any) -> None:
+        seen.append([row["status"] for row in table.snapshot()])
+        raise RuntimeError("dashboard down")
+
+    table = module.StepTable(DECLARED, log=lambda message: None, on_change=on_change)
+    table.start("load")
+    table.finish("load")
+    table.skip("render", "not needed")
+    assert seen == [
+        ["running", "pending", "pending"],
+        ["success", "pending", "pending"],
+        ["success", "pending", "skipped"],
+    ]
+    assert table.status("load") == "success"
