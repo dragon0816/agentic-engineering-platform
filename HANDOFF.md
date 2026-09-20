@@ -2,8 +2,12 @@
 
 ## Current phase and branch
 
-Phase 2 — Agent and capability layer, first reviewable implementation slice.
-Branch: `phase-2/implementation`, based on Phase 1 commit `006e5b6`.
+Phase 2 — Agent and capability layer. Two slices exist:
+`phase-2/implementation` (routing/dispatch/MCP, under review as PR #5) and
+`phase-2/file-tool-adapter` (first production source tool adaptation, stacked
+on the PR #5 branch tip; open its PR against `main` after PR #4 and PR #5 merge).
+The original Phase 2 slice: branch `phase-2/implementation`, based on Phase 1
+commit `006e5b6`.
 Phase 1 PR #4 remains open and unmerged. Phase 2 is stacked
 [PR #5](https://github.com/dragon0816/agentic-engineering-platform/pull/5) against
 `phase-1/implementation`; retarget after the Phase 1 merge is handled by a human.
@@ -133,6 +137,12 @@ opened despite the previous handoff describing it as the final step, and opened 
 After review fixes (commit `2b0b7a8`): pytest 116 passed (4 new regression tests),
 ruff check/format, mypy and `git diff --check` all pass locally.
 
+File-tool adapter slice (`phase-2/file-tool-adapter`, commits `8d7c568`/`cc358b0`):
+pytest 133 passed (7 source characterization + 10 adapter tests added), ruff
+check/format, mypy (32 files), pip check, `python -m build` (fixture ships in the
+sdist) and `git diff --check` all pass locally. Characterization tests were written
+and run against the pinned source excerpt before the adapter was implemented.
+
 ## Known issues / limitations
 
 - Cooperative deadlines are not hard process isolation; do not install blocking or
@@ -149,7 +159,15 @@ ruff check/format, mypy and `git diff --check` all pass locally.
 The repository owner merges PR #4 (merge commit, subject style "Merge Phase 1 …"),
 retargets PR #5 to `main` (automatic if the `phase-1/implementation` branch is
 deleted on merge), confirms CI on the retargeted PR and merges PR #5. Review
-evidence is posted on both PRs. Coding agents must not perform these merges.
-After both merges, select one real source capability for a separate
-characterization-backed adapter from the latest `main`; preserve the shared
-Bridge policy path.
+evidence is posted on both PRs. Coding agents must not perform these merges;
+merge attempts from this session were blocked by permission policy by design.
+
+The next adapter slice is already implemented and verified on
+`phase-2/file-tool-adapter` (source `tools/file_tools.py::read_file` adapted as
+`filesystem/read-file` behind the shared Bridge policy path; see
+`docs/PHASE_2_MIGRATION.md`). After PR #4 and PR #5 merge, open its PR against
+`main` — the branch is stacked on the PR #5 tip, so only the two adapter commits
+will appear in the diff. Follow-up candidates recorded in PR #4/#5 review comments
+remain open (e.g. bounded `BridgeExecutor` event log, SkillRegistry re-parse cost,
+MCP install round-trips, Review `not_required` semantics, generic top-level
+package names).
