@@ -7,9 +7,9 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
-from typing import Annotated, Literal, Self
+from typing import Literal, Self
 
-from pydantic import StringConstraints, model_validator
+from pydantic import model_validator
 
 from agent.routing import RequestRouter, RoutingOutcome
 from capabilities.runtime import CapabilityInvocation
@@ -21,17 +21,16 @@ from common.execution import (
     RequestContext,
     ResumePlan,
     ResumePolicy,
+    RunId,
 )
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import WorkflowEngine, WorkflowRunSnapshot
 
-# Lenient on purpose: a mistyped id is "unknown to this caller", not a crash.
-RunId = Annotated[str, StringConstraints(strict=True, min_length=1, max_length=128)]
-
 
 class RunControlResult(Contract):
-    """Host-triggered run control. Both payload fields None means the run is
-    unknown to this caller (missing, evicted or owned by another actor)."""
+    """Host-triggered run control. `run_id` echoes the request; a continuation's
+    own id is only in `workflow.run.run_id`. Both payload fields None means the
+    run is unknown to this caller (missing, evicted or owned by another actor)."""
 
     action: Literal["inspect", "resume"]
     run_id: RunId
@@ -123,11 +122,16 @@ class Gateway:
         # impossible by contract and would fail GatewayResult validation loudly.
         return GatewayResult(routing=outcome)
 
-    async def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
-        """Classify a retained run's steps for its owner; never executes anything."""
-        context = RequestContext.model_validate(request)
-        checked = RunControlResult(action="inspect", run_id=run_id)
-        return checked.model_copy(update={"plan": self.engine.inspect(context, checked.run_id)})
+    def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
+        """Classify a retained run's steps for its owner; never executes anything.
+
+        Synchronous like the in-memory engine lookup it wraps. The engine validates
+        the request context and enforces ownership; the result is validated once,
+        when constructed.
+        """
+        return RunControlResult(
+            action="inspect", run_id=run_id, plan=self.engine.inspect(request, run_id)
+        )
 
     async def resume(
         self,
@@ -143,13 +147,11 @@ class Gateway:
         message or a model. Run control is not a Skill route, so no model-selected
         route can trigger it; ownership and authorization stay in the engine.
         """
-        context = RequestContext.model_validate(request)
-        checked = RunControlResult(action="resume", run_id=run_id)
         if workflow_timeout_seconds is None:
             # The engine owns the default caller-wait timeout.
-            snapshot = await self.engine.resume(context, checked.run_id, policy)
+            snapshot = await self.engine.resume(request, run_id, policy)
         else:
             snapshot = await self.engine.resume(
-                context, checked.run_id, policy, timeout_seconds=workflow_timeout_seconds
+                request, run_id, policy, timeout_seconds=workflow_timeout_seconds
             )
-        return checked.model_copy(update={"workflow": snapshot})
+        return RunControlResult(action="resume", run_id=run_id, workflow=snapshot)

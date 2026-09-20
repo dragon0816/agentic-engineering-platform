@@ -12,6 +12,8 @@ RunStatus = Literal["pending", "running", "succeeded", "failed", "needs_input", 
 IdempotencyKey = Annotated[
     str, StringConstraints(strict=True, min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_.:-]+$")
 ]
+# Engine-generated run identifiers are Symbols; Gateway and adapters validate the same shape.
+RunId = Symbol
 
 
 class StepAttempt(Contract):

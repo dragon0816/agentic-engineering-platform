@@ -245,13 +245,18 @@ continue runs through the same Gateway and engine contracts as routed workflows.
 Both return a `RunControlResult` (`action`, `run_id`, `plan` for inspect,
 `workflow` snapshot for resume); both payload fields None means the run is
 unknown to this caller — missing, evicted or owned by another actor — exactly
-as the engine reports it.
+as the engine reports it. `RunControlResult.run_id` always echoes the requested
+id; a successful resume's continuation has its own id in `workflow.run.run_id`
+(with `resumed_from` naming the original), and that continuation is what to
+inspect or resume next. `inspect` is synchronous like the in-memory lookup it
+wraps; `resume` is asynchronous like `execute`.
 
 The Gateway adds no authority and parses nothing: ownership, pre-flight checks
 and per-step re-authorization stay in the engine, and `ResumePolicy` is a
 host/caller option that is never derived from the request message or a model.
 Run control is not a Skill route: `Gateway.handle` cannot inspect or resume a
 run, a model proposing such a route fails closed like any other invalid
-proposal, and routed workflow arguments are ordinary step inputs. The `run_id`
-is validated only for shape (1–128 characters); a mistyped id is unknown, not an
-error.
+proposal, and routed workflow arguments are ordinary step inputs. `run_id` is a
+`RunId` (the same `Symbol` shape the engine generates, shared from
+`common/execution.py` for CLI/n8n adapters): a mistyped but well-formed id is
+unknown, not an error, while malformed input fails validation loudly.

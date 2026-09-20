@@ -27,11 +27,22 @@ models any way to trigger a resumption. Requirements: `docs/phases/PHASE_3_WORKF
   continue a run.
 - Docs: phase spec slice 6 requirements and sequence, `docs/CONTRACTS.md`
   "Phase 3 Gateway run control", README.
+- PR #13 opened; pre-merge review applied: results are constructed once so the
+  contract validator actually runs (no `model_copy(update=...)`); `RunId` is the
+  engine's `Symbol` shape shared from `common/execution.py`, so malformed ids
+  fail loudly instead of being echoed back; `inspect` is synchronous like the
+  lookup it wraps; the Gateway no longer re-validates the context the engine
+  validates; the "no routed resumption" test asserts concrete outcomes
+  (`invalid_model_route`, a fresh run id, and the original still resumable);
+  the contract text states that `run_id` echoes the request while the
+  continuation id lives in `workflow.run.run_id`. Declined: merging the timeout
+  branches with `**kwargs` — mypy rejects the dict type against the non-float
+  keyword parameters.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #13 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
