@@ -600,3 +600,28 @@ page names, case-corrected to an existing page and keeping any `|alias` or
 flagged pages are read, and it returns the pages it changed. `Vault.write`
 and `append` now write `\n` on every platform, so a repair never rewrites a
 page's line endings. `raw/` and `drop/` are never written.
+
+## Conflicts and decisions (Phase 4, slice 7)
+
+`knowledge.conflicts.Decision(topic, keep=, reject=, reason=, pages=)` — one of
+`keep`, `reject` or `reason` required — is appended to `decisions.md` by
+`append_decision(vault, decision, today=)` as `## [date] topic` with `- keep:`,
+`- reject:`, `- reason:` and `- pages: [[…]]` lines; the header is written
+once and the file is never rewritten. `decisions_text(vault)` is what
+`IngestPlanner.plan(decisions=…)` receives: the file's text, or
+`(no settled decisions)`.
+
+`open_conflicts(vault)` returns the lint's `OpenConflict` for every `⚠️` line.
+`clear_conflict(vault, page, line, stamp=)` removes exactly that marker line
+through `Vault.write` with a backup and returns False, touching nothing, when
+the line has moved or is not a marker. `resolve(vault, decision, clear=,
+today=, stamp=)` records the decision, then clears the listed `(page, line)`
+markers bottom-up and returns a `Resolution` with `cleared` and `missed`.
+
+`knowledge.lint.ManualEdits` (`first_run`, `since`, `edited`, `added`,
+`removed`, `tool_written`) is computed into `LintReport.manual_edits`.
+`record_state(vault, written=, today=)` stores page hashes and the pages the
+tool wrote in `.ingest-state.json` (`Vault.state_write` / `state_read`, its own
+file, `{}` when absent or corrupt); `manual_edits(vault)` compares. A host
+calls `record_state` after an apply with the outcome's `written` so its own
+writes are not reported as a person's.

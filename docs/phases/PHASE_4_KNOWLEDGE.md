@@ -241,11 +241,32 @@ enforced in code, never left to a prompt:
    report as typed values, the repair with aliases, anchors and backups, and
    a link that leaves the vault not counting as a page.
 
+## Requirements and acceptance (slice 7 — conflicts and decisions)
+
+1. `knowledge.conflicts.Decision` (topic, keep, reject, reason, pages — one of
+   the first three required) is appended to `decisions.md` by
+   `append_decision`, the header written once; `decisions_text(vault)` is the
+   block the planner injects, `(no settled decisions)` when the file is
+   absent or only the header. The file is append-only: nothing rewrites it.
+2. `open_conflicts(vault)` finds every `⚠️` line by reading, through the same
+   `find_conflicts` the lint report uses. `clear_conflict(vault, page, line,
+   stamp=)` removes exactly one marker line, refuses a line that moved or is
+   not a marker, collapses the blank it leaves and backs the page up.
+3. `resolve(vault, decision, clear=, today=, stamp=)` records the decision
+   first and then clears the listed markers, bottom-up so line numbers stay
+   valid, reporting what was cleared and what had moved. A marker is never
+   cleared without its reason on record.
+4. Manual-edit detection is computed into the lint report: `record_state`
+   stores page hashes and what the tool wrote (`.ingest-state.json`, through
+   `Vault.state_write`); `manual_edits` reports pages edited by a person since
+   then (tool-written pages excluded), added and removed; a corrupt or absent
+   state is a first run, not a failure. `LintReport.manual_edits` carries it.
+5. Tests over the pinned conflicts excerpt already exist (slice 1); regression
+   tests cover the record, injection, finding and clearing, resolution with a
+   moved marker, and manual edits across two recorded states.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 7 — Conflicts and decisions: an append-only `Decision` record injected
-  into later planning, `⚠️` conflict markers found by reading, resolution that
-  records why, and manual-edit detection by page hash.
 - Slice 8 — Query with provenance: retrieval over Raw and Wiki returning an
   answer whose every citation names a `KnowledgeSource` (with page/slide where
   known). Deterministic lexical retrieval first; model synthesis, when used,

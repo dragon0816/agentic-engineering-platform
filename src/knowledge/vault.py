@@ -9,10 +9,11 @@ rule is rejected whole. Nothing here calls a model — a `WritePlan` is data tha
 a later slice will have a model propose.
 """
 
+import json
 import re
 from datetime import date, datetime
 from pathlib import Path, PurePosixPath
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from pydantic import model_validator
 
@@ -25,6 +26,7 @@ WRITABLE_FILES = ("index.md", "log.md", "decisions.md")
 REQUIRED = ("index.md", "log.md", "raw", "wiki")
 BACKUP_DIR = ".ingest-backup"
 CACHE_DIR = ".ingest-cache"
+STATE_FILE = ".ingest-state.json"
 _SHA256 = re.compile(r"^[a-f0-9]{64}$")
 SOURCES_AREA = "wiki/sources/"
 CONFLICT_HEADING = "## ⚠️ 待裁決的衝突"
@@ -386,6 +388,23 @@ class Vault:
                     break
             pages.append((rel, title))
         return tuple(pages)
+
+    def state_read(self) -> dict[str, Any]:
+        """The platform's own state file, `{}` when absent or unreadable — a
+        corrupt state is a first run, never a failure."""
+        path = self.root / STATE_FILE
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+        except (OSError, ValueError, UnicodeDecodeError):
+            return {}
+        return loaded if isinstance(loaded, dict) else {}
+
+    def state_write(self, state: dict[str, Any]) -> None:
+        (self.root / STATE_FILE).write_text(
+            json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True),
+            encoding="utf-8",
+            newline="\n",
+        )
 
     def _cache_path(self, key: str) -> Path:
         # The cache is keyed by a content hash and lives in its own directory;

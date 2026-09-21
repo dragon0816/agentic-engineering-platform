@@ -257,3 +257,24 @@ frontmatter missing); a superseded Raw is not pending; and `Vault.write`
 writes `\n` on every platform so a repair does not change line endings.
 Rollback removes `knowledge/lint.py`, its tests and the excerpt; nothing else
 imports them.
+
+## Slice 7 source-first decision
+
+Re-inspected the pinned `conflicts.py` excerpt (`tests/fixtures/
+source_vault_conflicts.txt`, characterized in slice 1): append-only
+`decisions.md` injected into prompts, `⚠️` markers found by regex, a marker
+cleared by line number with a moved-line refusal, page hashes in a state file
+and manual edits reported with tool-written pages excluded, chosen over git
+because the vault lives in a synced folder.
+
+Decision (2026-09-21): **ADAPT** all of it. The decision is a contract, the
+header and field labels are English (the source's were Traditional Chinese;
+the record's language is the host's), `resolve` writes the decision before
+clearing any marker so a marker is never removed without its reason on record
+(the source did both from one CLI command in the same order), clearing goes
+through `Vault.write` with a backup, and the state file is `.ingest-state.json`
+through the vault rather than `.brain-state.json` beside it. Manual-edit
+detection lives in `knowledge.lint` because it is computed by reading, and the
+lint report carries it. Rollback removes `knowledge/conflicts.py`, the state
+functions in `knowledge/lint.py`, `Vault.state_read` / `state_write` and the
+tests; nothing else imports them.

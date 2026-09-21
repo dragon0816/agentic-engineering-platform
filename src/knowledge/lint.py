@@ -9,8 +9,10 @@ mechanical repair the source made too, and it goes through the vault with a
 backup like any other page write.
 """
 
+import hashlib
 import re
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import PurePosixPath
 
 from pydantic import Field
@@ -89,6 +91,69 @@ class OpenConflict(Contract):
     text: Text
 
 
+class ManualEdits(Contract):
+    """Pages changed since the last recorded state, excluding what the tool
+    wrote itself; `first_run` when there is no state to compare against."""
+
+    first_run: bool = False
+    since: str | None = None
+    edited: tuple[Text, ...] = ()
+    added: tuple[Text, ...] = ()
+    removed: tuple[Text, ...] = ()
+    tool_written: int = Field(default=0, ge=0, strict=True)
+
+
+def page_hashes(vault: Vault) -> dict[str, str]:
+    """A short content hash per wiki page, `index.md` and `decisions.md`;
+    unreadable pages are left out rather than fatal."""
+    texts, _ = read_pages(vault, vault.wiki_files())
+    for extra in ("index.md", "decisions.md"):
+        if vault.exists(extra):
+            more, _ = read_pages(vault, (extra,))
+            texts.update(more)
+    return {
+        rel: hashlib.sha256(text.encode("utf-8")).hexdigest()[:16] for rel, text in texts.items()
+    }
+
+
+def record_state(vault: Vault, *, written: tuple[str, ...] = (), today: date) -> None:
+    """Record current hashes plus which pages this run wrote itself, so they
+    are not reported as human edits next time. Chosen over git because a vault
+    may live in a synced folder where a `.git` directory is a liability."""
+    vault.state_write(
+        {
+            "updated": today.isoformat(),
+            "hashes": page_hashes(vault),
+            "tool_written": sorted({normalize(rel) for rel in written}),
+        }
+    )
+
+
+def manual_edits(vault: Vault) -> ManualEdits:
+    state = vault.state_read()
+    previous = state.get("hashes") if isinstance(state, dict) else None
+    if not isinstance(previous, dict) or not previous:
+        return ManualEdits(first_run=True)
+    tool_written = state.get("tool_written")
+    written = set(tool_written) if isinstance(tool_written, list) else set()
+    current = page_hashes(vault)
+    edited = tuple(
+        rel
+        for rel, digest in current.items()
+        if rel in previous and previous[rel] != digest and rel not in written
+    )
+    added = tuple(rel for rel in current if rel not in previous)
+    removed = tuple(rel for rel in previous if rel not in current)
+    since = state.get("updated")
+    return ManualEdits(
+        since=since if isinstance(since, str) else None,
+        edited=edited,
+        added=added,
+        removed=removed,
+        tool_written=len(written),
+    )
+
+
 class LintReport(Contract):
     """The computed findings, each a closed shape. `dangling` is ranked by how
     often a missing page is referenced: the more, the sooner it deserves one."""
@@ -104,6 +169,8 @@ class LintReport(Contract):
     pending_sources: tuple[Text, ...] = ()
     open_conflicts: tuple[OpenConflict, ...] = ()
     unreadable: tuple[Text, ...] = ()
+    # Informational: what a person changed since the last recorded state.
+    manual_edits: ManualEdits = ManualEdits(first_run=True)
 
     @property
     def clean(self) -> bool:
@@ -234,6 +301,7 @@ def scan(vault: Vault) -> LintReport:
         pending_sources=pending,
         open_conflicts=tuple(conflicts),
         unreadable=unreadable,
+        manual_edits=manual_edits(vault),
     )
 
 
