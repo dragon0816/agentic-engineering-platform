@@ -278,12 +278,15 @@ engine wiring.
    equal values share one file, so repeated writes are idempotent.
 2. Writes are atomic and never leave a partial payload; an oversized or
    unserializable value is refused before anything is written.
-3. `get(owner, ref)` returns the payload only when the reference's parts agree,
-   the bytes hash to `ref.sha256` and the stored contract matches; tampering,
-   truncation, a swapped file, a wrong contract and an unknown reference each
-   fail closed with a distinct closed code.
-4. One owner's reference cannot read another owner's payload, and a file name is
-   derived from the validated digest only, never from caller text.
+3. `get(owner, ref)` returns the payload only when the identifier is one this
+   store issues, the bytes still hash to it, the payload hashes to `ref.sha256`
+   and the stored contract matches; tampering, truncation, a swapped file, a
+   wrong contract and an unknown reference each fail closed with a distinct
+   closed code.
+4. The owner is part of the stored record and is checked on every read, so one
+   owner's reference cannot read another owner's payload even on a
+   case-folding filesystem, and a file name is derived from a validated digest
+   only, never from caller text.
 5. Tests cover round trips for every JSON shape, deduplication, restart,
    tampering, mismatched references, owner isolation, limits and failed writes.
 

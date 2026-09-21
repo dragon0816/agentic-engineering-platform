@@ -149,21 +149,34 @@ needs back — a run's arguments and each completed step's result. It lives besi
 the checkpoint file, under the host's own access controls, and is the storage
 half of the boundary whose evidence half is `RunCheckpoint`.
 
-The digest is the identity. `put(owner, contract, payload)` canonicalises the
-value (sorted keys, no NaN/Infinity), stores it under its own SHA-256 in
-`root/<actor>/<namespace>/payload-<digest>.json` and returns the reference to
-record. Equal values share one file, so writing the same payload twice is
-idempotent and costs nothing. Writes are atomic (temporary file, `fsync`,
-`os.replace`), so a crash or a failed write never leaves a partial payload.
+What is stored is a record of owner, contract and payload, and the digest of
+that whole record is the storage identity. `put(owner, contract, payload)`
+canonicalises the value (sorted keys, no NaN/Infinity), writes the record to
+`root/<actor>/<namespace>/payload-<record digest>.json` and returns the
+reference to record: `ref_id` is `payload-<record digest>`, `sha256` is the
+digest of the payload value itself, `contract` is the declared contract. The
+same owner, contract and payload always produce the same reference and file, so
+writing twice is idempotent; the same value under two contracts, or for two
+owners, is two records and stays readable. Writes are atomic (temporary file,
+`fsync`, `os.replace`, then a best-effort directory `fsync`), so a crash or a
+failed write never leaves a partial payload, and an existing file that no longer
+hashes to its name is rewritten rather than reported as fine.
 
-`get(owner, ref)` returns the payload only when everything agrees: the
-reference's `ref_id` must be `payload-<sha256>` (so a file name can never be
-caller text and a reference this store never issued is refused as
-`invalid_transition`), the stored bytes must hash to `ref.sha256`
-(`unavailable` otherwise — tampering, truncation or a swapped file), and the
-stored contract must equal `ref.contract` (`invalid_transition` otherwise).
-A reference to something that was never stored is `missing`. Payload directories
-are per owner, so one owner's reference cannot read another owner's file.
+`get(owner, ref)` returns the payload only when everything agrees:
+
+- `ref_id` must be `payload-` followed by 64 lowercase hex characters, checked
+  before any path is built, so a reference can never name a file of its own
+  choosing (`invalid_transition`);
+- the stored bytes must hash to that identity — tampering, truncation or a
+  swapped file is `unavailable`;
+- the owner recorded *inside* the file must equal the requesting owner
+  (`missing`), so a case-folding filesystem cannot fold ownership with it;
+- the payload must still hash to `ref.sha256` (`unavailable`) and the stored
+  contract must equal `ref.contract` (`invalid_transition`).
+
+A reference to something that was never stored is `missing`. Payload
+directories are per owner as well, but the record — not the location — is what
+decides.
 
 Limits and omissions: a payload above `max_bytes` is `capacity` and an
 unserializable value is `invalid_transition`, both before anything is written.

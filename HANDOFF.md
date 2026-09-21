@@ -31,11 +31,21 @@ plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Payload storage"); source decision:
 - Oversized payloads are `capacity` and unserializable values are
   `invalid_transition`, both before anything is written. One owner's reference
   cannot read another owner's payload.
-- 20 tests (`tests/test_payloads.py`): round trips for every JSON shape,
-  contract preservation, deduplication and idempotent writes, distinct contracts
-  over identical bytes, owner isolation, unknown references, tampered/truncated/
-  swapped files, disagreeing references, limits, invalid owner/contract, failed
-  writes and restart.
+- 23 tests (`tests/test_payloads.py`): round trips for every JSON shape,
+  contract preservation, deduplication and idempotent writes, the same value
+  under two contracts, owner isolation including case-folding filesystems,
+  unknown and malformed references, tampered/truncated/swapped/NaN files,
+  self-healing writes, disagreeing references, limits, invalid owner/contract,
+  failed writes, restart and the exact stored record shape.
+- PR #18 opened; pre-merge review applied: the storage identity is now the
+  digest of the whole record (owner, contract, payload), so the same value
+  under two contracts no longer collides into one unreadable reference; the
+  owner inside the record is checked on every read, so a case-folding
+  filesystem cannot fold ownership; `get` verifies the raw bytes before parsing
+  and rejects NaN/Infinity literals, so a corrupt file can no longer raise a
+  bare `ValueError`; `put` rewrites a file that no longer hashes to its name
+  instead of reporting success forever; and the directory is fsynced after the
+  rename where the platform supports it.
 - Docs: phase spec slice 11 (approved scope) and sequence, checkpoint plan
   "Payload storage" section, `docs/CONTRACTS.md`, migration slice-11 decision,
   README.
@@ -66,9 +76,12 @@ plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Payload storage"); source decision:
   did not produce. Deduplication is a consequence, not a goal.
 - The reference decides what is acceptable; the file never gets a vote. A
   mismatch is a distinct closed code, never a best guess or a silent read.
-- `PayloadRef.ref_id` is `payload-<sha256>`: a digest may start with a digit and
-  `Symbol` may not, and deriving the file name from the validated digest makes
-  path traversal impossible by construction.
+- `PayloadRef.ref_id` is `payload-<digest of the stored record>`: a digest may
+  start with a digit and `Symbol` may not, and deriving the file name from a
+  validated digest makes path traversal impossible by construction. `sha256`
+  remains the digest of the payload value itself.
+- Ownership is evidence, not a location: the owner is inside the record and is
+  checked on read, so the store does not depend on filesystem case semantics.
 - Payload evidence stays small (1 MB default). Attachments and run artefacts are
   not payloads; the source's own 4 KB step-result summary cap informed the
   modest default.
@@ -82,7 +95,7 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 416 tests (396 prior + 20 payload)
+# PASS: 419 tests (396 prior + 23 payload)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
