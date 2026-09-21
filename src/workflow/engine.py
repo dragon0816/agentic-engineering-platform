@@ -744,6 +744,7 @@ class WorkflowEngine:
                 if result.status != "succeeded":
                     record.status = result.status
                     record.failure = result.failure
+                    await self._journal_step_failed(record, index, code)
                     return
                 if not await self._journal_step_completed(record, index, context, result.data):
                     # The step ran; its evidence stays `started`, so recovery
@@ -785,6 +786,16 @@ class WorkflowEngine:
             self._journal_failure(record, index, error)
             return False
         return True
+
+    async def _journal_step_failed(self, record: _RunRecord, index: int, code: str | None) -> None:
+        """Explain an uncertain step. The run already failed and the evidence is
+        already conservative, so a store that refuses this never changes either."""
+        if self.journal is None or record.journal is None:
+            return
+        try:
+            await asyncio.to_thread(self.journal.step_failed, record.journal, index, code)
+        except CheckpointStoreError as error:
+            record.append_log(f"step {index + 1} checkpoint_{error.code}")
 
     async def _journal_step_completed(
         self, record: _RunRecord, index: int, context: RequestContext, data: JsonValue

@@ -248,7 +248,18 @@ unknown to this caller — missing, evicted or owned by another actor — exactl
 as the engine reports it. `RunControlResult.run_id` always echoes the requested
 id; a successful resume's continuation has its own id in `workflow.run.run_id`
 (with `resumed_from` naming the original), and that continuation is what to
-inspect or resume next. `inspect` is synchronous like the in-memory lookup it
+inspect or resume next. `source` says which evidence answered: `memory` is this
+process's run history, `journal` is the durable record that outlives it, and
+`unknown` means the run is unknown to this caller — missing, evicted, never
+journalled or owned by another actor, all indistinguishable on purpose.
+`inspect` asks memory first and falls back to the journal, so a run that
+predates a restart is still reachable. `suspend` records a person's
+`SuspensionConfirmation` against the durable record and is only meaningful for a
+journalled run; a run that is alive here or already suspended raises the
+engine's own closed code rather than a vocabulary invented at this layer.
+`resume` continues a journalled run through recovery — so its continuation is
+journalled too and the durable "continued once" guard holds — and any other run
+in memory. `inspect` is synchronous like the in-memory lookup it
 wraps; `resume` is asynchronous like `execute`.
 
 The Gateway adds no authority and parses nothing: ownership, pre-flight checks
