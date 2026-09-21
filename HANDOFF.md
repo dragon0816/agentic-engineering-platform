@@ -1,75 +1,55 @@
-# Handoff — Phase 4 conflicts and decisions (slice 7)
+# Handoff — Phase 4 query with provenance (slice 8)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-4/conflicts-decisions`, based on `main` after PR #29 merged.
+Branch: `phase-4/query`, based on `main` after PR #30 merged.
 
 ## Goal
 
-Phase 4 slice 7: the append-only decision record the planner injects, open
-conflicts found by reading and cleared only with a reason on record, and
-manual-edit detection computed into the lint report. The owner asked for all of
-Phase 4 (slices 3–9) to be completed without check-ins unless something cannot
-be decided; each slice is reviewed, merged on green CI and followed by the
-next. Requirements: `docs/phases/PHASE_4_KNOWLEDGE.md` (slice 7); source
-decision: `docs/PHASE_4_MIGRATION.md` (slice 7); contracts: `docs/CONTRACTS.md`
-("Conflicts and decisions").
+Phase 4 slice 8: questions over the vault answered with passages whose every
+citation names where the words came from — the Roadmap's "query answers can
+cite source provenance". The owner asked for all of Phase 4 (slices 3–9) to be
+completed without check-ins unless something cannot be decided; each slice is
+reviewed, merged on green CI and followed by the next. Requirements:
+`docs/phases/PHASE_4_KNOWLEDGE.md` (slice 8); decision:
+`docs/PHASE_4_MIGRATION.md` (slice 8); contracts: `docs/CONTRACTS.md` ("Query
+with provenance").
 
 ## Completed
 
-- `knowledge/conflicts.py`: `Decision` (one of keep/reject/reason required),
-  `append_decision` (header once, file never rewritten), `decisions_text`
-  (what `IngestPlanner.plan(decisions=)` receives), `open_conflicts` (through
-  the lint's `find_conflicts`), `clear_conflict` (exactly one marker line, with
-  backup, refused when moved), `resolve` (decision recorded first, markers
-  cleared bottom-up, `Resolution` with `cleared`/`missed`).
-- `knowledge/lint.py`: `ManualEdits`, `page_hashes`, `record_state`,
-  `note_written`, `manual_edits`, `line_ending`; `LintReport.manual_edits`
-  computed by `scan` from the pages it already read.
-- `Vault.state_read` / `state_write` for `.ingest-state.json` (`{}` when absent
-  or corrupt).
-- 5 regression tests (`tests/test_conflicts.py`); the pinned `conflicts.py`
-  excerpt's characterization exists since slice 1.
-- Docs: phase spec slice 7 requirements, `docs/CONTRACTS.md`, migration slice 7
-  decision.
-
-- PR #30 opened; pre-merge review applied (10 findings): several markers on
-  one page were cleared with one write each, so the backup was overwritten
-  with a half-cleared page — `clear_conflicts` removes them in one write;
-  duplicate clears deleted a shifted line — deduplicated; the `tool_written`
-  exclusion (from the source) hid a person's later edit to a tool-written
-  page — replaced by `note_written`, which refreshes those hashes when the
-  tool writes; any line containing `⚠️` could be cleared, heading or prose —
-  only lines matching the marker rule; an odd state file raised out of `scan`
-  — first run; a malformed clear list could raise after writes — refused
-  first; clears sort by the normalized page; `scan` hashes the pages it
-  already read instead of reading again; `NO_DECISIONS` is one constant in
-  `planning`; a cleared page keeps its line endings. Two tests added.
+- `knowledge/query.py`: `tokens` (lowercased words plus CJK bigrams),
+  `retrieve(vault, question, k=)` (BM25 over every Raw section with text and
+  every Wiki paragraph, ties by corpus order), `Citation` (`raw`: source, file,
+  section, page/slide; `wiki`: page and the source behind it when the page
+  carries `source_id`), `Passage`, `Answer` with closed statuses, and
+  `QueryEngine(vault, model=, alias=).ask(question, k=)` whose synthesis may
+  cite only retrieved passages (`uncited` otherwise).
+- 3 tests (`tests/test_query.py`) over a small corpus with pages, slides, a
+  sources page carrying provenance and an entity page without.
+- Docs: phase spec slice 8 requirements, `docs/CONTRACTS.md`, migration slice 8
+  decision (lexical first, bigrams over a segmenter, strict synthesis).
 
 ## In Progress
 
-- PR #30 is open with the review posted; merge on green CI is authorized for
-  Phase 4 slices.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available. Merge on green CI is authorized for Phase 4 slices.
 
 ## Remaining
 
-- Slice 8: query with provenance — deterministic lexical retrieval over Raw
-  sections and Wiki pages, answers whose every citation names a
-  `KnowledgeSource` with page/slide where known; model synthesis optional and
-  limited to what retrieval returned.
-- Slice 9: migration adapter for an existing vault (adopt legacy Raw and Wiki
-  under typed provenance, report drift, snapshot and restore).
+- Slice 9: migration adapter for an existing vault — adopt legacy Raw (no
+  provenance frontmatter) into the index without rewriting it, migrate
+  `source_path` sources pages to typed provenance with backups, report
+  path-versus-hash drift, snapshot and restore the generated half.
 - Deferred from Phase 3, each needing its own scope: a payload sweep,
   process-liveness or lease-based suspension, and the earlier deferred reviews.
 
 ## Architecture decisions made
 
-- A marker is never cleared without its reason on record: `resolve` writes the
-  decision before it removes anything.
-- Manual-edit detection lives in `knowledge.lint` (computed by reading) and the
-  report carries it; the decision record lives in `knowledge.conflicts`.
-- The state file is the platform's own (`.ingest-state.json`, through the
-  vault), chosen over git as the source did because a vault may live in a
-  synced folder.
+- Lexical, deterministic retrieval first; embeddings can come later behind the
+  same `retrieve` shape.
+- Words without a retrieved source behind them are not an answer: synthesized
+  text is refused unless every citation is real.
+- No provider named; synthesis is one `ModelRequest` like every other model
+  call in knowledge code.
 
 ## Exact verification commands and results
 
@@ -77,14 +57,13 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 559 tests (554 prior + 5 conflicts; 2 skipped on Windows without
-#       symlink privileges, run on Linux CI)
+# PASS: see the PR; counts recorded after the review
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 76 source/test files
+# PASS
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
@@ -93,19 +72,21 @@ git diff --check
 # PASS
 ```
 
-No model, gateway, network, real vault, job or n8n instance was invoked. Local
-pytest uses `-p no:cacheprovider` because of temporary-directory ACLs on this
-machine; CI runs ordinary pytest.
+No model, gateway, network, real vault, job or n8n instance was invoked; the
+model in tests is a fake. Local pytest uses `-p no:cacheprovider` because of
+temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- `decisions.md` grows without bound and enters every plan prompt in full, as
-  in the source; a host that wants it condensed writes that itself.
-- Manual-edit detection compares whole-page hashes; it says which pages
-  changed, not what changed.
+- Retrieval rebuilds the corpus on every call by reading every Raw and Wiki
+  file; fine for hundreds of pages, a cache is a later concern.
+- BM25 over bigrams treats CJK as character pairs; no stemming for any
+  language.
+- Legacy Raw files without provenance are not part of the corpus until slice 9
+  adopts them.
 
 ## Next Recommended Action
 
-Open the PR for `phase-4/conflicts-decisions`, run the review, apply confirmed
-findings, merge on green CI, then write the slice 8 requirements (query with
-provenance) and implement it.
+Open the PR for `phase-4/query`, run the review, apply confirmed findings,
+merge on green CI, then write the slice 9 requirements (migration adapter) and
+implement it — the last Phase 4 slice.

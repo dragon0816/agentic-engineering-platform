@@ -285,3 +285,23 @@ removed (the source deleted any line containing the symbol); a page keeps
 its line endings; and a malformed clear list is refused before any write. Rollback removes `knowledge/conflicts.py`, the state
 functions in `knowledge/lint.py`, `Vault.state_read` / `state_write` and the
 tests; nothing else imports them.
+
+## Slice 8 source-first decision
+
+The source tooling's README lists `Query`, the schema's third operation, as
+not implemented; there is nothing to adapt. This slice is new platform
+behavior against the Roadmap's exit criterion that query answers cite source
+provenance.
+
+Decision (2026-09-21): deterministic lexical retrieval first (BM25, no index
+to maintain, no dependency), because it is exact, explainable and enough for a
+vault of hundreds of pages; embeddings or a vector index would add a model
+dependency and a stored artifact for a gain this corpus size does not need,
+and can come later behind the same `retrieve` shape. CJK is handled with
+character bigrams rather than a segmenter (no dependency; adequate for a
+Traditional-Chinese vault). Synthesis is optional and strict: a model may cite
+only the passages it was given, and text that cites nothing or something else
+is refused as `uncited` rather than returned as an answer — words without a
+retrieved source behind them are not an answer in a knowledge base whose whole
+point is provenance. Rollback removes `knowledge/query.py` and its tests;
+nothing else imports them.

@@ -268,12 +268,31 @@ enforced in code, never left to a prompt:
    tests cover the record, injection, finding and clearing, resolution with a
    moved marker, and manual edits across two recorded states.
 
+## Requirements and acceptance (slice 8 — query with provenance)
+
+1. `knowledge.query.retrieve(vault, question, k=)` ranks passages — every
+   Raw section with text and every Wiki paragraph — deterministically
+   (BM25; ties by corpus order), with character bigrams for CJK text so a
+   question in Chinese matches inside a run without a segmenter.
+2. Every `Passage` carries a `Citation`: a Raw passage names its
+   `KnowledgeSource`, file and section, with the page or slide the
+   extractor knew; a Wiki passage names its page and, when the page carries
+   `source_id`, the source behind it. This is the Roadmap's "query answers
+   can cite source provenance".
+3. `QueryEngine(vault, model=, alias=).ask(question, k=)` returns an `Answer`
+   with a closed status: `retrieved` (passages only, no model), `answered`
+   (a synthesized text whose every `[n]` citation names a retrieved
+   passage), `uncited` (the model's text was refused for citing nothing or
+   something it was not given), `model_failed` (an adapter that raises
+   included) or `no_match`. Synthesis goes through `ModelClient`; no
+   provider is named.
+4. Tests: tokenization with CJK bigrams, ranking that is stable across calls,
+   citations resolving to pages and slides, wiki passages citing the source
+   behind a sources page, image sections without text not being passages,
+   and synthesis accepted only when every citation is real.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 8 — Query with provenance: retrieval over Raw and Wiki returning an
-  answer whose every citation names a `KnowledgeSource` (with page/slide where
-  known). Deterministic lexical retrieval first; model synthesis, when used,
-  may cite only what retrieval returned.
 - Slice 9 — Migration adapter for an existing Obsidian vault: adopt existing
   Raw and Wiki content under typed provenance, report path-versus-hash drift,
   snapshot before adoption and restore on demand. Existing knowledge is not a

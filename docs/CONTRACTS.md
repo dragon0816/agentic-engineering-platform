@@ -630,3 +630,24 @@ only the pages the tool just wrote — a host calls it after an apply with the
 outcome's `written`, so the tool's writes are not reported as a person's while
 a later change to the same page still is; `manual_edits(vault)` compares. An
 odd state (blank keys, wrong types) is a first run, never a failure.
+
+## Query with provenance (Phase 4, slice 8)
+
+`knowledge.query.retrieve(vault, question, k=)` returns up to `k` `Passage`s
+(`text`, `citation`, `score`) ranked by BM25 over every Raw section with text
+and every Wiki paragraph, ties broken by corpus order so the same question
+always returns the same passages. `tokens` lowercases words and adds the
+overlapping bigrams of any CJK run. A `Citation` has `kind` `raw` (the
+`KnowledgeSource`, `raw_ref`, `section`, `page`/`slide` when known) or `wiki`
+(`wiki_page`, and `source` when the page's `source_id` names a Raw in the
+index).
+
+`QueryEngine(vault, model=None, alias=None, prompt=, max_output_tokens=)`
+`.ask(question, k=, trace=)` returns an `Answer` (`question`, `status`,
+`passages`, `text`, `synthesized_by`, `failure`). Statuses: `retrieved`
+(passages, no model), `answered` (text whose every `[n]` names a retrieved
+passage), `uncited` (the model's text refused: no citation, or one outside
+`1..len(passages)`), `model_failed` (the `Failure`; an adapter that raises
+becomes a retryable `model_error`) and `no_match`. Synthesis is one
+`ModelRequest` with the numbered passages and the question; the model is told
+to cite every claim and say so when the passages do not answer.
