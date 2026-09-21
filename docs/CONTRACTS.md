@@ -759,3 +759,52 @@ misconfigured catalog fails at construction rather than at the first request.
 It is plain serializable data (`model_validate` / `model_dump_json`), so a host
 may keep it in any format; the platform chooses no file, format or environment
 variable.
+
+## OpenAI-compatible adapter (Phase 5, slice 2)
+
+`models.openai_compatible.OpenAICompatible(endpoint, credential=None,
+transport=None, timeout_s=600.0)` implements `ModelClient` for any endpoint
+speaking the OpenAI chat-completions format. `ModelEndpoint.base_url` is the
+API root and `/chat/completions` is appended; an endpoint without one, or a
+non-positive timeout, is a `ValueError` at construction, because neither is a
+runtime condition. `credential` is a zero-argument callable resolved on every
+request, never captured, since the internal token is rewritten on a schedule;
+no credential is passed when it is `None`.
+
+`generate` sends `model`, `messages` and `max_tokens`, plus
+`response_format: {"type": "json_object"}` when the request declares an
+`output_contract`. The contract's name is a platform identifier and is never
+sent. A message with `images` becomes content parts (`text` then `image_url`),
+so Phase 4's `data:` URIs work unchanged; a `tool_call_id` is carried through.
+The reply always fills `text`, and `structured_output` only when an
+`output_contract` was declared and the text parses strictly as JSON; lenient
+salvage stays with the caller. `input_tokens` and `output_tokens` come from
+`usage.prompt_tokens` and `usage.completion_tokens`, with anything else there
+ignored. `trace` and `model_alias` are echoed from the request: a provider's
+own `model` field is an echo of what the client asked for, so it is never
+treated as evidence of what served the request.
+
+`stream` yields one `text` event per non-empty content delta, then `done` at
+`[DONE]` or at the end of the stream. Lines are reassembled across chunk
+boundaries. A chunk carrying no `choices`, a comment line and an unparseable
+payload are all skipped rather than failing: the internal gateway opens with a
+usage-only chunk, which is the fact the source had to patch LiteLLM to
+survive. A call whose requirements do not declare `streaming` is refused with
+a single `failed` event before anything is sent.
+
+Failure codes, all non-escaping: `model_timeout` and `model_unreachable`
+(retryable), `model_http_error` (retryable for 408, 429 and any 5xx),
+`model_unparseable` (a body that is not JSON or carries no choices),
+`model_error` (anything else raised), `streaming_not_declared` and
+`tools_not_supported`. Tools are refused because `ModelTool.input_contract`
+names a platform contract and rendering it as a provider schema needs a
+registry that does not exist yet. Every message is truncated to 500 characters
+and passed through `SECRET_PATTERN` redaction, so an upstream that echoes an
+`Authorization` header cannot print a token.
+
+`Transport` is the injected HTTP surface: `send(url, body, headers, timeout_s)`
+returns a `Reply` with `status`, `chunks()` and `close()`. A non-2xx status is
+an answer, not an exception. Arguments are plain values rather than a contract,
+so an `Authorization` header never lands in something serializable. The
+default `UrllibTransport` uses the standard library, so the platform's install
+stays `pydantic` alone and no test opens a socket.
