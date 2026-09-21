@@ -184,3 +184,54 @@ There is no deletion API, TTL or eviction — a retained checkpoint may referenc
 its payloads for as long as it exists — and no encryption, secret resolution,
 access control or engine wiring. Storing a credential in a payload remains
 forbidden by the same rule that forbids it in a checkpoint.
+
+## Engine recovery (slice 12)
+
+`WorkflowEngine(..., journal=RunJournal(checkpoints, payloads))` turns the
+contracts above into behavior on the real execution path. Without a journal the
+engine is unchanged: in memory only, exactly as before.
+
+Write-ahead ordering, as specified in "State and write ordering":
+
+1. `begin` commits the run arguments as a payload and creates the run record
+   **before** anything executes. A store that cannot acknowledge the run means
+   no run at all (`unavailable/checkpoint_<code>`, no run record in memory).
+2. Before each step, `started` is acknowledged. If that write fails or is
+   ambiguous the step is **not dispatched**, and the run fails
+   `checkpoint_<code>`; the evidence still reads `never_started`, which is true.
+3. After a step succeeds, its result payload is committed and only then is the
+   step recorded `completed`. If either write fails the step already ran, so the
+   evidence stays `started` — uncertain, which is also true.
+4. A run whose every step is completed *is* succeeded, so the final step's
+   completion and the terminal marker are one write, never two.
+
+Recovery is manual, as approved. `inspect_journal(context, run_id)` returns the
+durable evidence for a run this process may know nothing about, or `None` when
+the caller may not see it, the identifier is unusable or the store cannot
+answer — the caller learns nothing either way.
+`suspend(context, run_id, SuspensionConfirmation(...))` records a person's
+explicit claim that the owning process is gone: `process_confirmed_stopped` must
+be exactly `True`, and the operator and any note are written into the checkpoint
+itself, so a later process can still see who said it. `RunCheckpoint` requires
+that claim for every suspended record and refuses to let it be rewritten.
+Ownership is checked before liveness, so another owner's run is `missing` rather
+than a hint that it is running; a run still executing in this engine is refused,
+because a caller-wait timeout is not abandonment.
+
+The in-memory `resume()` refuses a journalled run (`use_recovery`): a journalled
+continuation must itself be journalled, and the "continued once" guard lives in
+the store, which only `recover()` reserves. All durable writes run off the event
+loop, and the SQLite store serialises them so it stays a single writer wherever
+it is called from.
+
+`recover(context, run_id, policy)` continues a **suspended** run, in this
+process or a later one. The stored manifest is provenance: the same version must
+still be installed and identical, or recovery refuses with `manifest_changed`.
+The completed prefix is restored from verified payloads and never re-run,
+pre-flight runs again, every remaining step is authorized again *now*, and an
+uncertain step is replayed only as the `ResumePolicy` allows. The continuation
+is a new run whose `resumed_from` names the original, reserved atomically
+through `continue_run`.
+
+An idempotency key that already names a durable run conflicts rather than
+starting a second one, even in a process whose in-memory key table is empty.

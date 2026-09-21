@@ -8,6 +8,7 @@ resolves payloads, enforces policy or recovers runs automatically.
 """
 
 import sqlite3
+import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -56,8 +57,13 @@ class SqliteCheckpointStore:
         self._capacity = capacity
         self._path = Path(path)
         self._conn: sqlite3.Connection | None = None
+        # Callers may run on a worker thread (the engine keeps blocking writes off
+        # its event loop); the lock keeps this a single writer wherever it is called.
+        self._lock = threading.RLock()
         try:
-            self._conn = sqlite3.connect(self._path, isolation_level=None, timeout=0)
+            self._conn = sqlite3.connect(
+                self._path, isolation_level=None, timeout=0, check_same_thread=False
+            )
             self._conn.execute("PRAGMA synchronous=FULL")
             with self._write() as conn:
                 for statement in _SCHEMA:
@@ -103,30 +109,34 @@ class SqliteCheckpointStore:
         """One atomic write. `unavailable` means known not committed; `commit_unknown`
         means the acknowledgment was lost and the caller must read back. Whatever
         happens inside, the transaction never stays open on the connection."""
-        conn = self._connection()
+        self._lock.acquire()
         try:
-            conn.execute("BEGIN IMMEDIATE")
-        except sqlite3.Error:
-            raise CheckpointStoreError("unavailable") from None
-        try:
-            yield conn
-        except BaseException as error:
-            self._rollback()
-            if isinstance(error, CheckpointStoreError):
+            conn = self._connection()
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+            except sqlite3.Error:
+                raise CheckpointStoreError("unavailable") from None
+            try:
+                yield conn
+            except BaseException as error:
+                self._rollback()
+                if isinstance(error, CheckpointStoreError):
+                    raise
+                if isinstance(error, sqlite3.IntegrityError):
+                    raise CheckpointStoreError("conflict") from None
+                if isinstance(error, sqlite3.Error):
+                    raise CheckpointStoreError("unavailable") from None
                 raise
-            if isinstance(error, sqlite3.IntegrityError):
-                raise CheckpointStoreError("conflict") from None
-            if isinstance(error, sqlite3.Error):
-                raise CheckpointStoreError("unavailable") from None
-            raise
-        try:
-            self._commit()
-        except sqlite3.Error as error:
-            self._rollback()
-            if getattr(error, "sqlite_errorname", "") in _NOT_COMMITTED:
-                raise CheckpointStoreError("unavailable") from None
-            # The commit may or may not have reached the file; never guess.
-            raise CheckpointStoreError("commit_unknown") from None
+            try:
+                self._commit()
+            except sqlite3.Error as error:
+                self._rollback()
+                if getattr(error, "sqlite_errorname", "") in _NOT_COMMITTED:
+                    raise CheckpointStoreError("unavailable") from None
+                # The commit may or may not have reached the file; never guess.
+                raise CheckpointStoreError("commit_unknown") from None
+        finally:
+            self._lock.release()
 
     def _commit(self) -> None:
         self._connection().execute("COMMIT")
@@ -205,13 +215,19 @@ class SqliteCheckpointStore:
 
     def get(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint | None:
         try:
-            return self._select(self._connection(), validate_owner(owner), validate_run_id(run_id))
+            with self._lock:
+                return self._select(
+                    self._connection(), validate_owner(owner), validate_run_id(run_id)
+                )
         except sqlite3.Error:
             raise CheckpointStoreError("unavailable") from None
 
     def find_key(self, owner: CheckpointOwner, key: IdempotencyKey) -> RunCheckpoint | None:
         try:
-            return self._select_key(self._connection(), validate_owner(owner), validate_key(key))
+            with self._lock:
+                return self._select_key(
+                    self._connection(), validate_owner(owner), validate_key(key)
+                )
         except sqlite3.Error:
             raise CheckpointStoreError("unavailable") from None
 

@@ -7,7 +7,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from test_checkpoints import changed, completed, failing, record, started
+from test_checkpoints import changed, completed, failing, record, started, suspended
 
 from common.checkpoints import RunCheckpoint
 from workflow.checkpoints import StoreErrorCode
@@ -27,7 +27,7 @@ def suspended_parent(store: SqliteCheckpointStore) -> RunCheckpoint:
     parent = store.create(record(idempotency_key="event-1"))
     parent = store.replace(started(parent), expected_revision=0)
     parent = store.replace(completed(parent), expected_revision=1)
-    return store.replace(changed(parent, status="suspended"), expected_revision=2)
+    return store.replace(suspended(parent), expected_revision=2)
 
 
 def child_of(parent: RunCheckpoint) -> RunCheckpoint:
@@ -36,6 +36,7 @@ def child_of(parent: RunCheckpoint) -> RunCheckpoint:
         run_id="run-2",
         revision=0,
         status="running",
+        suspended_by=None,
         resumed_from=parent.run_id,
         idempotency_key=None,
     )

@@ -60,7 +60,10 @@ policy and progress. No n8n runtime, HTTP endpoint or production connection is i
 [Workflow checkpoints](docs/WORKFLOW_CHECKPOINTS.md) define the owner-scoped restart
 evidence and store contract that manual recovery would rely on, with a bounded
 in-memory reference store, a single-writer SQLite backend and a content-addressed
-payload store for what those references point at; engine recovery is not wired yet.
+payload store for what those references point at. Giving the engine a
+`RunJournal` records write-ahead evidence on the real execution path, so a run
+interrupted by a restart can be inspected, suspended by a person who confirms the
+old process is gone, and continued from its completed prefix.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
