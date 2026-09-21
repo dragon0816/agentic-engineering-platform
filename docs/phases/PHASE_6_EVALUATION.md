@@ -96,18 +96,30 @@ before any new category of case is added.
    registry holding the repository's three skill manifests, the release
    workflow, and a Bridge whose `events` record every dispatch. Effects are
    read from the installed capability's declared `side_effect` for anything
-   that ran, so a route to a capability declared `execute` would be caught
-   whether or not policy allowed it to proceed.
+   that ran, so a route to a capability declared `execute` is caught by the
+   declaration. **A dispatch that failed after the handler ran still counts**,
+   because it still did whatever it did; only one refused before the handler
+   was reached did not. The stack is rebuilt for every case, since a Bridge's
+   event log is its own and reusing it carries evidence forward.
 5. A capability the repository deliberately does not install, such as
    `legacy/run-testing`, is still dispatched and still recorded. That a route
    resolves and nothing runs is the observation, not an absence of one.
-6. The registry proof declares full observability only because it checks that
-   neither the registry nor the advertisement exposes an execution surface at
-   all; the claim is verified in the runner rather than asserted.
-7. Tests: every case still passing through the shared runner; `no_execution`
+6. The registry proof declares that it observes **nothing**. A proof that
+   dispatches nothing has not watched for an effect, and claiming otherwise
+   would move this slice's hole out of the grader and into the runner. A case
+   that issues no request therefore forbids no effects and asserts no
+   `no_execution`: there is no request whose effects could be forbidden, and
+   what discovery must not expose is asserted structurally in
+   `tests/test_registry.py`, where it can be checked.
+7. Which cases are discovery proofs is named, not inferred from a missing
+   route, so a later case that legitimately omits one is routed rather than
+   silently graded as the registry proof.
+8. Tests: every case still passing through the shared runner; `no_execution`
    and a forbidden effect each failing when the run could not observe them;
-   `dispatched` recording an uninstalled capability; and the runner declaring
-   observability that matches what it actually wired.
+   `dispatched` recording an uninstalled capability; the effect reader
+   proven behaviourally, by a capability that declares `execute`, runs and
+   then fails, and is still reported, against one refused before it ran, which
+   is not; and one runner instance not carrying evidence between cases.
 
 ## Later slices (each needs its own requirements section before work starts)
 

@@ -43,6 +43,28 @@ SKILL_FILES = ("file-read.json", "release-workflow.json", "source-routing.json")
 # A Bridge sees every dispatch and the installed catalog declares every side
 # effect, so any of these would have been recorded had it happened.
 WATCHED: tuple[SideEffect, ...] = ("read", "write", "execute", "external_side_effect")
+# A dispatch that failed after the handler ran still caused whatever the
+# handler caused. `BridgeExecutor` marks these `invoked`, and its event code
+# is what distinguishes them from a dispatch refused before it began.
+INVOKED_CODES = frozenset({"timeout", "transient_failure", "handler_error", "invalid_output"})
+# Which cases are proofs about discovery rather than routed requests. Named
+# rather than inferred, so a later case that legitimately omits a route is
+# routed instead of being silently graded as the registry proof.
+DISCOVERY_CASES = frozenset({"discover-sample-task"})
+
+
+def effects_of(bridge: BridgeExecutor, installed: InstalledCapabilities) -> tuple[SideEffect, ...]:
+    """The declared side effect of everything the Bridge actually put in
+    motion. A capability that ran and then failed still ran, so its effect
+    counts; a dispatch refused before the handler was reached did not."""
+    effects: list[SideEffect] = []
+    for event in bridge.events:
+        if event.status != "succeeded" and event.code not in INVOKED_CODES:
+            continue
+        binding = installed.get(event.asset)
+        if binding is not None and binding.spec.side_effect not in effects:
+            effects.append(binding.spec.side_effect)
+    return tuple(effects)
 
 
 class Probe(Contract):
@@ -140,10 +162,18 @@ def grants() -> tuple[CapabilityGrant, ...]:
 
 
 class GatewayRunner:
-    """One Gateway for every routed case, so each is exercised through the
-    stack a host would actually use."""
+    """One `Gateway` per case, so one case's dispatches are never read as
+    another's. The stack is rebuilt on every run rather than reset, because a
+    Bridge's event log is its own and reusing it silently carries evidence
+    forward."""
 
     def __init__(self) -> None:
+        self.model = CountingModel()
+        self.handler = RecordingHandler()
+        self.installed = InstalledCapabilities()
+        self.bridge = BridgeExecutor(self.installed)
+
+    def _build(self) -> Gateway:
         self.model = CountingModel()
         self.handler = RecordingHandler()
         skills = SkillRegistry()
@@ -169,33 +199,21 @@ class GatewayRunner:
         self.bridge = BridgeExecutor(installed, LocalPolicy(grants()))
         workflows = InstalledWorkflows()
         workflows.register(release_workflow())
-        self.gateway = Gateway(
+        return Gateway(
             RequestRouter(CommandRouter(skills), model=self.model),
             self.bridge,
             WorkflowEngine(workflows, self.bridge),
         )
 
-    def _effects(self) -> tuple[SideEffect, ...]:
-        """The declared side effect of everything the Bridge actually ran. A
-        route to a capability declared `execute` is caught here whether or not
-        it succeeded, because the declaration is what the case forbids."""
-        effects: list[SideEffect] = []
-        for event in self.bridge.events:
-            if event.status != "succeeded":
-                continue
-            binding = self.installed.get(event.asset)
-            if binding is not None and binding.spec.side_effect not in effects:
-                effects.append(binding.spec.side_effect)
-        return tuple(effects)
-
     def run(self, case: EvaluationCase) -> ObservedRun:
-        result = asyncio.run(self.gateway.handle(case.request))
+        gateway = self._build()
+        result = asyncio.run(gateway.handle(case.request))
         workflow = result.workflow
         return ObservedRun(
             decision=result.routing.decision,
             origin=result.routing.origin,
             model_calls=len(self.model.calls),
-            side_effects=self._effects(),
+            side_effects=effects_of(self.bridge, self.installed),
             observable=WATCHED,
             dispatched=tuple(event.asset for event in self.bridge.events),
             status=workflow.run.status if workflow is not None else None,
@@ -205,10 +223,13 @@ class GatewayRunner:
 
 
 class DiscoveryRunner:
-    """The registry proof. It claims to observe every effect only because it
-    checks that neither the registry nor the advertisement exposes a way to
-    execute at all, so an effect would have needed an attribute that is not
-    there."""
+    """The registry proof: a manifest becomes discoverable and a Bridge says
+    it can run it, with nothing executed because nothing here can execute.
+
+    It declares that it observes no effects at all. Claiming otherwise would
+    move the hole this slice closed out of the grader and into the runner: a
+    proof that never dispatches anything has not watched for an effect, and
+    saying it did would be believed."""
 
     def run(self, case: EvaluationCase) -> ObservedRun:
         manifest = TaskManifest.model_validate_json(
@@ -219,8 +240,6 @@ class DiscoveryRunner:
         )
         registry = InMemoryTaskRegistry()
         advertisement = advertise_sample(manifest, registry, bridge)
-        if hasattr(registry, "execute") or hasattr(advertisement, "execute"):
-            raise AssertionError("discovery must expose no way to execute")
         discovered = registry.discover(namespace=case.request.namespace)
         return ObservedRun(
             discovered=tuple(task.metadata.identity for task in discovered),
@@ -229,7 +248,6 @@ class DiscoveryRunner:
             lifecycle=(manifest.metadata.lifecycle,),
             advertised=tuple(item.identity for item in advertisement.capabilities),
             installed=advertisement.installed_tasks,
-            observable=WATCHED,
         )
 
 
@@ -239,6 +257,6 @@ class RepositoryRunner:
     another's."""
 
     def run(self, case: EvaluationCase) -> ObservedRun:
-        if case.expected_route is None:
+        if case.case_id in DISCOVERY_CASES:
             return DiscoveryRunner().run(case)
         return GatewayRunner().run(case)

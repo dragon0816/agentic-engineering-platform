@@ -7,14 +7,30 @@ is why the source repository's benchmark shipped a selftest before it shipped
 a score (`docs/PHASE_6_MIGRATION.md`).
 """
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
 
 import pytest
-from evaluation_runner import WATCHED, GatewayRunner, RepositoryRunner
+from evaluation_runner import (
+    DISCOVERY_CASES,
+    WATCHED,
+    GatewayRunner,
+    Probe,
+    Report,
+    RepositoryRunner,
+    effects_of,
+)
 
-from common.assets import AssetIdentity
+from capabilities.contracts import CapabilitySpec
+from capabilities.runtime import (
+    CapabilityGrant,
+    CapabilityInvocation,
+    InstalledCapabilities,
+    LocalPolicy,
+)
+from common.assets import AssetIdentity, ExecutionDependencies
 from common.evaluation import (
     GRADERS,
     CaseResult,
@@ -25,7 +41,8 @@ from common.evaluation import (
     report,
     run_cases,
 )
-from common.execution import RouteDecision
+from common.execution import RequestContext, RouteDecision, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "evaluation/cases"
@@ -50,14 +67,100 @@ def test_every_routed_case_is_exercised_where_execution_could_be_seen() -> None:
     runner = RepositoryRunner()
     for case in load_cases(CASES):
         observed = runner.run(case)
-        assert set(observed.observable) == set(WATCHED), case.case_id
-        if case.expected_route is None:
+        if case.case_id in DISCOVERY_CASES:
+            # A proof that dispatches nothing has not watched for an effect,
+            # and says so rather than claiming a clean run.
+            assert observed.observable == (), case.case_id
+            assert "no_execution" not in case.assertions, case.case_id
             continue
+        assert set(observed.observable) == set(WATCHED), case.case_id
+        assert case.expected_route is not None
         if case.expected_route.kind == "needs_input":
             # Refusing dispatches nothing, which is the point of refusing.
             assert observed.dispatched == (), case.case_id
         else:
             assert observed.dispatched, case.case_id
+
+
+def test_the_runner_really_sees_an_effect_rather_than_declaring_that_it_would(
+    tmp_path: Path,
+) -> None:
+    """`observable` is a claim. This is the behaviour behind it: a capability
+    that ran is reported by its declared effect, and one that ran and then
+    failed is reported too, because it still did whatever it did."""
+
+    async def explode(context: Any, inputs: Any) -> Any:
+        raise RuntimeError("the effect happened, then this did")
+
+    spec = CapabilitySpec.model_validate(
+        {
+            "identity": {"namespace": "demo", "name": "detonate", "version": "1.0.0"},
+            "name": "demo.detonate",
+            "description": "Declares an execute effect and fails after running",
+            "input_contract": "demo.detonate.input.v1",
+            "output_contract": "demo.detonate.output.v1",
+            "side_effect": "execute",
+            "policy": {"required_permissions": ["demo.run"], "policy_refs": ["demo-policy"]},
+        }
+    )
+    installed = InstalledCapabilities()
+    installed.register(spec, explode, Probe, Report, ExecutionDependencies(central_required=False))
+    grant = CapabilityGrant.model_validate(
+        {
+            "actor": "engineer",
+            "asset": spec.identity,
+            "permissions": ["demo.run"],
+            "policy_refs": ["demo-policy"],
+            "approval_ref": "demo-approval",
+        }
+    )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant,)))
+    result = asyncio.run(
+        bridge.execute(
+            CapabilityInvocation(
+                context=RequestContext(
+                    trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+                    actor="engineer",
+                    namespace="demo",
+                    channel="evaluation",
+                    message="detonate",
+                ),
+                target=spec.identity,
+            )
+        )
+    )
+    assert result.status == "failed"
+    # The dispatch failed, and the effect still counts.
+    assert effects_of(bridge, installed) == ("execute",)
+
+    # A dispatch refused before the handler was reached did not happen.
+    denied = BridgeExecutor(installed, LocalPolicy(()))
+    asyncio.run(
+        denied.execute(
+            CapabilityInvocation(
+                context=RequestContext(
+                    trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+                    actor="engineer",
+                    namespace="demo",
+                    channel="evaluation",
+                    message="detonate",
+                ),
+                target=spec.identity,
+            )
+        )
+    )
+    assert denied.events and effects_of(denied, installed) == ()
+
+
+def test_one_runner_instance_does_not_carry_evidence_between_cases() -> None:
+    """A Bridge's event log is its own. Reusing one would let a case inherit
+    the dispatches of the one before it."""
+    runner = GatewayRunner()
+    cases = {case.case_id: case for case in load_cases(CASES)}
+    ran = runner.run(cases["phase3-workflow-dot-command"])
+    assert ran.dispatched and ran.side_effects == ("read",)
+    refused = runner.run(cases["phase2-unknown-explicit-command"])
+    assert refused.dispatched == () and refused.side_effects == ()
 
 
 def test_a_capability_the_repository_never_installs_is_still_dispatched() -> None:

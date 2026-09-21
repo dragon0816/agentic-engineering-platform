@@ -963,7 +963,9 @@ assertion holds, because grading a claim checks nothing.
 
 `observable` names the side effects the run was capable of detecting, and
 `dispatched` names every capability the Bridge was asked to run whether or not
-it was installed, authorized or reached. Together they make absence of an
+it was installed, authorized or reached. An effect counts as caused when the
+handler ran, including when it then failed; a dispatch refused before the
+handler was reached caused nothing. Together they make absence of an
 effect mean something: `no_execution` fails when `execute` was not observable,
 and the always-on forbidden check fails for any forbidden effect the run could
 not have seen. A harness that was not looking no longer reports a clean run. `advertised` and `installed` hold `AssetIdentity` values rather
@@ -1001,7 +1003,10 @@ list, so a permitted read is not read as failing open.
 case is exercised stays outside the contract it is graded against, so a host
 supplies the wiring; `tests/evaluation_runner.py` is the repository's, sending
 every routed case through one real `Gateway` and reading effects from the
-Bridge's own `events`.
+Bridge's own `events`. A case that issues no request, such as the registry
+proof, observes nothing and therefore forbids nothing: the harness will not
+grade an effect it could not have seen, so such a case carries its meaning in
+its assertions instead.
 
 `load_cases(directory)` reads every `.json` file, accepting one case or a list,
 in a stable order, refusing a duplicate `case_id` where the cases are loaded.

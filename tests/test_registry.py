@@ -102,7 +102,11 @@ def test_engineering_profile_and_evaluation_case() -> None:
     # and `tests/test_evaluation.py` grades them against the proof itself.
     assert case.expected_route is None
     assert "bridge_advertisement" in case.assertions
-    assert set(case.forbidden_side_effects) == {"write", "execute", "external_side_effect"}
+    # A case that issues no request forbids no effects: there is no request
+    # whose effects could be forbidden, and the harness refuses to grade a
+    # forbidden effect it could not have observed. What discovery must not do
+    # is asserted structurally in `test_vertical_proof` above.
+    assert case.forbidden_side_effects == ()
     assert json.loads(case.model_dump_json())["category"] == "deterministic"
 
 

@@ -40,16 +40,26 @@ effect list was not evidence, it was the absence of a witness.
   all three shipped skill manifests, the release workflow, and a Bridge whose
   `events` supply both `dispatched` and the declared side effect of anything
   that ran. Every routed case goes through it.
-- 18 test cases in `tests/test_evaluation.py`, including: every case still
+- 20 test cases in `tests/test_evaluation.py`, including: every case still
   passing through the shared runner; every routed case dispatching something
   except the one that refuses; `legacy/run-testing` dispatched and recorded
-  although the repository deliberately installs no implementation for it; and
-  a check that could not have seen its evidence failing rather than passing.
+  although the repository deliberately installs no implementation for it; a
+  check that could not have seen its evidence failing rather than passing; and
+  the effect reader proven behaviourally rather than by its own declaration.
+- PR #41 review (5 findings) applied, all fixed. Four were the evidence being
+  weaker than the docs claimed: a dispatch that failed *after* the handler ran
+  contributed no effect, so a capability that did its damage and then raised
+  read as a clean run; one `GatewayRunner` instance carried its Bridge's event
+  log between cases; `DiscoveryRunner` declared it watched everything while
+  watching nothing, moving the hole from the grader into the runner; and the
+  observability test compared the runner's declaration against the constant
+  the runner itself used. The fifth was a trap for later: the repository
+  runner chose the discovery wiring from a missing route, which a slice 3
+  scenario case could legitimately have.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -68,9 +78,11 @@ forbidden outcomes checked as evidence.
 - The filesystem capability is installed but never granted. A case about
   routing must not touch this machine's disk in order to prove that routing
   executed nothing.
-- The registry proof claims full observability only after checking that
-  neither the registry nor the advertisement exposes a way to execute, so the
-  claim is verified rather than asserted.
+- The registry proof declares that it observes nothing. A proof that
+  dispatches nothing has not watched for an effect, and saying it did would
+  move this slice's hole out of the grader and into the runner.
+- Which cases are discovery proofs is named rather than inferred from a
+  missing route, so a scenario case that legitimately omits one is routed.
 
 ## Exact verification commands and results
 
@@ -78,7 +90,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 630 passed, 3 skipped (link privileges)
+# PASS: 632 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -97,11 +109,18 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Known issues / limitations
 
-- `observable` is declared by the runner, not derived. A runner that wires no
-  Bridge and still claims to watch everything would be believed. The claim is
-  checked for the registry proof, which verifies there is no execution
-  surface; for the Gateway runner it rests on the Bridge recording every
-  dispatch, which the tests exercise.
+- `observable` is still declared by the runner rather than derived, so a
+  runner that wires no Bridge and claimed to watch everything would be
+  believed. What the review forced is that the two runners here are honest
+  about it, and that the Gateway runner's claim is now backed behaviourally:
+  a capability that declares `execute`, runs and then fails is reported, and
+  one refused before it ran is not.
+- The discovery case now forbids no side effects and no longer asserts
+  `no_execution`. It issues no request, so there is no request whose effects
+  could be forbidden; what discovery must not expose is asserted structurally
+  in `tests/test_registry.py`, which checks the registry and the advertisement
+  have no `execute` at all. Nothing was lost, but the case is narrower than it
+  looked.
 - All six cases remain category `deterministic`. No `agent` or `scenario` case
   exists yet.
 - Two test modules still load individual case files for their own unit
@@ -110,6 +129,5 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Next Recommended Action
 
-Open the PR for `phase-6/observable-execution`, run the review, apply
-confirmed findings and merge on green CI. Then write the slice 3 requirements
-and add the first `scenario` case.
+Merge PR #41 on green CI. Then write the slice 3 requirements and add the
+first `scenario` case with its forbidden outcomes.
