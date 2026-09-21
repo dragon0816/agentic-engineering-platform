@@ -40,7 +40,7 @@ class RunControlResult(Contract):
     or owned by another actor, all indistinguishable on purpose.
     """
 
-    action: Literal["inspect", "resume", "suspend"]
+    action: Literal["inspect", "resume", "suspend", "retire"]
     run_id: RunId
     source: Literal["memory", "journal", "unknown"] = "unknown"
     plan: ResumePlan | None = None
@@ -55,6 +55,8 @@ class RunControlResult(Contract):
             raise ValueError("resume reports the continuation, not a plan")
         if self.action == "suspend" and self.workflow is not None:
             raise ValueError("suspend records a confirmation; it never executes a run")
+        if self.action == "retire" and (self.workflow is not None or self.source == "memory"):
+            raise ValueError("retire removes durable history only")
         if self.suspended_by is not None and self.source != "journal":
             raise ValueError("only the durable record carries a confirmation")
         if self.source == "unknown" and (self.plan is not None or self.workflow is not None):
@@ -203,6 +205,31 @@ class Gateway:
             return RunControlResult(action="suspend", run_id=run_id)
         return RunControlResult(
             action="suspend",
+            run_id=run_id,
+            source="journal",
+            plan=entry.plan,
+            suspended_by=entry.suspended_by,
+        )
+
+    def retire(self, request: RequestContext, run_id: RunId) -> RunControlResult:
+        """Remove a finished run's durable history; the plan reports what went.
+
+        Only durable history is retired — this process's bounded memory evicts
+        itself — and only a run that is no longer executing qualifies: succeeded,
+        or suspended by a person's confirmation; the store's own closed code says
+        why otherwise. A run this caller cannot see
+        is `unknown`. Durable writes happen on the calling thread.
+        """
+        try:
+            entry = self.engine.retire(request, run_id)
+        except CheckpointStoreError as error:
+            if error.code != "missing":
+                raise
+            entry = None
+        if entry is None:
+            return RunControlResult(action="retire", run_id=run_id)
+        return RunControlResult(
+            action="retire",
             run_id=run_id,
             source="journal",
             plan=entry.plan,

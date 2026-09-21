@@ -32,11 +32,12 @@ corrupt, incompatible or disallowed. A reference does not grant access. SecretRe
 requirements in the manifest remain unresolved metadata. Arbitrary secret detection
 is not claimed: even opaque identifiers must not be populated with credentials.
 
-No TTL or silent eviction is defined in v1. At capacity, reject new runs. Retain
-idempotency mappings and continuation links for the store lifetime; no deletion API
-exists. A durable backend must retain these across restarts. Payload cleanup and
-key expiration/tombstones need a separately specified policy before deployment;
-deleting history must never silently make a used key executable again.
+No TTL or silent eviction is defined. At capacity, reject new runs. Idempotency
+mappings and continuation links are retained for the store lifetime; the only
+deletion is the explicit `retire` in "Retention (slice 14)" below, and a retired
+run's key stays bound as a tombstone, so deleting history never silently makes a
+used key executable again. A durable backend must retain all of this across
+restarts. Payload cleanup still needs its own policy.
 The memory reference defaults to 50 total records (including continuations), with
 a configurable positive capacity. This is independent of the existing engine's
 history/key limits; wiring or changing those limits is not part of this slice.
@@ -138,8 +139,8 @@ Reads run outside transactions and are owner-scoped like the memory model.
 Records store the checkpoint JSON plus indexed owner/run/key columns; they hold
 evidence and `PayloadRef`s only. Capacity counts every persisted record,
 including continuations, after a restart. A file whose `schema_version` is not
-`1` refuses to open. There is still no TTL, eviction, deletion, payload storage,
-engine wiring or automatic recovery.
+`1` is migrated in place and any other version refuses to open (slice 14). There
+is still no TTL, eviction or automatic recovery.
 
 ## Payload storage (slice 11)
 
@@ -180,8 +181,9 @@ decides.
 
 Limits and omissions: a payload above `max_bytes` is `capacity` and an
 unserializable value is `invalid_transition`, both before anything is written.
-There is no deletion API, TTL or eviction — a retained checkpoint may reference
-its payloads for as long as it exists — and no encryption, secret resolution,
+There is no payload deletion, TTL or eviction — a retained checkpoint may
+reference its payloads for as long as it exists, and retiring a checkpoint does
+not remove them — and no encryption, secret resolution,
 access control or engine wiring. Storing a credential in a payload remains
 forbidden by the same rule that forbids it in a checkpoint.
 
@@ -245,3 +247,37 @@ through `continue_run`.
 
 An idempotency key that already names a durable run conflicts rather than
 starting a second one, even in a process whose in-memory key table is empty.
+
+## Retention (slice 14)
+
+The store's capacity bounds the production start path, so history must be
+removable — but only history. `CheckpointStore.retire(owner, run_id)` deletes
+one record and returns it. It is legal for a record that is no longer executing:
+
+- a `succeeded` run, whose every step is completed evidence; and
+- a `suspended` run — whether continued, so its evidence lives on in the
+  continuation, or not, because the person who confirmed its process gone may
+  also decide not to continue it. This is how a run that failed for good leaves
+  the store: `suspend`, then `retire`, and nothing runs again.
+
+A `running` record may still be alive in some process and is never history,
+however old: `invalid_transition`. A run this owner cannot see is `missing`. Nothing is retired automatically: retention is a host decision, taken
+per run, through `WorkflowEngine.retire` / `Gateway.retire`, and refused while
+the run is alive in that engine exactly as suspension is.
+
+**A retired idempotency key never executes again.** Retiring a keyed record
+leaves a tombstone binding `(owner, key)` to the retired run id. `create` under
+that key is `key_retired` whatever the intent, `find_key` no longer finds a
+record, and tombstones do not count toward capacity. This is what lets history
+be deleted without violating the rule above. Tombstones are never removed, so
+they grow with the keyed runs ever retired — a few small values per run, the
+price of the guarantee — and both the application and, in SQLite, a trigger
+refuse to bind a retired key. The SQLite schema is now version
+`2` (a `retired_keys` table); a version-`1` file is migrated in place, and older
+code refuses a version-`2` file rather than opening it without the table and
+letting a retired key run again.
+
+Payloads are not removed by `retire`: they are content-addressed, and a
+continuation's completed prefix references the same payloads as its parent. A
+payload sweep — removing what no retained record references — is a separate
+policy, not defined here, and until it exists payload storage grows.

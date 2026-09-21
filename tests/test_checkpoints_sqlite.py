@@ -87,7 +87,7 @@ def test_unknown_schema_version_is_refused_and_leaves_no_handle(tmp_path: Path) 
     SqliteCheckpointStore(path).close()
     editor = sqlite3.connect(path)
     with editor:
-        editor.execute("UPDATE checkpoint_meta SET value = '2' WHERE key = 'schema_version'")
+        editor.execute("UPDATE checkpoint_meta SET value = '99' WHERE key = 'schema_version'")
     editor.close()  # the context manager commits but keeps the handle open
     failing(lambda: SqliteCheckpointStore(path), "unavailable")
     # A failed open closed its connection: on Windows the file could not move otherwise.

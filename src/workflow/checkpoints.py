@@ -21,6 +21,7 @@ StoreErrorCode = Literal[
     "already_continued",
     "unavailable",
     "commit_unknown",
+    "key_retired",
 ]
 _ERROR_CODE: TypeAdapter[StoreErrorCode] = TypeAdapter(StoreErrorCode)
 _RUN_ID: TypeAdapter[str] = TypeAdapter(RunId)
@@ -60,6 +61,8 @@ class CheckpointStore(Protocol):
     def continue_run(
         self, child: RunCheckpoint, *, expected_parent_revision: int
     ) -> RunCheckpoint: ...
+
+    def retire(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint: ...
 
 
 def checked_copy(checkpoint: RunCheckpoint) -> RunCheckpoint:
@@ -149,6 +152,16 @@ def check_continue(
             raise CheckpointStoreError("invalid_transition")
 
 
+def check_retire(item: RunCheckpoint) -> None:
+    """Only a record that is no longer executing may be removed. A succeeded run is
+    finished evidence; a suspended run has a person's confirmation that its process
+    is gone, and that same person may decide not to continue it — which is how a
+    run that failed for good leaves the store without being run again. A running
+    record may still be alive somewhere, so it is never history."""
+    if item.status == "running":
+        raise CheckpointStoreError("invalid_transition")
+
+
 def linked_parent(parent: RunCheckpoint, child: RunCheckpoint) -> RunCheckpoint:
     return parent.model_copy(update={"continued_by": child.run_id, "revision": parent.revision + 1})
 
@@ -165,7 +178,10 @@ class MemoryCheckpointStore:
 
     Records are scoped by owner, so run identifiers are private to an owner: one
     owner can neither observe nor block another's. Every write commits with one
-    assignment. There is no TTL/eviction or deletion API. A new instance starts
+    assignment. There is no TTL or eviction; `retire` is the only deletion, and a
+    retired run's idempotency key stays bound as a tombstone that no longer
+    counts toward capacity. Records are bounded; tombstones grow with the keyed
+    runs ever retired, which is the price of the guarantee. A new instance starts
     empty; this is not a durable backend.
     """
 
@@ -174,6 +190,8 @@ class MemoryCheckpointStore:
             raise ValueError("capacity must be a positive integer")
         self._capacity = capacity
         self._runs: dict[_StoreKey, RunCheckpoint] = {}
+        # (actor, namespace, key) -> run_id of the retired run that used it.
+        self._retired: dict[_StoreKey, str] = {}
 
     def _lookup(self, owner: CheckpointOwner, run_id: str) -> RunCheckpoint | None:
         return self._runs.get(_key(owner, run_id))
@@ -207,6 +225,9 @@ class MemoryCheckpointStore:
                 if not same_intent(existing, item):
                     raise CheckpointStoreError("key_conflict")
                 return existing.model_copy(deep=True)
+            # A key is live or retired, never both; the tombstone is the rarer case.
+            if _key(item.owner, item.idempotency_key) in self._retired:
+                raise CheckpointStoreError("key_retired")
         self._room(item)
         self._runs[_key(item.owner, item.run_id)] = item
         return item.model_copy(deep=True)
@@ -232,4 +253,15 @@ class MemoryCheckpointStore:
         self._room(item)
         self._runs[_key(parent.owner, parent.run_id)] = linked_parent(parent, item)
         self._runs[_key(item.owner, item.run_id)] = item
+        return item.model_copy(deep=True)
+
+    def retire(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint:
+        checked = validate_owner(owner)
+        item = self._lookup(checked, validate_run_id(run_id))
+        if item is None:
+            raise CheckpointStoreError("missing")
+        check_retire(item)
+        if item.idempotency_key is not None:
+            self._retired[_key(checked, item.idempotency_key)] = item.run_id
+        del self._runs[_key(checked, item.run_id)]
         return item.model_copy(deep=True)
