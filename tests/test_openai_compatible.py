@@ -22,12 +22,8 @@ from models.contracts import (
     ModelTool,
     ModelToolCall,
 )
-from models.openai_compatible import (
-    OpenAICompatible,
-    UrllibTransport,
-    _NoRedirect,
-    _status_failure,
-)
+from models.openai_compatible import OpenAICompatible
+from models.wire import NoRedirect, UrllibTransport, status_failure
 
 TRACE = TraceIdentifiers(trace_id="t-1", request_id="r-1", span_id="s-1")
 ANSWER: dict[str, Any] = {
@@ -443,9 +439,9 @@ def test_the_default_transport_speaks_the_standard_library_and_never_redirects()
     # A redirect is never followed: urllib would copy the Authorization header
     # to the new location and drop the POST body on the way.
     installed = getattr(UrllibTransport().opener, "handlers", [])
-    assert _NoRedirect in [type(handler) for handler in installed]
+    assert NoRedirect in [type(handler) for handler in installed]
     assert (
-        _NoRedirect().redirect_request(
+        NoRedirect().redirect_request(
             urllib.request.Request("https://gateway.invalid"),
             io.BytesIO(b""),
             302,
@@ -463,4 +459,4 @@ def test_the_default_transport_speaks_the_standard_library_and_never_redirects()
     )
     relocated = moved.send("https://gateway.invalid", b"{}", {"Authorization": "Bearer t"}, 1.0)
     assert relocated.status == 302
-    assert _status_failure(relocated.status, b"".join(relocated.chunks())).retryable is False
+    assert status_failure(relocated.status, b"".join(relocated.chunks())).retryable is False

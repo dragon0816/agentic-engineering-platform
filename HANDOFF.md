@@ -1,16 +1,14 @@
-# Handoff — Phase 5 model gateway, slice 2 (OpenAI-compatible adapter)
+# Handoff — Phase 5 model gateway, slice 3 (Ollama adapter)
 
-Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-5/openai-adapter`, based on `main` after PR #34 merged.
+Updated: 2026-09-22 (Asia/Taipei).
+Branch: `phase-5/ollama`, based on `main` after PR #35 merged.
 
 ## Goal
 
-Phase 5 slice 2: the first provider adapter. One `ModelClient` over the OpenAI
-chat-completions format, serving the internal company gateway, a LiteLLM proxy
-or any other OpenAI-shaped API. Requirements:
-`docs/phases/PHASE_5_GATEWAY.md` (slice 2); decisions:
-`docs/PHASE_5_MIGRATION.md` (slice 2); contracts: `docs/CONTRACTS.md`
-("OpenAI-compatible adapter").
+Phase 5 slice 3: the local provider, and the shared surface a second adapter
+revealed. Requirements: `docs/phases/PHASE_5_GATEWAY.md` (slice 3); decisions:
+`docs/PHASE_5_MIGRATION.md` (slice 3); contracts: `docs/CONTRACTS.md`
+("Shared adapter rules and the Ollama adapter").
 
 ## Owner decisions still in force (taken 2026-09-21)
 
@@ -20,63 +18,41 @@ or any other OpenAI-shaped API. Requirements:
 2. Providers are Ollama and the internal OpenAI-compatible gateway. Codex and
    Claude Code are out of scope in both senses, which is why the source's
    LiteLLM proxy is not migrated at all.
+3. Remaining Phase 5 slices are to be completed without check-ins unless
+   something cannot be decided (owner, 2026-09-22).
 
 ## Completed
 
-- `src/models/openai_compatible.py`: `OpenAICompatible` implementing
-  `ModelClient`, plus the injected `Transport`/`Reply` protocols and the
-  standard-library `UrllibTransport`.
-  - `generate` maps roles, text, images as content parts, `max_tokens` and
-    `response_format: json_object` for a declared `output_contract`; fills
-    `text` always and `structured_output` only on strict JSON; reads usage,
-    ignoring the internal deployment's extra fields.
-  - `stream` yields a `text` event per non-empty delta then `done`,
-    reassembling lines across chunk boundaries and skipping a `choices`-less
-    prelude, comments and unparseable payloads.
-  - Every failure is typed: `model_timeout`, `model_unreachable`,
-    `model_http_error` (retryable on 408, 429 and 5xx), `model_unparseable`,
-    `model_error`, `streaming_not_declared`, `tools_not_supported`. Messages
-    are truncated and redacted through the existing `SECRET_PATTERN`.
-  - The credential is a callable resolved per request, because the source's
-    token is rewritten on a schedule.
-- 13 tests (`tests/test_openai_compatible.py`), none opening a socket: the
-  round trip, images and an output contract, per-request credential
-  resolution and its own failure, streaming including a split line, a
-  non-stream reply and the undeclared-streaming refusal, every transport
-  failure, every HTTP status class with a redacted body, unparseable replies,
-  both tool refusals, the configurable token field, construction errors, and
-  the default transport's request construction, error mapping and redirect
-  refusal.
-- Docs: slice 2 requirements in the phase spec, the slice 2 source-first
-  decision (ADAPT `Gateway.send`, with each replacement and its reason), and
-  the contract section.
-- PR #35 review (6 findings) applied: the default opener **refuses
-  redirects**, because urllib copies `Authorization` to wherever a 3xx points
-  and drops the POST body, which would have leaked the internal token; a
-  replayed exchange carrying `tool_calls` on its messages is refused like a
-  tool request rather than sent without them; a 2xx reply carrying no
-  server-sent events is `model_unparseable` instead of a silent empty success
-  that discards the answer; the token limit field is configurable
-  (`max_tokens_field`) for providers that dropped `max_tokens`; resolving the
-  credential is its own `credential_unavailable` rather than an unreachable
-  endpoint; and an endpoint declaring a credential with no resolver supplied
-  is refused at construction.
+- `src/models/wire.py`, extracted from `openai_compatible.py`: the
+  `Transport`/`Reply` protocols, the redirect-refusing `UrllibTransport`,
+  failure mapping and redaction, per-request credential resolution, the tool
+  and undeclared-streaming refusals, strict structured parsing, and the
+  response/event builders. The extraction is pure movement; the slice 2 tests
+  pass unchanged apart from their import line.
+- `src/models/ollama.py`: `Ollama` implementing `ModelClient` against the
+  native `/api/chat`. Images as bare base64 with `image_not_inline` for a
+  reference that cannot be inlined, `options.num_predict`, `format: "json"`,
+  an explicit `stream` flag, usage from `prompt_eval_count`/`eval_count`, and
+  newline-delimited JSON streaming that stops at `done`.
+- 6 tests (`tests/test_ollama.py`), none opening a socket: the round trip
+  against Ollama's own field names, images and the refusal, structured
+  output, streaming including a split line and a stream with no `done`, a
+  server that is not Ollama, and the shared rules holding identically here.
 
 ## In Progress
 
-- Nothing; the PR is open with the review applied.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available.
 
 ## Remaining
 
-- Slice 3: `ollama` adapter, satisfying `local_only`. New platform work; the
-  source repository contains no Ollama integration, so there is nothing to
-  characterize. Its wire format is not OpenAI's, so it is a separate adapter
-  rather than a base URL change.
 - Slice 4: the credential resolution boundary (`SecretRef` to value), with an
   environment-backed development resolver outside the platform's import path.
-  The adapter already takes a callable, so this slice supplies it rather than
-  changing the adapter.
-- Slice 5: observability and a complete inert requirements-to-response example.
+  Both adapters already take a callable, so this slice supplies it rather than
+  changing either adapter.
+- Slice 5: observability and a complete inert requirements-to-response
+  example, then the Phase 5 closure change (Roadmap status, README, the
+  `CLAUDE.md` active-phase pointer).
 - Deferred from Phase 3: a payload sweep, process-liveness or lease-based
   suspension, and the earlier deferred reviews.
 - Deferred from Phase 4: a retrieval cache, host wiring that plans from an
@@ -85,14 +61,15 @@ or any other OpenAI-shaped API. Requirements:
 
 ## Architecture decisions made
 
-- A non-2xx status is an answer the transport reports, not an exception, so
-  the adapter decides retryability rather than the transport.
-- A timeout is distinguished from a refusal, because only one of them suggests
-  trying a different endpoint.
-- The `Transport` arguments are plain values, never a contract, so an
-  `Authorization` header cannot land in something serializable.
-- An `output_contract`'s name is never sent to a provider; the provider is
-  asked for JSON and the caller validates the shape it already knows.
+- Ollama's native `/api/chat` rather than its OpenAI-compatible shim, because
+  the shim is documented as experimental, the differences are real, and the
+  local path should not depend on a compatibility layer that may lag.
+  Reversing it is a catalog change, not a rewrite.
+- The shared surface was extracted only once a second consumer existed. With
+  one consumer it would have been a guess; with two it is the set of rules
+  that must not differ between providers.
+- Locality is not enforced by the adapter. `local` is a claim the catalog
+  makes, and a host may run Ollama on another machine.
 
 ## Exact verification commands and results
 
@@ -100,7 +77,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 591 passed, 3 skipped (link privileges)
+# PASS: 597 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -115,31 +92,26 @@ git diff --check
 # PASS
 ```
 
-No model, gateway, network, real vault, job or n8n instance was invoked. Every
-test in this slice injects a transport or replaces `urlopen`; nothing opens a
-socket.
+No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Known issues / limitations
 
-- Tool calling is refused rather than mapped. `ModelTool.input_contract` names
-  a platform contract and there is no registry that can render it as a
-  provider function schema. No caller in the platform sends tools today.
-- `max_tokens` is the default token-limit field, which the internal
-  deployment and LiteLLM both accept; a provider that dropped it needs
-  `max_tokens_field="max_completion_tokens"` passed per client. Nothing reads
-  this from the catalog yet, because it is adapter knowledge rather than a
-  platform capability.
-- A response's `tool_calls` are not read back, for the same reason tools are
-  not sent.
-- Retryability is reported but nothing retries yet; a caller decides.
-- `model_error` stays retryable, because a custom transport may raise its own
-  transient exception types. An adapter bug therefore reads as retryable.
-- `UrllibTransport` opens one connection per request with no pooling, matching
-  the source. An async or pooled transport is an alternative implementation of
-  the same protocol, not a change here.
+- **The Ollama adapter has never been run against a live Ollama server.** It
+  is written to the documented native chat API and covered by tests with an
+  injected transport. Before anyone relies on it, run one real request against
+  a local Ollama and confirm the field names, particularly
+  `prompt_eval_count`/`eval_count` and the streaming `done` flag.
+- Ollama's tool calling is not used, for the same reason as the other adapter:
+  a `ModelTool` names a platform contract and no registry can render it as a
+  provider schema.
+- `keep_alive`, `think`, `num_ctx` and the rest of Ollama's options are not
+  exposed. Only `num_predict` is set, from the request's `max_output_tokens`.
+- A response's `tool_calls` are not read back by either adapter.
+- `model_error` stays retryable in the shared mapping, because a custom
+  transport may raise its own transient exception types.
 
 ## Next Recommended Action
 
-Merge PR #35 on green CI. Then write the slice 3 requirements section and
-implement the `ollama` adapter against its own wire format, reusing the
-`Transport` protocol introduced here.
+Open the PR for `phase-5/ollama`, run the review, apply confirmed findings and
+merge on green CI. Then write the slice 4 requirements section and implement
+the credential resolution boundary.

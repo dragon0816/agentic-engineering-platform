@@ -822,3 +822,37 @@ default `UrllibTransport` uses the standard library through an opener that
 included, to wherever a 3xx points and drop the POST body on the way, so a
 redirect is reported as the status it is. The platform's install stays
 `pydantic` alone and no test opens a socket.
+
+## Shared adapter rules and the Ollama adapter (Phase 5, slice 3)
+
+`models.wire` is what every HTTP model adapter shares, so a second provider is
+its wire format and nothing else. It holds the `Transport` protocol
+(`send(url, body, headers, timeout_s) -> Reply`, whose arguments are plain
+values so an `Authorization` header never enters something serializable), the
+`Reply` protocol (`status`, `chunks()`, `close()`), `UrllibTransport` with its
+redirect-refusing opener, `transport_failure` and `status_failure`, `redacted`
+and `describe`, `authorized` (per-request credential resolution, with
+`credential_unavailable` when the resolver raises), `checked_base` (the
+construction-time refusals: no base url, a non-positive timeout, or an
+endpoint declaring a credential with no resolver), `unsupported` (tools in
+either shape), `undeclared_streaming`, `structured` (strict JSON only when an
+`output_contract` was declared), `lines`, `token_count`, and the
+`failed_response`/`failed_event`/`answered` builders. `answered` is where the
+platform's alias, rather than a provider's echoed `model`, is put on a reply.
+
+`models.ollama.Ollama(endpoint, credential=None, transport=None,
+timeout_s=600.0)` implements `ModelClient` against Ollama's native
+`/api/chat`. `base_url` is the server root, such as `http://localhost:11434`.
+`generate` sends `model`, `messages`, `stream: false` (Ollama streams by
+default), `options.num_predict` from `max_output_tokens`, and `format: "json"`
+for a declared `output_contract`. A message's `images` are sent as bare base64:
+a `data:` URI is stripped to its payload, and any other reference is refused
+as `image_not_inline` before the call, because Ollama embeds bytes rather than
+fetching a URL. Usage is read from `prompt_eval_count` and `eval_count`.
+
+`stream` reads newline-delimited JSON objects: one `text` event per non-empty
+`message.content`, stopping at the object whose `done` is true, then `done`.
+Blank and half-written lines are skipped, lines are reassembled across chunk
+boundaries, and a 2xx body containing no JSON object is `model_unparseable`.
+Failure codes are the shared ones plus `image_not_inline`. Locality is not
+enforced: `local` is a catalog claim, and a host may run Ollama elsewhere.
