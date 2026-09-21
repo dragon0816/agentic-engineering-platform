@@ -16,22 +16,36 @@ with provenance").
 
 ## Completed
 
-- `knowledge/query.py`: `tokens` (lowercased words plus CJK bigrams),
-  `retrieve(vault, question, k=)` (BM25 over every Raw section with text and
-  every Wiki paragraph, ties by corpus order), `Citation` (`raw`: source, file,
-  section, page/slide; `wiki`: page and the source behind it when the page
-  carries `source_id`), `Passage`, `Answer` with closed statuses, and
-  `QueryEngine(vault, model=, alias=).ask(question, k=)` whose synthesis may
-  cite only retrieved passages (`uncited` otherwise).
-- 3 tests (`tests/test_query.py`) over a small corpus with pages, slides, a
-  sources page carrying provenance and an entity page without.
+- `knowledge/query.py`: `tokens` (lowercased words, scripts split, CJK
+  characters plus bigrams plus the run), `cited_numbers` (`[2]`, `[1, 3]`,
+  `[1-3]`), `retrieve(vault, question, k=)` (BM25 over every section with
+  text of every current Raw and every Wiki paragraph after its frontmatter,
+  ties by corpus order), `Citation` (`raw`: source, file, section,
+  page/slide; `wiki`: page and the source behind it when the page carries
+  `source_id`), `Passage`, `Answer` with closed statuses (`retrieved`,
+  `answered`, `unanswered`, `uncited`, `model_failed`, `no_match`), and
+  `QueryEngine(vault, model=, alias=).ask(question, k=, trace=)` whose
+  synthesis may cite only retrieved passages.
+- `knowledge/modelcalls.py`: `failure_from_exception`, the one place an
+  adapter's exception becomes a retryable `Failure`, used by description,
+  planning and query. `knowledge.lint.body_of` splits a page's body from its
+  frontmatter (CRLF tolerated; `head_fields` tolerates CRLF too).
+- 4 tests (`tests/test_query.py`) over a small corpus with pages, slides, a
+  CRLF sources page carrying provenance, an entity page without, and a
+  superseded Raw version.
 - Docs: phase spec slice 8 requirements, `docs/CONTRACTS.md`, migration slice 8
-  decision (lexical first, bigrams over a segmenter, strict synthesis).
+  decision (lexical first, bigrams over a segmenter, strict synthesis) with the
+  review-driven changes recorded.
+- PR #31 review (10 findings) applied: superseded Raw excluded; Latin glued to
+  CJK tokenized; CJK unigrams; blank question is `no_match`, not a validation
+  error; frontmatter split shared with lint and CRLF-safe; honest "no answer"
+  is `unanswered`, not refused; `[1, 2]` and `[1-3]` citations; shared
+  adapter-failure helper; a real image-section assertion; per-request default
+  trace ids.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- Nothing; merge of PR #31 on green CI is authorized for Phase 4 slices.
 
 ## Remaining
 
@@ -57,7 +71,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: see the PR; counts recorded after the review
+# PASS: 561 passed, 2 skipped (symlink privilege) in 4.7s
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -80,13 +94,12 @@ temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 - Retrieval rebuilds the corpus on every call by reading every Raw and Wiki
   file; fine for hundreds of pages, a cache is a later concern.
-- BM25 over bigrams treats CJK as character pairs; no stemming for any
+- BM25 treats CJK as characters and character pairs; no stemming for any
   language.
 - Legacy Raw files without provenance are not part of the corpus until slice 9
   adopts them.
 
 ## Next Recommended Action
 
-Open the PR for `phase-4/query`, run the review, apply confirmed findings,
-merge on green CI, then write the slice 9 requirements (migration adapter) and
-implement it — the last Phase 4 slice.
+Merge PR #31 on green CI, then write the slice 9 requirements (migration
+adapter) and implement it on `phase-4/migration` — the last Phase 4 slice.

@@ -47,6 +47,7 @@ def head_fields(text: str) -> dict[str, str] | None:
     """The `key: value` lines of a page's frontmatter, or None when the page
     has no frontmatter at all. Lines that are not fields are skipped, not
     fatal; an unclosed fence reads to the end of the page."""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
     if FRONTMATTER_OPEN.match(text) is None:
         return None
     fields: dict[str, str] = {}
@@ -57,6 +58,19 @@ def head_fields(text: str) -> dict[str, str] | None:
         if match is not None:
             fields[match.group(1).lower()] = match.group(2).strip("\"'")
     return fields
+
+
+def body_of(text: str) -> str:
+    """The page after its frontmatter block (the whole page when it has none,
+    or when the fence never closes)."""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    if FRONTMATTER_OPEN.match(normalized) is None:
+        return normalized
+    lines = normalized.split("\n")
+    for index, line in enumerate(lines[1:], 1):
+        if line.strip() == "---":
+            return "\n".join(lines[index + 1 :])
+    return normalized
 
 
 class PathLink(Contract):

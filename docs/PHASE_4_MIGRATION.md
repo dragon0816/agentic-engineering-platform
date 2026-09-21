@@ -303,5 +303,16 @@ Traditional-Chinese vault). Synthesis is optional and strict: a model may cite
 only the passages it was given, and text that cites nothing or something else
 is refused as `uncited` rather than returned as an answer — words without a
 retrieved source behind them are not an answer in a knowledge base whose whole
-point is provenance. Rollback removes `knowledge/query.py` and its tests;
+point is provenance. Review of the PR sharpened this: a text that cites
+nothing is what the prompt asks for when the passages do not answer, so it is
+`unanswered` with its sentence kept, not refused; citations written as
+`[1, 3]` or `[1-3]` count; a superseded Raw is not in the corpus (its
+successor holds the evidence); CJK is indexed by character as well as bigram
+so a one-character question matches; a Latin term glued to CJK is its own
+token; wiki bodies are split from frontmatter by the lint module's reader
+(CRLF pages included); the adapter-exception-to-`Failure` rule now lives once
+in `knowledge/modelcalls.py` for description, planning and query; and a
+default trace is derived per request rather than constant. Rollback removes
+`knowledge/query.py`, `knowledge/modelcalls.py` (inlining the helper back into
+`describe.py` and `planning.py`), `knowledge.lint.body_of` and the query tests;
 nothing else imports them.

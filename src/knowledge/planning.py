@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError
 
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
+from knowledge.modelcalls import failure_from_exception
 from knowledge.raw import RawDocument, one_line_ending
 from knowledge.vault import (
     SOURCES_AREA,
@@ -407,14 +408,7 @@ class IngestPlanner:
         try:
             response = self.model.generate(request)
         except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
-            raise _ModelFailed(
-                Failure(
-                    code="model_error",
-                    message=f"{type(error).__name__}: {error}"[:200].strip()
-                    or type(error).__name__,
-                    retryable=True,
-                )
-            ) from error
+            raise _ModelFailed(failure_from_exception(error)) from error
         if response.failure is not None:
             raise _ModelFailed(response.failure)
         return response.structured_output, response.text

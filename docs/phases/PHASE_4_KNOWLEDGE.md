@@ -271,9 +271,12 @@ enforced in code, never left to a prompt:
 ## Requirements and acceptance (slice 8 — query with provenance)
 
 1. `knowledge.query.retrieve(vault, question, k=)` ranks passages — every
-   Raw section with text and every Wiki paragraph — deterministically
-   (BM25; ties by corpus order), with character bigrams for CJK text so a
-   question in Chinese matches inside a run without a segmenter.
+   section with text of every current Raw (a superseded version is not
+   cited) and every Wiki paragraph after its frontmatter — deterministically
+   (BM25; ties by corpus order), with single characters and character
+   bigrams for CJK text so a question of any length in Chinese matches
+   inside a run without a segmenter, and a Latin term glued to CJK is still a
+   term of its own.
 2. Every `Passage` carries a `Citation`: a Raw passage names its
    `KnowledgeSource`, file and section, with the page or slide the
    extractor knew; a Wiki passage names its page and, when the page carries
@@ -281,15 +284,19 @@ enforced in code, never left to a prompt:
    can cite source provenance".
 3. `QueryEngine(vault, model=, alias=).ask(question, k=)` returns an `Answer`
    with a closed status: `retrieved` (passages only, no model), `answered`
-   (a synthesized text whose every `[n]` citation names a retrieved
-   passage), `uncited` (the model's text was refused for citing nothing or
-   something it was not given), `model_failed` (an adapter that raises
-   included) or `no_match`. Synthesis goes through `ModelClient`; no
-   provider is named.
-4. Tests: tokenization with CJK bigrams, ranking that is stable across calls,
-   citations resolving to pages and slides, wiki passages citing the source
-   behind a sources page, image sections without text not being passages,
-   and synthesis accepted only when every citation is real.
+   (a synthesized text whose every citation — `[2]`, `[1, 3]` or `[1-3]` —
+   names a retrieved passage), `unanswered` (the model cited nothing, as it
+   is told to when the passages do not answer; its sentence is kept),
+   `uncited` (the text was refused for citing something it was not given),
+   `model_failed` (an adapter that raises included) or `no_match` (a blank
+   question included). Synthesis goes through `ModelClient`; no provider is
+   named, and a default trace is derived per request.
+4. Tests: tokenization with CJK characters and bigrams and split scripts,
+   ranking that is stable across calls, citations resolving to pages and
+   slides, wiki passages citing the source behind a CRLF sources page, image
+   sections without text not being passages, only the current version of an
+   original being cited, and synthesis accepted only when every citation is
+   real.
 
 ## Later slices (each needs its own requirements section before work starts)
 
