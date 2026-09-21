@@ -227,3 +227,20 @@ only, verified on every read. The source's 4 KB summary cap informs the modest
 not payloads), but no source behavior is adapted or deprecated. Rollback removes
 `workflow/payloads.py` and its tests; checkpoints keep referencing payloads a
 host stores some other way.
+
+## Slice 12 source-first decision
+
+The pinned source has no recovery to adapt: `jobrunner.JobRegistry` keeps runs in
+a memory ring buffer, a caller-wait timeout leaves the thread running with no
+durable trace, and a process restart loses every run. Its only cross-process
+state is best-effort mirroring to the ops dashboard, which the migration record
+already classifies as observability, not evidence.
+
+Decision: **new platform semantics** within the owner-approved scope. The
+source's preserved behaviors stay intact — bounded in-memory history, caller-wait
+timeouts that do not finalize a run, first-failed-step termination — and the
+journal is added beside them as a correctness gate, not a replacement. Manual
+suspension (option A) was chosen over process-liveness checks or leases because
+the platform cannot honestly claim to know a foreign process is dead; a person
+claims it and the claim is recorded. Rollback removes `workflow/journal.py` and
+the engine's optional `journal` argument; runs stay in memory as before.

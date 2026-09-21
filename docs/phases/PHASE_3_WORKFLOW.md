@@ -290,6 +290,31 @@ engine wiring.
 5. Tests cover round trips for every JSON shape, deduplication, restart,
    tampering, mismatched references, owner isolation, limits and failed writes.
 
+## Requirements and acceptance (slice 12 — engine recovery)
+
+Owner approved scope (2026-09-21), option A of three: suspension is **purely
+manual**. The platform never probes processes, reads PIDs or takes leases; a
+person confirms that the owning process is gone and the confirmation is
+recorded. B (process liveness) and C (leases) can be layered on later.
+
+1. The journal is optional: without it the engine behaves exactly as before.
+2. Write-ahead ordering on the real execution path: arguments and the run record
+   commit before execution; `started` is acknowledged before each dispatch and a
+   failed or ambiguous write forbids that dispatch; the result payload commits
+   before the step is recorded complete; the final completion and the terminal
+   marker are one write.
+3. `suspend` requires a `SuspensionConfirmation` whose
+   `process_confirmed_stopped` is exactly `True`, records the operator, and is
+   refused while the run is alive in this engine.
+4. `recover` continues a suspended run in any process: the stored manifest must
+   still be installed and identical, the completed prefix is restored from
+   verified payloads and never re-run, pre-flight and per-step authorization run
+   again, and an uncertain step obeys the existing `ResumePolicy`.
+5. Tests exercise a real restart (a new engine over the same files), evidence
+   after success and failure, refused dispatch without acknowledgment, refused
+   suspension of a live run, changed manifests, denied re-authorization and a
+   key that already names a durable run.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -305,8 +330,10 @@ engine wiring.
 - Slice 9: checkpoint contracts and memory reference model for manual recovery.
 - Slice 10: single-writer SQLite checkpoint backend.
 - Slice 11: content-addressed protected payload storage.
-- Later Phase 3 slices: explicit engine recovery through the existing
-  Gateway/Bridge policy path, including coordinator ownership semantics.
+- Slice 12: engine recovery with manual, human-confirmed suspension.
+- Later Phase 3 work (each needs explicit scope): a Gateway surface for run
+  control over the journal, and process-liveness or lease-based suspension if
+  single-Bridge manual recovery ever stops being enough.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks
