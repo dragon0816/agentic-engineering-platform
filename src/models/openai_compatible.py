@@ -111,41 +111,46 @@ class OpenAICompatible:
         headers = wire.authorized(self.credential)
         if isinstance(headers, Failure):
             return wire.failed_response(request, headers)
+        # Serialized before the clock starts, so the two adapters measure the
+        # same span and a large image is charged to neither provider.
+        body = json.dumps(self._payload(request, stream=False)).encode("utf-8")
+        elapsed = wire.Elapsed()
         try:
-            reply = self.transport.send(
-                self.url,
-                json.dumps(self._payload(request, stream=False)).encode("utf-8"),
-                headers,
-                self.timeout_s,
-            )
+            reply = self.transport.send(self.url, body, headers, self.timeout_s)
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
-            return wire.failed_response(request, wire.transport_failure(error))
+            return wire.failed_response(
+                request, wire.transport_failure(error), duration_ms=elapsed.ms
+            )
         try:
             status = reply.status
             raw = b"".join(reply.chunks())
         except Exception as error:  # noqa: BLE001 - a read can fail like a send
-            return wire.failed_response(request, wire.transport_failure(error))
+            return wire.failed_response(
+                request, wire.transport_failure(error), duration_ms=elapsed.ms
+            )
         finally:
             wire.close_quietly(reply)
         if status // 100 != 2:
-            return wire.failed_response(request, wire.status_failure(status, raw))
-        return self._answer(request, raw)
+            return wire.failed_response(
+                request, wire.status_failure(status, raw), duration_ms=elapsed.ms
+            )
+        return self._answer(request, raw, elapsed.ms)
 
-    def _answer(self, request: ModelRequest, raw: bytes) -> ModelResponse:
+    def _answer(self, request: ModelRequest, raw: bytes, duration_ms: int) -> ModelResponse:
+        def refused(failure: Failure) -> ModelResponse:
+            return wire.failed_response(request, failure, duration_ms=duration_ms)
+
         try:
             body = json.loads(raw)
         except (ValueError, UnicodeDecodeError):
-            return wire.failed_response(
-                request, Failure(code="model_unparseable", message="the reply is not json")
-            )
+            return refused(Failure(code="model_unparseable", message="the reply is not json"))
         reported = wire.provider_error(body)
         if reported is not None:
-            return wire.failed_response(request, reported)
+            return refused(reported)
         choices = body.get("choices") if isinstance(body, dict) else None
         if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
-            return wire.failed_response(
-                request,
-                Failure(code="model_unparseable", message="the reply carries no choices"),
+            return refused(
+                Failure(code="model_unparseable", message="the reply carries no choices")
             )
         message = choices[0].get("message")
         content = message.get("content") if isinstance(message, dict) else None
@@ -156,6 +161,7 @@ class OpenAICompatible:
             text=content if isinstance(content, str) else "",
             input_tokens=wire.token_count(usage.get("prompt_tokens")),
             output_tokens=wire.token_count(usage.get("completion_tokens")),
+            duration_ms=duration_ms,
         )
 
     def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
@@ -167,24 +173,27 @@ class OpenAICompatible:
         if isinstance(headers, Failure):
             yield wire.failed_event(request, headers)
             return
+        body = json.dumps(self._payload(request, stream=True)).encode("utf-8")
+        elapsed = wire.Elapsed()
         try:
-            reply = self.transport.send(
-                self.url,
-                json.dumps(self._payload(request, stream=True)).encode("utf-8"),
-                headers,
-                self.timeout_s,
-            )
+            reply = self.transport.send(self.url, body, headers, self.timeout_s)
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
-            yield wire.failed_event(request, wire.transport_failure(error))
+            yield wire.failed_event(request, wire.transport_failure(error), duration_ms=elapsed.ms)
             return
+        sent = elapsed.ms
+        # Only the time spent waiting on the provider counts from here; a
+        # consumer that renders slowly must not make the model look slow.
+        waited = wire.Waited(reply.chunks())
         answered = False
         try:
             if reply.status // 100 != 2:
                 yield wire.failed_event(
-                    request, wire.status_failure(reply.status, b"".join(reply.chunks()))
+                    request,
+                    wire.status_failure(reply.status, b"".join(waited)),
+                    duration_ms=sent + waited.ms,
                 )
                 return
-            for line in wire.lines(reply.chunks()):
+            for line in wire.lines(iter(waited)):
                 payload = _event_data(line)
                 if payload is None:
                     continue
@@ -198,13 +207,15 @@ class OpenAICompatible:
                 if reported is not None:
                     # Once the status is sent, a refusal can only arrive in
                     # the body; reading past it would call it a success.
-                    yield wire.failed_event(request, reported)
+                    yield wire.failed_event(request, reported, duration_ms=sent + waited.ms)
                     return
                 text = _delta(chunk)
                 if text is not None:
                     yield ModelStreamEvent(trace=request.trace, kind="text", text=text)
         except Exception as error:  # noqa: BLE001 - a read can fail like a send
-            yield wire.failed_event(request, wire.transport_failure(error))
+            yield wire.failed_event(
+                request, wire.transport_failure(error), duration_ms=sent + waited.ms
+            )
             return
         finally:
             wire.close_quietly(reply)
@@ -217,6 +228,7 @@ class OpenAICompatible:
                 Failure(
                     code="model_unparseable", message="the reply carries no server-sent events"
                 ),
+                duration_ms=sent + waited.ms,
             )
             return
-        yield ModelStreamEvent(trace=request.trace, kind="done")
+        yield ModelStreamEvent(trace=request.trace, kind="done", duration_ms=sent + waited.ms)

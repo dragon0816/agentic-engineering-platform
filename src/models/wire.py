@@ -12,6 +12,7 @@ import json
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Iterator, Mapping
+from time import monotonic
 from typing import Any, Protocol
 
 from common.assets import SECRET_PATTERN
@@ -244,16 +245,75 @@ def structured(request: ModelRequest, text: str) -> Any:
         return None
 
 
-def failed_response(request: ModelRequest, failure: Failure) -> ModelResponse:
-    return ModelResponse(trace=request.trace, model_alias=request.model_alias, failure=failure)
+class Elapsed:
+    """How long the provider took. Started when a call goes out, so a request
+    refused before that reports nothing rather than a misleading zero.
+    Monotonic, because a clock adjustment must not produce a negative latency
+    in an evaluation. The payload is built before the clock starts, so two
+    adapters measure the same span and a large image does not count against
+    whichever provider happens to receive it."""
+
+    def __init__(self) -> None:
+        self._started = monotonic()
+
+    @property
+    def ms(self) -> int:
+        return max(0, round((monotonic() - self._started) * 1000))
 
 
-def failed_event(request: ModelRequest, failure: Failure) -> ModelStreamEvent:
-    return ModelStreamEvent(trace=request.trace, kind="failed", failure=failure)
+class Waited:
+    """The time a stream spent waiting on its source, and none of the time its
+    consumer spent between pulls. A stream is read as the caller iterates, so
+    measuring wall clock to the last event would charge a provider for a
+    harness that renders slowly, and a model that sends many small deltas
+    would rank as the slow one."""
+
+    def __init__(self, chunks: Iterator[bytes]) -> None:
+        self._chunks = chunks
+        self._waited = 0.0
+
+    @property
+    def ms(self) -> int:
+        return max(0, round(self._waited * 1000))
+
+    def __iter__(self) -> Iterator[bytes]:
+        while True:
+            started = monotonic()
+            try:
+                chunk = next(self._chunks)
+            except StopIteration:
+                self._waited += monotonic() - started
+                return
+            self._waited += monotonic() - started
+            yield chunk
+
+
+def failed_response(
+    request: ModelRequest, failure: Failure, *, duration_ms: int | None = None
+) -> ModelResponse:
+    return ModelResponse(
+        trace=request.trace,
+        model_alias=request.model_alias,
+        failure=failure,
+        duration_ms=duration_ms,
+    )
+
+
+def failed_event(
+    request: ModelRequest, failure: Failure, *, duration_ms: int | None = None
+) -> ModelStreamEvent:
+    return ModelStreamEvent(
+        trace=request.trace, kind="failed", failure=failure, duration_ms=duration_ms
+    )
 
 
 def answered(
-    request: ModelRequest, *, text: str, input_tokens: int, output_tokens: int
+    request: ModelRequest,
+    *,
+    text: str,
+    input_tokens: int,
+    output_tokens: int,
+    duration_ms: int | None = None,
 ) -> ModelResponse:
     return ModelResponse(
         trace=request.trace,
@@ -264,4 +324,5 @@ def answered(
         structured_output=structured(request, text),
         input_tokens=input_tokens,
         output_tokens=output_tokens,
+        duration_ms=duration_ms,
     )

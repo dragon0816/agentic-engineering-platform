@@ -247,11 +247,51 @@ These hold for every slice and are enforced in code, never by convention:
    registering its own provider, caching, and the full requirements-to-client
    chain over a catalog holding both providers.
 
-## Later slices (each needs its own requirements section before work starts)
+## Requirements and acceptance (slice 5 — observability and a worked example)
 
-- Slice 5 — observability and a complete inert example: usage and latency on
-  every response, an alias-labelled trace, and a requirements-to-response
-  chain a host can copy, with no network in tests.
+1. `ModelResponse.duration_ms` and `ModelStreamEvent.duration_ms` report how
+   long the provider took, so evaluation can compare aliases on latency as
+   well as on quality and usage, which `docs/ARCHITECTURE.md` requires of the
+   model router. `None` means nothing was measured, which a harness must be
+   able to tell from a call that took no time. Both adapters use a monotonic
+   clock and start it after the payload is serialized, so the same span is
+   measured on both sides of a comparison. A stream counts only the time
+   spent blocked on the provider, never the time its reader spends between
+   events, and the terminal event carries the total.
+2. `models.proof` is the model layer's counterpart to `workflow.proof`:
+   something a host copies rather than infers. `SAMPLE_CATALOG` is plain data
+   in the shape a host keeps in YAML or JSON, `clients_from` validates it and
+   wires a resolver and a transport, and `ask` states what the work needs and
+   sends one request to whichever endpoint satisfies it, naming no provider,
+   model id or URL. A caller's own mistake, such as a blank prompt, is
+   `invalid_request` rather than an exception, since `ask` promises a value
+   either way.
+3. The example is inert. Nothing is installed, no socket is opened in a test,
+   the sample catalog carries a `SecretRef` name rather than any value, and
+   the repository's own `SECRET_PATTERN` guard finds nothing in it.
+4. Tests: the sample catalog validating and carrying no credential material,
+   the whole chain answering through both providers with the alias decided by
+   requirements, a routing failure that stays a `Failure`, a resolver needed
+   only where a secret is declared, measured durations on a successful and a
+   failed call for each adapter with the clock replaced, and a stream whose
+   reader pauses for seconds between events still reporting only what it
+   waited on the provider for.
+
+## Phase 5 exit criteria
+
+Met on 2026-09-22:
+
+- **Local Ollama and the internal OpenAI-compatible gateway satisfy the same
+  model client interface.** `models.ollama.Ollama` and
+  `models.openai_compatible.OpenAICompatible` both implement `ModelClient`,
+  each over its own wire format, sharing `models.wire` for everything a
+  provider must not decide for itself.
+- **Credentials are externalized.** A `ModelEndpoint` declares a `SecretRef`
+  and never holds a value; `models.credentials` is the only place one is
+  produced, per request, by a resolver the host supplies.
+- **Provider-specific patches stay isolated.** Nothing outside `src/models/`
+  names a provider, a wire format or a URL, and the platform's install is
+  still `pydantic` alone.
 
 ## Out of scope for Phase 5
 
