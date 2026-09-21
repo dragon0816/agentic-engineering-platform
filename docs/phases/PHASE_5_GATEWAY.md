@@ -99,12 +99,68 @@ These hold for every slice and are enforced in code, never by convention:
    `model_dump_json`/`model_validate_json`, loading from plain data, and that
    no endpoint contract can hold a secret value in a field or in a URL.
 
+## Requirements and acceptance (slice 2 — OpenAI-compatible adapter)
+
+1. `models.openai_compatible.OpenAICompatible(endpoint, credential=, transport=,
+   timeout_s=)` implements `ModelClient` for any endpoint speaking the OpenAI
+   chat-completions format: the internal company gateway, a LiteLLM proxy or a
+   public OpenAI-shaped API. `ModelEndpoint.base_url` is the API root and the
+   adapter appends `/chat/completions`; an endpoint without one is a
+   programming error (`ValueError` at construction), not a runtime failure.
+2. The credential is a zero-argument callable resolved **per request**, never
+   captured at construction, because the source's token rotates on a schedule
+   (`refresh-token.ps1`, `docs/PHASE_5_MIGRATION.md`). No credential reaches a
+   contract, a log or a `Failure`: an error body is truncated and passed
+   through the repository's existing `SECRET_PATTERN` redaction before it
+   becomes a message, and headers never appear in one.
+3. `generate` maps a `ModelRequest` to one call and back: roles and text,
+   `images` as image-url content parts so Phase 4's `data:` URIs work
+   unchanged, `max_output_tokens`, and `response_format: json_object` when an
+   `output_contract` is declared. The reply always fills `text`, and
+   `structured_output` when that text parses strictly as JSON; a contract name
+   is a platform identifier and is never sent to the provider, and lenient
+   salvage stays with the caller that wants it. `input_tokens` and
+   `output_tokens` come from `usage`, whose unknown fields are ignored because
+   the internal deployment adds its own. `trace` and `model_alias` are echoed
+   from the request: a provider's echoed `model` is never treated as evidence
+   of what served it.
+4. `stream` yields `ModelStreamEvent`s over server-sent events: one `text`
+   event per non-empty content delta, then `done` at `[DONE]` or at the end of
+   the stream. A 2xx reply carrying no events at all is an endpoint that
+   ignored `stream: true`, and is `model_unparseable` rather than a silent
+   empty success that throws the answer away. **A chunk carrying no `choices` is normal and is skipped**,
+   which is the fact the source's `gateway.py` had to monkey-patch a private
+   LiteLLM class to survive. A call that did not declare `streaming` in its
+   requirements is refused with a single `failed` event, keeping declarations
+   honest the way `ModelRequest` already couples tools to `tool_calling`.
+5. Every failure is typed and nothing escapes the adapter: `model_timeout`
+   and `model_unreachable` (both retryable), `credential_unavailable` when
+   the resolver itself fails (retryable, and distinct because the endpoint was
+   never asked), `model_http_error` (retryable for 408, 429 and 5xx, not
+   otherwise), `model_unparseable` and `model_error`. `generate` returns them
+   on `ModelResponse.failure`; `stream` yields a `failed` event and stops. A
+   request carrying `tools`, or messages replaying `tool_calls`, is refused as
+   `tools_not_supported` until a contract can be rendered as a provider
+   schema, which needs a registry that does not exist yet; no caller in the
+   platform sends tools today.
+6. HTTP sits behind an injected `Transport` protocol returning a `Reply`
+   (`status`, `chunks()`, `close()`), so the platform adds no dependency and
+   no test opens a socket. A non-2xx status is an answer, not an exception.
+   The default `UrllibTransport` uses the standard library through an opener
+   that refuses redirects, because urllib would otherwise copy the
+   `Authorization` header to the redirect target and drop the POST body; its
+   request construction, its error mapping and its redirect refusal are tested
+   with the opener replaced.
+7. Tests: the full generate round trip including images, an `output_contract`,
+   usage with unknown fields present and absent; the alias echoed rather than
+   the provider's `model`; streaming with a `choices`-less prelude skipped, a
+   malformed keepalive ignored, a stream that ends without `[DONE]`, and the
+   undeclared-streaming refusal; every failure code including a redacted error
+   body; the credential resolved once per request and absent when none is
+   given; and the default transport's request construction and error mapping.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 2 — `openai_compatible` adapter: `ModelClient.generate` and `stream`
-  over an OpenAI-shaped endpoint, covering the internal company gateway, a
-  LiteLLM proxy and any other OpenAI-compatible API. Injected transport,
-  resolved credential, typed failures, usage accounting, redaction.
 - Slice 3 — `ollama` adapter: the local provider, satisfying `local_only`.
   New platform work; the source repository contains no Ollama integration.
 - Slice 4 — credential resolution boundary: a `CredentialResolver` the host

@@ -79,3 +79,64 @@ variable is chosen by the platform.
 
 Rollback removes `src/models/catalog.py` and its tests; nothing else imports
 them, and `models.contracts` is untouched.
+
+## Slice 2 source-first decision
+
+Re-inspected the `Gateway` class and `read_key` in `agent/agent.py`, and the
+three compatibility facts recorded in the table above.
+
+Decision (2026-09-21): **ADAPT** `Gateway.send` into
+`models.openai_compatible.OpenAICompatible`. What is preserved: the standard
+library as the transport, so the platform adds no dependency; bearer
+authentication; `POST {base}/chat/completions`; and reading token counts from
+the reply's `usage`.
+
+What is deliberately replaced, each because the source's choice cannot hold
+inside a platform contract:
+
+- `SystemExit` on an HTTP or URL error becomes a typed `Failure` on the
+  response. A library cannot end the host's process, and Phase 4 already
+  established that a provider failure is a status rather than an exception.
+- The error body, which the source pasted into its message up to 500
+  characters, is truncated **and** redacted through the existing
+  `SECRET_PATTERN`. An upstream that echoes a request header would otherwise
+  print a token.
+- Usage accumulated on the client object becomes per-response
+  `input_tokens`/`output_tokens`, so a shared client cannot mix two callers'
+  accounting.
+- A timeout is distinguished from a refusal (`model_timeout` against
+  `model_unreachable`), because only one of them suggests a different endpoint.
+- The key is a callable resolved per request rather than a string captured at
+  construction, because `refresh-token.ps1` rewrites the token on a schedule
+  and a long-lived client would otherwise hold an expired one.
+- `read_key`'s environment and `.env` fallbacks are not migrated at all; the
+  host resolves the value and hands it in.
+
+The two compatibility facts the source had to work around are preserved as
+behavior rather than as settings: a streaming chunk with no `choices` is
+skipped (the source patched LiteLLM's private `_CombinedChunkSplitter` for
+exactly this), and unknown fields inside `usage` are ignored rather than
+rejected (the source set `drop_params` for the same reason). The third,
+`use_chat_completions_url_for_anthropic_messages`, has no analogue here
+because this adapter speaks only the chat-completions format.
+
+Not migrated in this slice: tool calling. `ModelTool.input_contract` is a
+`Symbol` naming a platform contract, and rendering it as a provider function
+schema needs a contract registry that does not exist. No caller in the
+platform sends tools today, so the adapter refuses them with a typed
+`tools_not_supported` rather than silently dropping them.
+
+Review of the PR added six more differences from the source, each a place the
+source's shape would not survive as a platform contract: the default opener
+refuses redirects, because urllib copies `Authorization` to wherever a 3xx
+points and the source's bare `urlopen` would have leaked the internal token; a
+replayed exchange carrying `tool_calls` on its messages is refused like a tool
+request instead of being sent without them; a 2xx reply with no server-sent
+events is reported rather than returned as an empty success; the token limit
+field is configurable for providers that dropped `max_tokens`; resolving the
+credential is its own failure code rather than an unreachable endpoint; and an
+endpoint that declares a credential with no resolver supplied is refused at
+construction.
+
+Rollback removes `src/models/openai_compatible.py` and its tests; nothing else
+imports them.
