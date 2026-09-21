@@ -218,9 +218,13 @@ enforced in code, never left to a prompt:
    referenced; links that carry a path or a `.md` naming a wiki page;
    pages without frontmatter; a legacy `source_path:` that no longer
    resolves; a `source_id:` that names no Raw in the index; Raw sources no
-   `wiki/sources/` page carries; open `⚠️` conflicts with their line. Nothing
-   in it calls a model; a judgement pass may take the report as context
-   later.
+   `wiki/sources/` page carries (a superseded Raw handed its evidence on and
+   is not pending); open `⚠️` conflicts with their line; pages that cannot be
+   read. Nothing in it calls a model, and nothing a page contains aborts the
+   report — an empty link, a bare marker, a malformed identifier or a
+   non-UTF-8 page is a finding, never an exception. Frontmatter is read
+   leniently (Obsidian lists, blanks and comments are not fields, not
+   errors); a judgement pass may take the report as context later.
 2. The pinned `brain.py` scan is characterized first, with the pinned ingest
    and conflicts excerpts supplying what it imported; the adapted scan
    reproduces its rules, including that only `.md` is stripped from a page
@@ -228,8 +232,9 @@ enforced in code, never left to a prompt:
 3. `fix_links(vault, report, stamp=)` is the one mechanical repair: the
    flagged path-carrying links become bare page names, case-corrected to an
    existing page, aliases and anchors kept, untouched otherwise; every
-   rewritten page goes through `Vault.write` with a backup, and nothing under
-   `raw/` or `drop/` is ever written.
+   rewritten page goes through `Vault.write` with a backup and one line
+   ending on every platform, only the flagged pages are read, and nothing
+   under `raw/` or `drop/` is ever written.
 4. Manual-edit detection and decision bookkeeping are slice 7; the report
    gains them there.
 5. Tests: characterization of the excerpt and regression over the adapted

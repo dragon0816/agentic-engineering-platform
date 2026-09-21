@@ -4,6 +4,7 @@ import os
 from datetime import date
 from pathlib import Path
 
+import pytest
 from test_raw import make_vault
 
 from knowledge.lint import (
@@ -14,6 +15,7 @@ from knowledge.lint import (
     PathLink,
     UnknownSource,
     fix_links,
+    head_fields,
     page_name,
     scan,
 )
@@ -21,39 +23,39 @@ from knowledge.raw import DropIntake, PlainTextExtractor
 from knowledge.vault import Vault, provenance_lines
 
 TODAY = date(2026, 9, 21)
+PAGES = {
+    "wiki/overview.md": "---\ntitle: Overview\n---\n[[Foo]] [[Continue.dev]] [[Openhands]]\n",
+    "wiki/entities/Foo.md": (
+        "---\ntitle: Foo\ntype: entity\n---\n"
+        "See [[wiki/entities/Bar]] and [[Missing]] and [[CLAUDE.md]].\n"
+    ),
+    "wiki/entities/Bar.md": (
+        "---\ntitle: Bar\ntype: entity\n---\n[[Missing]] [[Missing]] [[Foo.md|the foo]]\n"
+        "- ⚠️ Foo says X, Bar says Y\n"
+    ),
+    "wiki/entities/Continue.dev.md": "---\ntitle: Continue.dev\ntype: entity\n---\n[[Foo]]\n",
+    "wiki/entities/OpenHands.md": (
+        "---\ntitle: OpenHands\ntype: entity\n---\n[[raw/Study/Openhands#History]]\n"
+    ),
+    "wiki/concepts/Lonely.md": "no frontmatter here\n",
+    "wiki/sources/Gone.md": (
+        "---\ntitle: Gone\ntype: source\nsource_path: raw/Study/gone.md\n---\n[[Bar]]\n"
+    ),
+    "wiki/sources/Legacy.md": (
+        "---\ntitle: Legacy\ntype: source\nsource_path: raw/Study/legacy.md\n---\n[[Foo]]\n"
+    ),
+    "wiki/sources/Stale.md": (
+        "---\ntitle: Stale\ntype: source\nsource_id: src-0000\n---\n[[Foo]]\n"
+    ),
+}
 
 
 def populate(vault: Vault) -> None:
     root = vault.root
-    pages = {
-        "wiki/overview.md": "---\ntitle: Overview\n---\n[[Foo]] [[Continue.dev]] [[Openhands]]\n",
-        "wiki/entities/Foo.md": (
-            "---\ntitle: Foo\ntype: entity\n---\n"
-            "See [[wiki/entities/Bar]] and [[Missing]] and [[CLAUDE.md]].\n"
-        ),
-        "wiki/entities/Bar.md": (
-            "---\ntitle: Bar\ntype: entity\n---\n[[Missing]] [[Missing]] [[Foo.md|the foo]]\n"
-            "- ⚠️ Foo says X, Bar says Y\n"
-        ),
-        "wiki/entities/Continue.dev.md": "---\ntitle: Continue.dev\ntype: entity\n---\n[[Foo]]\n",
-        "wiki/entities/OpenHands.md": (
-            "---\ntitle: OpenHands\ntype: entity\n---\n[[raw/Study/Openhands#History]]\n"
-        ),
-        "wiki/concepts/Lonely.md": "no frontmatter here\n",
-        "wiki/sources/Gone.md": (
-            "---\ntitle: Gone\ntype: source\nsource_path: raw/Study/gone.md\n---\n[[Bar]]\n"
-        ),
-        "wiki/sources/Legacy.md": (
-            "---\ntitle: Legacy\ntype: source\nsource_path: raw/Study/legacy.md\n---\n[[Foo]]\n"
-        ),
-        "wiki/sources/Stale.md": (
-            "---\ntitle: Stale\ntype: source\nsource_id: src-0000\n---\n[[Foo]]\n"
-        ),
-    }
-    for rel, text in pages.items():
+    for rel, text in PAGES.items():
         path = root / rel
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
+        path.write_text(text, encoding="utf-8", newline="\n")
     (root / "raw" / "Study").mkdir(parents=True, exist_ok=True)
     (root / "raw" / "Study" / "legacy.md").write_text("legacy body\n", encoding="utf-8")
     (root / "index.md").write_text(
@@ -66,6 +68,19 @@ def test_page_name_strips_only_md() -> None:
     assert page_name("Continue.dev") == "Continue.dev"
     assert page_name("CLAUDE.md") == "CLAUDE"
     assert page_name("wiki\\entities\\Foo.md") == "Foo"
+
+
+def test_frontmatter_is_read_leniently() -> None:
+    assert head_fields("no fence\n") is None
+    assert head_fields("---\ntitle: A\ntype: entity\ntags:\n  - x\n\n# comment\n---\nbody") == {
+        "title": "A",
+        "type": "entity",
+        "tags": "",
+    }
+    assert head_fields("--- \nType: 'entity'\nsource_id: \"src-1\"\n") == {
+        "type": "entity",
+        "source_id": "src-1",
+    }
 
 
 def test_scan_computes_every_finding_as_typed_values(tmp_path: Path) -> None:
@@ -114,12 +129,52 @@ def test_scan_computes_every_finding_as_typed_values(tmp_path: Path) -> None:
     assert report.unknown_source_id == (
         UnknownSource(page="wiki/sources/Stale.md", source_id="src-0000"),
     )
-    assert report.pending_sources == ("raw/never.md",)
+    assert report.pending_sources == ("raw/never.md,".rstrip(","),)
     assert report.open_conflicts == (
         OpenConflict(page="wiki/entities/Bar.md", line=6, text="Foo says X, Bar says Y"),
     )
+    assert report.unreadable == ()
     assert LintReport.model_validate_json(report.model_dump_json()) == report
     assert LintReport(pages=0).clean
+
+
+def test_nothing_a_page_contains_aborts_the_report(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    populate(vault)
+    root = tmp_path
+    (root / "wiki" / "entities" / "Odd.md").write_text(
+        '---\ntitle: Odd\nsource_id: "src 1"\ntags:\n  - x\n---\n[[ ]] [[Foo]]\n- ⚠️ \n',
+        encoding="utf-8",
+    )
+    (root / "wiki" / "entities" / "Big5.md").write_bytes("# 舊筆記\n".encode("cp950"))
+    report = scan(vault)
+    assert report.unreadable == ("wiki/entities/Big5.md",)
+    assert "wiki/entities/Odd.md" not in report.missing_frontmatter
+    assert UnknownSource(page="wiki/entities/Odd.md", source_id="src 1") in report.unknown_source_id
+    assert all(item.target for item in report.dangling)
+    assert OpenConflict(page="wiki/entities/Odd.md", line=8, text="(marker without text)") in (
+        report.open_conflicts
+    )
+    assert report.pages == 10  # the unreadable page is not counted as a page
+
+
+def test_a_superseded_raw_is_not_pending(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PlainTextExtractor()])
+    (tmp_path / "drop" / "r.txt").write_bytes(b"v1")
+    first = intake.intake("drop/r.txt", mode="apply", today=TODAY)
+    (tmp_path / "drop" / "r.txt").write_bytes(b"v2")
+    second = intake.intake("drop/r.txt", mode="apply", today=TODAY)
+    assert second.status == "drifted" and second.source is not None and first.source is not None
+    (tmp_path / "wiki" / "sources").mkdir(parents=True)
+    id_line, sha_line = provenance_lines(second.source)
+    (tmp_path / "wiki" / "sources" / "R.md").write_text(
+        f"---\ntitle: R\n{id_line}\n{sha_line}\n---\nbody\n", encoding="utf-8"
+    )
+    assert scan(vault).pending_sources == ()
+    # Without a sources page for the current version, only the current one is pending.
+    (tmp_path / "wiki" / "sources" / "R.md").unlink()
+    assert scan(vault).pending_sources == (second.raw_ref,)
 
 
 def test_fix_links_rewrites_only_flagged_links_keeps_aliases_and_backs_up(
@@ -137,7 +192,9 @@ def test_fix_links_rewrites_only_flagged_links_keeps_aliases_and_backs_up(
     # The case-corrected real page name replaces the path and keeps its anchor.
     assert vault.read("wiki/entities/OpenHands.md").endswith("[[OpenHands#History]]\n")
     backup = tmp_path / ".ingest-backup" / "lint-1" / "wiki" / "entities" / "Foo.md"
-    assert backup.read_text(encoding="utf-8") == populate_text("wiki/entities/Foo.md")
+    assert backup.read_bytes() == PAGES["wiki/entities/Foo.md"].encode("utf-8")
+    # Line endings are untouched by a repair, on any platform.
+    assert b"\r" not in (tmp_path / "wiki" / "entities" / "Foo.md").read_bytes()
     after = scan(vault)
     assert after.path_links == () and fix_links(vault, after, stamp="lint-2") == ()
     assert not (tmp_path / ".ingest-backup" / "lint-2").exists()
@@ -145,26 +202,17 @@ def test_fix_links_rewrites_only_flagged_links_keeps_aliases_and_backs_up(
     assert vault.read("raw/Study/legacy.md") == "legacy body\n"
 
 
-def populate_text(rel: str) -> str:
-    if rel == "wiki/entities/Foo.md":
-        return (
-            "---\ntitle: Foo\ntype: entity\n---\n"
-            "See [[wiki/entities/Bar]] and [[Missing]] and [[CLAUDE.md]].\n"
-        )
-    raise KeyError(rel)
-
-
-def test_a_link_leaving_the_vault_is_not_a_page(tmp_path: Path) -> None:
+def test_a_link_leaving_the_vault_is_a_finding_not_a_page(
+    tmp_path: Path, tmp_path_factory: pytest.TempPathFactory
+) -> None:
     vault = make_vault(tmp_path)
     populate(vault)
-    (tmp_path.parent / "outside.md").write_text("---\ntitle: Out\n---\n[[Foo]]\n", encoding="utf-8")
+    outside = tmp_path_factory.mktemp("outside") / "outside.md"
+    outside.write_text("---\ntitle: Out\n---\n[[Foo]]\n", encoding="utf-8")
     try:
-        try:
-            os.symlink(tmp_path.parent / "outside.md", tmp_path / "wiki" / "entities" / "Out.md")
-        except (OSError, NotImplementedError):
-            return
-        report = scan(vault)
-        assert all(item != "wiki/entities/Out.md" for item in report.orphans)
-        assert report.pages == 9
-    finally:
-        (tmp_path.parent / "outside.md").unlink()
+        os.symlink(outside, tmp_path / "wiki" / "entities" / "Out.md")
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks need privileges on this machine")
+    report = scan(vault)
+    assert report.unreadable == ("wiki/entities/Out.md",)
+    assert "wiki/entities/Out.md" not in report.orphans and report.pages == 9

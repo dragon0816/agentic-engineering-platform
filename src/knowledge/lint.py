@@ -3,7 +3,8 @@
 Adapted from the pinned `brain.py` scan (docs/PHASE_4_MIGRATION.md): what is
 countable is computed here — exactly, instantly and for free — and only
 judgement is ever sent to a model, in a later pass that takes this report as
-context. Nothing here calls a model. The one write, `fix_links`, is the
+context. Nothing here calls a model, and nothing a page contains can abort the
+report: a broken page is a finding. The one write, `fix_links`, is the
 mechanical repair the source made too, and it goes through the vault with a
 backup like any other page write.
 """
@@ -14,17 +15,23 @@ from pathlib import PurePosixPath
 
 from pydantic import Field
 
-from common.base import Contract, Symbol, Text
-from knowledge.raw import RawIndex, frontmatter
+from common.base import Contract, Text
+from knowledge.raw import RawIndex
 from knowledge.vault import SOURCES_AREA, Vault, VaultError, normalize
 
 WIKILINK = re.compile(r"\[\[([^\]|#]+)((?:[|#][^\]]*)?)\]\]")
 # A conflict a page carries until a person settles it; plain markdown so it
 # survives being edited in Obsidian. Horizontal whitespace only: `\s` would
 # start the match on the preceding blank line.
-CONFLICT = re.compile(r"^[ \t]*(?:[-*][ \t]*)?⚠️[ \t]*(.+?)[ \t]*$", re.M)
+CONFLICT = re.compile(r"^[ \t]*(?:[-*][ \t]*)?⚠️[ \t]*(.*?)[ \t]*$", re.M)
+# A page has frontmatter when it opens with a fence; what is inside is read
+# leniently, line by line, because Obsidian frontmatter holds lists, blank
+# lines and comments that are not `key: value`.
+FRONTMATTER_OPEN = re.compile(r"^---[ \t]*\n")
+FIELD = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*):[ \t]*(.*?)[ \t]*$")
 # Entry points; nothing links to them by design.
 ENTRY_POINTS = frozenset({"wiki/overview.md", "index.md"})
+EMPTY_MARKER = "(marker without text)"
 
 
 def page_name(rel: str) -> str:
@@ -32,6 +39,22 @@ def page_name(rel: str) -> str:
     never the whole suffix: `Continue.dev` is a page name."""
     name = PurePosixPath(normalize(rel)).name
     return name[:-3] if name.endswith(".md") else name
+
+
+def head_fields(text: str) -> dict[str, str] | None:
+    """The `key: value` lines of a page's frontmatter, or None when the page
+    has no frontmatter at all. Lines that are not fields are skipped, not
+    fatal; an unclosed fence reads to the end of the page."""
+    if FRONTMATTER_OPEN.match(text) is None:
+        return None
+    fields: dict[str, str] = {}
+    for line in text.split("\n")[1:]:
+        if line.strip() == "---":
+            break
+        match = FIELD.match(line)
+        if match is not None:
+            fields[match.group(1).lower()] = match.group(2).strip("\"'")
+    return fields
 
 
 class PathLink(Contract):
@@ -53,8 +76,11 @@ class BrokenSourcePath(Contract):
 
 
 class UnknownSource(Contract):
+    """A `source_id:` the Raw index does not know — including one that is not
+    even a well-formed identifier, which is reported, never raised."""
+
     page: Text
-    source_id: Symbol
+    source_id: Text
 
 
 class OpenConflict(Contract):
@@ -77,6 +103,7 @@ class LintReport(Contract):
     unknown_source_id: tuple[UnknownSource, ...] = ()
     pending_sources: tuple[Text, ...] = ()
     open_conflicts: tuple[OpenConflict, ...] = ()
+    unreadable: tuple[Text, ...] = ()
 
     @property
     def clean(self) -> bool:
@@ -90,31 +117,46 @@ class LintReport(Contract):
                 self.unknown_source_id,
                 self.pending_sources,
                 self.open_conflicts,
+                self.unreadable,
             )
         )
 
 
-def _pages(vault: Vault) -> dict[str, str]:
-    """Every wiki page's text plus `index.md`, which shares the link rules;
-    `log.md` is append-only history and is left alone."""
+def read_pages(vault: Vault, rels: tuple[str, ...]) -> tuple[dict[str, str], tuple[str, ...]]:
+    """The text of each page, and the pages that could not be read — a link
+    that leaves the vault, or bytes that are not UTF-8 — as findings."""
     texts: dict[str, str] = {}
-    for rel, _ in vault.wiki_pages():
+    unreadable: list[str] = []
+    for rel in rels:
         try:
             texts[rel] = vault.read(rel)
-        except VaultError:
-            continue
-    if vault.exists("index.md"):
-        texts["index.md"] = vault.read("index.md")
-    return texts
+        except (VaultError, UnicodeDecodeError):
+            unreadable.append(rel)
+    return texts, tuple(unreadable)
 
 
-def _field(text: str, key: str) -> str:
-    head = frontmatter(text)
-    return head[0].get(key, "") if head is not None else ""
+def _all_pages(vault: Vault) -> tuple[dict[str, str], tuple[str, ...]]:
+    """Every wiki page plus `index.md`, which shares the link rules; `log.md`
+    is append-only history and is left alone."""
+    rels = vault.wiki_files() + (("index.md",) if vault.exists("index.md") else ())
+    return read_pages(vault, rels)
+
+
+def find_conflicts(rel: str, text: str) -> tuple[OpenConflict, ...]:
+    """Every `⚠️` line of one page; a marker whose text was deleted is still an
+    open conflict, reported as such rather than dropped."""
+    return tuple(
+        OpenConflict(
+            page=rel,
+            line=text.count("\n", 0, match.start()) + 1,
+            text=match.group(1).strip() or EMPTY_MARKER,
+        )
+        for match in CONFLICT.finditer(text)
+    )
 
 
 def scan(vault: Vault) -> LintReport:
-    texts = _pages(vault)
+    texts, unreadable = _all_pages(vault)
     wiki_pages = {rel: text for rel, text in texts.items() if rel.startswith("wiki/")}
     by_name: dict[str, list[str]] = defaultdict(list)
     for rel in texts:
@@ -127,6 +169,8 @@ def scan(vault: Vault) -> LintReport:
     for rel, text in texts.items():
         for match in WIKILINK.finditer(text):
             link = match.group(1).strip()
+            if not link:
+                continue  # `[[ ]]` links nowhere and names nothing
             # A path is always wrong. A trailing .md is only wrong when it names
             # a wiki page: [[CLAUDE.md]] may point at a root file and resolve.
             if "/" in link or (link.endswith(".md") and page_name(link).lower() in wiki_names):
@@ -140,24 +184,24 @@ def scan(vault: Vault) -> LintReport:
                 dangling[link] += 1
 
     orphans = tuple(rel for rel in texts if rel not in ENTRY_POINTS and not inbound.get(rel))
-    missing_frontmatter = tuple(
-        rel for rel, text in wiki_pages.items() if frontmatter(text) is None
-    )
-    types = Counter(_field(text, "type") or "(untyped)" for text in wiki_pages.values())
+    heads = {rel: head_fields(text) for rel, text in wiki_pages.items()}
+    missing_frontmatter = tuple(rel for rel, head in heads.items() if head is None)
+    types = Counter((head or {}).get("type") or "(untyped)" for head in heads.values())
 
     index = RawIndex.scan(vault)
     known_sources = {entry.source.source_id for entry in index.entries}
     carried: set[str] = set()
     broken_paths: list[BrokenSourcePath] = []
     unknown: list[UnknownSource] = []
-    for rel, text in wiki_pages.items():
-        source_id = _field(text, "source_id")
+    for rel, head in heads.items():
+        fields = head or {}
+        source_id = fields.get("source_id", "")
         if source_id:
             if rel.startswith(SOURCES_AREA):
                 carried.add(source_id)
             if source_id not in known_sources:
                 unknown.append(UnknownSource(page=rel, source_id=source_id))
-        source_path = _field(text, "source_path").strip("\"'")
+        source_path = fields.get("source_path", "")
         if source_path:
             try:
                 present = vault.exists(source_path)
@@ -165,15 +209,18 @@ def scan(vault: Vault) -> LintReport:
                 present = False
             if not present:
                 broken_paths.append(BrokenSourcePath(page=rel, source_path=source_path))
+    # A superseded Raw handed its evidence to its successor; only the current
+    # version of each original can be pending.
+    superseded = {entry.supersedes for entry in index.entries if entry.supersedes is not None}
     pending = tuple(
-        entry.raw_ref for entry in index.entries if entry.source.source_id not in carried
+        entry.raw_ref
+        for entry in index.entries
+        if entry.source.source_id not in superseded and entry.source.source_id not in carried
     )
 
-    conflicts = []
+    conflicts: list[OpenConflict] = []
     for rel, text in wiki_pages.items():
-        for match in CONFLICT.finditer(text):
-            line = text.count("\n", 0, match.start()) + 1
-            conflicts.append(OpenConflict(page=rel, line=line, text=match.group(1).strip()))
+        conflicts.extend(find_conflicts(rel, text))
 
     return LintReport(
         pages=len(wiki_pages),
@@ -186,6 +233,7 @@ def scan(vault: Vault) -> LintReport:
         unknown_source_id=tuple(unknown),
         pending_sources=pending,
         open_conflicts=tuple(conflicts),
+        unreadable=unreadable,
     )
 
 
@@ -194,16 +242,15 @@ def fix_links(vault: Vault, report: LintReport, *, stamp: str) -> tuple[str, ...
     the schema asks for. Mechanical, so no model. Where a page with that name
     exists under a different case, the real page name is used, so `[[Openhands]]`
     does not end up dangling beside `OpenHands`. Only links the scan flagged are
-    touched; a legitimate link to a root file is left alone. Every rewritten
-    page is backed up first."""
-    texts = _pages(vault)
-    by_lower = {page_name(rel).lower(): page_name(rel) for rel in texts}
+    touched; a legitimate link to a root file is left alone. Only the flagged
+    pages are read, and every rewritten one is backed up first."""
+    names = vault.wiki_files() + (("index.md",) if vault.exists("index.md") else ())
+    by_lower = {page_name(rel).lower(): page_name(rel) for rel in names}
     offenders = {(item.page, item.link) for item in report.path_links}
+    flagged = tuple(sorted({item.page for item in report.path_links}))
+    texts, _ = read_pages(vault, flagged)
     changed: list[str] = []
-    for rel in sorted({item.page for item in report.path_links}):
-        text = texts.get(rel)
-        if text is None:
-            continue
+    for rel, text in texts.items():
 
         def replace(match: re.Match[str], page: str = rel) -> str:
             inner = match.group(1).strip()

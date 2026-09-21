@@ -24,17 +24,32 @@ and followed by the next. Requirements: `docs/phases/PHASE_4_KNOWLEDGE.md`
   pending_sources, open_conflicts; `clean`), `scan(vault)`, `page_name`,
   `fix_links(vault, report, stamp=)` writing through `Vault.write` with a
   backup and keeping aliases and anchors. Nothing calls a model.
-- 4 regression tests (`tests/test_lint.py`): every finding as typed values
-  (including typed provenance and pending Raw sources), the repair with
-  aliases, anchors and backups, `page_name`, and a link leaving the vault not
-  counting as a page.
+- 7 regression tests (`tests/test_lint.py`): every finding as typed values
+  (including typed provenance and pending Raw sources), lenient frontmatter,
+  nothing a page contains aborting the report, a superseded Raw not pending,
+  the repair with aliases, anchors, backups and untouched line endings,
+  `page_name`, and a link leaving the vault as a finding.
 - Docs: phase spec slice 6 requirements, `docs/CONTRACTS.md`, migration slice 6
   decision, fixtures README.
 
+- PR #29 opened; pre-merge review applied (10 findings, seven of them ways a
+  page could abort or mislead the report): an empty `[[ ]]`, a bare `⚠️`, a
+  malformed `source_id` and a non-UTF-8 page each raised out of `scan` — now
+  findings (`unreadable` added, `UnknownSource.source_id` is `Text`, a bare
+  marker reads `(marker without text)`); the strict Raw frontmatter reader
+  called ordinary Obsidian frontmatter missing — `head_fields` reads it as
+  leniently as the source did; a superseded Raw was pending forever — the
+  `supersedes` chain excludes it; `Vault.write`/`append` translated line
+  endings on Windows so a repair rewrote whole pages — `\n` everywhere;
+  pages are read once (`Vault.wiki_files`) and `fix_links` reads only the
+  flagged ones; the symlink test skips instead of silently passing and uses
+  its own temp dir; the duplicated page text in the tests is one dict.
+  Three regression tests added.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- PR #29 is open with the review posted; merge on green CI is authorized for
+  Phase 4 slices.
 
 ## Remaining
 
@@ -63,8 +78,8 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 551 tests (544 prior + 3 characterization + 4 regression; 1 skipped on
-#       Windows without symlink privileges, runs on Linux CI)
+# PASS: 554 tests (544 prior + 3 characterization + 7 regression; 2 skipped on
+#       Windows without symlink privileges, run on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -89,7 +104,7 @@ of temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- `scan` reads every wiki page in full on each call; fine for hundreds of
+- `scan` reads every wiki page in full once per call; fine for hundreds of
   pages.
 - A legacy Raw file without provenance frontmatter is not in the Raw index and
   so is not reported as pending; slice 9 adopts it.

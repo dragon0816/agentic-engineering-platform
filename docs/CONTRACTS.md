@@ -574,21 +574,29 @@ text the model reads: sections in order, each image as
 
 ## Static lint (Phase 4, slice 6)
 
-`knowledge.lint.scan(vault)` returns a `LintReport` computed by reading alone:
-`pages` and `types` (from the `type:` frontmatter, `(untyped)` otherwise),
+`knowledge.lint.scan(vault)` returns a `LintReport` computed by reading alone,
+and nothing a page contains aborts it: `pages` and `types` (from the `type:`
+frontmatter, `(untyped)` otherwise; `head_fields` reads frontmatter leniently,
+so lists, blank lines and comments are skipped, not errors),
 `orphans` (no inbound link; `wiki/overview.md` and `index.md` are entry points),
 `dangling` (`DanglingLink(target, count)`, ranked by references, ties in
 first-seen order), `path_links` (`PathLink(page, link)` — a link with a path,
 or a `.md` that names a wiki page; `[[CLAUDE.md]]` may name a root file and is
 left alone), `missing_frontmatter`, `broken_source_path` (a legacy
 `source_path:` that no longer resolves), `unknown_source_id` (a `source_id:`
-the Raw index does not know), `pending_sources` (Raw files no `wiki/sources/`
-page carries by `source_id`) and `open_conflicts` (`OpenConflict(page, line,
-text)` for every `⚠️` line). `report.clean` is true when every list is empty.
+the Raw index does not know, malformed ones included), `pending_sources` (Raw
+files no `wiki/sources/` page carries by `source_id`; a superseded Raw is not
+pending), `open_conflicts` (`OpenConflict(page, line, text)` for every `⚠️`
+line, a bare marker reported as `(marker without text)`) and `unreadable`
+(a link that leaves the vault, or bytes that are not UTF-8). An empty `[[ ]]`
+links nowhere and is ignored. `report.clean` is true when every list is
+empty.
 `page_name` strips only `.md`, never a page's own dots. Nothing in this module
 calls a model.
 
 `fix_links(vault, report, stamp=)` rewrites exactly the flagged links to bare
 page names, case-corrected to an existing page and keeping any `|alias` or
-`#anchor`, through `Vault.write` with a backup under the stamp; it returns the
-pages it changed. `raw/` and `drop/` are never written.
+`#anchor`, through `Vault.write` with a backup under the stamp; only the
+flagged pages are read, and it returns the pages it changed. `Vault.write`
+and `append` now write `\n` on every platform, so a repair never rewrites a
+page's line endings. `raw/` and `drop/` are never written.

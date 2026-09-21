@@ -248,5 +248,12 @@ adopts it. `manual_edits` waits for slice 7's state file.
 Intentional differences: findings are closed contracts, not dict entries; the
 report is data for a host to render (the source printed Traditional Chinese
 lines); `fix_links` writes through `Vault.write` with the stamp the caller
-gives, so a lint repair is backed up like any page write. Rollback removes
-`knowledge/lint.py`, its tests and the excerpt; nothing else imports them.
+gives, so a lint repair is backed up like any page write. From review: the
+report can no longer be aborted by what a page contains (an empty link, a
+bare `⚠️`, a malformed `source_id`, a non-UTF-8 page — each is a finding);
+frontmatter is read as leniently as the source read it (the first draft
+reused the strict Raw reader and would have called ordinary Obsidian
+frontmatter missing); a superseded Raw is not pending; and `Vault.write`
+writes `\n` on every platform so a repair does not change line endings.
+Rollback removes `knowledge/lint.py`, its tests and the excerpt; nothing else
+imports them.
