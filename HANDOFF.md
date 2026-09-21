@@ -46,15 +46,26 @@ was indistinguishable from a satisfied one.
   (router, gateway and the registry proof), every declared assertion having a
   grader and every grader being exercised, each grader rejecting a
   deliberately wrong observation, an unrecognized assertion failing, the
-  always-on route and side-effect checks, stable loading with a duplicate
-  refused, and the report naming failures. 15 test cases.
+  always-on route and side-effect checks including a wrong target of the right
+  kind and a refusal that did something permitted, stable loading with a
+  duplicate refused, and the report naming failures. 15 test cases.
 - `CLAUDE.md`, `docs/ROADMAP.md` and `docs/ARCHITECTURE.md` now name Phase 6 as
   the active phase.
+- PR #39 review (7 findings) applied, 6 fixed. Every one was an instance of
+  the failure this slice exists to remove, a grader that cannot fail:
+  `bridge_advertisement` compared a capability's name against an identity's
+  name and would have failed any case declaring both it and a route;
+  the discovery observation read `advertised` from the fixture the proof
+  returns unchanged instead of the `installed_tasks` it actually produces;
+  `published_discovery` read a lifecycle from a query that already filters
+  unpublished assets; `scoped_identity` looped over parts `AssetIdentity`
+  validates at construction; `fail_closed` treated any effect as failing open
+  rather than consulting the case's forbidden list; and a route mismatch named
+  only the kind, hiding a wrong target of the right kind.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -119,16 +130,20 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 - `tests/test_evaluation.py` chooses how to exercise a case by its id prefix
   and namespace. That is host wiring living in a test; when a scenario case
   arrives it will need a better home than a chain of conditionals.
-- `bridge_advertisement` is weaker for a case with no expected route: it
-  requires that something was discovered and that a Bridge advertised
-  something, not that the two correspond. Strengthening it needs the
-  discovered task's capability identity in `ObservedRun`.
+- **`no_execution` cannot fail for the four router-only and discovery cases**,
+  the seventh review finding, left open deliberately. A bare `RequestRouter`
+  has nothing to execute with and the registry proof asserts it has no
+  `execute` at all, so their observations record no side effects because none
+  were possible. Making the check meaningful means dispatching those cases
+  through a Bridge with a counting handler, which is the shared runner slice 2
+  needs anyway. Until then the assertion is structurally satisfied rather than
+  checked, and only the two gateway cases observe execution for real.
 - The five existing test modules still load cases themselves. They are unit
   tests of each component and the suite is the cross-cutting gate, so the
   overlap is deliberate, but a future slice could let them share one runner.
 
 ## Next Recommended Action
 
-Open the PR for `phase-6/harness`, run the review, apply confirmed findings
-and merge on green CI. Then write the slice 2 requirements section and add the
-first `scenario` case with its forbidden outcomes.
+Merge PR #39 on green CI. Then write the slice 2 requirements section, build
+the shared runner that dispatches every case through a Bridge so execution is
+observable, and add the first `scenario` case with its forbidden outcomes.

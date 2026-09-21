@@ -957,8 +957,13 @@ satisfied only by copying the case's own words back into the observation.
 `ObservedRun` records what actually happened when a case was exercised:
 `decision`, `origin` (mirroring `agent.routing.RoutingOutcome`), `model_calls`,
 `side_effects`, `status`, `completed_steps`, `discovered`, `lifecycle`,
-`advertised` and `failure`. Every field is evidence a grader can check, never a
-flag claiming that an assertion holds, because grading a claim checks nothing.
+`advertised`, `installed` and `failure`. Every field is evidence a grader can
+check, never a flag claiming that an assertion holds, because grading a claim
+checks nothing. `advertised` and `installed` hold `AssetIdentity` values rather
+than names, because a capability named `sample.inspect` carries an identity
+named `inspect`; and `lifecycle` is what was registered rather than what a
+query returned, since discovery already drops anything unpublished and reading
+it back from there would be a check that cannot fail.
 
 A `Grader` takes `(case, observed)` and returns `None` when satisfied or a
 reason when not, so a failure always says why. `GRADERS` registers one per
@@ -969,10 +974,20 @@ assertion name the repository's cases declare: `no_model_call`, `no_execution`,
 
 `grade(case, observed, graders=)` returns a `CaseResult` (`case_id`, `passed`,
 `grades`, `unknown_assertions`, and `reasons()`). The expected route is checked
-when the case names one, the forbidden side effects are always checked, and an
-assertion with no grader is reported in `unknown_assertions` and **fails the
-case**: a harness that ignores what it does not understand reports a perfect
-score and is believed.
+when the case names one, and a mismatch names the target reached rather than
+only its kind, because a wrong target of the right kind is the common mistake.
+The forbidden side effects are always checked, and an assertion with no grader
+is reported in `unknown_assertions` and **fails the case**: a harness that
+ignores what it does not understand reports a perfect score and is believed.
+
+Each grader checks something that can actually fail. `scoped_identity` checks
+that what was found stayed inside the namespace that was asked about, since
+`AssetIdentity` already guarantees the three parts are present;
+`published_discovery` requires every registered lifecycle to be `published`
+rather than merely containing it; `bridge_advertisement` compares identities
+and, for a discovery case, requires every discovered task to appear among the
+Bridge's installed tasks; and `fail_closed` consults the case's own forbidden
+list, so a permitted read is not read as failing open.
 
 `load_cases(directory)` reads every `.json` file, accepting one case or a list,
 in a stable order, refusing a duplicate `case_id` where the cases are loaded.

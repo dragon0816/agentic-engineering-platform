@@ -20,6 +20,7 @@ from test_routing import skills
 from agent.registry import InMemoryTaskRegistry
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
+from common.assets import AssetIdentity
 from common.evaluation import (
     GRADERS,
     CaseResult,
@@ -90,8 +91,14 @@ def observe_discovery(case: EvaluationCase) -> ObservedRun:
     discovered = registry.discover(namespace=case.request.namespace)
     return ObservedRun(
         discovered=tuple(task.metadata.identity for task in discovered),
-        lifecycle=tuple(task.metadata.lifecycle for task in discovered),
-        advertised=tuple(item.name for item in advertisement.capabilities),
+        # The lifecycle of what was registered, not of what a query returned:
+        # `discover` already drops anything unpublished, so reading it back
+        # from there would be a check that cannot fail.
+        lifecycle=(manifest.metadata.lifecycle,),
+        advertised=tuple(item.identity for item in advertisement.capabilities),
+        # What the proof actually produces. The capability list comes back
+        # unchanged from the fixture, so only this shows the task was advertised.
+        installed=advertisement.installed_tasks,
     )
 
 
@@ -169,7 +176,8 @@ def satisfied(case: EvaluationCase) -> ObservedRun:
         completed_steps=1,
         discovered=(case.expected_route.target,) if case.expected_route else (),
         lifecycle=("published",),
-        advertised=("inspect",),
+        advertised=(case.expected_route.target,) if case.expected_route else (),
+        installed=(case.expected_route.target,) if case.expected_route else (),
     )
 
 
@@ -186,7 +194,10 @@ WRONG: dict[str, dict[str, Any]] = {
     "deterministic_trigger": {"origin": "model"},
     "fail_closed": {"decision": None},
     "workflow_succeeds": {"status": "failed"},
-    "scoped_identity": {"decision": None, "discovered": ()},
+    "scoped_identity": {
+        "decision": None,
+        "discovered": (AssetIdentity(namespace="elsewhere", name="inspect", version="1.0.0"),),
+    },
     "published_discovery": {"lifecycle": ("draft",)},
     "bridge_advertisement": {"advertised": ()},
 }
@@ -237,6 +248,28 @@ def test_a_forbidden_side_effect_and_a_wrong_route_are_always_checked() -> None:
     astray = grade(case, ObservedRun(decision=None))
     assert not astray.passed
     assert any("routed to nothing" in reason for reason in astray.reasons())
+
+    # A wrong target of the right kind is the common mistake, so the reason
+    # names the target rather than only the kind.
+    elsewhere = RouteDecision(
+        kind="capability",
+        target=AssetIdentity(namespace="sample", name="other", version="1.0.0"),
+        reason="known",
+    )
+    wrong = grade(
+        case, ObservedRun.model_validate({**satisfied(case).model_dump(), "decision": elsewhere})
+    )
+    assert not wrong.passed
+    assert any("sample/other@1.0.0" in reason for reason in wrong.reasons())
+
+    # Refusing is not failing open just because something permitted happened.
+    refusing = routed_case(
+        assertions=["fail_closed"], expected_route={"kind": "needs_input", "reason": "unknown"}
+    )
+    permitted = ObservedRun(
+        decision=refusing.expected_route, origin="needs_input", side_effects=("read",)
+    )
+    assert grade(refusing, permitted).passed
 
 
 def test_cases_load_in_a_stable_order_and_refuse_a_repeated_id(tmp_path: Path) -> None:

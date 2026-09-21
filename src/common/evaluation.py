@@ -59,10 +59,15 @@ class ObservedRun(Contract):
     status: RunStatus | None = None
     completed_steps: int = Field(default=0, ge=0, strict=True)
     # For a case about discovery rather than a request: what was found, the
-    # lifecycle states those assets are in, and what a bridge advertised.
+    # lifecycle of each registered asset (as registered, not as filtered by a
+    # query that already drops anything unpublished), the capabilities a
+    # Bridge advertises and the tasks it reports installed. Identities rather
+    # than names, because a capability's name and its identity's name are not
+    # the same string.
     discovered: tuple[AssetIdentity, ...] = ()
     lifecycle: tuple[Symbol, ...] = ()
-    advertised: tuple[Symbol, ...] = ()
+    advertised: tuple[AssetIdentity, ...] = ()
+    installed: tuple[AssetIdentity, ...] = ()
     failure: Failure | None = None
 
 
@@ -106,8 +111,11 @@ def _fail_closed(case: EvaluationCase, observed: ObservedRun) -> str | None:
         return "nothing was decided"
     if observed.decision.kind != "needs_input":
         return f"the request resolved to {observed.decision.kind} instead of needs_input"
-    if observed.side_effects:
-        return f"effects occurred anyway: {', '.join(observed.side_effects)}"
+    # Refusing means doing nothing the case forbade, not doing nothing at all:
+    # a permitted read is not a way of failing open.
+    trespass = [item for item in observed.side_effects if item in case.forbidden_side_effects]
+    if trespass:
+        return f"effects occurred anyway: {', '.join(trespass)}"
     return None
 
 
@@ -120,8 +128,10 @@ def _workflow_succeeds(case: EvaluationCase, observed: ObservedRun) -> str | Non
 
 
 def _scoped_identity(case: EvaluationCase, observed: ObservedRun) -> str | None:
-    """An asset is addressable by namespace, name and version, which is what
-    makes it discoverable without a central runtime change."""
+    """What was found belongs to the namespace that was asked about. That an
+    identity has all three parts is guaranteed by `AssetIdentity` itself, so
+    checking it here would be a grader that cannot fail; what is not
+    guaranteed is that a query stays inside its scope."""
     found = observed.discovered or (
         (observed.decision.target,)
         if observed.decision is not None and observed.decision.target is not None
@@ -129,34 +139,35 @@ def _scoped_identity(case: EvaluationCase, observed: ObservedRun) -> str | None:
     )
     if not found:
         return "nothing carried a scoped identity"
-    for identity in found:
-        if not identity.namespace or not identity.name or not identity.version:
-            return f"{identity.name or '(unnamed)'} is not fully scoped"
+    strayed = [item for item in found if item.namespace != case.request.namespace]
+    if strayed:
+        return f"outside {case.request.namespace}: {', '.join(i.namespace for i in strayed)}"
     return None
 
 
 def _published_discovery(case: EvaluationCase, observed: ObservedRun) -> str | None:
     if not observed.discovered:
         return "nothing was discovered"
-    if "published" not in observed.lifecycle:
-        return f"discovered assets are {', '.join(observed.lifecycle) or 'in no lifecycle state'}"
+    unpublished = [state for state in observed.lifecycle if state != "published"]
+    if unpublished or not observed.lifecycle:
+        return f"registered as {', '.join(observed.lifecycle) or 'nothing'}"
     return None
 
 
 def _bridge_advertisement(case: EvaluationCase, observed: ObservedRun) -> str | None:
+    """A Bridge reports that it can run what was found. Identities are
+    compared, never names: a capability is named `sample.inspect` while the
+    identity it carries is named `inspect`."""
     expected = case.expected_route.target if case.expected_route is not None else None
     if expected is not None:
-        return (
-            None
-            if expected.name in observed.advertised
-            else f"no bridge advertised {expected.name}"
-        )
-    # A discovery case names no route, so what must hold is that something was
-    # found and that a Bridge said it can run it.
+        if expected not in observed.advertised:
+            return f"no bridge advertised {expected.namespace}/{expected.name}"
+        return None
     if not observed.discovered:
         return "nothing was discovered to advertise"
-    if not observed.advertised:
-        return "no bridge advertised any capability"
+    missing = [item for item in observed.discovered if item not in observed.installed]
+    if missing:
+        return f"discovered but not installed: {', '.join(item.name for item in missing)}"
     return None
 
 
@@ -193,6 +204,17 @@ class CaseResult(Contract):
         return named + unknown
 
 
+def _describe(decision: RouteDecision | None) -> str:
+    """Enough of a route to see what went wrong: a wrong target of the right
+    kind is the common case, and naming only the kind hides it."""
+    if decision is None:
+        return "nothing"
+    if decision.target is None:
+        return decision.kind
+    target = decision.target
+    return f"{decision.kind} {target.namespace}/{target.name}@{target.version}"
+
+
 def grade(
     case: EvaluationCase, observed: ObservedRun, *, graders: Mapping[str, Grader] = GRADERS
 ) -> CaseResult:
@@ -207,11 +229,7 @@ def grade(
             GradeOutcome(
                 assertion="expected_route",
                 passed=matched,
-                detail=(
-                    "satisfied"
-                    if matched
-                    else f"routed to {observed.decision.kind if observed.decision else 'nothing'}"
-                ),
+                detail="satisfied" if matched else f"routed to {_describe(observed.decision)}",
             )
         )
     trespass = [effect for effect in observed.side_effects if effect in case.forbidden_side_effects]
