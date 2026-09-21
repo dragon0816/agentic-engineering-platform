@@ -82,8 +82,9 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 565 passed, 2 skipped (symlink privilege); the fourth migration test
-# skips its last, link-dependent check here and runs it whole on Linux CI
+# PASS: 564 passed, 3 skipped — two for symlink privilege, and the fourth
+# migration test, which runs every check but its last, link-dependent one
+# here and is counted as skipped; Linux CI runs it whole
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
