@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–4 complete (Phase 4 knowledge platform closed 2026-09-21); Phase 5 — Model gateway next, specification pending
+Status: Phases 1–4 complete (Phase 4 knowledge platform closed 2026-09-21); Phase 5 — Model gateway active
 
 ## Objective
 

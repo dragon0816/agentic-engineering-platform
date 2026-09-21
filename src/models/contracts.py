@@ -8,9 +8,13 @@ from pydantic import Field, JsonValue, StrictBool, model_validator
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
 
+# Declared weakest to strongest; `models.catalog` compares by this order, so
+# the two layers cannot drift apart.
+Reasoning = Literal["low", "medium", "high"]
+
 
 class ModelRequirements(Contract):
-    reasoning: Literal["low", "medium", "high"] = "medium"
+    reasoning: Reasoning = "medium"
     tool_calling: StrictBool = False
     structured_output: StrictBool = False
     streaming: StrictBool = False

@@ -713,3 +713,49 @@ snapshot (files absent from it are removed); a missing snapshot is
 `missing_original`, and a managed directory that is itself a link is
 `unwritable_target` before anything is touched. `raw/` and `drop/` are never
 part of a snapshot or a restore.
+
+## Model catalog and selection (Phase 5, slice 1)
+
+`models.catalog.ModelCapabilities` declares what one endpoint can do:
+`reasoning` (the `Reasoning` literal shared with `ModelRequirements`, so the
+two cannot drift), `tool_calling`, `structured_output`, `streaming`, `vision`,
+`local` and `max_context_tokens`. It mirrors `ModelRequirements` with two
+deliberate differences: `local` states where the model runs, against a
+request's `local_only`, and `max_context_tokens` is a ceiling against the
+request's `min_context_tokens` floor. The ceiling is **required**, because a
+context window cannot be guessed: a silent default would make an endpoint
+either unselectable or a liar. `unmet(requirements)` returns every field that
+cannot be met, in one canonical order (`reasoning`, the four flags,
+`local_only`, `min_context_tokens`); `satisfies` is `unmet` being empty.
+`reasoning` compares as an order, so a stronger endpoint still qualifies; each
+flag is an implication, so declaring more than asked is fine. Every field of
+`ModelRequirements` has a rule here, pinned by a test so a field added there
+cannot be silently ignored by selection.
+
+`ModelEndpoint` binds a stable `alias` to a `provider`, the provider's own
+`model` id, its `capabilities`, an optional `base_url` and an optional
+`credential`. A `base_url` is http or https (the scheme compares
+case-insensitively), names a host, contains no whitespace and carries no
+userinfo, so `https://user:token@host` is refused. The credential is a
+`SecretRef`, a name only. `ModelEndpoint` is a `RegistryContract`, so
+recognizable credential material is refused in any field, including a
+`?api_key=` smuggled into the URL: no contract in this layer ever carries a
+token. `ModelRoute` binds a purpose such as `default` to one alias.
+
+`ModelCatalog(endpoints, routes)` implements the `ModelSelector` protocol.
+`select(requirements)` returns the first alias in catalog order whose
+capabilities satisfy the requirements, so the same question always selects the
+same alias; nothing satisfying them is a `Failure` (`no_model_for_requirements`,
+not retryable) naming how many endpoints were considered, the endpoint that
+came closest (fewest unmet fields, ties by catalog order) and what that one
+lacked, so the message describes a real candidate rather than a union no
+single endpoint was blocked by. `select_route(name)` returns that route's alias
+or a `Failure` (`unknown_route`). `endpoint(alias)` looks one up. Selection
+calls no model, reads no file and opens no socket.
+
+A catalog is validated where it is built: at least one endpoint, no duplicate
+alias, no duplicate route name and no route naming an unknown alias, so a
+misconfigured catalog fails at construction rather than at the first request.
+It is plain serializable data (`model_validate` / `model_dump_json`), so a host
+may keep it in any format; the platform chooses no file, format or environment
+variable.
