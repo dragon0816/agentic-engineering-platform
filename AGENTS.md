@@ -67,7 +67,9 @@ Architecture -> Requirements -> Contracts -> Tests -> Implementation
              -> Verification -> Commit -> Handoff
 ```
 
-Before modifying implementation code, read `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, the active phase specification and `HANDOFF.md`.
+Before modifying implementation code, read `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/TASKS.md`, the active phase specification and `HANDOFF.md`.
+
+`docs/TASKS.md` is the progress record and accumulates; `HANDOFF.md` is rewritten each time and carries only where the current work stopped.
 
 Use repository procedures under `.agents/skills/`:
 - `architecture-guard` before implementation or architectural changes;
