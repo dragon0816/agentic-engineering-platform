@@ -630,3 +630,32 @@ only the pages the tool just wrote — a host calls it after an apply with the
 outcome's `written`, so the tool's writes are not reported as a person's while
 a later change to the same page still is; `manual_edits(vault)` compares. An
 odd state (blank keys, wrong types) is a first run, never a failure.
+
+## Query with provenance (Phase 4, slice 8)
+
+`knowledge.query.retrieve(vault, question, k=)` returns up to `k` `Passage`s
+(`text`, `citation`, `score`) ranked by BM25 over every section with text of
+every current Raw (a version another Raw `supersedes` is left out) and every
+Wiki paragraph after its frontmatter (`knowledge.lint.body_of`, CRLF
+tolerated), ties broken by corpus order so the same question always returns
+the same passages. `tokens` lowercases words, splits a word that mixes
+scripts so its Latin part stands alone, and turns a CJK run into its
+characters, its overlapping bigrams and (beyond two characters) the run.
+`cited_numbers(text)` reads `[2]`, `[1, 3]` and `[1-3]`. A `Citation` has `kind` `raw` (the
+`KnowledgeSource`, `raw_ref`, `section`, `page`/`slide` when known) or `wiki`
+(`wiki_page`, and `source` when the page's `source_id` names a Raw in the
+index).
+
+`QueryEngine(vault, model=None, alias=None, prompt=, max_output_tokens=)`
+`.ask(question, k=, trace=)` returns an `Answer` (`question`, `status`,
+`passages`, `text`, `synthesized_by`, `failure`). Statuses: `retrieved`
+(passages, no model), `answered` (text whose every citation names a retrieved
+passage), `unanswered` (the text cites nothing — the model saying the passages
+do not answer, its sentence kept), `uncited` (refused: a citation outside
+`1..len(passages)`), `model_failed` (the `Failure`; an adapter that raises
+becomes a retryable `model_error` through `knowledge.modelcalls.
+failure_from_exception`, shared with description and planning) and `no_match`
+(a blank question included). Synthesis is one `ModelRequest` with the numbered
+passages and the question, under the given trace or one derived from the
+question and the engine's request count; the model is told to cite every
+claim and say so when the passages do not answer.

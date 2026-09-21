@@ -285,3 +285,34 @@ removed (the source deleted any line containing the symbol); a page keeps
 its line endings; and a malformed clear list is refused before any write. Rollback removes `knowledge/conflicts.py`, the state
 functions in `knowledge/lint.py`, `Vault.state_read` / `state_write` and the
 tests; nothing else imports them.
+
+## Slice 8 source-first decision
+
+The source tooling's README lists `Query`, the schema's third operation, as
+not implemented; there is nothing to adapt. This slice is new platform
+behavior against the Roadmap's exit criterion that query answers cite source
+provenance.
+
+Decision (2026-09-21): deterministic lexical retrieval first (BM25, no index
+to maintain, no dependency), because it is exact, explainable and enough for a
+vault of hundreds of pages; embeddings or a vector index would add a model
+dependency and a stored artifact for a gain this corpus size does not need,
+and can come later behind the same `retrieve` shape. CJK is handled with
+character bigrams rather than a segmenter (no dependency; adequate for a
+Traditional-Chinese vault). Synthesis is optional and strict: a model may cite
+only the passages it was given, and text that cites nothing or something else
+is refused as `uncited` rather than returned as an answer — words without a
+retrieved source behind them are not an answer in a knowledge base whose whole
+point is provenance. Review of the PR sharpened this: a text that cites
+nothing is what the prompt asks for when the passages do not answer, so it is
+`unanswered` with its sentence kept, not refused; citations written as
+`[1, 3]` or `[1-3]` count; a superseded Raw is not in the corpus (its
+successor holds the evidence); CJK is indexed by character as well as bigram
+so a one-character question matches; a Latin term glued to CJK is its own
+token; wiki bodies are split from frontmatter by the lint module's reader
+(CRLF pages included); the adapter-exception-to-`Failure` rule now lives once
+in `knowledge/modelcalls.py` for description, planning and query; and a
+default trace is derived per request rather than constant. Rollback removes
+`knowledge/query.py`, `knowledge/modelcalls.py` (inlining the helper back into
+`describe.py` and `planning.py`), `knowledge.lint.body_of` and the query tests;
+nothing else imports them.

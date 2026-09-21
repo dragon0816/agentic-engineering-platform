@@ -16,7 +16,8 @@ from collections.abc import Mapping
 from pathlib import PurePosixPath
 
 from common.base import Symbol, Text
-from common.execution import Failure, TraceIdentifiers
+from common.execution import TraceIdentifiers
+from knowledge.modelcalls import failure_from_exception
 from knowledge.raw import ImageDescription, RawSection, needs_description, one_line_ending
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
@@ -86,12 +87,9 @@ class ImageDescriber:
         try:
             response = self.model.generate(request)
         except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
-            failure = Failure(
-                code="model_error",
-                message=f"{type(error).__name__}: {error}"[:200].strip() or type(error).__name__,
-                retryable=True,
+            return ImageDescription(
+                image_ref=image_ref, status="model_failed", failure=failure_from_exception(error)
             )
-            return ImageDescription(image_ref=image_ref, status="model_failed", failure=failure)
         if response.failure is not None:
             return ImageDescription(
                 image_ref=image_ref, status="model_failed", failure=response.failure

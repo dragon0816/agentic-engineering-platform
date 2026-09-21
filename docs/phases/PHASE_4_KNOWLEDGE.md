@@ -268,12 +268,38 @@ enforced in code, never left to a prompt:
    tests cover the record, injection, finding and clearing, resolution with a
    moved marker, and manual edits across two recorded states.
 
+## Requirements and acceptance (slice 8 — query with provenance)
+
+1. `knowledge.query.retrieve(vault, question, k=)` ranks passages — every
+   section with text of every current Raw (a superseded version is not
+   cited) and every Wiki paragraph after its frontmatter — deterministically
+   (BM25; ties by corpus order), with single characters and character
+   bigrams for CJK text so a question of any length in Chinese matches
+   inside a run without a segmenter, and a Latin term glued to CJK is still a
+   term of its own.
+2. Every `Passage` carries a `Citation`: a Raw passage names its
+   `KnowledgeSource`, file and section, with the page or slide the
+   extractor knew; a Wiki passage names its page and, when the page carries
+   `source_id`, the source behind it. This is the Roadmap's "query answers
+   can cite source provenance".
+3. `QueryEngine(vault, model=, alias=).ask(question, k=)` returns an `Answer`
+   with a closed status: `retrieved` (passages only, no model), `answered`
+   (a synthesized text whose every citation — `[2]`, `[1, 3]` or `[1-3]` —
+   names a retrieved passage), `unanswered` (the model cited nothing, as it
+   is told to when the passages do not answer; its sentence is kept),
+   `uncited` (the text was refused for citing something it was not given),
+   `model_failed` (an adapter that raises included) or `no_match` (a blank
+   question included). Synthesis goes through `ModelClient`; no provider is
+   named, and a default trace is derived per request.
+4. Tests: tokenization with CJK characters and bigrams and split scripts,
+   ranking that is stable across calls, citations resolving to pages and
+   slides, wiki passages citing the source behind a CRLF sources page, image
+   sections without text not being passages, only the current version of an
+   original being cited, and synthesis accepted only when every citation is
+   real.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 8 — Query with provenance: retrieval over Raw and Wiki returning an
-  answer whose every citation names a `KnowledgeSource` (with page/slide where
-  known). Deterministic lexical retrieval first; model synthesis, when used,
-  may cite only what retrieval returned.
 - Slice 9 — Migration adapter for an existing Obsidian vault: adopt existing
   Raw and Wiki content under typed provenance, report path-versus-hash drift,
   snapshot before adoption and restore on demand. Existing knowledge is not a
