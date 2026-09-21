@@ -23,18 +23,32 @@ decision: `docs/PHASE_4_MIGRATION.md` (slice 7); contracts: `docs/CONTRACTS.md`
   backup, refused when moved), `resolve` (decision recorded first, markers
   cleared bottom-up, `Resolution` with `cleared`/`missed`).
 - `knowledge/lint.py`: `ManualEdits`, `page_hashes`, `record_state`,
-  `manual_edits`; `LintReport.manual_edits` computed by `scan`.
+  `note_written`, `manual_edits`, `line_ending`; `LintReport.manual_edits`
+  computed by `scan` from the pages it already read.
 - `Vault.state_read` / `state_write` for `.ingest-state.json` (`{}` when absent
   or corrupt).
-- 3 regression tests (`tests/test_conflicts.py`); the pinned `conflicts.py`
+- 5 regression tests (`tests/test_conflicts.py`); the pinned `conflicts.py`
   excerpt's characterization exists since slice 1.
 - Docs: phase spec slice 7 requirements, `docs/CONTRACTS.md`, migration slice 7
   decision.
 
+- PR #30 opened; pre-merge review applied (10 findings): several markers on
+  one page were cleared with one write each, so the backup was overwritten
+  with a half-cleared page — `clear_conflicts` removes them in one write;
+  duplicate clears deleted a shifted line — deduplicated; the `tool_written`
+  exclusion (from the source) hid a person's later edit to a tool-written
+  page — replaced by `note_written`, which refreshes those hashes when the
+  tool writes; any line containing `⚠️` could be cleared, heading or prose —
+  only lines matching the marker rule; an odd state file raised out of `scan`
+  — first run; a malformed clear list could raise after writes — refused
+  first; clears sort by the normalized page; `scan` hashes the pages it
+  already read instead of reading again; `NO_DECISIONS` is one constant in
+  `planning`; a cleared page keeps its line endings. Two tests added.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- PR #30 is open with the review posted; merge on green CI is authorized for
+  Phase 4 slices.
 
 ## Remaining
 
@@ -63,7 +77,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 557 tests (554 prior + 3 conflicts; 2 skipped on Windows without
+# PASS: 559 tests (554 prior + 5 conflicts; 2 skipped on Windows without
 #       symlink privileges, run on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS

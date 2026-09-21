@@ -6,8 +6,9 @@ wrong. It is injected into every plan so a later source does not reinstate a
 rejected claim — the piece a change log cannot provide, since a log records
 that a line was deleted, not that it was deleted *because it was wrong*. Open
 conflicts are the `⚠️` lines still sitting on pages, found by reading; one is
-cleared only after its decision is on record. Manual-edit detection lives in
-`knowledge.lint`, which computes it into the report.
+cleared only after its decision is on record, and clearing removes marker
+lines and nothing else. Manual-edit detection lives in `knowledge.lint`,
+which computes it into the report.
 """
 
 from datetime import date
@@ -16,7 +17,8 @@ from typing import Self
 from pydantic import model_validator
 
 from common.base import Contract, Text
-from knowledge.lint import OpenConflict, find_conflicts, read_pages
+from knowledge.lint import CONFLICT, OpenConflict, find_conflicts, line_ending, read_pages
+from knowledge.planning import NO_DECISIONS
 from knowledge.vault import Vault, normalize
 
 DECISIONS_FILE = "decisions.md"
@@ -27,7 +29,6 @@ DECISIONS_HEADER = """# Decisions — settled conflicts
 > not written back. One `## [YYYY-MM-DD] topic` per decision, saying what is
 > kept, what is rejected and why. Keep it short: it enters every prompt.
 """
-NO_DECISIONS = "(no settled decisions)"
 
 
 class Decision(Contract):
@@ -60,8 +61,8 @@ def decision_block(decision: Decision, today: date) -> str:
 
 
 def decisions_text(vault: Vault) -> str:
-    """The block a plan prompt receives: the settled decisions, or a marker
-    saying there are none (a header alone is none)."""
+    """The block a plan prompt receives: the settled decisions, or the
+    planner's marker saying there are none (a header alone is none)."""
     text = vault.read(DECISIONS_FILE).strip()
     if not text or text == DECISIONS_HEADER.strip():
         return NO_DECISIONS
@@ -86,20 +87,37 @@ def open_conflicts(vault: Vault) -> tuple[OpenConflict, ...]:
     return tuple(found)
 
 
-def clear_conflict(vault: Vault, page: str, line: int, *, stamp: str) -> bool:
-    """Remove one `⚠️` line after it has been decided. False if the line has
-    moved or is not a conflict marker — nothing else is ever removed."""
+def clear_conflicts(
+    vault: Vault, page: str, lines: tuple[int, ...], *, stamp: str
+) -> tuple[int, ...]:
+    """Remove the marker lines of one page in one write — one backup of the
+    original, whatever the number of markers — and return the line numbers
+    actually removed. A line that is not a conflict marker (a heading or prose
+    that merely mentions the symbol), or that has moved, is left alone: nothing
+    but markers is ever removed."""
     rel = normalize(page)
-    lines = vault.read(rel).split("\n")
-    index = line - 1
-    if not (0 <= index < len(lines)) or "⚠️" not in lines[index]:
-        return False
-    del lines[index]
-    # Leave no double blank line behind.
-    while 0 < index < len(lines) and not lines[index].strip() and not lines[index - 1].strip():
-        del lines[index]
-    vault.write(rel, "\n".join(lines).rstrip("\n") + "\n", stamp=stamp)
-    return True
+    text = vault.read(rel)
+    rows = text.split("\n")
+    removable = sorted(
+        {n for n in lines if 1 <= n <= len(rows) and CONFLICT.match(rows[n - 1]) is not None},
+        reverse=True,
+    )
+    if not removable:
+        return ()
+    for number in removable:
+        index = number - 1
+        del rows[index]
+        # Leave no double blank line behind.
+        while 0 < index < len(rows) and not rows[index].strip() and not rows[index - 1].strip():
+            del rows[index]
+    ending = line_ending(vault, rel)
+    vault.write(rel, ending.join(rows).rstrip("\r\n") + ending, stamp=stamp)
+    return tuple(sorted(removable))
+
+
+def clear_conflict(vault: Vault, page: str, line: int, *, stamp: str) -> bool:
+    """Remove one marker line after it has been decided; False when it moved."""
+    return bool(clear_conflicts(vault, page, (line,), stamp=stamp))
 
 
 class Resolution(Contract):
@@ -120,16 +138,24 @@ def resolve(
     stamp: str,
 ) -> Resolution:
     """Record why, then remove the markers. The decision is written first so
-    a marker is never cleared without its reason on record."""
+    a marker is never cleared without its reason on record; the clear list is
+    checked before anything is written so nothing can fail half-way."""
+    wanted: dict[str, set[int]] = {}
+    for page, line in clear:
+        rel = normalize(page)
+        if not rel or line < 1:
+            raise ValueError("a conflict to clear is a page and a line number")
+        wanted.setdefault(rel, set()).add(line)
     append_decision(vault, decision, today=today)
     before = {(item.page, item.line): item for item in open_conflicts(vault)}
     cleared: list[OpenConflict] = []
     missed: list[tuple[str, int]] = []
-    # Clear from the bottom up so earlier line numbers stay valid.
-    for page, line in sorted(clear, key=lambda item: (item[0], -item[1])):
-        found = before.get((normalize(page), line))
-        if found is not None and clear_conflict(vault, page, line, stamp=stamp):
-            cleared.append(found)
-        else:
-            missed.append((page, line))
+    for rel in sorted(wanted):
+        known = {line for line in wanted[rel] if (rel, line) in before}
+        removed = set(clear_conflicts(vault, rel, tuple(known), stamp=stamp)) if known else set()
+        for line in sorted(wanted[rel]):
+            if line in removed:
+                cleared.append(before[(rel, line)])
+            else:
+                missed.append((rel, line))
     return Resolution(decision=decision, cleared=tuple(cleared), missed=tuple(missed))

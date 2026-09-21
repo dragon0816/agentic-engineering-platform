@@ -612,16 +612,21 @@ once and the file is never rewritten. `decisions_text(vault)` is what
 `(no settled decisions)`.
 
 `open_conflicts(vault)` returns the lint's `OpenConflict` for every `⚠️` line.
-`clear_conflict(vault, page, line, stamp=)` removes exactly that marker line
-through `Vault.write` with a backup and returns False, touching nothing, when
-the line has moved or is not a marker. `resolve(vault, decision, clear=,
-today=, stamp=)` records the decision, then clears the listed `(page, line)`
-markers bottom-up and returns a `Resolution` with `cleared` and `missed`.
+`clear_conflicts(vault, page, lines, stamp=)` removes the marker lines of one
+page in one write — one backup of the original — and returns the line numbers
+removed; a line that does not match the marker rule or has moved is left
+alone, and the page keeps its own line endings (`line_ending`).
+`clear_conflict` is the one-line form. `resolve(vault, decision, clear=,
+today=, stamp=)` refuses a malformed clear list before writing anything,
+records the decision, then clears per page and returns a `Resolution` with
+`cleared` and `missed`. `NO_DECISIONS` is `knowledge.planning`'s, shared.
 
 `knowledge.lint.ManualEdits` (`first_run`, `since`, `edited`, `added`,
-`removed`, `tool_written`) is computed into `LintReport.manual_edits`.
-`record_state(vault, written=, today=)` stores page hashes and the pages the
-tool wrote in `.ingest-state.json` (`Vault.state_write` / `state_read`, its own
-file, `{}` when absent or corrupt); `manual_edits(vault)` compares. A host
-calls `record_state` after an apply with the outcome's `written` so its own
-writes are not reported as a person's.
+`removed`) is computed into `LintReport.manual_edits` from the pages `scan`
+already read. `record_state(vault, today=)` stores every page's hash in
+`.ingest-state.json` (`Vault.state_write` / `state_read`, its own file, `{}`
+when absent or corrupt); `note_written(vault, written, today=)` refreshes
+only the pages the tool just wrote — a host calls it after an apply with the
+outcome's `written`, so the tool's writes are not reported as a person's while
+a later change to the same page still is; `manual_edits(vault)` compares. An
+odd state (blank keys, wrong types) is a first run, never a failure.

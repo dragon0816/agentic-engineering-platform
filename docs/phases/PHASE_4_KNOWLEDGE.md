@@ -249,18 +249,21 @@ enforced in code, never left to a prompt:
    block the planner injects, `(no settled decisions)` when the file is
    absent or only the header. The file is append-only: nothing rewrites it.
 2. `open_conflicts(vault)` finds every `⚠️` line by reading, through the same
-   `find_conflicts` the lint report uses. `clear_conflict(vault, page, line,
-   stamp=)` removes exactly one marker line, refuses a line that moved or is
-   not a marker, collapses the blank it leaves and backs the page up.
-3. `resolve(vault, decision, clear=, today=, stamp=)` records the decision
-   first and then clears the listed markers, bottom-up so line numbers stay
-   valid, reporting what was cleared and what had moved. A marker is never
-   cleared without its reason on record.
-4. Manual-edit detection is computed into the lint report: `record_state`
-   stores page hashes and what the tool wrote (`.ingest-state.json`, through
-   `Vault.state_write`); `manual_edits` reports pages edited by a person since
-   then (tool-written pages excluded), added and removed; a corrupt or absent
-   state is a first run, not a failure. `LintReport.manual_edits` carries it.
+   `find_conflicts` the lint report uses. `clear_conflicts(vault, page,
+   lines, stamp=)` removes the marker lines of one page in one write — one
+   backup of the original however many markers — and only lines that match
+   the marker rule: a heading or prose that mentions the symbol, or a line
+   that moved, is left alone. A page keeps its own line endings.
+3. `resolve(vault, decision, clear=, today=, stamp=)` checks the clear list,
+   records the decision, then clears per page, reporting what was cleared
+   and what was missed. A marker is never cleared without its reason on
+   record, and nothing can fail half-way.
+4. Manual-edit detection is computed into the lint report from the pages it
+   already read: `record_state` stores every page's hash; `note_written`
+   refreshes only the pages the tool just wrote, so its writes are not
+   reported as a person's while a later change to the same page still is;
+   `manual_edits` reports edited, added and removed pages since. A corrupt,
+   odd or absent state is a first run, not a failure.
 5. Tests over the pinned conflicts excerpt already exist (slice 1); regression
    tests cover the record, injection, finding and clearing, resolution with a
    moved marker, and manual edits across two recorded states.

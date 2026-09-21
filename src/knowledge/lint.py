@@ -92,65 +92,88 @@ class OpenConflict(Contract):
 
 
 class ManualEdits(Contract):
-    """Pages changed since the last recorded state, excluding what the tool
-    wrote itself; `first_run` when there is no state to compare against."""
+    """Pages a person changed since the recorded state — edited, added or
+    removed — and `first_run` when there is no usable state to compare against.
+    A page the tool wrote and noted is not an edit; a later change to it is."""
 
     first_run: bool = False
     since: str | None = None
     edited: tuple[Text, ...] = ()
     added: tuple[Text, ...] = ()
     removed: tuple[Text, ...] = ()
-    tool_written: int = Field(default=0, ge=0, strict=True)
 
 
-def page_hashes(vault: Vault) -> dict[str, str]:
+def line_ending(vault: Vault, rel: str) -> str:
+    """The line ending a page uses, so a one-line repair rewrites nothing else."""
+    return "\r\n" if b"\r\n" in vault.read_bytes(rel) else "\n"
+
+
+def _hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def page_hashes(vault: Vault, texts: dict[str, str] | None = None) -> dict[str, str]:
     """A short content hash per wiki page, `index.md` and `decisions.md`;
-    unreadable pages are left out rather than fatal."""
-    texts, _ = read_pages(vault, vault.wiki_files())
-    for extra in ("index.md", "decisions.md"):
-        if vault.exists(extra):
-            more, _ = read_pages(vault, (extra,))
-            texts.update(more)
-    return {
-        rel: hashlib.sha256(text.encode("utf-8")).hexdigest()[:16] for rel, text in texts.items()
-    }
+    unreadable pages are left out rather than fatal. Texts already read by
+    the caller are hashed rather than read again."""
+    known = dict(texts) if texts is not None else _all_pages(vault)[0]
+    if "decisions.md" not in known and vault.exists("decisions.md"):
+        more, _ = read_pages(vault, ("decisions.md",))
+        known.update(more)
+    return {rel: _hash(text) for rel, text in known.items()}
 
 
-def record_state(vault: Vault, *, written: tuple[str, ...] = (), today: date) -> None:
-    """Record current hashes plus which pages this run wrote itself, so they
-    are not reported as human edits next time. Chosen over git because a vault
-    may live in a synced folder where a `.git` directory is a liability."""
-    vault.state_write(
-        {
-            "updated": today.isoformat(),
-            "hashes": page_hashes(vault),
-            "tool_written": sorted({normalize(rel) for rel in written}),
-        }
-    )
+def record_state(vault: Vault, *, today: date) -> None:
+    """Record every page's hash now. Chosen over git, as the source did,
+    because a vault may live in a synced folder where a `.git` directory is a
+    liability."""
+    vault.state_write({"updated": today.isoformat(), "hashes": page_hashes(vault)})
 
 
-def manual_edits(vault: Vault) -> ManualEdits:
+def note_written(vault: Vault, written: tuple[str, ...], *, today: date) -> None:
+    """After the tool writes pages, refresh their recorded hashes — and only
+    theirs — so its own writes are not reported as a person's while a later
+    change to the same page still is."""
     state = vault.state_read()
-    previous = state.get("hashes") if isinstance(state, dict) else None
-    if not isinstance(previous, dict) or not previous:
+    hashes = _clean_hashes(state.get("hashes"))
+    if hashes is None:
+        record_state(vault, today=today)
+        return
+    texts, _ = read_pages(vault, tuple(normalize(rel) for rel in written))
+    for rel, text in texts.items():
+        hashes[rel] = _hash(text)
+    for rel in written:
+        if normalize(rel) not in texts:
+            hashes.pop(normalize(rel), None)
+    vault.state_write({"updated": today.isoformat(), "hashes": hashes})
+
+
+def _clean_hashes(value: object) -> dict[str, str] | None:
+    if not isinstance(value, dict) or not value:
+        return None
+    cleaned = {
+        key: digest
+        for key, digest in value.items()
+        if isinstance(key, str) and key.strip() and isinstance(digest, str)
+    }
+    return cleaned or None
+
+
+def manual_edits(vault: Vault, texts: dict[str, str] | None = None) -> ManualEdits:
+    """A corrupt, odd or absent state is a first run, never a failure."""
+    state = vault.state_read()
+    previous = _clean_hashes(state.get("hashes"))
+    if previous is None:
         return ManualEdits(first_run=True)
-    tool_written = state.get("tool_written")
-    written = set(tool_written) if isinstance(tool_written, list) else set()
-    current = page_hashes(vault)
-    edited = tuple(
-        rel
-        for rel, digest in current.items()
-        if rel in previous and previous[rel] != digest and rel not in written
-    )
-    added = tuple(rel for rel in current if rel not in previous)
-    removed = tuple(rel for rel in previous if rel not in current)
+    current = page_hashes(vault, texts)
     since = state.get("updated")
     return ManualEdits(
-        since=since if isinstance(since, str) else None,
-        edited=edited,
-        added=added,
-        removed=removed,
-        tool_written=len(written),
+        since=since if isinstance(since, str) and since.strip() else None,
+        edited=tuple(
+            rel for rel, digest in current.items() if rel in previous and previous[rel] != digest
+        ),
+        added=tuple(rel for rel in current if rel not in previous),
+        removed=tuple(rel for rel in previous if rel not in current),
     )
 
 
@@ -301,7 +324,7 @@ def scan(vault: Vault) -> LintReport:
         pending_sources=pending,
         open_conflicts=tuple(conflicts),
         unreadable=unreadable,
-        manual_edits=manual_edits(vault),
+        manual_edits=manual_edits(vault, texts),
     )
 
 
@@ -330,6 +353,7 @@ def fix_links(vault: Vault, report: LintReport, *, stamp: str) -> tuple[str, ...
 
         fixed = WIKILINK.sub(replace, text)
         if fixed != text:
-            vault.write(rel, fixed, stamp=stamp)
+            ending = line_ending(vault, rel)
+            vault.write(rel, fixed.replace("\n", ending), stamp=stamp)
             changed.append(rel)
     return tuple(changed)

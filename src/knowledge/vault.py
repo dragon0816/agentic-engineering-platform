@@ -332,6 +332,10 @@ class Vault:
     def exists(self, rel: str) -> bool:
         return self._resolve(rel)[1].exists()
 
+    def read_bytes(self, rel: str) -> bytes:
+        _, target = self._resolve(rel)
+        return target.read_bytes() if target.is_file() else b""
+
     def read_head(self, rel: str, *, max_lines: int = 64) -> str:
         """The frontmatter of a file, read line by line and stopped at the
         closing `---`, so a large or oddly encoded body is never touched."""

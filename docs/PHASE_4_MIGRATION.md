@@ -275,6 +275,13 @@ clearing any marker so a marker is never removed without its reason on record
 through `Vault.write` with a backup, and the state file is `.ingest-state.json`
 through the vault rather than `.brain-state.json` beside it. Manual-edit
 detection lives in `knowledge.lint` because it is computed by reading, and the
-lint report carries it. Rollback removes `knowledge/conflicts.py`, the state
+lint report carries it. From review: the source's `tool_written` exclusion
+was recorded *after* the tool's writes, so a person's later change to a
+tool-written page was invisible until the next state write — replaced by
+`note_written`, which refreshes those pages' hashes at the moment the tool
+writes them; several markers on one page are cleared in one write so the
+one backup is the original; only lines matching the marker rule are ever
+removed (the source deleted any line containing the symbol); a page keeps
+its line endings; and a malformed clear list is refused before any write. Rollback removes `knowledge/conflicts.py`, the state
 functions in `knowledge/lint.py`, `Vault.state_read` / `state_write` and the
 tests; nothing else imports them.
