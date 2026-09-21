@@ -144,6 +144,13 @@ class RunJournal:
             state, index, StepCheckpoint(step_index=index, state="completed", result=reference)
         )
 
+    def step_failed(self, state: JournalState, index: int, code: str | None) -> None:
+        """Why the step is uncertain. The step already ran, so the evidence is
+        already conservative; this only explains it to whoever reads it later."""
+        state.checkpoint = self._write(
+            state, index, StepCheckpoint(step_index=index, state="started", code=code)
+        )
+
     def _write(self, state: JournalState, index: int, step: StepCheckpoint) -> RunCheckpoint:
         """A run whose every step is completed *is* succeeded, so the last step's
         completion and the terminal marker are one write, never two."""

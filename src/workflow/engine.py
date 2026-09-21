@@ -742,6 +742,10 @@ class WorkflowEngine:
                 )
                 self._emit(record, "step_finished", step_index=index, code=code)
                 if result.status != "succeeded":
+                    # Explain the step before the run becomes terminal: nothing
+                    # may await between the terminal status and the final
+                    # snapshot, or a caller-wait timeout could overwrite it.
+                    await self._journal_step_failed(record, index, code)
                     record.status = result.status
                     record.failure = result.failure
                     return
@@ -785,6 +789,16 @@ class WorkflowEngine:
             self._journal_failure(record, index, error)
             return False
         return True
+
+    async def _journal_step_failed(self, record: _RunRecord, index: int, code: str | None) -> None:
+        """Explain an uncertain step. The run already failed and the evidence is
+        already conservative, so a store that refuses this never changes either."""
+        if self.journal is None or record.journal is None:
+            return
+        try:
+            await asyncio.to_thread(self.journal.step_failed, record.journal, index, code)
+        except CheckpointStoreError as error:
+            record.append_log(f"step {index + 1} checkpoint_{error.code}")
 
     async def _journal_step_completed(
         self, record: _RunRecord, index: int, context: RequestContext, data: JsonValue

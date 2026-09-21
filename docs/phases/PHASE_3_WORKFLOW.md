@@ -318,6 +318,23 @@ recorded. B (process liveness) and C (leases) can be layered on later.
    suspension of a live run, changed manifests, denied re-authorization and a
    key that already names a durable run.
 
+## Requirements and acceptance (slice 13 — Gateway run control over the journal)
+
+1. `Gateway.inspect` answers from this process's history first and falls back to
+   the durable journal, reporting which in `source`; `unknown` still covers
+   missing, evicted, never-journalled and other actors' runs alike.
+2. `Gateway.suspend` records a `SuspensionConfirmation` against the durable
+   record. A run this caller cannot see is `unknown`; a live or already
+   suspended run raises the engine's closed code, not a new vocabulary.
+3. `Gateway.resume` continues a journalled run through recovery and any other
+   run in memory, so the durable "continued once" guard always applies.
+4. The Gateway still adds no authority: ownership, policy and every pre-flight
+   stay in the engine.
+5. Tests cover the result contract, memory-then-journal fallback, an
+   unjournalled engine, unknown and foreign runs, suspend-then-resume across a
+   restart, continue-once, resuming without a confirmation, a live run, and
+   denied authorization after a restart.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -334,6 +351,7 @@ recorded. B (process liveness) and C (leases) can be layered on later.
 - Slice 10: single-writer SQLite checkpoint backend.
 - Slice 11: content-addressed protected payload storage.
 - Slice 12: engine recovery with manual, human-confirmed suspension.
+- Slice 13: Gateway run control over durable evidence.
 - Later Phase 3 work (each needs explicit scope): a Gateway surface for run
   control over the journal, and process-liveness or lease-based suspension if
   single-Bridge manual recovery ever stops being enough.

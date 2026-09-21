@@ -242,14 +242,30 @@ recovery, persistence or Gateway trigger is provided.
 policy=ResumePolicy(...), workflow_timeout_seconds=...)` are the host-facing
 entry points for run control, so CLI, Agent runtime and a future n8n adapter
 continue runs through the same Gateway and engine contracts as routed workflows.
-Both return a `RunControlResult` (`action`, `run_id`, `plan` for inspect,
-`workflow` snapshot for resume); both payload fields None means the run is
-unknown to this caller — missing, evicted or owned by another actor — exactly
-as the engine reports it. `RunControlResult.run_id` always echoes the requested
+`Gateway.suspend(request, run_id, confirmation)` completes the set. Each returns
+a `RunControlResult` (`action`, `run_id`, `source`, `plan` for inspect and
+suspend, `workflow` snapshot for resume, `suspended_by` when the durable record
+carries a confirmation); `source: unknown` with no payload means the run is
+unknown to this caller, exactly as the engine reports it.
+`RunControlResult.run_id` always echoes the requested
 id; a successful resume's continuation has its own id in `workflow.run.run_id`
 (with `resumed_from` naming the original), and that continuation is what to
-inspect or resume next. `inspect` is synchronous like the in-memory lookup it
-wraps; `resume` is asynchronous like `execute`.
+inspect or resume next. `source` says which evidence answered: `memory` is this
+process's run history, `journal` is the durable record that outlives it, and
+`unknown` means the run is unknown to this caller — missing, evicted, never
+journalled or owned by another actor, all indistinguishable on purpose.
+`inspect` answers from the durable record whenever it exists — it alone knows
+whether a run was suspended or already continued — and from this process's
+history otherwise, so a run that predates a restart is still reachable. `suspend` records a person's
+`SuspensionConfirmation` against the durable record and is only meaningful for a
+journalled run; a run that is alive here or already suspended raises the
+engine's own closed code rather than a vocabulary invented at this layer.
+`resume` continues a journalled run through recovery — so its continuation is
+journalled too and the durable "continued once" guard holds — and any other run
+in memory. `inspect` and `suspend` are synchronous and do their durable
+I/O on the calling thread, so a host already inside an event loop should call
+them through `asyncio.to_thread`; `resume` is asynchronous like `execute` and
+offloads that I/O itself.
 
 The Gateway adds no authority and parses nothing: ownership, pre-flight checks
 and per-step re-authorization stay in the engine, and `ResumePolicy` is a

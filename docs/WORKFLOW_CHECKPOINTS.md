@@ -220,7 +220,17 @@ because a caller-wait timeout is not abandonment.
 
 The in-memory `resume()` refuses a journalled run (`use_recovery`): a journalled
 continuation must itself be journalled, and the "continued once" guard lives in
-the store, which only `recover()` reserves. All durable writes run off the event
+the store, which only `recover()` reserves. `Gateway.inspect`, `Gateway.suspend`
+and `Gateway.resume` route to the journal automatically, so a host uses one set
+of entry points whether or not a run outlived the process that started it; the
+durable record answers `inspect` whenever it exists, because only it knows that
+a run was suspended or already continued.
+
+A failed step also records *why* it is uncertain: the engine writes the Bridge's
+failure code onto the still-`started` evidence. That write is the one journal
+write whose failure changes nothing — the step already ran and `started` is
+already the conservative truth, so a store that refuses it only costs the
+explanation. All durable writes run off the event
 loop, and the SQLite store serialises them so it stays a single writer wherever
 it is called from.
 

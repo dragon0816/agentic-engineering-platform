@@ -204,6 +204,7 @@ def test_inputs_and_results_are_owned_by_the_run_even_after_caller_timeout() -> 
 
     async def scenario() -> None:
         release = asyncio.Event()
+        reached_second = asyncio.Event()
         calls = 0
 
         async def mutate(context: RequestContext, inputs: Contract) -> Contract:
@@ -211,6 +212,7 @@ def test_inputs_and_results_are_owned_by_the_run_even_after_caller_timeout() -> 
             calls += 1
             assert isinstance(inputs, Items)
             if calls == 2:
+                reached_second.set()
                 await release.wait()
             item = inputs.items[0]
             assert isinstance(item, dict) and isinstance(item["n"], int)
@@ -241,9 +243,16 @@ def test_inputs_and_results_are_owned_by_the_run_even_after_caller_timeout() -> 
         retrieved.steps[0].inputs.clear()
         runner = WorkflowEngine(workflows, BridgeExecutor(installed, LocalPolicy((grant(),))))
         item: dict[str, JsonValue] = {"n": 1}
-        snapshot = await runner.execute(
+        timed_out = await runner.execute(
             context(), flow.metadata.identity, {"items": [item]}, timeout_seconds=0.02
         )
+        assert timed_out.run.failure is not None
+        assert timed_out.run.failure.code == "workflow_timeout"
+        # The caller stopped waiting; the run did not. Waiting for the second
+        # step to be entered is deterministic, unlike waiting a fixed 20 ms.
+        await reached_second.wait()
+        snapshot = runner.get(timed_out.run.run_id)
+        assert snapshot is not None
         assert calls == 2 and snapshot.run.completed_steps == 1
         item["n"] = 999
         data = snapshot.step_results[0].data

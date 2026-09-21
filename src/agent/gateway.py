@@ -14,7 +14,7 @@ from pydantic import JsonValue, TypeAdapter, model_validator
 from agent.routing import RequestRouter, RoutingOutcome
 from capabilities.runtime import CapabilityInvocation
 from common.assets import AssetIdentity
-from common.base import Contract
+from common.base import Contract, Symbol
 from common.execution import (
     CapabilityResult,
     Failure,
@@ -24,26 +24,41 @@ from common.execution import (
     ResumePolicy,
     RunId,
 )
+from workflow.checkpoints import CheckpointStoreError
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import ProgressStream, WorkflowEngine, WorkflowRunSnapshot
+from workflow.journal import SuspensionConfirmation
 
 
 class RunControlResult(Contract):
     """Host-triggered run control. `run_id` echoes the request; a continuation's
-    own id is only in `workflow.run.run_id`. Both payload fields None means the
-    run is unknown to this caller (missing, evicted or owned by another actor)."""
+    own id is only in `workflow.run.run_id`.
 
-    action: Literal["inspect", "resume"]
+    `source` says which evidence answered: `memory` is this process's run
+    history, `journal` is the durable record that outlives it, and `unknown`
+    means the run is unknown to this caller — missing, evicted, never journalled
+    or owned by another actor, all indistinguishable on purpose.
+    """
+
+    action: Literal["inspect", "resume", "suspend"]
     run_id: RunId
+    source: Literal["memory", "journal", "unknown"] = "unknown"
     plan: ResumePlan | None = None
     workflow: WorkflowRunSnapshot | None = None
+    suspended_by: Symbol | None = None
 
     @model_validator(mode="after")
     def payload_matches_action(self) -> Self:
         if self.action == "inspect" and self.workflow is not None:
             raise ValueError("inspect never executes a run")
-        if self.action == "resume" and self.plan is not None:
+        if self.action == "resume" and (self.plan is not None or self.suspended_by is not None):
             raise ValueError("resume reports the continuation, not a plan")
+        if self.action == "suspend" and self.workflow is not None:
+            raise ValueError("suspend records a confirmation; it never executes a run")
+        if self.suspended_by is not None and self.source != "journal":
+            raise ValueError("only the durable record carries a confirmation")
+        if self.source == "unknown" and (self.plan is not None or self.workflow is not None):
+            raise ValueError("an unknown run has no evidence to report")
         return self
 
 
@@ -141,14 +156,57 @@ class Gateway:
         )
 
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
-        """Classify a retained run's steps for its owner; never executes anything.
+        """Classify a run's steps for its owner; never executes anything.
 
-        Synchronous like the in-memory engine lookup it wraps. The engine validates
-        the request context and enforces ownership; the result is validated once,
-        when constructed.
+        The durable record answers whenever it exists, because it alone knows
+        whether a run has been suspended or already continued; this process's
+        own history answers for everything else. `source` says which.
+
+        Durable reads happen on the calling thread: a host already inside an
+        event loop should call this through `asyncio.to_thread`.
         """
+        entry = self.engine.inspect_journal(request, run_id)
+        if entry is not None:
+            return RunControlResult(
+                action="inspect",
+                run_id=run_id,
+                source="journal",
+                plan=entry.plan,
+                suspended_by=entry.suspended_by,
+            )
+        plan = self.engine.inspect(request, run_id)
+        if plan is None:
+            return RunControlResult(action="inspect", run_id=run_id)
+        return RunControlResult(action="inspect", run_id=run_id, source="memory", plan=plan)
+
+    def suspend(
+        self, request: RequestContext, run_id: RunId, confirmation: SuspensionConfirmation
+    ) -> RunControlResult:
+        """Record a person's confirmation that the process owning a run is gone.
+
+        Only a journalled run can be suspended, because only durable evidence
+        outlives the process whose absence is being confirmed. A run this caller
+        cannot see is `unknown`, like everywhere else; a run that is alive here
+        or already suspended raises the engine's own closed code rather than a
+        second vocabulary invented at this layer.
+
+        Durable writes happen on the calling thread: a host already inside an
+        event loop should call this through `asyncio.to_thread`.
+        """
+        try:
+            entry = self.engine.suspend(request, run_id, confirmation)
+        except CheckpointStoreError as error:
+            if error.code != "missing":
+                raise
+            entry = None
+        if entry is None:
+            return RunControlResult(action="suspend", run_id=run_id)
         return RunControlResult(
-            action="inspect", run_id=run_id, plan=self.engine.inspect(request, run_id)
+            action="suspend",
+            run_id=run_id,
+            source="journal",
+            plan=entry.plan,
+            suspended_by=entry.suspended_by,
         )
 
     async def resume(
@@ -161,18 +219,36 @@ class Gateway:
     ) -> RunControlResult:
         """Continue a finished run through the same engine contract as routed workflows.
 
-        The policy is a host/caller option and is never derived from the request
-        message or a model. Run control is not a Skill route, so no model-selected
-        route can trigger it; ownership and authorization stay in the engine.
+        A journalled run is continued through recovery, so its continuation is
+        journalled too and the durable "continued once" guard is honoured; every
+        other run uses the in-memory path. The policy is a host/caller option and
+        is never derived from the request message or a model. Run control is not
+        a Skill route, so no model-selected route can trigger it; ownership and
+        authorization stay in the engine.
         """
-        if workflow_timeout_seconds is None:
-            # The engine owns the default caller-wait timeout.
-            snapshot = await self.engine.resume(request, run_id, policy)
-        else:
-            snapshot = await self.engine.resume(
-                request, run_id, policy, timeout_seconds=workflow_timeout_seconds
-            )
-        return RunControlResult(action="resume", run_id=run_id, workflow=snapshot)
+        # Reading the durable record touches the disk under the store's lock, so
+        # it never runs on the event loop the in-flight runs share.
+        journalled = (
+            await asyncio.to_thread(self.engine.inspect_journal, request, run_id) is not None
+        )
+        timeout = (
+            {}
+            if workflow_timeout_seconds is None
+            else {"timeout_seconds": workflow_timeout_seconds}
+        )
+        snapshot = (
+            await self.engine.recover(request, run_id, policy, **timeout)
+            if journalled
+            else await self.engine.resume(request, run_id, policy, **timeout)
+        )
+        if snapshot is None:
+            return RunControlResult(action="resume", run_id=run_id)
+        return RunControlResult(
+            action="resume",
+            run_id=run_id,
+            source="journal" if journalled else "memory",
+            workflow=snapshot,
+        )
 
     def watch(self, request: RequestContext, run_id: RunId) -> ProgressStream | None:
         """Bounded progress stream for the run's owner through the same engine contract.
