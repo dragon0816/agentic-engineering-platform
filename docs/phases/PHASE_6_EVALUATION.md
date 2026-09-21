@@ -71,16 +71,66 @@ whether it passed.
    deliberately wrong observation; an unknown assertion failing its case; a
    duplicate case id refused; and the report naming failures.
 
+## Requirements and acceptance (slice 2 — observable execution)
+
+Slice 1 left one grader unable to fail: `no_execution` passed for the four
+cases whose observation came from a bare router or the registry proof, because
+neither can execute and so neither could ever have recorded execution. A check
+that cannot fail is the thing this phase exists to remove, so it is closed
+before any new category of case is added.
+
+1. `ObservedRun.observable` names the side effects a run was capable of
+   detecting, and `ObservedRun.dispatched` names every capability the Bridge
+   was asked to run. A runner that cannot see execution says so rather than
+   reporting an empty list that reads like proof.
+2. `no_execution` fails when `execute` was not observable, with that as its
+   reason. The always-on forbidden-side-effect check fails the same way for
+   any effect the case forbids that the run could not have detected: absence
+   of evidence is not evidence of absence, and a suite that treats it as such
+   reports a clean run for a harness that was not looking.
+3. `CaseRunner` is the protocol that turns a case into an `ObservedRun`, and
+   `run_cases(cases, runner, graders=)` grades a whole directory through one.
+   The wiring that decides how a case is exercised moves out of the test body
+   into one module a host can copy.
+4. Every routed case is exercised through a real `Gateway`: one skill
+   registry holding the repository's three skill manifests, the release
+   workflow, and a Bridge whose `events` record every dispatch. Effects are
+   read from the installed capability's declared `side_effect` for anything
+   that ran, so a route to a capability declared `execute` is caught by the
+   declaration. **A dispatch that failed after the handler ran still counts**,
+   because it still did whatever it did; only one refused before the handler
+   was reached did not. The stack is rebuilt for every case, since a Bridge's
+   event log is its own and reusing it carries evidence forward.
+5. A capability the repository deliberately does not install, such as
+   `legacy/run-testing`, is still dispatched and still recorded. That a route
+   resolves and nothing runs is the observation, not an absence of one.
+6. The registry proof declares that it observes **nothing**. A proof that
+   dispatches nothing has not watched for an effect, and claiming otherwise
+   would move this slice's hole out of the grader and into the runner. A case
+   that issues no request therefore forbids no effects and asserts no
+   `no_execution`: there is no request whose effects could be forbidden, and
+   what discovery must not expose is asserted structurally in
+   `tests/test_registry.py`, where it can be checked.
+7. Which cases are discovery proofs is named, not inferred from a missing
+   route, so a later case that legitimately omits one is routed rather than
+   silently graded as the registry proof.
+8. Tests: every case still passing through the shared runner; `no_execution`
+   and a forbidden effect each failing when the run could not observe them;
+   `dispatched` recording an uninstalled capability; the effect reader
+   proven behaviourally, by a capability that declares `execute`, runs and
+   then fails, and is still reported, against one refused before it ran, which
+   is not; and one runner instance not carrying evidence between cases.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 2 — policy and forbidden outcomes: a scenario case's `Forbidden` list
+- Slice 3 — policy and forbidden outcomes: a scenario case's `Forbidden` list
   (overwrite a released tag, skip mandatory tests, modify an unrelated
   repository, expose credentials) checked as evidence rather than intent.
-- Slice 3 — model-involving evaluation: the same case set across configured
+- Slice 4 — model-involving evaluation: the same case set across configured
   aliases, with repetition, comparing quality, latency (`duration_ms` from
   Phase 5), reliability and usage. Reported as skipped when no alias is
   configured, never quietly passed.
-- Slice 4 — trace capture with redaction: route, plan, tool and workflow calls,
+- Slice 5 — trace capture with redaction: route, plan, tool and workflow calls,
   approvals, duration, model usage and final status.
 
 ## Out of scope for Phase 6

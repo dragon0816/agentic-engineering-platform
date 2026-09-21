@@ -1,66 +1,61 @@
-# Handoff — Phase 6 evaluation, slice 1 (the grading harness)
+# Handoff — Phase 6 evaluation, slice 2 (observable execution)
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-6/harness`, based on `main` after PR #38 merged.
+Branch: `phase-6/observable-execution`, based on `main` after PR #40 merged.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-Phase 6 slice 1: make a case's declarations decide whether it passed.
-Requirements: `docs/phases/PHASE_6_EVALUATION.md` (slice 1); decisions:
-`docs/PHASE_6_MIGRATION.md`; contracts: `docs/CONTRACTS.md` ("Evaluation
-harness").
+Close the one grader slice 1 left unable to fail, before adding any new
+category of case. Requirements: `docs/phases/PHASE_6_EVALUATION.md` (slice 2);
+contracts: `docs/CONTRACTS.md` ("Evaluation harness").
 
 ## Owner decisions in force
 
 Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
 **Codex and Claude Code are out of scope for Phase 6 entirely** (2026-09-22),
 so they are not evaluated, not driven and not a capability the platform
-invokes. `docs/phases/PHASE_6_EVALUATION.md` records it.
+invokes.
 
 ## The gap this slice closed
 
-`EvaluationCase.assertions` had named what must hold since Phase 1, and
-nothing read it. Five test modules loaded the six cases and re-implemented a
-subset of their meaning by hand, so a case could declare `no_execution` while
-the test that loaded it never looked for execution, and a misspelled assertion
-was indistinguishable from a satisfied one.
+Slice 1's review found that `no_execution` passed for four of the six cases
+without being able to fail: their observations came from a bare `RequestRouter`
+or the registry proof, neither of which can execute anything, so an empty
+effect list was not evidence, it was the absence of a witness.
 
 ## Completed
 
-- `src/common/evaluation.py`: `ObservedRun` (evidence of what happened, never a
-  claim that an assertion holds), the `Grader` protocol and nine graders, one
-  per assertion the repository's cases declare; `grade` (expected route when
-  the case names one, forbidden side effects always, each named assertion, and
-  an unknown assertion **failing** its case); `load_cases` (stable order, a
-  file holding one case or many, a duplicate id refused where cases are
-  loaded); `report`.
-- `EvaluationCase.expected_route` is now optional, because a discovery case is
-  not a routed request. `evaluation/cases/discover-task.json` drops the route
-  it could never have been graded against, keeping the four assertions that
-  carry its meaning; `tests/test_registry.py` checks that instead.
-- `tests/test_evaluation.py`: the six cases graded against the real platform
-  (router, gateway and the registry proof), every declared assertion having a
-  grader and every grader being exercised, each grader rejecting a
-  deliberately wrong observation, an unrecognized assertion failing, the
-  always-on route and side-effect checks including a wrong target of the right
-  kind and a refusal that did something permitted, stable loading with a
-  duplicate refused, and the report naming failures. 15 test cases.
-- `CLAUDE.md`, `docs/ROADMAP.md` and `docs/ARCHITECTURE.md` now name Phase 6 as
-  the active phase.
-- PR #39 review (7 findings) applied, 6 fixed. Every one was an instance of
-  the failure this slice exists to remove, a grader that cannot fail:
-  `bridge_advertisement` compared a capability's name against an identity's
-  name and would have failed any case declaring both it and a route;
-  the discovery observation read `advertised` from the fixture the proof
-  returns unchanged instead of the `installed_tasks` it actually produces;
-  `published_discovery` read a lifecycle from a query that already filters
-  unpublished assets; `scoped_identity` looped over parts `AssetIdentity`
-  validates at construction; `fail_closed` treated any effect as failing open
-  rather than consulting the case's forbidden list; and a route mismatch named
-  only the kind, hiding a wrong target of the right kind.
+- `ObservedRun.observable` names the effects a run could detect, and
+  `ObservedRun.dispatched` names every capability the Bridge was asked to run.
+  `no_execution` now fails when `execute` was not observable, and the
+  always-on forbidden check fails for any forbidden effect the run could not
+  have seen. Absence of evidence stopped counting as evidence of absence.
+- `CaseRunner` and `run_cases(cases, runner)` move the wiring out of the
+  contract: the harness grades what a runner returns and does not decide how a
+  case is exercised.
+- `tests/evaluation_runner.py` is the repository's runner. One `Gateway` holds
+  all three shipped skill manifests, the release workflow, and a Bridge whose
+  `events` supply both `dispatched` and the declared side effect of anything
+  that ran. Every routed case goes through it.
+- 20 test cases in `tests/test_evaluation.py`, including: every case still
+  passing through the shared runner; every routed case dispatching something
+  except the one that refuses; `legacy/run-testing` dispatched and recorded
+  although the repository deliberately installs no implementation for it; a
+  check that could not have seen its evidence failing rather than passing; and
+  the effect reader proven behaviourally rather than by its own declaration.
+- PR #41 review (5 findings) applied, all fixed. Four were the evidence being
+  weaker than the docs claimed: a dispatch that failed *after* the handler ran
+  contributed no effect, so a capability that did its damage and then raised
+  read as a clean run; one `GatewayRunner` instance carried its Bridge's event
+  log between cases; `DiscoveryRunner` declared it watched everything while
+  watching nothing, moving the hole from the grader into the runner; and the
+  observability test compared the runner's declaration against the constant
+  the runner itself used. The fifth was a trap for later: the repository
+  runner chose the discovery wiring from a missing route, which a slice 3
+  scenario case could legitimately have.
 
 ## In Progress
 
@@ -68,36 +63,26 @@ was indistinguishable from a satisfied one.
 
 ## Remaining
 
-- Slice 2: policy and forbidden outcomes for scenario cases (the Roadmap's
-  release example: never overwrite a released tag, skip mandatory tests,
-  modify an unrelated repository or expose credentials), checked as evidence.
-- Slice 3: model-involving evaluation across configured aliases with
-  repetition, comparing quality, latency (`duration_ms` from Phase 5),
-  reliability and usage. Reported as skipped when no alias is configured,
-  never quietly passed.
-- Slice 4: trace capture with redaction.
-- Deferred from Phase 3: a payload sweep, process-liveness or lease-based
-  suspension, and the earlier deferred reviews.
-- Deferred from Phase 4: a retrieval cache, host wiring that plans from an
-  adopted document, a size-and-mtime shortcut for adopted-file drift checks,
-  and image description for legacy `raw/`.
-- Deferred from Phase 5: tool calling in either adapter, reading `tool_calls`
-  back off a response, retry behaviour, a pooled or async transport, and a
-  production credential backend. The Ollama adapter and the company gateway
-  have still never been exercised against a live endpoint.
+Listed in `docs/TASKS.md`. Next is slice 3, the first `scenario` case with its
+forbidden outcomes checked as evidence.
 
 ## Architecture decisions made
 
-- An unrecognized assertion fails its case. The source repository's benchmark
-  shipped a selftest because a grader that accepts anything is
-  indistinguishable from a working one; the same exposure here is sharper,
-  since the assertions are free symbols.
-- A grader reads evidence, never a claim. `ObservedRun` therefore carries
-  counts, effects and identities rather than booleans named after assertions.
-- Not every evaluation case is a routed request, so `expected_route` is
-  optional. The alternative was to keep it mandatory and satisfy it for the
-  discovery case by copying the case's own `reason` into the observation,
-  which would have made the check vacuous.
+- The Bridge already records every dispatch in `events`, so no recording
+  wrapper was added. The evidence the harness needs was already produced by
+  the platform.
+- Effects are read from the installed capability's declared `side_effect` for
+  anything that ran, not from what a handler did. A route to a capability
+  declared `execute` is caught by the declaration, which is what a case
+  forbids.
+- The filesystem capability is installed but never granted. A case about
+  routing must not touch this machine's disk in order to prove that routing
+  executed nothing.
+- The registry proof declares that it observes nothing. A proof that
+  dispatches nothing has not watched for an effect, and saying it did would
+  move this slice's hole out of the grader and into the runner.
+- Which cases are discovery proofs is named rather than inferred from a
+  missing route, so a scenario case that legitimately omits one is routed.
 
 ## Exact verification commands and results
 
@@ -105,7 +90,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 627 passed, 3 skipped (link privileges)
+# PASS: 632 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -124,25 +109,25 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Known issues / limitations
 
-- All six cases are category `deterministic`. No `agent` or `scenario` case
-  exists yet, so those categories are declared in the contract and unexercised.
-- `tests/test_evaluation.py` chooses how to exercise a case by its id prefix
-  and namespace. That is host wiring living in a test; when a scenario case
-  arrives it will need a better home than a chain of conditionals.
-- **`no_execution` cannot fail for the four router-only and discovery cases**,
-  the seventh review finding, left open deliberately. A bare `RequestRouter`
-  has nothing to execute with and the registry proof asserts it has no
-  `execute` at all, so their observations record no side effects because none
-  were possible. Making the check meaningful means dispatching those cases
-  through a Bridge with a counting handler, which is the shared runner slice 2
-  needs anyway. Until then the assertion is structurally satisfied rather than
-  checked, and only the two gateway cases observe execution for real.
-- The five existing test modules still load cases themselves. They are unit
-  tests of each component and the suite is the cross-cutting gate, so the
-  overlap is deliberate, but a future slice could let them share one runner.
+- `observable` is still declared by the runner rather than derived, so a
+  runner that wires no Bridge and claimed to watch everything would be
+  believed. What the review forced is that the two runners here are honest
+  about it, and that the Gateway runner's claim is now backed behaviourally:
+  a capability that declares `execute`, runs and then fails is reported, and
+  one refused before it ran is not.
+- The discovery case now forbids no side effects and no longer asserts
+  `no_execution`. It issues no request, so there is no request whose effects
+  could be forbidden; what discovery must not expose is asserted structurally
+  in `tests/test_registry.py`, which checks the registry and the advertisement
+  have no `execute` at all. Nothing was lost, but the case is narrower than it
+  looked.
+- All six cases remain category `deterministic`. No `agent` or `scenario` case
+  exists yet.
+- Two test modules still load individual case files for their own unit
+  assertions. That overlap is deliberate: they test one component, the suite
+  is the cross-cutting gate.
 
 ## Next Recommended Action
 
-Merge PR #39 on green CI. Then write the slice 2 requirements section, build
-the shared runner that dispatches every case through a Bridge so execution is
-observable, and add the first `scenario` case with its forbidden outcomes.
+Merge PR #41 on green CI. Then write the slice 3 requirements and add the
+first `scenario` case with its forbidden outcomes.

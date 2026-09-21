@@ -13,14 +13,24 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_gateway import Handler, capability_spec, gateway
-from test_registry import sample
-from test_routing import skills
+from evaluation_runner import (
+    DISCOVERY_CASES,
+    WATCHED,
+    GatewayRunner,
+    Probe,
+    Report,
+    RepositoryRunner,
+    effects_of,
+)
 
-from agent.registry import InMemoryTaskRegistry
-from agent.routing import CommandRouter, RequestRouter
-from agent.skills import SkillManifest, SkillRegistry
-from common.assets import AssetIdentity
+from capabilities.contracts import CapabilitySpec
+from capabilities.runtime import (
+    CapabilityGrant,
+    CapabilityInvocation,
+    InstalledCapabilities,
+    LocalPolicy,
+)
+from common.assets import AssetIdentity, ExecutionDependencies
 from common.evaluation import (
     GRADERS,
     CaseResult,
@@ -29,102 +39,19 @@ from common.evaluation import (
     grade,
     load_cases,
     report,
+    run_cases,
 )
-from common.execution import RouteDecision
-from models.contracts import ModelRequest, ModelResponse
-from workflow.host_bridge import BridgeRegistration
-from workflow.proof import advertise_sample
+from common.execution import RequestContext, RouteDecision, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "evaluation/cases"
 
 
-class CountingModel:
-    """A model that records being asked. A deterministic case that reaches it
-    has already failed, but it must be present to prove nothing called it."""
-
-    def __init__(self) -> None:
-        self.calls: list[ModelRequest] = []
-
-    def generate(self, request: ModelRequest) -> ModelResponse:
-        self.calls.append(request)
-        raise AssertionError("a deterministic case must not reach a model")
-
-    def stream(self, request: ModelRequest) -> Any:
-        raise NotImplementedError
-
-
-def observe_routed(case: EvaluationCase, registry: SkillRegistry) -> ObservedRun:
-    model = CountingModel()
-    result = RequestRouter(CommandRouter(registry), model=model).route(case.request)
-    return ObservedRun(
-        decision=result.decision,
-        origin=result.origin,
-        model_calls=len(model.calls),
-        failure=result.failure,
-    )
-
-
-def observe_gateway(case: EvaluationCase) -> ObservedRun:
-    handler = Handler()
-    model = CountingModel()
-    result = asyncio.run(gateway(handler, model).handle(case.request))  # type: ignore[arg-type]
-    effects = (capability_spec().side_effect,) if handler.calls else ()
-    workflow = result.workflow
-    return ObservedRun(
-        decision=result.routing.decision,
-        origin=result.routing.origin,
-        model_calls=len(model.calls),
-        side_effects=effects,
-        status=workflow.run.status if workflow is not None else None,
-        completed_steps=workflow.run.completed_steps if workflow is not None else 0,
-    )
-
-
-def observe_discovery(case: EvaluationCase) -> ObservedRun:
-    manifest = sample()
-    bridge = BridgeRegistration.model_validate_json(
-        (ROOT / "examples/bridge.json").read_text(encoding="utf-8")
-    )
-    registry = InMemoryTaskRegistry()
-    advertisement = advertise_sample(manifest, registry, bridge)
-    discovered = registry.discover(namespace=case.request.namespace)
-    return ObservedRun(
-        discovered=tuple(task.metadata.identity for task in discovered),
-        # The lifecycle of what was registered, not of what a query returned:
-        # `discover` already drops anything unpublished, so reading it back
-        # from there would be a check that cannot fail.
-        lifecycle=(manifest.metadata.lifecycle,),
-        advertised=tuple(item.identity for item in advertisement.capabilities),
-        # What the proof actually produces. The capability list comes back
-        # unchanged from the fixture, so only this shows the task was advertised.
-        installed=advertisement.installed_tasks,
-    )
-
-
-def files_registry() -> SkillRegistry:
-    registry = SkillRegistry()
-    for data in json.loads((ROOT / "skills/file-read.json").read_text(encoding="utf-8")):
-        registry.register(SkillManifest.model_validate(data))
-    return registry
-
-
-def observe(case: EvaluationCase) -> ObservedRun:
-    """Drive the real platform the way a host would, chosen by what the case
-    is about rather than by what it claims will happen."""
-    if case.case_id.startswith("discover"):
-        return observe_discovery(case)
-    if case.case_id.startswith("phase3"):
-        return observe_gateway(case)
-    if case.request.namespace == "filesystem":
-        return observe_routed(case, files_registry())
-    return observe_routed(case, skills())
-
-
 def test_every_case_in_the_repository_passes_against_the_real_platform() -> None:
     cases = load_cases(CASES)
     assert len(cases) >= 6
-    results = [grade(case, observe(case)) for case in cases]
+    results = run_cases(cases, RepositoryRunner())
     summary = report(results)
     assert all(result.passed for result in results), summary
     assert summary.endswith(f"{len(cases)}/{len(cases)} cases passed")
@@ -132,6 +59,119 @@ def test_every_case_in_the_repository_passes_against_the_real_platform() -> None
     assert not any(result.unknown_assertions for result in results)
     for result in results:
         assert CaseResult.model_validate_json(result.model_dump_json()) == result
+
+
+def test_every_routed_case_is_exercised_where_execution_could_be_seen() -> None:
+    """The gap slice 1 left: four cases were observed through a bare router or
+    the registry proof, so `no_execution` passed without being able to fail."""
+    runner = RepositoryRunner()
+    for case in load_cases(CASES):
+        observed = runner.run(case)
+        if case.case_id in DISCOVERY_CASES:
+            # A proof that dispatches nothing has not watched for an effect,
+            # and says so rather than claiming a clean run.
+            assert observed.observable == (), case.case_id
+            assert "no_execution" not in case.assertions, case.case_id
+            continue
+        assert set(observed.observable) == set(WATCHED), case.case_id
+        assert case.expected_route is not None
+        if case.expected_route.kind == "needs_input":
+            # Refusing dispatches nothing, which is the point of refusing.
+            assert observed.dispatched == (), case.case_id
+        else:
+            assert observed.dispatched, case.case_id
+
+
+def test_the_runner_really_sees_an_effect_rather_than_declaring_that_it_would(
+    tmp_path: Path,
+) -> None:
+    """`observable` is a claim. This is the behaviour behind it: a capability
+    that ran is reported by its declared effect, and one that ran and then
+    failed is reported too, because it still did whatever it did."""
+
+    async def explode(context: Any, inputs: Any) -> Any:
+        raise RuntimeError("the effect happened, then this did")
+
+    spec = CapabilitySpec.model_validate(
+        {
+            "identity": {"namespace": "demo", "name": "detonate", "version": "1.0.0"},
+            "name": "demo.detonate",
+            "description": "Declares an execute effect and fails after running",
+            "input_contract": "demo.detonate.input.v1",
+            "output_contract": "demo.detonate.output.v1",
+            "side_effect": "execute",
+            "policy": {"required_permissions": ["demo.run"], "policy_refs": ["demo-policy"]},
+        }
+    )
+    installed = InstalledCapabilities()
+    installed.register(spec, explode, Probe, Report, ExecutionDependencies(central_required=False))
+    grant = CapabilityGrant.model_validate(
+        {
+            "actor": "engineer",
+            "asset": spec.identity,
+            "permissions": ["demo.run"],
+            "policy_refs": ["demo-policy"],
+            "approval_ref": "demo-approval",
+        }
+    )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant,)))
+    result = asyncio.run(
+        bridge.execute(
+            CapabilityInvocation(
+                context=RequestContext(
+                    trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+                    actor="engineer",
+                    namespace="demo",
+                    channel="evaluation",
+                    message="detonate",
+                ),
+                target=spec.identity,
+            )
+        )
+    )
+    assert result.status == "failed"
+    # The dispatch failed, and the effect still counts.
+    assert effects_of(bridge, installed) == ("execute",)
+
+    # A dispatch refused before the handler was reached did not happen.
+    denied = BridgeExecutor(installed, LocalPolicy(()))
+    asyncio.run(
+        denied.execute(
+            CapabilityInvocation(
+                context=RequestContext(
+                    trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+                    actor="engineer",
+                    namespace="demo",
+                    channel="evaluation",
+                    message="detonate",
+                ),
+                target=spec.identity,
+            )
+        )
+    )
+    assert denied.events and effects_of(denied, installed) == ()
+
+
+def test_one_runner_instance_does_not_carry_evidence_between_cases() -> None:
+    """A Bridge's event log is its own. Reusing one would let a case inherit
+    the dispatches of the one before it."""
+    runner = GatewayRunner()
+    cases = {case.case_id: case for case in load_cases(CASES)}
+    ran = runner.run(cases["phase3-workflow-dot-command"])
+    assert ran.dispatched and ran.side_effects == ("read",)
+    refused = runner.run(cases["phase2-unknown-explicit-command"])
+    assert refused.dispatched == () and refused.side_effects == ()
+
+
+def test_a_capability_the_repository_never_installs_is_still_dispatched() -> None:
+    """`legacy/run-testing` has routing but no implementation on purpose. That
+    the route resolved and nothing ran is the observation; no attempt at all
+    would not be."""
+    case = next(item for item in load_cases(CASES) if item.case_id == "phase2-known-command")
+    observed = GatewayRunner().run(case)
+    assert [item.name for item in observed.dispatched] == ["run-testing"]
+    assert observed.side_effects == ()
+    assert grade(case, observed).passed
 
 
 def test_every_declared_assertion_has_a_grader() -> None:
@@ -174,6 +214,7 @@ def satisfied(case: EvaluationCase) -> ObservedRun:
         side_effects=("read",),
         status="succeeded",
         completed_steps=1,
+        observable=WATCHED,
         discovered=(case.expected_route.target,) if case.expected_route else (),
         lifecycle=("published",),
         advertised=(case.expected_route.target,) if case.expected_route else (),
@@ -215,7 +256,9 @@ def test_every_grader_rejects_a_deliberately_wrong_observation(assertion: str) -
             assertions=[assertion],
             expected_route={"kind": "needs_input", "reason": "unknown command"},
         )
-        passing = ObservedRun(decision=case.expected_route, origin="deterministic")
+        passing = ObservedRun(
+            decision=case.expected_route, origin="deterministic", observable=WATCHED
+        )
 
     assert grade(case, passing).passed, grade(case, passing).reasons()
 
@@ -267,7 +310,10 @@ def test_a_forbidden_side_effect_and_a_wrong_route_are_always_checked() -> None:
         assertions=["fail_closed"], expected_route={"kind": "needs_input", "reason": "unknown"}
     )
     permitted = ObservedRun(
-        decision=refusing.expected_route, origin="needs_input", side_effects=("read",)
+        decision=refusing.expected_route,
+        origin="needs_input",
+        side_effects=("read",),
+        observable=WATCHED,
     )
     assert grade(refusing, permitted).passed
 
@@ -294,3 +340,27 @@ def test_the_report_names_every_failure_and_its_reason() -> None:
     assert "FAIL synthetic" in lines
     assert "no_model_call: 2 model call(s) were made" in lines
     assert lines.endswith("1/2 cases passed")
+
+
+def test_a_check_that_could_not_have_seen_its_evidence_does_not_pass() -> None:
+    """Absence of evidence is not evidence of absence. A run that was not
+    watching for an effect leaves the case unproven, not satisfied."""
+    case = routed_case(assertions=["no_execution"])
+    blind = ObservedRun.model_validate({**satisfied(case).model_dump(), "observable": ("read",)})
+    result = grade(case, blind)
+    assert not result.passed
+    assert any("not observable" in reason for reason in result.reasons())
+    assert any("execution was not observable" in reason for reason in result.reasons())
+
+    # The always-on forbidden check refuses the same way, naming what it
+    # could not see rather than reporting a clean run.
+    quiet = routed_case(assertions=[])
+    unwatched = ObservedRun.model_validate(
+        {**satisfied(quiet).model_dump(), "observable": ("read", "execute")}
+    )
+    missed = grade(quiet, unwatched)
+    assert not missed.passed
+    assert any("not observable here: write" in reason for reason in missed.reasons())
+
+    # And a run that was watching, and saw nothing, passes.
+    assert grade(case, satisfied(case)).passed
