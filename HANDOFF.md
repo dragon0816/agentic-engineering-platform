@@ -47,11 +47,20 @@ Normative plan: `docs/WORKFLOW_CHECKPOINTS.md`. Requirements:
 - Docs: `docs/WORKFLOW_CHECKPOINTS.md`, `docs/CONTRACTS.md` "Checkpoint
   persistence boundary", migration slice-9 decision, phase spec slice 9 and
   sequence, README pointer.
+- PR #16 opened; pre-merge review applied: `recovery_plan` reports a `running`
+  record as `running` (only `suspended` needs input); a continuation keeps the
+  parent's first unresolved step's evidence so a started step stays uncertain
+  until the child re-acknowledges it; run identifiers are owner-scoped so one
+  owner can neither observe nor block another's; a keyed `create` compares the
+  intent fields as well as the digest; a two-node parent/continuation cycle is
+  rejected; `replace` keys its compare-and-swap on `expected_revision` only;
+  TypeAdapters are hoisted and redundant copies removed; the contract heading
+  is an H2; tests assert exact error codes.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #16 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 

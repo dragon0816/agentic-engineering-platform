@@ -21,13 +21,24 @@ StoreErrorCode = Literal[
     "unavailable",
     "commit_unknown",
 ]
+_ERROR_CODE: TypeAdapter[StoreErrorCode] = TypeAdapter(StoreErrorCode)
+_RUN_ID: TypeAdapter[str] = TypeAdapter(RunId)
+_KEY: TypeAdapter[str] = TypeAdapter(IdempotencyKey)
+# Execution intent: what a keyed resubmission or a continuation must match exactly.
+INTENT_FIELDS = ("manifest", "runtime_contract", "intent_sha256", "arguments")
+_MUTABLE_FIELDS = {"status", "steps", "revision"}
+_STEP_TRANSITIONS = {
+    ("never_started", "started"),
+    ("started", "started"),
+    ("started", "completed"),
+}
 
 
 class CheckpointStoreError(Exception):
     """Sanitized outcome; commit_unknown requires inspection before proceeding."""
 
     def __init__(self, code: StoreErrorCode) -> None:
-        self.code: StoreErrorCode = TypeAdapter(StoreErrorCode).validate_python(code)
+        self.code: StoreErrorCode = _ERROR_CODE.validate_python(code)
         super().__init__(self.code)
 
 
@@ -50,46 +61,64 @@ class CheckpointStore(Protocol):
     ) -> RunCheckpoint: ...
 
 
+_StoreKey = tuple[str, str, str]
+
+
 def _checked(checkpoint: RunCheckpoint) -> RunCheckpoint:
+    """Validated private copy: manifests carry mutable input maps."""
     return RunCheckpoint.model_validate(checkpoint).model_copy(deep=True)
+
+
+def _key(owner: CheckpointOwner, run_id: str) -> _StoreKey:
+    return (owner.actor, owner.namespace, run_id)
+
+
+def _same_intent(left: RunCheckpoint, right: RunCheckpoint) -> bool:
+    return all(getattr(left, field) == getattr(right, field) for field in INTENT_FIELDS)
 
 
 class MemoryCheckpointStore:
     """Bounded reference model, synchronous calls on one owning thread only.
 
-    One aggregate assignment commits all relationships. There is no TTL/eviction
-    or deletion API. A new instance starts empty; this is not a durable backend.
+    Records are scoped by owner, so run identifiers are private to an owner: one
+    owner can neither observe nor block another's. Every write commits with one
+    assignment. There is no TTL/eviction or deletion API. A new instance starts
+    empty; this is not a durable backend.
     """
 
     def __init__(self, *, capacity: int = 50) -> None:
         if type(capacity) is not int or capacity < 1:
             raise ValueError("capacity must be a positive integer")
         self._capacity = capacity
-        self._runs: dict[str, RunCheckpoint] = {}
+        self._runs: dict[_StoreKey, RunCheckpoint] = {}
+
+    def _lookup(self, owner: CheckpointOwner, run_id: str) -> RunCheckpoint | None:
+        return self._runs.get(_key(owner, run_id))
 
     def get(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint | None:
-        owner = CheckpointOwner.model_validate(owner)
-        run_id = TypeAdapter(RunId).validate_python(run_id)
-        item = self._runs.get(run_id)
-        return _checked(item) if item is not None and item.owner == owner else None
+        item = self._lookup(CheckpointOwner.model_validate(owner), _RUN_ID.validate_python(run_id))
+        return item.model_copy(deep=True) if item is not None else None
 
     def find_key(self, owner: CheckpointOwner, key: IdempotencyKey) -> RunCheckpoint | None:
-        owner = CheckpointOwner.model_validate(owner)
-        key = TypeAdapter(IdempotencyKey).validate_python(key)
+        item = self._find_key(CheckpointOwner.model_validate(owner), _KEY.validate_python(key))
+        return item.model_copy(deep=True) if item is not None else None
+
+    def _find_key(self, owner: CheckpointOwner, key: str) -> RunCheckpoint | None:
         return next(
-            (
-                _checked(r)
-                for r in self._runs.values()
-                if r.owner == owner and r.idempotency_key == key
-            ),
+            (r for r in self._runs.values() if r.owner == owner and r.idempotency_key == key),
             None,
         )
 
     def _room(self, item: RunCheckpoint) -> None:
-        if item.run_id in self._runs:
+        if _key(item.owner, item.run_id) in self._runs:
             raise CheckpointStoreError("conflict")
         if len(self._runs) >= self._capacity:
             raise CheckpointStoreError("capacity")
+
+    @staticmethod
+    def _revision(item: RunCheckpoint, expected: int) -> None:
+        if type(expected) is not int or expected < 0 or expected != item.revision:
+            raise CheckpointStoreError("conflict")
 
     def create(self, checkpoint: RunCheckpoint) -> RunCheckpoint:
         item = _checked(checkpoint)
@@ -102,55 +131,45 @@ class MemoryCheckpointStore:
         ):
             raise CheckpointStoreError("invalid_transition")
         if item.idempotency_key is not None:
-            existing = self.find_key(item.owner, item.idempotency_key)
+            existing = self._find_key(item.owner, item.idempotency_key)
             if existing is not None:
-                if existing.intent_sha256 != item.intent_sha256:
+                # The digest is the caller's fingerprint; the fields are checked too.
+                if not _same_intent(existing, item):
                     raise CheckpointStoreError("key_conflict")
-                return existing
+                return existing.model_copy(deep=True)
         self._room(item)
-        self._runs = {**self._runs, item.run_id: item}
-        return _checked(item)
+        self._runs[_key(item.owner, item.run_id)] = item
+        return item.model_copy(deep=True)
 
     def replace(self, checkpoint: RunCheckpoint, *, expected_revision: int) -> RunCheckpoint:
+        """Compare-and-swap on `expected_revision`; the stored revision advances once."""
         item = _checked(checkpoint)
-        old = self.get(item.owner, item.run_id)
+        old = self._lookup(item.owner, item.run_id)
         if old is None:
             raise CheckpointStoreError("missing")
         self._revision(old, expected_revision)
-        if item.revision != expected_revision:
-            raise CheckpointStoreError("conflict")
-        mutable = {"status", "steps", "revision"}
-        if old.model_dump(exclude=mutable) != item.model_dump(exclude=mutable):
+        if old.status != "running":
             raise CheckpointStoreError("invalid_transition")
-        if old.status != "running" or old.continued_by is not None:
+        if old.model_dump(exclude=_MUTABLE_FIELDS) != item.model_dump(exclude=_MUTABLE_FIELDS):
             raise CheckpointStoreError("invalid_transition")
         transitions = 0
         for before, after in zip(old.steps, item.steps, strict=True):
             if before == after:
                 continue
             transitions += 1
-            if (before.state, after.state) not in {
-                ("never_started", "started"),
-                ("started", "started"),
-                ("started", "completed"),
-            }:
+            if (before.state, after.state) not in _STEP_TRANSITIONS:
                 raise CheckpointStoreError("invalid_transition")
         if transitions > 1:
             raise CheckpointStoreError("invalid_transition")
-        updated = RunCheckpoint.model_validate({**item.model_dump(), "revision": old.revision + 1})
-        self._runs = {**self._runs, updated.run_id: updated}
-        return _checked(updated)
-
-    @staticmethod
-    def _revision(item: RunCheckpoint, expected: int) -> None:
-        if type(expected) is not int or expected < 0 or expected != item.revision:
-            raise CheckpointStoreError("conflict")
+        updated = item.model_copy(update={"revision": old.revision + 1})
+        self._runs[_key(item.owner, item.run_id)] = updated
+        return updated.model_copy(deep=True)
 
     def continue_run(self, child: RunCheckpoint, *, expected_parent_revision: int) -> RunCheckpoint:
         item = _checked(child)
         if item.resumed_from is None:
             raise CheckpointStoreError("invalid_transition")
-        parent = self.get(item.owner, item.resumed_from)
+        parent = self._lookup(item.owner, item.resumed_from)
         if parent is None:
             raise CheckpointStoreError("missing")
         if parent.continued_by is not None:
@@ -161,25 +180,24 @@ class MemoryCheckpointStore:
             or item.status != "running"
             or item.revision != 0
             or item.continued_by is not None
-            or any(
-                getattr(parent, f) != getattr(item, f)
-                for f in ("manifest", "runtime_contract", "intent_sha256", "arguments")
-            )
+            or not _same_intent(parent, item)
         ):
             raise CheckpointStoreError("invalid_transition")
+        unresolved = False
         for before, after in zip(parent.steps, item.steps, strict=True):
-            if before.state == "completed":
+            if before.state == "completed" or not unresolved:
+                # The completed prefix and the first unresolved step keep the
+                # parent's evidence: a started step stays started (uncertain)
+                # until the child itself re-acknowledges it.
+                unresolved = unresolved or before.state != "completed"
                 if before != after:
                     raise CheckpointStoreError("invalid_transition")
             elif after.state != "never_started":
                 raise CheckpointStoreError("invalid_transition")
         self._room(item)
-        linked = RunCheckpoint.model_validate(
-            {
-                **parent.model_dump(),
-                "continued_by": item.run_id,
-                "revision": parent.revision + 1,
-            }
+        linked = parent.model_copy(
+            update={"continued_by": item.run_id, "revision": parent.revision + 1}
         )
-        self._runs = {**self._runs, parent.run_id: linked, item.run_id: item}
-        return _checked(item)
+        self._runs[_key(parent.owner, parent.run_id)] = linked
+        self._runs[_key(item.owner, item.run_id)] = item
+        return item.model_copy(deep=True)

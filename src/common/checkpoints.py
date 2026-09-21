@@ -73,6 +73,8 @@ class RunCheckpoint(Contract):
             raise ValueError("success requires exactly all steps completed")
         if self.run_id in {self.resumed_from, self.continued_by}:
             raise ValueError("run cannot be its own parent or continuation")
+        if self.resumed_from is not None and self.resumed_from == self.continued_by:
+            raise ValueError("a run cannot be continued by its own parent")
         if self.continued_by is not None and self.status != "suspended":
             raise ValueError("only a suspended run can have a continuation")
         if self.resumed_from is not None and self.idempotency_key is not None:
@@ -80,7 +82,11 @@ class RunCheckpoint(Contract):
         return self
 
     def recovery_plan(self) -> ResumePlan:
-        """Metadata-only restart classification, never automatic dispatch."""
+        """Metadata-only restart classification, never automatic dispatch.
+
+        A `running` record may still belong to a live process (a caller-wait
+        timeout is not abandonment), so only a `suspended` record needs input.
+        """
         checked = RunCheckpoint.model_validate(self)
         steps = tuple(
             StepStateRecord(
@@ -90,10 +96,17 @@ class RunCheckpoint(Contract):
             )
             for step in checked.steps
         )
+        status: Literal["succeeded", "running", "needs_input"] = (
+            "succeeded"
+            if checked.status == "succeeded"
+            else "running"
+            if checked.status == "running"
+            else "needs_input"
+        )
         return ResumePlan(
             run_id=checked.run_id,
             workflow=checked.manifest.metadata.identity,
-            status="succeeded" if checked.status == "succeeded" else "needs_input",
+            status=status,
             steps=steps,
             next_step=next((s.step_index for s in steps if s.state != "completed"), None),
         )

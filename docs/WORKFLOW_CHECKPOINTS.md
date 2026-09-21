@@ -58,7 +58,13 @@ history/key limits; wiring or changing those limits is not part of this slice.
    is not abandonment and must not finalize the durable run.
 6. An explicit resume uses the existing ResumePolicy and current authorization.
    Atomically reserve the parent's one continuation and create the child, preserving
-   its completed prefix. Keep the original key pointing to the original run.
+   its completed prefix **and the first unresolved step's evidence**: a `started`
+   (uncertain) parent step stays `started` in the child until the child itself
+   re-acknowledges it, so a crash before that acknowledgment still classifies the
+   step as uncertain without walking the parent chain. Keep the original key
+   pointing to the original run.
+7. `recovery_plan` reports a `running` record as `running` (its process may be
+   alive) and only a `suspended` record as `needs_input`; `succeeded` is terminal.
 
 The reference store checks linear progress, immutable intent and completed results,
 revision compare-and-swap, owner isolation and atomic key/continuation relationships.
@@ -71,11 +77,14 @@ the best-effort progress/log reporting hook. Existing reporting remains best-eff
 
 ## Store outcomes and fault acceptance
 
-`create` returns the existing run for the same scoped key/fingerprint; changed
-fingerprint is `key_conflict`. The caller must derive the fingerprint from exact
+`create` returns the existing run for the same scoped key when the fingerprint
+**and** the intent fields (manifest, runtime contract, arguments reference) match;
+anything else is `key_conflict`. The caller must derive the fingerprint from exact
 workflow, arguments and all non-trace RequestContext fields, as the current engine
 does; it is not accepted from an untrusted submission. No key means a new run.
-`replace` requires the expected revision; successful updates increment it once.
+Run identifiers are scoped by owner: one owner can neither observe nor block
+another owner's identifiers. `replace` is a compare-and-swap on the expected
+revision; successful updates increment the stored revision once.
 `continue_run` atomically updates parent and creates child; repeated reservation is
 `already_continued` and the owner can inspect the existing link.
 

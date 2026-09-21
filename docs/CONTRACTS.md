@@ -318,7 +318,7 @@ deduplication, retained-key capacity, caller-timeout overlays and progress lag/c
 semantics all remain unchanged. No n8n SDK, HTTP server, credentials, production
 instance or notification transport is introduced. See
 `integrations/n8n/README.md` for offline host wiring and source status differences.
-# Checkpoint persistence boundary (Phase 3 slice 9)
+## Checkpoint persistence boundary (Phase 3 slice 9)
 
 `common.checkpoints` defines owner-scoped RunCheckpoint/StepCheckpoint v1 and
 PayloadRef. `workflow.checkpoints.CheckpointStore` defines atomic create, revision
