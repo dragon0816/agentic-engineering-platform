@@ -477,3 +477,25 @@ of each Raw file (`Vault.read_head`, stopped at the closing `---`) and skips
 any file without this provenance or whose head cannot be decoded, so an
 existing vault's content — in any encoding — is never a reason to fail, nor
 rewritten.
+
+## Office extraction (Phase 4, slice 3)
+
+`knowledge.office` adds `PdfExtractor` (`.pdf`), `PptxExtractor` (`.pptx`) and
+`DocxExtractor` (`.docx`) behind the `Extractor` protocol, as the optional
+extra `office`. The protocol gained an `AssetSink`: `extract(data, assets)`
+hands image bytes to `assets.put(data, suffix)` and receives the `image_ref`
+to carry; an extractor never writes. `StagedAssets` is the intake's sink — it
+names each asset by content under the Raw document's own directory
+(`raw/notes/hello.md` keeps its images under `raw/notes/hello/assets/`), and
+the intake lists those refs in `written` and writes them only on apply through
+`Vault.write_raw_bytes`, which creates exclusively, treats the same bytes at
+the same name as a no-op and refuses different bytes (`raw_exists`).
+
+Sections keep their relationships: PDF text and images per `page`; PPTX text
+frames, tables and pictures per `slide` in shape order; DOCX paragraphs
+(headings become Markdown `#`), tables and inline pictures in body order with
+no page. `table_markdown` renders a GitHub-style table with cells flattened to
+one line and pipes escaped. A corrupt or unreadable original, whatever the
+library raised, is `undecodable`. Known limitations: PDF tables arrive as text
+in reading order, PPTX speaker notes are not extracted, and images are stored
+as the library provides them (pypdf converts raw image streams to PNG).

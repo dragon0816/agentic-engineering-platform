@@ -17,6 +17,8 @@ from knowledge.raw import (
     PlainTextExtractor,
     RawDocument,
     RawSection,
+    StagedAssets,
+    assets_dir_for,
     parse,
     raw_index,
     render,
@@ -136,18 +138,28 @@ def test_parse_refuses_what_is_not_a_raw_document() -> None:
 
 
 def test_extractors_decode_and_strip_only_what_they_must() -> None:
+    sink = StagedAssets("raw/x/assets")
     plain = PlainTextExtractor()
-    assert plain.extract(b"  hello\n\n") == (RawSection(text="  hello"),)
-    assert plain.extract(b"   \n") == ()
+    assert plain.extract(b"  hello\n\n", sink) == (RawSection(text="  hello"),)
+    assert plain.extract(b"   \n", sink) == ()
     with pytest.raises(ExtractionError) as raised:
-        plain.extract(b"\xff\xfe")
+        plain.extract(b"\xff\xfe", sink)
     assert raised.value.code == "undecodable"
     markdown = MarkdownExtractor()
-    assert markdown.extract(b"---\ntitle: T\n---\n# Heading\n\nbody\n") == (
+    assert markdown.extract(b"---\ntitle: T\n---\n# Heading\n\nbody\n", sink) == (
         RawSection(text="# Heading\n\nbody"),
     )
-    assert markdown.extract(b"---\nno end\nbody\n") == (RawSection(text="---\nno end\nbody"),)
-    assert markdown.extract(b"---\ntitle: T\n---\n\n") == ()
+    assert markdown.extract(b"---\nno end\nbody\n", sink) == (RawSection(text="---\nno end\nbody"),)
+    assert markdown.extract(b"---\ntitle: T\n---\n\n", sink) == ()
+    assert sink.items == {}
+    # Assets are named by content under the document's own directory.
+    ref = sink.put(b"\x89PNG...", "PNG")
+    assert (
+        ref.startswith("raw/x/assets/")
+        and ref.endswith(".png")
+        and sink.put(b"\x89PNG...", ".png") == ref
+    )
+    assert assets_dir_for("raw/notes/hello--abcd1234.md") == "raw/notes/hello--abcd1234/assets"
 
 
 def test_intake_writes_once_and_reports_exactly_what_it_would(tmp_path: Path) -> None:

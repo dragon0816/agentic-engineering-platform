@@ -118,12 +118,34 @@ enforced in code, never left to a prompt:
    modes, that Raw is never overwritten and Drop never written, and that
    identity follows content rather than path.
 
+## Requirements and acceptance (slice 3 — office extraction)
+
+1. `knowledge.office` provides `PdfExtractor`, `PptxExtractor` and
+   `DocxExtractor` behind the `Extractor` protocol. The libraries are the
+   optional extra `office` (`pypdf`, `python-pptx`, `python-docx`; licenses
+   and maintenance recorded in `docs/PHASE_4_MIGRATION.md` before adoption);
+   every import is lazy, so the platform without the extra still loads and
+   simply has no extractor for those suffixes.
+2. Relationships are kept in the sections: PDF text and images per page;
+   PPTX text frames, tables and pictures per slide in shape order; DOCX
+   paragraphs (headings as Markdown `#`), tables and inline pictures in body
+   order, with no page (Word has none). Tables are GitHub-style Markdown with
+   cells flattened and pipes escaped.
+3. An extractor never writes. It hands image bytes to an `AssetSink`; the
+   intake stages them, names each by its content under the Raw document's own
+   `<stem>/assets/` directory, lists them in `written`, and writes them only
+   on apply through `Vault.write_raw_bytes` — write-once like Raw, with the
+   same bytes at the same name a no-op and different bytes refused.
+4. A corrupt or unreadable original is the closed status `undecodable`,
+   whatever the library raised; an encrypted PDF that an empty password does
+   not open is the same.
+5. Tests generate a PDF (with a real xref and an embedded image), a PPTX and a
+   DOCX in the test itself, and show the corpus round-tripping to Raw with
+   page/slide/image relationships intact, a repeated picture stored once, dry
+   run and apply agreeing, and Drop untouched. CI installs the extra.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 3 — Office extraction: PDF, PPTX and DOCX adapters behind the
-  `Extractor` protocol as an optional dependency extra (license and maintenance
-  recorded before adoption); text, tables as Markdown, image files saved beside
-  Raw with their page/slide relationship preserved in the section metadata.
 - Slice 4 — Image description through `ModelClient` with `vision=True`
   declared; the description attaches to the image's Raw section with the same
   provenance. No vision provider is named anywhere in knowledge code.

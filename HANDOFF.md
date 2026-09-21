@@ -1,106 +1,90 @@
-# Handoff — Phase 4 Drop → Raw with provenance (slice 2)
+# Handoff — Phase 4 office extraction (slice 3)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-4/drop-intake`, based on `main` at `a59ef7f` (PR #22 merged).
+Branch: `phase-4/office-extraction`, based on `main` at `41ed9a6` (PR #23 merged).
 
 ## Goal
 
-Phase 4 slice 2: originals under `drop/` become Raw Markdown that carries its
-own provenance, with identity by content rather than path. Requirements:
-`docs/phases/PHASE_4_KNOWLEDGE.md` (slice 2); source decision:
-`docs/PHASE_4_MIGRATION.md` (slice 2); contracts: `docs/CONTRACTS.md`
-("Drop → Raw").
+Phase 4 slice 3: PDF, PPTX and DOCX originals round-trip to Raw with their
+page/slide/image relationships, behind the `Extractor` protocol and an optional
+dependency extra. The owner asked for all of Phase 4 (slices 3–9) to be
+completed without check-ins unless something cannot be decided; each slice is
+reviewed, merged on green CI and followed by the next. Requirements:
+`docs/phases/PHASE_4_KNOWLEDGE.md` (slice 3); libraries and licenses:
+`docs/PHASE_4_MIGRATION.md` (slice 3); contracts: `docs/CONTRACTS.md`
+("Office extraction").
 
 ## Completed
 
-- `knowledge/raw.py`: `RawSection` (kind `text`/`table`/`image`, text, optional
-  `page`/`slide`, `image_ref` under `raw/` exactly for images) and
-  `RawDocument` (document-level `KnowledgeSource` with `raw_ref`, `extractor`,
-  `created`, ≥1 section); `render`/`parse` round-trip the Markdown form
-  exactly — provenance frontmatter plus numbered section markers carrying
-  page/slide/image. `source_for(bytes, original_ref)` derives `sha256` and
-  `source_id` from content.
-- `Vault.write_raw` (create, never replace: `raw_exists`; `outside_raw`
-  otherwise), `Vault.read_original` (`outside_drop`, `missing_original`),
-  `Vault.raw_files`, `Vault.exists`. Raw is write-once; Drop is read-only.
-- `DropIntake(vault, extractors).intake(drop_rel, mode, today)` with closed
-  statuses `written` / `duplicate` / `drifted` / `unsupported` / `undecodable`
-  / `empty`, dry run by default, a drifted original keeping the old Raw and
-  writing the new one as `<stem>--<8 hex>.md` with `supersedes` naming the old
-  source. `Extractor` protocol; `PlainTextExtractor` and `MarkdownExtractor`
-  (drops the original's own frontmatter) with no new dependency. `raw_index`
-  skips Raw files without provenance so an existing vault is never rewritten.
-- 15 tests (`tests/test_raw.py`): content identity, contract refusals, the
-  round trip with pages/slides/images, parse refusals, both extractors, every
-  intake status in both modes, drift, write-once Raw and read-only Drop, the
-  index skipping legacy files, honest outcomes, any text and any line ending
-  round-tripping byte for byte, equivalent path spellings, drift chains and
-  batch dry runs, and legacy files in other encodings or in the way.
-- Docs: phase spec slice 2 requirements, `docs/CONTRACTS.md`, migration slice 2
-  decision (ADAPT the intent of `collect.py`; do not migrate path-keyed dedup).
-
-- PR #23 opened; pre-merge review applied (10 findings, most of them real):
-  an original containing marker-like text raised an uncaught `ValidationError`
-  out of `intake` — body lines are now escaped so any text is representable,
-  and `unrepresentable` is a closed status for anything the contracts still
-  refuse; CRLF originals were stored corrupted on Windows and any `\r`, form
-  feed or Unicode separator broke the round trip — line endings are
-  normalized on entry, `parse` splits on `\n` only, and `write_raw` writes
-  `\n` on every platform; a legacy Raw file in another encoding crashed every
-  intake — the index reads only each file's head and skips what it cannot
-  decode; `supersedes` named an arbitrary earlier version after repeated drift
-  — each Raw records what it supersedes and the latest is found by following
-  links; `drop/./d.txt` was a different identity from `drop/d.txt` — paths are
-  canonical; the hash-suffixed name was never checked for existence — it is
-  escalated past any file already there so dry run and apply agree; an image
-  reference with whitespace could not be parsed back — refused; `write_raw`
-  was check-then-act — exclusive creation now; one frontmatter reader and the
-  shared `provenance_lines` serve both `parse` and the index; `intake_all`
-  runs a batch over one index scan. Four regression tests added.
+- Optional extra `office` = `pypdf>=6,<7` (BSD-3-Clause), `python-pptx>=1,<2`
+  (MIT), `python-docx>=1,<2` (MIT); transitive deps all permissive; versions,
+  release cadence and typing recorded before adoption. CI installs
+  `.[dev,office]`.
+- `Extractor` protocol gained an `AssetSink`: `extract(data, assets)` hands
+  image bytes to `assets.put(data, suffix)` and receives the `image_ref`.
+  `StagedAssets` names each by content under the Raw document's own
+  `<stem>/assets/` directory; the intake fixes the Raw name before extraction,
+  lists asset refs in `written`, and writes them only on apply through the new
+  `Vault.write_raw_bytes` (exclusive create; same bytes at the same name a
+  no-op; different bytes `raw_exists`).
+- `knowledge/office.py`: `PdfExtractor` (text and images per page; encrypted
+  PDFs an empty password does not open are `undecodable`), `PptxExtractor`
+  (text frames, tables, pictures per slide in shape order), `DocxExtractor`
+  (paragraphs with headings as `#`, tables, inline pictures in body order; no
+  page). `table_markdown` renders GitHub-style tables. Any library exception on
+  a corrupt original maps to the closed status `undecodable`.
+- 5 tests (`tests/test_office.py`) that generate the corpus in the test itself
+  — a PDF with a real xref and an embedded image, a PPTX, a DOCX — and show it
+  round-tripping to Raw with relationships intact, a repeated picture stored
+  once, dry run and apply agreeing on every path, assets write-once, and Drop
+  untouched. `test_raw.py` updated for the sink.
+- Docs: phase spec slice 3 requirements, `docs/CONTRACTS.md`, migration slice 3
+  decision with the license table and rejected alternatives (`PyMuPDF` is AGPL),
+  README.
 
 ## In Progress
 
-- PR #23 is open with the review posted; CI results for the final head are
-  recorded on the PR.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available. Merge on green CI is authorized for Phase 4 slices.
 
 ## Remaining
 
-- Review and merge this PR (owner says "merge #N").
-- Slice 3 next: office extraction (PDF/PPTX/DOCX) behind `Extractor` as an
-  optional dependency extra — record license and maintenance status of each
-  library before adoption (owner's rule); tables as Markdown, images saved
-  beside Raw with page/slide relationships. Write its requirements first.
-- Slices 4–9 as outlined in the phase spec.
+- Slice 4: image description through `ModelClient` with `vision=True`,
+  attached at intake time (Raw is write-once, so a description must be part of
+  the document when it is written).
+- Slice 5: ingest planning through `ModelClient` (two passes, condensation
+  cache, structured output into a `WritePlan`).
+- Slice 6: static lint as a typed report. Slice 7: conflicts and decisions.
+  Slice 8: query with provenance. Slice 9: migration adapter for an existing
+  vault.
 - Deferred from Phase 3, each needing its own scope: a payload sweep,
   process-liveness or lease-based suspension, and the earlier deferred reviews.
 
 ## Architecture decisions made
 
-- Identity is the content (`sha256` of the original's bytes); the source's
-  `source_path` dedup is not migrated. Same content anywhere is one source; a
-  changed original is a new source and reported as drift.
-- Raw is write-once. `Vault.write_raw` is the only writer and refuses an
-  existing file, which is the only immutability a pipeline can enforce.
-- A drifted original never replaces the old Raw; the new Raw lives beside it
-  under a hash-suffixed name so nothing collides and history stays readable.
-- Provenance and relationships live in the Raw file itself (frontmatter and
-  section markers), so lint (slice 6) and query (slice 8) recover them from
-  the file alone.
+- Extractors never write; the intake owns every byte that reaches disk, so
+  dry run stays exact and Raw stays write-once even for images.
+- Assets are content-named under the document's own directory, so a repeated
+  image is stored once and a re-intake of identical bytes is a no-op.
+- A broad exception boundary in extractors is deliberate: third-party parsers
+  raise an open set on corrupt input, and the intake promises closed statuses.
+- `PyMuPDF` was excluded on license (AGPL); the chosen libraries are all
+  permissive.
 
 ## Exact verification commands and results
 
-Windows, Python 3.12.14, repository root:
+Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 519 tests (504 prior + 15 raw; 1 skipped on Windows without symlink
+# PASS: 524 tests (519 prior + 5 office; 1 skipped on Windows without symlink
 #       privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 65 source/test files
+# PASS: 67 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
@@ -109,24 +93,22 @@ git diff --check
 # PASS
 ```
 
-Vault directories live under pytest's temporary directory. No model, gateway,
-network, real vault, job or n8n instance was invoked. Local pytest uses
-`-p no:cacheprovider` because of temporary-directory ACLs on this machine; CI
-runs ordinary pytest.
+The office tests `importorskip` the libraries, so the core suite still passes
+without the extra. No model, gateway, network, real vault, job or n8n instance
+was invoked. Local pytest uses `-p no:cacheprovider` because of
+temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- Only `.txt` and `.md` originals are supported; anything else is
-  `unsupported` until slice 3.
-- A single `intake` scans the index once per call; a batch should use
-  `intake_all`, which scans once and keeps the index current with its writes.
-- Drift is detected per `original_ref`; renaming an original and changing it
-  looks like a fresh source, which is correct by the content rule but loses
-  the "supersedes" link.
+- PDF tables arrive as text in reading order; PPTX speaker notes are not
+  extracted; DOCX sections carry no page number.
+- Images are stored as the library provides them; pypdf converts raw image
+  streams to PNG. No image is resized or re-encoded by the platform.
+- Extraction reads the whole original into memory; very large originals are a
+  host concern for now.
 
 ## Next Recommended Action
 
-Open the PR for `phase-4/drop-intake` against `main`, run the review, apply
-confirmed findings and let the owner merge. Then write the slice 3 requirements
-(office extraction) and record the candidate libraries' licenses before adding
-any dependency.
+Open the PR for `phase-4/office-extraction`, run the review, apply confirmed
+findings, merge on green CI, then write the slice 4 requirements (image
+description through `ModelClient`) and implement it.

@@ -70,6 +70,9 @@ finished history can be retired without a used idempotency key ever running agai
 Phase 4 (knowledge platform) has begun with the vault safety model: `drop/` and
 `raw/` are never written, a dry run is the default, every overwrite is backed up,
 and a write plan that breaks a rule is rejected whole (`docs/phases/PHASE_4_KNOWLEDGE.md`).
+Originals dropped into `drop/` become write-once Raw Markdown whose identity is
+its content; PDF, PPTX and DOCX are extracted with page/slide/image relationships
+kept when the `office` extra is installed (`pip install -e ".[dev,office]"`).
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).

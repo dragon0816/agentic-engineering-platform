@@ -374,9 +374,7 @@ class Vault:
                 found.append(rel)
         return tuple(found)
 
-    def write_raw(self, rel: str, content: str) -> None:
-        """The one way raw/ is written: create, never replace. Raw is immutable
-        in the only sense a pipeline can honour — write once, never change."""
+    def _raw_target(self, rel: str) -> Path:
         clean = normalize(rel)
         if not clean.startswith("raw/"):
             raise VaultError("outside_raw", rel)
@@ -384,6 +382,12 @@ class Vault:
         if not resolved.startswith("raw/") or target.is_dir():
             raise VaultError("outside_raw", rel)
         target.parent.mkdir(parents=True, exist_ok=True)
+        return target
+
+    def write_raw(self, rel: str, content: str) -> None:
+        """The one way raw/ is written: create, never replace. Raw is immutable
+        in the only sense a pipeline can honour — write once, never change."""
+        target = self._raw_target(rel)
         try:
             # Exclusive creation: two writers cannot both succeed, and the
             # bytes on disk are exactly the text, whatever the platform.
@@ -391,6 +395,20 @@ class Vault:
                 handle.write(content)
         except FileExistsError:
             raise VaultError("raw_exists", rel) from None
+
+    def write_raw_bytes(self, rel: str, data: bytes) -> bool:
+        """An asset under raw/, named by its content: creating it again with the
+        same bytes is a no-op (False); different bytes at that name are
+        `raw_exists`, because raw is never replaced."""
+        target = self._raw_target(rel)
+        try:
+            with target.open("xb") as handle:
+                handle.write(data)
+        except FileExistsError:
+            if target.read_bytes() == data:
+                return False
+            raise VaultError("raw_exists", rel) from None
+        return True
 
     def _target(self, rel: str) -> Path:
         code = refusal_for(rel)
