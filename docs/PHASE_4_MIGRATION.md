@@ -224,3 +224,36 @@ block; and every failure outcome reports whether the source was condensed.
 
 Rollback removes `knowledge/planning.py`, `Vault.cache_read` / `cache_write` /
 `wiki_pages` and the tests; nothing else imports them.
+
+## Slice 6 source-first decision
+
+Inspected and pinned `vault/brain.py`'s static half (`page_name`, `scan`,
+`fix_links`; `tests/fixtures/source_vault_lint.txt`). The judgement half (the
+lint prompt, `gather_content`, the 120 KB budget) and the CLI are not pinned:
+they are a model pass over the computed report, deferred until a need appears,
+and would go through `ModelClient` like every other model call.
+
+Decision (2026-09-21): **ADAPT** the computed findings into a typed
+`LintReport` with the source's rules kept exactly — only `.md` stripped from a
+page name (the `Continue.dev` lesson), a trailing `.md` wrong only when it names
+a wiki page (the `[[CLAUDE.md]]` lesson), entry points excepted from orphans,
+dangling links ranked by reference count, only flagged links repaired and case
+corrected against real page names. The source's `source_path` check is kept as
+`broken_source_path` for an existing vault's pages and joined by
+`unknown_source_id` for typed provenance; its `pending` (raw files never
+ingested, by path) becomes `pending_sources` by `source_id` against the Raw
+index, so a legacy Raw file without provenance is not reported until slice 9
+adopts it. `manual_edits` waits for slice 7's state file.
+
+Intentional differences: findings are closed contracts, not dict entries; the
+report is data for a host to render (the source printed Traditional Chinese
+lines); `fix_links` writes through `Vault.write` with the stamp the caller
+gives, so a lint repair is backed up like any page write. From review: the
+report can no longer be aborted by what a page contains (an empty link, a
+bare `⚠️`, a malformed `source_id`, a non-UTF-8 page — each is a finding);
+frontmatter is read as leniently as the source read it (the first draft
+reused the strict Raw reader and would have called ordinary Obsidian
+frontmatter missing); a superseded Raw is not pending; and `Vault.write`
+writes `\n` on every platform so a repair does not change line endings.
+Rollback removes `knowledge/lint.py`, its tests and the excerpt; nothing else
+imports them.

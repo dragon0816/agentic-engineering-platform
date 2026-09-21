@@ -403,6 +403,15 @@ class Vault:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
 
+    def wiki_files(self) -> tuple[str, ...]:
+        """Every regular `.md` file under wiki/, in path order, without
+        reading any of them."""
+        return tuple(
+            path.relative_to(self.root).as_posix()
+            for path in sorted((self.root / "wiki").rglob("*.md"))
+            if path.is_file()
+        )
+
     def raw_files(self) -> tuple[str, ...]:
         """Every Markdown file under raw/ except assets, in path order."""
         root = self.root / "raw"
@@ -468,7 +477,9 @@ class Vault:
         target = self._target(rel)
         backed_up = self._backup(target, rel, check_stamp(stamp))
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        # One line ending on every platform, like raw and the cache; a repair
+        # must not rewrite a whole page's endings.
+        target.write_text(content, encoding="utf-8", newline="\n")
         return backed_up
 
     def _backup(self, target: Path, rel: str, stamp: str) -> bool:
@@ -483,7 +494,7 @@ class Vault:
         """Append to an append-only file; the layout check still applies."""
         target = self._target(rel)
         existing = target.read_text(encoding="utf-8") if target.exists() else ""
-        target.write_text(existing.rstrip() + "\n" + block, encoding="utf-8")
+        target.write_text(existing.rstrip() + "\n" + block, encoding="utf-8", newline="\n")
 
     def check_against(self, plan: WritePlan) -> tuple[PlanProblem, ...]:
         """The rules that depend on this vault: a target that cannot be written
