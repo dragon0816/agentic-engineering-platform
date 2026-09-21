@@ -30,17 +30,38 @@ own provenance, with identity by content rather than path. Requirements:
   source. `Extractor` protocol; `PlainTextExtractor` and `MarkdownExtractor`
   (drops the original's own frontmatter) with no new dependency. `raw_index`
   skips Raw files without provenance so an existing vault is never rewritten.
-- 11 tests (`tests/test_raw.py`): content identity, contract refusals, the
+- 15 tests (`tests/test_raw.py`): content identity, contract refusals, the
   round trip with pages/slides/images, parse refusals, both extractors, every
   intake status in both modes, drift, write-once Raw and read-only Drop, the
-  index skipping legacy files, honest outcomes.
+  index skipping legacy files, honest outcomes, any text and any line ending
+  round-tripping byte for byte, equivalent path spellings, drift chains and
+  batch dry runs, and legacy files in other encodings or in the way.
 - Docs: phase spec slice 2 requirements, `docs/CONTRACTS.md`, migration slice 2
   decision (ADAPT the intent of `collect.py`; do not migrate path-keyed dedup).
 
+- PR #23 opened; pre-merge review applied (10 findings, most of them real):
+  an original containing marker-like text raised an uncaught `ValidationError`
+  out of `intake` — body lines are now escaped so any text is representable,
+  and `unrepresentable` is a closed status for anything the contracts still
+  refuse; CRLF originals were stored corrupted on Windows and any `\r`, form
+  feed or Unicode separator broke the round trip — line endings are
+  normalized on entry, `parse` splits on `\n` only, and `write_raw` writes
+  `\n` on every platform; a legacy Raw file in another encoding crashed every
+  intake — the index reads only each file's head and skips what it cannot
+  decode; `supersedes` named an arbitrary earlier version after repeated drift
+  — each Raw records what it supersedes and the latest is found by following
+  links; `drop/./d.txt` was a different identity from `drop/d.txt` — paths are
+  canonical; the hash-suffixed name was never checked for existence — it is
+  escalated past any file already there so dry run and apply agree; an image
+  reference with whitespace could not be parsed back — refused; `write_raw`
+  was check-then-act — exclusive creation now; one frontmatter reader and the
+  shared `provenance_lines` serve both `parse` and the index; `intake_all`
+  runs a batch over one index scan. Four regression tests added.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #23 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
@@ -72,7 +93,7 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 515 tests (504 prior + 11 raw; 1 skipped on Windows without symlink
+# PASS: 519 tests (504 prior + 15 raw; 1 skipped on Windows without symlink
 #       privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
@@ -97,8 +118,8 @@ runs ordinary pytest.
 
 - Only `.txt` and `.md` originals are supported; anything else is
   `unsupported` until slice 3.
-- `raw_index` re-reads every Raw file's head on each intake; fine for a vault
-  of hundreds, a host with thousands may want a cached index later.
+- A single `intake` scans the index once per call; a batch should use
+  `intake_all`, which scans once and keeps the index current with its writes.
 - Drift is detected per `original_ref`; renaming an original and changing it
   looks like a fresh source, which is correct by the content rule but loses
   the "supersedes" link.

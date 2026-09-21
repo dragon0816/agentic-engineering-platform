@@ -86,8 +86,10 @@ enforced in code, never left to a prompt:
    file, the extractor that produced it, the creation date, at least one
    section). `render` writes the Raw Markdown — provenance as frontmatter,
    every section behind a marker carrying its page/slide/image — and `parse`
-   reads it back; the two round-trip exactly, so a reader, a lint and a query
-   all recover the same relationships from the file alone.
+   reads it back; the two round-trip exactly for any text (marker-like body
+   lines are escaped, line endings are one), so a reader, a lint and a query
+   all recover the same relationships from the file alone. A Raw written for
+   a drifted original records what it `supersedes`.
 2. Identity is the content: `source_for(bytes, original_ref)` derives the
    `sha256` and a `source_id` from the bytes, so the same original dropped
    under two names is one source and a changed original is a new one. The
@@ -102,9 +104,10 @@ enforced in code, never left to a prompt:
    `duplicate` (the content is already in Raw; nothing written, the existing
    `raw_ref` reported), `drifted` (the same `original_ref` is in Raw with other
    content; the old Raw is kept, the new one is written beside it under a
-   hash-suffixed name, and `supersedes` names the old source), `unsupported`,
-   `undecodable` or `empty`. Dry run is the default and reports exactly what an
-   apply would write.
+   hash-suffixed name, and `supersedes` names the latest old source),
+   `unsupported`, `undecodable`, `empty` or `unrepresentable`. Every status is
+   closed: nothing an original contains escapes as an exception. Dry run is
+   the default and reports exactly what an apply would write, name included.
 5. Extraction is behind an `Extractor` protocol keyed by suffix. Plain text and
    Markdown extractors ship with no new dependency; office formats and images
    are slices 3 and 4.

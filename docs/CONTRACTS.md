@@ -438,12 +438,18 @@ it, `created`, and at least one section. `render` writes the file: provenance
 as frontmatter (`source_id`, `source_sha256`, `original_ref`, `raw_ref`,
 `extractor`, `created`) and each section behind a numbered
 `<!-- raw-section N kind=… page=… slide=… image=… -->` marker; `parse` reads it
-back and the two round-trip exactly. Section text may not contain a marker or
-a frontmatter block, so the file is unambiguous.
+back and the two round-trip exactly for any text: a body line that would read
+as a marker is escaped with a backslash on the way out and unescaped on the
+way in, and every line ending is `\n` (CRLF and lone CR are normalized on
+entry, and the file is written with `\n` on every platform). An image
+reference is normalized and carries no whitespace. A Raw written for an
+original that drifted also records `supersedes: <source_id>`, so the chain of
+versions is in the files themselves.
 
 `Vault.write_raw(rel, content)` is the only way the platform writes under
-`raw/`: it creates and never replaces (`raw_exists`), refuses anything outside
-`raw/` (`outside_raw`) and a resolved location that leaves it. Raw is immutable
+`raw/`: it creates exclusively (`open("x")`) and never replaces (`raw_exists`,
+even under concurrent writers), refuses anything outside `raw/` (`outside_raw`)
+and a resolved location that leaves it. Raw is immutable
 in the only sense a pipeline can honour — write once, never change. `drop/` is
 read through `Vault.read_original` (`outside_drop`, `missing_original`) and
 never written.
@@ -454,11 +460,20 @@ derived from the drop path), `duplicate` (the content is already in Raw —
 nothing written, the existing `raw_ref` and source reported), `drifted` (the
 same `original_ref` is in Raw with other content — the old Raw stays, the new
 one is written beside it as `<stem>--<8 hex>.md`, and `supersedes` names the
-old source), `unsupported` (no extractor for the suffix), `undecodable` or
-`empty`. Dry run is the default and reports exactly what an apply writes; the
-contract refuses an outcome whose payload does not match its status. Extraction
+old source — the *latest* one, found by following `supersedes` links, however
+many times it drifted), `unsupported` (no extractor for the suffix),
+`undecodable`, `empty` or `unrepresentable` (the extractor produced something
+the contracts refuse — a closed status, never an escaping exception). Paths are
+canonical (`drop/./d.txt` is `drop/d.txt`), so equivalent spellings are one
+identity. Dry run is the default and reports exactly what an apply writes —
+including the hash-suffixed name, which is escalated past any file already
+there. The contract refuses an outcome whose payload does not match its
+status. `intake_all` runs a batch over one index scan, and a dry-run batch sees
+its own would-be writes. Extraction
 is behind the `Extractor` protocol (`name`, `suffixes`, `extract(bytes)`);
 `PlainTextExtractor` and `MarkdownExtractor` (which drops the original's own
-frontmatter) ship with no new dependency. `raw_index` lists every Raw file that
-carries this provenance and skips the rest, so an existing vault's content is
-never rewritten.
+frontmatter) ship with no new dependency. `RawIndex.scan` reads only the head
+of each Raw file (`Vault.read_head`, stopped at the closing `---`) and skips
+any file without this provenance or whose head cannot be decoded, so an
+existing vault's content — in any encoding — is never a reason to fail, nor
+rewritten.

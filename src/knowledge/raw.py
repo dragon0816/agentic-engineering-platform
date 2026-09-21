@@ -15,23 +15,35 @@ from datetime import date
 from pathlib import PurePosixPath
 from typing import Literal, Protocol, Self
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 
 from common.base import Contract, Symbol, Text
 from knowledge.contracts import KnowledgeSource
-from knowledge.vault import Vault, VaultError, normalize
+from knowledge.vault import Vault, VaultError, normalize, provenance_lines
 
 RAW_AREA = "raw/"
 DROP_AREA = "drop/"
 SECTION_MARKER = "<!-- raw-section"
+# A body line that would read as a marker is escaped with a backslash on the
+# way out and unescaped on the way in, so any text is representable.
+_ESCAPED_MARKER = re.compile(r"^(\\*)" + re.escape(SECTION_MARKER))
 _MARKER = re.compile(
     r"^<!-- raw-section (?P<index>\d+) kind=(?P<kind>text|table|image)"
     r"(?: page=(?P<page>\d+))?(?: slide=(?P<slide>\d+))?(?: image=(?P<image>\S+))? -->$"
 )
 _FRONTMATTER_LINE = re.compile(r"^(?P<key>[a-z0-9_]+): (?P<value>.+)$")
+_PROVENANCE_KEYS = ("source_id", "source_sha256", "original_ref", "raw_ref", "extractor", "created")
 
 SectionKind = Literal["text", "table", "image"]
-IntakeStatus = Literal["written", "duplicate", "drifted", "unsupported", "undecodable", "empty"]
+IntakeStatus = Literal[
+    "written", "duplicate", "drifted", "unsupported", "undecodable", "empty", "unrepresentable"
+]
+
+
+def _lines(text: str) -> str:
+    """One line ending. `str.splitlines` would also split on form feeds and
+    Unicode separators, so the file format only ever uses `\\n`."""
+    return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
 class RawSection(Contract):
@@ -46,10 +58,15 @@ class RawSection(Contract):
 
     @field_validator("text", mode="before")
     @classmethod
-    def trimmed_lines(cls, value: str) -> str:
+    def one_line_ending(cls, value: str) -> str:
         # Surrounding newlines would be lost by the file format anyway; drop
         # them here so a document equals its own round trip.
-        return value.strip("\n") if isinstance(value, str) else value
+        return _lines(value).strip("\n") if isinstance(value, str) else value
+
+    @field_validator("image_ref", mode="before")
+    @classmethod
+    def normalized_ref(cls, value: str | None) -> str | None:
+        return normalize(value) if isinstance(value, str) else value
 
     @model_validator(mode="after")
     def shape_matches_kind(self) -> Self:
@@ -57,30 +74,32 @@ class RawSection(Contract):
             raise ValueError("exactly an image section names an image")
         if self.kind != "image" and not self.text.strip():
             raise ValueError("a text or table section carries text")
-        if self.image_ref is not None and not normalize(self.image_ref).startswith(RAW_AREA):
-            raise ValueError("an image lives under raw/")
-        if SECTION_MARKER in self.text:
-            raise ValueError("section text may not contain a section marker")
-        if self.text.strip().startswith("---") and "\n---" in self.text:
-            raise ValueError("section text may not contain a frontmatter block")
+        if self.image_ref is not None:
+            if not self.image_ref.startswith(RAW_AREA):
+                raise ValueError("an image lives under raw/")
+            if any(char.isspace() for char in self.image_ref):
+                raise ValueError("an image reference has no whitespace")
         return self
 
 
 class RawDocument(Contract):
     """A Raw file: document-level provenance, the extractor that produced it,
-    and its sections in order."""
+    the source it supersedes when the same original drifted, and its sections."""
 
     source: KnowledgeSource
     extractor: Symbol
     created: date
     sections: tuple[RawSection, ...] = Field(min_length=1)
+    supersedes: Symbol | None = None
 
     @model_validator(mode="after")
     def document_level_provenance(self) -> Self:
-        if self.source.raw_ref is None or not normalize(self.source.raw_ref).startswith(RAW_AREA):
+        if self.source.raw_ref is None or not self.source.raw_ref.startswith(RAW_AREA):
             raise ValueError("a raw document names its raw_ref under raw/")
         if self.source.page is not None or self.source.slide is not None:
             raise ValueError("document provenance has no page or slide; sections do")
+        if self.supersedes == self.source.source_id:
+            raise ValueError("a document does not supersede itself")
         return self
 
 
@@ -96,14 +115,15 @@ def render(document: RawDocument) -> str:
     source = document.source
     lines = [
         "---",
-        f"source_id: {source.source_id}",
-        f"source_sha256: {source.sha256}",
+        *provenance_lines(source),
         f"original_ref: {source.original_ref}",
         f"raw_ref: {source.raw_ref}",
         f"extractor: {document.extractor}",
         f"created: {document.created.isoformat()}",
-        "---",
     ]
+    if document.supersedes is not None:
+        lines.append(f"supersedes: {document.supersedes}")
+    lines.append("---")
     for index, section in enumerate(document.sections, 1):
         marker = f"{SECTION_MARKER} {index} kind={section.kind}"
         if section.page is not None:
@@ -111,39 +131,52 @@ def render(document: RawDocument) -> str:
         if section.slide is not None:
             marker += f" slide={section.slide}"
         if section.image_ref is not None:
-            marker += f" image={normalize(section.image_ref)}"
+            marker += f" image={section.image_ref}"
         lines += ["", marker + " -->"]
-        if section.text:
-            lines.append(section.text)
+        for line in section.text.split("\n") if section.text else ():
+            lines.append("\\" + line if _ESCAPED_MARKER.match(line) else line)
     return "\n".join(lines) + "\n"
+
+
+def frontmatter(text: str) -> tuple[dict[str, str], int] | None:
+    """The `key: value` head of a file and the line after it, or None when the
+    file does not start with a closed frontmatter block."""
+    lines = _lines(text).split("\n")
+    if not lines or lines[0] != "---":
+        return None
+    try:
+        end = lines.index("---", 1)
+    except ValueError:
+        return None
+    fields: dict[str, str] = {}
+    for line in lines[1:end]:
+        match = _FRONTMATTER_LINE.match(line)
+        if match is None:
+            return None
+        fields[match.group("key")] = match.group("value").strip()
+    return fields, end + 1
+
+
+def _provenance(fields: dict[str, str], raw_ref: str | None = None) -> KnowledgeSource:
+    return KnowledgeSource(
+        source_id=fields["source_id"],
+        original_ref=fields["original_ref"],
+        sha256=fields["source_sha256"],
+        raw_ref=raw_ref if raw_ref is not None else fields["raw_ref"],
+    )
 
 
 def parse(text: str) -> RawDocument:
     """The document a Raw file holds. Malformed input is a `ValueError`; a file
     without provenance frontmatter is not a Raw document of this platform."""
-    lines = text.splitlines()
-    if not lines or lines[0] != "---":
-        raise ValueError("raw document starts with frontmatter")
-    try:
-        end = lines.index("---", 1)
-    except ValueError:
-        raise ValueError("unterminated frontmatter") from None
-    fields: dict[str, str] = {}
-    for line in lines[1:end]:
-        match = _FRONTMATTER_LINE.match(line)
-        if match is None:
-            raise ValueError("malformed frontmatter line")
-        fields[match.group("key")] = match.group("value").strip()
-    try:
-        source = KnowledgeSource(
-            source_id=fields["source_id"],
-            original_ref=fields["original_ref"],
-            sha256=fields["source_sha256"],
-            raw_ref=fields["raw_ref"],
-        )
-        extractor, created = fields["extractor"], date.fromisoformat(fields["created"])
-    except KeyError as missing:
-        raise ValueError(f"frontmatter is missing {missing.args[0]}") from None
+    head = frontmatter(text)
+    if head is None:
+        raise ValueError("a raw document starts with closed, well-formed frontmatter")
+    fields, start = head
+    missing = [key for key in _PROVENANCE_KEYS if key not in fields]
+    if missing:
+        raise ValueError(f"frontmatter is missing {missing[0]}")
+    source = _provenance(fields)
     sections: list[RawSection] = []
     current: dict[str, str | None] | None = None
     body: list[str] = []
@@ -160,7 +193,7 @@ def parse(text: str) -> RawDocument:
                 )
             )
 
-    for line in lines[end + 1 :]:
+    for line in _lines(text).split("\n")[start:]:
         match = _MARKER.match(line)
         if match is not None:
             close()
@@ -168,11 +201,17 @@ def parse(text: str) -> RawDocument:
             if int(match.group("index")) != len(sections) + 1:
                 raise ValueError("section markers are numbered in order")
         elif current is not None:
-            body.append(line)
+            body.append(line[1:] if _ESCAPED_MARKER.match(line) else line)
         elif line.strip():
             raise ValueError("text before the first section marker")
     close()
-    return RawDocument(source=source, extractor=extractor, created=created, sections=sections)
+    return RawDocument(
+        source=source,
+        extractor=fields["extractor"],
+        created=date.fromisoformat(fields["created"]),
+        sections=sections,
+        supersedes=fields.get("supersedes"),
+    )
 
 
 class ExtractionError(Exception):
@@ -196,7 +235,7 @@ class Extractor(Protocol):
 
 def _decode(data: bytes) -> str:
     try:
-        return data.decode("utf-8")
+        return _lines(data.decode("utf-8"))
     except UnicodeDecodeError:
         raise ExtractionError("undecodable") from None
 
@@ -219,7 +258,7 @@ class MarkdownExtractor:
 
     def extract(self, data: bytes) -> tuple[RawSection, ...]:
         text = _decode(data)
-        lines = text.splitlines()
+        lines = text.split("\n")
         if lines and lines[0] == "---" and "---" in lines[1:]:
             lines = lines[lines.index("---", 1) + 1 :]
         body = "\n".join(lines)
@@ -247,51 +286,81 @@ class IntakeOutcome(Contract):
             raise ValueError("exactly a drifted intake names what it supersedes")
         if (self.raw_ref is not None) != (self.status in ("written", "drifted", "duplicate")):
             raise ValueError("a raw_ref belongs to content that is, or now is, in raw/")
-        if self.source is None and self.status not in ("unsupported", "undecodable", "empty"):
+        if self.source is None and self.status in ("written", "drifted", "duplicate"):
             raise ValueError("an intake that reached the content names its source")
         return self
 
 
 class RawEntry(Contract):
-    """What the intake's index knows about one Raw file without reading its body."""
+    """What the index knows about one Raw file from its head alone."""
 
     raw_ref: Text
     source: KnowledgeSource
+    created: date
+    supersedes: Symbol | None = None
 
 
-_INDEX_KEYS = ("source_id", "source_sha256", "original_ref")
+class RawIndex:
+    """The Raw files that carry this platform's provenance, read from their
+    heads once and kept current with the intake's own writes."""
+
+    def __init__(self, entries: Iterable[RawEntry] = ()) -> None:
+        self.entries: list[RawEntry] = list(entries)
+
+    @classmethod
+    def scan(cls, vault: Vault) -> "RawIndex":
+        """Files without provenance, or whose head cannot be read, are skipped —
+        an existing vault's content is never a reason to fail, nor rewritten."""
+        entries: list[RawEntry] = []
+        for rel in vault.raw_files():
+            head = frontmatter(vault.read_head(rel))
+            if head is None or any(key not in head[0] for key in _PROVENANCE_KEYS):
+                continue
+            fields = head[0]
+            try:
+                entries.append(
+                    RawEntry(
+                        raw_ref=rel,
+                        source=_provenance(fields, raw_ref=rel),
+                        created=date.fromisoformat(fields["created"]),
+                        supersedes=fields.get("supersedes"),
+                    )
+                )
+            except (ValidationError, ValueError):
+                continue
+        return cls(entries)
+
+    def by_content(self, sha256: str) -> RawEntry | None:
+        return next((entry for entry in self.entries if entry.source.sha256 == sha256), None)
+
+    def latest_for(self, original_ref: str) -> RawEntry | None:
+        """The current Raw of an original: the one no later Raw supersedes."""
+        chain = [entry for entry in self.entries if entry.source.original_ref == original_ref]
+        superseded = {entry.supersedes for entry in chain if entry.supersedes is not None}
+        heads = [entry for entry in chain if entry.source.source_id not in superseded]
+        return max(heads, key=lambda entry: (entry.created, entry.raw_ref), default=None)
+
+    def paths(self) -> set[str]:
+        return {entry.raw_ref for entry in self.entries}
+
+    def add(self, document: RawDocument) -> None:
+        assert document.source.raw_ref is not None
+        self.entries.append(
+            RawEntry(
+                raw_ref=document.source.raw_ref,
+                source=document.source,
+                created=document.created,
+                supersedes=document.supersedes,
+            )
+        )
 
 
 def raw_index(vault: Vault) -> tuple[RawEntry, ...]:
-    """Every Raw file that carries this platform's provenance. Files without it
-    (an existing vault's content) are skipped, never rewritten."""
-    entries: list[RawEntry] = []
-    for rel in vault.raw_files():
-        head = vault.read(rel).split("\n---", 1)[0].splitlines()
-        if not head or head[0] != "---":
-            continue
-        fields: dict[str, str] = {}
-        for line in head[1:]:
-            match = _FRONTMATTER_LINE.match(line)
-            if match is not None:
-                fields[match.group("key")] = match.group("value").strip()
-        if not all(key in fields for key in _INDEX_KEYS):
-            continue
-        try:
-            source = KnowledgeSource(
-                source_id=fields["source_id"],
-                original_ref=fields["original_ref"],
-                sha256=fields["source_sha256"],
-                raw_ref=rel,
-            )
-        except ValueError:
-            continue
-        entries.append(RawEntry(raw_ref=rel, source=source))
-    return tuple(entries)
+    return tuple(RawIndex.scan(vault).entries)
 
 
 class DropIntake:
-    """Reads one original from `drop/` and writes it to `raw/` once."""
+    """Reads originals from `drop/` and writes each to `raw/` once."""
 
     def __init__(self, vault: Vault, extractors: Iterable[Extractor]) -> None:
         self.vault = vault
@@ -306,14 +375,15 @@ class DropIntake:
         *,
         mode: Literal["dry_run", "apply"] = "dry_run",
         today: date | None = None,
+        index: RawIndex | None = None,
     ) -> IntakeOutcome:
-        original_ref = normalize(drop_rel)
-        if not original_ref.startswith(DROP_AREA):
-            raise VaultError("outside_drop", drop_rel)
+        """One original. The index is scanned once per call unless a batch
+        passes its own, which the intake keeps current with what it writes."""
+        original_ref = self.vault.original_ref(drop_rel)
         data = self.vault.read_original(original_ref)
         source = source_for(data, original_ref)
-        index = raw_index(self.vault)
-        same_content = next((e for e in index if e.source.sha256 == source.sha256), None)
+        known = index if index is not None else RawIndex.scan(self.vault)
+        same_content = known.by_content(source.sha256)
         if same_content is not None:
             return IntakeOutcome(
                 mode=mode,
@@ -322,35 +392,40 @@ class DropIntake:
                 source=same_content.source,
                 raw_ref=same_content.raw_ref,
             )
-        suffix = PurePosixPath(original_ref).suffix.lower()
-        extractor = self._by_suffix.get(suffix)
+        extractor = self._by_suffix.get(PurePosixPath(original_ref).suffix.lower())
         if extractor is None:
             return IntakeOutcome(mode=mode, status="unsupported", original_ref=original_ref)
         try:
             sections = extractor.extract(data)
         except ExtractionError as error:
             return IntakeOutcome(mode=mode, status=error.code, original_ref=original_ref)
+        except ValidationError:
+            return IntakeOutcome(mode=mode, status="unrepresentable", original_ref=original_ref)
         if not sections:
             return IntakeOutcome(mode=mode, status="empty", original_ref=original_ref)
 
         # The same original path with other content is drift: the old Raw is
         # immutable and stays, the new one lives beside it under a name that
-        # cannot collide, and the outcome says which it supersedes.
-        previous = next((e for e in index if e.source.original_ref == original_ref), None)
-        raw_ref = self._raw_ref_for(original_ref, source, taken={e.raw_ref for e in index})
+        # cannot collide, and both the file and the outcome say what it supersedes.
+        previous = known.latest_for(original_ref)
+        raw_ref = self._raw_ref_for(original_ref, source, taken=known.paths())
         placed = source.model_copy(update={"raw_ref": raw_ref})
-        document = RawDocument(
-            source=placed,
-            extractor=extractor.name,
-            created=today if today is not None else date.today(),
-            sections=sections,
-        )
-        status: IntakeStatus = "drifted" if previous is not None else "written"
+        try:
+            document = RawDocument(
+                source=placed,
+                extractor=extractor.name,
+                created=today if today is not None else date.today(),
+                sections=sections,
+                supersedes=previous.source.source_id if previous is not None else None,
+            )
+        except ValidationError:
+            return IntakeOutcome(mode=mode, status="unrepresentable", original_ref=original_ref)
         if mode == "apply":
             self.vault.write_raw(raw_ref, render(document))
+            known.add(document)
         return IntakeOutcome(
             mode=mode,
-            status=status,
+            status="drifted" if previous is not None else "written",
             original_ref=original_ref,
             source=placed,
             raw_ref=raw_ref,
@@ -358,10 +433,44 @@ class DropIntake:
             written=(raw_ref,),
         )
 
+    def intake_all(
+        self,
+        drop_rels: Iterable[str],
+        *,
+        mode: Literal["dry_run", "apply"] = "dry_run",
+        today: date | None = None,
+    ) -> tuple[IntakeOutcome, ...]:
+        """A batch over one index scan; a dry run sees its own would-be writes
+        too, so it reports exactly what an apply of the same batch would do."""
+        index = RawIndex.scan(self.vault)
+        outcomes = []
+        for drop_rel in drop_rels:
+            outcome = self.intake(drop_rel, mode=mode, today=today, index=index)
+            if mode == "dry_run" and outcome.written and outcome.source is not None:
+                index.add(
+                    RawDocument(
+                        source=outcome.source,
+                        extractor="pending",
+                        created=today if today is not None else date.today(),
+                        sections=(RawSection(text="pending"),),
+                        supersedes=(outcome.supersedes.source_id if outcome.supersedes else None),
+                    )
+                )
+            outcomes.append(outcome)
+        return tuple(outcomes)
+
     def _raw_ref_for(self, original_ref: str, source: KnowledgeSource, *, taken: set[str]) -> str:
         relative = PurePosixPath(original_ref[len(DROP_AREA) :])
-        plain = str(PurePosixPath(RAW_AREA) / relative.with_suffix(".md"))
+        plain = (PurePosixPath(RAW_AREA) / relative.with_suffix(".md")).as_posix()
         if plain not in taken and not self.vault.exists(plain):
             return plain
-        suffixed = relative.with_name(f"{relative.stem}--{source.sha256[:8]}.md")
-        return str(PurePosixPath(RAW_AREA) / suffixed)
+        # A legacy file may already sit where the hash-suffixed name would go;
+        # the name is escalated until it is free, so a dry run and an apply agree.
+        for attempt in range(1, 1000):
+            suffix = source.sha256[:8] if attempt == 1 else f"{source.sha256[:8]}-{attempt}"
+            candidate = (
+                PurePosixPath(RAW_AREA) / relative.with_name(f"{relative.stem}--{suffix}.md")
+            ).as_posix()
+            if candidate not in taken and not self.vault.exists(candidate):
+                return candidate
+        raise VaultError("raw_exists", plain)

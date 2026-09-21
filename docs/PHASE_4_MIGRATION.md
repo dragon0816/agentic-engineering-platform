@@ -105,6 +105,12 @@ original keeps the old Raw and writes the new one beside it under a
 hash-suffixed name; the source's `--force` rebuilt the wiki page in place and
 left no trace of the earlier text. Existing Raw files without provenance are
 skipped by the index, not adopted; adoption is slice 9 with a snapshot first.
+The section marker is escaped inside body text so any original is
+representable, and line endings are normalized to `\n` on entry and on disk;
+the source stored whatever bytes the model or a human produced. Paths are
+canonicalized so equivalent spellings are one identity, and the drift chain is
+recorded in each Raw's `supersedes` line so the latest version is found by
+following links, not by directory order.
 
 Rollback removes `knowledge/raw.py`, `Vault.write_raw` / `read_original` /
 `raw_files` / `exists` and the tests; nothing else imports them.

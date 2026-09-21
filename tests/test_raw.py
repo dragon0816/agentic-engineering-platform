@@ -79,10 +79,11 @@ def test_section_and_document_contracts_refuse_the_wrong_shape() -> None:
         RawSection(kind="table", text="  ")
     with pytest.raises(ValidationError, match="lives under raw/"):
         RawSection(kind="image", image_ref="drop/p.png")
-    with pytest.raises(ValidationError, match="section marker"):
-        RawSection(text="<!-- raw-section 9 kind=text -->")
-    with pytest.raises(ValidationError, match="frontmatter block"):
-        RawSection(text="---\na: b\n---\nbody")
+    with pytest.raises(ValidationError, match="no whitespace"):
+        RawSection(kind="image", image_ref="raw/a/assets/fig 1.png")
+    assert RawSection(kind="image", image_ref="raw\\a\\p.png").image_ref == "raw/a/p.png"
+    with pytest.raises(ValidationError, match="supersede itself"):
+        document(supersedes=document().source.source_id)
     with pytest.raises(ValidationError, match="raw_ref under raw/"):
         document(source=source_for(b"hello", "drop/hello.txt"))
     with pytest.raises(ValidationError, match="no page or slide"):
@@ -123,9 +124,9 @@ def test_raw_markdown_round_trips_every_relationship() -> None:
 def test_parse_refuses_what_is_not_a_raw_document() -> None:
     good = render(document())
     for bad, why in (
-        ("# just markdown\n", "starts with frontmatter"),
-        ("---\nsource_id: x\n", "unterminated"),
-        ("---\nnot a field\n---\n", "malformed frontmatter"),
+        ("# just markdown\n", "well-formed frontmatter"),
+        ("---\nsource_id: x\n", "well-formed frontmatter"),
+        ("---\nnot a field\n---\n", "well-formed frontmatter"),
         ("---\nsource_id: src-1\n---\n", "missing"),
         (good.replace("raw-section 1", "raw-section 2"), "numbered in order"),
         (good.replace("---\n\n<!--", "---\nstray text\n<!--"), "before the first section"),
@@ -280,3 +281,89 @@ def test_outcomes_are_honest_about_their_status() -> None:
     ok = IntakeOutcome(mode="dry_run", status="empty", original_ref="drop/x.txt")
     assert IntakeOutcome.model_validate_json(ok.model_dump_json()) == ok
     assert isinstance(src, KnowledgeSource)
+
+
+def test_any_text_is_representable_and_line_endings_are_one(tmp_path: Path) -> None:
+    tricky = (
+        "see <!-- raw-section 1 kind=text --> in docs\n"
+        "<!-- raw-section 1 kind=text -->\n"
+        "\\<!-- raw-section 2 kind=text -->\n"
+        "---\na: b\n---\nhorizontal rules too\r\nand CRLF\r\nand a \x0c form feed here"
+    )
+    doc = document(sections=(RawSection(text=tricky), RawSection(text="\r\nsecond\r\n", page=2)))
+    assert doc.sections[0].text == tricky.replace("\r\n", "\n")
+    assert doc.sections[1].text == "second"
+    text = render(doc)
+    assert "\n\\<!-- raw-section 1 kind=text -->\n\\\\<!-- raw-section 2" in text
+    assert parse(text) == doc and render(parse(text)) == text
+    # Through the vault and back, on any platform, byte for byte.
+    vault = make_vault(tmp_path)
+    vault.write_raw("raw/tricky.md", text)
+    assert (tmp_path / "raw" / "tricky.md").read_bytes() == text.encode("utf-8")
+    assert parse(vault.read("raw/tricky.md")) == doc
+    # A CRLF original is stored with one line ending and no doubled blank lines.
+    intake = intake_for(vault)
+    drop(vault, "drop/win.txt", b"line one\r\nline two\r\n")
+    intake.intake("drop/win.txt", mode="apply", today=TODAY)
+    assert parse(vault.read("raw/win.md")).sections == (RawSection(text="line one\nline two"),)
+    drop(vault, "drop/marker.txt", b"see <!-- raw-section note")
+    assert intake.intake("drop/marker.txt", mode="apply", today=TODAY).status == "written"
+
+
+def test_equivalent_drop_paths_are_one_identity(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    intake = intake_for(vault)
+    drop(vault, "drop/d.txt", b"v1")
+    first = intake.intake("drop/./d.txt", mode="apply", today=TODAY)
+    assert first.original_ref == "drop/d.txt" and first.raw_ref == "raw/d.md"
+    drop(vault, "drop/d.txt", b"v2")
+    second = intake.intake("drop//d.txt", mode="apply", today=TODAY)
+    assert second.status == "drifted" and second.supersedes == first.source
+    assert first.source is not None and second.raw_ref is not None
+    stored = parse(vault.read(second.raw_ref))
+    assert stored.source.raw_ref == second.raw_ref
+    assert stored.supersedes == first.source.source_id
+
+
+def test_drift_chains_supersede_the_latest_not_an_arbitrary_version(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    intake = intake_for(vault)
+    versions = []
+    for body in (b"# v1", b"# v2", b"# v3", b"# v4"):
+        drop(vault, "drop/r.md", body)
+        versions.append(intake.intake("drop/r.md", mode="apply", today=TODAY))
+    for earlier, later in zip(versions, versions[1:], strict=False):
+        assert later.status == "drifted" and later.supersedes == earlier.source
+    assert len(vault.raw_files()) == 4
+    # A batch dry run sees its own would-be writes, exactly as an apply would.
+    drop(vault, "drop/batch-a.md", b"same")
+    drop(vault, "drop/batch-b.md", b"same")
+    preview = intake.intake_all(["drop/batch-a.md", "drop/batch-b.md"], today=TODAY)
+    assert [o.status for o in preview] == ["written", "duplicate"]
+    assert [o.raw_ref for o in preview] == ["raw/batch-a.md", "raw/batch-a.md"]
+    applied = intake.intake_all(["drop/batch-a.md", "drop/batch-b.md"], mode="apply", today=TODAY)
+    assert [o.status for o in applied] == ["written", "duplicate"]
+
+
+def test_legacy_raw_never_breaks_an_intake(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    (tmp_path / "raw" / "big5.md").write_bytes("# 舊筆記\n".encode("cp950"))
+    good_head = render(document()).encode("utf-8")
+    (tmp_path / "raw" / "mixed.md").write_bytes(good_head + "後面是 Big5 內文\n".encode("cp950"))
+    entries = raw_index(vault)
+    assert [e.raw_ref for e in entries] == ["raw/mixed.md"]
+    outcome = intake_for(vault).intake(
+        drop(vault, "drop/new.txt", b"fresh"), mode="apply", today=TODAY
+    )
+    assert outcome.status == "written"
+    # A legacy file sitting where the hash-suffixed name would go is not overwritten.
+    drop(vault, "drop/report.md", b"# v1")
+    first = intake_for(vault).intake("drop/report.md", mode="apply", today=TODAY)
+    drop(vault, "drop/report.md", b"# v2")
+    clash = source_for(b"# v2", "drop/report.md").sha256[:8]
+    (tmp_path / "raw" / f"report--{clash}.md").write_text("legacy\n", encoding="utf-8")
+    preview = intake_for(vault).intake("drop/report.md", today=TODAY)
+    applied = intake_for(vault).intake("drop/report.md", mode="apply", today=TODAY)
+    assert preview.raw_ref == applied.raw_ref == f"raw/report--{clash}-2.md"
+    assert applied.supersedes == first.source
+    assert (tmp_path / "raw" / f"report--{clash}.md").read_text(encoding="utf-8") == "legacy\n"

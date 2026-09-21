@@ -71,7 +71,11 @@ class VaultError(Exception):
 
 
 def normalize(rel: str) -> str:
-    return rel.replace("\\", "/").lstrip("/")
+    """One spelling per path: forward slashes, no leading slash, no `.` segments
+    or doubled separators, so equal paths compare equal. `..` is kept for the
+    layout check to refuse."""
+    clean = rel.replace("\\", "/").lstrip("/")
+    return PurePosixPath(clean).as_posix() if clean else ""
 
 
 def refusal_for(rel: str) -> WriteRefusalCode | None:
@@ -324,14 +328,38 @@ class Vault:
     def exists(self, rel: str) -> bool:
         return self._resolve(rel)[1].exists()
 
-    def read_original(self, rel: str) -> bytes:
-        """The bytes of one original under drop/. Drop is read, never written."""
+    def read_head(self, rel: str, *, max_lines: int = 64) -> str:
+        """The frontmatter of a file, read line by line and stopped at the
+        closing `---`, so a large or oddly encoded body is never touched."""
+        _, target = self._resolve(rel)
+        if not target.is_file():
+            return ""
+        head: list[bytes] = []
+        with target.open("rb") as handle:
+            for number, raw in enumerate(handle):
+                line = raw.rstrip(b"\r\n")
+                head.append(line)
+                if (number > 0 and line == b"---") or number + 1 >= max_lines:
+                    break
+        try:
+            return b"\n".join(head).decode("utf-8") + "\n"
+        except UnicodeDecodeError:
+            return ""
+
+    def original_ref(self, rel: str) -> str:
+        """The canonical spelling of an original's path under drop/: the
+        resolved, relative, forward-slash form that identity is recorded with."""
         clean = normalize(rel)
         if not clean.startswith("drop/"):
             raise VaultError("outside_drop", rel)
-        resolved, target = self._resolve(clean)
+        resolved, _ = self._resolve(clean)
         if not resolved.startswith("drop/"):
             raise VaultError("outside_drop", rel)
+        return resolved
+
+    def read_original(self, rel: str) -> bytes:
+        """The bytes of one original under drop/. Drop is read, never written."""
+        _, target = self._resolve(self.original_ref(rel))
         if not target.is_file():
             raise VaultError("missing_original", rel)
         return target.read_bytes()
@@ -350,17 +378,19 @@ class Vault:
         """The one way raw/ is written: create, never replace. Raw is immutable
         in the only sense a pipeline can honour — write once, never change."""
         clean = normalize(rel)
-        if refusal_for(clean) == "escapes_vault":
-            raise VaultError("escapes_vault", rel)
         if not clean.startswith("raw/"):
             raise VaultError("outside_raw", rel)
         resolved, target = self._resolve(clean)
-        if not resolved.startswith("raw/"):
+        if not resolved.startswith("raw/") or target.is_dir():
             raise VaultError("outside_raw", rel)
-        if target.exists():
-            raise VaultError("raw_exists", rel)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        try:
+            # Exclusive creation: two writers cannot both succeed, and the
+            # bytes on disk are exactly the text, whatever the platform.
+            with target.open("x", encoding="utf-8", newline="\n") as handle:
+                handle.write(content)
+        except FileExistsError:
+            raise VaultError("raw_exists", rel) from None
 
     def _target(self, rel: str) -> Path:
         code = refusal_for(rel)
