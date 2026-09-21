@@ -114,3 +114,42 @@ following links, not by directory order.
 
 Rollback removes `knowledge/raw.py`, `Vault.write_raw` / `read_original` /
 `raw_files` / `exists` and the tests; nothing else imports them.
+
+## Slice 3 source-first decision
+
+The source tooling has no office extraction: its README lists images as a known
+gap and it ingested Markdown only. There is nothing to wrap or adapt, so this
+slice is new platform behavior against the Roadmap's requirement (PDF/PPT/DOCX
+round-trip to Raw with page/slide/image relationships).
+
+Decision (2026-09-21): adopt three libraries as the optional extra `office`,
+each behind the `Extractor` protocol so nothing else in the platform imports
+them. Recorded before adoption, from the installed distributions' metadata and
+PyPI release history:
+
+| Library | Version pinned | License (`License-Expression`) | Recent releases | Typing |
+| --- | --- | --- | --- | --- |
+| `pypdf[image]` | `>=6,<7` (6.19.0) | BSD-3-Clause | 6.19.0 (2026-09-16), 6.18.1 (2026-09-11), 6.18.0 (2026-09-07) — weekly cadence | `py.typed` |
+| `python-pptx` | `>=1,<2` (1.0.2) | MIT | 1.0.2 (2024-08-07), 1.0.1, 1.0.0 (2024-08) — stable, slow | `py.typed` |
+| `python-docx` | `>=1,<2` (1.2.0) | MIT | 1.2.0 (2025-06-16), 1.1.2 (2024-05-01) — stable, slow | `py.typed` |
+
+Transitive: `lxml` (BSD-3-Clause), `Pillow` (MIT-CMU; also declared directly
+through `pypdf[image]`, since image extraction needs it), `XlsxWriter`
+(BSD-2-Clause), `typing_extensions` (PSF). All permissive; no copyleft. Both
+OpenXML libraries are mature and release rarely because the format is stable;
+`pypdf` is actively maintained by the py-pdf organisation. Alternatives not
+taken: `pdfplumber`/`pdfminer.six` (heavier, MIT, would add table heuristics
+that are better left to a later slice if needed); `PyMuPDF` (AGPL — excluded by
+license); `unstructured` (large dependency surface for a small need).
+
+Extraction maps the parsers' documented error types — `PyPdfError`,
+`PythonPptxError`, `OpcError`, `LxmlError`, plus the standard-library errors a
+broken stream raises — to the closed status `undecodable` with the cause
+chained; a bare `Exception` boundary was rejected in review because it would
+turn a programming error into a data status. An unreadable image inside a
+readable original is skipped rather than fatal (also from review: one
+undecodable picture must not cost every page's text). Shapes are classified
+by type, never through `shape_type`, which raises for elements python-pptx
+does not model. Rollback removes `knowledge/office.py`, its tests, the extra and the
+CI install line; the `AssetSink` addition to the protocol stays useful for any
+later extractor.

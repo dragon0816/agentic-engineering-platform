@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
-      - run: python -m pip install -e ".[dev]"
+      - run: python -m pip install -e ".[dev,office]"
       - run: python -m pytest
       - run: python -m ruff check .
       - run: python -m ruff format --check .

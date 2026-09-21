@@ -477,3 +477,34 @@ of each Raw file (`Vault.read_head`, stopped at the closing `---`) and skips
 any file without this provenance or whose head cannot be decoded, so an
 existing vault's content — in any encoding — is never a reason to fail, nor
 rewritten.
+
+## Office extraction (Phase 4, slice 3)
+
+`knowledge.office` adds `PdfExtractor` (`.pdf`), `PptxExtractor` (`.pptx`) and
+`DocxExtractor` (`.docx`) behind the `Extractor` protocol, as the optional
+extra `office`. The protocol gained an `AssetSink`: `extract(data, assets)`
+hands image bytes to `assets.put(data, suffix)` and receives the `image_ref`
+to carry; an extractor never writes. `StagedAssets` is the intake's sink — it
+names each asset by content under the Raw document's own directory
+(`raw/notes/hello.md` keeps its images under `raw/notes/hello/assets/`), and
+the intake lists those refs in `written` and writes them only on apply through
+`Vault.write_raw_bytes`, which creates exclusively, treats the same bytes at
+the same name as a no-op and refuses different bytes (`raw_exists`).
+
+Sections keep their relationships: PDF text and images per `page`; PPTX text
+frames, tables and pictures per `slide` in shape order, descending into groups
+and including pictures placed in placeholders; DOCX paragraphs (headings
+become Markdown `#`), tables and inline pictures in body order — content
+controls (`w:sdt`) included, and pictures inside table cells following their
+table — with no page. `table_markdown` renders a GitHub-style table with cells
+flattened to one line and pipes escaped.
+
+Two error rules. A corrupt or unreadable *original* is `undecodable`, mapped
+from the parsers' documented error types (their base classes plus the
+standard-library errors broken streams raise) with the cause chained. An
+unreadable *image* inside a readable original — a filter pypdf cannot decode,
+a linked rather than embedded picture — is skipped, not fatal: the text is
+still evidence. Known limitations: PDF tables arrive as text in reading
+order, PPTX speaker notes are not extracted, a skipped image leaves no trace
+in the Raw file, and images are stored as the library provides them (pypdf
+converts raw image streams to PNG, which needs its `image` extra — declared).

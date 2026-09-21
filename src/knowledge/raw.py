@@ -220,9 +220,38 @@ class ExtractionError(Exception):
         super().__init__(code)
 
 
+class AssetSink(Protocol):
+    """Where an extractor hands over image bytes. It answers with the `image_ref`
+    the section should carry; whether and when the bytes reach disk is the
+    intake's business, so an extractor never writes."""
+
+    def put(self, data: bytes, suffix: str) -> str: ...
+
+
+class StagedAssets:
+    """Assets one extraction produced, named by their content under the Raw
+    document's own assets directory and written only on apply."""
+
+    def __init__(self, assets_dir: str) -> None:
+        self.assets_dir = normalize(assets_dir)
+        self.items: dict[str, bytes] = {}
+
+    def put(self, data: bytes, suffix: str) -> str:
+        clean = suffix.lower() if suffix.startswith(".") else f".{suffix.lower()}"
+        ref = f"{self.assets_dir}/{hashlib.sha256(data).hexdigest()[:16]}{clean}"
+        self.items.setdefault(ref, data)
+        return ref
+
+
+def assets_dir_for(raw_ref: str) -> str:
+    """`raw/notes/hello.md` keeps its images under `raw/notes/hello/assets/`."""
+    return normalize(raw_ref)[: -len(".md")] + "/assets"
+
+
 class Extractor(Protocol):
     """Turns an original's bytes into sections. Names itself so a Raw file says
-    what produced it; keyed by suffix so the intake can choose."""
+    what produced it; keyed by suffix so the intake can choose; hands images to
+    the sink rather than writing anything."""
 
     @property
     def name(self) -> str: ...
@@ -230,7 +259,7 @@ class Extractor(Protocol):
     @property
     def suffixes(self) -> tuple[str, ...]: ...
 
-    def extract(self, data: bytes) -> tuple[RawSection, ...]: ...
+    def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]: ...
 
 
 def _decode(data: bytes) -> str:
@@ -244,7 +273,7 @@ class PlainTextExtractor:
     name = "plain-text.v1"
     suffixes = (".txt",)
 
-    def extract(self, data: bytes) -> tuple[RawSection, ...]:
+    def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
         text = _decode(data)
         return (RawSection(kind="text", text=text),) if text.strip() else ()
 
@@ -256,7 +285,7 @@ class MarkdownExtractor:
     name = "markdown.v1"
     suffixes = (".md", ".markdown")
 
-    def extract(self, data: bytes) -> tuple[RawSection, ...]:
+    def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
         text = _decode(data)
         lines = text.split("\n")
         if lines and lines[0] == "---" and "---" in lines[1:]:
@@ -395,20 +424,22 @@ class DropIntake:
         extractor = self._by_suffix.get(PurePosixPath(original_ref).suffix.lower())
         if extractor is None:
             return IntakeOutcome(mode=mode, status="unsupported", original_ref=original_ref)
+        # The Raw's name is fixed before extraction so images can be named
+        # under it; the same original path with other content is drift: the old
+        # Raw is immutable and stays, the new one lives beside it under a name
+        # that cannot collide, and both the file and the outcome say what it
+        # supersedes.
+        previous = known.latest_for(original_ref)
+        raw_ref = self._raw_ref_for(original_ref, source, taken=known.paths())
+        staged = StagedAssets(assets_dir_for(raw_ref))
         try:
-            sections = extractor.extract(data)
+            sections = extractor.extract(data, staged)
         except ExtractionError as error:
             return IntakeOutcome(mode=mode, status=error.code, original_ref=original_ref)
         except ValidationError:
             return IntakeOutcome(mode=mode, status="unrepresentable", original_ref=original_ref)
         if not sections:
             return IntakeOutcome(mode=mode, status="empty", original_ref=original_ref)
-
-        # The same original path with other content is drift: the old Raw is
-        # immutable and stays, the new one lives beside it under a name that
-        # cannot collide, and both the file and the outcome say what it supersedes.
-        previous = known.latest_for(original_ref)
-        raw_ref = self._raw_ref_for(original_ref, source, taken=known.paths())
         placed = source.model_copy(update={"raw_ref": raw_ref})
         try:
             document = RawDocument(
@@ -420,7 +451,13 @@ class DropIntake:
             )
         except ValidationError:
             return IntakeOutcome(mode=mode, status="unrepresentable", original_ref=original_ref)
+        referenced = {section.image_ref for section in sections if section.image_ref}
+        assets = tuple(ref for ref in staged.items if ref in referenced)
         if mode == "apply":
+            # Assets first: they are content-named, so a Raw that fails to
+            # write leaves nothing a later attempt cannot reuse.
+            for ref in assets:
+                self.vault.write_raw_bytes(ref, staged.items[ref])
             self.vault.write_raw(raw_ref, render(document))
             known.add(document)
         return IntakeOutcome(
@@ -430,7 +467,7 @@ class DropIntake:
             source=placed,
             raw_ref=raw_ref,
             supersedes=previous.source if previous is not None else None,
-            written=(raw_ref,),
+            written=(raw_ref, *assets),
         )
 
     def intake_all(
