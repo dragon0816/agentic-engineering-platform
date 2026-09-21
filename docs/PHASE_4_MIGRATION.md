@@ -1,0 +1,68 @@
+# Phase 4 source inspection and disposition
+
+Source: `dragon0816/knowledge_management`, commit
+`2f5e6d0431c5b6af8fbee05c6c0a5779e1a84bb9` (`main` at inspection, 2026-09-21,
+read-only shallow clone). The repository mixes four concerns — a LiteLLM
+gateway, a coding agent, a benchmark suite and the Obsidian vault tooling —
+and only the vault tooling belongs to Phase 4. `docs/SOURCE_REPOSITORIES.md`
+already records the strategy: preserve the safety invariants and decompose by
+platform boundary; address the known gaps (images ignored, no query) explicitly.
+
+## Slice 1 source-first decision
+
+Inspected `vault/ingest.py` (764 lines), `vault/conflicts.py` (177),
+`vault/brain.py` (536), `vault/snapshot.py` (137) and `vault/collect.py` (266),
+plus `vault/README.md` and the vault-related entries of the source's
+`docs/DECISIONS.md`.
+
+Decision: **ADAPT** the vault safety model into typed contracts and a pure
+validation/apply core in `knowledge.vault`, characterized by pinned excerpts
+(`tests/fixtures/source_vault_ingest.txt`, `source_vault_conflicts.txt`).
+The source's `Gateway` client, prompts, condensation, CLI and run loop are not
+migrated in this slice; a `WritePlan` is data here, and the model that will
+propose one arrives in slice 5 behind `ModelClient`. The source repository is
+unchanged. Rollback removes `knowledge/vault.py`, its tests, fixtures and docs;
+nothing else imports them.
+
+Why not WRAP: the safety core is entangled with `print`, `SystemExit`, module
+globals (`VAULT_DEFAULT`, `WRITE_ALLOWED`) and a plan that is an untyped dict.
+Wrapping would keep an untyped boundary at exactly the place the platform's
+contracts must hold (rule 10: provenance preserved). Why not REWRITE: the
+behaviors are proven on a real 190-page vault and each carries a recorded
+reason; they are pinned and reproduced, not reinvented.
+
+| Source | Observed behavior | Decision and preserved boundary |
+| --- | --- | --- |
+| `ingest.py` `Vault.safe_write` | refuses any path not under `wiki/`, `index.md`, `log.md`; refuses a path that escapes the vault root; backs up an existing target to `.ingest-backup/<stamp>/<rel>` before overwriting | ADAPT into a typed layout with closed refusal codes; `drop/` and `decisions.md` join the layout (`decisions.md` writable, `drop/` immutable); backup before overwrite preserved |
+| `ingest.py` `validate` | rejects a plan with no pages, no `wiki/sources/` page, a sources page missing `source_path: <rel>`, a write outside `wiki/`, empty content, or a wikilink carrying a path; a plan is rejected whole | ADAPT as `check_plan` returning `PlanProblem` codes; `source_path` text becomes a typed `KnowledgeSource` in the plan; whole-plan rejection preserved |
+| `ingest.py` `repair_wikilinks` | `[[wiki/x/Foo]]`/`[[raw/x/Foo]]`/`[[Foo.md]]` → `[[Foo]]`; `[[A / B / C]]` → `[[A]] / [[B]] / [[C]]`; anything else with a slash left for rejection | ADAPT unchanged; repairs reported in the outcome |
+| `ingest.py` `ensure_conflicts_visible` | if contradictions are reported and no page carries `⚠️`, append a `## ⚠️ 待裁決的衝突` block to the first entity/concept page (else the first page) | ADAPT unchanged, including the preference order |
+| `ingest.py` `update_index` | insert each entry under the matching `## Section` heading (case-insensitive substring), before trailing blank lines, skipping exact duplicates; create the section at the end if absent | ADAPT unchanged |
+| `ingest.py` `append_log` | append `## [date] ingest \| <source stem>` plus body and `- ⚠️` lines | ADAPT; the date is injected, not read from the clock, so tests are deterministic |
+| `ingest.py` `ingested_paths`/`pending` | dedup key is the `source_path` recorded in `wiki/sources/` frontmatter — a moved source looks un-ingested, a changed one looks done | NOT MIGRATED here; slice 2 replaces path identity with content-hash provenance and reports drift (the source's own README names this as its sharp edge) |
+| `ingest.py` `Gateway`, prompts, `condense`, `plan_ingest` | OpenAI-compatible HTTP client with retries, Traditional-Chinese maintainer prompts, chunked condensation cached by content hash, two-pass planning | NOT MIGRATED in this slice; slice 5 through `ModelClient`, with condensation cache and two passes preserved as behaviors |
+| `conflicts.py` | append-only `decisions.md`, `⚠️` markers found by regex over `wiki/`, `clear_conflict` by line, page hashes in `.brain-state.json`, manual-edit detection excluding tool-written pages | Pinned now; ADAPT in slice 7 |
+| `brain.py` static `scan` | orphans (entry points excluded), dangling links by count, path-carrying links (with the `[[CLAUDE.md]]` exception), missing frontmatter, unresolved `source_path`, pending sources; `page_name` strips only `.md` | Inspected; pin and ADAPT in slice 6 |
+| `snapshot.py` | copy `wiki/`, `index.md`, `log.md`, `decisions.md`, `.brain-state.json` to `.brain-snapshot/<stamp>`; restore snapshots the current state first | Inspected; ADAPT in slice 9 as the migration adapter's safety net |
+| `collect.py` | copy project READMEs and `docs/**/*.md` into `raw/Programming/<project>/`, hash-compare duplicate checkouts, exclude `HANDOFF.md` by name | NOT MIGRATED; a Drop intake (slice 2) subsumes it, and the exclusion becomes host configuration |
+| Runtime `CLAUDE.md` schema sent as the system prompt | conventions live in the vault and are read at run time | NOT MIGRATED: the platform encodes the conventions it enforces as contracts; a host may still keep a schema file for human maintainers |
+
+## Characterization and intentional differences
+
+`tests/fixtures/source_vault_ingest.txt` and `source_vault_conflicts.txt` are
+verbatim line excerpts (see `tests/fixtures/README.md` for ranges and
+checksums). Tests exercise them against temporary vault directories; the
+excerpts print nothing the tests depend on and touch nothing outside pytest's
+temporary directory.
+
+Intentional differences in the adapted implementation:
+
+- Refusals are closed codes on a typed outcome, not `ValueError` messages.
+- `drop/` is immutable alongside `raw/`; `decisions.md` is writable alongside
+  `index.md` and `log.md` (the source writes it from `conflicts.py` without
+  going through `safe_write`).
+- Provenance in a sources page is a `KnowledgeSource`, validated as a value;
+  the source compared a frontmatter string.
+- Dates and backup stamps are injected so behavior is reproducible.
+- No `print`, no `SystemExit`, no environment defaults: a missing vault is a
+  typed refusal, and the vault root is always explicit.

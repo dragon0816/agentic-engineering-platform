@@ -1,0 +1,210 @@
+import re
+
+from datetime import date, datetime
+from pathlib import Path
+
+WRITE_ALLOWED = ("wiki/", "index.md", "log.md")
+
+class Vault:
+    REQUIRED = ("CLAUDE.md", "index.md", "log.md", "raw", "wiki")
+
+    def __init__(self, root: Path):
+        self.root = root
+        if not root.exists():
+            raise SystemExit(f"\nNo such directory: {root}\n  Pass --vault DIR or set VAULT_PATH.\n")
+        missing = [name for name in self.REQUIRED if not (root / name).exists()]
+        if missing:
+            raise SystemExit(
+                f"\n{root} does not look like a wiki vault.\n"
+                f"  Missing: {', '.join(missing)}\n"
+                f"  A vault needs: {', '.join(self.REQUIRED)}\n"
+                "  CLAUDE.md is the schema and is sent to the model as the system prompt.\n"
+            )
+
+    def read(self, rel: str) -> str:
+        path = self.root / rel
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+
+    def raw_sources(self) -> list:
+        """Markdown under raw/, excluding assets and raw/'s own README.
+
+        Only `raw/README.md` is skipped -- that one describes the folder itself.
+        A project's README is a legitimate source, and blanket-skipping the name
+        silently dropped seven of them from raw/Programming/.
+        """
+        found = []
+        for path in sorted((self.root / "raw").rglob("*.md")):
+            rel = path.relative_to(self.root).as_posix()
+            if "/assets/" in rel or rel.lower() == "raw/readme.md":
+                continue
+            found.append(rel)
+        return found
+
+    def ingested_paths(self) -> set:
+        """source_path values already recorded in wiki/sources/ frontmatter."""
+        done = set()
+        for path in (self.root / "wiki" / "sources").glob("*.md"):
+            match = re.search(r"^source_path:\s*(.+)$", path.read_text(encoding="utf-8"), re.M)
+            if match:
+                done.add(match.group(1).strip().strip('"').replace("\\", "/"))
+        return done
+
+    def pending(self) -> list:
+        done = self.ingested_paths()
+        return [rel for rel in self.raw_sources() if rel not in done]
+
+    def wiki_inventory(self) -> list:
+        """Every wiki page as (relative path, title) for the relevance pass."""
+        pages = []
+        for path in sorted((self.root / "wiki").rglob("*.md")):
+            text = path.read_text(encoding="utf-8")
+            match = re.search(r"^title:\s*(.+)$", text, re.M)
+            title = match.group(1).strip() if match else path.stem
+            pages.append((path.relative_to(self.root).as_posix(), title))
+        return pages
+
+    def safe_write(self, rel: str, content: str) -> Path:
+        rel = rel.replace("\\", "/").lstrip("/")
+        if not rel.startswith(WRITE_ALLOWED):
+            raise ValueError(f"refusing to write outside wiki/: {rel}")
+        target = (self.root / rel).resolve()
+        if self.root.resolve() not in target.parents and target != self.root.resolve():
+            raise ValueError(f"path escapes the vault: {rel}")
+
+        # An "update" replaces a page wholesale, so a model that drops a section
+        # loses it silently. Keep the previous version; a knowledge base has no
+        # tests to catch that for you.
+        if target.exists():
+            stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            backup = self.root / ".ingest-backup" / stamp / rel
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            backup.write_text(target.read_text(encoding="utf-8"), encoding="utf-8")
+
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+        return target
+
+def validate(plan: dict, source_rel: str) -> list:
+    """Reject a plan that would break the vault's own rules."""
+    problems = []
+    pages = plan.get("pages") or []
+    if not pages:
+        problems.append("no pages returned")
+
+    source_pages = [p for p in pages if p.get("path", "").startswith("wiki/sources/")]
+    if not source_pages:
+        problems.append("no wiki/sources/ page")
+    for page in source_pages:
+        if f"source_path: {source_rel}" not in (page.get("content") or ""):
+            problems.append(f"{page['path']}: frontmatter is missing `source_path: {source_rel}`")
+
+    for page in pages:
+        path = (page.get("path") or "").replace("\\", "/")
+        if not path.startswith("wiki/"):
+            problems.append(f"refuses to write outside wiki/: {path}")
+        if not (page.get("content") or "").strip():
+            problems.append(f"{path}: empty content")
+        # The schema says bare page names; a path inside a wikilink resolves to
+        # the wrong note in Obsidian, which is how the existing pages went wrong.
+        # Only paths are rejected here: [[CLAUDE.md]] names the schema file in
+        # the vault root and is a legitimate link, so a blanket ban on `.md`
+        # would reject good output.
+        for bad in re.findall(r"\[\[[^\]]*/[^\]]*\]\]", page.get("content") or ""):
+            problems.append(f"{path}: wikilink with a path, should be a bare page name: {bad}")
+    return problems
+
+
+def repair_wikilinks(plan: dict) -> list:
+    """Fix the two link mistakes that have an unambiguous correction.
+
+    Rejecting a whole plan over one bad link is expensive: it threw away a
+    12-chunk condensation of a 277 KB source, which cost more than everything
+    else in that run combined. Repair what is certain, still reject what is not.
+
+      [[wiki/entities/Foo]]   -> [[Foo]]        a path; the schema forbids it
+      [[RFIC / FEM / AFE]]    -> [[RFIC]] / [[FEM]] / [[AFE]]
+                                                an enumeration; Obsidian would
+                                                read the slashes as folders
+    """
+    repaired = []
+
+    def fix(match):
+        inner = match.group(1).strip()
+        if "/" not in inner:
+            return match.group(0)
+        if inner.startswith(("wiki/", "raw/")) or inner.endswith(".md"):
+            fixed = f"[[{Path(inner).stem}]]"
+        elif " / " in inner:
+            parts = [p.strip() for p in inner.split("/") if p.strip()]
+            fixed = " / ".join(f"[[{p}]]" for p in parts)
+        else:
+            return match.group(0)  # genuinely ambiguous; let validate reject it
+        repaired.append(f"{inner} -> {fixed}")
+        return fixed
+
+    for page in plan.get("pages") or []:
+        content = page.get("content") or ""
+        new = re.sub(r"\[\[([^\]|#]+)\]\]", fix, content)
+        if new != content:
+            page["content"] = new
+    return repaired
+
+
+def ensure_conflicts_visible(plan: dict) -> bool:
+    """Guarantee every reported contradiction also appears on a page.
+
+    The model is told to do this, and mostly does. When it does not, the
+    conflict would exist only in log.md -- which nobody reads in Obsidian, and
+    which is how 3 conflicts ended up invisible across 192 pages. Rejecting the
+    whole plan would throw away good work, so the marker is added here instead.
+    """
+    notes = [str(n).strip() for n in (plan.get("contradictions") or []) if str(n).strip()]
+    if not notes:
+        return False
+
+    pages = plan.get("pages") or []
+    if any("⚠️" in (page.get("content") or "") for page in pages):
+        return False
+
+    # Prefer an entity/concept page -- that is where a reader meets the claim.
+    target = next((p for p in pages
+                   if p.get("path", "").startswith(("wiki/entities/", "wiki/concepts/"))),
+                  pages[0] if pages else None)
+    if target is None:
+        return False
+
+    block = "\n\n## ⚠️ 待裁決的衝突\n\n" + "\n".join(f"⚠️ {note}" for note in notes) + "\n"
+    target["content"] = target["content"].rstrip() + block
+    return True
+
+def update_index(vault: Vault, entries: list) -> None:
+    """Insert lines under the right '## Section' heading, skipping duplicates."""
+    lines = vault.read("index.md").splitlines()
+    for entry in entries:
+        section = (entry.get("section") or "").strip()
+        line = (entry.get("line") or "").strip()
+        if not section or not line or line in lines:
+            continue
+        heading = next(
+            (i for i, text in enumerate(lines)
+             if text.startswith("## ") and section.lower() in text.lower()), None)
+        if heading is None:
+            lines += ["", f"## {section}", line]
+            continue
+        insert = heading + 1
+        while insert < len(lines) and not lines[insert].startswith("## "):
+            insert += 1
+        while insert > heading + 1 and not lines[insert - 1].strip():
+            insert -= 1
+        lines.insert(insert, line)
+    vault.safe_write("index.md", "\n".join(lines).rstrip() + "\n")
+
+
+def append_log(vault: Vault, plan: dict) -> None:
+    title = Path(plan["_source"]).stem
+    body = (plan.get("log_body") or "").rstrip()
+    block = f"\n## [{date.today().isoformat()}] ingest | {title}\n{body}\n"
+    for note in plan.get("contradictions") or []:
+        block += f"- ⚠️ {note}\n"
+    path = vault.root / "log.md"
+    path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n" + block, encoding="utf-8")

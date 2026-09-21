@@ -378,3 +378,32 @@ identical, restores the completed prefix from verified payloads, and
 re-authorizes every remaining step. On a journalled engine the in-memory
 `resume()` is refused (`use_recovery`), because the durable "continued once"
 guard is reserved by `recover()` alone.
+
+## Knowledge vault (Phase 4, slice 1)
+
+`knowledge.vault` is the safety model every later knowledge slice writes
+through. The layout is a contract: `drop/` and `raw/` are immutable
+(`immutable_area`), writes are confined to `wiki/`, `index.md`, `log.md` and
+`decisions.md` (`outside_writable` otherwise), and a path with `..`, a drive
+letter or nothing at all is `escapes_vault`; `Vault.write` re-checks the
+resolved target so a symlink cannot escape either. Every overwrite is backed up
+under `.ingest-backup/<stamp>/<path>` first.
+
+`WritePlan` is what one ingest proposes: `source` (a `KnowledgeSource`, the
+provenance the `wiki/sources/` page must carry as `source_id:` and
+`source_sha256:` frontmatter lines), whole-page `pages` (`create`/`update`,
+never a diff), `index_entries` per section, a `log_body` and `contradictions`.
+`check_plan` returns closed `PlanProblem` codes — `no_pages`,
+`no_sources_page`, `missing_provenance`, `outside_wiki`, `escapes_vault`,
+`empty_content`, `path_in_wikilink` — and any problem rejects the plan whole.
+Before validation, `repair_wikilinks` fixes the two unambiguous link mistakes
+(a path becomes the bare page name; `[[A / B]]` becomes `[[A]] / [[B]]`) and
+`ensure_conflicts_visible` writes a reported contradiction onto an entity or
+concept page as a `⚠️` block, so it is seen where a reader meets the claim.
+
+`Vault.apply(plan, mode="dry_run"|"apply", today=, stamp=)` returns a
+`VaultOutcome`: `written` (what was, or would be, written), `backed_up`,
+`repairs`, `conflict_marker_added` and `problems`. A dry run — the default —
+writes nothing and lists exactly what an apply would write; a rejected plan
+writes nothing in either mode, and the contract refuses an outcome that claims
+otherwise. Nothing in this module calls a model.

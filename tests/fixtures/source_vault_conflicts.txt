@@ -1,0 +1,158 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from datetime import date
+from pathlib import Path
+
+DECISIONS_FILE = "decisions.md"
+STATE_FILE = ".brain-state.json"
+
+# A conflict block a page carries until a human settles it. The marker has to
+# survive being edited in Obsidian, so it is plain markdown, not HTML.
+# Horizontal whitespace only: `\s` matches newlines, so `^\s*` would start the
+# match on the preceding blank line and report the line number one too low.
+CONFLICT_RE = re.compile(r"^[ \t]*(?:[-*][ \t]*)?⚠️[ \t]*(.+?)[ \t]*$", re.M)
+
+DECISIONS_HEADER = """# Decisions — 已裁決的衝突
+
+> 這個檔案是 **append-only 的裁決紀錄**，不是時間軸（那是 `log.md`）。
+> 每次 ingest 與 lint 都會把本檔送給模型，避免它把已經被否決的說法再寫回來。
+>
+> 一筆一個 `## [YYYY-MM-DD] 主題`，底下寫「保留什麼／否決什麼／理由」。
+> 保持簡短：這個檔案每次都會進 context。
+"""
+
+
+# ---------------------------------------------------------------------------
+# decisions.md
+# ---------------------------------------------------------------------------
+
+def decisions_path(root: Path) -> Path:
+    return root / DECISIONS_FILE
+
+
+def read_decisions(root: Path) -> str:
+    path = decisions_path(root)
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def decisions_for_prompt(root: Path) -> str:
+    """The block injected into ingest and lint prompts."""
+    text = read_decisions(root).strip()
+    if not text or text.strip() == DECISIONS_HEADER.strip():
+        return "（尚無裁決紀錄）"
+    return text
+
+
+def append_decision(root: Path, topic: str, keep: str, reject: str,
+                    reason: str, pages: list) -> Path:
+    path = decisions_path(root)
+    if not path.exists():
+        path.write_text(DECISIONS_HEADER, encoding="utf-8")
+
+    block = [f"\n## [{date.today().isoformat()}] {topic}"]
+    if keep:
+        block.append(f"- 保留：{keep}")
+    if reject:
+        block.append(f"- 否決：{reject}")
+    if reason:
+        block.append(f"- 理由：{reason}")
+    if pages:
+        block.append("- 影響頁面：" + "、".join(f"[[{p}]]" for p in pages))
+
+    path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n" + "\n".join(block) + "\n",
+                    encoding="utf-8")
+    return path
+
+
+# ---------------------------------------------------------------------------
+# Open conflicts
+# ---------------------------------------------------------------------------
+
+def find_conflicts(root: Path) -> list:
+    """Every ⚠️ line still sitting in a wiki page, with enough context to act."""
+    found = []
+    for path in sorted((root / "wiki").rglob("*.md")):
+        rel = path.relative_to(root).as_posix()
+        text = path.read_text(encoding="utf-8")
+        for match in CONFLICT_RE.finditer(text):
+            line_no = text.count("\n", 0, match.start()) + 1
+            found.append({"page": rel, "line": line_no, "text": match.group(1).strip()})
+    return found
+
+
+def clear_conflict(root: Path, rel: str, line_no: int) -> bool:
+    """Remove one ⚠️ line after it has been decided. Returns False if it moved."""
+    path = root / rel
+    lines = path.read_text(encoding="utf-8").splitlines()
+    index = line_no - 1
+    if not (0 <= index < len(lines)) or "⚠️" not in lines[index]:
+        return False
+    del lines[index]
+    # Leave no double blank line behind.
+    while index < len(lines) and index > 0 and not lines[index].strip() and not lines[index - 1].strip():
+        del lines[index]
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return True
+
+
+# ---------------------------------------------------------------------------
+# Manual-edit detection
+# ---------------------------------------------------------------------------
+
+def page_hashes(root: Path) -> dict:
+    digests = {}
+    for path in sorted((root / "wiki").rglob("*.md")):
+        rel = path.relative_to(root).as_posix()
+        digests[rel] = hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    for extra in ("index.md", DECISIONS_FILE):
+        target = root / extra
+        if target.exists():
+            digests[extra] = hashlib.sha256(target.read_bytes()).hexdigest()[:16]
+    return digests
+
+
+def read_state(root: Path) -> dict:
+    path = root / STATE_FILE
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except ValueError:
+        return {}
+
+
+def write_state(root: Path, written_by_tool: set = frozenset()) -> None:
+    """Record current hashes, plus which pages this run wrote itself.
+
+    Pages the tool just wrote are not human edits, so they are stamped now and
+    will not be reported next time.
+    """
+    state = {
+        "updated": date.today().isoformat(),
+        "hashes": page_hashes(root),
+        "tool_written": sorted(written_by_tool),
+    }
+    (root / STATE_FILE).write_text(json.dumps(state, ensure_ascii=False, indent=2),
+                                   encoding="utf-8")
+
+
+def detect_manual_edits(root: Path) -> dict:
+    """Pages changed since the last recorded state, excluding what the tool wrote."""
+    state = read_state(root)
+    previous = state.get("hashes") or {}
+    if not previous:
+        return {"first_run": True, "edited": [], "added": [], "removed": []}
+
+    tool_written = set(state.get("tool_written") or [])
+    current = page_hashes(root)
+
+    edited = [rel for rel, digest in current.items()
+              if rel in previous and previous[rel] != digest and rel not in tool_written]
+    added = [rel for rel in current if rel not in previous]
+    removed = [rel for rel in previous if rel not in current]
+    return {"first_run": False, "edited": sorted(edited),
+            "added": sorted(added), "removed": sorted(removed),
+            "since": state.get("updated", "?")}
