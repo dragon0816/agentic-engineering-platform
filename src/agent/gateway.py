@@ -158,24 +158,26 @@ class Gateway:
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
         """Classify a run's steps for its owner; never executes anything.
 
-        This process's own history answers first. When it has nothing — the run
-        predates a restart, or was evicted — the durable journal answers instead,
-        and `source` says which. The engine validates the request context and
-        enforces ownership; the result is validated once, when constructed.
+        The durable record answers whenever it exists, because it alone knows
+        whether a run has been suspended or already continued; this process's
+        own history answers for everything else. `source` says which.
+
+        Durable reads happen on the calling thread: a host already inside an
+        event loop should call this through `asyncio.to_thread`.
         """
-        plan = self.engine.inspect(request, run_id)
-        if plan is not None:
-            return RunControlResult(action="inspect", run_id=run_id, source="memory", plan=plan)
         entry = self.engine.inspect_journal(request, run_id)
-        if entry is None:
+        if entry is not None:
+            return RunControlResult(
+                action="inspect",
+                run_id=run_id,
+                source="journal",
+                plan=entry.plan,
+                suspended_by=entry.suspended_by,
+            )
+        plan = self.engine.inspect(request, run_id)
+        if plan is None:
             return RunControlResult(action="inspect", run_id=run_id)
-        return RunControlResult(
-            action="inspect",
-            run_id=run_id,
-            source="journal",
-            plan=entry.plan,
-            suspended_by=entry.suspended_by,
-        )
+        return RunControlResult(action="inspect", run_id=run_id, source="memory", plan=plan)
 
     def suspend(
         self, request: RequestContext, run_id: RunId, confirmation: SuspensionConfirmation
@@ -187,6 +189,9 @@ class Gateway:
         cannot see is `unknown`, like everywhere else; a run that is alive here
         or already suspended raises the engine's own closed code rather than a
         second vocabulary invented at this layer.
+
+        Durable writes happen on the calling thread: a host already inside an
+        event loop should call this through `asyncio.to_thread`.
         """
         try:
             entry = self.engine.suspend(request, run_id, confirmation)
@@ -221,7 +226,11 @@ class Gateway:
         a Skill route, so no model-selected route can trigger it; ownership and
         authorization stay in the engine.
         """
-        journalled = self.engine.inspect_journal(request, run_id) is not None
+        # Reading the durable record touches the disk under the store's lock, so
+        # it never runs on the event loop the in-flight runs share.
+        journalled = (
+            await asyncio.to_thread(self.engine.inspect_journal, request, run_id) is not None
+        )
         timeout = (
             {}
             if workflow_timeout_seconds is None

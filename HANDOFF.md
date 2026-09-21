@@ -16,9 +16,9 @@ outlived the process that started it. Requirements:
 - `RunControlResult` gained `source` (`memory` / `journal` / `unknown`), a
   `suspend` action and `suspended_by`, with validators pinning what each action
   may report and keeping `unknown` empty.
-- `Gateway.inspect` asks this process's history first and falls back to the
-  journal, so a run that predates a restart is still reachable; `source` says
-  which answered.
+- `Gateway.inspect` answers from the durable record whenever it exists — only it
+  knows whether a run was suspended or already continued — and from this
+  process's history otherwise; `source` says which answered.
 - `Gateway.suspend(request, run_id, confirmation)` records a person's
   `SuspensionConfirmation` against the durable record. A run this caller cannot
   see is `unknown` like everywhere else; a live or already suspended run raises
@@ -37,10 +37,21 @@ outlived the process that started it. Requirements:
   without a confirmation, a live run, and denied authorization after a restart.
 - Docs: phase spec slice 13, `docs/CONTRACTS.md`, checkpoint plan, README.
 
+- PR #20 opened; pre-merge review applied: the step-failure journal write moved
+  *before* the terminal status assignment, closing the only window where a
+  caller-wait timeout could overwrite a finished run's real failure code;
+  `inspect` now prefers the durable record, so a suspension is visible while the
+  run is still in this process's history (previously a host polling `inspect`
+  would keep seeing `memory`/no confirmation and re-call `suspend`, which threw);
+  `resume` offloads its durable probe to a thread instead of reading the disk on
+  the event loop, and the sync `inspect`/`suspend` say plainly that they do
+  durable I/O on the calling thread; the older `docs/CONTRACTS.md` paragraph was
+  reconciled with the new entry point and asynchrony.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #20 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 

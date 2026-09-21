@@ -742,9 +742,12 @@ class WorkflowEngine:
                 )
                 self._emit(record, "step_finished", step_index=index, code=code)
                 if result.status != "succeeded":
+                    # Explain the step before the run becomes terminal: nothing
+                    # may await between the terminal status and the final
+                    # snapshot, or a caller-wait timeout could overwrite it.
+                    await self._journal_step_failed(record, index, code)
                     record.status = result.status
                     record.failure = result.failure
-                    await self._journal_step_failed(record, index, code)
                     return
                 if not await self._journal_step_completed(record, index, context, result.data):
                     # The step ran; its evidence stays `started`, so recovery

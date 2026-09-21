@@ -114,7 +114,7 @@ def test_result_contract_pins_what_each_action_may_report() -> None:
             RunControlResult.model_validate({"run_id": "run-1", **invalid})
 
 
-def test_inspect_prefers_this_process_then_falls_back_to_the_journal(
+def test_the_durable_record_answers_inspect_whenever_it_exists(
     journalled_host: Any,
 ) -> None:
     built = journalled_host()
@@ -123,15 +123,30 @@ def test_inspect_prefers_this_process_then_falls_back_to_the_journal(
     run_id = result.run.run_id
 
     live = gateway.inspect(context(), run_id)
-    assert live.source == "memory" and live.plan is not None
+    assert live.source == "journal" and live.plan is not None
+    assert [s.state for s in live.plan.steps] == ["uncertain", "never_started"]
+    assert live.plan.steps[0].code == "handler_error"
     assert live.suspended_by is None
+    # Both sources agree on the step evidence. Their statuses differ on purpose:
+    # this process knows the run failed, while the durable record stays `running`
+    # until a person confirms the owning process is gone — a failed run is a
+    # candidate for continuation, not a finished one.
+    in_memory = gateway.engine.inspect(context(), run_id)
+    assert in_memory is not None
+    assert in_memory.steps == live.plan.steps and in_memory.next_step == live.plan.next_step
+    assert (in_memory.status, live.plan.status) == ("failed", "running")
+
+    # A suspension is only visible in the durable record, so inspect must see it
+    # even while this process still holds the run in its own history.
+    gateway.suspend(context(), run_id, confirmation())
+    suspended = gateway.inspect(context(), run_id)
+    assert suspended.source == "journal" and suspended.suspended_by == "leo"
+    assert suspended.plan is not None and suspended.plan.status == "needs_input"
 
     # A new process has no history, but the evidence outlived it.
     after_restart = built.restart().inspect(context(), run_id)
-    assert after_restart.source == "journal"
-    assert after_restart.plan is not None
-    assert [s.state for s in after_restart.plan.steps] == ["uncertain", "never_started"]
-    assert after_restart.plan.steps == live.plan.steps
+    assert after_restart.plan == suspended.plan
+    assert after_restart.suspended_by == "leo"
 
 
 def test_an_unjournalled_engine_still_answers_from_memory(journalled_host: Any) -> None:
@@ -141,6 +156,8 @@ def test_an_unjournalled_engine_still_answers_from_memory(journalled_host: Any) 
     assert gateway.inspect(context(), result.run.run_id).source == "memory"
     # A different process keeps nothing, and there is no journal to ask.
     assert built.restart().inspect(context(), result.run.run_id).source == "unknown"
+    # Without a journal there is nothing to suspend, either.
+    assert gateway.suspend(context(), result.run.run_id, confirmation()).source == "unknown"
 
 
 def test_unknown_and_foreign_runs_report_nothing(journalled_host: Any) -> None:
