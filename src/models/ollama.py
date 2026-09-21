@@ -152,6 +152,9 @@ class Ollama:
             return wire.failed_response(
                 request, Failure(code="model_unparseable", message="the reply is not json")
             )
+        reported = wire.provider_error(body)
+        if reported is not None:
+            return wire.failed_response(request, reported)
         text = _content(body)
         if text is None:
             return wire.failed_response(
@@ -195,6 +198,12 @@ class Ollama:
                 if not isinstance(chunk, dict):
                     continue
                 answered = True
+                reported = wire.provider_error(chunk)
+                if reported is not None:
+                    # Ollama reports a mid-stream failure in the body, the
+                    # status having been sent long before.
+                    yield wire.failed_event(request, reported)
+                    return
                 text = _content(chunk)
                 if text:
                     yield ModelStreamEvent(trace=request.trace, kind="text", text=text)

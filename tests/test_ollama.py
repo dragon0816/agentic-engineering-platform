@@ -257,3 +257,32 @@ def test_the_rules_that_must_not_differ_between_providers_hold_here() -> None:
     assert Ollama(endpoint(base_url="http://localhost:11434/")).url == (
         "http://localhost:11434/api/chat"
     )
+
+
+def test_a_refusal_in_a_two_hundred_body_is_not_a_success() -> None:
+    # Ollama answers 200 and puts the refusal in the body.
+    refused = Ollama(
+        endpoint(), transport=Transport(json_reply({"error": "model 'qwen9' not found"}))
+    ).generate(request())
+    assert refused.failure is not None
+    assert refused.failure.code == "provider_error" and not refused.failure.retryable
+    assert "qwen9" in refused.failure.message
+
+    # Mid-stream the status was sent long ago, so a failure arrives the same
+    # way. What already streamed is kept; the stream then fails rather than
+    # ending as an empty success.
+    chunks = [
+        b'{"message": {"content": "partial"}, "done": false}\n',
+        b'{"error": "runtime out of memory"}\n',
+        b'{"message": {"content": "never read"}, "done": true}\n',
+    ]
+    events = list(
+        Ollama(endpoint(), transport=Transport(Reply(200, chunks))).stream(
+            request(requirements=ModelRequirements(streaming=True))
+        )
+    )
+    assert [event.kind for event in events] == ["text", "failed"]
+    assert events[0].text == "partial"
+    assert events[1].failure is not None
+    assert events[1].failure.code == "provider_error"
+    assert "out of memory" in events[1].failure.message

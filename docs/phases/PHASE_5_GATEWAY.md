@@ -182,7 +182,11 @@ These hold for every slice and are enforced in code, never by convention:
    events: one `text` event per non-empty `message.content`, stopping at the
    object whose `done` is true, then `done`. Lines are reassembled across
    chunk boundaries, blank and half-written lines are skipped, and a 2xx body
-   with no JSON object in it at all is `model_unparseable`.
+   with no JSON object in it at all is `model_unparseable`. An object carrying
+   `error` is `provider_error` and stops the stream: once the status has been
+   sent, a refusal can only arrive in the body, and reading past it would
+   report an empty success and discard the server's explanation. The same
+   holds for a 2xx reply to `generate`, in both adapters.
 5. Nothing about locality is enforced. `local` is a claim an endpoint makes in
    the catalog and a host may run Ollama on another machine; this adapter
    needs only an address. A credential is supported because a reverse proxy

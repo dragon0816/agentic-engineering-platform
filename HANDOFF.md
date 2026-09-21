@@ -34,15 +34,21 @@ revealed. Requirements: `docs/phases/PHASE_5_GATEWAY.md` (slice 3); decisions:
   reference that cannot be inlined, `options.num_predict`, `format: "json"`,
   an explicit `stream` flag, usage from `prompt_eval_count`/`eval_count`, and
   newline-delimited JSON streaming that stops at `done`.
-- 6 tests (`tests/test_ollama.py`), none opening a socket: the round trip
+- 7 tests (`tests/test_ollama.py`), none opening a socket: the round trip
   against Ollama's own field names, images and the refusal, structured
   output, streaming including a split line and a stream with no `done`, a
-  server that is not Ollama, and the shared rules holding identically here.
+  server that is not Ollama, a refusal carried in a 2xx body, and the shared
+  rules holding identically here.
+- PR #36 review (1 finding) applied: `wire.provider_error` reads a refusal out
+  of a 2xx body, in a reply or mid-stream, for both adapters. Ollama answers
+  200 with `{"error": ...}` for a model it does not have, and once a stream's
+  status is sent there is nowhere else to report one; the stream previously
+  ended as a plain `done`, so a provider failure read as a successful empty
+  completion.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -77,7 +83,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 597 passed, 3 skipped (link privileges)
+# PASS: 599 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -112,6 +118,5 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Next Recommended Action
 
-Open the PR for `phase-5/ollama`, run the review, apply confirmed findings and
-merge on green CI. Then write the slice 4 requirements section and implement
-the credential resolution boundary.
+Merge PR #36 on green CI. Then write the slice 4 requirements section and
+implement the credential resolution boundary.

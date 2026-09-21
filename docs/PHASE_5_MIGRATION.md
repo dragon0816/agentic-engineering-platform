@@ -178,5 +178,12 @@ that must not differ between providers, which is exactly what belongs in one
 place: what a failure means, that nothing escapes, that no credential leaves
 a header, and that a status is an answer.
 
+Review of the PR added `wire.provider_error`, used by both adapters: Ollama
+answers 200 with `{"error": ...}` for a model it does not have, and once a
+stream's status has been sent neither wire format has anywhere but the body to
+report a failure. Without it a refusal ended a stream as a plain `done`, so the
+caller read a provider failure as a successful empty completion and the
+server's own explanation was thrown away.
+
 Rollback removes `src/models/ollama.py` and its tests; `models.wire` would
 fold back into `models.openai_compatible`, which is the only other importer.

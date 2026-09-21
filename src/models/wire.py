@@ -182,6 +182,31 @@ def authorized(credential: Callable[[], str] | None) -> dict[str, str] | Failure
     return headers
 
 
+def provider_error(body: object) -> Failure | None:
+    """A provider that answered 2xx and put its refusal in the body. Ollama
+    does this for a model it does not have, and once a stream's headers are
+    sent there is no status left to carry an error, so both wire formats can
+    report one this way. Reading past it would turn a refusal into an empty
+    success and throw the server's own explanation away."""
+    if not isinstance(body, dict):
+        return None
+    reported = body.get("error")
+    if reported is None:
+        return None
+    if isinstance(reported, dict):
+        inner = reported.get("message")
+        text = inner if isinstance(inner, str) else json.dumps(reported)
+    else:
+        text = reported if isinstance(reported, str) else json.dumps(reported)
+    return Failure(
+        code="provider_error",
+        message=redacted(text) or "(empty error)",
+        # The provider understood and declined: a missing model or a rejected
+        # option does not fix itself on the next identical call.
+        retryable=False,
+    )
+
+
 def unsupported(request: ModelRequest) -> Failure | None:
     """Tool calling, in either of the shapes a request can carry it. A
     `ModelTool` names a platform contract, and rendering that as a provider

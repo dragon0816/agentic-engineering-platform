@@ -47,16 +47,18 @@ def _event_data(line: bytes) -> str | None:
     return text[len(b"data:") :].strip().decode("utf-8", "replace")
 
 
-def _delta(payload: str) -> str | None:
-    """The text a streaming chunk adds, or None when it adds none. A chunk
-    with no `choices` is the internal gateway's usage-only prelude: normal,
-    and the reason the source had to patch a private LiteLLM class."""
+def _parsed(payload: str) -> dict[str, Any] | None:
     try:
         body = json.loads(payload)
     except ValueError:
         return None
-    if not isinstance(body, dict):
-        return None
+    return body if isinstance(body, dict) else None
+
+
+def _delta(body: dict[str, Any]) -> str | None:
+    """The text a streaming chunk adds, or None when it adds none. A chunk
+    with no `choices` is the internal gateway's usage-only prelude: normal,
+    and the reason the source had to patch a private LiteLLM class."""
     choices = body.get("choices")
     if not isinstance(choices, list) or not choices:
         return None
@@ -136,6 +138,9 @@ class OpenAICompatible:
             return wire.failed_response(
                 request, Failure(code="model_unparseable", message="the reply is not json")
             )
+        reported = wire.provider_error(body)
+        if reported is not None:
+            return wire.failed_response(request, reported)
         choices = body.get("choices") if isinstance(body, dict) else None
         if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
             return wire.failed_response(
@@ -186,7 +191,16 @@ class OpenAICompatible:
                 answered = True
                 if payload == "[DONE]":
                     break
-                text = _delta(payload)
+                chunk = _parsed(payload)
+                if chunk is None:
+                    continue
+                reported = wire.provider_error(chunk)
+                if reported is not None:
+                    # Once the status is sent, a refusal can only arrive in
+                    # the body; reading past it would call it a success.
+                    yield wire.failed_event(request, reported)
+                    return
+                text = _delta(chunk)
                 if text is not None:
                     yield ModelStreamEvent(trace=request.trace, kind="text", text=text)
         except Exception as error:  # noqa: BLE001 - a read can fail like a send

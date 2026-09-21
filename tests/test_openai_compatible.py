@@ -460,3 +460,29 @@ def test_the_default_transport_speaks_the_standard_library_and_never_redirects()
     relocated = moved.send("https://gateway.invalid", b"{}", {"Authorization": "Bearer t"}, 1.0)
     assert relocated.status == 302
     assert status_failure(relocated.status, b"".join(relocated.chunks())).retryable is False
+
+
+def test_a_refusal_in_a_two_hundred_body_is_not_a_success() -> None:
+    # A proxy that answers 200 and describes the refusal in the body.
+    body = {"error": {"message": "quota exceeded", "type": "insufficient_quota"}}
+    refused = OpenAICompatible(endpoint(), transport=Transport(json_reply(body))).generate(
+        request()
+    )
+    assert refused.failure is not None
+    assert refused.failure.code == "provider_error" and not refused.failure.retryable
+    assert "quota exceeded" in refused.failure.message
+
+    chunks = [
+        b'data: {"choices": [{"delta": {"content": "partial"}}]}\n',
+        b'data: {"error": {"message": "upstream closed"}}\n',
+        b"data: [DONE]\n",
+    ]
+    events = list(
+        OpenAICompatible(endpoint(), transport=Transport(Reply(200, chunks))).stream(
+            request(requirements=ModelRequirements(streaming=True))
+        )
+    )
+    assert [event.kind for event in events] == ["text", "failed"]
+    assert events[1].failure is not None
+    assert events[1].failure.code == "provider_error"
+    assert "upstream closed" in events[1].failure.message
