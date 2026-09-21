@@ -239,6 +239,32 @@ retention, sensitive-data boundary, write ordering and failure semantics.
 - Tests precede implementation, including validation and failed/ambiguous write windows.
 - Preserve all existing engine/Gateway/n8n behavior; full tests, lint, types and build.
 
+## Requirements and acceptance (slice 10 — SQLite checkpoint backend)
+
+Owner approved scope (2026-09-21): a single local SQLite file per Bridge using
+the standard library only; one transaction per `create` / `replace` /
+`continue_run`, acknowledged only after commit; the `CheckpointStore` protocol
+only — no engine wiring, no payload storage, no automatic recovery.
+
+1. `SqliteCheckpointStore` implements the same protocol and passes the same
+   contract suite as the memory reference model; the transition rules are shared
+   code so the two backends cannot drift.
+2. Every write is one `BEGIN IMMEDIATE` … `COMMIT` transaction. A failure before
+   commit rolls back and reports `unavailable` (known not committed); a failure
+   during commit reports `commit_unknown`, and the caller must read back before
+   proceeding. A second writer on the same file is refused (`unavailable`), never
+   waited for.
+3. Evidence, key bindings, continuation links and capacity survive closing and
+   reopening the file; an unknown schema version refuses to open. Records hold
+   checkpoint evidence and `PayloadRef`s only.
+4. The file location is host configuration; nothing is written inside the
+   project. All slice-9 invariants (owner isolation, no TTL/eviction/deletion,
+   capacity rejection, write-ahead ordering) apply unchanged.
+5. Tests: the parametrized contract suite over both backends plus SQLite
+   durability tests (restart, capacity after restart, key reuse after restart,
+   schema refusal, second writer, closed store, commit failure before/after the
+   real commit, failure inside a transaction).
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -252,8 +278,9 @@ retention, sensitive-data boundary, write ordering and failure semantics.
 - Slice 7: bounded progress streaming (`watch`).
 - Slice 8: optional offline n8n submission adapter through Gateway.
 - Slice 9: checkpoint contracts and memory reference model for manual recovery.
-- Later Phase 3 slices: local durable backend, protected payload storage and
-  explicit engine recovery through the existing Gateway/Bridge policy path.
+- Slice 10: single-writer SQLite checkpoint backend.
+- Later Phase 3 slices: protected payload storage and explicit engine recovery
+  through the existing Gateway/Bridge policy path.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks

@@ -196,3 +196,17 @@ consumers branch on `run.status == 'succeeded'`, not source `ok/data.status`. A 
 timeout is not terminal evidence; use inspect/watch rather than creating new work.
 The adapter is an offline host seam, not a server or installed n8n node. Rollback:
 remove optional `integrations.n8n` and its fixtures; ordinary Gateway paths remain.
+
+## Slice 10 source-first decision
+
+The pinned source Bridge keeps runs in memory only; durable run history lives in
+the separate ops dashboard reached by best-effort mirroring (`_report`), which is
+neither a checkpoint store nor a restart contract, and no source module wraps a
+local transactional store. There is nothing to ADAPT for durability itself.
+
+Decision: **new platform semantics**, bounded by the owner-approved scope — a
+single-writer local SQLite file using the standard library, one transaction per
+write acknowledged only after commit, and the slice-9 rules shared as code
+between backends. The source's best-effort mirroring remains the model for
+progress reporting, not for checkpoints. No source deprecation is claimed;
+rollback removes `workflow/checkpoints_sqlite.py` and its tests.

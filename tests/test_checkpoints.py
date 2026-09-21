@@ -1,5 +1,9 @@
-"""Contract/reference-store checks, not a filesystem durability claim."""
+"""Contract/reference-store checks run against every backend; the memory tests are
+not a filesystem durability claim and the SQLite backend has its own durability tests."""
 
+import itertools
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -15,6 +19,22 @@ from workflow.checkpoints import (
     MemoryCheckpointStore,
     StoreErrorCode,
 )
+from workflow.checkpoints_sqlite import SqliteCheckpointStore
+
+StoreFactory = Callable[..., CheckpointStore]
+
+
+@pytest.fixture(params=["memory", "sqlite"])
+def make_store(request: pytest.FixtureRequest, tmp_path: Path) -> StoreFactory:
+    counter = itertools.count()
+
+    def factory(*, capacity: int = 50) -> CheckpointStore:
+        if request.param == "memory":
+            return MemoryCheckpointStore(capacity=capacity)
+        path = tmp_path / f"checkpoints-{next(counter)}.sqlite"
+        return SqliteCheckpointStore(path, capacity=capacity)
+
+    return factory
 
 
 def record(**changes: Any) -> RunCheckpoint:
@@ -113,8 +133,8 @@ def test_invalid_step_evidence(changes: dict[str, Any]) -> None:
         StepCheckpoint.model_validate({"step_index": 0, **changes})
 
 
-def test_key_binding_is_scoped_atomic_and_retained_at_capacity() -> None:
-    store: CheckpointStore = MemoryCheckpointStore(capacity=1)
+def test_key_binding_is_scoped_atomic_and_retained_at_capacity(make_store: StoreFactory) -> None:
+    store = make_store(capacity=1)
     item = store.create(record(idempotency_key="event-1"))
     assert store.create(record(run_id="run-2", idempotency_key="event-1")) == item
     failing(
@@ -138,8 +158,8 @@ def test_key_binding_is_scoped_atomic_and_retained_at_capacity() -> None:
     assert store.get(CheckpointOwner(actor="engineer", namespace="other"), item.run_id) is None
 
 
-def test_same_key_other_owner_is_independent() -> None:
-    store = MemoryCheckpointStore()
+def test_same_key_other_owner_is_independent(make_store: StoreFactory) -> None:
+    store = make_store()
     one = store.create(record(idempotency_key="event-1"))
     two = store.create(
         record(
@@ -152,8 +172,8 @@ def test_same_key_other_owner_is_independent() -> None:
     assert store.find_key(two.owner, "event-1") == two
 
 
-def test_run_ids_are_private_to_their_owner() -> None:
-    store = MemoryCheckpointStore()
+def test_run_ids_are_private_to_their_owner(make_store: StoreFactory) -> None:
+    store = make_store()
     mine = store.create(record())
     other = CheckpointOwner(actor="other", namespace="sample")
     theirs = store.create(record(owner=other.model_dump()))
@@ -164,8 +184,8 @@ def test_run_ids_are_private_to_their_owner() -> None:
     assert store.get(other, "run-1") == theirs
 
 
-def test_cas_success_is_immutable_and_inputs_are_isolated() -> None:
-    store = MemoryCheckpointStore()
+def test_cas_success_is_immutable_and_inputs_are_isolated(make_store: StoreFactory) -> None:
+    store = make_store()
     item = store.create(record())
     active = store.replace(started(item), expected_revision=0)
     assert active.revision == 1
@@ -178,11 +198,11 @@ def test_cas_success_is_immutable_and_inputs_are_isolated() -> None:
     )
 
 
-def test_deep_copies_protect_nested_manifests() -> None:
+def test_deep_copies_protect_nested_manifests(make_store: StoreFactory) -> None:
     source = record()
     step = WorkflowStep(capability=spec().identity, inputs={})
     source = changed(source, manifest={**source.manifest.model_dump(), "steps": [step, step]})
-    store = MemoryCheckpointStore()
+    store = make_store()
     saved = store.create(source)
     assert isinstance(source.manifest.steps[0], WorkflowStep)
     source.manifest.steps[0].inputs["unexpected"] = RunInput(source="run")
@@ -193,15 +213,17 @@ def test_deep_copies_protect_nested_manifests() -> None:
     assert store.get(saved.owner, saved.run_id) == saved
 
 
-def test_cannot_skip_write_ahead_or_create_precompleted_run() -> None:
-    store = MemoryCheckpointStore()
+def test_cannot_skip_write_ahead_or_create_precompleted_run(make_store: StoreFactory) -> None:
+    store = make_store()
     item = store.create(record())
     failing(lambda: store.replace(completed(item), expected_revision=0), "invalid_transition")
     failing(lambda: store.create(completed(record(run_id="run-2"))), "invalid_transition")
 
 
-def test_continuation_is_atomic_preserves_prefix_and_original_key() -> None:
-    store = MemoryCheckpointStore()
+def test_continuation_is_atomic_preserves_prefix_and_original_key(
+    make_store: StoreFactory,
+) -> None:
+    store = make_store()
     parent = store.create(record(idempotency_key="event-1"))
     parent = store.replace(started(parent), expected_revision=0)
     parent = store.replace(completed(parent), expected_revision=1)
@@ -227,8 +249,8 @@ def test_continuation_is_atomic_preserves_prefix_and_original_key() -> None:
     assert store.get(parent.owner, "run-3") is None
 
 
-def test_continuation_keeps_the_unresolved_steps_uncertainty() -> None:
-    store = MemoryCheckpointStore()
+def test_continuation_keeps_the_unresolved_steps_uncertainty(make_store: StoreFactory) -> None:
+    store = make_store()
     parent = store.create(record())
     parent = store.replace(started(parent), expected_revision=0)
     parent = store.replace(changed(parent, status="suspended"), expected_revision=1)
@@ -248,8 +270,8 @@ def test_continuation_keeps_the_unresolved_steps_uncertainty() -> None:
     assert store.replace(completed(acknowledged), expected_revision=1).steps[0].state == "completed"
 
 
-def test_failed_continuation_leaves_no_half_link() -> None:
-    store = MemoryCheckpointStore(capacity=1)
+def test_failed_continuation_leaves_no_half_link(make_store: StoreFactory) -> None:
+    store = make_store(capacity=1)
     parent = store.create(record())
     parent = store.replace(changed(parent, status="suspended"), expected_revision=0)
     child = changed(
@@ -304,8 +326,8 @@ def test_fault_windows_never_claim_effect_was_not_invoked(
     assert len(effects) == expected_effects
 
 
-def test_terminal_success_cannot_be_reopened() -> None:
-    store = MemoryCheckpointStore()
+def test_terminal_success_cannot_be_reopened(make_store: StoreFactory) -> None:
+    store = make_store()
     item = store.create(record())
     item = store.replace(started(item), expected_revision=0)
     item = store.replace(completed(item), expected_revision=1)
@@ -328,8 +350,10 @@ def test_terminal_success_cannot_be_reopened() -> None:
         ("trace", "invalid_transition"),
     ],
 )
-def test_execution_intent_is_immutable(field: str, code: StoreErrorCode) -> None:
-    store = MemoryCheckpointStore()
+def test_execution_intent_is_immutable(
+    make_store: StoreFactory, field: str, code: StoreErrorCode
+) -> None:
+    store = make_store()
     item = store.create(record())
     alternatives: dict[str, Any] = {
         "manifest": manifest([spec().identity] * 2, description="changed"),
@@ -346,15 +370,15 @@ def test_execution_intent_is_immutable(field: str, code: StoreErrorCode) -> None
 
 
 @pytest.mark.parametrize("revision", [True, -1, 1])
-def test_invalid_revision_never_writes(revision: int) -> None:
-    store = MemoryCheckpointStore()
+def test_invalid_revision_never_writes(make_store: StoreFactory, revision: int) -> None:
+    store = make_store()
     item = store.create(record())
     failing(lambda: store.replace(started(item), expected_revision=revision), "conflict")
     assert store.get(item.owner, item.run_id) == item
 
 
-def test_continuation_rejects_changed_prefix_and_stale_writer() -> None:
-    store = MemoryCheckpointStore()
+def test_continuation_rejects_changed_prefix_and_stale_writer(make_store: StoreFactory) -> None:
+    store = make_store()
     parent = store.create(record())
     parent = store.replace(started(parent), expected_revision=0)
     parent = store.replace(completed(parent), expected_revision=1)
@@ -373,8 +397,10 @@ def test_continuation_rejects_changed_prefix_and_stale_writer() -> None:
     assert store.get(parent.owner, child.run_id) is None
 
 
-def test_lost_creation_acknowledgments_do_not_duplicate_relations() -> None:
-    store = MemoryCheckpointStore()
+def test_lost_creation_acknowledgments_do_not_duplicate_relations(
+    make_store: StoreFactory,
+) -> None:
+    store = make_store()
     original = record(idempotency_key="event-1")
     with pytest.raises(CheckpointStoreError, match="^commit_unknown$"):
         store.create(original)

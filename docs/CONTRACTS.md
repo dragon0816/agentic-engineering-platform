@@ -326,3 +326,11 @@ replacement and continuation reservation; MemoryCheckpointStore is only an
 isolated bounded reference model, not the engine's storage backend.
 See [Workflow checkpoints](WORKFLOW_CHECKPOINTS.md) for ordering, retention,
 manual recovery and failure contracts. No existing runtime gains restart durability.
+
+`SqliteCheckpointStore` (`workflow.checkpoints_sqlite`) is the durable
+single-writer backend for that protocol: one local SQLite file per Bridge, one
+transaction per write acknowledged only after commit, `unavailable` for a known
+non-commit and `commit_unknown` when the acknowledgment was lost (read back
+before proceeding), a refused rather than waiting second writer, and evidence,
+keys, links and capacity that survive a restart. The shared transition rules in
+`workflow.checkpoints` keep it and the memory model identical in behavior.

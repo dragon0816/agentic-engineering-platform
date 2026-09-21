@@ -103,3 +103,31 @@ Memory tests simulate these windows; they do not prove filesystem crash durabili
 Next slice: choose and review a local payload/storage backend, implement actual
 transaction durability and restart tests, then wire the existing engine to this
 boundary with fresh policy checks. Do not treat this reference model as deployment.
+
+## SQLite backend (slice 10)
+
+`workflow.checkpoints_sqlite.SqliteCheckpointStore(path, capacity=50)` is the
+first durable backend: one local SQLite file per Bridge, standard library only,
+single process and single owning thread. The path is host configuration and must
+never point inside the project tree. The transition rules are the shared
+functions in `workflow.checkpoints`, so the memory reference model and the SQLite
+backend pass the same contract suite and cannot drift.
+
+Each `create`, `replace` and `continue_run` is one `BEGIN IMMEDIATE` … `COMMIT`
+transaction with `synchronous=FULL`; the call returns only after `COMMIT`
+returned. Outcomes:
+
+- `unavailable`: known not committed — the transaction could not start (for
+  example a second writer holds the file), the file is closed, the schema version
+  is unknown, or a statement failed before commit and was rolled back. The same
+  write may be retried by the coordinator; nothing was recorded.
+- `commit_unknown`: `COMMIT` raised, so the write may or may not have reached the
+  file. Read the record back from a fresh handle before deciding anything;
+  never repeat a capability or pick a new run/key as a fallback.
+
+Reads run outside transactions and are owner-scoped like the memory model.
+Records store the checkpoint JSON plus indexed owner/run/key columns; they hold
+evidence and `PayloadRef`s only. Capacity counts every persisted record,
+including continuations, after a restart. A file whose `schema_version` is not
+`1` refuses to open. There is still no TTL, eviction, deletion, payload storage,
+engine wiring or automatic recovery.
