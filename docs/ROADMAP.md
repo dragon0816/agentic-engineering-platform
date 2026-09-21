@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phase 3 — Workflow platform active
+Status: Phases 1–4 complete (Phase 4 knowledge platform closed 2026-09-21); Phase 5 — Model gateway next, specification pending
 
 ## Objective
 
@@ -88,6 +88,8 @@ Drop originals
 Preserve immutable raw/source semantics, dry-run/apply separation, backups, source provenance, conflict decisions and static lint. Add the currently missing query layer and image-aware ingestion. Define an explicit migration adapter/path for existing Obsidian vault content, existing Raw data, images and metadata so provenance/immutability rules can be adopted without treating existing knowledge as a greenfield corpus.
 
 Exit criteria: PDF/PPT/DOCX sample corpus round-trips to Raw with traceable source/page/slide/image relationships; Wiki generation cannot mutate Raw; query answers can cite source provenance.
+
+Met 2026-09-21 in nine slices (`docs/phases/PHASE_4_KNOWLEDGE.md`, decisions in `docs/PHASE_4_MIGRATION.md`): vault safety model, Drop → Raw with content identity, office extraction, image description and ingest planning through the model interface, static lint, conflicts and decisions, query with provenance, and a migration adapter that adopts an existing vault without rewriting `raw/`.
 
 ## Phase 5 — Model gateway
 

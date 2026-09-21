@@ -67,12 +67,18 @@ old process is gone, and continued from its completed prefix — through the sam
 `Gateway.inspect`/`suspend`/`resume` entry points a host already uses, and
 finished history can be retired without a used idempotency key ever running again.
 
-Phase 4 (knowledge platform) has begun with the vault safety model: `drop/` and
-`raw/` are never written, a dry run is the default, every overwrite is backed up,
-and a write plan that breaks a rule is rejected whole (`docs/phases/PHASE_4_KNOWLEDGE.md`).
-Originals dropped into `drop/` become write-once Raw Markdown whose identity is
-its content; PDF, PPTX and DOCX are extracted with page/slide/image relationships
-kept when the `office` extra is installed (`pip install -e ".[dev,office]"`).
+Phase 4 (knowledge platform, `src/knowledge/`) is complete
+(`docs/phases/PHASE_4_KNOWLEDGE.md`). The vault safety model never writes `drop/`
+or `raw/`, defaults to a dry run, backs up every overwrite and rejects a rule-breaking
+write plan whole. Originals dropped into `drop/` become write-once Raw Markdown whose
+identity is its content; PDF, PPTX and DOCX are extracted with page/slide/image
+relationships kept when the `office` extra is installed (`pip install -e ".[dev,office]"`),
+and images are described through the `ModelClient` interface at intake. Ingest
+planning, static lint, conflict markers with an append-only `decisions.md`, and
+query with citations that name the source (BM25 with CJK support, optional strict
+synthesis) build on that. An existing Obsidian vault is adopted by content hash
+through a ledger, with snapshot and restore of the generated half, without a byte
+of `raw/` changing. No model provider is named anywhere in knowledge code.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).

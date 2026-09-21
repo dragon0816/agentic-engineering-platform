@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Architecture
 
-Status: Approved architecture baseline; Phase 3 workflow platform active
+Status: Approved architecture baseline; Phases 1–4 implemented, Phase 5 model gateway next
 
 ## 1. Purpose
 
