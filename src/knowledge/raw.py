@@ -10,7 +10,7 @@ carry their page, slide or image, and parses back exactly.
 
 import hashlib
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from datetime import date
 from pathlib import PurePosixPath
 from typing import Literal, Protocol, Self
@@ -18,6 +18,7 @@ from typing import Literal, Protocol, Self
 from pydantic import Field, ValidationError, field_validator, model_validator
 
 from common.base import Contract, Symbol, Text
+from common.execution import Failure
 from knowledge.contracts import KnowledgeSource
 from knowledge.vault import Vault, VaultError, normalize, provenance_lines
 
@@ -294,9 +295,42 @@ class MarkdownExtractor:
         return (RawSection(kind="text", text=body),) if body.strip() else ()
 
 
+DescriptionStatus = Literal[
+    "described", "too_large", "unsupported_type", "model_failed", "empty_answer", "missing_bytes"
+]
+
+
+class ImageDescription(Contract):
+    """What became of one image's description request: a closed status, the
+    text when there is one, the model's failure when that is the reason."""
+
+    image_ref: Text
+    status: DescriptionStatus
+    text: str = ""
+    failure: Failure | None = None
+
+    @model_validator(mode="after")
+    def payload_matches_status(self) -> Self:
+        if (self.status == "described") != bool(self.text.strip()):
+            raise ValueError("exactly a described image carries text")
+        if (self.status == "model_failed") != (self.failure is not None):
+            raise ValueError("exactly a model failure carries the failure")
+        return self
+
+
+class Describer(Protocol):
+    """Gives image sections without text a description before the Raw file is
+    written; `knowledge.describe.ImageDescriber` does so through a model."""
+
+    def describe_sections(
+        self, sections: tuple[RawSection, ...], assets: Mapping[str, bytes], *, trace_id: str
+    ) -> tuple[tuple[RawSection, ...], tuple[ImageDescription, ...]]: ...
+
+
 class IntakeOutcome(Contract):
     """What one intake did, or would do. Only `written` and `drifted` write;
-    `duplicate` names the Raw that already holds the content."""
+    `duplicate` names the Raw that already holds the content. Descriptions come
+    from an apply; a dry run counts the images an apply would describe."""
 
     mode: Literal["dry_run", "apply"]
     status: IntakeStatus
@@ -305,6 +339,8 @@ class IntakeOutcome(Contract):
     raw_ref: Text | None = None
     supersedes: KnowledgeSource | None = None
     written: tuple[Text, ...] = ()
+    images_to_describe: int = Field(default=0, ge=0, strict=True)
+    descriptions: tuple[ImageDescription, ...] = ()
 
     @model_validator(mode="after")
     def status_matches_payload(self) -> Self:
@@ -317,6 +353,10 @@ class IntakeOutcome(Contract):
             raise ValueError("a raw_ref belongs to content that is, or now is, in raw/")
         if self.source is None and self.status in ("written", "drifted", "duplicate"):
             raise ValueError("an intake that reached the content names its source")
+        if self.descriptions and self.mode != "apply":
+            raise ValueError("descriptions come from an apply; a dry run only counts")
+        if (self.descriptions or self.images_to_describe) and not self.written:
+            raise ValueError("only an intake that writes describes images")
         return self
 
 
@@ -391,8 +431,11 @@ def raw_index(vault: Vault) -> tuple[RawEntry, ...]:
 class DropIntake:
     """Reads originals from `drop/` and writes each to `raw/` once."""
 
-    def __init__(self, vault: Vault, extractors: Iterable[Extractor]) -> None:
+    def __init__(
+        self, vault: Vault, extractors: Iterable[Extractor], describer: Describer | None = None
+    ) -> None:
         self.vault = vault
+        self.describer = describer
         self._by_suffix: dict[str, Extractor] = {}
         for extractor in extractors:
             for suffix in extractor.suffixes:
@@ -440,6 +483,17 @@ class DropIntake:
             return IntakeOutcome(mode=mode, status="unrepresentable", original_ref=original_ref)
         if not sections:
             return IntakeOutcome(mode=mode, status="empty", original_ref=original_ref)
+        # Raw is write-once, so a description can only become part of the
+        # document now. A dry run spends no tokens and counts instead.
+        pending = len(
+            {item.image_ref for item in sections if item.kind == "image" and not item.text.strip()}
+        )
+        descriptions: tuple[ImageDescription, ...] = ()
+        if mode == "apply" and self.describer is not None and pending:
+            sections, descriptions = self.describer.describe_sections(
+                sections, staged.items, trace_id=f"intake-{source.sha256[:16]}"
+            )
+            pending = 0
         placed = source.model_copy(update={"raw_ref": raw_ref})
         try:
             document = RawDocument(
@@ -468,6 +522,8 @@ class DropIntake:
             raw_ref=raw_ref,
             supersedes=previous.source if previous is not None else None,
             written=(raw_ref, *assets),
+            images_to_describe=pending,
+            descriptions=descriptions,
         )
 
     def intake_all(

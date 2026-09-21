@@ -508,3 +508,24 @@ still evidence. Known limitations: PDF tables arrive as text in reading
 order, PPTX speaker notes are not extracted, a skipped image leaves no trace
 in the Raw file, and images are stored as the library provides them (pypdf
 converts raw image streams to PNG, which needs its `image` extra — declared).
+
+## Image description (Phase 4, slice 4)
+
+`knowledge.describe.ImageDescriber(model, alias=, prompt=, max_output_tokens=,
+max_bytes=)` describes one image per request through `models.contracts.
+ModelClient`: a `ModelRequest` with `ModelRequirements(vision=True)` and a
+single user `ModelMessage` whose `images` holds the picture as a `data:` URI
+(`data_uri(bytes, media_type)`), so any adapter can consume it without file
+access. Every outcome is an `ImageDescription` with a closed `status`:
+`described` (with `text`), `too_large`, `unsupported_type`, `model_failed`
+(with the model's `Failure`), `empty_answer` or `missing_bytes`; the contract
+ties `text` to `described` and `failure` to `model_failed`.
+
+`describe_sections(sections, assets, trace_id=)` gives every image section
+without text one attempt, memoised per `image_ref`, and returns the updated
+sections and the descriptions. `DropIntake(vault, extractors, describer=)`
+calls it on apply before the Raw file is written — Raw is write-once, so this
+is the only moment a description can become part of the document — and the
+`IntakeOutcome` carries `descriptions`; a dry run carries `images_to_describe`
+instead and asks the model nothing. A description that fails never loses the
+document: the image section is written without text and the status says why.

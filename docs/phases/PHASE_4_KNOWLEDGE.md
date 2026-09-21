@@ -144,11 +144,31 @@ enforced in code, never left to a prompt:
    page/slide/image relationships intact, a repeated picture stored once, dry
    run and apply agreeing, and Drop untouched. CI installs the extra.
 
+## Requirements and acceptance (slice 4 — image description)
+
+1. `knowledge.describe.ImageDescriber(model, alias=…)` asks a `ModelClient`
+   to describe an image with `ModelRequirements(vision=True)` declared and the
+   image carried inline as a `data:` URI in a provider-neutral `ModelMessage`.
+   No provider, endpoint or credential appears in knowledge code; the alias is
+   host configuration.
+2. Raw is write-once, so description happens at intake: `DropIntake` takes an
+   optional describer and, on apply, describes every image section that has
+   no text yet before the Raw file is written. The description becomes the
+   image section's text, under the same provenance as the image.
+3. Every failure is a closed `ImageDescription` status — `described`,
+   `too_large`, `unsupported_type`, `model_failed` (with the model's
+   `Failure`), `empty_answer`, `missing_bytes` — reported on the
+   `IntakeOutcome`; a failed description never loses the document.
+4. A picture repeated in one document is described once. A dry run spends no
+   tokens: it reports how many images an apply would describe
+   (`images_to_describe`) — the one place a dry run cannot show the exact
+   text an apply writes, stated as such.
+5. Tests use a fake vision model: the request shape, every status, the
+   memoisation, the intake in both modes, a failing model still writing the
+   document, and an intake without a describer asking nothing.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 4 — Image description through `ModelClient` with `vision=True`
-  declared; the description attaches to the image's Raw section with the same
-  provenance. No vision provider is named anywhere in knowledge code.
 - Slice 5 — Ingest planning through `ModelClient`: the two-pass plan
   (relevance over an inventory, then writes), chunked condensation cached by
   content hash, structured output validated into a `WritePlan`. The model
