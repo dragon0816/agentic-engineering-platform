@@ -549,18 +549,25 @@ conventions) and a user message, `ModelRequirements(structured_output=True)`
 and an `output_contract` (`knowledge.ingest-relevance.v1`, then
 `knowledge.ingest-plan.v1`); a long source is first condensed chunk by chunk
 with plain-text requests and the result cached through `Vault.cache_write` /
-`cache_read` under `.ingest-cache/<sha256>.md`, keyed by the original's
-content hash and confined to that directory.
+`cache_read` under `.ingest-cache/<key>.md`, confined to that directory and
+keyed (`IngestPlanner.cache_key`) by a hash of the rendered source text, the
+chunk size, the prompt and the model alias — everything the condensed text
+depends on. A part that comes back empty is a retryable `condense_empty`
+failure and nothing is cached.
 
 The answer is read from `structured_output`, or extracted as JSON from fences
 or prose (`extract_json`), validated loosely as an `IngestProposal` and then
-strictly as a `WritePlan` with the document's `KnowledgeSource`; the sources
-page is repaired to carry the provenance lines (`ensure_provenance`) and the
-plan is validated by a vault dry run. `PlanningOutcome.status` is closed:
+strictly as a `WritePlan` with the document's `KnowledgeSource`; each page's
+`action` is decided by whether the vault holds it (the model is not asked);
+a contradiction that only says "none" or "n/a" is dropped; the sources page
+is repaired to carry the provenance lines (`ensure_provenance`, tolerant of
+CRLF and odd path spellings) and the plan is validated by a vault dry run. `PlanningOutcome.status` is closed:
 `planned` (a plan the vault accepted), `invalid` (the plan and its
 `problems`), `model_failed` (the `Failure`; an adapter that raises becomes a
 retryable `model_error`) or `unparseable`; `relevant`, `condensed` and
-`cache_hit` say what happened. The planner writes nothing but the cache; the
-caller applies the plan through `Vault.apply`. `source_text(document)` is the
+`cache_hit` say what happened, on every status. The planner writes nothing
+but the cache; the caller applies the plan through `Vault.apply`. Empty
+conventions are refused at construction. `Vault.wiki_pages` lists files
+only and skips a link that leaves the vault. `source_text(document)` is the
 text the model reads: sections in order, each image as
 `[image on page N: description]` or `(no description)`.

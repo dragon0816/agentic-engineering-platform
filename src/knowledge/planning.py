@@ -6,16 +6,18 @@ first the model picks which existing wiki pages matter (from an inventory of
 paths and titles, capped), then it proposes the writes with those pages, the
 index, the recorded decisions and the source text in front of it. A long
 source is condensed chunk by chunk first, and that — by far the most
-expensive step — is cached under the vault by the source's content hash, so a
-plan rejected downstream never costs the condensation twice.
+expensive step — is cached under the vault, keyed by everything the condensed
+text depends on, so a plan rejected downstream never costs the condensation
+twice and a changed input never reads a stale one.
 
 The model proposes; it never writes. Its answer is data, repaired where the
-repair is mechanical (the provenance lines a sources page must carry) and
-otherwise handed to `knowledge.vault` to validate and apply. No provider is
-named here; every call goes through `ModelClient` with `structured_output`
-declared.
+repair is mechanical (the provenance lines a sources page must carry, whether
+a page is created or updated) and otherwise handed to `knowledge.vault` to
+validate and apply. No provider is named here; every call goes through
+`ModelClient` with `structured_output` declared.
 """
 
+import hashlib
 import json
 import re
 from typing import Literal
@@ -24,7 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError
 
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
-from knowledge.raw import RawDocument
+from knowledge.raw import RawDocument, one_line_ending
 from knowledge.vault import (
     SOURCES_AREA,
     IndexEntry,
@@ -33,6 +35,7 @@ from knowledge.vault import (
     Vault,
     WritePlan,
     carries_provenance,
+    normalize,
     provenance_lines,
 )
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
@@ -42,6 +45,9 @@ RELEVANCE_CONTRACT = "knowledge.ingest-relevance.v1"
 CONDENSE_OVER_CHARS = 40_000
 CHUNK_CHARS = 24_000
 MAX_RELEVANT = 8
+# A model that has nothing to report sometimes says so in words; these are not
+# contradictions.
+_NO_CONTRADICTION = frozenset({"none", "n/a", "no", "no contradictions", "-"})
 
 DEFAULT_CONVENTIONS = """You maintain a Markdown wiki that is curated from immutable Raw sources.
 Pages live under wiki/sources/ (one summary page per source), wiki/entities/,
@@ -72,25 +78,24 @@ Answer with JSON only, in this shape:
 {{
   "summary": "one sentence, for a person, on what this ingest does",
   "pages": [
-    {{"path": "wiki/sources/<Title>.md", "action": "create",
+    {{"path": "wiki/sources/<Title>.md",
       "content": "the whole page, frontmatter included"}},
-    {{"path": "wiki/entities/<Name>.md", "action": "create or update",
-      "content": "the whole page"}}
+    {{"path": "wiki/entities/<Name>.md", "content": "the whole page"}}
   ],
   "index_entries": [{{"section": "Sources|Entities|Concepts|Syntheses",
                       "line": "- [[Page]] — one line."}}],
   "log_body": "- Source: ...\\n- Added ...",
-  "contradictions": ["a contradiction with an existing page, or none"]
+  "contradictions": []
 }}
 
 Rules:
-- `content` is the complete file, frontmatter included; an update is the whole
-  page again, never a diff.
+- `content` is the complete file, frontmatter included; a page that already
+  exists is replaced by what you write, so write the whole page again, never a
+  diff.
 - Exactly one page under wiki/sources/ summarises this source.
-- `action` is "create" for a page that does not exist and "update" for one that
-  does; the pages you were given exist, everything else does not.
-- When you find a contradiction, also write a ⚠️ line on the affected entity or
-  concept page: readers see pages, not logs.
+- `contradictions` lists real contradictions with existing pages, one sentence
+  each; leave it empty when there are none. When you find one, also write a ⚠️
+  line on the affected entity or concept page: readers see pages, not logs.
 - Settled decisions below are final. Do not reinstate a rejected claim; if the
   source contradicts a decision, say so under contradictions and keep the decision.
 - Today is {today}, for `created` and `updated`.
@@ -179,18 +184,24 @@ def extract_json(text: str) -> JsonValue:
         raise
 
 
+def _closing_frontmatter(lines: list[str]) -> int | None:
+    if not lines or lines[0].strip() != "---":
+        return None
+    return next((index for index, line in enumerate(lines[1:], 1) if line.strip() == "---"), None)
+
+
 def ensure_provenance(plan: WritePlan) -> WritePlan:
     """The sources page must carry the source's identity lines. They are
     deterministic, so a model that omitted them is repaired, not rejected."""
     pages = []
     for page in plan.pages:
-        if page.path.replace("\\", "/").lstrip("/").startswith(SOURCES_AREA) and not (
-            carries_provenance(page.content, plan.source)
+        if normalize(page.path).startswith(SOURCES_AREA) and not carries_provenance(
+            page.content, plan.source
         ):
-            lines = page.content.split("\n")
+            lines = one_line_ending(page.content).split("\n")
             wanted = list(provenance_lines(plan.source))
-            if lines and lines[0].strip() == "---" and "---" in lines[1:]:
-                end = lines.index("---", 1)
+            end = _closing_frontmatter(lines)
+            if end is not None:
                 kept = [
                     line
                     for line in lines[1:end]
@@ -222,6 +233,8 @@ class IngestPlanner:
     ) -> None:
         if max_output_tokens < 1 or condense_over < 1 or chunk_chars < 1:
             raise ValueError("limits are positive")
+        if not conventions.strip():
+            raise ValueError("conventions are the system message and cannot be empty")
         self.model = model
         self.vault = vault
         self.alias = alias
@@ -229,6 +242,12 @@ class IngestPlanner:
         self.max_output_tokens = max_output_tokens
         self.condense_over = condense_over
         self.chunk_chars = chunk_chars
+
+    def cache_key(self, text: str) -> str:
+        """Everything the condensed text depends on: the rendered source, the
+        chunking, the prompt and the model that answered."""
+        material = f"{self.alias}\n{self.chunk_chars}\n{CONDENSE_PROMPT}\n{text}"
+        return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
     def plan(
         self, document: RawDocument, *, today: str, decisions: str = "(no settled decisions)"
@@ -239,15 +258,16 @@ class IngestPlanner:
         text = source_text(document)
         condensed = cache_hit = False
         if len(text) > self.condense_over:
-            cached = self.vault.cache_read(source.sha256)
+            key = self.cache_key(text)
+            cached = self.vault.cache_read(key)
             if cached is not None:
                 text, condensed, cache_hit = cached, True, True
             else:
                 try:
                     text = self._condense(text, source_ref, trace_id)
                 except _ModelFailed as failed:
-                    return self._failed(source_ref, failed.failure, failed.status)
-                self.vault.cache_write(source.sha256, text)
+                    return self._failed(source_ref, failed)
+                self.vault.cache_write(key, text)
                 condensed = True
 
         inventory = self.vault.wiki_pages()
@@ -266,13 +286,13 @@ class IngestPlanner:
                 trace=TraceIdentifiers(trace_id=trace_id, request_id="relevance", span_id="pass-1"),
             )
         except _ModelFailed as failed:
-            return self._failed(source_ref, failed.failure, failed.status)
+            return self._failed(source_ref, failed, condensed=condensed, cache_hit=cache_hit)
         known = {path for path, _ in inventory}
         proposed = answer.get("relevant") if isinstance(answer, dict) else None
         items = proposed if isinstance(proposed, list) else []
-        relevant = tuple(item for item in items if isinstance(item, str) and item in known)[
-            :MAX_RELEVANT
-        ]
+        relevant = tuple(
+            dict.fromkeys(item for item in items if isinstance(item, str) and item in known)
+        )[:MAX_RELEVANT]
 
         related = (
             "\n\n".join(f"----- {path} -----\n{self.vault.read(path)}" for path in relevant)
@@ -292,24 +312,14 @@ class IngestPlanner:
                 trace=TraceIdentifiers(trace_id=trace_id, request_id="plan", span_id="pass-2"),
             )
         except _ModelFailed as failed:
-            return self._failed(
-                source_ref, failed.failure, failed.status, relevant, condensed, cache_hit
-            )
+            return self._failed(source_ref, failed, relevant, condensed, cache_hit)
         try:
-            proposal = IngestProposal.model_validate(answer)
-            plan = WritePlan(
-                source=source,
-                summary=proposal.summary,
-                pages=tuple(PlannedPage.model_validate(page) for page in proposal.pages),
-                index_entries=tuple(
-                    IndexEntry.model_validate(entry) for entry in proposal.index_entries
-                ),
-                log_body=proposal.log_body,
-                contradictions=tuple(note for note in proposal.contradictions if note.strip()),
-            )
+            plan = self._plan_from(answer, document)
         except ValidationError as error:
             failure = Failure(code="plan_shape", message=f"{error.error_count()} field errors")
-            return self._failed(source_ref, failure, "unparseable", relevant, condensed, cache_hit)
+            return self._failed(
+                source_ref, _ModelFailed(failure, "unparseable"), relevant, condensed, cache_hit
+            )
         plan = ensure_provenance(plan)
         outcome = self.vault.apply(plan)  # a dry run: validation only, nothing written
         return PlanningOutcome(
@@ -322,6 +332,40 @@ class IngestPlanner:
             cache_hit=cache_hit,
         )
 
+    def _plan_from(self, answer: JsonValue, document: RawDocument) -> WritePlan:
+        """The strict plan. Whether a page is created or updated is a fact the
+        vault knows, so it is decided here, never guessed by the model."""
+        proposal = IngestProposal.model_validate(answer)
+        pages = []
+        for item in proposal.pages:
+            path = item.get("path")
+            action = "update" if isinstance(path, str) and self._exists(path) else "create"
+            pages.append(
+                PlannedPage.model_validate(
+                    {"path": path, "content": item.get("content", ""), "action": action}
+                )
+            )
+        return WritePlan(
+            source=document.source,
+            summary=proposal.summary,
+            pages=tuple(pages),
+            index_entries=tuple(
+                IndexEntry.model_validate(entry) for entry in proposal.index_entries
+            ),
+            log_body=proposal.log_body,
+            contradictions=tuple(
+                note
+                for note in proposal.contradictions
+                if note.strip() and note.strip().lower() not in _NO_CONTRADICTION
+            ),
+        )
+
+    def _exists(self, path: str) -> bool:
+        try:
+            return self.vault.exists(path)
+        except Exception:  # noqa: BLE001 - an unresolvable path is for check_plan to refuse
+            return False
+
     def _condense(self, text: str, source_ref: str, trace_id: str) -> str:
         chunks = [text[i : i + self.chunk_chars] for i in range(0, len(text), self.chunk_chars)]
         parts = []
@@ -330,7 +374,17 @@ class IngestPlanner:
                 trace_id=trace_id, request_id=f"condense-{number}", span_id="condense"
             )
             prompt = CONDENSE_PROMPT.format(n=number, total=len(chunks)) + "\n\n" + chunk
-            parts.append(self._ask_text(prompt, trace=trace).strip())
+            part = self._ask_text(prompt, trace=trace).strip()
+            if not part:
+                # A hollow part would be cached for good; better no cache at all.
+                raise _ModelFailed(
+                    Failure(
+                        code="condense_empty",
+                        message=f"part {number} of {len(chunks)} came back empty",
+                        retryable=True,
+                    )
+                )
+            parts.append(part)
         return f"(source {source_ref} is long; its parts, condensed)\n\n" + "\n\n".join(parts)
 
     def _request(
@@ -383,19 +437,18 @@ class IngestPlanner:
     @staticmethod
     def _failed(
         source_ref: str,
-        failure: Failure,
-        status: PlanningStatus,
+        failed: "_ModelFailed",
         relevant: tuple[str, ...] = (),
         condensed: bool = False,
         cache_hit: bool = False,
     ) -> PlanningOutcome:
         return PlanningOutcome(
-            status=status,
+            status=failed.status,
             source_ref=source_ref,
             relevant=relevant,
             condensed=condensed,
             cache_hit=cache_hit,
-            failure=failure,
+            failure=failed.failure,
         )
 
 

@@ -213,5 +213,14 @@ conventions and the planner does not care which language they are in. The
 planner never writes wiki content: the plan goes back through `Vault.apply`,
 which is slice 1's whole point.
 
+From review: the cache key is a hash of everything the condensed text depends
+on (rendered source, chunking, prompt, model alias), not the original's hash
+alone — a described image or a different model must not read a stale
+condensation; an empty condensed part is a failure, never cached; whether a
+page is created or updated is decided from the vault, not asked of the model
+(engineering rule 1: deterministic details belong in code, not prompts); a
+contradiction that only says "none" is dropped rather than written as a ⚠️
+block; and every failure outcome reports whether the source was condensed.
+
 Rollback removes `knowledge/planning.py`, `Vault.cache_read` / `cache_write` /
 `wiki_pages` and the tests; nothing else imports them.

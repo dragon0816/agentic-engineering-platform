@@ -371,9 +371,16 @@ class Vault:
         frontmatter, else the file's stem — in path order."""
         pages = []
         for path in sorted((self.root / "wiki").rglob("*.md")):
+            if not path.is_file():
+                continue
             rel = path.relative_to(self.root).as_posix()
+            try:
+                head = self.read_head(rel)
+            except VaultError:
+                # A link that leaves the vault is not a page of it.
+                continue
             title = path.stem
-            for line in self.read_head(rel).split("\n"):
+            for line in head.split("\n"):
                 if line.startswith("title:") and line[6:].strip():
                     title = line[6:].strip().strip("\"'")
                     break

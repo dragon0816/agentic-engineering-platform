@@ -34,7 +34,7 @@ planning").
   `cache_write` confined to `.ingest-cache/` and keyed by a content hash.
 - `source_text(document)`: sections in order, each image as
   `[image on page N: description]` or `(no description)`.
-- 8 tests (`tests/test_planning.py`) with a fake model: source text, JSON
+- 9 tests (`tests/test_planning.py`) with a fake model: source text, JSON
   extraction, provenance repair, both passes and their prompts with a plan the
   vault applies end to end, prose answers, invalid and malformed plans,
   failures on either pass and an adapter that raises, condensation with chunk
@@ -44,10 +44,23 @@ planning").
   decision (ADAPT the passes, condensation cache, JSON extraction and decision
   injection; do not migrate the HTTP client, review output or runtime schema).
 
+- PR #28 opened; pre-merge review applied (10 findings): an empty condensed
+  part was cached for good — now a retryable `condense_empty` failure with no
+  cache; the cache was keyed by the original's hash alone although the text
+  depends on the rendered source, chunking, prompt and alias — keyed by all
+  of them; the prompt's example invited a literal "none" contradiction that
+  became a ⚠️ block — example emptied and such notes dropped; frontmatter
+  repair broke on CRLF or a trailing space and on odd path spellings —
+  normalized; `wiki_pages` raised on a link leaving the vault and listed
+  directories — skipped; relevant paths deduplicated; failure outcomes
+  report `condensed`/`cache_hit`; empty conventions refused at construction;
+  `action` is decided from the vault instead of asked of the model. One
+  regression test added and the rest extended.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- PR #28 is open with the review posted; merge on green CI is authorized for
+  Phase 4 slices.
 
 ## Remaining
 
@@ -76,7 +89,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 543 tests (535 prior + 8 planning; 1 skipped on Windows without symlink
+# PASS: 544 tests (535 prior + 9 planning; 1 skipped on Windows without symlink
 #       privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
@@ -100,8 +113,9 @@ temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 - The relevance pass sees at most `condense_over` characters of the source;
   the plan pass sees the whole (condensed) text.
-- The condensation cache has no size bound or expiry; it is keyed by content,
-  so it never goes stale, only large.
+- The condensation cache has no size bound or expiry; it is keyed by what the
+  text depends on, so it never goes stale, only large. A truncated (rather
+  than empty) condensed part cannot be detected and is cached.
 - One plan per source; batching several sources into one plan is not offered.
 
 ## Next Recommended Action

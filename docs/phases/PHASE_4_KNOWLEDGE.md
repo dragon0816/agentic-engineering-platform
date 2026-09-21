@@ -187,14 +187,18 @@ enforced in code, never left to a prompt:
    the model follows are a platform default a host may replace; no vault
    schema file is read.
 2. A source longer than a threshold is condensed chunk by chunk first, and
-   the result is cached under the vault (`.ingest-cache/<sha256>.md`, keyed
-   by the original's content hash) so a plan rejected downstream never costs
-   the condensation twice; a failure part-way leaves no partial cache.
+   the result is cached under the vault (`.ingest-cache/<key>.md`, the key a
+   hash of everything the condensed text depends on: the rendered source,
+   the chunking, the prompt and the model alias) so a plan rejected
+   downstream never costs the condensation twice and a changed input never
+   reads a stale one; a failure or an empty part leaves no cache.
 3. The model's answer is data: structured output when the adapter provides
    it, else JSON extracted from fences or prose. It becomes a `WritePlan`
    whose sources page is repaired to carry the source's provenance lines
-   (deterministic, so omitted ones are added rather than rejected), and is
-   validated by a vault dry run. The planner never writes wiki, index, log,
+   (deterministic, so omitted ones are added rather than rejected) and whose
+   pages are `create` or `update` by what the vault holds, never by the
+   model's guess; a contradiction that only says "none" is not one. The plan
+   is validated by a vault dry run. The planner never writes wiki, index, log,
    raw or drop; the caller applies the plan through `Vault.apply`.
 4. Every outcome is a closed `PlanningOutcome` status — `planned`, `invalid`
    (with the plan and its problems), `model_failed` (with the failure, an
