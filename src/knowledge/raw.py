@@ -10,7 +10,7 @@ carry their page, slide or image, and parses back exactly.
 
 import hashlib
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from datetime import date
 from pathlib import PurePosixPath
 from typing import Literal, Protocol, Self
@@ -18,6 +18,7 @@ from typing import Literal, Protocol, Self
 from pydantic import Field, ValidationError, field_validator, model_validator
 
 from common.base import Contract, Symbol, Text
+from common.execution import Failure
 from knowledge.contracts import KnowledgeSource
 from knowledge.vault import Vault, VaultError, normalize, provenance_lines
 
@@ -29,21 +30,32 @@ SECTION_MARKER = "<!-- raw-section"
 _ESCAPED_MARKER = re.compile(r"^(\\*)" + re.escape(SECTION_MARKER))
 _MARKER = re.compile(
     r"^<!-- raw-section (?P<index>\d+) kind=(?P<kind>text|table|image)"
-    r"(?: page=(?P<page>\d+))?(?: slide=(?P<slide>\d+))?(?: image=(?P<image>\S+))? -->$"
+    r"(?: page=(?P<page>\d+))?(?: slide=(?P<slide>\d+))?(?: image=(?P<image>\S+))?"
+    r"(?: described=(?P<described>\S+))? -->$"
 )
 _FRONTMATTER_LINE = re.compile(r"^(?P<key>[a-z0-9_]+): (?P<value>.+)$")
 _PROVENANCE_KEYS = ("source_id", "source_sha256", "original_ref", "raw_ref", "extractor", "created")
 
 SectionKind = Literal["text", "table", "image"]
 IntakeStatus = Literal[
-    "written", "duplicate", "drifted", "unsupported", "undecodable", "empty", "unrepresentable"
+    "written",
+    "duplicate",
+    "drifted",
+    "unsupported",
+    "undecodable",
+    "empty",
+    "unrepresentable",
+    "description_failed",
 ]
 
 
-def _lines(text: str) -> str:
+def one_line_ending(text: str) -> str:
     """One line ending. `str.splitlines` would also split on form feeds and
     Unicode separators, so the file format only ever uses `\\n`."""
     return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+_lines = one_line_ending
 
 
 class RawSection(Contract):
@@ -55,6 +67,9 @@ class RawSection(Contract):
     page: int | None = Field(default=None, ge=1, strict=True)
     slide: int | None = Field(default=None, ge=1, strict=True)
     image_ref: Text | None = None
+    # The model alias that wrote an image's text, so a model's words are never
+    # mistaken for the source's; absent when the text came from the original.
+    described_by: Symbol | None = None
 
     @field_validator("text", mode="before")
     @classmethod
@@ -79,7 +94,14 @@ class RawSection(Contract):
                 raise ValueError("an image lives under raw/")
             if any(char.isspace() for char in self.image_ref):
                 raise ValueError("an image reference has no whitespace")
+        if self.described_by is not None and (self.kind != "image" or not self.text.strip()):
+            raise ValueError("only an image's description names what described it")
         return self
+
+
+def needs_description(section: RawSection) -> bool:
+    """An image section with no text yet — the one thing a describer touches."""
+    return section.kind == "image" and not section.text.strip()
 
 
 class RawDocument(Contract):
@@ -132,6 +154,8 @@ def render(document: RawDocument) -> str:
             marker += f" slide={section.slide}"
         if section.image_ref is not None:
             marker += f" image={section.image_ref}"
+        if section.described_by is not None:
+            marker += f" described={section.described_by}"
         lines += ["", marker + " -->"]
         for line in section.text.split("\n") if section.text else ():
             lines.append("\\" + line if _ESCAPED_MARKER.match(line) else line)
@@ -190,6 +214,7 @@ def parse(text: str) -> RawDocument:
                     page=int(current["page"]) if current["page"] else None,
                     slide=int(current["slide"]) if current["slide"] else None,
                     image_ref=current["image"],
+                    described_by=current["described"],
                 )
             )
 
@@ -294,9 +319,42 @@ class MarkdownExtractor:
         return (RawSection(kind="text", text=body),) if body.strip() else ()
 
 
+DescriptionStatus = Literal[
+    "described", "too_large", "unsupported_type", "model_failed", "empty_answer", "missing_bytes"
+]
+
+
+class ImageDescription(Contract):
+    """What became of one image's description request: a closed status, the
+    text when there is one, the model's failure when that is the reason."""
+
+    image_ref: Text
+    status: DescriptionStatus
+    text: str = ""
+    failure: Failure | None = None
+
+    @model_validator(mode="after")
+    def payload_matches_status(self) -> Self:
+        if (self.status == "described") != bool(self.text.strip()):
+            raise ValueError("exactly a described image carries text")
+        if (self.status == "model_failed") != (self.failure is not None):
+            raise ValueError("exactly a model failure carries the failure")
+        return self
+
+
+class Describer(Protocol):
+    """Gives image sections without text a description before the Raw file is
+    written; `knowledge.describe.ImageDescriber` does so through a model."""
+
+    def describe_sections(
+        self, sections: tuple[RawSection, ...], assets: Mapping[str, bytes], *, trace_id: str
+    ) -> tuple[tuple[RawSection, ...], tuple[ImageDescription, ...]]: ...
+
+
 class IntakeOutcome(Contract):
     """What one intake did, or would do. Only `written` and `drifted` write;
-    `duplicate` names the Raw that already holds the content."""
+    `duplicate` names the Raw that already holds the content. Descriptions come
+    from an apply; a dry run counts the images an apply would describe."""
 
     mode: Literal["dry_run", "apply"]
     status: IntakeStatus
@@ -305,6 +363,8 @@ class IntakeOutcome(Contract):
     raw_ref: Text | None = None
     supersedes: KnowledgeSource | None = None
     written: tuple[Text, ...] = ()
+    images_to_describe: int = Field(default=0, ge=0, strict=True)
+    descriptions: tuple[ImageDescription, ...] = ()
 
     @model_validator(mode="after")
     def status_matches_payload(self) -> Self:
@@ -317,6 +377,15 @@ class IntakeOutcome(Contract):
             raise ValueError("a raw_ref belongs to content that is, or now is, in raw/")
         if self.source is None and self.status in ("written", "drifted", "duplicate"):
             raise ValueError("an intake that reached the content names its source")
+        if self.descriptions and self.mode != "apply":
+            raise ValueError("descriptions come from an apply; a dry run only counts")
+        described = ("written", "drifted", "description_failed")
+        if (self.descriptions or self.images_to_describe) and self.status not in described:
+            raise ValueError("only an intake that reached a document describes images")
+        if (self.status == "description_failed") != any(
+            item.status == "model_failed" for item in self.descriptions
+        ):
+            raise ValueError("exactly a model failure stops the write")
         return self
 
 
@@ -388,11 +457,19 @@ def raw_index(vault: Vault) -> tuple[RawEntry, ...]:
     return tuple(RawIndex.scan(vault).entries)
 
 
+def _undescribed(sections: tuple[RawSection, ...]) -> int:
+    """Distinct images still without a description."""
+    return len({item.image_ref for item in sections if needs_description(item)})
+
+
 class DropIntake:
     """Reads originals from `drop/` and writes each to `raw/` once."""
 
-    def __init__(self, vault: Vault, extractors: Iterable[Extractor]) -> None:
+    def __init__(
+        self, vault: Vault, extractors: Iterable[Extractor], describer: Describer | None = None
+    ) -> None:
         self.vault = vault
+        self.describer = describer
         self._by_suffix: dict[str, Extractor] = {}
         for extractor in extractors:
             for suffix in extractor.suffixes:
@@ -441,16 +518,47 @@ class DropIntake:
         if not sections:
             return IntakeOutcome(mode=mode, status="empty", original_ref=original_ref)
         placed = source.model_copy(update={"raw_ref": raw_ref})
-        try:
-            document = RawDocument(
+        created = today if today is not None else date.today()
+        supersedes = previous.source.source_id if previous is not None else None
+
+        def document_of(parts: tuple[RawSection, ...]) -> RawDocument:
+            return RawDocument(
                 source=placed,
                 extractor=extractor.name,
-                created=today if today is not None else date.today(),
-                sections=sections,
-                supersedes=previous.source.source_id if previous is not None else None,
+                created=created,
+                sections=parts,
+                supersedes=supersedes,
             )
+
+        try:
+            # Validated before any token is spent: an unrepresentable document
+            # costs nothing.
+            document = document_of(sections)
         except ValidationError:
             return IntakeOutcome(mode=mode, status="unrepresentable", original_ref=original_ref)
+        descriptions: tuple[ImageDescription, ...] = ()
+        if mode == "apply" and self.describer is not None and any(map(needs_description, sections)):
+            # Raw is write-once, so a description can only become part of the
+            # document now. A superseded version keeps its identical pictures'
+            # words; the model is asked only about the rest. A dry run spends
+            # no tokens and counts instead.
+            sections = self._reuse_descriptions(sections, previous)
+            sections, descriptions = self.describer.describe_sections(
+                sections, staged.items, trace_id=f"intake-{source.sha256[:16]}"
+            )
+            if any(item.status == "model_failed" for item in descriptions):
+                # The model failed, not the document: nothing is written, so a
+                # later apply can try again instead of baking the gap into Raw.
+                return IntakeOutcome(
+                    mode=mode,
+                    status="description_failed",
+                    original_ref=original_ref,
+                    source=placed,
+                    images_to_describe=_undescribed(sections),
+                    descriptions=descriptions,
+                )
+            document = document_of(sections)
+        pending = _undescribed(sections)
         referenced = {section.image_ref for section in sections if section.image_ref}
         assets = tuple(ref for ref in staged.items if ref in referenced)
         if mode == "apply":
@@ -468,6 +576,8 @@ class DropIntake:
             raw_ref=raw_ref,
             supersedes=previous.source if previous is not None else None,
             written=(raw_ref, *assets),
+            images_to_describe=pending,
+            descriptions=descriptions,
         )
 
     def intake_all(
@@ -495,6 +605,43 @@ class DropIntake:
                 )
             outcomes.append(outcome)
         return tuple(outcomes)
+
+    def _reuse_descriptions(
+        self, sections: tuple[RawSection, ...], previous: RawEntry | None
+    ) -> tuple[RawSection, ...]:
+        """Descriptions the superseded Raw already holds for the same picture
+        (same content-named asset), carried over with their `described_by`."""
+        if previous is None:
+            return sections
+        try:
+            older = parse(self.vault.read(previous.raw_ref))
+        except ValueError:
+            return sections
+        known = {
+            PurePosixPath(item.image_ref).name: item
+            for item in older.sections
+            if item.image_ref is not None and item.described_by is not None
+        }
+        reused: list[RawSection] = []
+        for section in sections:
+            match = (
+                known.get(PurePosixPath(section.image_ref).name)
+                if section.image_ref is not None and needs_description(section)
+                else None
+            )
+            if match is None:
+                reused.append(section)
+            else:
+                reused.append(
+                    RawSection.model_validate(
+                        {
+                            **section.model_dump(),
+                            "text": match.text,
+                            "described_by": match.described_by,
+                        }
+                    )
+                )
+        return tuple(reused)
 
     def _raw_ref_for(self, original_ref: str, source: KnowledgeSource, *, taken: set[str]) -> str:
         relative = PurePosixPath(original_ref[len(DROP_AREA) :])

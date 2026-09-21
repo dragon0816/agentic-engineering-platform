@@ -508,3 +508,33 @@ still evidence. Known limitations: PDF tables arrive as text in reading
 order, PPTX speaker notes are not extracted, a skipped image leaves no trace
 in the Raw file, and images are stored as the library provides them (pypdf
 converts raw image streams to PNG, which needs its `image` extra — declared).
+
+## Image description (Phase 4, slice 4)
+
+`knowledge.describe.ImageDescriber(model, alias=, prompt=, max_output_tokens=,
+max_bytes=)` describes one image per request through `models.contracts.
+ModelClient`: a `ModelRequest` with `ModelRequirements(vision=True)` and a
+single user `ModelMessage` whose `images` holds the picture as a `data:` URI
+(`data_uri(bytes, media_type)`), so any adapter can consume it without file
+access. Every outcome is an `ImageDescription` with a closed `status`:
+`described` (with `text`), `too_large`, `unsupported_type` (only PNG, JPEG,
+GIF and WebP are sent), `model_failed` (with the model's `Failure` — an
+adapter that raises becomes a retryable `model_error`), `empty_answer` or
+`missing_bytes`; the contract ties `text` to `described` and `failure` to
+`model_failed`. Results are memoised by the image's content for the
+describer's lifetime.
+
+`describe_sections(sections, assets, trace_id=)` gives every image section
+without text one attempt and returns the updated sections — each described
+one carrying `described_by=<alias>`, rendered as `described=<alias>` in its
+section marker, so a model's words are never mistaken for the source's — and
+the descriptions. `DropIntake(vault, extractors, describer=)` calls it on
+apply, after the undescribed document has been validated (so an
+unrepresentable one costs no tokens) and before the Raw file is written — Raw
+is write-once, so this is the only moment a description can become part of
+the document. A drifted original first reuses the descriptions its superseded
+Raw holds for identical pictures. The `IntakeOutcome` carries `descriptions`
+and `images_to_describe` (distinct images still without text); a dry run
+counts and asks nothing. A `model_failed` description stops the write: the
+status is `description_failed`, nothing is written, and a later apply retries.
+Every other failure writes the document without that image's text.

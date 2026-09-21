@@ -153,3 +153,34 @@ by type, never through `shape_type`, which raises for elements python-pptx
 does not model. Rollback removes `knowledge/office.py`, its tests, the extra and the
 CI install line; the `AssetSink` addition to the protocol stays useful for any
 later extractor.
+
+## Slice 4 source-first decision
+
+The source tooling's README names images as a known gap ("Images under `raw/`
+are ignored; the schema expects them to be read where relevant, which needs a
+vision-capable model on the gateway"). There is no source behavior to adapt.
+
+Decision (2026-09-21): describe at intake, through `ModelClient`, with the
+image inline. Alternatives not taken: describing already-written Raw files
+(Raw is write-once, so that would need a sidecar or a new Raw version for what
+is a derived text — deferred until a need appears); passing the image as a
+file path or vault reference in `ModelMessage.images` (would make every
+adapter a file reader and would not work for staged, not-yet-written bytes);
+naming a provider's vision API (rule 6: knowledge code depends on the model
+interface only). The architecture rule "multimodal ingestion through model
+capability requirements rather than a hard-coded vision provider" is met by
+`ModelRequirements(vision=True)` on the request. A dry run deliberately spends
+no tokens and therefore cannot show the exact description an apply would
+write; it reports the count instead, and the phase spec says so.
+
+From review: a model failure does not write. The first draft wrote the Raw
+with empty image sections, and because identity is the content, the same
+original could never be described later — a transient outage would have
+baked the gap into write-once Raw. Now `model_failed` stops the write
+(`description_failed`) and a later apply retries; `too_large`,
+`unsupported_type` and `empty_answer` are properties of the image or the
+answer, not the environment, so they write without text. Also from review:
+the section marker records `described=<alias>` (rule 7, provenance of derived
+text), an adapter that raises is a status, descriptions are memoised by
+content and reused across drift, and the undescribed document is validated
+before any token is spent.

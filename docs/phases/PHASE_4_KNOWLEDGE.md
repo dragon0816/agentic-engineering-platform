@@ -144,11 +144,40 @@ enforced in code, never left to a prompt:
    page/slide/image relationships intact, a repeated picture stored once, dry
    run and apply agreeing, and Drop untouched. CI installs the extra.
 
+## Requirements and acceptance (slice 4 — image description)
+
+1. `knowledge.describe.ImageDescriber(model, alias=…)` asks a `ModelClient`
+   to describe an image with `ModelRequirements(vision=True)` declared and the
+   image carried inline as a `data:` URI in a provider-neutral `ModelMessage`.
+   No provider, endpoint or credential appears in knowledge code; the alias is
+   host configuration.
+2. Raw is write-once, so description happens at intake: `DropIntake` takes an
+   optional describer and, on apply, describes every image section that has
+   no text yet before the Raw file is written. The description becomes the
+   image section's text, marked `described=<alias>` in the section marker so
+   a model's words are never mistaken for the source's.
+3. Every failure is a closed `ImageDescription` status — `described`,
+   `too_large`, `unsupported_type`, `model_failed` (with the model's
+   `Failure`; an adapter that raises is one too), `empty_answer`,
+   `missing_bytes` — reported on the `IntakeOutcome`. A model failure is the
+   host's environment, not the document's content, so it stops the write:
+   the intake status is `description_failed`, nothing is written, and a
+   later apply can try again instead of baking the gap into write-once Raw.
+   Every other status writes the document without that image's text.
+4. A picture is described once: memoised by content for the describer's
+   lifetime, and a drifted original reuses the descriptions its superseded
+   Raw already holds for identical pictures. A dry run spends no tokens: it
+   reports how many distinct images still need a description
+   (`images_to_describe`) — the one place a dry run cannot show the exact
+   text an apply writes, stated as such.
+5. Tests use a fake vision model: the request shape, every status including
+   an adapter that raises, memoisation and trace ids, the marker in the Raw
+   file, the intake in both modes, a model failure stopping the write and a
+   retry succeeding, reuse across drift, and an intake without a describer
+   asking nothing.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 4 — Image description through `ModelClient` with `vision=True`
-  declared; the description attaches to the image's Raw section with the same
-  provenance. No vision provider is named anywhere in knowledge code.
 - Slice 5 — Ingest planning through `ModelClient`: the two-pass plan
   (relevance over an inventory, then writes), chunked condensation cached by
   content hash, structured output validated into a `WritePlan`. The model
