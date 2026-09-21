@@ -21,6 +21,12 @@ from common.assets import SecretRef
 from models.catalog import ModelEndpoint
 
 
+class CredentialMisconfigured(LookupError):
+    """A secret no amount of retrying will produce: nothing is mapped to it,
+    or the place it should be is empty. Adapters report this as a failure
+    that will not fix itself, unlike a token caught mid-rotation."""
+
+
 class CredentialResolver(Protocol):
     """The execution environment's answer to one declared secret. Raising is
     how a resolver reports failure; every adapter turns that into a typed
@@ -34,10 +40,13 @@ class _Mapped:
 
     def _checked(self, name: str, value: str | None, source: str) -> str:
         if value is None:
-            raise LookupError(f"no {source} for the secret named {name}")
-        if not value.strip():
-            raise LookupError(f"the {source} for the secret named {name} is blank")
-        return value
+            raise CredentialMisconfigured(f"no {source} for the secret named {name}")
+        # A token read from a file or pasted into a variable usually carries a
+        # trailing newline, which would make an unusable Authorization header.
+        trimmed = value.strip()
+        if not trimmed:
+            raise CredentialMisconfigured(f"the {source} for the secret named {name} is blank")
+        return trimmed
 
 
 class EnvironmentCredentials(_Mapped):
@@ -54,7 +63,9 @@ class EnvironmentCredentials(_Mapped):
     def resolve(self, ref: SecretRef) -> str:
         variable = self._names.get(ref.name)
         if variable is None:
-            raise LookupError(f"no environment variable is mapped to the secret named {ref.name}")
+            raise CredentialMisconfigured(
+                f"no environment variable is mapped to the secret named {ref.name}"
+            )
         return self._checked(ref.name, self._environ.get(variable), f"value in {variable}")
 
 

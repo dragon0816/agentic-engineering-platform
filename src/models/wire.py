@@ -18,6 +18,7 @@ from common.assets import SECRET_PATTERN
 from common.execution import Failure
 from models.catalog import ModelEndpoint
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
+from models.credentials import CredentialMisconfigured
 
 MAX_ERROR_CHARS = 500
 # A status worth trying again on: the request was not wrong, the moment was.
@@ -175,8 +176,9 @@ def authorized(credential: Callable[[], str] | None) -> dict[str, str] | Failure
             code="credential_unavailable",
             message=describe(error),
             # A rotating token is rewritten on a schedule, so a read can fail
-            # for a moment and succeed immediately afterwards.
-            retryable=True,
+            # for a moment and succeed immediately afterwards. A secret nothing
+            # is mapped to will never appear, however often it is asked for.
+            retryable=not isinstance(error, CredentialMisconfigured),
         )
     headers["Authorization"] = f"Bearer {token}"
     return headers

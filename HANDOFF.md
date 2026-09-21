@@ -35,17 +35,27 @@ migrated.
   `for_requirements`, a `ClientBuilder` protocol and a provider registry
   defaulting to the two built-in adapters. Typed failures: `unknown_alias`,
   `unknown_provider`, `endpoint_misconfigured`. Clients are cached per alias.
-- 6 tests (`tests/test_clients.py`), none opening a socket: resolution where
+- 7 tests (`tests/test_clients.py`), none opening a socket: resolution where
   the host says and nowhere else, per-call rather than captured resolution,
   the whole requirements-to-answer chain over a catalog holding both
   providers, every typed construction failure, a resolver that fails reaching
   the caller as `credential_unavailable` with the endpoint never contacted,
-  and a host registering its own provider.
+  a host registering its own provider beside the built-ins, and per-alias
+  wire options reaching the adapter.
+- PR #37 review (6 findings) applied: `options` carries per-alias adapter
+  keyword arguments, so `max_completion_tokens` is reachable through the
+  factory; registering providers now merges over the built-ins instead of
+  replacing them, matching what the docs promised; a host builder that raises
+  anything else is `provider_build_failed` rather than an escape;
+  `CredentialMisconfigured` separates a secret that will never appear from a
+  token caught mid-rotation, so only the latter is retryable; a resolved value
+  is stripped, since a token read from a file carries a trailing newline; and
+  the vacuous secret-leak assertion now checks the client actually built from
+  a resolver that holds the value.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -65,8 +75,11 @@ migrated.
   reads nothing unless a host states which variable holds which secret. A
   prefix convention was rejected: a convention that guesses is a convention
   that reads the wrong thing in silence.
-- Registering providers replaces the default map rather than merging with it,
-  so a host that means to restrict the platform to one provider can.
+- Registering providers merges over the built-in map, since the point is to
+  add a provider rather than lose the ones that ship; reusing a key overrides
+  one. A host that means to restrict the platform states a narrower catalog.
+- A wire detail of one endpoint, such as which field carries the token limit,
+  is host wiring passed per alias rather than a field on the shared contract.
 - Construction failures are typed rather than raised, because a misconfigured
   catalog should read like an unavailable model to the caller rather than an
   exception from the middle of a request.
@@ -77,7 +90,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 605 passed, 3 skipped (link privileges)
+# PASS: 606 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -109,6 +122,5 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Next Recommended Action
 
-Open the PR for `phase-5/credentials`, run the review, apply confirmed
-findings and merge on green CI. Then write the slice 5 requirements section,
+Merge PR #37 on green CI. Then write the slice 5 requirements section,
 implement per-response duration and the worked example, and close Phase 5.

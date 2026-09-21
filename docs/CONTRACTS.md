@@ -883,25 +883,39 @@ without rebuilding the client.
 
 `EnvironmentCredentials(names, environ=None)` maps each `SecretRef` name to an
 environment variable name, stated by the host: there is no prefix convention
-and no default, so a secret nobody mapped is never guessed at. A missing or
-blank variable raises `LookupError`. It is development-grade; a production
-deployment supplies its own resolver over a real store.
+and no default, so a secret nobody mapped is never guessed at. A resolved
+value is stripped, because a token read from a file almost always carries a
+trailing newline that would make an unusable header. It is development-grade;
+a production deployment supplies its own resolver over a real store.
 `StaticCredentials(values)` is the same shape for a host that already holds
 its secrets, and for tests.
+
+Both raise `CredentialMisconfigured` (a `LookupError`) for a secret nothing is
+mapped to, a missing value or a blank one. `wire.authorized` reports that as
+`credential_unavailable` with `retryable=False`, because such a secret will
+never appear however often it is asked for, while any other resolver error
+stays retryable: a token being rewritten on a schedule is readable a moment
+later.
 
 `models.clients.ModelClients(catalog, resolver=None, transport=None,
 timeout_s=600.0, providers=None)` builds the right `ModelClient` for an alias.
 `for_alias(alias)` returns a client or a `Failure`; `for_route(name)` and
 `for_requirements(requirements)` return `(alias, client)` or a `Failure`, the
 last being the whole chain from what a caller needs to something that can
-answer it. `providers` maps a provider symbol to a `ClientBuilder` and
-defaults to `openai_compatible` and `ollama`; passing it replaces the defaults
-rather than adding to them, so a host can register its own provider without
-changing core runtime code.
+answer it. `providers` maps a provider symbol to a `ClientBuilder`
+and is merged over the built-in `openai_compatible` and `ollama`, so a host
+can register its own provider without changing core runtime code, and can
+override a built-in by reusing its key. `options` carries per-alias keyword
+arguments for the adapter, such as `{"company_reasoning": {"max_tokens_field":
+"max_completion_tokens"}}`: these are wire details of one endpoint that the
+shared contract deliberately does not describe, so they belong to host wiring.
+An option naming no endpoint is a `ValueError` where the wiring is written.
 
-Failure codes: `unknown_alias`, `unknown_provider`, and
+Failure codes: `unknown_alias`, `unknown_provider`,
 `endpoint_misconfigured` for the construction-time refusals (no base url, a
-non-positive timeout, a declared credential with no resolver), alongside the
+non-positive timeout, a declared credential with no resolver, an option the
+provider does not take) and `provider_build_failed` for anything else a
+host-registered builder raises, alongside the
 catalog's own `no_model_for_requirements` and `unknown_route`, which travel
 through unchanged. A built client is cached per alias, so a host may call this
 per request without rebuilding a transport each time.

@@ -88,11 +88,24 @@ def test_a_secret_is_resolved_where_the_host_says_and_nowhere_else() -> None:
     with pytest.raises(LookupError, match="no value"):
         held.resolve(SecretRef(name="other_token"))
 
-    # A resolver is not a contract, and neither it nor the endpoint that names
-    # the secret can print its value.
+    # A trailing newline, which a token read from a file almost always has,
+    # would make an unusable Authorization header.
+    assert (
+        EnvironmentCredentials(
+            {"company_gateway_token": "CHATRS_TOKEN"}, environ={"CHATRS_TOKEN": "a-live-token\n"}
+        ).resolve(TOKEN)
+        == "a-live-token"
+    )
+
+    # A resolver is not a contract, and the value reaches neither the endpoint
+    # that names the secret nor the client built from it: only the closure
+    # that asks for it again each time.
     assert "held-token" not in repr(held) and "held-token" not in str(held)
     assert not hasattr(held, "model_dump")
-    assert "a-live-token" not in company().model_dump_json()
+    built = ModelClients(catalog(company()), resolver=held).for_alias("company_reasoning")
+    assert isinstance(built, OpenAICompatible)
+    assert "held-token" not in repr(vars(built))
+    assert "held-token" not in built.endpoint.model_dump_json()
 
 
 def test_a_credential_is_resolved_once_per_call_not_captured() -> None:
@@ -204,6 +217,23 @@ def test_a_resolver_that_fails_reaches_the_caller_as_a_status() -> None:
     assert "rewritten" in response.failure.message
     assert transport.calls == []  # the endpoint was never contacted
 
+    # A secret nothing is mapped to will never appear, however often it is
+    # asked for, so it is not reported as worth trying again.
+    misconfigured = ModelClients(
+        catalog(company()), resolver=StaticCredentials({}), transport=transport
+    ).for_alias("company_reasoning")
+    assert not isinstance(misconfigured, Failure)
+    permanent = misconfigured.generate(
+        ModelRequest(
+            trace=TRACE,
+            model_alias="company_reasoning",
+            messages=(ModelMessage(role="user", text="ask"),),
+        )
+    )
+    assert permanent.failure is not None
+    assert permanent.failure.code == "credential_unavailable"
+    assert not permanent.failure.retryable
+
 
 def test_a_host_may_register_its_own_provider() -> None:
     built: list[ModelEndpoint] = []
@@ -216,9 +246,60 @@ def test_a_host_may_register_its_own_provider() -> None:
 
         def stream(self, request: ModelRequest) -> Any: ...
 
-    clients = ModelClients(catalog(local(provider="echo")), providers={"echo": Echo})
+    clients = ModelClients(
+        catalog(local(provider="echo"), company()),
+        resolver=StaticCredentials({"company_gateway_token": "held-token"}),
+        providers={"echo": Echo},
+    )
     client = clients.for_alias("local_small")
     assert isinstance(client, Echo) and [item.alias for item in built] == ["local_small"]
-    # Registering a provider replaces the defaults rather than adding to them.
-    replaced = ModelClients(catalog(company()), providers={"echo": Echo})
-    assert isinstance(replaced.for_alias("company_reasoning"), Failure)
+    # Registering adds to the built-ins rather than replacing them.
+    assert isinstance(clients.for_alias("company_reasoning"), OpenAICompatible)
+    # A repeated key overrides one.
+    overridden = ModelClients(catalog(local()), providers={"ollama": Echo}).for_alias("local_small")
+    assert isinstance(overridden, Echo)
+
+    # A builder that fails in its own way is still a status, not an escape.
+    class Broken:
+        def __init__(self, endpoint: ModelEndpoint, **_: Any) -> None:
+            raise RuntimeError("the host's builder is broken")
+
+        def generate(self, request: ModelRequest) -> Any: ...
+
+        def stream(self, request: ModelRequest) -> Any: ...
+
+    broke = ModelClients(catalog(local()), providers={"ollama": Broken}).for_alias("local_small")
+    assert isinstance(broke, Failure) and broke.code == "provider_build_failed"
+    assert "broken" in broke.message
+
+
+def test_per_endpoint_wire_options_reach_the_adapter() -> None:
+    transport = Transport(Reply(200, [b'{"choices": [{"message": {"content": "hi"}}]}']))
+    clients = ModelClients(
+        catalog(company()),
+        resolver=StaticCredentials({"company_gateway_token": "held-token"}),
+        transport=transport,
+        options={"company_reasoning": {"max_tokens_field": "max_completion_tokens"}},
+    )
+    client = clients.for_alias("company_reasoning")
+    assert not isinstance(client, Failure)
+    client.generate(
+        ModelRequest(
+            trace=TRACE,
+            model_alias="company_reasoning",
+            messages=(ModelMessage(role="user", text="ask"),),
+            max_output_tokens=64,
+        )
+    )
+    payload = transport.calls[0]["payload"]
+    assert payload["max_completion_tokens"] == 64 and "max_tokens" not in payload
+
+    # An option naming no endpoint is a wiring mistake, refused where it is made.
+    with pytest.raises(ValueError, match="options name no endpoint"):
+        ModelClients(catalog(company()), options={"typo": {}})
+
+    # An option the provider does not take is reported, not raised.
+    wrong = ModelClients(
+        catalog(local()), options={"local_small": {"max_tokens_field": "max_tokens"}}
+    ).for_alias("local_small")
+    assert isinstance(wrong, Failure) and wrong.code == "endpoint_misconfigured"
