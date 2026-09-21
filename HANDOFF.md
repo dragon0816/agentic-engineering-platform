@@ -1,84 +1,87 @@
-# Handoff — Phase 4 image description (slice 4)
+# Handoff — Phase 4 ingest planning (slice 5)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-4/image-description`, based on `main` at `12efefd` (PR #26 merged).
+Branch: `phase-4/ingest-planning`, based on `main` after PR #27 merged.
 
 ## Goal
 
-Phase 4 slice 4: image sections get a description through the model
-interface, at intake time, with no vision provider named in knowledge code.
-The owner asked for all of Phase 4 (slices 3–9) to be completed without
-check-ins unless something cannot be decided; each slice is reviewed, merged on
-green CI and followed by the next. Requirements:
-`docs/phases/PHASE_4_KNOWLEDGE.md` (slice 4); decision:
-`docs/PHASE_4_MIGRATION.md` (slice 4); contracts: `docs/CONTRACTS.md` ("Image
-description").
+Phase 4 slice 5: from one Raw document to a `WritePlan` through the model
+interface, in the two passes the source tooling found cheaper and more accurate
+than one, with condensation cached by content. The owner asked for all of Phase
+4 (slices 3–9) to be completed without check-ins unless something cannot be
+decided; each slice is reviewed, merged on green CI and followed by the next.
+Requirements: `docs/phases/PHASE_4_KNOWLEDGE.md` (slice 5); source decision:
+`docs/PHASE_4_MIGRATION.md` (slice 5); contracts: `docs/CONTRACTS.md` ("Ingest
+planning").
 
 ## Completed
 
-- `knowledge/describe.py`: `ImageDescriber(model, alias=, prompt=,
-  max_output_tokens=, max_bytes=)` builds a `ModelRequest` with
-  `ModelRequirements(vision=True)` and one user `ModelMessage` carrying the
-  picture as a `data:` URI; `describe_sections` gives every image section
-  without text one attempt, memoised per `image_ref`.
-- `knowledge/raw.py`: `ImageDescription` contract (closed `status`:
-  `described`, `too_large`, `unsupported_type`, `model_failed` with the
-  model's `Failure`, `empty_answer`, `missing_bytes`; `text` tied to
-  `described`, `failure` to `model_failed`); `Describer` protocol;
-  `DropIntake(vault, extractors, describer=None)` describes on apply before the
-  Raw file is written; `IntakeOutcome.descriptions` (apply only) and
-  `images_to_describe` (distinct images an apply would describe; a dry run
-  spends no tokens).
-- 8 tests (`tests/test_describe.py`) with a fake vision model: request shape,
-  every status including an adapter that raises, memoisation by content and
-  trace ids, the `described=` marker round-tripping in the Raw file, the
-  intake in both modes, a model failure stopping the write and a retry
-  succeeding, reuse across drift, and an intake without a describer asking
-  nothing.
-- Docs: phase spec slice 4 requirements, `docs/CONTRACTS.md`, migration slice 4
-  decision (why intake time, why inline `data:` URIs, why no provider).
+- `knowledge/planning.py`: `IngestPlanner(model, vault, alias=, conventions=,
+  max_output_tokens=, condense_over=, chunk_chars=)`. `plan(document, today=,
+  decisions=)` runs relevance (inventory of wiki paths and titles → existing
+  pages, capped at 8) then the writes (related pages in full, `index.md`,
+  settled decisions, source text), each a `ModelRequest` with a system message
+  (the conventions), `structured_output=True` and an output contract. A long
+  source is condensed chunk by chunk first and cached under
+  `.ingest-cache/<sha256>.md`. The answer is `structured_output` or JSON
+  extracted from fences/prose, validated loosely (`IngestProposal`) then
+  strictly (`WritePlan`), repaired to carry the provenance lines
+  (`ensure_provenance`), and validated by a vault dry run. `PlanningOutcome`
+  statuses: `planned`, `invalid` (plan + problems), `model_failed` (an adapter
+  that raises included), `unparseable`; plus `relevant`, `condensed`,
+  `cache_hit`. The planner writes nothing but the cache.
+- `Vault.wiki_pages()` (path, title from frontmatter or stem), `cache_read` /
+  `cache_write` confined to `.ingest-cache/` and keyed by a content hash.
+- `source_text(document)`: sections in order, each image as
+  `[image on page N: description]` or `(no description)`.
+- 9 tests (`tests/test_planning.py`) with a fake model: source text, JSON
+  extraction, provenance repair, both passes and their prompts with a plan the
+  vault applies end to end, prose answers, invalid and malformed plans,
+  failures on either pass and an adapter that raises, condensation with chunk
+  count and cache reuse across planners (and no partial cache on failure), and
+  the cache's confinement.
+- Docs: phase spec slice 5 requirements, `docs/CONTRACTS.md`, migration slice 5
+  decision (ADAPT the passes, condensation cache, JSON extraction and decision
+  injection; do not migrate the HTTP client, review output or runtime schema).
 
-- PR #27 opened; pre-merge review applied (10 findings, four of them design
-  defects): an adapter that raised escaped `intake` — now a retryable
-  `model_failed`; a model failure wrote empty image sections into write-once
-  Raw that dedup would never let be described again — now `model_failed`
-  stops the write (`description_failed`) and a later apply retries; a model's
-  description was indistinguishable from the source's caption — the section
-  marker records `described=<alias>`; identical pictures were re-described
-  on every drift and in every document — memoised by content for the
-  describer's lifetime and reused from the superseded Raw on drift; the
-  undescribed document is validated before tokens are spent; `model_copy`
-  bypassing validators is replaced by `model_validate`; the media-type table
-  is what vision endpoints accept; `needs_description` is the one predicate;
-  request ids use the asset's content name and spans count issued requests.
-  Three regression tests added.
+- PR #28 opened; pre-merge review applied (10 findings): an empty condensed
+  part was cached for good — now a retryable `condense_empty` failure with no
+  cache; the cache was keyed by the original's hash alone although the text
+  depends on the rendered source, chunking, prompt and alias — keyed by all
+  of them; the prompt's example invited a literal "none" contradiction that
+  became a ⚠️ block — example emptied and such notes dropped; frontmatter
+  repair broke on CRLF or a trailing space and on odd path spellings —
+  normalized; `wiki_pages` raised on a link leaving the vault and listed
+  directories — skipped; relevant paths deduplicated; failure outcomes
+  report `condensed`/`cache_hit`; empty conventions refused at construction;
+  `action` is decided from the vault instead of asked of the model. One
+  regression test added and the rest extended.
 
 ## In Progress
 
-- PR #27 is open with the review posted; merge on green CI is authorized for
+- PR #28 is open with the review posted; merge on green CI is authorized for
   Phase 4 slices.
 
 ## Remaining
 
-- Slice 5: ingest planning through `ModelClient` — two passes (relevance over
-  a wiki inventory, then writes), chunked condensation cached by content hash,
-  structured output validated into a `WritePlan` that slice 1 applies.
-- Slice 6: static lint as a typed report. Slice 7: conflicts and decisions.
-  Slice 8: query with provenance. Slice 9: migration adapter for an existing
+- Slice 6: static lint as a typed report (pin `brain.py`'s `scan` first).
+- Slice 7: conflicts and decisions (the `decisions` text the planner takes).
+- Slice 8: query with provenance. Slice 9: migration adapter for an existing
   vault.
 - Deferred from Phase 3, each needing its own scope: a payload sweep,
   process-liveness or lease-based suspension, and the earlier deferred reviews.
 
 ## Architecture decisions made
 
-- Describe at intake, because Raw is write-once: a description is part of the
-  document or it is not in Raw. Describing already-written Raw is deferred.
-- The image travels inline as a `data:` URI in the provider-neutral message,
-  so adapters need no file access and staged (not yet written) bytes work.
-- Rule 6 held literally: the request declares `vision=True`; no provider,
-  endpoint or credential appears in knowledge code. The alias is host config.
-- A dry run spends no tokens and therefore cannot show the description text an
-  apply would write; it reports the count and the spec says so.
+- The model proposes; the vault disposes. The plan goes back through
+  `Vault.apply`, which is slice 1's whole point; the planner never writes wiki
+  content.
+- Provenance lines are repaired in, not demanded of the model: they are
+  deterministic, and a rejected plan wastes the condensation.
+- Conventions are a platform default a host may replace; the planner does not
+  read a vault schema file and does not care which language the conventions
+  are in.
+- Every failure is a closed status, including an adapter that raises.
 
 ## Exact verification commands and results
 
@@ -86,14 +89,14 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 535 tests (527 prior + 8 describe; 1 skipped on Windows without symlink
+# PASS: 544 tests (535 prior + 9 planning; 1 skipped on Windows without symlink
 #       privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 69 source/test files
+# PASS: 71 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
@@ -103,21 +106,20 @@ git diff --check
 ```
 
 No model, gateway, network, real vault, job or n8n instance was invoked; the
-vision model in tests is a fake. Local pytest uses `-p no:cacheprovider`
-because of temporary-directory ACLs on this machine; CI runs ordinary pytest.
+model in tests is a fake. Local pytest uses `-p no:cacheprovider` because of
+temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- Only intake-time description exists; Raw files written before a describer was
-  configured keep their image sections without text (a drifted version of the
-  same original will be described, and reuses nothing from an undescribed one).
-- One request per distinct image; no batching, no retries beyond what the
-  model adapter does.
-- `max_bytes` (5 MB) and the media-type table are fixed defaults; a host may
-  pass others to `ImageDescriber`.
+- The relevance pass sees at most `condense_over` characters of the source;
+  the plan pass sees the whole (condensed) text.
+- The condensation cache has no size bound or expiry; it is keyed by what the
+  text depends on, so it never goes stale, only large. A truncated (rather
+  than empty) condensed part cannot be detected and is cached.
+- One plan per source; batching several sources into one plan is not offered.
 
 ## Next Recommended Action
 
-Open the PR for `phase-4/image-description`, run the review, apply confirmed
-findings, merge on green CI, then write the slice 5 requirements (ingest
-planning through `ModelClient`) and implement it.
+Open the PR for `phase-4/ingest-planning`, run the review, apply confirmed
+findings, merge on green CI, then pin `brain.py`'s static `scan` and write the
+slice 6 requirements (static lint).

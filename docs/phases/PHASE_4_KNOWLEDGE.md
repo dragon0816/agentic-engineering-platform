@@ -176,12 +176,42 @@ enforced in code, never left to a prompt:
    retry succeeding, reuse across drift, and an intake without a describer
    asking nothing.
 
+## Requirements and acceptance (slice 5 — ingest planning)
+
+1. `knowledge.planning.IngestPlanner(model, vault, alias=…)` plans one Raw
+   document's ingest in two passes through `ModelClient` with
+   `structured_output` declared: relevance (which existing wiki pages matter,
+   from an inventory of paths and titles, filtered to pages that exist and
+   capped at 8), then the writes (with those pages in full, the current
+   `index.md`, the settled decisions and the source text). The conventions
+   the model follows are a platform default a host may replace; no vault
+   schema file is read.
+2. A source longer than a threshold is condensed chunk by chunk first, and
+   the result is cached under the vault (`.ingest-cache/<key>.md`, the key a
+   hash of everything the condensed text depends on: the rendered source,
+   the chunking, the prompt and the model alias) so a plan rejected
+   downstream never costs the condensation twice and a changed input never
+   reads a stale one; a failure or an empty part leaves no cache.
+3. The model's answer is data: structured output when the adapter provides
+   it, else JSON extracted from fences or prose. It becomes a `WritePlan`
+   whose sources page is repaired to carry the source's provenance lines
+   (deterministic, so omitted ones are added rather than rejected) and whose
+   pages are `create` or `update` by what the vault holds, never by the
+   model's guess; a contradiction that only says "none" is not one. The plan
+   is validated by a vault dry run. The planner never writes wiki, index, log,
+   raw or drop; the caller applies the plan through `Vault.apply`.
+4. Every outcome is a closed `PlanningOutcome` status — `planned`, `invalid`
+   (with the plan and its problems), `model_failed` (with the failure, an
+   adapter that raises included), `unparseable` — plus what pass 1 chose,
+   whether the source was condensed and whether the cache answered.
+5. Tests use a fake model: the source text the model sees (images in place),
+   JSON extraction, provenance repair, both passes and their prompts, a plan
+   the vault applies end to end, prose answers, invalid and malformed plans,
+   failures on either pass, condensation with chunk count and cache reuse
+   across planners, and the cache's confinement.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 5 — Ingest planning through `ModelClient`: the two-pass plan
-  (relevance over an inventory, then writes), chunked condensation cached by
-  content hash, structured output validated into a `WritePlan`. The model
-  proposes; slice 1 validates and applies.
 - Slice 6 — Static lint as a typed report: orphans, dangling links ranked by
   reference count, path-carrying links, missing frontmatter, provenance that no
   longer resolves, raw sources never ingested, open conflicts, manual edits.

@@ -24,6 +24,8 @@ WRITABLE_AREAS = ("wiki/",)
 WRITABLE_FILES = ("index.md", "log.md", "decisions.md")
 REQUIRED = ("index.md", "log.md", "raw", "wiki")
 BACKUP_DIR = ".ingest-backup"
+CACHE_DIR = ".ingest-cache"
+_SHA256 = re.compile(r"^[a-f0-9]{64}$")
 SOURCES_AREA = "wiki/sources/"
 CONFLICT_HEADING = "## ⚠️ 待裁決的衝突"
 
@@ -363,6 +365,43 @@ class Vault:
         if not target.is_file():
             raise VaultError("missing_original", rel)
         return target.read_bytes()
+
+    def wiki_pages(self) -> tuple[tuple[str, str], ...]:
+        """Every wiki page as (relative path, title) — the title from the
+        frontmatter, else the file's stem — in path order."""
+        pages = []
+        for path in sorted((self.root / "wiki").rglob("*.md")):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(self.root).as_posix()
+            try:
+                head = self.read_head(rel)
+            except VaultError:
+                # A link that leaves the vault is not a page of it.
+                continue
+            title = path.stem
+            for line in head.split("\n"):
+                if line.startswith("title:") and line[6:].strip():
+                    title = line[6:].strip().strip("\"'")
+                    break
+            pages.append((rel, title))
+        return tuple(pages)
+
+    def _cache_path(self, key: str) -> Path:
+        # The cache is keyed by a content hash and lives in its own directory;
+        # anything else is a programming error, not a path to resolve.
+        if not _SHA256.fullmatch(key):
+            raise ValueError("a cache key is a content hash")
+        return self.root / CACHE_DIR / f"{key}.md"
+
+    def cache_read(self, key: str) -> str | None:
+        path = self._cache_path(key)
+        return path.read_text(encoding="utf-8") if path.is_file() else None
+
+    def cache_write(self, key: str, text: str) -> None:
+        path = self._cache_path(key)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="\n")
 
     def raw_files(self) -> tuple[str, ...]:
         """Every Markdown file under raw/ except assets, in path order."""

@@ -538,3 +538,36 @@ and `images_to_describe` (distinct images still without text); a dry run
 counts and asks nothing. A `model_failed` description stops the write: the
 status is `description_failed`, nothing is written, and a later apply retries.
 Every other failure writes the document without that image's text.
+
+## Ingest planning (Phase 4, slice 5)
+
+`knowledge.planning.IngestPlanner(model, vault, alias=, conventions=,
+max_output_tokens=, condense_over=, chunk_chars=)` turns one `RawDocument`
+into a `PlanningOutcome`. `plan(document, today=, decisions=)` runs two passes
+through `ModelClient`, each a `ModelRequest` with a system message (the
+conventions) and a user message, `ModelRequirements(structured_output=True)`
+and an `output_contract` (`knowledge.ingest-relevance.v1`, then
+`knowledge.ingest-plan.v1`); a long source is first condensed chunk by chunk
+with plain-text requests and the result cached through `Vault.cache_write` /
+`cache_read` under `.ingest-cache/<key>.md`, confined to that directory and
+keyed (`IngestPlanner.cache_key`) by a hash of the rendered source text, the
+chunk size, the prompt and the model alias — everything the condensed text
+depends on. A part that comes back empty is a retryable `condense_empty`
+failure and nothing is cached.
+
+The answer is read from `structured_output`, or extracted as JSON from fences
+or prose (`extract_json`), validated loosely as an `IngestProposal` and then
+strictly as a `WritePlan` with the document's `KnowledgeSource`; each page's
+`action` is decided by whether the vault holds it (the model is not asked);
+a contradiction that only says "none" or "n/a" is dropped; the sources page
+is repaired to carry the provenance lines (`ensure_provenance`, tolerant of
+CRLF and odd path spellings) and the plan is validated by a vault dry run. `PlanningOutcome.status` is closed:
+`planned` (a plan the vault accepted), `invalid` (the plan and its
+`problems`), `model_failed` (the `Failure`; an adapter that raises becomes a
+retryable `model_error`) or `unparseable`; `relevant`, `condensed` and
+`cache_hit` say what happened, on every status. The planner writes nothing
+but the cache; the caller applies the plan through `Vault.apply`. Empty
+conventions are refused at construction. `Vault.wiki_pages` lists files
+only and skips a link that leaves the vault. `source_text(document)` is the
+text the model reads: sections in order, each image as
+`[image on page N: description]` or `(no description)`.

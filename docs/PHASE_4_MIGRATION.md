@@ -184,3 +184,43 @@ the section marker records `described=<alias>` (rule 7, provenance of derived
 text), an adapter that raises is a status, descriptions are memoised by
 content and reused across drift, and the undescribed document is validated
 before any token is spent.
+
+## Slice 5 source-first decision
+
+Re-inspected `vault/ingest.py`'s `plan_ingest`, `condense`, `extract_json`,
+the three prompts and `Gateway.ask` (pinned excerpt covers the safety core,
+not these). Behaviors worth keeping, each with a recorded reason in the source:
+two passes (relevance over an inventory, then writes) are cheaper and more
+accurate than one; condensation of long sources chunk by chunk, cached by
+content hash, because a rejected plan otherwise redoes the most expensive step;
+JSON extracted from fences or prose because models wrap it; the settled
+decisions injected into the prompt so a rejected claim is not reinstated.
+
+Decision (2026-09-21): **ADAPT** those behaviors into `knowledge.planning`
+behind `ModelClient`; **do not migrate** the HTTP gateway client, its retries,
+key handling and health check (Phase 5's model adapters own transport), the
+`--review-dir` output (a host concern over `PlanningOutcome`), or the runtime
+`CLAUDE.md` schema (the conventions are a platform default a host may replace).
+
+Intentional differences: requests declare `structured_output` and an output
+contract, so an adapter that can return structured data does, and text is the
+fallback rather than the only path; the provenance a sources page must carry
+is repaired in rather than demanded of the model (it is deterministic, and the
+source's own experience was that a rejected plan wastes the condensation);
+every failure is a closed status; the prompts are in English by default, where
+the source's were Traditional Chinese for one vault — a host passes its own
+conventions and the planner does not care which language they are in. The
+planner never writes wiki content: the plan goes back through `Vault.apply`,
+which is slice 1's whole point.
+
+From review: the cache key is a hash of everything the condensed text depends
+on (rendered source, chunking, prompt, model alias), not the original's hash
+alone — a described image or a different model must not read a stale
+condensation; an empty condensed part is a failure, never cached; whether a
+page is created or updated is decided from the vault, not asked of the model
+(engineering rule 1: deterministic details belong in code, not prompts); a
+contradiction that only says "none" is dropped rather than written as a ⚠️
+block; and every failure outcome reports whether the source was condensed.
+
+Rollback removes `knowledge/planning.py`, `Vault.cache_read` / `cache_write` /
+`wiki_pages` and the tests; nothing else imports them.
