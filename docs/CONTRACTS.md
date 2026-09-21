@@ -946,3 +946,35 @@ data, resolver=, transport=)` validates it and returns `ModelClients`.
 `ModelResponse` or a `Failure`: a `Failure` from `ask` is a routing problem
 (or `invalid_request` for a caller's own mistake, such as a blank prompt),
 one on the response is a provider problem, and neither becomes an exception.
+
+## Evaluation harness (Phase 6, slice 1)
+
+`common.evaluation.EvaluationCase` gains an optional `expected_route`: a case
+that is not a routed request has none. Discovery and Bridge advertisement are
+control-plane concerns with no route to take, and requiring one there could be
+satisfied only by copying the case's own words back into the observation.
+
+`ObservedRun` records what actually happened when a case was exercised:
+`decision`, `origin` (mirroring `agent.routing.RoutingOutcome`), `model_calls`,
+`side_effects`, `status`, `completed_steps`, `discovered`, `lifecycle`,
+`advertised` and `failure`. Every field is evidence a grader can check, never a
+flag claiming that an assertion holds, because grading a claim checks nothing.
+
+A `Grader` takes `(case, observed)` and returns `None` when satisfied or a
+reason when not, so a failure always says why. `GRADERS` registers one per
+assertion name the repository's cases declare: `no_model_call`, `no_execution`,
+`exact_scoped_target`, `deterministic_trigger`, `fail_closed`,
+`workflow_succeeds`, `scoped_identity`, `published_discovery` and
+`bridge_advertisement`.
+
+`grade(case, observed, graders=)` returns a `CaseResult` (`case_id`, `passed`,
+`grades`, `unknown_assertions`, and `reasons()`). The expected route is checked
+when the case names one, the forbidden side effects are always checked, and an
+assertion with no grader is reported in `unknown_assertions` and **fails the
+case**: a harness that ignores what it does not understand reports a perfect
+score and is believed.
+
+`load_cases(directory)` reads every `.json` file, accepting one case or a list,
+in a stable order, refusing a duplicate `case_id` where the cases are loaded.
+`report(results)` returns one line per case with the reason under every
+failure, so a CI log says what broke rather than that something did.
