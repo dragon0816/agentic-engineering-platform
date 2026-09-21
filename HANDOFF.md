@@ -29,17 +29,34 @@ description").
   Raw file is written; `IntakeOutcome.descriptions` (apply only) and
   `images_to_describe` (distinct images an apply would describe; a dry run
   spends no tokens).
-- 5 tests (`tests/test_describe.py`) with a fake vision model: request shape,
-  every status, memoisation and trace ids, the intake in both modes, a failing
-  model still writing the document, and an intake without a describer asking
+- 8 tests (`tests/test_describe.py`) with a fake vision model: request shape,
+  every status including an adapter that raises, memoisation by content and
+  trace ids, the `described=` marker round-tripping in the Raw file, the
+  intake in both modes, a model failure stopping the write and a retry
+  succeeding, reuse across drift, and an intake without a describer asking
   nothing.
 - Docs: phase spec slice 4 requirements, `docs/CONTRACTS.md`, migration slice 4
   decision (why intake time, why inline `data:` URIs, why no provider).
 
+- PR #27 opened; pre-merge review applied (10 findings, four of them design
+  defects): an adapter that raised escaped `intake` — now a retryable
+  `model_failed`; a model failure wrote empty image sections into write-once
+  Raw that dedup would never let be described again — now `model_failed`
+  stops the write (`description_failed`) and a later apply retries; a model's
+  description was indistinguishable from the source's caption — the section
+  marker records `described=<alias>`; identical pictures were re-described
+  on every drift and in every document — memoised by content for the
+  describer's lifetime and reused from the superseded Raw on drift; the
+  undescribed document is validated before tokens are spent; `model_copy`
+  bypassing validators is replaced by `model_validate`; the media-type table
+  is what vision endpoints accept; `needs_description` is the one predicate;
+  request ids use the asset's content name and spans count issued requests.
+  Three regression tests added.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- PR #27 is open with the review posted; merge on green CI is authorized for
+  Phase 4 slices.
 
 ## Remaining
 
@@ -69,7 +86,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 532 tests (527 prior + 5 describe; 1 skipped on Windows without symlink
+# PASS: 535 tests (527 prior + 8 describe; 1 skipped on Windows without symlink
 #       privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
@@ -92,7 +109,8 @@ because of temporary-directory ACLs on this machine; CI runs ordinary pytest.
 ## Known issues / limitations
 
 - Only intake-time description exists; Raw files written before a describer was
-  configured keep their image sections without text.
+  configured keep their image sections without text (a drifted version of the
+  same original will be described, and reuses nothing from an undescribed one).
 - One request per distinct image; no batching, no retries beyond what the
   model adapter does.
 - `max_bytes` (5 MB) and the media-type table are fixed defaults; a host may

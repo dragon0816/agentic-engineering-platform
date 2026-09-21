@@ -154,18 +154,27 @@ enforced in code, never left to a prompt:
 2. Raw is write-once, so description happens at intake: `DropIntake` takes an
    optional describer and, on apply, describes every image section that has
    no text yet before the Raw file is written. The description becomes the
-   image section's text, under the same provenance as the image.
+   image section's text, marked `described=<alias>` in the section marker so
+   a model's words are never mistaken for the source's.
 3. Every failure is a closed `ImageDescription` status — `described`,
    `too_large`, `unsupported_type`, `model_failed` (with the model's
-   `Failure`), `empty_answer`, `missing_bytes` — reported on the
-   `IntakeOutcome`; a failed description never loses the document.
-4. A picture repeated in one document is described once. A dry run spends no
-   tokens: it reports how many images an apply would describe
+   `Failure`; an adapter that raises is one too), `empty_answer`,
+   `missing_bytes` — reported on the `IntakeOutcome`. A model failure is the
+   host's environment, not the document's content, so it stops the write:
+   the intake status is `description_failed`, nothing is written, and a
+   later apply can try again instead of baking the gap into write-once Raw.
+   Every other status writes the document without that image's text.
+4. A picture is described once: memoised by content for the describer's
+   lifetime, and a drifted original reuses the descriptions its superseded
+   Raw already holds for identical pictures. A dry run spends no tokens: it
+   reports how many distinct images still need a description
    (`images_to_describe`) — the one place a dry run cannot show the exact
    text an apply writes, stated as such.
-5. Tests use a fake vision model: the request shape, every status, the
-   memoisation, the intake in both modes, a failing model still writing the
-   document, and an intake without a describer asking nothing.
+5. Tests use a fake vision model: the request shape, every status including
+   an adapter that raises, memoisation and trace ids, the marker in the Raw
+   file, the intake in both modes, a model failure stopping the write and a
+   retry succeeding, reuse across drift, and an intake without a describer
+   asking nothing.
 
 ## Later slices (each needs its own requirements section before work starts)
 

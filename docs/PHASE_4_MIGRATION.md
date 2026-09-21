@@ -172,3 +172,15 @@ capability requirements rather than a hard-coded vision provider" is met by
 `ModelRequirements(vision=True)` on the request. A dry run deliberately spends
 no tokens and therefore cannot show the exact description an apply would
 write; it reports the count instead, and the phase spec says so.
+
+From review: a model failure does not write. The first draft wrote the Raw
+with empty image sections, and because identity is the content, the same
+original could never be described later — a transient outage would have
+baked the gap into write-once Raw. Now `model_failed` stops the write
+(`description_failed`) and a later apply retries; `too_large`,
+`unsupported_type` and `empty_answer` are properties of the image or the
+answer, not the environment, so they write without text. Also from review:
+the section marker records `described=<alias>` (rule 7, provenance of derived
+text), an adapter that raises is a status, descriptions are memoised by
+content and reused across drift, and the undescribed document is validated
+before any token is spent.

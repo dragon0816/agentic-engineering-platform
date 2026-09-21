@@ -3,10 +3,11 @@
 Raw is write-once, so a description has to be part of the document when it is
 written: the intake hands the staged image bytes to an `ImageDescriber`, which
 asks a `ModelClient` with `vision=True` declared and attaches the answer to the
-image section as its text. No provider is named here; the image travels as a
-`data:` URI inside the provider-neutral `ModelMessage`, so any adapter can
-consume it without file access, and every failure is a closed status on the
-outcome rather than a lost document.
+image section as its text, marked with the alias that produced it so a model's
+words are never mistaken for the source's. No provider is named here; the
+image travels as a `data:` URI inside the provider-neutral `ModelMessage`, so
+any adapter can consume it without file access, and every failure — the
+adapter raising included — is a closed status, never a lost document.
 """
 
 import base64
@@ -15,20 +16,19 @@ from collections.abc import Mapping
 from pathlib import PurePosixPath
 
 from common.base import Symbol, Text
-from common.execution import TraceIdentifiers
-from knowledge.raw import ImageDescription, RawSection
+from common.execution import Failure, TraceIdentifiers
+from knowledge.raw import ImageDescription, RawSection, needs_description, one_line_ending
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
 MAX_IMAGE_BYTES = 5_000_000
+# What vision endpoints accept in general; anything else is `unsupported_type`
+# before a byte is sent, rather than a provider rejection dressed as an outage.
 MEDIA_TYPES = {
     ".png": "image/png",
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
     ".gif": "image/gif",
     ".webp": "image/webp",
-    ".bmp": "image/bmp",
-    ".tif": "image/tiff",
-    ".tiff": "image/tiff",
 }
 DEFAULT_PROMPT = (
     "Describe this image for a knowledge base: what it shows, and any text, numbers, "
@@ -42,8 +42,9 @@ def data_uri(data: bytes, media_type: str) -> str:
 
 
 class ImageDescriber:
-    """Describes image sections one request each, memoised per image reference
-    so a picture repeated in a document is described once."""
+    """Describes image sections one request each. Results are memoised by the
+    image's content for the describer's lifetime, so a picture repeated in a
+    document, across documents or across versions of one is described once."""
 
     def __init__(
         self,
@@ -61,6 +62,7 @@ class ImageDescriber:
         self.prompt = prompt
         self.max_output_tokens = max_output_tokens
         self.max_bytes = max_bytes
+        self._by_content: dict[str, str] = {}
 
     def describe(self, image_ref: str, data: bytes, *, trace: TraceIdentifiers) -> ImageDescription:
         media_type = MEDIA_TYPES.get(PurePosixPath(image_ref).suffix.lower())
@@ -68,6 +70,10 @@ class ImageDescriber:
             return ImageDescription(image_ref=image_ref, status="unsupported_type")
         if len(data) > self.max_bytes:
             return ImageDescription(image_ref=image_ref, status="too_large")
+        digest = hashlib.sha256(data).hexdigest()
+        known = self._by_content.get(digest)
+        if known is not None:
+            return ImageDescription(image_ref=image_ref, status="described", text=known)
         request = ModelRequest(
             trace=trace,
             model_alias=self.alias,
@@ -77,14 +83,23 @@ class ImageDescriber:
             requirements=ModelRequirements(vision=True),
             max_output_tokens=self.max_output_tokens,
         )
-        response = self.model.generate(request)
+        try:
+            response = self.model.generate(request)
+        except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
+            failure = Failure(
+                code="model_error",
+                message=f"{type(error).__name__}: {error}"[:200].strip() or type(error).__name__,
+                retryable=True,
+            )
+            return ImageDescription(image_ref=image_ref, status="model_failed", failure=failure)
         if response.failure is not None:
             return ImageDescription(
                 image_ref=image_ref, status="model_failed", failure=response.failure
             )
-        text = response.text.strip()
+        text = one_line_ending(response.text).strip()
         if not text:
             return ImageDescription(image_ref=image_ref, status="empty_answer")
+        self._by_content[digest] = text
         return ImageDescription(image_ref=image_ref, status="described", text=text)
 
     def describe_sections(
@@ -94,14 +109,15 @@ class ImageDescriber:
         *,
         trace_id: str,
     ) -> tuple[tuple[RawSection, ...], tuple[ImageDescription, ...]]:
-        """Every image section that has no description yet gets one attempt; a
+        """Every image section that needs a description gets one attempt; a
         section that already carries text is left alone. Bytes the sink does not
         hold (an image that was never staged) are `missing_bytes`."""
         results: dict[str, ImageDescription] = {}
+        issued = 0
         updated: list[RawSection] = []
         for section in sections:
             ref = section.image_ref
-            if section.kind != "image" or ref is None or section.text.strip():
+            if ref is None or not needs_description(section):
                 updated.append(section)
                 continue
             if ref not in results:
@@ -109,16 +125,20 @@ class ImageDescriber:
                 if data is None:
                     results[ref] = ImageDescription(image_ref=ref, status="missing_bytes")
                 else:
-                    span = hashlib.sha256(ref.encode()).hexdigest()[:16]
+                    issued += 1
                     trace = TraceIdentifiers(
                         trace_id=trace_id,
-                        request_id=f"describe-{span}",
-                        span_id=f"image-{len(results) + 1}",
+                        request_id=f"describe-{PurePosixPath(ref).stem}",
+                        span_id=f"image-{issued}",
                     )
                     results[ref] = self.describe(ref, data, trace=trace)
             outcome = results[ref]
             if outcome.status == "described":
-                updated.append(section.model_copy(update={"text": outcome.text}))
+                updated.append(
+                    RawSection.model_validate(
+                        {**section.model_dump(), "text": outcome.text, "described_by": self.alias}
+                    )
+                )
             else:
                 updated.append(section)
         return tuple(updated), tuple(results.values())
