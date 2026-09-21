@@ -4,9 +4,10 @@ citation names where the words came from.
 Retrieval is deterministic and lexical (BM25 over passages, with characters
 and character bigrams for CJK text so Chinese and Japanese are searchable
 without a segmenter). A Raw section cites its `KnowledgeSource` with the page
-or slide it came from; a Wiki paragraph cites its page and, when the page
-carries `source_id`, the source behind it. Only the current version of each
-original is in the corpus. Synthesis through `ModelClient` is optional and may
+or slide it came from (an adopted legacy file's sections are its paragraphs);
+a Wiki paragraph cites its page and, when the page carries `source_id`, the
+source behind it. Only the current version of each original is in the
+corpus. Synthesis through `ModelClient` is optional and may
 cite only what retrieval returned: an answer that cites something it was not
 given is refused, and one that honestly cites nothing is reported as such.
 """
@@ -24,8 +25,8 @@ from common.execution import Failure, TraceIdentifiers
 from knowledge.contracts import KnowledgeSource
 from knowledge.lint import body_of, head_fields, read_pages
 from knowledge.modelcalls import failure_from_exception
-from knowledge.raw import RawIndex, one_line_ending, parse
-from knowledge.vault import Vault
+from knowledge.raw import RawIndex, load_document, one_line_ending
+from knowledge.vault import Vault, VaultError
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
 _TOKEN = re.compile(r"\w+", re.UNICODE)
@@ -134,8 +135,8 @@ def _corpus(vault: Vault) -> list[_Doc]:
         if entry.source.source_id in superseded:
             continue
         try:
-            document = parse(vault.read(entry.raw_ref))
-        except (ValueError, ValidationError, UnicodeDecodeError):
+            document = load_document(vault, entry)
+        except (ValueError, ValidationError, UnicodeDecodeError, VaultError):
             continue
         for number, section in enumerate(document.sections, 1):
             if not section.text.strip():

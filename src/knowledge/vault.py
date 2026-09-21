@@ -27,6 +27,10 @@ REQUIRED = ("index.md", "log.md", "raw", "wiki")
 BACKUP_DIR = ".ingest-backup"
 CACHE_DIR = ".ingest-cache"
 STATE_FILE = ".ingest-state.json"
+# Legacy Raw files adopted by content hash, so raw/ is never rewritten to
+# carry provenance (docs/PHASE_4_MIGRATION.md, slice 9).
+LEDGER_FILE = ".ingest-adopted.json"
+SNAPSHOT_DIR = ".ingest-snapshot"
 _SHA256 = re.compile(r"^[a-f0-9]{64}$")
 SOURCES_AREA = "wiki/sources/"
 CONFLICT_HEADING = "## ⚠️ 待裁決的衝突"
@@ -393,22 +397,36 @@ class Vault:
             pages.append((rel, title))
         return tuple(pages)
 
-    def state_read(self) -> dict[str, Any]:
-        """The platform's own state file, `{}` when absent or unreadable — a
-        corrupt state is a first run, never a failure."""
-        path = self.root / STATE_FILE
+    def _json_read(self, name: str) -> dict[str, Any]:
+        path = self.root / name
         try:
             loaded = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         except (OSError, ValueError, UnicodeDecodeError):
             return {}
         return loaded if isinstance(loaded, dict) else {}
 
-    def state_write(self, state: dict[str, Any]) -> None:
-        (self.root / STATE_FILE).write_text(
-            json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True),
+    def _json_write(self, name: str, data: dict[str, Any]) -> None:
+        (self.root / name).write_text(
+            json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True),
             encoding="utf-8",
             newline="\n",
         )
+
+    def state_read(self) -> dict[str, Any]:
+        """The platform's own state file, `{}` when absent or unreadable — a
+        corrupt state is a first run, never a failure."""
+        return self._json_read(STATE_FILE)
+
+    def state_write(self, state: dict[str, Any]) -> None:
+        self._json_write(STATE_FILE, state)
+
+    def ledger_read(self) -> dict[str, Any]:
+        """The adoption ledger: legacy Raw files by path with the content hash
+        they were adopted at. `{}` when absent or unreadable, like the state."""
+        return self._json_read(LEDGER_FILE)
+
+    def ledger_write(self, ledger: dict[str, Any]) -> None:
+        self._json_write(LEDGER_FILE, ledger)
 
     def _cache_path(self, key: str) -> Path:
         # The cache is keyed by a content hash and lives in its own directory;
@@ -494,6 +512,11 @@ class Vault:
         if target.is_dir():
             raise VaultError("unwritable_target", rel)
         return target
+
+    def check_writable(self, rel: str) -> None:
+        """The layout check a write would apply, without writing: raises the
+        `VaultError` the write would, so a plan can be refused before it starts."""
+        self._target(rel)
 
     def write(self, rel: str, content: str, *, stamp: str) -> bool:
         """Write one file; returns whether an existing file was backed up first."""
