@@ -215,8 +215,9 @@ class Gateway:
         """Remove a finished run's durable history; the plan reports what went.
 
         Only durable history is retired — this process's bounded memory evicts
-        itself — and only a succeeded run or one already continued qualifies; the
-        store's own closed code says why otherwise. A run this caller cannot see
+        itself — and only a run that is no longer executing qualifies: succeeded,
+        or suspended by a person's confirmation; the store's own closed code says
+        why otherwise. A run this caller cannot see
         is `unknown`. Durable writes happen on the calling thread.
         """
         try:

@@ -153,14 +153,12 @@ def check_continue(
 
 
 def check_retire(item: RunCheckpoint) -> None:
-    """Only history that is finished *durably* may be removed: a succeeded run, or
-    a suspended run whose continuation now carries its evidence forward. A running
-    record may still be alive somewhere, and a suspended one that was not continued
-    is still a recovery candidate; neither is history yet."""
-    finished = item.status == "succeeded" or (
-        item.status == "suspended" and item.continued_by is not None
-    )
-    if not finished:
+    """Only a record that is no longer executing may be removed. A succeeded run is
+    finished evidence; a suspended run has a person's confirmation that its process
+    is gone, and that same person may decide not to continue it — which is how a
+    run that failed for good leaves the store without being run again. A running
+    record may still be alive somewhere, so it is never history."""
+    if item.status == "running":
         raise CheckpointStoreError("invalid_transition")
 
 
@@ -182,8 +180,9 @@ class MemoryCheckpointStore:
     owner can neither observe nor block another's. Every write commits with one
     assignment. There is no TTL or eviction; `retire` is the only deletion, and a
     retired run's idempotency key stays bound as a tombstone that no longer
-    counts toward capacity. A new instance starts empty; this is not a durable
-    backend.
+    counts toward capacity. Records are bounded; tombstones grow with the keyed
+    runs ever retired, which is the price of the guarantee. A new instance starts
+    empty; this is not a durable backend.
     """
 
     def __init__(self, *, capacity: int = 50) -> None:
@@ -221,13 +220,14 @@ class MemoryCheckpointStore:
         item = checked_copy(checkpoint)
         check_create(item)
         if item.idempotency_key is not None:
-            if _key(item.owner, item.idempotency_key) in self._retired:
-                raise CheckpointStoreError("key_retired")
             existing = self._find_key(item.owner, item.idempotency_key)
             if existing is not None:
                 if not same_intent(existing, item):
                     raise CheckpointStoreError("key_conflict")
                 return existing.model_copy(deep=True)
+            # A key is live or retired, never both; the tombstone is the rarer case.
+            if _key(item.owner, item.idempotency_key) in self._retired:
+                raise CheckpointStoreError("key_retired")
         self._room(item)
         self._runs[_key(item.owner, item.run_id)] = item
         return item.model_copy(deep=True)

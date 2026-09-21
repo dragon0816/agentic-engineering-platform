@@ -338,10 +338,11 @@ recorded. B (process liveness) and C (leases) can be layered on later.
 ## Requirements and acceptance (slice 14 — checkpoint retention)
 
 1. `CheckpointStore.retire(owner, run_id)` removes exactly one record and only
-   when it is finished durably: `succeeded`, or `suspended` and already
-   continued. Anything else is `invalid_transition`; an unseen run is `missing`.
+   when it is no longer executing: `succeeded`, or `suspended` (continued or
+   not). A `running` record is `invalid_transition`; an unseen run is `missing`.
 2. A retired run's idempotency key stays bound as a tombstone: `create` under it
-   is `key_retired` for any intent, and tombstones do not count toward capacity.
+   is `key_retired` for any intent, tombstones do not count toward capacity, and
+   the SQLite database refuses the binding itself, not only the application.
 3. The SQLite schema moves to version `2`; a version-`1` file is migrated in
    place, and any other version refuses to open.
 4. `WorkflowEngine.retire` and `Gateway.retire` expose this per run, refuse a run

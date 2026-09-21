@@ -43,13 +43,19 @@ _SCHEMA = (
     " actor TEXT NOT NULL, namespace TEXT NOT NULL, run_id TEXT NOT NULL,"
     " idempotency_key TEXT, record TEXT NOT NULL,"
     " PRIMARY KEY (actor, namespace, run_id))",
-    # The database, not only the application, refuses a second binding of a key.
+    # The database, not only the application, refuses a second binding of a key:
+    # the index for a live key, the trigger below for a retired one.
     "CREATE UNIQUE INDEX IF NOT EXISTS checkpoints_key"
     " ON checkpoints (actor, namespace, idempotency_key) WHERE idempotency_key IS NOT NULL",
     # A retired run's key outlives its record, so it can never be executed again.
     "CREATE TABLE IF NOT EXISTS retired_keys ("
     " actor TEXT NOT NULL, namespace TEXT NOT NULL, idempotency_key TEXT NOT NULL,"
     " run_id TEXT NOT NULL, PRIMARY KEY (actor, namespace, idempotency_key))",
+    "CREATE TRIGGER IF NOT EXISTS checkpoints_refuse_retired_key"
+    " BEFORE INSERT ON checkpoints WHEN NEW.idempotency_key IS NOT NULL AND EXISTS ("
+    "  SELECT 1 FROM retired_keys WHERE actor = NEW.actor AND namespace = NEW.namespace"
+    "  AND idempotency_key = NEW.idempotency_key)"
+    " BEGIN SELECT RAISE(ABORT, 'key_retired'); END",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
@@ -258,13 +264,14 @@ class SqliteCheckpointStore:
         check_create(item)
         with self._write() as conn:
             if item.idempotency_key is not None:
-                if self._retired(conn, item.owner, item.idempotency_key):
-                    raise CheckpointStoreError("key_retired")
                 existing = self._select_key(conn, item.owner, item.idempotency_key)
                 if existing is not None:
                     if not same_intent(existing, item):
                         raise CheckpointStoreError("key_conflict")
                     return existing
+                # A key is live or retired, never both; the tombstone is the rarer case.
+                if self._retired(conn, item.owner, item.idempotency_key):
+                    raise CheckpointStoreError("key_retired")
             self._room(conn, item)
             self._insert(conn, item)
         return item

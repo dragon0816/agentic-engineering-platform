@@ -263,6 +263,15 @@ parent's payloads, so a sweep needs reference counting across records and is
 its own policy); retiring `running` records after some age (the platform still
 cannot know a foreign process is dead — the same reason suspension is manual).
 
+A suspended run is retirable whether or not it was continued: the person who
+confirmed its process gone is the same authority that may decide not to continue
+it, and that two-step path is how a run that failed for good leaves the store
+without ever being dispatched again (review finding on this slice; the first
+draft required a continuation, which would have leaked a slot per deterministic
+failure). Tombstones are never removed and grow with the keyed runs ever
+retired; that growth is the price of the guarantee and is documented rather than
+hidden behind a second capacity.
+
 Preserved: every existing transition rule, the owner scoping and
 indistinguishability of unseen runs, and the refusal of a live run mirrored
 from `suspend`. The SQLite schema version moves to `2`, with in-place migration

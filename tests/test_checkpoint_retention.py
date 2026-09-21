@@ -24,7 +24,7 @@ from test_engine_recovery import FailOnce, Stuck, confirmation
 from test_gateway_journal import JournalledHost, start
 
 from common.checkpoints import RunCheckpoint
-from common.execution import ResumePolicy
+from common.execution import RequestContext, ResumePolicy
 from workflow.checkpoints import CheckpointStore, CheckpointStoreError, MemoryCheckpointStore
 from workflow.checkpoints_sqlite import SCHEMA_VERSION, SqliteCheckpointStore
 
@@ -112,18 +112,26 @@ def test_a_retired_key_never_executes_again(make_store: StoreFactory) -> None:
     assert store.create(record(run_id="run-3")).run_id == "run-3"
 
 
-def test_only_finished_history_is_retirable(make_store: StoreFactory) -> None:
+def test_a_running_record_is_never_history(make_store: StoreFactory) -> None:
     store = make_store()
     running = store.create(record())
     failing(lambda: store.retire(running.owner, running.run_id), "invalid_transition")
-    waiting = store.replace(suspended(store.create(record(run_id="run-9"))), expected_revision=0)
-    # A suspended run nobody continued is still the only place its evidence lives.
-    failing(lambda: store.retire(waiting.owner, waiting.run_id), "invalid_transition")
     failing(lambda: store.retire(running.owner, "run-unknown"), "missing")
-    other = changed(running, run_id="run-1").owner.model_copy(update={"actor": "someone-else"})
+    other = running.owner.model_copy(update={"actor": "someone-else"})
     failing(lambda: store.retire(other, running.run_id), "missing")
     assert store.get(running.owner, running.run_id) == running
-    assert store.get(waiting.owner, waiting.run_id) == waiting
+
+
+def test_a_suspended_run_may_be_given_up_on(make_store: StoreFactory) -> None:
+    """The person who confirmed the process gone may also decide not to continue."""
+    store = make_store(capacity=1)
+    waiting = store.create(record(idempotency_key="event-1"))
+    waiting = store.replace(suspended(waiting), expected_revision=0)
+    retired = store.retire(waiting.owner, waiting.run_id)
+    assert retired.status == "suspended" and retired.continued_by is None
+    assert store.get(waiting.owner, waiting.run_id) is None
+    failing(lambda: store.create(record(run_id="run-2", idempotency_key="event-1")), "key_retired")
+    assert store.create(record(run_id="run-2")).run_id == "run-2"
 
 
 def test_a_continued_parent_is_history_once_its_child_exists(make_store: StoreFactory) -> None:
@@ -163,7 +171,8 @@ def test_a_version_one_file_is_migrated_in_place(tmp_path: Path) -> None:
     with SqliteCheckpointStore(path) as store:
         item = finished(store, idempotency_key="release-1")
     with sqlite3.connect(path) as editor:
-        # What a slice-10 store left behind: no tombstone table, version 1.
+        # What a slice-10 store left behind: no tombstone table or trigger, version 1.
+        editor.execute("DROP TRIGGER checkpoints_refuse_retired_key")
         editor.execute("DROP TABLE retired_keys")
         editor.execute("UPDATE checkpoint_meta SET value = '1' WHERE key = 'schema_version'")
     with SqliteCheckpointStore(path) as store:
@@ -178,6 +187,28 @@ def test_a_version_one_file_is_migrated_in_place(tmp_path: Path) -> None:
             "SELECT value FROM checkpoint_meta WHERE key = 'schema_version'"
         ).fetchone()
         assert version == "2"
+
+
+def test_the_database_itself_refuses_a_retired_key(tmp_path: Path) -> None:
+    path = tmp_path / "checkpoints.sqlite"
+    with SqliteCheckpointStore(path) as store:
+        item = finished(store, idempotency_key="release-1")
+        store.retire(item.owner, item.run_id)
+        fresh = record(run_id="run-2", idempotency_key="release-1")
+        # Bypass the store: a write path that forgets the tombstone probe still fails.
+        with pytest.raises(sqlite3.IntegrityError, match="key_retired"):
+            store._connection().execute(
+                "INSERT INTO checkpoints (actor, namespace, run_id, idempotency_key, record)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (
+                    fresh.owner.actor,
+                    fresh.owner.namespace,
+                    fresh.run_id,
+                    fresh.idempotency_key,
+                    fresh.model_dump_json(),
+                ),
+            )
+        assert store.get(fresh.owner, fresh.run_id) is None
 
 
 def test_a_retire_that_fails_to_commit_leaves_the_record(tmp_path: Path) -> None:
@@ -228,15 +259,27 @@ def test_the_gateway_retires_finished_history_only(host: Any) -> None:
     assert gateway.retire(context(), "run-does-not-exist").source == "unknown"
 
 
-def test_the_gateway_refuses_to_retire_a_recovery_candidate(host: Any) -> None:
+def test_a_failed_run_leaves_without_running_again(host: Any) -> None:
+    """suspend, then retire: the path for a run that failed for good."""
     built = host()
     gateway = built.restart(FailOnce())
     run_id = start(gateway, built).run.run_id
+    # Failed, but its durable record is still `running`: not history yet.
     with pytest.raises(CheckpointStoreError, match="invalid_transition"):
         gateway.retire(context(), run_id)
+    calls = len(built.handler.calls)
+    gateway.suspend(context(), run_id, confirmation(note="not worth continuing"))
+    gone = gateway.retire(context(), run_id)
+    assert gone.source == "journal" and gone.suspended_by == "leo"
+    assert built.restart().inspect(context(), run_id).source == "unknown"
+    assert len(built.handler.calls) == calls
+
+
+def test_a_continued_run_and_its_parent_are_both_retirable(host: Any) -> None:
+    built = host()
+    gateway = built.restart(FailOnce())
+    run_id = start(gateway, built).run.run_id
     gateway.suspend(context(), run_id, confirmation())
-    with pytest.raises(CheckpointStoreError, match="invalid_transition"):
-        gateway.retire(context(), run_id)
     resumed = asyncio.run(
         gateway.resume(context(), run_id, policy=ResumePolicy(uncertain="replay_read_only"))
     )
@@ -245,6 +288,42 @@ def test_the_gateway_refuses_to_retire_a_recovery_candidate(host: Any) -> None:
     parent = gateway.retire(context(), run_id)
     assert parent.source == "journal" and parent.suspended_by == "leo"
     assert gateway.retire(context(), resumed.workflow.run.run_id).source == "journal"
+
+
+def test_another_owner_cannot_learn_that_a_run_is_alive(host: Any) -> None:
+    async def scenario() -> None:
+        built = host()
+        gateway = built.restart(Stuck())
+        started_run = await gateway.execute_workflow(
+            context(), built.workflow.metadata.identity, {"count": 1}, workflow_timeout_seconds=0.01
+        )
+        other = RequestContext(
+            trace=context().trace,
+            actor="someone-else",
+            namespace=context().namespace,
+            channel="test",
+            message="retire",
+        )
+        try:
+            # Alive, but this caller may not learn even that.
+            assert gateway.retire(other, started_run.run.run_id).source == "unknown"
+        finally:
+            gateway.engine._tasks[started_run.run.run_id].cancel()
+            await gateway.engine.wait(started_run.run.run_id)
+
+    asyncio.run(scenario())
+
+
+def test_a_retired_run_is_an_ordinary_run_for_the_rest_of_the_process(host: Any) -> None:
+    built = host()
+    gateway = built.restart()
+    done = start(gateway, built)
+    gateway.retire(context(), done.run.run_id)
+    # No dead end: the in-memory path answers, and never points back at recovery.
+    resumed = asyncio.run(gateway.resume(context(), done.run.run_id))
+    assert resumed.source == "memory"
+    assert resumed.workflow is not None and resumed.workflow.run.failure is not None
+    assert resumed.workflow.run.failure.code != "use_recovery"
 
 
 def test_a_live_run_cannot_be_retired(host: Any) -> None:

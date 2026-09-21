@@ -849,17 +849,28 @@ class WorkflowEngine:
     def retire(self, context: RequestContext, run_id: str) -> JournalEntry | None:
         """Remove finished durable history so the store keeps room for new runs.
 
-        Only a succeeded run or a suspended run that was already continued may
-        go; the store refuses anything else, and a retired idempotency key can
-        never execute again. Refused while the run is alive here, like suspend.
+        A succeeded run, or a suspended one — continued or given up on by the
+        person who confirmed its process gone — may go; a running record never
+        may, and a retired idempotency key can never execute again. Refused
+        while the run is alive here, like suspend.
         """
         if self.journal is None:
             return None
         checked = RequestContext.model_validate(context)
+        owner = self.journal.owner_of(checked)
+        # Ownership first, as in suspend: another owner's live run is `missing`,
+        # never a hint that it exists and is running.
+        if self.journal.checkpoints.get(owner, run_id) is None:
+            raise CheckpointStoreError("missing")
         task = self._tasks.get(run_id)
         if task is not None and not task.done():
             raise CheckpointStoreError("invalid_transition")
-        retired = self.journal.checkpoints.retire(self.journal.owner_of(checked), run_id)
+        retired = self.journal.checkpoints.retire(owner, run_id)
+        # Its durable history is gone, so for the rest of this process the run
+        # is an ordinary in-memory one and resume no longer points at recovery.
+        record = self._runs.get(run_id)
+        if record is not None:
+            record.journal = None
         return self.journal.entry_of(retired)
 
     async def recover(

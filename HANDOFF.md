@@ -15,10 +15,10 @@ deletion at all. The owner asked for everything listed to be finished and Phase
 
 ## Completed
 
-- `CheckpointStore.retire(owner, run_id)` on both backends. Legal for exactly two
-  kinds of record — a `succeeded` run, or a `suspended` run already continued —
-  and `invalid_transition` otherwise (`check_retire` is a shared rule like the
-  others). An unseen run is `missing`.
+- `CheckpointStore.retire(owner, run_id)` on both backends. Legal for a record
+  that is no longer executing — a `succeeded` run, or a `suspended` run whether
+  continued or not — and `invalid_transition` for a `running` one (`check_retire`
+  is a shared rule like the others). An unseen run is `missing`.
 - **A retired idempotency key never executes again.** Retiring a keyed record
   leaves a tombstone; `create` under that key is the new closed code
   `key_retired` whatever the intent, `find_key` no longer finds a record, and
@@ -32,20 +32,37 @@ deletion at all. The owner asked for everything listed to be finished and Phase
   engine maps `key_retired` to `checkpoint_key_retired` through the existing
   store-error path, so a retired key resubmitted after a restart is refused
   without dispatch.
-- 16 tests (`tests/test_checkpoint_retention.py`), parametrized over both
+- 22 tests (`tests/test_checkpoint_retention.py`), parametrized over both
   backends where they apply: freeing a slot, the tombstone under the same and a
-  different intent, every refusal, a continued parent, tombstone and schema
-  survival across a restart, the version-`1` migration, an ambiguous commit
-  leaving the record, and the engine/Gateway paths including a live run.
+  different intent, a running record never being history, giving up on a
+  suspended run, a continued parent, tombstone and schema survival across a
+  restart, the version-`1` migration, the database-level refusal, an ambiguous
+  commit leaving the record, and the engine/Gateway paths: a failed run leaving
+  without running again, a continued run and its parent, another owner unable
+  to learn a run is alive, a retired run becoming an ordinary in-memory one, a
+  live run, a retired key resubmitted after a restart, and an unjournalled
+  engine.
 - Docs: checkpoint plan "Retention" plus its three stale "no deletion" sentences,
   `docs/CONTRACTS.md`, phase spec slice 14 and sequence, migration decision
   (with the alternatives not taken), README.
 
+- PR #21 opened; pre-merge review applied (9 findings, three of them real
+  defects): `retire` now checks ownership before liveness, so another owner's
+  live run is `missing` rather than a hint it exists; **any suspended run is
+  retirable, continued or not** — the first draft required a continuation,
+  which would have leaked one slot per deterministic failure, whereas now a run
+  that failed for good leaves by `suspend` then `retire` without ever running
+  again; a retired run's in-memory record drops its journal so `resume` no
+  longer dead-ends at `use_recovery`; the SQLite database refuses a retired key
+  itself through a trigger, not only the application; keyed `create` probes
+  the live key before the tombstone; `entry_of` is the one name for the
+  journal's metadata view; tombstone growth is documented as the price of the
+  guarantee; and the stale `docs/CONTRACTS.md` sentences were reconciled.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. The owner has authorized merging once Phase 3 is
-  confirmed complete.
+- PR #21 is open with the review posted; merge on green CI is authorized by the
+  owner once Phase 3 is confirmed complete.
 
 ## Remaining
 
@@ -83,7 +100,7 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 466 tests (450 prior + 16 retention)
+# PASS: 472 tests (450 prior + 22 retention)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

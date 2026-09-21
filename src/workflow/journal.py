@@ -165,10 +165,6 @@ class RunJournal:
     @staticmethod
     def entry_of(checkpoint: RunCheckpoint) -> JournalEntry:
         """The metadata-only view of any record, retired ones included."""
-        return RunJournal._entry(checkpoint)
-
-    @staticmethod
-    def _entry(checkpoint: RunCheckpoint) -> JournalEntry:
         return JournalEntry(
             run_id=checkpoint.run_id,
             plan=checkpoint.recovery_plan(),
@@ -180,7 +176,7 @@ class RunJournal:
     def read(self, context: RequestContext, run_id: RunId) -> JournalEntry | None:
         """Metadata-only restart evidence for the run's owner; never dispatch."""
         checkpoint = self.checkpoints.get(self.owner_of(context), run_id)
-        return None if checkpoint is None else self._entry(checkpoint)
+        return None if checkpoint is None else self.entry_of(checkpoint)
 
     def suspend(
         self, context: RequestContext, run_id: RunId, confirmation: SuspensionConfirmation
@@ -209,7 +205,7 @@ class RunJournal:
             ),
             expected_revision=checkpoint.revision,
         )
-        return self._entry(updated)
+        return self.entry_of(updated)
 
     def continuation(
         self, state_run_id: RunId, context: RequestContext, parent: RunCheckpoint

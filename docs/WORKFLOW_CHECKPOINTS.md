@@ -252,16 +252,16 @@ starting a second one, even in a process whose in-memory key table is empty.
 
 The store's capacity bounds the production start path, so history must be
 removable — but only history. `CheckpointStore.retire(owner, run_id)` deletes
-one record and returns it. It is legal for exactly two kinds of record:
+one record and returns it. It is legal for a record that is no longer executing:
 
 - a `succeeded` run, whose every step is completed evidence; and
-- a `suspended` run that has been continued (`continued_by` is set), whose
-  evidence now lives on in its continuation.
+- a `suspended` run — whether continued, so its evidence lives on in the
+  continuation, or not, because the person who confirmed its process gone may
+  also decide not to continue it. This is how a run that failed for good leaves
+  the store: `suspend`, then `retire`, and nothing runs again.
 
-A `running` record may still be alive in some process, and a suspended record
-nobody continued is still the only place its evidence lives and still a recovery
-candidate; both are `invalid_transition`. A run this owner cannot see is
-`missing`. Nothing is retired automatically: retention is a host decision, taken
+A `running` record may still be alive in some process and is never history,
+however old: `invalid_transition`. A run this owner cannot see is `missing`. Nothing is retired automatically: retention is a host decision, taken
 per run, through `WorkflowEngine.retire` / `Gateway.retire`, and refused while
 the run is alive in that engine exactly as suspension is.
 
@@ -269,7 +269,10 @@ the run is alive in that engine exactly as suspension is.
 leaves a tombstone binding `(owner, key)` to the retired run id. `create` under
 that key is `key_retired` whatever the intent, `find_key` no longer finds a
 record, and tombstones do not count toward capacity. This is what lets history
-be deleted without violating the rule above. The SQLite schema is now version
+be deleted without violating the rule above. Tombstones are never removed, so
+they grow with the keyed runs ever retired — a few small values per run, the
+price of the guarantee — and both the application and, in SQLite, a trigger
+refuse to bind a retired key. The SQLite schema is now version
 `2` (a `retired_keys` table); a version-`1` file is migrated in place, and older
 code refuses a version-`2` file rather than opening it without the table and
 letting a retired key run again.

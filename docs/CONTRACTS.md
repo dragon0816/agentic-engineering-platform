@@ -244,8 +244,8 @@ entry points for run control, so CLI, Agent runtime and a future n8n adapter
 continue runs through the same Gateway and engine contracts as routed workflows.
 `Gateway.suspend(request, run_id, confirmation)` and
 `Gateway.retire(request, run_id)` complete the set. Each returns
-a `RunControlResult` (`action`, `run_id`, `source`, `plan` for inspect and
-suspend, `workflow` snapshot for resume, `suspended_by` when the durable record
+a `RunControlResult` (`action`, `run_id`, `source`, `plan` for inspect, suspend
+and retire, `workflow` snapshot for resume, `suspended_by` when the durable record
 carries a confirmation); `source: unknown` with no payload means the run is
 unknown to this caller, exactly as the engine reports it.
 `RunControlResult.run_id` always echoes the requested
@@ -263,11 +263,11 @@ journalled run; a run that is alive here or already suspended raises the
 engine's own closed code rather than a vocabulary invented at this layer.
 `resume` continues a journalled run through recovery — so its continuation is
 journalled too and the durable "continued once" guard holds — and any other run
-in memory. `retire` removes finished durable history only (a succeeded run, or a
-suspended run already continued) and reports the plan of what went; the store's
+in memory. `retire` removes durable history that is no longer executing (a succeeded run,
+or a suspended run, continued or not) and reports the plan of what went; the store's
 closed code says why anything else is refused, and a retired idempotency key can
-never execute again (`key_retired`). `inspect` and `suspend` are synchronous and do their durable
-I/O on the calling thread, so a host already inside an event loop should call
+never execute again (`key_retired`). `inspect`, `suspend` and `retire` are synchronous and do their
+durable I/O on the calling thread, so a host already inside an event loop should call
 them through `asyncio.to_thread`; `resume` is asynchronous like `execute` and
 offloads that I/O itself.
 
