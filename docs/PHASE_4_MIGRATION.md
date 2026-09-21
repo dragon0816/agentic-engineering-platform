@@ -79,3 +79,32 @@ Intentional differences in the adapted implementation:
   left the vault half-applied.
 - The backup stamp is a single path component and the automatic one carries
   microseconds; the source used a second-resolution clock stamp.
+
+## Slice 2 source-first decision
+
+Re-inspected `vault/collect.py` (copy project docs into `raw/Programming/`,
+hash-compare duplicate checkouts, report docs that changed after ingestion) and
+the `Vault.raw_sources` / `ingested_paths` / `pending` excerpt (dedup by the
+`source_path` recorded in `wiki/sources/`).
+
+Decision (2026-09-21): **ADAPT** the intent — originals enter Raw exactly once,
+duplicates are detected by content, a changed original is reported rather than
+silently treated as done — into `knowledge.raw`, and **do not migrate** the
+path-keyed dedup. `collect.py`'s hash comparison is the behavior worth keeping
+and is now the identity rule itself: `source_for` derives the source from the
+bytes. `collect.py`'s project-scanning roots and its `HANDOFF.md` exclusion are
+host concerns, not platform behavior.
+
+Intentional differences: Raw files carry typed provenance frontmatter
+(`source_id`, `source_sha256`, `original_ref`, `raw_ref`, `extractor`,
+`created`) and per-section markers for page/slide/image, so relationships are
+recoverable from the file alone; the source's Raw was whatever a human or
+`collect.py` dropped there. Raw is write-once (`Vault.write_raw` refuses an
+existing file) rather than merely "never written by the tool". A drifted
+original keeps the old Raw and writes the new one beside it under a
+hash-suffixed name; the source's `--force` rebuilt the wiki page in place and
+left no trace of the earlier text. Existing Raw files without provenance are
+skipped by the index, not adopted; adoption is slice 9 with a snapshot first.
+
+Rollback removes `knowledge/raw.py`, `Vault.write_raw` / `read_original` /
+`raw_files` / `exists` and the tests; nothing else imports them.

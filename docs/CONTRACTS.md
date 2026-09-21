@@ -419,3 +419,46 @@ contract refuses an outcome that claims otherwise. An apply is whole or not at
 all: what every target held before is kept in memory, and a write that fails
 part-way puts it all back and raises `write_failed`. Nothing in this module
 calls a model.
+
+## Drop → Raw (Phase 4, slice 2)
+
+`knowledge.raw` turns an original under `drop/` into a Raw Markdown file that
+carries its own provenance. **Identity is the content**: `source_for(bytes,
+original_ref)` derives the `sha256` and a `source_id` (`src-<16 hex>`) from the
+bytes, so the same original dropped under two names is one source and a
+changed original is a new one; the path-keyed dedup of the source tooling is
+not migrated.
+
+`RawSection` is one extracted unit — `kind` `text` / `table` / `image`, its
+text, optional `page` and `slide`, and an `image_ref` under `raw/` exactly for
+images (an image may also carry a description in `text`). `RawDocument` is a
+document-level `KnowledgeSource` whose `raw_ref` names the file (no page or
+slide at document level — sections carry those), the `extractor` that produced
+it, `created`, and at least one section. `render` writes the file: provenance
+as frontmatter (`source_id`, `source_sha256`, `original_ref`, `raw_ref`,
+`extractor`, `created`) and each section behind a numbered
+`<!-- raw-section N kind=… page=… slide=… image=… -->` marker; `parse` reads it
+back and the two round-trip exactly. Section text may not contain a marker or
+a frontmatter block, so the file is unambiguous.
+
+`Vault.write_raw(rel, content)` is the only way the platform writes under
+`raw/`: it creates and never replaces (`raw_exists`), refuses anything outside
+`raw/` (`outside_raw`) and a resolved location that leaves it. Raw is immutable
+in the only sense a pipeline can honour — write once, never change. `drop/` is
+read through `Vault.read_original` (`outside_drop`, `missing_original`) and
+never written.
+
+`DropIntake(vault, extractors).intake(drop_rel, mode, today)` returns an
+`IntakeOutcome` whose `status` is closed: `written` (a new Raw file at the path
+derived from the drop path), `duplicate` (the content is already in Raw —
+nothing written, the existing `raw_ref` and source reported), `drifted` (the
+same `original_ref` is in Raw with other content — the old Raw stays, the new
+one is written beside it as `<stem>--<8 hex>.md`, and `supersedes` names the
+old source), `unsupported` (no extractor for the suffix), `undecodable` or
+`empty`. Dry run is the default and reports exactly what an apply writes; the
+contract refuses an outcome whose payload does not match its status. Extraction
+is behind the `Extractor` protocol (`name`, `suffixes`, `extract(bytes)`);
+`PlainTextExtractor` and `MarkdownExtractor` (which drops the original's own
+frontmatter) ship with no new dependency. `raw_index` lists every Raw file that
+carries this provenance and skips the rest, so an existing vault's content is
+never rewritten.

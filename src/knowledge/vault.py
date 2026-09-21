@@ -41,6 +41,10 @@ WriteRefusalCode = Literal[
     "outside_writable",
     "unwritable_target",
     "write_failed",
+    "outside_raw",
+    "raw_exists",
+    "outside_drop",
+    "missing_original",
 ]
 PlanProblemCode = Literal[
     "no_pages",
@@ -316,6 +320,47 @@ class Vault:
     def read(self, rel: str) -> str:
         _, target = self._resolve(rel)
         return target.read_text(encoding="utf-8") if target.is_file() else ""
+
+    def exists(self, rel: str) -> bool:
+        return self._resolve(rel)[1].exists()
+
+    def read_original(self, rel: str) -> bytes:
+        """The bytes of one original under drop/. Drop is read, never written."""
+        clean = normalize(rel)
+        if not clean.startswith("drop/"):
+            raise VaultError("outside_drop", rel)
+        resolved, target = self._resolve(clean)
+        if not resolved.startswith("drop/"):
+            raise VaultError("outside_drop", rel)
+        if not target.is_file():
+            raise VaultError("missing_original", rel)
+        return target.read_bytes()
+
+    def raw_files(self) -> tuple[str, ...]:
+        """Every Markdown file under raw/ except assets, in path order."""
+        root = self.root / "raw"
+        found = []
+        for path in sorted(root.rglob("*.md")):
+            rel = path.relative_to(self.root).as_posix()
+            if "/assets/" not in rel:
+                found.append(rel)
+        return tuple(found)
+
+    def write_raw(self, rel: str, content: str) -> None:
+        """The one way raw/ is written: create, never replace. Raw is immutable
+        in the only sense a pipeline can honour — write once, never change."""
+        clean = normalize(rel)
+        if refusal_for(clean) == "escapes_vault":
+            raise VaultError("escapes_vault", rel)
+        if not clean.startswith("raw/"):
+            raise VaultError("outside_raw", rel)
+        resolved, target = self._resolve(clean)
+        if not resolved.startswith("raw/"):
+            raise VaultError("outside_raw", rel)
+        if target.exists():
+            raise VaultError("raw_exists", rel)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
 
     def _target(self, rel: str) -> Path:
         code = refusal_for(rel)

@@ -78,14 +78,45 @@ enforced in code, never left to a prompt:
    provenance and the closed codes. All existing tests, lint, strict types,
    packaging and CI must continue to pass.
 
+## Requirements and acceptance (slice 2 — Drop → Raw with provenance)
+
+1. `knowledge.raw` defines `RawSection` (kind `text` / `table` / `image`, the
+   text, optional `page` and `slide`, an `image_ref` exactly for images) and
+   `RawDocument` (a document-level `KnowledgeSource` whose `raw_ref` names the
+   file, the extractor that produced it, the creation date, at least one
+   section). `render` writes the Raw Markdown — provenance as frontmatter,
+   every section behind a marker carrying its page/slide/image — and `parse`
+   reads it back; the two round-trip exactly, so a reader, a lint and a query
+   all recover the same relationships from the file alone.
+2. Identity is the content: `source_for(bytes, original_ref)` derives the
+   `sha256` and a `source_id` from the bytes, so the same original dropped
+   under two names is one source and a changed original is a new one. The
+   path-keyed dedup of the source tooling is not migrated.
+3. `Vault.write_raw` is the only way the platform writes under `raw/`: it
+   creates and never overwrites (`raw_exists`), so Raw stays immutable in the
+   only sense a pipeline can honour — write once, never change. `drop/` is
+   never written at all.
+4. `DropIntake.intake(drop_rel, mode, today)` reads one original from `drop/`
+   (refusing anything outside it) and returns a typed `IntakeOutcome`:
+   `written` (a new Raw document, its path chosen from the drop path),
+   `duplicate` (the content is already in Raw; nothing written, the existing
+   `raw_ref` reported), `drifted` (the same `original_ref` is in Raw with other
+   content; the old Raw is kept, the new one is written beside it under a
+   hash-suffixed name, and `supersedes` names the old source), `unsupported`,
+   `undecodable` or `empty`. Dry run is the default and reports exactly what an
+   apply would write.
+5. Extraction is behind an `Extractor` protocol keyed by suffix. Plain text and
+   Markdown extractors ship with no new dependency; office formats and images
+   are slices 3 and 4.
+6. Raw files without provenance frontmatter (an existing vault's content) are
+   ignored by the intake's index, never rewritten; adopting them is slice 9.
+7. Tests cover the contracts and their refusals, the render/parse round trip
+   with pages, slides and images, both extractors, every intake status in both
+   modes, that Raw is never overwritten and Drop never written, and that
+   identity follows content rather than path.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 2 — Drop → Raw with provenance: `RawDocument` and `RawSection`
-  contracts; an intake that hashes an original into a `KnowledgeSource`, writes
-  Raw Markdown whose frontmatter carries the typed provenance, and deduplicates
-  by content hash rather than path (the source's known sharp edge). Plain-text
-  and Markdown extraction with no new dependency; an `Extractor` protocol for
-  the rest.
 - Slice 3 — Office extraction: PDF, PPTX and DOCX adapters behind the
   `Extractor` protocol as an optional dependency extra (license and maintenance
   recorded before adoption); text, tables as Markdown, image files saved beside
