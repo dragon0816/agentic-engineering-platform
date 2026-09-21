@@ -48,6 +48,15 @@ outlived the process that started it. Requirements:
   durable I/O on the calling thread; the older `docs/CONTRACTS.md` paragraph was
   reconciled with the new entry point and asynchrony.
 
+- Fixed a pre-existing flaky test that CI caught on this branch:
+  `test_inputs_and_results_are_owned_by_the_run_even_after_caller_timeout`
+  asserted that two steps had run within a 20 ms caller wait, which a slow
+  Windows runner does not guarantee. It now waits on an `asyncio.Event` the
+  second step sets, which is deterministic. The engine under test has no
+  journal, so this was flakiness exposed by CI, not a regression from this
+  slice; the PR-triggered run on the same commit passed while the push-triggered
+  one failed.
+
 ## In Progress
 
 - PR #20 is open with the review posted; CI results for the final head are
