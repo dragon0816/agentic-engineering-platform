@@ -335,6 +335,23 @@ recorded. B (process liveness) and C (leases) can be layered on later.
    restart, continue-once, resuming without a confirmation, a live run, and
    denied authorization after a restart.
 
+## Requirements and acceptance (slice 14 — checkpoint retention)
+
+1. `CheckpointStore.retire(owner, run_id)` removes exactly one record and only
+   when it is finished durably: `succeeded`, or `suspended` and already
+   continued. Anything else is `invalid_transition`; an unseen run is `missing`.
+2. A retired run's idempotency key stays bound as a tombstone: `create` under it
+   is `key_retired` for any intent, and tombstones do not count toward capacity.
+3. The SQLite schema moves to version `2`; a version-`1` file is migrated in
+   place, and any other version refuses to open.
+4. `WorkflowEngine.retire` and `Gateway.retire` expose this per run, refuse a run
+   alive in that engine, and add no vocabulary of their own.
+5. Nothing is retired automatically, and payloads are not removed.
+6. Tests cover both backends: freeing a slot, the tombstone under same and
+   different intent, every refusal, a continued parent, restart survival, the
+   version-`1` migration, an ambiguous commit, and the engine/Gateway paths
+   including a retired key resubmitted after a restart.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -352,6 +369,7 @@ recorded. B (process liveness) and C (leases) can be layered on later.
 - Slice 11: content-addressed protected payload storage.
 - Slice 12: engine recovery with manual, human-confirmed suspension.
 - Slice 13: Gateway run control over durable evidence.
+- Slice 14: checkpoint retention with idempotency-key tombstones.
 - Later Phase 3 work (each needs explicit scope): a Gateway surface for run
   control over the journal, and process-liveness or lease-based suspension if
   single-Bridge manual recovery ever stops being enough.

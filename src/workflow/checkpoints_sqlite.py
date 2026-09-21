@@ -24,6 +24,7 @@ from workflow.checkpoints import (
     check_continue,
     check_create,
     check_replace,
+    check_retire,
     checked_copy,
     linked_parent,
     same_intent,
@@ -32,7 +33,10 @@ from workflow.checkpoints import (
     validate_run_id,
 )
 
-SCHEMA_VERSION = "1"
+# Version 2 adds retired-key tombstones. Older code refuses a version-2 file
+# rather than opening it without the table and letting a retired key run again.
+SCHEMA_VERSION = "2"
+_MIGRATABLE = frozenset({"1"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS checkpoint_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS checkpoints ("
@@ -42,6 +46,10 @@ _SCHEMA = (
     # The database, not only the application, refuses a second binding of a key.
     "CREATE UNIQUE INDEX IF NOT EXISTS checkpoints_key"
     " ON checkpoints (actor, namespace, idempotency_key) WHERE idempotency_key IS NOT NULL",
+    # A retired run's key outlives its record, so it can never be executed again.
+    "CREATE TABLE IF NOT EXISTS retired_keys ("
+    " actor TEXT NOT NULL, namespace TEXT NOT NULL, idempotency_key TEXT NOT NULL,"
+    " run_id TEXT NOT NULL, PRIMARY KEY (actor, namespace, idempotency_key))",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
@@ -74,6 +82,12 @@ class SqliteCheckpointStore:
                 if row is None:
                     conn.execute(
                         "INSERT INTO checkpoint_meta (key, value) VALUES ('schema_version', ?)",
+                        (SCHEMA_VERSION,),
+                    )
+                elif row[0] in _MIGRATABLE:
+                    # The tables above are additive; only the version mark moves.
+                    conn.execute(
+                        "UPDATE checkpoint_meta SET value = ? WHERE key = 'schema_version'",
                         (SCHEMA_VERSION,),
                     )
                 elif row[0] != SCHEMA_VERSION:
@@ -179,6 +193,14 @@ class SqliteCheckpointStore:
         ).fetchone()
         return SqliteCheckpointStore._load(row)
 
+    @staticmethod
+    def _retired(conn: sqlite3.Connection, owner: CheckpointOwner, key: str) -> bool:
+        row = conn.execute(
+            "SELECT 1 FROM retired_keys WHERE actor = ? AND namespace = ? AND idempotency_key = ?",
+            (owner.actor, owner.namespace, key),
+        ).fetchone()
+        return row is not None
+
     def _room(self, conn: sqlite3.Connection, item: RunCheckpoint) -> None:
         exists = conn.execute(
             "SELECT 1 FROM checkpoints WHERE actor = ? AND namespace = ? AND run_id = ?",
@@ -236,6 +258,8 @@ class SqliteCheckpointStore:
         check_create(item)
         with self._write() as conn:
             if item.idempotency_key is not None:
+                if self._retired(conn, item.owner, item.idempotency_key):
+                    raise CheckpointStoreError("key_retired")
                 existing = self._select_key(conn, item.owner, item.idempotency_key)
                 if existing is not None:
                     if not same_intent(existing, item):
@@ -268,4 +292,24 @@ class SqliteCheckpointStore:
             self._room(conn, item)
             self._update(conn, linked_parent(parent, item))
             self._insert(conn, item)
+        return item
+
+    def retire(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint:
+        checked = validate_owner(owner)
+        identifier = validate_run_id(run_id)
+        with self._write() as conn:
+            item = self._select(conn, checked, identifier)
+            if item is None:
+                raise CheckpointStoreError("missing")
+            check_retire(item)
+            if item.idempotency_key is not None:
+                conn.execute(
+                    "INSERT INTO retired_keys (actor, namespace, idempotency_key, run_id)"
+                    " VALUES (?, ?, ?, ?)",
+                    (checked.actor, checked.namespace, item.idempotency_key, item.run_id),
+                )
+            conn.execute(
+                "DELETE FROM checkpoints WHERE actor = ? AND namespace = ? AND run_id = ?",
+                (checked.actor, checked.namespace, identifier),
+            )
         return item

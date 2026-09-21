@@ -846,6 +846,22 @@ class WorkflowEngine:
             raise CheckpointStoreError("invalid_transition")
         return self.journal.suspend(checked, run_id, confirmation)
 
+    def retire(self, context: RequestContext, run_id: str) -> JournalEntry | None:
+        """Remove finished durable history so the store keeps room for new runs.
+
+        Only a succeeded run or a suspended run that was already continued may
+        go; the store refuses anything else, and a retired idempotency key can
+        never execute again. Refused while the run is alive here, like suspend.
+        """
+        if self.journal is None:
+            return None
+        checked = RequestContext.model_validate(context)
+        task = self._tasks.get(run_id)
+        if task is not None and not task.done():
+            raise CheckpointStoreError("invalid_transition")
+        retired = self.journal.checkpoints.retire(self.journal.owner_of(checked), run_id)
+        return self.journal.entry_of(retired)
+
     async def recover(
         self,
         context: RequestContext,

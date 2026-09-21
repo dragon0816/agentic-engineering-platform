@@ -244,3 +244,26 @@ suspension (option A) was chosen over process-liveness checks or leases because
 the platform cannot honestly claim to know a foreign process is dead; a person
 claims it and the claim is recorded. Rollback removes `workflow/journal.py` and
 the engine's optional `journal` argument; runs stay in memory as before.
+
+## Slice 14 source-first decision
+
+Decision (2026-09-21): finished durable history is removable through an explicit,
+per-run `retire`, and a retired run's idempotency key becomes a tombstone.
+
+Why: since slice 12 the checkpoint store's capacity bounds the production start
+path, and the store had no deletion at all — the plan deliberately deferred it
+because deleting history could make a used key executable again. Tombstones
+resolve that tension: the record goes, the key binding stays, and capacity
+counts records only.
+
+Alternatives not taken: a TTL or oldest-first eviction (silent deletion is
+exactly what the plan forbids, and "old" says nothing about whether a run is
+finished); deleting payloads with the record (a continuation shares its
+parent's payloads, so a sweep needs reference counting across records and is
+its own policy); retiring `running` records after some age (the platform still
+cannot know a foreign process is dead — the same reason suspension is manual).
+
+Preserved: every existing transition rule, the owner scoping and
+indistinguishability of unseen runs, and the refusal of a live run mirrored
+from `suspend`. The SQLite schema version moves to `2`, with in-place migration
+of `1`, so older code fails closed on a file it does not fully understand.

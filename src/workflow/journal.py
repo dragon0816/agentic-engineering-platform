@@ -163,6 +163,11 @@ class RunJournal:
         return self.checkpoints.replace(updated, expected_revision=state.checkpoint.revision)
 
     @staticmethod
+    def entry_of(checkpoint: RunCheckpoint) -> JournalEntry:
+        """The metadata-only view of any record, retired ones included."""
+        return RunJournal._entry(checkpoint)
+
+    @staticmethod
     def _entry(checkpoint: RunCheckpoint) -> JournalEntry:
         return JournalEntry(
             run_id=checkpoint.run_id,

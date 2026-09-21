@@ -1,92 +1,81 @@
-# Handoff — Phase 3 Gateway run control over the journal (slice 13)
+# Handoff — Phase 3 checkpoint retention (slice 14, closes Phase 3)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-3/gateway-journal`, based on `main` at `6c51679` (PR #19 merged).
+Branch: `phase-3/checkpoint-retention`, based on `main` at `7416baf` (PR #20 merged).
 
 ## Goal
 
-Phase 3 slice 13, chosen by the owner: let the Gateway's existing run-control
-entry points reach durable evidence, so a host uses one API whether or not a run
-outlived the process that started it. Requirements:
-`docs/phases/PHASE_3_WORKFLOW.md` (slice 13); contracts:
-`docs/CONTRACTS.md`; plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Engine recovery").
+Close the last known operational gap of Phase 3: since slice 12 the checkpoint
+store's capacity bounds the production start path, and the store had no
+deletion at all. The owner asked for everything listed to be finished and Phase
+3 confirmed complete, then Phase 4 begun. Requirements:
+`docs/phases/PHASE_3_WORKFLOW.md` (slice 14); decision and alternatives:
+`docs/PHASE_3_MIGRATION.md` (slice 14); plan: `docs/WORKFLOW_CHECKPOINTS.md`
+("Retention").
 
 ## Completed
 
-- `RunControlResult` gained `source` (`memory` / `journal` / `unknown`), a
-  `suspend` action and `suspended_by`, with validators pinning what each action
-  may report and keeping `unknown` empty.
-- `Gateway.inspect` answers from the durable record whenever it exists — only it
-  knows whether a run was suspended or already continued — and from this
-  process's history otherwise; `source` says which answered.
-- `Gateway.suspend(request, run_id, confirmation)` records a person's
-  `SuspensionConfirmation` against the durable record. A run this caller cannot
-  see is `unknown` like everywhere else; a live or already suspended run raises
-  the engine's own closed code rather than a vocabulary invented at this layer.
-- `Gateway.resume` continues a journalled run through `recover` and any other
-  run through the in-memory path, so the durable "continued once" guard always
-  applies and a journalled continuation is itself journalled.
-- The engine now records *why* a step is uncertain: the Bridge failure code is
-  written onto the still-`started` evidence (`RunJournal.step_failed`). This is
-  the one journal write whose failure changes nothing — the step already ran and
-  `started` is already the conservative truth — so a refusing store only costs
-  the explanation, never the outcome.
-- 10 tests (`tests/test_gateway_journal.py`) over a real restart: the result
-  contract, memory-then-journal fallback, an unjournalled engine, unknown and
-  foreign runs, suspend-then-resume across processes, continue-once, resuming
-  without a confirmation, a live run, and denied authorization after a restart.
-- Docs: phase spec slice 13, `docs/CONTRACTS.md`, checkpoint plan, README.
-
-- PR #20 opened; pre-merge review applied: the step-failure journal write moved
-  *before* the terminal status assignment, closing the only window where a
-  caller-wait timeout could overwrite a finished run's real failure code;
-  `inspect` now prefers the durable record, so a suspension is visible while the
-  run is still in this process's history (previously a host polling `inspect`
-  would keep seeing `memory`/no confirmation and re-call `suspend`, which threw);
-  `resume` offloads its durable probe to a thread instead of reading the disk on
-  the event loop, and the sync `inspect`/`suspend` say plainly that they do
-  durable I/O on the calling thread; the older `docs/CONTRACTS.md` paragraph was
-  reconciled with the new entry point and asynchrony.
-
-- Fixed a pre-existing flaky test that CI caught on this branch:
-  `test_inputs_and_results_are_owned_by_the_run_even_after_caller_timeout`
-  asserted that two steps had run within a 20 ms caller wait, which a slow
-  Windows runner does not guarantee. It now waits on an `asyncio.Event` the
-  second step sets, which is deterministic. The engine under test has no
-  journal, so this was flakiness exposed by CI, not a regression from this
-  slice; the PR-triggered run on the same commit passed while the push-triggered
-  one failed.
+- `CheckpointStore.retire(owner, run_id)` on both backends. Legal for exactly two
+  kinds of record — a `succeeded` run, or a `suspended` run already continued —
+  and `invalid_transition` otherwise (`check_retire` is a shared rule like the
+  others). An unseen run is `missing`.
+- **A retired idempotency key never executes again.** Retiring a keyed record
+  leaves a tombstone; `create` under that key is the new closed code
+  `key_retired` whatever the intent, `find_key` no longer finds a record, and
+  tombstones do not count toward capacity.
+- SQLite schema version `2` (`retired_keys` table). A version-`1` file is migrated
+  in place; any other version refuses to open, so older code fails closed on a
+  file it does not fully understand.
+- `WorkflowEngine.retire` and `Gateway.retire` (new `retire` action on
+  `RunControlResult`), refusing a run alive in that engine like `suspend`, with
+  `missing` folded into `unknown` for the same indistinguishability rule. The
+  engine maps `key_retired` to `checkpoint_key_retired` through the existing
+  store-error path, so a retired key resubmitted after a restart is refused
+  without dispatch.
+- 16 tests (`tests/test_checkpoint_retention.py`), parametrized over both
+  backends where they apply: freeing a slot, the tombstone under the same and a
+  different intent, every refusal, a continued parent, tombstone and schema
+  survival across a restart, the version-`1` migration, an ambiguous commit
+  leaving the record, and the engine/Gateway paths including a live run.
+- Docs: checkpoint plan "Retention" plus its three stale "no deletion" sentences,
+  `docs/CONTRACTS.md`, phase spec slice 14 and sequence, migration decision
+  (with the alternatives not taken), README.
 
 ## In Progress
 
-- PR #20 is open with the review posted; CI results for the final head are
-  recorded on the PR.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available. The owner has authorized merging once Phase 3 is
+  confirmed complete.
 
 ## Remaining
 
-- Review and merge this PR.
-- **Checkpoint retention is the one known operational gap.** The store has no
-  TTL, eviction or deletion by design, and since slice 12 its capacity bounds
-  the production start path: at capacity, new journalled runs fail
-  `checkpoint_capacity` permanently and across restarts. A retention policy —
-  what may be pruned, and how without making a used idempotency key executable
-  again — needs its own scope before any long-lived deployment.
-- Optional later work: process-liveness or lease-based suspension if
-  single-Bridge manual recovery stops being enough.
-- Earlier deferred reviews remain: bounded Bridge event history, SkillRegistry
-  parse cost, MCP installation round trips, Review `not_required` semantics,
-  generic top-level package names, repeated RequestContext validation.
+- Merge this PR once review findings are applied and CI is green.
+- **Phase 3 is then complete** against `docs/ROADMAP.md`: deterministic
+  commands and Agents trigger workflows through one contract; n8n, when enabled,
+  uses the same contract; runs are journalled, recoverable across restarts and
+  retirable without a used key ever running again.
+- Next phase: Phase 4, knowledge platform (`docs/ROADMAP.md`). It has no phase
+  specification yet; the first action is to write
+  `docs/phases/PHASE_4_KNOWLEDGE.md` from the architecture and the source
+  repositories, then slice it.
+- Deferred, each needing its own scope: a payload sweep (removing what no
+  retained record references), process-liveness or lease-based suspension, and
+  the earlier deferred reviews (bounded Bridge event history, SkillRegistry parse
+  cost, MCP installation round trips, Review `not_required` semantics, generic
+  top-level package names, repeated RequestContext validation).
 
 ## Architecture decisions made
 
-- One API, two sources of evidence. The Gateway chooses between memory and the
-  journal and says which answered; callers do not branch on deployment shape.
-- The Gateway still invents no vocabulary: ownership, policy, pre-flight and the
-  closed store codes all stay in the engine and the store. `missing` becomes
-  `unknown` only to preserve the indistinguishability rule that already applies
-  to inspect and resume.
-- Recording a step's failure code is explanation, not evidence: the
-  classification is already correct without it, so its write is allowed to fail.
+- Explicit per-run retirement over TTL or oldest-first eviction: silent
+  deletion is what the plan forbids, and age says nothing about whether a run is
+  finished.
+- Tombstones over "never delete keyed records": the record goes, the key binding
+  stays, capacity counts records only.
+- Payloads are not removed with the record: a continuation shares its parent's
+  payloads, so a sweep needs reference counting across records and is its own
+  policy.
+- A `running` record is never retirable, however old: the platform still cannot
+  know a foreign process is dead, the same reason suspension is manual.
 
 ## Exact verification commands and results
 
@@ -94,13 +83,13 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 450 tests (440 prior + 10 Gateway journal)
+# PASS: 466 tests (450 prior + 16 retention)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 59 source/test files
+# PASS: 60 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
@@ -109,25 +98,25 @@ git diff --check
 # PASS
 ```
 
-The 440 existing tests passed unchanged before any new test was written. One
-test then showed that the durable plan classified a failed step correctly but
-could not explain it, which is why `step_failed` exists. Checkpoint files and
-payloads live under pytest's temporary directory. No production service,
-database server, transport, model, job or n8n instance was invoked. Local pytest
-uses `-p no:cacheprovider` because of temporary-directory ACLs on this machine;
-CI runs ordinary pytest.
+One existing test simulated an unknown schema version with `'2'`, which is now
+the current version; it uses `'99'`. One new test expected `unavailable` from a
+fabricated lock error and learned the store's classification is stricter: an
+error without SQLite's "definitely not committed" name is `commit_unknown`, and
+the test now asserts that. Checkpoint files and payloads live under pytest's
+temporary directory. No production service, database server, transport, model,
+job or n8n instance was invoked. Local pytest uses `-p no:cacheprovider`
+because of temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- `Gateway.watch` is still memory-only: progress streams belong to a live run,
-  and a run that outlived its process has no stream to join. `inspect` is the
-  durable equivalent.
-- Suspension remains manual, single-Bridge and single-writer by approved scope.
-- A journalled run pays a durable write before and after every step.
+- Payload storage grows until a payload sweep exists.
+- Retention is manual and per run; a host that wants a policy (for example,
+  retire every succeeded run older than a week) writes that loop itself.
+- `Gateway.watch` remains memory-only; suspension remains manual, single-Bridge
+  and single-writer by approved scope.
 
 ## Next Recommended Action
 
-Open the PR for `phase-3/gateway-journal` against `main`, run the review, apply
-confirmed findings and let the owner merge. Then scope checkpoint retention with
-the owner — it is the last known gap in the durability work — or move to the next
-Roadmap phase (Phase 4, knowledge platform).
+Open the PR for `phase-3/checkpoint-retention` against `main`, run the review,
+apply confirmed findings, merge on green CI (authorized), then start Phase 4 by
+writing its phase specification.

@@ -64,7 +64,8 @@ payload store for what those references point at. Giving the engine a
 `RunJournal` records write-ahead evidence on the real execution path, so a run
 interrupted by a restart can be inspected, suspended by a person who confirms the
 old process is gone, and continued from its completed prefix — through the same
-`Gateway.inspect`/`suspend`/`resume` entry points a host already uses.
+`Gateway.inspect`/`suspend`/`resume` entry points a host already uses, and
+finished history can be retired without a used idempotency key ever running again.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
