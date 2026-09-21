@@ -45,6 +45,7 @@ RELEVANCE_CONTRACT = "knowledge.ingest-relevance.v1"
 CONDENSE_OVER_CHARS = 40_000
 CHUNK_CHARS = 24_000
 MAX_RELEVANT = 8
+NO_DECISIONS = "(no settled decisions)"
 # A model that has nothing to report sometimes says so in words; these are not
 # contradictions.
 _NO_CONTRADICTION = frozenset({"none", "n/a", "no", "no contradictions", "-"})
@@ -250,7 +251,7 @@ class IngestPlanner:
         return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
     def plan(
-        self, document: RawDocument, *, today: str, decisions: str = "(no settled decisions)"
+        self, document: RawDocument, *, today: str, decisions: str = NO_DECISIONS
     ) -> PlanningOutcome:
         source = document.source
         source_ref = source.raw_ref or source.original_ref
@@ -301,7 +302,7 @@ class IngestPlanner:
         try:
             answer = self._ask(
                 PLAN_PROMPT.format(
-                    decisions=decisions or "(no settled decisions)",
+                    decisions=decisions or NO_DECISIONS,
                     index=self.vault.read("index.md"),
                     related=related,
                     source_ref=source_ref,

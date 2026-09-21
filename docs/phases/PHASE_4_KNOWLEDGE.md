@@ -241,11 +241,35 @@ enforced in code, never left to a prompt:
    report as typed values, the repair with aliases, anchors and backups, and
    a link that leaves the vault not counting as a page.
 
+## Requirements and acceptance (slice 7 — conflicts and decisions)
+
+1. `knowledge.conflicts.Decision` (topic, keep, reject, reason, pages — one of
+   the first three required) is appended to `decisions.md` by
+   `append_decision`, the header written once; `decisions_text(vault)` is the
+   block the planner injects, `(no settled decisions)` when the file is
+   absent or only the header. The file is append-only: nothing rewrites it.
+2. `open_conflicts(vault)` finds every `⚠️` line by reading, through the same
+   `find_conflicts` the lint report uses. `clear_conflicts(vault, page,
+   lines, stamp=)` removes the marker lines of one page in one write — one
+   backup of the original however many markers — and only lines that match
+   the marker rule: a heading or prose that mentions the symbol, or a line
+   that moved, is left alone. A page keeps its own line endings.
+3. `resolve(vault, decision, clear=, today=, stamp=)` checks the clear list,
+   records the decision, then clears per page, reporting what was cleared
+   and what was missed. A marker is never cleared without its reason on
+   record, and nothing can fail half-way.
+4. Manual-edit detection is computed into the lint report from the pages it
+   already read: `record_state` stores every page's hash; `note_written`
+   refreshes only the pages the tool just wrote, so its writes are not
+   reported as a person's while a later change to the same page still is;
+   `manual_edits` reports edited, added and removed pages since. A corrupt,
+   odd or absent state is a first run, not a failure.
+5. Tests over the pinned conflicts excerpt already exist (slice 1); regression
+   tests cover the record, injection, finding and clearing, resolution with a
+   moved marker, and manual edits across two recorded states.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 7 — Conflicts and decisions: an append-only `Decision` record injected
-  into later planning, `⚠️` conflict markers found by reading, resolution that
-  records why, and manual-edit detection by page hash.
 - Slice 8 — Query with provenance: retrieval over Raw and Wiki returning an
   answer whose every citation names a `KnowledgeSource` (with page/slide where
   known). Deterministic lexical retrieval first; model synthesis, when used,

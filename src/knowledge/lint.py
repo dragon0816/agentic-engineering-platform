@@ -9,8 +9,10 @@ mechanical repair the source made too, and it goes through the vault with a
 backup like any other page write.
 """
 
+import hashlib
 import re
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import PurePosixPath
 
 from pydantic import Field
@@ -89,6 +91,92 @@ class OpenConflict(Contract):
     text: Text
 
 
+class ManualEdits(Contract):
+    """Pages a person changed since the recorded state — edited, added or
+    removed — and `first_run` when there is no usable state to compare against.
+    A page the tool wrote and noted is not an edit; a later change to it is."""
+
+    first_run: bool = False
+    since: str | None = None
+    edited: tuple[Text, ...] = ()
+    added: tuple[Text, ...] = ()
+    removed: tuple[Text, ...] = ()
+
+
+def line_ending(vault: Vault, rel: str) -> str:
+    """The line ending a page uses, so a one-line repair rewrites nothing else."""
+    return "\r\n" if b"\r\n" in vault.read_bytes(rel) else "\n"
+
+
+def _hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def page_hashes(vault: Vault, texts: dict[str, str] | None = None) -> dict[str, str]:
+    """A short content hash per wiki page, `index.md` and `decisions.md`;
+    unreadable pages are left out rather than fatal. Texts already read by
+    the caller are hashed rather than read again."""
+    known = dict(texts) if texts is not None else _all_pages(vault)[0]
+    if "decisions.md" not in known and vault.exists("decisions.md"):
+        more, _ = read_pages(vault, ("decisions.md",))
+        known.update(more)
+    return {rel: _hash(text) for rel, text in known.items()}
+
+
+def record_state(vault: Vault, *, today: date) -> None:
+    """Record every page's hash now. Chosen over git, as the source did,
+    because a vault may live in a synced folder where a `.git` directory is a
+    liability."""
+    vault.state_write({"updated": today.isoformat(), "hashes": page_hashes(vault)})
+
+
+def note_written(vault: Vault, written: tuple[str, ...], *, today: date) -> None:
+    """After the tool writes pages, refresh their recorded hashes — and only
+    theirs — so its own writes are not reported as a person's while a later
+    change to the same page still is."""
+    state = vault.state_read()
+    hashes = _clean_hashes(state.get("hashes"))
+    if hashes is None:
+        record_state(vault, today=today)
+        return
+    texts, _ = read_pages(vault, tuple(normalize(rel) for rel in written))
+    for rel, text in texts.items():
+        hashes[rel] = _hash(text)
+    for rel in written:
+        if normalize(rel) not in texts:
+            hashes.pop(normalize(rel), None)
+    vault.state_write({"updated": today.isoformat(), "hashes": hashes})
+
+
+def _clean_hashes(value: object) -> dict[str, str] | None:
+    if not isinstance(value, dict) or not value:
+        return None
+    cleaned = {
+        key: digest
+        for key, digest in value.items()
+        if isinstance(key, str) and key.strip() and isinstance(digest, str)
+    }
+    return cleaned or None
+
+
+def manual_edits(vault: Vault, texts: dict[str, str] | None = None) -> ManualEdits:
+    """A corrupt, odd or absent state is a first run, never a failure."""
+    state = vault.state_read()
+    previous = _clean_hashes(state.get("hashes"))
+    if previous is None:
+        return ManualEdits(first_run=True)
+    current = page_hashes(vault, texts)
+    since = state.get("updated")
+    return ManualEdits(
+        since=since if isinstance(since, str) and since.strip() else None,
+        edited=tuple(
+            rel for rel, digest in current.items() if rel in previous and previous[rel] != digest
+        ),
+        added=tuple(rel for rel in current if rel not in previous),
+        removed=tuple(rel for rel in previous if rel not in current),
+    )
+
+
 class LintReport(Contract):
     """The computed findings, each a closed shape. `dangling` is ranked by how
     often a missing page is referenced: the more, the sooner it deserves one."""
@@ -104,6 +192,8 @@ class LintReport(Contract):
     pending_sources: tuple[Text, ...] = ()
     open_conflicts: tuple[OpenConflict, ...] = ()
     unreadable: tuple[Text, ...] = ()
+    # Informational: what a person changed since the last recorded state.
+    manual_edits: ManualEdits = ManualEdits(first_run=True)
 
     @property
     def clean(self) -> bool:
@@ -234,6 +324,7 @@ def scan(vault: Vault) -> LintReport:
         pending_sources=pending,
         open_conflicts=tuple(conflicts),
         unreadable=unreadable,
+        manual_edits=manual_edits(vault, texts),
     )
 
 
@@ -262,6 +353,7 @@ def fix_links(vault: Vault, report: LintReport, *, stamp: str) -> tuple[str, ...
 
         fixed = WIKILINK.sub(replace, text)
         if fixed != text:
-            vault.write(rel, fixed, stamp=stamp)
+            ending = line_ending(vault, rel)
+            vault.write(rel, fixed.replace("\n", ending), stamp=stamp)
             changed.append(rel)
     return tuple(changed)
