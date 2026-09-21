@@ -865,3 +865,57 @@ refusal never reads as an empty success and the server's own explanation
 survives. Failure codes are the shared ones plus `image_not_inline`. Locality
 is not enforced: `local` is a catalog claim, and a host may run Ollama
 elsewhere.
+
+## Credentials and client construction (Phase 5, slice 4)
+
+`models.credentials.CredentialResolver` is the boundary AGENTS rule 17
+describes: `resolve(ref: SecretRef) -> str`, supplied by the execution
+environment. Raising is how a resolver reports failure, which both adapters
+turn into `credential_unavailable` rather than letting it escape. Nothing in
+this module is a `Contract`, because a contract is serializable, validated and
+loggable, which is everything a secret value must not be.
+
+`credential_for(endpoint, resolver)` returns the zero-argument callable the
+adapters take: `None` when the endpoint declares no credential, a `ValueError`
+when it declares one and no resolver was supplied, and otherwise a closure
+that calls the resolver **on every request**, so a rotated token is picked up
+without rebuilding the client.
+
+`EnvironmentCredentials(names, environ=None)` maps each `SecretRef` name to an
+environment variable name, stated by the host: there is no prefix convention
+and no default, so a secret nobody mapped is never guessed at. A resolved
+value is stripped, because a token read from a file almost always carries a
+trailing newline that would make an unusable header. It is development-grade;
+a production deployment supplies its own resolver over a real store.
+`StaticCredentials(values)` is the same shape for a host that already holds
+its secrets, and for tests.
+
+Both raise `CredentialMisconfigured` (a `LookupError`) for a secret nothing is
+mapped to, a missing value or a blank one. `wire.authorized` reports that as
+`credential_unavailable` with `retryable=False`, because such a secret will
+never appear however often it is asked for, while any other resolver error
+stays retryable: a token being rewritten on a schedule is readable a moment
+later.
+
+`models.clients.ModelClients(catalog, resolver=None, transport=None,
+timeout_s=600.0, providers=None)` builds the right `ModelClient` for an alias.
+`for_alias(alias)` returns a client or a `Failure`; `for_route(name)` and
+`for_requirements(requirements)` return `(alias, client)` or a `Failure`, the
+last being the whole chain from what a caller needs to something that can
+answer it. `providers` maps a provider symbol to a `ClientBuilder`
+and is merged over the built-in `openai_compatible` and `ollama`, so a host
+can register its own provider without changing core runtime code, and can
+override a built-in by reusing its key. `options` carries per-alias keyword
+arguments for the adapter, such as `{"company_reasoning": {"max_tokens_field":
+"max_completion_tokens"}}`: these are wire details of one endpoint that the
+shared contract deliberately does not describe, so they belong to host wiring.
+An option naming no endpoint is a `ValueError` where the wiring is written.
+
+Failure codes: `unknown_alias`, `unknown_provider`,
+`endpoint_misconfigured` for the construction-time refusals (no base url, a
+non-positive timeout, a declared credential with no resolver, an option the
+provider does not take) and `provider_build_failed` for anything else a
+host-registered builder raises, alongside the
+catalog's own `no_model_for_requirements` and `unknown_route`, which travel
+through unchanged. A built client is cached per alias, so a host may call this
+per request without rebuilding a transport each time.

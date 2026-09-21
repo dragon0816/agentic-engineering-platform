@@ -1,50 +1,57 @@
-# Handoff — Phase 5 model gateway, slice 3 (Ollama adapter)
+# Handoff — Phase 5 model gateway, slice 4 (credentials and client construction)
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-5/ollama`, based on `main` after PR #35 merged.
+Branch: `phase-5/credentials`, based on `main` after PR #36 merged.
 
 ## Goal
 
-Phase 5 slice 3: the local provider, and the shared surface a second adapter
-revealed. Requirements: `docs/phases/PHASE_5_GATEWAY.md` (slice 3); decisions:
-`docs/PHASE_5_MIGRATION.md` (slice 3); contracts: `docs/CONTRACTS.md`
-("Shared adapter rules and the Ollama adapter").
+Phase 5 slice 4: where a `SecretRef` becomes a value, and the last link from a
+declared requirement to something that can answer it. Requirements:
+`docs/phases/PHASE_5_GATEWAY.md` (slice 4); contracts: `docs/CONTRACTS.md`
+("Credentials and client construction"). This slice adapts nothing: the source
+repository resolves its key by reading environment variables and scraping a
+`.env` file, which `docs/PHASE_5_MIGRATION.md` already recorded as not
+migrated.
 
-## Owner decisions still in force (taken 2026-09-21)
+## Owner decisions still in force
 
 1. Provider adapters are in-process code under `src/models/`; a proxy, if ever
    deployed, is a host artifact. The platform never starts a provider process
-   and takes no new runtime dependency.
+   and takes no new runtime dependency (2026-09-21).
 2. Providers are Ollama and the internal OpenAI-compatible gateway. Codex and
-   Claude Code are out of scope in both senses, which is why the source's
-   LiteLLM proxy is not migrated at all.
+   Claude Code are out of scope in both senses (2026-09-21).
 3. Remaining Phase 5 slices are to be completed without check-ins unless
-   something cannot be decided (owner, 2026-09-22).
+   something cannot be decided (2026-09-22).
 
 ## Completed
 
-- `src/models/wire.py`, extracted from `openai_compatible.py`: the
-  `Transport`/`Reply` protocols, the redirect-refusing `UrllibTransport`,
-  failure mapping and redaction, per-request credential resolution, the tool
-  and undeclared-streaming refusals, strict structured parsing, and the
-  response/event builders. The extraction is pure movement; the slice 2 tests
-  pass unchanged apart from their import line.
-- `src/models/ollama.py`: `Ollama` implementing `ModelClient` against the
-  native `/api/chat`. Images as bare base64 with `image_not_inline` for a
-  reference that cannot be inlined, `options.num_predict`, `format: "json"`,
-  an explicit `stream` flag, usage from `prompt_eval_count`/`eval_count`, and
-  newline-delimited JSON streaming that stops at `done`.
-- 7 tests (`tests/test_ollama.py`), none opening a socket: the round trip
-  against Ollama's own field names, images and the refusal, structured
-  output, streaming including a split line and a stream with no `done`, a
-  server that is not Ollama, a refusal carried in a 2xx body, and the shared
-  rules holding identically here.
-- PR #36 review (1 finding) applied: `wire.provider_error` reads a refusal out
-  of a 2xx body, in a reply or mid-stream, for both adapters. Ollama answers
-  200 with `{"error": ...}` for a model it does not have, and once a stream's
-  status is sent there is nowhere else to report one; the stream previously
-  ended as a plain `done`, so a provider failure read as a successful empty
-  completion.
+- `src/models/credentials.py`: the `CredentialResolver` protocol,
+  `credential_for` (per-call resolution, `None` when nothing is declared, a
+  `ValueError` when something is declared and no resolver was supplied),
+  `EnvironmentCredentials` (explicit name-to-variable mapping, no convention
+  and no default, refusing a missing or blank value) and `StaticCredentials`.
+  Nothing here is a `Contract`, so a value cannot be serialized or logged.
+- `src/models/clients.py`: `ModelClients` with `for_alias`, `for_route` and
+  `for_requirements`, a `ClientBuilder` protocol and a provider registry
+  defaulting to the two built-in adapters. Typed failures: `unknown_alias`,
+  `unknown_provider`, `endpoint_misconfigured`. Clients are cached per alias.
+- 7 tests (`tests/test_clients.py`), none opening a socket: resolution where
+  the host says and nowhere else, per-call rather than captured resolution,
+  the whole requirements-to-answer chain over a catalog holding both
+  providers, every typed construction failure, a resolver that fails reaching
+  the caller as `credential_unavailable` with the endpoint never contacted,
+  a host registering its own provider beside the built-ins, and per-alias
+  wire options reaching the adapter.
+- PR #37 review (6 findings) applied: `options` carries per-alias adapter
+  keyword arguments, so `max_completion_tokens` is reachable through the
+  factory; registering providers now merges over the built-ins instead of
+  replacing them, matching what the docs promised; a host builder that raises
+  anything else is `provider_build_failed` rather than an escape;
+  `CredentialMisconfigured` separates a secret that will never appear from a
+  token caught mid-rotation, so only the latter is retryable; a resolved value
+  is stripped, since a token read from a file carries a trailing newline; and
+  the vacuous secret-leak assertion now checks the client actually built from
+  a resolver that holds the value.
 
 ## In Progress
 
@@ -52,13 +59,10 @@ revealed. Requirements: `docs/phases/PHASE_5_GATEWAY.md` (slice 3); decisions:
 
 ## Remaining
 
-- Slice 4: the credential resolution boundary (`SecretRef` to value), with an
-  environment-backed development resolver outside the platform's import path.
-  Both adapters already take a callable, so this slice supplies it rather than
-  changing either adapter.
-- Slice 5: observability and a complete inert requirements-to-response
-  example, then the Phase 5 closure change (Roadmap status, README, the
-  `CLAUDE.md` active-phase pointer).
+- Slice 5: observability (per-response duration beside the token counts, so
+  evaluation can compare aliases on latency as `docs/ARCHITECTURE.md`
+  requires) and a worked inert example, then the Phase 5 closure change
+  (Roadmap status, README, the `CLAUDE.md` active-phase pointer).
 - Deferred from Phase 3: a payload sweep, process-liveness or lease-based
   suspension, and the earlier deferred reviews.
 - Deferred from Phase 4: a retrieval cache, host wiring that plans from an
@@ -67,15 +71,18 @@ revealed. Requirements: `docs/phases/PHASE_5_GATEWAY.md` (slice 3); decisions:
 
 ## Architecture decisions made
 
-- Ollama's native `/api/chat` rather than its OpenAI-compatible shim, because
-  the shim is documented as experimental, the differences are real, and the
-  local path should not depend on a compatibility layer that may lag.
-  Reversing it is a catalog change, not a rewrite.
-- The shared surface was extracted only once a second consumer existed. With
-  one consumer it would have been a guess; with two it is the set of rules
-  that must not differ between providers.
-- Locality is not enforced by the adapter. `local` is a claim the catalog
-  makes, and a host may run Ollama on another machine.
+- The platform ships a development resolver but no production backend, and it
+  reads nothing unless a host states which variable holds which secret. A
+  prefix convention was rejected: a convention that guesses is a convention
+  that reads the wrong thing in silence.
+- Registering providers merges over the built-in map, since the point is to
+  add a provider rather than lose the ones that ship; reusing a key overrides
+  one. A host that means to restrict the platform states a narrower catalog.
+- A wire detail of one endpoint, such as which field carries the token limit,
+  is host wiring passed per alias rather than a field on the shared contract.
+- Construction failures are typed rather than raised, because a misconfigured
+  catalog should read like an unavailable model to the caller rather than an
+  exception from the middle of a request.
 
 ## Exact verification commands and results
 
@@ -83,7 +90,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 599 passed, 3 skipped (link privileges)
+# PASS: 606 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -102,21 +109,18 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Known issues / limitations
 
-- **The Ollama adapter has never been run against a live Ollama server.** It
-  is written to the documented native chat API and covered by tests with an
-  injected transport. Before anyone relies on it, run one real request against
-  a local Ollama and confirm the field names, particularly
-  `prompt_eval_count`/`eval_count` and the streaming `done` flag.
-- Ollama's tool calling is not used, for the same reason as the other adapter:
-  a `ModelTool` names a platform contract and no registry can render it as a
-  provider schema.
-- `keep_alive`, `think`, `num_ctx` and the rest of Ollama's options are not
-  exposed. Only `num_predict` is set, from the request's `max_output_tokens`.
-- A response's `tool_calls` are not read back by either adapter.
-- `model_error` stays retryable in the shared mapping, because a custom
-  transport may raise its own transient exception types.
+- `SecretRef.name` is a `Symbol` and a JWT matches that pattern, so the type
+  system still cannot prove a name is not itself a secret. The resolver
+  boundary makes this less likely to matter, since a name is now looked up
+  rather than used.
+- No production credential backend: an OS keychain or enterprise vault
+  resolver is a host concern and remains out of scope for Phase 5.
+- A cached client holds the catalog's endpoint as it was built. A host that
+  edits its catalog builds a new `ModelClients`.
+- The Ollama adapter still has never been run against a live server; see the
+  slice 3 note, which stands.
 
 ## Next Recommended Action
 
-Merge PR #36 on green CI. Then write the slice 4 requirements section and
-implement the credential resolution boundary.
+Merge PR #37 on green CI. Then write the slice 5 requirements section,
+implement per-response duration and the worked example, and close Phase 5.

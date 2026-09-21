@@ -199,11 +199,56 @@ These hold for every slice and are enforced in code, never by convention:
    (both tool shapes, undeclared streaming, per-request credential
    resolution, a resolver that fails, and the construction errors).
 
+## Requirements and acceptance (slice 4 — credentials and client construction)
+
+1. `models.credentials.CredentialResolver` is the boundary AGENTS rule 17
+   describes: `resolve(ref: SecretRef) -> str`, supplied by the execution
+   environment. A resolver that cannot produce a value raises, which both
+   adapters already turn into `credential_unavailable`; nothing in the
+   platform reads an environment variable on its own.
+2. `credential_for(endpoint, resolver)` turns a `ModelEndpoint` and a resolver
+   into the zero-argument callable the adapters take: `None` when the endpoint
+   declares no credential, a `ValueError` when it declares one and no resolver
+   was supplied, and otherwise a closure that resolves **per call**, so a
+   rotating token is never captured.
+3. `EnvironmentCredentials(names)` is a development-grade resolver mapping each
+   `SecretRef` name to an environment variable name explicitly. There is no
+   prefix convention and no default: a host says which variable holds which
+   secret, or nothing is read. A resolved value is stripped, since a token
+   read from a file carries a trailing newline. A secret nothing is mapped to,
+   or whose value is missing or blank, raises `CredentialMisconfigured`, which
+   the adapters report as a failure that will not fix itself; any other
+   resolver error stays retryable. Neither resolver is a `Contract`, because a
+   contract is serializable and a secret value must not be.
+   `StaticCredentials(values)` is the same shape for a host that already holds
+   its secrets, and for tests.
+4. `models.clients.ModelClients(catalog, resolver=, transport=, timeout_s=,
+   providers=)` builds the right `ModelClient` for an alias: `for_alias`,
+   `for_route` and `for_requirements`, the last being the whole chain from
+   declared `ModelRequirements` to a client that can answer. `providers` maps
+   a provider symbol to a builder and is merged over the two built in, so a
+   host can add one without changing core runtime code and can override a
+   built-in by reusing its key. `options` carries per-alias keyword arguments
+   for the adapter, which is where a wire detail of one endpoint belongs when
+   the shared contract deliberately does not describe it.
+5. Every way of failing is typed rather than raised: `unknown_alias`,
+   `unknown_provider`, `endpoint_misconfigured` (the construction errors,
+   including a declared credential with no resolver and an option the provider
+   does not take) and `provider_build_failed` for anything else a
+   host-registered builder raises, alongside the catalog's own
+   `no_model_for_requirements` and `unknown_route`. An option naming no
+   endpoint is refused where the wiring is written. A built client is
+   cached per alias, so a host may call this per request without rebuilding a
+   transport each time.
+6. Tests: resolution per call rather than capture, a resolver that raises
+   reaching the adapter as `credential_unavailable`, the environment resolver
+   with an explicit mapping and its refusals, that no resolver or endpoint
+   repr exposes a secret value, each typed construction failure, a host
+   registering its own provider, caching, and the full requirements-to-client
+   chain over a catalog holding both providers.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 4 — credential resolution boundary: a `CredentialResolver` the host
-  supplies, with an environment-backed development implementation that lives
-  outside the platform's import path, plus redaction coverage.
 - Slice 5 — observability and a complete inert example: usage and latency on
   every response, an alias-labelled trace, and a requirements-to-response
   chain a host can copy, with no network in tests.
