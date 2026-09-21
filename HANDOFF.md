@@ -3,6 +3,9 @@
 Updated: 2026-09-22 (Asia/Taipei).
 Branch: `phase-6/harness`, based on `main` after PR #38 merged.
 
+Progress across every phase is in `docs/TASKS.md`. This file is only where
+the current work stopped and how to resume it, and is rewritten each time.
+
 ## Goal
 
 Phase 6 slice 1: make a case's declarations decide whether it passed.
@@ -12,14 +15,10 @@ harness").
 
 ## Owner decisions in force
 
-1. **Codex and Claude Code are out of scope for Phase 6 entirely**
-   (2026-09-22). They were already excluded from Phase 5 as model providers;
-   they are now also not evaluated, not driven and not a capability the
-   platform invokes. The phase specification records this.
-2. Provider adapters are in-process code and the platform never starts a
-   provider process (2026-09-21).
-3. Remaining slices are completed without check-ins unless something cannot be
-   decided (2026-09-22).
+Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
+**Codex and Claude Code are out of scope for Phase 6 entirely** (2026-09-22),
+so they are not evaluated, not driven and not a capability the platform
+invokes. `docs/phases/PHASE_6_EVALUATION.md` records it.
 
 ## The gap this slice closed
 
