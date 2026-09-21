@@ -771,7 +771,9 @@ runtime condition. `credential` is a zero-argument callable resolved on every
 request, never captured, since the internal token is rewritten on a schedule;
 no credential is passed when it is `None`.
 
-`generate` sends `model`, `messages` and `max_tokens`, plus
+`generate` sends `model`, `messages` and a token limit under
+`max_tokens_field` (`max_tokens` by default, `max_completion_tokens` for a
+provider that has dropped the older name), plus
 `response_format: {"type": "json_object"}` when the request declares an
 `output_contract`. The contract's name is a platform identifier and is never
 sent. A message with `images` becomes content parts (`text` then `image_url`),
@@ -793,18 +795,30 @@ survive. A call whose requirements do not declare `streaming` is refused with
 a single `failed` event before anything is sent.
 
 Failure codes, all non-escaping: `model_timeout` and `model_unreachable`
-(retryable), `model_http_error` (retryable for 408, 429 and any 5xx),
-`model_unparseable` (a body that is not JSON or carries no choices),
-`model_error` (anything else raised), `streaming_not_declared` and
-`tools_not_supported`. Tools are refused because `ModelTool.input_contract`
-names a platform contract and rendering it as a provider schema needs a
-registry that does not exist yet. Every message is truncated to 500 characters
-and passed through `SECRET_PATTERN` redaction, so an upstream that echoes an
+(retryable), `credential_unavailable` (retryable, because the token is
+rewritten on a schedule and the endpoint was never asked),
+`model_http_error` (retryable for 408, 429 and any 5xx), `model_unparseable`
+(a body that is not JSON, carries no choices, or in a stream carries no
+server-sent events at all), `model_error` (anything else raised, reported as
+retryable because a custom transport may raise its own transient types),
+`streaming_not_declared` and `tools_not_supported`. Tools are refused because
+`ModelTool.input_contract` names a platform contract and rendering it as a
+provider schema needs a registry that does not exist yet; a replayed exchange
+carrying `tool_calls` on its messages is refused the same way rather than sent
+as an invalid conversation. Every message is truncated to 500 characters and
+passed through `SECRET_PATTERN` redaction, so an upstream that echoes an
 `Authorization` header cannot print a token.
+
+An endpoint that declares a `credential` and is given no resolver is a
+`ValueError` at construction, beside the `base_url` and timeout checks, rather
+than anonymous calls and a 401 later.
 
 `Transport` is the injected HTTP surface: `send(url, body, headers, timeout_s)`
 returns a `Reply` with `status`, `chunks()` and `close()`. A non-2xx status is
 an answer, not an exception. Arguments are plain values rather than a contract,
 so an `Authorization` header never lands in something serializable. The
-default `UrllibTransport` uses the standard library, so the platform's install
-stays `pydantic` alone and no test opens a socket.
+default `UrllibTransport` uses the standard library through an opener that
+**refuses redirects**: urllib would copy every header, `Authorization`
+included, to wherever a 3xx points and drop the POST body on the way, so a
+redirect is reported as the status it is. The platform's install stays
+`pydantic` alone and no test opens a socket.

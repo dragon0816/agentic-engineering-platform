@@ -4,12 +4,14 @@ provider failure a typed status, and no credential anywhere but a header."""
 import io
 import json
 import urllib.error
+import urllib.request
 from collections.abc import Iterator, Mapping
 from email.message import Message
 from typing import Any
 
 import pytest
 
+from common.assets import SecretRef
 from common.execution import TraceIdentifiers
 from models.catalog import ModelCapabilities, ModelEndpoint
 from models.contracts import (
@@ -18,8 +20,14 @@ from models.contracts import (
     ModelRequest,
     ModelRequirements,
     ModelTool,
+    ModelToolCall,
 )
-from models.openai_compatible import OpenAICompatible, UrllibTransport
+from models.openai_compatible import (
+    OpenAICompatible,
+    UrllibTransport,
+    _NoRedirect,
+    _status_failure,
+)
 
 TRACE = TraceIdentifiers(trace_id="t-1", request_id="r-1", span_id="s-1")
 ANSWER: dict[str, Any] = {
@@ -308,9 +316,77 @@ def test_an_endpoint_without_an_address_is_a_programming_error() -> None:
     assert client.url == "https://gateway.invalid/api/chat/completions"
 
 
-def test_the_default_transport_speaks_the_standard_library(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_a_declared_credential_needs_a_resolver_and_can_fail_on_its_own() -> None:
+    declaring = endpoint(credential=SecretRef(name="company_gateway_token"))
+    with pytest.raises(ValueError, match="supply a resolver"):
+        OpenAICompatible(declaring)
+
+    def unavailable() -> str:
+        raise OSError("the token file is being rewritten")
+
+    transport = Transport(json_reply(ANSWER))
+    client = OpenAICompatible(declaring, credential=unavailable, transport=transport)
+    response = client.generate(request())
+    assert response.failure is not None
+    # Not "unreachable": the endpoint was never asked.
+    assert response.failure.code == "credential_unavailable"
+    assert response.failure.retryable
+    assert transport.calls == []
+
+    streamed = list(client.stream(request(requirements=ModelRequirements(streaming=True))))
+    assert [event.kind for event in streamed] == ["failed"]
+    assert streamed[0].failure is not None
+    assert streamed[0].failure.code == "credential_unavailable"
+
+
+def test_a_replayed_tool_exchange_is_refused_like_a_tool_request() -> None:
+    transport = Transport(json_reply(ANSWER))
+    call = ModelToolCall(call_id="c1", name="read_file", arguments={"path": "a.md"})
+    response = OpenAICompatible(endpoint(), transport=transport).generate(
+        request(
+            messages=(
+                ModelMessage(role="user", text="read it"),
+                ModelMessage(role="assistant", tool_calls=(call,)),
+                ModelMessage(role="tool", text="contents", tool_call_id="c1"),
+            )
+        )
+    )
+    assert response.failure is not None
+    assert response.failure.code == "tools_not_supported"
+    assert transport.calls == []
+
+
+def test_a_stream_that_is_not_a_stream_is_not_a_silent_success() -> None:
+    # An endpoint that ignored `stream: true` and answered in one JSON body.
+    whole = Transport(Reply(200, [json.dumps(ANSWER).encode("utf-8")]))
+    events = list(
+        OpenAICompatible(endpoint(), transport=whole).stream(
+            request(requirements=ModelRequirements(streaming=True))
+        )
+    )
+    assert [event.kind for event in events] == ["failed"]
+    assert events[0].failure is not None and events[0].failure.code == "model_unparseable"
+
+    # An immediate [DONE] is a real, empty stream and stays a success.
+    empty = Transport(Reply(200, [b"data: [DONE]\n"]))
+    ended = list(
+        OpenAICompatible(endpoint(), transport=empty).stream(
+            request(requirements=ModelRequirements(streaming=True))
+        )
+    )
+    assert [event.kind for event in ended] == ["done"]
+
+
+def test_the_token_field_is_configurable_for_newer_models() -> None:
+    transport = Transport(json_reply(ANSWER))
+    OpenAICompatible(
+        endpoint(), transport=transport, max_tokens_field="max_completion_tokens"
+    ).generate(request())
+    payload = transport.calls[0]["payload"]
+    assert payload["max_completion_tokens"] == 256 and "max_tokens" not in payload
+
+
+def test_the_default_transport_speaks_the_standard_library_and_never_redirects() -> None:
     seen: dict[str, Any] = {}
 
     class Raw:
@@ -325,16 +401,23 @@ def test_the_default_transport_speaks_the_standard_library(
         def close(self) -> None:
             self.closed = True
 
-    def fake_urlopen(prepared: Any, timeout: float) -> Raw:
-        seen["url"] = prepared.full_url
-        seen["method"] = prepared.get_method()
-        seen["body"] = prepared.data
-        seen["headers"] = prepared.headers
-        seen["timeout"] = timeout
-        return Raw()
+    class Opener:
+        def __init__(self, error: BaseException | None = None) -> None:
+            self.error = error
 
-    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    reply = UrllibTransport().send(
+        def open(self, prepared: Any, timeout: float) -> Raw:
+            seen["url"] = prepared.full_url
+            seen["method"] = prepared.get_method()
+            seen["body"] = prepared.data
+            seen["headers"] = prepared.headers
+            seen["timeout"] = timeout
+            if self.error is not None:
+                raise self.error
+            return Raw()
+
+    transport = UrllibTransport()
+    transport.opener = Opener()  # type: ignore[assignment]
+    reply = transport.send(
         "https://gateway.invalid/api/chat/completions",
         b'{"model": "m"}',
         {"Authorization": "Bearer t"},
@@ -347,12 +430,37 @@ def test_the_default_transport_speaks_the_standard_library(
     assert seen["headers"]["Authorization"] == "Bearer t"
 
     # A status is an answer: the transport reports it instead of raising.
-    def failing(prepared: Any, timeout: float) -> Raw:
-        raise urllib.error.HTTPError(
+    refusing = UrllibTransport()
+    refusing.opener = Opener(  # type: ignore[assignment]
+        urllib.error.HTTPError(
             "https://gateway.invalid", 503, "busy", Message(), io.BytesIO(b"overloaded")
         )
-
-    monkeypatch.setattr("urllib.request.urlopen", failing)
-    refused = UrllibTransport().send("https://gateway.invalid", b"{}", {}, 1.0)
+    )
+    refused = refusing.send("https://gateway.invalid", b"{}", {}, 1.0)
     assert refused.status == 503 and b"".join(refused.chunks()) == b"overloaded"
     refused.close()
+
+    # A redirect is never followed: urllib would copy the Authorization header
+    # to the new location and drop the POST body on the way.
+    installed = getattr(UrllibTransport().opener, "handlers", [])
+    assert _NoRedirect in [type(handler) for handler in installed]
+    assert (
+        _NoRedirect().redirect_request(
+            urllib.request.Request("https://gateway.invalid"),
+            io.BytesIO(b""),
+            302,
+            "found",
+            Message(),
+            "https://elsewhere.invalid",
+        )
+        is None
+    )
+    moved = UrllibTransport()
+    moved.opener = Opener(  # type: ignore[assignment]
+        urllib.error.HTTPError(
+            "https://gateway.invalid", 302, "found", Message(), io.BytesIO(b"moved")
+        )
+    )
+    relocated = moved.send("https://gateway.invalid", b"{}", {"Authorization": "Bearer t"}, 1.0)
+    assert relocated.status == 302
+    assert _status_failure(relocated.status, b"".join(relocated.chunks())).retryable is False

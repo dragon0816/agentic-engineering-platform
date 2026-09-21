@@ -126,24 +126,31 @@ These hold for every slice and are enforced in code, never by convention:
    of what served it.
 4. `stream` yields `ModelStreamEvent`s over server-sent events: one `text`
    event per non-empty content delta, then `done` at `[DONE]` or at the end of
-   the stream. **A chunk carrying no `choices` is normal and is skipped**,
+   the stream. A 2xx reply carrying no events at all is an endpoint that
+   ignored `stream: true`, and is `model_unparseable` rather than a silent
+   empty success that throws the answer away. **A chunk carrying no `choices` is normal and is skipped**,
    which is the fact the source's `gateway.py` had to monkey-patch a private
    LiteLLM class to survive. A call that did not declare `streaming` in its
    requirements is refused with a single `failed` event, keeping declarations
    honest the way `ModelRequest` already couples tools to `tool_calling`.
-5. Every failure is typed and nothing escapes the adapter: `model_timeout` and
-   `model_unreachable` (both retryable), `model_http_error` (retryable for
-   408, 429 and 5xx, not otherwise), `model_unparseable` (not retryable) and
-   `model_error` for anything else raised. `generate` returns them on
-   `ModelResponse.failure`; `stream` yields a `failed` event and stops.
-   Requests carrying `tools` are refused as `tools_not_supported` until a
-   contract can be rendered as a provider schema, which needs a registry that
-   does not exist yet; no caller in the platform sends tools today.
+5. Every failure is typed and nothing escapes the adapter: `model_timeout`
+   and `model_unreachable` (both retryable), `credential_unavailable` when
+   the resolver itself fails (retryable, and distinct because the endpoint was
+   never asked), `model_http_error` (retryable for 408, 429 and 5xx, not
+   otherwise), `model_unparseable` and `model_error`. `generate` returns them
+   on `ModelResponse.failure`; `stream` yields a `failed` event and stops. A
+   request carrying `tools`, or messages replaying `tool_calls`, is refused as
+   `tools_not_supported` until a contract can be rendered as a provider
+   schema, which needs a registry that does not exist yet; no caller in the
+   platform sends tools today.
 6. HTTP sits behind an injected `Transport` protocol returning a `Reply`
    (`status`, `chunks()`, `close()`), so the platform adds no dependency and
    no test opens a socket. A non-2xx status is an answer, not an exception.
-   The default `UrllibTransport` uses the standard library; its request
-   construction and its error mapping are tested with `urlopen` replaced.
+   The default `UrllibTransport` uses the standard library through an opener
+   that refuses redirects, because urllib would otherwise copy the
+   `Authorization` header to the redirect target and drop the POST body; its
+   request construction, its error mapping and its redirect refusal are tested
+   with the opener replaced.
 7. Tests: the full generate round trip including images, an `output_contract`,
    usage with unknown fields present and absent; the alias echoed rather than
    the provider's `model`; streaming with a `choices`-less prelude skipped, a

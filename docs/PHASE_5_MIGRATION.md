@@ -126,5 +126,17 @@ schema needs a contract registry that does not exist. No caller in the
 platform sends tools today, so the adapter refuses them with a typed
 `tools_not_supported` rather than silently dropping them.
 
+Review of the PR added six more differences from the source, each a place the
+source's shape would not survive as a platform contract: the default opener
+refuses redirects, because urllib copies `Authorization` to wherever a 3xx
+points and the source's bare `urlopen` would have leaked the internal token; a
+replayed exchange carrying `tool_calls` on its messages is refused like a tool
+request instead of being sent without them; a 2xx reply with no server-sent
+events is reported rather than returned as an empty success; the token limit
+field is configurable for providers that dropped `max_tokens`; resolving the
+credential is its own failure code rather than an unreachable endpoint; and an
+endpoint that declares a credential with no resolver supplied is refused at
+construction.
+
 Rollback removes `src/models/openai_compatible.py` and its tests; nothing else
 imports them.

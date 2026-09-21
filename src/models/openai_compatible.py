@@ -24,7 +24,7 @@ import json
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Iterator, Mapping
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from common.assets import SECRET_PATTERN
 from common.execution import Failure
@@ -77,13 +77,34 @@ class _UrllibReply:
             pass
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuses to follow a redirect. urllib copies every header it was given
+    to the new location, `Authorization` included, and turns the POST into a
+    bodyless GET on the way. A model endpoint that redirects is misconfigured,
+    so the 3xx is reported as the status it is rather than chased."""
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        return None
+
+
 class UrllibTransport:
     """The standard library, so the platform's install stays `pydantic` alone."""
+
+    def __init__(self) -> None:
+        self.opener = urllib.request.build_opener(_NoRedirect())
 
     def send(self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float) -> Reply:
         prepared = urllib.request.Request(url, data=body, headers=dict(headers), method="POST")
         try:
-            raw = urllib.request.urlopen(prepared, timeout=timeout_s)  # noqa: S310 - url is config
+            raw = self.opener.open(prepared, timeout=timeout_s)
         except urllib.error.HTTPError as answered:
             return _UrllibReply(answered, answered.code)
         return _UrllibReply(raw, int(getattr(raw, "status", 200)))
@@ -198,29 +219,49 @@ class OpenAICompatible:
         credential: Callable[[], str] | None = None,
         transport: Transport | None = None,
         timeout_s: float = 600.0,
+        max_tokens_field: Literal["max_tokens", "max_completion_tokens"] = "max_tokens",
     ) -> None:
         if endpoint.base_url is None:
             raise ValueError("an openai-compatible endpoint needs a base url")
         if timeout_s <= 0:
             raise ValueError("a timeout is positive")
+        if endpoint.credential is not None and credential is None:
+            # Otherwise the calls go out anonymously and the endpoint answers
+            # 401 at run time, long after the configuration mistake was made.
+            raise ValueError("this endpoint declares a credential; supply a resolver for it")
         self.endpoint = endpoint
         self.url = endpoint.base_url.rstrip("/") + CHAT_PATH
         # Resolved per request, never captured: the internal token rotates.
         self.credential = credential
         self.transport = transport if transport is not None else UrllibTransport()
         self.timeout_s = timeout_s
+        # Newer chat models reject `max_tokens` in favour of the longer name.
+        self.max_tokens_field = max_tokens_field
 
-    def _headers(self) -> dict[str, str]:
+    def _authorized(self) -> dict[str, str] | Failure:
+        """The headers for one call. Resolving the credential is its own
+        failure: a token being rewritten is not an unreachable endpoint."""
         headers = {"Content-Type": "application/json"}
-        if self.credential is not None:
-            headers["Authorization"] = f"Bearer {self.credential()}"
+        if self.credential is None:
+            return headers
+        try:
+            token = self.credential()
+        except Exception as error:  # noqa: BLE001 - a resolver's failure is a status here
+            return Failure(
+                code="credential_unavailable",
+                message=_described(error),
+                # The internal token is rewritten on a schedule, so a read can
+                # fail for a moment and succeed immediately afterwards.
+                retryable=True,
+            )
+        headers["Authorization"] = f"Bearer {token}"
         return headers
 
     def _payload(self, request: ModelRequest, *, stream: bool) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "model": self.endpoint.model,
             "messages": [_wire_message(message) for message in request.messages],
-            "max_tokens": request.max_output_tokens,
+            self.max_tokens_field: request.max_output_tokens,
         }
         if request.output_contract is not None:
             # The contract names a platform shape the provider knows nothing
@@ -234,7 +275,9 @@ class OpenAICompatible:
         return ModelResponse(trace=request.trace, model_alias=request.model_alias, failure=failure)
 
     def _unsupported(self, request: ModelRequest) -> Failure | None:
-        if request.tools:
+        # A replayed exchange carries its tool calls on the messages rather
+        # than in `tools`; sending it without them is an invalid conversation.
+        if request.tools or any(message.tool_calls for message in request.messages):
             return Failure(
                 code="tools_not_supported",
                 message="a tool's input contract cannot yet be rendered as a provider schema",
@@ -246,11 +289,14 @@ class OpenAICompatible:
         refusal = self._unsupported(request)
         if refusal is not None:
             return self._failed(request, refusal)
+        headers = self._authorized()
+        if isinstance(headers, Failure):
+            return self._failed(request, headers)
         try:
             reply = self.transport.send(
                 self.url,
                 json.dumps(self._payload(request, stream=False)).encode("utf-8"),
-                self._headers(),
+                headers,
                 self.timeout_s,
             )
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
@@ -312,16 +358,21 @@ class OpenAICompatible:
         if refusal is not None:
             yield failed(refusal)
             return
+        headers = self._authorized()
+        if isinstance(headers, Failure):
+            yield failed(headers)
+            return
         try:
             reply = self.transport.send(
                 self.url,
                 json.dumps(self._payload(request, stream=True)).encode("utf-8"),
-                self._headers(),
+                headers,
                 self.timeout_s,
             )
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
             yield failed(_transport_failure(error))
             return
+        answered = False
         try:
             if reply.status // 100 != 2:
                 yield failed(_status_failure(reply.status, b"".join(reply.chunks())))
@@ -330,6 +381,7 @@ class OpenAICompatible:
                 payload = _event_data(line)
                 if payload is None:
                     continue
+                answered = True
                 if payload == "[DONE]":
                     break
                 text = _delta(payload)
@@ -340,6 +392,17 @@ class OpenAICompatible:
             return
         finally:
             _close(reply)
+        if not answered:
+            # An endpoint that ignored `stream: true` answered in one JSON
+            # body. Reporting `done` would throw that answer away and call it
+            # success; `generate` would have called the same body unparseable.
+            yield failed(
+                Failure(
+                    code="model_unparseable",
+                    message="the reply carries no server-sent events",
+                )
+            )
+            return
         yield ModelStreamEvent(trace=request.trace, kind="done")
 
 

@@ -39,20 +39,32 @@ or any other OpenAI-shaped API. Requirements:
     are truncated and redacted through the existing `SECRET_PATTERN`.
   - The credential is a callable resolved per request, because the source's
     token is rewritten on a schedule.
-- 9 tests (`tests/test_openai_compatible.py`), none opening a socket: the
+- 13 tests (`tests/test_openai_compatible.py`), none opening a socket: the
   round trip, images and an output contract, per-request credential
-  resolution, streaming including a split line and the undeclared-streaming
-  refusal, every transport failure, every HTTP status class with a redacted
-  body, unparseable replies, the tools refusal, construction errors, and the
-  default transport's request construction and error mapping.
+  resolution and its own failure, streaming including a split line, a
+  non-stream reply and the undeclared-streaming refusal, every transport
+  failure, every HTTP status class with a redacted body, unparseable replies,
+  both tool refusals, the configurable token field, construction errors, and
+  the default transport's request construction, error mapping and redirect
+  refusal.
 - Docs: slice 2 requirements in the phase spec, the slice 2 source-first
   decision (ADAPT `Gateway.send`, with each replacement and its reason), and
   the contract section.
+- PR #35 review (6 findings) applied: the default opener **refuses
+  redirects**, because urllib copies `Authorization` to wherever a 3xx points
+  and drops the POST body, which would have leaked the internal token; a
+  replayed exchange carrying `tool_calls` on its messages is refused like a
+  tool request rather than sent without them; a 2xx reply carrying no
+  server-sent events is `model_unparseable` instead of a silent empty success
+  that discards the answer; the token limit field is configurable
+  (`max_tokens_field`) for providers that dropped `max_tokens`; resolving the
+  credential is its own `credential_unavailable` rather than an unreachable
+  endpoint; and an endpoint declaring a credential with no resolver supplied
+  is refused at construction.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -88,7 +100,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 587 passed, 3 skipped (link privileges)
+# PASS: 591 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -112,19 +124,22 @@ socket.
 - Tool calling is refused rather than mapped. `ModelTool.input_contract` names
   a platform contract and there is no registry that can render it as a
   provider function schema. No caller in the platform sends tools today.
-- `max_tokens` is sent rather than the newer `max_completion_tokens`, which
-  the internal deployment and LiteLLM both accept. A provider that has dropped
-  the older field would need a per-endpoint switch.
+- `max_tokens` is the default token-limit field, which the internal
+  deployment and LiteLLM both accept; a provider that dropped it needs
+  `max_tokens_field="max_completion_tokens"` passed per client. Nothing reads
+  this from the catalog yet, because it is adapter knowledge rather than a
+  platform capability.
 - A response's `tool_calls` are not read back, for the same reason tools are
   not sent.
 - Retryability is reported but nothing retries yet; a caller decides.
+- `model_error` stays retryable, because a custom transport may raise its own
+  transient exception types. An adapter bug therefore reads as retryable.
 - `UrllibTransport` opens one connection per request with no pooling, matching
   the source. An async or pooled transport is an alternative implementation of
   the same protocol, not a change here.
 
 ## Next Recommended Action
 
-Open the PR for `phase-5/openai-adapter`, run the review, apply confirmed
-findings and merge on green CI. Then write the slice 3 requirements section and
+Merge PR #35 on green CI. Then write the slice 3 requirements section and
 implement the `ollama` adapter against its own wire format, reusing the
 `Transport` protocol introduced here.
