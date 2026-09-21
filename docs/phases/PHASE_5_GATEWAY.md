@@ -60,17 +60,21 @@ These hold for every slice and are enforced in code, never by convention:
 
 1. `models.catalog.ModelCapabilities` declares what one endpoint can do:
    `reasoning`, `tool_calling`, `structured_output`, `streaming`, `vision`,
-   `local` (the model runs on the caller's machine) and `max_context_tokens`.
+   `local` (the model runs on the caller's machine) and a required
+   `max_context_tokens`, required because a context window cannot be guessed.
    `satisfies(requirements)` is true when every declared `ModelRequirements`
    field is met: an ordered comparison for `reasoning`, implication for each
    flag, `local` for a `local_only` request, and `max_context_tokens` at
-   least `min_context_tokens`.
+   least `min_context_tokens`. Every requirement field has a rule, pinned by a
+   test against `ModelRequirements.model_fields` so a field added there cannot
+   be silently ignored.
 2. `models.catalog.ModelEndpoint` binds a stable `alias` to a `provider`, the
-   provider's own `model` id, an optional `base_url`, an optional
-   `credential` (`SecretRef`, a name only) and its `ModelCapabilities`. It is
-   a serializable `Contract` and carries no secret value; a `base_url` that is
-   not HTTP(S), or a credential that is not a `SecretRef`, is a validation
-   error.
+   provider's own `model` id, its `ModelCapabilities`, an optional `base_url`
+   and an optional `credential` (`SecretRef`, a name only). It is serializable
+   and carries no secret value: a credential that is not a `SecretRef` is a
+   validation error, and so is one smuggled into the URL, whether as userinfo
+   or as a recognizable key in a query string. A `base_url` must be http or
+   https (case-insensitively), name a host and contain no whitespace.
 3. `models.catalog.ModelCatalog` holds the endpoints and optional named
    `routes` (a purpose such as `default` or `knowledge` pointing at one
    alias). A duplicate alias, a route naming an unknown alias and an empty
@@ -79,7 +83,8 @@ These hold for every slice and are enforced in code, never by convention:
 4. `ModelCatalog.select(requirements)` implements the existing
    `ModelSelector` protocol: it returns the first alias in catalog order whose
    capabilities satisfy the requirements, or a `Failure`
-   (`no_model_for_requirements`, not retryable) naming what could not be met.
+   (`no_model_for_requirements`, not retryable) naming how many endpoints were
+   considered, which one came closest and what that one lacked.
    `select_route(name)` returns a route's alias or a `Failure`
    (`unknown_route`). Neither calls a model, reads a file or touches the
    network.
@@ -87,11 +92,12 @@ These hold for every slice and are enforced in code, never by convention:
    a host can keep it in YAML or JSON without the platform choosing a
    configuration format or a file location in this slice.
 6. Tests: capability satisfaction on every field including the ordered
-   `reasoning` comparison and the inverted `local_only` case, selection
-   determinism across repeated calls, catalog-order tie-breaking, both
-   failures, every validation error, a round trip through
-   `model_dump_json`/`model_validate_json`, and a check that no endpoint
-   contract can hold a secret value.
+   `reasoning` comparison and the inverted `local_only` case, the pinned
+   requirement-field mirror, selection determinism across repeated calls,
+   catalog-order tie-breaking, the closest-endpoint failure naming a real
+   candidate, both failures, every validation error, a round trip through
+   `model_dump_json`/`model_validate_json`, loading from plain data, and that
+   no endpoint contract can hold a secret value in a field or in a URL.
 
 ## Later slices (each needs its own requirements section before work starts)
 

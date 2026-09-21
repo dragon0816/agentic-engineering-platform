@@ -50,16 +50,24 @@ table and a second credential. It is reversible by one catalog edit.
 - `src/models/catalog.py`: `ModelCapabilities` (with `unmet`/`satisfies`),
   `ModelEndpoint`, `ModelRoute`, `ModelCatalog` (`select`, `select_route`,
   `endpoint`), implementing the existing `ModelSelector` protocol.
-- 3 tests (`tests/test_catalog.py`): capability checks field by field,
-  deterministic selection with catalog-order tie-breaking and both typed
-  failures, and every construction-time validation including that a secret
-  value cannot be passed where a `SecretRef` belongs.
+- 5 tests (`tests/test_catalog.py`): the pinned requirement-field mirror,
+  capability checks field by field, deterministic selection with catalog-order
+  tie-breaking and both typed failures, every construction-time validation,
+  and that an endpoint carries no credential in a field or in its URL.
 - `CLAUDE.md` and `docs/ROADMAP.md` now point at Phase 5 as the active phase.
+- PR #34 review (6 findings) applied: `max_context_tokens` is required rather
+  than defaulting to an absurd ceiling of 1; the selection `Failure` names the
+  endpoint that came closest and what that one lacked instead of a union no
+  single endpoint was blocked by; a test pins the `ModelRequirements` mirror so
+  a field added there cannot be silently ignored; `ModelEndpoint` is a
+  `RegistryContract` and refuses userinfo in a `base_url`, so a credential
+  cannot be smuggled through the URL; the scheme check is case-insensitive and
+  a host is required; and the `Reasoning` literal now lives once in
+  `models.contracts`, with the comparison order derived from it.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -96,7 +104,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 567 passed, 3 skipped (link privileges)
+# PASS: 569 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -129,8 +137,7 @@ slice opens no socket at all.
 
 ## Next Recommended Action
 
-Open the PR for `phase-5/catalog`, run the review, apply confirmed findings and
-merge on green CI. Then write the slice 2 requirements section and implement
+Merge PR #34 on green CI. Then write the slice 2 requirements section and implement
 the `openai_compatible` adapter, starting from the `Gateway` class in the
 pinned `agent/agent.py` and the three load-bearing constraints recorded in
 `docs/PHASE_5_MIGRATION.md`.
