@@ -668,15 +668,26 @@ legacy Raw files entered into the ledger by content hash, `source_for_legacy`
 deriving a `KnowledgeSource` whose `original_ref` and `raw_ref` are the file
 itself), `raw_readopted` (drifted files named in `readopt`, recorded at their
 current hash), `raw_drifted` (`DriftedRaw(raw_ref, recorded_sha256,
-current_sha256)`), `raw_skipped` (`SkippedRaw(raw_ref, reason)` with `reason`
-`undecodable` or `empty`), `pages_migrated` (`MigratedPage(page, source)` —
-`source_path:` sources pages given the provenance lines), `pages_unresolved`
-(`UnresolvedPage(page, source_path)`), `pages_skipped` (frontmatter never
-closes) and `written`, exactly what an apply writes: the pages, then the
-ledger. `snapshot` is set only on an apply that wrote. A page is written by
-`Vault.write` (backup under the stamp, the page's own line endings kept);
-the ledger by `Vault.ledger_write`. `raw/` is never written. `legacy_raw`
-lists the Raw files without provenance frontmatter.
+current_sha256)`), `raw_missing` (ledger records whose file is gone, dropped
+from the ledger on apply so a new file at that path is new), `raw_skipped`
+(`SkippedRaw(raw_ref, reason)` with `reason` `undecodable`, `empty`,
+`duplicate` — the same bytes as a Raw already known, the first path winning
+— or `invalid_provenance` — a head that claims this platform's provenance
+but does not validate, neither typed nor legacy), `pages_migrated`
+(`MigratedPage(page, source)` — `source_path:` sources pages given the
+provenance lines), `pages_unresolved` (`UnresolvedPage(page, source_path)`),
+`pages_unwritable` (`UnwritablePage(page, code)` — resolves, but the vault
+would refuse the write, checked by `Vault.check_writable` before anything is
+written), `pages_skipped` (frontmatter never closes, or a link that leaves
+the vault) and `written`, exactly what an apply writes: the pages, then the
+ledger. `snapshot` is set only on an apply that wrote. An apply writes all of
+its files or none: what each held before is put back if any write fails, and
+the failure is raised as `write_failed`. A stamp names one apply: a second
+apply under a stamp that already wrote is refused as `write_failed` before
+anything is written. A page is written by `Vault.write` (backup under the
+stamp, the page's own line endings kept); the ledger by `Vault.ledger_write`.
+`raw/` is never written. `legacy_raw` lists the Raw files without provenance
+frontmatter (`knowledge.raw.looks_typed` tells a damaged typed head apart).
 
 The ledger `.ingest-adopted.json` (`Vault.ledger_read` / `ledger_write`, `{}`
 when absent or corrupt) maps a Raw path to `{source_id, sha256, adopted}`.
@@ -685,7 +696,8 @@ when absent or corrupt) maps a Raw path to `{source_id, sha256, adopted}`.
 changed file is left out until re-adopted. `knowledge.raw.load_document(vault,
 entry)` returns the `RawDocument` behind any entry — parsed for a typed file,
 built by `adopted_document` for a legacy one (extractor `adopted.v1`, one text
-section per paragraph); `ValueError` for what cannot be read as a document.
+section per paragraph, the note's own frontmatter left out by
+`strip_frontmatter`); `ValueError` for what cannot be read as a document.
 Query cites an adopted file's paragraphs by section number; lint counts an
 adopted file among `pending_sources` until a sources page carries its id.
 
@@ -693,8 +705,11 @@ adopted file among `pending_sources` until a sources page carries its id.
 `index.md`, `log.md`, `decisions.md`, `.ingest-state.json`,
 `.ingest-adopted.json`) to `.ingest-snapshot/<stamp[-label]>` and returns the
 name; an existing name is `write_failed`, a name with a separator is a
-`ValueError`. `snapshots(vault)` lists them. `restore(vault, name, stamp=)`
-snapshots the current state as `<stamp>-before-restore`, then replaces the
-generated half with the named snapshot (files absent from it are removed);
-a missing snapshot is `missing_original`. `raw/` and `drop/` are never part
-of a snapshot or a restore.
+`ValueError`. Links are copied as links, never followed, so nothing outside
+the vault is duplicated into it. `snapshots(vault)` lists them.
+`restore(vault, name, stamp=)` snapshots the current state as
+`<stamp>-before-restore`, then replaces the generated half with the named
+snapshot (files absent from it are removed); a missing snapshot is
+`missing_original`, and a managed directory that is itself a link is
+`unwritable_target` before anything is touched. `raw/` and `drop/` are never
+part of a snapshot or a restore.

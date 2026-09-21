@@ -32,7 +32,7 @@ on green CI and followed by the next. Requirements:
   (paragraph sections, extractor `adopted.v1`) for planning and query.
 - `knowledge/query.py`: the corpus reads every entry through `load_document`,
   so adopted files are cited by paragraph.
-- 3 tests (`tests/test_migrate.py`): adoption in both modes over a legacy
+- 4 tests (`tests/test_migrate.py`): adoption in both modes over a legacy
   vault (CRLF sources page, Big5 file, empty file, stale path, unclosed
   frontmatter), Raw bytes unchanged, index/lint/planning/query seeing the
   adopted file, idempotence, drift and re-adoption, ingested and adopted Raw
@@ -40,11 +40,20 @@ on green CI and followed by the next. Requirements:
 - Docs: phase spec slice 9 requirements (and the Phase 4 exit-criteria
   note), `docs/CONTRACTS.md`, migration slice 9 decision (ADAPT `snapshot.py`;
   ledger over rewriting Raw or re-dropping it).
+- PR #32 review (9 findings) applied: an apply writes all or nothing
+  (`Vault.apply`'s rule reused) and a page the vault would refuse is reported
+  after `Vault.check_writable`; a damaged typed head is `invalid_provenance`,
+  neither typed nor legacy (`knowledge.raw.looks_typed`); a note's own
+  frontmatter is not a passage (`strip_frontmatter`); an emptied adopted file
+  is drift, a deleted one is `raw_missing` and dropped from the ledger;
+  snapshots copy links as links and a restore refuses a linked managed
+  directory; a reused stamp is refused before any write and documented;
+  duplicate bytes are skipped as `duplicate`; the typed scan runs once and
+  pages are read once; and a fourth test covers every edge above.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- Nothing; merge of PR #32 on green CI is authorized for Phase 4 slices.
 
 ## Remaining
 
@@ -73,7 +82,8 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 564 passed, 2 skipped (symlink privilege)
+# PASS: 565 passed, 2 skipped (symlink privilege); the fourth migration test
+# skips its last, link-dependent check here and runs it whole on Linux CI
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -104,6 +114,6 @@ machine; CI runs ordinary pytest.
 
 ## Next Recommended Action
 
-Open the PR for `phase-4/migration`, run the review, apply confirmed findings,
-merge on green CI, then make the Phase 4 closure change and write the Phase 5
-specification.
+Merge PR #32 on green CI, then make the Phase 4 closure change (Roadmap
+status, README, `CLAUDE.md` active-phase pointer) and write the Phase 5
+specification before any Phase 5 code.

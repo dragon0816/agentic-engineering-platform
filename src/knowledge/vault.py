@@ -513,6 +513,11 @@ class Vault:
             raise VaultError("unwritable_target", rel)
         return target
 
+    def check_writable(self, rel: str) -> None:
+        """The layout check a write would apply, without writing: raises the
+        `VaultError` the write would, so a plan can be refused before it starts."""
+        self._target(rel)
+
     def write(self, rel: str, content: str, *, stamp: str) -> bool:
         """Write one file; returns whether an existing file was backed up first."""
         target = self._target(rel)

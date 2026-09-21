@@ -401,6 +401,14 @@ class RawEntry(Contract):
 
 
 ADOPTED_EXTRACTOR = "adopted.v1"
+_TYPED_HINT = ("source_sha256:", "raw_ref:")
+
+
+def looks_typed(head: str) -> bool:
+    """A head that claims this platform's provenance, valid or not — a file
+    the intake wrote and something later damaged is neither a typed Raw nor a
+    legacy one, and is never adopted as if it were."""
+    return any(line.startswith(_TYPED_HINT) for line in head.split("\n"))
 
 
 def _adopted_entry(rel: str, record: object, data: bytes) -> RawEntry | None:
@@ -444,9 +452,10 @@ class RawIndex:
         entries: list[RawEntry] = []
         adopted = vault.ledger_read() if ledger else {}
         for rel in vault.raw_files():
-            head = frontmatter(vault.read_head(rel))
+            head_text = vault.read_head(rel)
+            head = frontmatter(head_text)
             if head is None or any(key not in head[0] for key in _PROVENANCE_KEYS):
-                if rel in adopted:
+                if rel in adopted and not looks_typed(head_text):
                     entry = _adopted_entry(rel, adopted[rel], vault.read_bytes(rel))
                     if entry is not None:
                         entries.append(entry)
@@ -494,11 +503,23 @@ def raw_index(vault: Vault) -> tuple[RawEntry, ...]:
     return tuple(RawIndex.scan(vault).entries)
 
 
+def strip_frontmatter(text: str) -> str:
+    """The text after a leading `---` block, whatever the block holds — a
+    note's own frontmatter is metadata, not a passage."""
+    lines = _lines(text).split("\n")
+    if not lines or lines[0].strip() != "---":
+        return _lines(text)
+    end = next((i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"), None)
+    return _lines(text) if end is None else "\n".join(lines[end + 1 :])
+
+
 def adopted_document(entry: RawEntry, text: str) -> RawDocument:
     """A legacy file as a document: its paragraphs are the sections, in order,
     so query and planning read it like any other Raw without a byte of it
-    changing. A file with no text is a `ValueError`, like a malformed one."""
-    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", _lines(text)) if p.strip()]
+    changing; its own frontmatter is left out, as an original's is. A file
+    with no text is a `ValueError`, like a malformed one."""
+    body = strip_frontmatter(text)
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", body) if p.strip()]
     if not paragraphs:
         raise ValueError("an adopted file has no text")
     return RawDocument(

@@ -3,6 +3,7 @@ without a byte changing, its sources pages gain typed provenance with a
 backup, drift is reported, and the generated half can be snapshotted and
 restored."""
 
+import os
 from datetime import date
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from knowledge.migrate import (
     DriftedRaw,
     SkippedRaw,
     UnresolvedPage,
+    UnwritablePage,
     adopt,
     legacy_raw,
     restore,
@@ -227,3 +229,137 @@ def test_snapshots_cover_the_generated_half_and_restore_is_undoable(tmp_path: Pa
         restore(vault, "nope", stamp="s3")
     with pytest.raises(ValueError, match="single path component"):
         restore(vault, "../../etc", stamp="s3")
+
+
+def test_adoption_reports_every_edge_and_writes_all_or_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vault = make_vault(tmp_path)
+    legacy_vault(vault)
+    root = tmp_path
+    # A note's own frontmatter is metadata, not a passage; a head that claims
+    # provenance but does not validate is neither typed nor legacy; the same
+    # bytes twice are one source, the first path winning.
+    (root / "raw" / "Study" / "note.md").write_text(
+        "---\ntitle: Note\ntags: [agents, sandbox]\n---\n\nBody about sandboxes.\n",
+        encoding="utf-8",
+    )
+    (root / "raw" / "Study" / "damaged.md").write_text(
+        "---\nsource_id: src-x\nsource_sha256: not-a-hash\noriginal_ref: drop/x\n"
+        "raw_ref: raw/Study/damaged.md\nextractor: e\ncreated: 2026-01-01\n---\nbody\n",
+        encoding="utf-8",
+    )
+    (root / "raw" / "Study" / "truncated.md").write_text(
+        "---\nsource_id: src-y\nsource_sha256: " + "a" * 64 + "\n", encoding="utf-8"
+    )
+    (root / "raw" / "Copy").mkdir()
+    (root / "raw" / "Copy" / "openhands.md").write_bytes(
+        (root / "raw" / "Study" / "openhands.md").read_bytes()
+    )
+    assert "raw/Study/damaged.md" not in legacy_raw(vault)
+    assert "raw/Study/truncated.md" not in legacy_raw(vault)
+
+    report = adopt(vault, mode="apply", today=TODAY, stamp="e1")
+    assert [a.raw_ref for a in report.raw_adopted] == [
+        "raw/Copy/openhands.md",
+        "raw/Study/moved.md",
+        "raw/Study/note.md",
+    ]
+    assert report.raw_skipped == (
+        SkippedRaw(raw_ref="raw/Study/big5.md", reason="undecodable"),
+        SkippedRaw(raw_ref="raw/Study/damaged.md", reason="invalid_provenance"),
+        SkippedRaw(raw_ref="raw/Study/empty.md", reason="empty"),
+        SkippedRaw(raw_ref="raw/Study/openhands.md", reason="duplicate"),
+        SkippedRaw(raw_ref="raw/Study/truncated.md", reason="invalid_provenance"),
+    )
+    # The sources page's path did not resolve: its Raw was the duplicate.
+    assert [u.page for u in report.pages_unresolved] == [
+        "wiki/sources/OpenHands SDK.md",
+        "wiki/sources/Stale.md",
+    ]
+    indexed = {e.raw_ref for e in RawIndex.scan(vault).entries}
+    assert indexed == {"raw/Copy/openhands.md", "raw/Study/moved.md", "raw/Study/note.md"}
+    (hit,) = retrieve(vault, "sandboxes", k=1)
+    assert hit.text == "Body about sandboxes." and hit.citation.section == 1
+    assert retrieve(vault, "tags agents", k=5) == ()
+
+    # An adopted file emptied by hand is drift, not a skip; one deleted is
+    # missing and its record is dropped, so a new file there is new.
+    (root / "raw" / "Study" / "note.md").write_bytes(b"\n")
+    (root / "raw" / "Study" / "moved.md").unlink()
+    second = adopt(vault, today=TODAY, stamp="e2")
+    assert [d.raw_ref for d in second.raw_drifted] == ["raw/Study/note.md"]
+    assert second.raw_missing == ("raw/Study/moved.md",)
+    assert second.written == (".ingest-adopted.json",)
+    assert "raw/Study/moved.md" in vault.ledger_read()  # a dry run wrote nothing
+    named = adopt(vault, mode="apply", today=TODAY, stamp="e2", readopt=["raw/Study/note.md"])
+    assert named.raw_readopted == () and named.raw_drifted == ()
+    assert SkippedRaw(raw_ref="raw/Study/note.md", reason="empty") in named.raw_skipped
+    assert "raw/Study/moved.md" not in vault.ledger_read() and named.snapshot == "e2-before-adopt"
+    (root / "raw" / "Study" / "moved.md").write_text("brand new\n", encoding="utf-8")
+    third = adopt(vault, mode="apply", today=TODAY, stamp="e3")
+    assert [a.raw_ref for a in third.raw_adopted] == ["raw/Study/moved.md"]
+    # The emptied note is still drift: an empty file is never adopted.
+    assert third.raw_readopted == () and [d.raw_ref for d in third.raw_drifted] == [
+        "raw/Study/note.md"
+    ]
+
+    # A stamp names one apply: a second apply under it is refused before any
+    # write, and the vault is exactly as it was.
+    (root / "raw" / "Study" / "later.md").write_text("later\n", encoding="utf-8")
+    ledger_before = (root / ".ingest-adopted.json").read_bytes()
+    with pytest.raises(VaultError, match="write_failed"):
+        adopt(vault, mode="apply", today=TODAY, stamp="e3")
+    assert (root / ".ingest-adopted.json").read_bytes() == ledger_before
+
+    # All or nothing: a write that fails part-way puts every file back.
+    (root / "raw" / "Study" / "page.md").write_text(
+        "---\nsource_path: raw/Study/later.md\n---\nlooks like a page\n", encoding="utf-8"
+    )
+    (root / "wiki" / "sources" / "Later.md").write_text(
+        "---\nsource_path: raw/Study/later.md\n---\nabout later\n", encoding="utf-8"
+    )
+    (root / "wiki" / "sources" / "Page.md").write_text(
+        "---\nsource_path: raw/Study/page.md\n---\nabout page\n", encoding="utf-8"
+    )
+    before = {
+        p: p.read_bytes()
+        for p in root.rglob("*")
+        if p.is_file() and ".ingest-snapshot" not in p.parts
+    }
+    real_write = vault.write
+    calls: list[str] = []
+
+    def failing(rel: str, content: str, *, stamp: str) -> bool:
+        calls.append(rel)
+        if len(calls) == 2:
+            raise OSError("disk full")
+        return real_write(rel, content, stamp=stamp)
+
+    monkeypatch.setattr(vault, "write", failing)
+    with pytest.raises(VaultError, match="write_failed"):
+        adopt(vault, mode="apply", today=TODAY, stamp="e5")
+    assert calls == ["wiki/sources/Later.md", "wiki/sources/Page.md"]
+    after = {
+        p: p.read_bytes()
+        for p in root.rglob("*")
+        if p.is_file() and ".ingest-snapshot" not in p.parts
+    }
+    assert {p: b for p, b in after.items() if ".ingest-backup" not in p.parts} == before
+    assert "e5-before-adopt" in snapshots(vault)
+    monkeypatch.undo()
+
+    # A page the vault would refuse to write is reported, not attempted.
+    link = root / "wiki" / "sources" / "Linked.md"
+    try:
+        os.symlink(root / "raw" / "Study" / "page.md", link)
+    except (OSError, NotImplementedError):
+        pytest.skip("links need privileges on this machine")
+    fourth = adopt(vault, today=TODAY, stamp="e6")
+    assert fourth.pages_unwritable == (
+        UnwritablePage(page="wiki/sources/Linked.md", code="immutable_area"),
+    )
+    assert [m.page for m in fourth.pages_migrated] == [
+        "wiki/sources/Later.md",
+        "wiki/sources/Page.md",
+    ]

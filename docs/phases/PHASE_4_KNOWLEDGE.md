@@ -306,38 +306,48 @@ enforced in code, never left to a prompt:
    without this platform's provenance frontmatter) is recorded in a ledger
    (`.ingest-adopted.json`) by content hash, with a `KnowledgeSource` whose
    identity is that content and whose original is the file itself. Files
-   that are not UTF-8 or hold no text are reported as skipped, never adopted
+   that are not UTF-8, hold no text, repeat the bytes of a Raw already known
+   or carry a damaged typed head are reported as skipped, never adopted
    silently.
 2. The Raw index consults the ledger: an adopted file is an entry
    (`adopted=True`, `created` = the adoption date) as long as its bytes still
    hash to what was adopted; `load_document` reads it as a document whose
-   sections are its paragraphs, so lint, planning and query treat it like
-   any other Raw. A ledger that is absent, corrupt or malformed is a first
-   run, never a failure.
-3. Drift is path-versus-hash: an adopted file whose bytes changed is
-   reported (`DriftedRaw` with both hashes), left out of the index and
-   adopted again only when named in `readopt` — a person's change to what is
-   immutable by rule is never accepted by accident.
+   sections are its paragraphs (its own frontmatter left out), so lint,
+   planning and query treat it like any other Raw. A ledger that is absent,
+   corrupt or malformed is a first run, never a failure.
+3. Drift is path-versus-hash: an adopted file whose bytes changed (emptied
+   included) is reported (`DriftedRaw` with both hashes), left out of the
+   index and adopted again only when named in `readopt` — a person's change
+   to what is immutable by rule is never accepted by accident. A ledger
+   record whose file is gone is reported and dropped, so a new file at that
+   path is new.
 4. A `wiki/sources/` page that still carries the source tooling's
    `source_path:` and no `source_id` gains the typed provenance lines when
    the path resolves to a Raw the index knows (adopted or ingested), through
    `Vault.write` with a backup and the page's own line endings; the
    `source_path:` line stays for the person reading it. A path that resolves
-   to nothing is reported as unresolved; a page whose frontmatter never
+   to nothing is reported as unresolved; a page the vault would refuse to
+   write is reported with the refusal code; a page whose frontmatter never
    closes is reported as skipped.
 5. Dry run is the default and names exactly what an apply writes. An apply
    that writes first snapshots the generated half — `wiki/`, `index.md`,
    `log.md`, `decisions.md`, the state file and the ledger — under
-   `.ingest-snapshot/<stamp>-before-adopt`; `raw/` and `drop/` are never part
-   of a snapshot. `snapshot`, `snapshots` and `restore` are available on
-   their own; a restore snapshots the current state first so it is itself
-   undoable, and a snapshot name is one path component.
+   `.ingest-snapshot/<stamp>-before-adopt`, then writes everything or
+   nothing; a stamp names one apply. `raw/` and `drop/` are never part of a
+   snapshot, and links are copied as links, never followed. `snapshot`,
+   `snapshots` and `restore` are available on their own; a restore snapshots
+   the current state first so it is itself undoable, refuses a managed
+   directory that is itself a link, and a snapshot name is one path
+   component.
 6. Tests: adoption in both modes over a legacy vault (with a CRLF sources
    page, a Big5 file, an empty file, a stale path and an unclosed
    frontmatter), Raw bytes unchanged before and after, the index, lint,
    planning text and query seeing the adopted file, idempotence, drift and
-   re-adoption, ingested and adopted Raw side by side, corrupt ledgers, and
-   snapshot/restore round trips that leave `raw/` alone.
+   re-adoption, ingested and adopted Raw side by side, corrupt ledgers,
+   snapshot/restore round trips that leave `raw/` alone, and the edges: a
+   note's own frontmatter, a damaged typed head, duplicate bytes, an emptied
+   or deleted adopted file, a reused stamp, an unwritable page and a write
+   that fails part-way.
 
 With this slice the Phase 4 exit criteria are met: the office corpus
 round-trips to Raw with page/slide/image relationships (slices 2–4), Wiki

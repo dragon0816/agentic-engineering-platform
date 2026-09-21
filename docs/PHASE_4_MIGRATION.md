@@ -344,9 +344,19 @@ added beside it, so a later move of the file changes nothing the page relies
 on.
 
 Intentional differences: adoption is a dry run by default with the exact
-write list; an apply that writes is preceded by a snapshot; a Big5 or empty
-legacy file is reported, not adopted; a sources page keeps its `source_path:`
-and its line endings; and nothing here prints, exits or reads a clock.
+write list; an apply that writes is preceded by a snapshot and writes all or
+nothing (the source's snapshot had no adopt step; `Vault.apply`'s
+remember-and-put-back rule is reused); a Big5 or empty legacy file is
+reported, not adopted; a sources page keeps its `source_path:` and its line
+endings; and nothing here prints, exits or reads a clock. Review of the PR
+added: a damaged typed head is neither typed nor legacy and is never
+adopted; a note's own frontmatter is not a passage; the same bytes twice
+are one source (the first path wins, as a duplicate drop would); an emptied
+adopted file is drift and a deleted one is dropped from the ledger; a page
+the vault would refuse to write is reported before anything is written; a
+reused stamp is refused before any write; snapshots copy links as links and
+a restore refuses a managed directory that is itself a link; and the typed
+scan runs once per adoption.
 Rollback removes `knowledge/migrate.py`, `Vault.ledger_read` /
 `ledger_write`, the `ledger` branch of `RawIndex.scan`, `RawEntry.adopted`,
 `adopted_document` / `load_document` (query returns to `parse`) and the
