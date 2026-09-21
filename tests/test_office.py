@@ -41,7 +41,7 @@ def make_png() -> bytes:
 PNG = make_png()
 
 
-def make_pdf(pages: list[str], *, image: bool = False) -> bytes:
+def make_pdf(pages: list[str], *, image: bool = False, broken_image: bool = False) -> bytes:
     """A minimal PDF with one line of Helvetica text per page and, optionally,
     a 1x1 RGB image on the first page; offsets are computed so the xref is real."""
     objects: list[bytes] = []
@@ -67,7 +67,9 @@ def make_pdf(pages: list[str], *, image: bool = False) -> bytes:
     if image:
         objects.append(
             b"<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceRGB"
-            b" /BitsPerComponent 8 /Length 3 >>\nstream\n\xff\x00\x00\nendstream"
+            b" /BitsPerComponent 8"
+            + (b" /Filter /JBIG2Decode" if broken_image else b"")
+            + b" /Length 3 >>\nstream\n\xff\x00\x00\nendstream"
         )
     header = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
@@ -218,3 +220,73 @@ def test_the_corpus_round_trips_to_raw_with_assets(tmp_path: Path) -> None:
     with pytest.raises(Exception, match="raw_exists"):
         vault.write_raw_bytes(image, b"other")
     assert (tmp_path / "drop" / "q3" / "deck.pptx").read_bytes() == dropped
+
+
+def test_an_unreadable_image_does_not_lose_the_pages_text() -> None:
+    staged = StagedAssets("raw/report/assets")
+    sections = PdfExtractor().extract(
+        make_pdf(["Text survives", "Second page"], image=True, broken_image=True), staged
+    )
+    assert [(s.kind, s.page, s.text) for s in sections] == [
+        ("text", 1, "Text survives"),
+        ("text", 2, "Second page"),
+    ]
+    assert staged.items == {}
+
+
+def test_pictures_in_placeholders_and_groups_are_kept() -> None:
+    from pptx import Presentation
+    from pptx.enum.shapes import PP_PLACEHOLDER
+    from pptx.util import Inches
+
+    deck = Presentation()
+    captioned = deck.slides.add_slide(deck.slide_layouts[8])  # Picture with Caption
+    assert captioned.shapes.title is not None
+    captioned.shapes.title.text = "Captioned"
+    for placeholder in captioned.placeholders:
+        if placeholder.placeholder_format.type == PP_PLACEHOLDER.PICTURE:
+            placeholder.insert_picture(io.BytesIO(PNG))
+    grouped = deck.slides.add_slide(deck.slide_layouts[6])
+    group = grouped.shapes.add_group_shape()
+    group.shapes.add_textbox(
+        Inches(1), Inches(1), Inches(3), Inches(1)
+    ).text_frame.text = "grouped text"
+    group.shapes.add_picture(io.BytesIO(PNG), Inches(1), Inches(2))
+    out = io.BytesIO()
+    deck.save(out)
+
+    sections = PptxExtractor().extract(out.getvalue(), StagedAssets("raw/deck/assets"))
+    assert [(s.kind, s.slide) for s in sections] == [
+        ("text", 1),
+        ("image", 1),
+        ("text", 2),
+        ("image", 2),
+    ]
+    assert sections[0].text == "Captioned" and sections[2].text == "grouped text"
+
+
+def test_docx_content_controls_and_cell_pictures_are_kept() -> None:
+    from docx import Document
+    from docx.oxml import parse_xml
+    from docx.oxml.ns import nsdecls
+
+    document = Document()
+    document.add_paragraph("before")
+    control = parse_xml(
+        f"<w:sdt {nsdecls('w')}><w:sdtContent><w:p><w:r><w:t>inside content control"
+        "</w:t></w:r></w:p></w:sdtContent></w:sdt>"
+    )
+    body = document.element.body
+    body.insert(len(body) - 1, control)  # before the final sectPr
+    table = document.add_table(rows=1, cols=2)
+    table.cell(0, 0).text = "cell text"
+    table.cell(0, 1).paragraphs[0].add_run().add_picture(io.BytesIO(PNG))
+    document.add_paragraph("after")
+    out = io.BytesIO()
+    document.save(out)
+
+    sections = DocxExtractor().extract(out.getvalue(), StagedAssets("raw/doc/assets"))
+    assert [s.kind for s in sections] == ["text", "table", "image", "text"]
+    assert sections[0].text == "before\n\ninside content control"
+    assert sections[1].text.startswith("| cell text |")
+    assert sections[3].text == "after"

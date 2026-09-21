@@ -33,19 +33,35 @@ reviewed, merged on green CI and followed by the next. Requirements:
   (paragraphs with headings as `#`, tables, inline pictures in body order; no
   page). `table_markdown` renders GitHub-style tables. Any library exception on
   a corrupt original maps to the closed status `undecodable`.
-- 5 tests (`tests/test_office.py`) that generate the corpus in the test itself
+- 8 tests (`tests/test_office.py`) that generate the corpus in the test itself
   — a PDF with a real xref and an embedded image, a PPTX, a DOCX — and show it
   round-tripping to Raw with relationships intact, a repeated picture stored
-  once, dry run and apply agreeing on every path, assets write-once, and Drop
-  untouched. `test_raw.py` updated for the sink.
+  once, dry run and apply agreeing on every path, assets write-once, Drop
+  untouched, an unreadable image leaving the text intact, pictures in
+  placeholders and groups, and content controls and cell pictures.
+  `test_raw.py` updated for the sink.
 - Docs: phase spec slice 3 requirements, `docs/CONTRACTS.md`, migration slice 3
   decision with the license table and rejected alternatives (`PyMuPDF` is AGPL),
   README.
 
+- PR #26 opened; pre-merge review applied (10 findings, six of them silent data
+  loss): pictures in placeholders and inside group shapes were dropped — shapes
+  are now classified by type and groups walked; paragraphs and tables inside
+  content controls (`w:sdt`) and pictures inside table cells were dropped —
+  the DOCX walk descends into `sdtContent` and scans cells for pictures; one
+  unreadable image made a whole PDF `undecodable` — image failures are now
+  isolated per image (including pypdf's `DependencyError`, which is not a
+  `PyPdfError`); reading `shape_type` on an unmodelled element raised and
+  sank the deck — never read; `pypdf` is declared with its `image` extra so
+  Pillow is a direct requirement; the bare `except Exception` boundary is
+  replaced by the parsers' documented error types with the cause chained;
+  the private `document._body` is gone and one `_Sections` gatherer replaces
+  the repeated flush blocks. Three regression tests added.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available. Merge on green CI is authorized for Phase 4 slices.
+- PR #26 is open with the review posted; merge on green CI is authorized for
+  Phase 4 slices.
 
 ## Remaining
 
@@ -66,8 +82,8 @@ reviewed, merged on green CI and followed by the next. Requirements:
   dry run stays exact and Raw stays write-once even for images.
 - Assets are content-named under the document's own directory, so a repeated
   image is stored once and a re-intake of identical bytes is a no-op.
-- A broad exception boundary in extractors is deliberate: third-party parsers
-  raise an open set on corrupt input, and the intake promises closed statuses.
+- Extractors map the parsers' documented error types to `undecodable` with the
+  cause chained, and skip an unreadable image rather than lose the document.
 - `PyMuPDF` was excluded on license (AGPL); the chosen libraries are all
   permissive.
 
@@ -77,7 +93,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 524 tests (519 prior + 5 office; 1 skipped on Windows without symlink
+# PASS: 527 tests (519 prior + 8 office; 1 skipped on Windows without symlink
 #       privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS

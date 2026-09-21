@@ -2,18 +2,28 @@
 
 Each extractor keeps the relationship the Roadmap asks for — text, tables and
 images with the page or slide they came from — and hands image bytes to the
-intake's `AssetSink` rather than writing anything. The libraries are an
-optional dependency (`pip install .[office]`); nothing else in the platform
-imports them, and every import here is lazy so a host without the extra still
-loads this module and gets `unsupported` for these suffixes only if it never
-registers these extractors.
+intake's `AssetSink` rather than writing anything. The libraries are the
+optional extra `office`; nothing else in the platform imports them, and every
+import here is lazy so a host without the extra still loads this module.
+
+Two rules shape the error handling. A corrupt or unreadable *original* is the
+closed status `undecodable`, mapped from the parsers' documented error types
+with the cause chained, never from a bare `Exception`. An unreadable *image*
+inside a readable original is skipped, not fatal: losing one picture is better
+than losing every page's text behind a status that blames the file.
 """
 
 import io
-from collections.abc import Iterable, Sequence
+import zipfile
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import PurePosixPath
+from typing import Any
 
 from knowledge.raw import AssetSink, ExtractionError, RawSection
+
+# What the parsers raise on corrupt input, beyond their own base classes:
+# broken streams surface as these from the standard library and lxml.
+_CORRUPT = (ValueError, TypeError, KeyError, IndexError, OSError, zipfile.BadZipFile)
 
 
 def table_markdown(rows: Sequence[Sequence[str]]) -> str:
@@ -32,10 +42,43 @@ def table_markdown(rows: Sequence[Sequence[str]]) -> str:
     return "\n".join(lines)
 
 
-def _text_section(parts: list[str], **place: int | None) -> RawSection | None:
-    body = "\n\n".join(part for part in parts if part.strip())
-    parts.clear()
-    return RawSection(kind="text", text=body, **place) if body.strip() else None
+class _Sections:
+    """Gathers consecutive text into one section and flushes it before a
+    table or an image, so reading order is kept."""
+
+    def __init__(self) -> None:
+        self.items: list[RawSection] = []
+        self._texts: list[str] = []
+
+    def text(self, value: str) -> None:
+        if value.strip():
+            self._texts.append(value)
+
+    def flush(self, **place: int | None) -> None:
+        body = "\n\n".join(self._texts)
+        self._texts = []
+        if body.strip():
+            self.items.append(RawSection(kind="text", text=body, **place))
+
+    def table(self, rows: Sequence[Sequence[str]], **place: int | None) -> None:
+        self.flush(**place)
+        markdown = table_markdown(rows)
+        if markdown:
+            self.items.append(RawSection(kind="table", text=markdown, **place))
+
+    def image(self, ref: str, **place: int | None) -> None:
+        self.flush(**place)
+        self.items.append(RawSection(kind="image", image_ref=ref, **place))
+
+    def done(self, **place: int | None) -> tuple[RawSection, ...]:
+        self.flush(**place)
+        return tuple(self.items)
+
+
+def _undecodable(error: BaseException) -> ExtractionError:
+    failure = ExtractionError("undecodable")
+    failure.__cause__ = error
+    return failure
 
 
 class PdfExtractor:
@@ -47,121 +90,144 @@ class PdfExtractor:
 
     def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
         from pypdf import PdfReader
+        from pypdf.errors import DependencyError, PyPdfError
 
-        sections: list[RawSection] = []
+        out = _Sections()
         try:
             reader = PdfReader(io.BytesIO(data))
             if reader.is_encrypted and not reader.decrypt(""):
                 raise ExtractionError("undecodable")
             for number, page in enumerate(reader.pages, 1):
-                text = page.extract_text() or ""
-                if text.strip():
-                    sections.append(RawSection(kind="text", text=text, page=number))
-                for image in page.images:
+                out.text(page.extract_text() or "")
+                out.flush(page=number)
+                for key in list(page.images.keys()):
+                    try:
+                        # Decoding happens on access; one image with a filter
+                        # pypdf cannot decode (or no Pillow) must not cost the
+                        # page's text, which is still evidence.
+                        image = page.images[key]
+                        blob = image.data
+                    except (PyPdfError, DependencyError, ImportError, *_CORRUPT):
+                        # DependencyError (a missing external decoder) is not
+                        # a PyPdfError in pypdf's hierarchy.
+                        continue
                     suffix = PurePosixPath(image.name).suffix or ".png"
-                    ref = assets.put(image.data, suffix)
-                    sections.append(RawSection(kind="image", image_ref=ref, page=number))
-        except ExtractionError:
-            raise
-        except Exception:
-            # A third-party parser raises an open set of types on a corrupt or
-            # unsupported file; the intake needs one closed status for all of it.
-            raise ExtractionError("undecodable") from None
-        return tuple(sections)
+                    out.image(assets.put(blob, suffix), page=number)
+        except (PyPdfError, *_CORRUPT) as error:
+            raise _undecodable(error) from error
+        return out.done()
 
 
 class PptxExtractor:
-    """Per slide, in shape order: text frames gathered into one text section,
-    tables as Markdown, pictures as image sections. Speaker notes are not
-    extracted."""
+    """Per slide, in shape order and into groups: text frames gathered into
+    one text section, tables as Markdown, pictures (placeholders included) as
+    image sections. Speaker notes are not extracted."""
 
     name = "pptx.v1"
     suffixes = (".pptx",)
 
     def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
+        from lxml.etree import LxmlError
         from pptx import Presentation
-        from pptx.enum.shapes import MSO_SHAPE_TYPE
+        from pptx.exc import PythonPptxError
+        from pptx.shapes.group import GroupShape
         from pptx.shapes.picture import Picture
 
-        sections: list[RawSection] = []
+        out = _Sections()
+
+        def walk(shapes: Iterable[Any], number: int) -> None:
+            for shape in shapes:
+                # Type checks, not `shape_type`: an element python-pptx does not
+                # model raises from that property, and a picture in a placeholder
+                # is still a Picture.
+                if isinstance(shape, GroupShape):
+                    walk(shape.shapes, number)
+                elif isinstance(shape, Picture):
+                    try:
+                        blob, ext = shape.image.blob, shape.image.ext
+                    except (PythonPptxError, *_CORRUPT):
+                        continue  # a linked, non-embedded picture has no bytes
+                    out.image(assets.put(blob, ext), slide=number)
+                elif shape.has_table:
+                    rows = [[cell.text for cell in row.cells] for row in shape.table.rows]
+                    out.table(rows, slide=number)
+                elif shape.has_text_frame:
+                    out.text(shape.text_frame.text)
+
         try:
             deck = Presentation(io.BytesIO(data))
             for number, slide in enumerate(deck.slides, 1):
-                texts: list[str] = []
-                for shape in slide.shapes:
-                    if getattr(shape, "has_table", False) and shape.has_table:
-                        if (gathered := _text_section(texts, slide=number)) is not None:
-                            sections.append(gathered)
-                        rows = [[cell.text for cell in row.cells] for row in shape.table.rows]
-                        table = table_markdown(rows)
-                        if table:
-                            sections.append(RawSection(kind="table", text=table, slide=number))
-                    elif shape.shape_type == MSO_SHAPE_TYPE.PICTURE and isinstance(shape, Picture):
-                        if (gathered := _text_section(texts, slide=number)) is not None:
-                            sections.append(gathered)
-                        ref = assets.put(shape.image.blob, shape.image.ext)
-                        sections.append(RawSection(kind="image", image_ref=ref, slide=number))
-                    elif shape.has_text_frame:
-                        texts.append(shape.text_frame.text)
-                if (gathered := _text_section(texts, slide=number)) is not None:
-                    sections.append(gathered)
-        except ExtractionError:
-            raise
-        except Exception:
-            raise ExtractionError("undecodable") from None
-        return tuple(sections)
+                walk(slide.shapes, number)
+                out.flush(slide=number)
+        except (PythonPptxError, LxmlError, *_CORRUPT) as error:
+            raise _undecodable(error) from error
+        return out.done()
 
 
 class DocxExtractor:
-    """Body elements in document order: paragraphs gathered into text sections
-    (headings keep their level as Markdown `#`), tables as Markdown, inline
-    pictures as image sections. Word has no fixed pages, so sections carry no
-    page number."""
+    """Body blocks in document order, content controls (`w:sdt`) included:
+    paragraphs gathered into text sections (headings keep their level as
+    Markdown `#`), tables as Markdown with the pictures inside their cells
+    following them, inline pictures as image sections. Word has no fixed pages,
+    so sections carry no page number."""
 
     name = "docx.v1"
     suffixes = (".docx",)
 
     def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
         from docx import Document
+        from docx.opc.exceptions import OpcError
         from docx.oxml.ns import qn
         from docx.table import Table
         from docx.text.paragraph import Paragraph
+        from lxml.etree import LxmlError
 
-        sections: list[RawSection] = []
+        out = _Sections()
+        paragraph_tag, table_tag, control_tag = qn("w:p"), qn("w:tbl"), qn("w:sdt")
+
+        def blocks(element: Any) -> Iterator[Any]:
+            for child in element.iterchildren():
+                if child.tag in (paragraph_tag, table_tag):
+                    yield child
+                elif child.tag == control_tag:
+                    for content in child.iterchildren(qn("w:sdtContent")):
+                        yield from blocks(content)
+
+        def pictures(element: Any) -> Iterator[str]:
+            for blip in element.iter(qn("a:blip")):
+                relationship = blip.get(qn("r:embed"))
+                if not relationship:
+                    continue
+                try:
+                    part = document.part.related_parts[relationship]
+                except (OpcError, *_CORRUPT):
+                    continue
+                suffix = PurePosixPath(str(part.partname)).suffix or ".png"
+                yield assets.put(part.blob, suffix)
+
+        def paragraph(element: Any) -> None:
+            item = Paragraph(element, document)
+            style = item.style.name if item.style is not None and item.style.name else ""
+            out.text(_heading(style, item.text))
+            for ref in pictures(element):
+                out.image(ref)
+
+        def table(element: Any) -> None:
+            item = Table(element, document)
+            out.table([[cell.text for cell in row.cells] for row in item.rows])
+            for ref in pictures(element):
+                out.image(ref)
+
         try:
             document = Document(io.BytesIO(data))
-            texts: list[str] = []
-            for child in document.element.body.iterchildren():
-                if child.tag == qn("w:p"):
-                    paragraph = Paragraph(child, document._body)
-                    texts.append(
-                        _heading(paragraph.style.name if paragraph.style else "", paragraph.text)
-                    )
-                    for blip in child.iter(qn("a:blip")):
-                        relationship = blip.get(qn("r:embed"))
-                        if not relationship:
-                            continue
-                        part = document.part.related_parts[relationship]
-                        if (gathered := _text_section(texts)) is not None:
-                            sections.append(gathered)
-                        suffix = PurePosixPath(str(part.partname)).suffix or ".png"
-                        ref = assets.put(part.blob, suffix)
-                        sections.append(RawSection(kind="image", image_ref=ref))
-                elif child.tag == qn("w:tbl"):
-                    if (gathered := _text_section(texts)) is not None:
-                        sections.append(gathered)
-                    table = Table(child, document._body)
-                    rows = [[cell.text for cell in row.cells] for row in table.rows]
-                    markdown = table_markdown(rows)
-                    if markdown:
-                        sections.append(RawSection(kind="table", text=markdown))
-            if (gathered := _text_section(texts)) is not None:
-                sections.append(gathered)
-        except ExtractionError:
-            raise
-        except Exception:
-            raise ExtractionError("undecodable") from None
-        return tuple(sections)
+            for block in blocks(document.element.body):
+                if block.tag == table_tag:
+                    table(block)
+                else:
+                    paragraph(block)
+        except (OpcError, LxmlError, *_CORRUPT) as error:
+            raise _undecodable(error) from error
+        return out.done()
 
 
 def _heading(style: str, text: str) -> str:
@@ -170,5 +236,5 @@ def _heading(style: str, text: str) -> str:
     return text
 
 
-def office_extractors() -> Iterable[PdfExtractor | PptxExtractor | DocxExtractor]:
+def office_extractors() -> tuple[PdfExtractor, PptxExtractor, DocxExtractor]:
     return (PdfExtractor(), PptxExtractor(), DocxExtractor())

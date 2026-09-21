@@ -129,11 +129,12 @@ PyPI release history:
 
 | Library | Version pinned | License (`License-Expression`) | Recent releases | Typing |
 | --- | --- | --- | --- | --- |
-| `pypdf` | `>=6,<7` (6.19.0) | BSD-3-Clause | 6.19.0 (2026-09-16), 6.18.1 (2026-09-11), 6.18.0 (2026-09-07) — weekly cadence | `py.typed` |
+| `pypdf[image]` | `>=6,<7` (6.19.0) | BSD-3-Clause | 6.19.0 (2026-09-16), 6.18.1 (2026-09-11), 6.18.0 (2026-09-07) — weekly cadence | `py.typed` |
 | `python-pptx` | `>=1,<2` (1.0.2) | MIT | 1.0.2 (2024-08-07), 1.0.1, 1.0.0 (2024-08) — stable, slow | `py.typed` |
 | `python-docx` | `>=1,<2` (1.2.0) | MIT | 1.2.0 (2025-06-16), 1.1.2 (2024-05-01) — stable, slow | `py.typed` |
 
-Transitive: `lxml` (BSD-3-Clause), `Pillow` (MIT-CMU), `XlsxWriter`
+Transitive: `lxml` (BSD-3-Clause), `Pillow` (MIT-CMU; also declared directly
+through `pypdf[image]`, since image extraction needs it), `XlsxWriter`
 (BSD-2-Clause), `typing_extensions` (PSF). All permissive; no copyleft. Both
 OpenXML libraries are mature and release rarely because the format is stable;
 `pypdf` is actively maintained by the py-pdf organisation. Alternatives not
@@ -141,9 +142,14 @@ taken: `pdfplumber`/`pdfminer.six` (heavier, MIT, would add table heuristics
 that are better left to a later slice if needed); `PyMuPDF` (AGPL — excluded by
 license); `unstructured` (large dependency surface for a small need).
 
-Extraction runs behind a broad exception boundary that maps to the closed
-status `undecodable`: these parsers raise an open set of types on corrupt input,
-and the intake contract promises a closed status for anything an original
-contains. Rollback removes `knowledge/office.py`, its tests, the extra and the
+Extraction maps the parsers' documented error types — `PyPdfError`,
+`PythonPptxError`, `OpcError`, `LxmlError`, plus the standard-library errors a
+broken stream raises — to the closed status `undecodable` with the cause
+chained; a bare `Exception` boundary was rejected in review because it would
+turn a programming error into a data status. An unreadable image inside a
+readable original is skipped rather than fatal (also from review: one
+undecodable picture must not cost every page's text). Shapes are classified
+by type, never through `shape_type`, which raises for elements python-pptx
+does not model. Rollback removes `knowledge/office.py`, its tests, the extra and the
 CI install line; the `AssetSink` addition to the protocol stays useful for any
 later extractor.
