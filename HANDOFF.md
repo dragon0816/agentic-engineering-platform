@@ -17,20 +17,23 @@ plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Payload storage"); source decision:
 
 - `workflow/payloads.py`: `PayloadStore` protocol and `FilePayloadStore(root,
   max_bytes=1_000_000)`. `put` canonicalises the value (sorted keys, ASCII, no
-  NaN/Infinity), stores it at
-  `root/<actor>/<namespace>/payload-<sha256>.json` and returns the `PayloadRef`
-  a checkpoint records; equal values share one file, so repeated writes are
-  idempotent. Writes are atomic (temp file, `fsync`, `os.replace`) and a failed
-  write leaves nothing behind.
-- `get` returns the payload only when the reference's own parts agree
-  (`ref_id == payload-<sha256>`, else `invalid_transition`), the stored bytes
-  hash to `ref.sha256` (else `unavailable`) and the stored contract matches
-  (else `invalid_transition`); an unstored reference is `missing`. The file name
-  derives from the validated digest alone, never from caller text, so a
-  reference cannot name a path.
+  NaN/Infinity), stores a record of owner, contract and payload at
+  `root/<actor>/<namespace>/payload-<record digest>.json` and returns the
+  `PayloadRef` a checkpoint records: `ref_id` is that record digest, `sha256` is
+  the digest of the payload value. The same owner, contract and payload always
+  produce the same reference and file, so repeated writes are idempotent.
+  Writes are atomic (temp file, `fsync`, `os.replace`, best-effort directory
+  `fsync`); a failed write leaves nothing behind and an existing file that no
+  longer hashes to its name is rewritten.
+- `get` returns the payload only when the identifier is one this store issues
+  (else `invalid_transition`, checked before any path is built), the stored
+  bytes hash to it (else `unavailable`), the owner recorded inside the file is
+  the requesting owner (else `missing`), the payload hashes to `ref.sha256`
+  (else `unavailable`) and the stored contract matches (else
+  `invalid_transition`). An unstored reference is `missing`.
 - Oversized payloads are `capacity` and unserializable values are
-  `invalid_transition`, both before anything is written. One owner's reference
-  cannot read another owner's payload.
+  `invalid_transition`, both before anything is written. Ownership is checked
+  from the record, so it holds even on a case-folding filesystem.
 - 23 tests (`tests/test_payloads.py`): round trips for every JSON shape,
   contract preservation, deduplication and idempotent writes, the same value
   under two contracts, owner isolation including case-folding filesystems,
@@ -52,8 +55,8 @@ plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Payload storage"); source decision:
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #18 is open with the review posted and applied; CI passed on the final
+  head `c46615f`. Only the owner's merge decision remains.
 
 ## Remaining
 
@@ -71,7 +74,7 @@ plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Payload storage"); source decision:
 
 ## Architecture decisions made
 
-- The digest is the identity: a payload is stored under its own SHA-256 and
+- The digest is the identity: a record is stored under its own SHA-256 and
   verified again on every read, so recovery can never be fed something the run
   did not produce. Deduplication is a consequence, not a goal.
 - The reference decides what is acceptable; the file never gets a vote. A
@@ -128,6 +131,5 @@ CI runs ordinary pytest.
 
 ## Next Recommended Action
 
-Open the PR for `phase-3/payload-storage` against `main`, run the review, apply
-confirmed findings and let the owner merge. Then scope engine recovery with the
-owner, starting with the coordinator ownership question above.
+Merge PR #18 (owner's decision; review and CI are on the PR). Then scope engine
+recovery with the owner, starting with the coordinator ownership question above.
