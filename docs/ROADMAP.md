@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–4 complete (Phase 4 knowledge platform closed 2026-09-21); Phase 5 — Model gateway active
+Status: Phases 1–5 complete (Phase 5 model gateway closed 2026-09-22); Phase 6 — Evaluation, policy and observability next, specification pending
 
 ## Objective
 
@@ -96,6 +96,8 @@ Met 2026-09-21 in nine slices (`docs/phases/PHASE_4_KNOWLEDGE.md`, decisions in 
 Extract the LiteLLM/company-model gateway from the mixed knowledge repository into `src/gateway/` or a separately deployable package under this repo. Keep provider-specific patches isolated. Agent/knowledge/evaluation consume a model interface rather than importing gateway internals.
 
 Exit criteria: at least local Ollama and the internal OpenAI-compatible gateway can satisfy the same model client interface; credentials are externalized.
+
+Met 2026-09-22 in five slices (`docs/phases/PHASE_5_GATEWAY.md`, decisions in `docs/PHASE_5_MIGRATION.md`): a capability-checked model catalog with deterministic selection, an OpenAI-compatible adapter, an Ollama adapter over its own wire format, the credential resolution boundary and client construction from a catalog, and per-response latency with a worked example. The source's LiteLLM proxy was deliberately not migrated: it existed to terminate the Anthropic wire format for Claude Code, which the owner placed out of scope, and the company gateway is already OpenAI-compatible.
 
 ## Phase 6 — Evaluation, policy and observability
 

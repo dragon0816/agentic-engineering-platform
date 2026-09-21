@@ -80,6 +80,20 @@ synthesis) build on that. An existing Obsidian vault is adopted by content hash
 through a ledger, with snapshot and restore of the generated half, without a byte
 of `raw/` changing. No model provider is named anywhere in knowledge code.
 
+Phase 5 (model gateway, `src/models/`) is complete
+(`docs/phases/PHASE_5_GATEWAY.md`). A catalog maps a stable alias to a
+provider, a model id and the capabilities that endpoint actually has, and
+selection matches declared `ModelRequirements` against them deterministically,
+so changing a provider or a model is configuration rather than a code change.
+Two adapters implement the same `ModelClient`: one for any OpenAI-compatible
+endpoint, including an internal company gateway, and one for a local Ollama
+over its own wire format. Every provider failure is a typed status rather than
+an exception, no credential leaves a request header, and a `SecretRef` becomes
+a value only in a resolver the host supplies, once per request. HTTP sits
+behind an injected transport whose default is the standard library, so the
+runtime install is still `pydantic` alone and no test opens a socket.
+`models.proof` is a complete inert example a host can copy.
+
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not

@@ -130,36 +130,43 @@ class Ollama:
         if isinstance(prepared, Failure):
             return wire.failed_response(request, prepared)
         body, headers = prepared
+        elapsed = wire.Elapsed()
         try:
             reply = self.transport.send(self.url, body, headers, self.timeout_s)
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
-            return wire.failed_response(request, wire.transport_failure(error))
+            return wire.failed_response(
+                request, wire.transport_failure(error), duration_ms=elapsed.ms
+            )
         try:
             status = reply.status
             raw = b"".join(reply.chunks())
         except Exception as error:  # noqa: BLE001 - a read can fail like a send
-            return wire.failed_response(request, wire.transport_failure(error))
+            return wire.failed_response(
+                request, wire.transport_failure(error), duration_ms=elapsed.ms
+            )
         finally:
             wire.close_quietly(reply)
         if status // 100 != 2:
-            return wire.failed_response(request, wire.status_failure(status, raw))
-        return self._answer(request, raw)
+            return wire.failed_response(
+                request, wire.status_failure(status, raw), duration_ms=elapsed.ms
+            )
+        return self._answer(request, raw, elapsed.ms)
 
-    def _answer(self, request: ModelRequest, raw: bytes) -> ModelResponse:
+    def _answer(self, request: ModelRequest, raw: bytes, duration_ms: int) -> ModelResponse:
+        def refused(failure: Failure) -> ModelResponse:
+            return wire.failed_response(request, failure, duration_ms=duration_ms)
+
         try:
             body = json.loads(raw)
         except (ValueError, UnicodeDecodeError):
-            return wire.failed_response(
-                request, Failure(code="model_unparseable", message="the reply is not json")
-            )
+            return refused(Failure(code="model_unparseable", message="the reply is not json"))
         reported = wire.provider_error(body)
         if reported is not None:
-            return wire.failed_response(request, reported)
+            return refused(reported)
         text = _content(body)
         if text is None:
-            return wire.failed_response(
-                request,
-                Failure(code="model_unparseable", message="the reply carries no message"),
+            return refused(
+                Failure(code="model_unparseable", message="the reply carries no message")
             )
         counted = body if isinstance(body, dict) else {}
         return wire.answered(
@@ -167,6 +174,7 @@ class Ollama:
             text=text,
             input_tokens=wire.token_count(counted.get("prompt_eval_count")),
             output_tokens=wire.token_count(counted.get("eval_count")),
+            duration_ms=duration_ms,
         )
 
     def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
@@ -175,16 +183,19 @@ class Ollama:
             yield wire.failed_event(request, prepared)
             return
         body, headers = prepared
+        elapsed = wire.Elapsed()
         try:
             reply = self.transport.send(self.url, body, headers, self.timeout_s)
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
-            yield wire.failed_event(request, wire.transport_failure(error))
+            yield wire.failed_event(request, wire.transport_failure(error), duration_ms=elapsed.ms)
             return
         answered = False
         try:
             if reply.status // 100 != 2:
                 yield wire.failed_event(
-                    request, wire.status_failure(reply.status, b"".join(reply.chunks()))
+                    request,
+                    wire.status_failure(reply.status, b"".join(reply.chunks())),
+                    duration_ms=elapsed.ms,
                 )
                 return
             for line in wire.lines(reply.chunks()):
@@ -202,7 +213,7 @@ class Ollama:
                 if reported is not None:
                     # Ollama reports a mid-stream failure in the body, the
                     # status having been sent long before.
-                    yield wire.failed_event(request, reported)
+                    yield wire.failed_event(request, reported, duration_ms=elapsed.ms)
                     return
                 text = _content(chunk)
                 if text:
@@ -210,7 +221,7 @@ class Ollama:
                 if chunk.get("done") is True:
                     break
         except Exception as error:  # noqa: BLE001 - a read can fail like a send
-            yield wire.failed_event(request, wire.transport_failure(error))
+            yield wire.failed_event(request, wire.transport_failure(error), duration_ms=elapsed.ms)
             return
         finally:
             wire.close_quietly(reply)
@@ -220,6 +231,7 @@ class Ollama:
             yield wire.failed_event(
                 request,
                 Failure(code="model_unparseable", message="the reply carries no json objects"),
+                duration_ms=elapsed.ms,
             )
             return
-        yield ModelStreamEvent(trace=request.trace, kind="done")
+        yield ModelStreamEvent(trace=request.trace, kind="done", duration_ms=elapsed.ms)

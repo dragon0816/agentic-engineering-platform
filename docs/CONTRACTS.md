@@ -919,3 +919,21 @@ host-registered builder raises, alongside the
 catalog's own `no_model_for_requirements` and `unknown_route`, which travel
 through unchanged. A built client is cached per alias, so a host may call this
 per request without rebuilding a transport each time.
+
+## Model observability and the worked example (Phase 5, slice 5)
+
+`ModelResponse.duration_ms` and `ModelStreamEvent.duration_ms` report how long
+the provider took, in milliseconds, so evaluation can compare aliases on
+latency as well as on quality and usage. Both adapters measure with
+`wire.Elapsed`, from just before the call goes out to after the reply is read,
+on a monotonic clock so a clock adjustment cannot produce a negative latency.
+A stream carries it on the event that ends it, `done` or `failed`; the text
+deltas are not each timed. A request refused before any call reports zero.
+
+`models.proof` is a copyable host path, not a default. `SAMPLE_CATALOG` is
+plain data in the shape a host keeps in YAML or JSON, declaring a credential
+as a `SecretRef` name so the whole catalog is safe to commit. `clients_from(
+data, resolver=, transport=)` validates it and returns `ModelClients`.
+`ask(clients, requirements=, prompt=, trace=, max_output_tokens=)` returns a
+`ModelResponse` or a `Failure`: a `Failure` from `ask` is a routing problem,
+one on the response is a provider problem, and neither becomes an exception.
