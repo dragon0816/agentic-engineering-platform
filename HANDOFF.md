@@ -1,63 +1,94 @@
-# Handoff — Phase 4 complete; next is the Phase 5 specification
+# Handoff — Phase 5 model gateway, slice 1 (catalog and selection)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-4/closure`, based on `main` after PR #32 merged.
+Branch: `phase-5/catalog`, based on `main` after PR #33 merged.
 
 ## Goal
 
-Close Phase 4 (knowledge platform) in the repository's status documents now
-that its exit criteria are met, and leave the next phase's first step
-explicit. No code changes in this handoff.
+Phase 5 slice 1: the alias layer. Callers name a stable alias; a catalog maps
+it to a provider, a model id and the capabilities that endpoint actually has,
+and deterministic selection matches declared `ModelRequirements` against them.
+No provider adapter in this slice. Requirements:
+`docs/phases/PHASE_5_GATEWAY.md` (slice 1); decisions:
+`docs/PHASE_5_MIGRATION.md`; contracts: `docs/CONTRACTS.md` ("Model catalog
+and selection").
 
-## Phase 4 summary (PRs #22–#32, all merged to `main`)
+## Owner decisions taken on 2026-09-21
 
-| Slice | PR | What landed |
-|---|---|---|
-| 1 vault safety model | #22 | `knowledge.vault`: `drop/`/`raw/` immutable, writes confined to `wiki/` and the root files, dry run default, backups, whole-plan rejection with rollback |
-| 2 Drop → Raw | #23 | write-once Raw with content identity, section markers, drift chain (`supersedes`), `RawIndex` |
-| 3 office extraction | #26 | PDF/PPTX/DOCX behind `Extractor` with page/slide/image relationships (`office` extra) |
-| 4 image description | #27 | vision description through `ModelClient` at intake; `described_by` marks a model's words |
-| 5 ingest planning | #28 | two-pass planning through `ModelClient`, condensation cache, `ensure_provenance`, plan validated by the vault |
-| 6 static lint | #29 | `LintReport` (orphans, dangling, path links, frontmatter, provenance, pending sources, conflicts), `fix_links` |
-| 7 conflicts and decisions | #30 | `decisions.md` append-only, conflict markers cleared in one write, manual-edit detection |
-| 8 query with provenance | #31 | BM25 over Raw sections and Wiki paragraphs with CJK characters/bigrams, every passage cited, strict synthesis |
-| 9 migration adapter | #32 | legacy Raw adopted by content hash through a ledger, `source_path` pages migrated, snapshot/restore, drift reported |
+Both were asked and answered before this slice started:
 
-Exit criteria (Roadmap Phase 4): the office corpus round-trips to Raw with
-traceable source/page/slide/image relationships (slices 2–4); Wiki generation
-cannot mutate Raw (slices 1, 5, 9); query answers cite source provenance
-(slice 8). Verified by the suite: 564 passed, 3 skipped on Windows (link
-privileges); Linux CI runs every test.
+1. **Where the gateway lives.** Two artifacts, not one. Provider adapters are
+   in-process code under `src/models/`, shipped with the platform. A proxy, if
+   one is ever deployed, is a deployment artifact the host runs; the platform
+   only ever receives a base URL and a resolved credential, so "started beside
+   the agent" and "deployed elsewhere" are the same code path. The platform
+   never starts a provider process, and gains no new runtime dependency.
+2. **Providers.** Ollama and the internal OpenAI-compatible gateway. **Codex
+   and Claude Code are excluded from Phase 5** in both possible senses, as
+   clients of a gateway and as something the platform invokes.
 
-## Completed in this handoff
+Consequence of (2), recorded in `docs/PHASE_5_MIGRATION.md`: the source's
+LiteLLM proxy is no longer needed at all. It existed to terminate the Anthropic
+wire format for Claude Code; chatrs is already OpenAI-compatible, so the
+`openai_compatible` adapter can address it directly. This drops a heavyweight
+dependency, a monkey patch against a private LiteLLM class, a second alias
+table and a second credential. It is reversible by one catalog edit.
 
-- `docs/ROADMAP.md` status line, `docs/ARCHITECTURE.md` status line and the
-  Phase 4 paragraph in `README.md` say Phase 4 is complete and what it holds.
+## Completed
+
+- `docs/phases/PHASE_5_GATEWAY.md`: phase scope, eight invariants, slice 1
+  requirements, later slices, and an explicit out-of-scope section naming the
+  Codex and Claude Code exclusion.
+- `docs/PHASE_5_MIGRATION.md`: source inspection of the gateway half of
+  `knowledge_management` at the pinned commit, a disposition row per artifact,
+  and the slice 1 source-first decision (ADAPT the alias idea in-process; do
+  not migrate the proxy). Three load-bearing constraints were extracted from
+  the source for later slices: the credential rotates, so it is resolved per
+  use rather than captured; a streaming chunk with no `choices` is normal and
+  must be skipped; a provider's echoed model name is not evidence of what
+  served the request.
+- `src/models/catalog.py`: `ModelCapabilities` (with `unmet`/`satisfies`),
+  `ModelEndpoint`, `ModelRoute`, `ModelCatalog` (`select`, `select_route`,
+  `endpoint`), implementing the existing `ModelSelector` protocol.
+- 3 tests (`tests/test_catalog.py`): capability checks field by field,
+  deterministic selection with catalog-order tie-breaking and both typed
+  failures, and every construction-time validation including that a secret
+  value cannot be passed where a `SecretRef` belongs.
+- `CLAUDE.md` and `docs/ROADMAP.md` now point at Phase 5 as the active phase.
 
 ## In Progress
 
-- Nothing.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available.
 
 ## Remaining
 
-- Phase 5 specification (`docs/phases/PHASE_5_GATEWAY.md`) before any Phase 5
-  code: extract the LiteLLM/company gateway behind the `ModelClient`
-  interface, credentials externalized, provider patches isolated. Decisions
-  to take with the owner first: where the gateway lives (`src/gateway/` or a
-  separately deployable package), and which providers the first slice must
-  satisfy (the Roadmap names local Ollama and the internal OpenAI-compatible
-  gateway).
-- Deferred from Phase 3, each needing its own scope: a payload sweep,
-  process-liveness or lease-based suspension, and the earlier deferred reviews.
-- Deferred from Phase 4: a retrieval cache (the corpus is rebuilt per query),
-  host wiring that plans from an adopted document, a size-and-mtime shortcut
-  for adopted-file drift checks, and image description for legacy `raw/`
-  (adoption never writes a Raw file; a host drops the originals instead).
+- Slice 2: `openai_compatible` adapter (`generate` and `stream`), injected
+  transport with a standard-library default, resolved credential, typed
+  failures, usage accounting, redaction.
+- Slice 3: `ollama` adapter. New platform work; the source repository contains
+  no Ollama integration, so there is nothing to characterize.
+- Slice 4: the credential resolution boundary (`SecretRef` to value), with an
+  environment-backed development resolver outside the platform's import path.
+- Slice 5: observability and a complete inert requirements-to-response example.
+- Deferred from Phase 3: a payload sweep, process-liveness or lease-based
+  suspension, and the earlier deferred reviews.
+- Deferred from Phase 4: a retrieval cache, host wiring that plans from an
+  adopted document, a size-and-mtime shortcut for adopted-file drift checks,
+  and image description for legacy `raw/`.
 
 ## Architecture decisions made
 
-None in this handoff; Phase 4 decisions are in `docs/PHASE_4_MIGRATION.md`
-(one section per slice).
+- An endpoint declares its capabilities, so a requirement is checked rather
+  than trusted; the source's proxy alias table could not reason about them.
+- Selection is deterministic and ties break by catalog order, the same promise
+  Phase 4's retrieval makes.
+- A misconfigured catalog fails where it is built, not at the first request.
+- The flat module layout of `src/models/` follows `src/knowledge/` rather than
+  the nested `interface/router/providers/` tree sketched in
+  `docs/ARCHITECTURE.md` section 6, which the repository already departs from.
+  A separate `company_gateway` adapter is not planned either: the company
+  gateway is `openai_compatible` with a different base URL and credential.
 
 ## Exact verification commands and results
 
@@ -65,7 +96,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 564 passed, 3 skipped (link privileges)
+# PASS: 567 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -80,14 +111,26 @@ git diff --check
 # PASS
 ```
 
-No model, gateway, network, real vault, job or n8n instance was invoked.
+No model, gateway, network, real vault, job or n8n instance was invoked. This
+slice opens no socket at all.
 
 ## Known issues / limitations
 
-See "Remaining". Nothing in Phase 4 is known to be broken.
+- `SecretRef.name` is a `Symbol`, and a JWT happens to match that pattern, so
+  the type system refuses a raw string credential but cannot prove a name is
+  not itself a secret. Resolution arrives in slice 4; the invariant is
+  documented and tested as far as the contract allows.
+- The catalog has no notion of availability, latency, cost or evaluation
+  results, which `docs/ARCHITECTURE.md` lists as later routing inputs. Only
+  declared capability is matched today.
+- Declared capabilities are trusted as configuration. Nothing verifies that an
+  endpoint really has vision or the context length it claims; the source's
+  `check-model.ps1` showed a provider's own echo cannot be that evidence.
 
 ## Next Recommended Action
 
-Agree the two Phase 5 decisions above with the owner, then write
-`docs/phases/PHASE_5_GATEWAY.md`, point `CLAUDE.md` at it, and start the
-first Phase 5 slice on a `phase-5/...` branch.
+Open the PR for `phase-5/catalog`, run the review, apply confirmed findings and
+merge on green CI. Then write the slice 2 requirements section and implement
+the `openai_compatible` adapter, starting from the `Gateway` class in the
+pinned `agent/agent.py` and the three load-bearing constraints recorded in
+`docs/PHASE_5_MIGRATION.md`.

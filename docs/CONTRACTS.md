@@ -713,3 +713,38 @@ snapshot (files absent from it are removed); a missing snapshot is
 `missing_original`, and a managed directory that is itself a link is
 `unwritable_target` before anything is touched. `raw/` and `drop/` are never
 part of a snapshot or a restore.
+
+## Model catalog and selection (Phase 5, slice 1)
+
+`models.catalog.ModelCapabilities` declares what one endpoint can do:
+`reasoning` (`low`/`medium`/`high`), `tool_calling`, `structured_output`,
+`streaming`, `vision`, `local` and `max_context_tokens`. It mirrors
+`ModelRequirements` with two deliberate differences: `local` states where the
+model runs, against a request's `local_only`, and `max_context_tokens` is a
+ceiling against the request's `min_context_tokens` floor. `unmet(requirements)`
+returns every field that cannot be met, in one canonical order (`reasoning`,
+the four flags, `local_only`, `min_context_tokens`); `satisfies` is `unmet`
+being empty. `reasoning` compares as an order, so a stronger endpoint still
+qualifies; each flag is an implication, so declaring more than asked is fine.
+
+`ModelEndpoint` binds a stable `alias` to a `provider`, the provider's own
+`model` id, an optional `base_url` (http or https, no whitespace) and an
+optional `credential`. The credential is a `SecretRef`, a name only: a value
+cannot be passed where a reference belongs, and no contract in this layer ever
+carries a token. `ModelRoute` binds a purpose such as `default` to one alias.
+
+`ModelCatalog(endpoints, routes)` implements the `ModelSelector` protocol.
+`select(requirements)` returns the first alias in catalog order whose
+capabilities satisfy the requirements, so the same question always selects the
+same alias; nothing satisfying them is a `Failure` (`no_model_for_requirements`,
+not retryable) naming how many endpoints were considered and every field that
+blocked them. `select_route(name)` returns that route's alias or a `Failure`
+(`unknown_route`). `endpoint(alias)` looks one up. Selection calls no model,
+reads no file and opens no socket.
+
+A catalog is validated where it is built: at least one endpoint, no duplicate
+alias, no duplicate route name and no route naming an unknown alias, so a
+misconfigured catalog fails at construction rather than at the first request.
+It is plain serializable data (`model_validate` / `model_dump_json`), so a host
+may keep it in any format; the platform chooses no file, format or environment
+variable.
