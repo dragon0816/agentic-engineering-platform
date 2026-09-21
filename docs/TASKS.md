@@ -23,13 +23,19 @@ the history is complete; this table is the index into them.
 
 ## Status
 
-Phases 0 to 5 complete. Phase 6 active, one slice of at least four done.
-36 pull requests merged (#1 to #39; #5 was closed unmerged and superseded by
+Phases 0 to 5 complete. Phase 6 active, two slices of at least five done.
+38 pull requests merged (#1 to #41; #5 was closed unmerged and superseded by
 #6, and #24 and #25 were never pull requests).
 
-The suite is 627 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 630 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
+
+## Cross-cutting
+
+| Work | PR | What landed |
+|---|---|---|
+| Progress record | #40 | This file, backfilled from the merged pull requests, and named in the reading order of `CLAUDE.md` and `AGENTS.md` |
 
 ## Phase 0 — Architecture and inventory (complete)
 
@@ -101,9 +107,10 @@ privileges and run on Linux CI.
 | Slice | PR | Status | What it covers |
 |---|---|---|---|
 | 1 grading harness | #39 | done | A case's declared assertions decide whether it passed; every grader proven to reject |
-| 2 policy and forbidden outcomes | — | next | A shared runner that dispatches every case through a Bridge so execution is observable, and the first `scenario` case |
-| 3 model-involving evaluation | — | planned | The same cases across configured aliases with repetition, comparing quality, latency, reliability and usage |
-| 4 trace capture | — | planned | Route, plan, calls, approvals, duration and usage, with redaction |
+| 2 observable execution | #41 | done | One shared runner sends every routed case through a real Gateway; a check that could not see its evidence no longer passes |
+| 3 policy and forbidden outcomes | — | next | The first `scenario` case, with its forbidden outcomes checked as evidence |
+| 4 model-involving evaluation | — | planned | The same cases across configured aliases with repetition, comparing quality, latency, reliability and usage |
+| 5 trace capture | — | planned | Route, plan, calls, approvals, duration and usage, with redaction |
 
 ## Open items carried forward
 
@@ -114,7 +121,7 @@ Recorded where they were found, and not blocking the active phase.
 | Phase 3 | A payload sweep, and process-liveness or lease-based suspension |
 | Phase 4 | A retrieval cache, host wiring that plans from an adopted document, a size-and-mtime shortcut for adopted-file drift checks, image description for legacy `raw/` |
 | Phase 5 | Tool calling in either adapter (it needs a registry that can render a contract as a provider schema), reading `tool_calls` back, retry behaviour, a pooled or async transport, a production credential backend |
-| Phase 6 | `no_execution` cannot fail for the four router-only and discovery cases until slice 2's shared runner exists |
+| Phase 6 | Closed in slice 2: every routed case is now exercised where execution could be seen |
 
 **Never exercised against a live endpoint.** Neither the Ollama adapter nor
 the company gateway has been run against a real server. Both are written to

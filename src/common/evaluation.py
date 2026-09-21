@@ -17,7 +17,7 @@ not a check.
 import json
 from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Protocol
 
 from pydantic import Field
 
@@ -56,6 +56,15 @@ class ObservedRun(Contract):
     origin: Origin | None = None
     model_calls: int = Field(default=0, ge=0, strict=True)
     side_effects: tuple[SideEffect, ...] = ()
+    # What this run was capable of detecting. A run that could not have seen
+    # an effect must say so: an empty `side_effects` from a harness that was
+    # not looking reads exactly like proof that nothing happened, and that is
+    # the shape of check this phase exists to remove.
+    observable: tuple[SideEffect, ...] = ()
+    # Every capability the Bridge was asked to run, whether or not it was
+    # installed, authorized or reached. That a route resolved and nothing ran
+    # is an observation; no attempt at all is not.
+    dispatched: tuple[AssetIdentity, ...] = ()
     status: RunStatus | None = None
     completed_steps: int = Field(default=0, ge=0, strict=True)
     # For a case about discovery rather than a request: what was found, the
@@ -81,10 +90,19 @@ def _no_model_call(case: EvaluationCase, observed: ObservedRun) -> str | None:
     return None
 
 
+EXECUTING: tuple[SideEffect, ...] = ("execute", "external_side_effect")
+
+
+def _unobservable(observed: ObservedRun, effects: Iterable[SideEffect]) -> tuple[str, ...]:
+    """The effects a check would need to have seen and could not."""
+    return tuple(item for item in effects if item not in observed.observable)
+
+
 def _no_execution(case: EvaluationCase, observed: ObservedRun) -> str | None:
-    ran = [
-        effect for effect in observed.side_effects if effect in ("execute", "external_side_effect")
-    ]
+    blind = _unobservable(observed, EXECUTING)
+    if blind:
+        return f"execution was not observable here ({', '.join(blind)} unwatched)"
+    ran = [effect for effect in observed.side_effects if effect in EXECUTING]
     return f"executed: {', '.join(ran)}" if ran else None
 
 
@@ -232,12 +250,21 @@ def grade(
                 detail="satisfied" if matched else f"routed to {_describe(observed.decision)}",
             )
         )
+    # Absence of evidence is not evidence of absence: a forbidden effect the
+    # run could not have seen leaves the case unproven, not satisfied.
+    blind = _unobservable(observed, case.forbidden_side_effects)
     trespass = [effect for effect in observed.side_effects if effect in case.forbidden_side_effects]
+    if blind:
+        detail = f"not observable here: {', '.join(blind)}"
+    elif trespass:
+        detail = f"forbidden: {', '.join(trespass)}"
+    else:
+        detail = "satisfied"
     grades.append(
         GradeOutcome(
             assertion="forbidden_side_effects",
-            passed=not trespass,
-            detail="satisfied" if not trespass else f"forbidden: {', '.join(trespass)}",
+            passed=not blind and not trespass,
+            detail=detail,
         )
     )
     unknown: list[str] = []
@@ -258,6 +285,23 @@ def grade(
         grades=tuple(grades),
         unknown_assertions=tuple(unknown),
     )
+
+
+class CaseRunner(Protocol):
+    """Turns a case into evidence. A host writes one of these; the harness
+    only grades what it returns, so how a case is exercised stays outside the
+    contract it is graded against."""
+
+    def run(self, case: EvaluationCase) -> ObservedRun: ...
+
+
+def run_cases(
+    cases: Iterable[EvaluationCase],
+    runner: CaseRunner,
+    *,
+    graders: Mapping[str, Grader] = GRADERS,
+) -> tuple[CaseResult, ...]:
+    return tuple(grade(case, runner.run(case), graders=graders) for case in cases)
 
 
 def load_cases(directory: Path) -> tuple[EvaluationCase, ...]:

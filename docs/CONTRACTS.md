@@ -957,9 +957,16 @@ satisfied only by copying the case's own words back into the observation.
 `ObservedRun` records what actually happened when a case was exercised:
 `decision`, `origin` (mirroring `agent.routing.RoutingOutcome`), `model_calls`,
 `side_effects`, `status`, `completed_steps`, `discovered`, `lifecycle`,
-`advertised`, `installed` and `failure`. Every field is evidence a grader can
-check, never a flag claiming that an assertion holds, because grading a claim
-checks nothing. `advertised` and `installed` hold `AssetIdentity` values rather
+`advertised`, `installed` and `failure`, plus `observable` and `dispatched`.
+Every field is evidence a grader can check, never a flag claiming that an
+assertion holds, because grading a claim checks nothing.
+
+`observable` names the side effects the run was capable of detecting, and
+`dispatched` names every capability the Bridge was asked to run whether or not
+it was installed, authorized or reached. Together they make absence of an
+effect mean something: `no_execution` fails when `execute` was not observable,
+and the always-on forbidden check fails for any forbidden effect the run could
+not have seen. A harness that was not looking no longer reports a clean run. `advertised` and `installed` hold `AssetIdentity` values rather
 than names, because a capability named `sample.inspect` carries an identity
 named `inspect`; and `lifecycle` is what was registered rather than what a
 query returned, since discovery already drops anything unpublished and reading
@@ -988,6 +995,13 @@ rather than merely containing it; `bridge_advertisement` compares identities
 and, for a discovery case, requires every discovered task to appear among the
 Bridge's installed tasks; and `fail_closed` consults the case's own forbidden
 list, so a permitted read is not read as failing open.
+
+`CaseRunner` is the protocol that turns a case into an `ObservedRun`, and
+`run_cases(cases, runner, graders=)` grades a directory through one. How a
+case is exercised stays outside the contract it is graded against, so a host
+supplies the wiring; `tests/evaluation_runner.py` is the repository's, sending
+every routed case through one real `Gateway` and reading effects from the
+Bridge's own `events`.
 
 `load_cases(directory)` reads every `.json` file, accepting one case or a list,
 in a stable order, refusing a duplicate `case_id` where the cases are loaded.
