@@ -1,5 +1,20 @@
 # Phase 3 source inspection and disposition
 
+## Slice 9 source-first decision
+
+Re-inspected pinned `tests/fixtures/source_jobrunner.txt` and `source_steps.txt`
+from the revision below. JobRegistry retains only in-memory runs; StepTable marks
+pending/running/success/failure and prohibits re-entry; on_change/reporting is
+best-effort. These boundaries contain no durable checkpoint, restart loader,
+idempotency transaction or atomic continuation implementation to wrap.
+
+Decision: **ADAPT** existing platform evidence/identity/ResumePolicy semantics in
+an additive checkpoint contract and isolated memory reference model. Keep source
+characterization tests, existing engine and source repositories unchanged. Durable
+write acknowledgment is a new correctness gate, deliberately separate from source
+best-effort reporting. No source deprecation or disk durability parity is claimed.
+Rollback removes the new checkpoint modules/tests/docs; no runtime imports them.
+
 Source: `dragon0816/rs_workflow_system`, commit
 `896046e8fe2170d21f9213e56e5ce2f93c05ba43` (read-only inspection).
 
