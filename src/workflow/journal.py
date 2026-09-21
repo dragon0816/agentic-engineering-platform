@@ -49,6 +49,8 @@ class JournalEntry(Contract):
     run_id: RunId
     plan: ResumePlan
     suspended_by: Symbol | None = None
+    suspension_note: Text | None = None
+    continued_by: RunId | None = None
 
     @model_validator(mode="after")
     def suspension_matches(self) -> Self:
@@ -153,16 +155,20 @@ class RunJournal:
         )
         return self.checkpoints.replace(updated, expected_revision=state.checkpoint.revision)
 
-    def read(self, context: RequestContext, run_id: RunId) -> JournalEntry | None:
-        """Metadata-only restart evidence for the run's owner; never dispatch."""
-        checkpoint = self.checkpoints.get(self.owner_of(context), run_id)
-        if checkpoint is None:
-            return None
+    @staticmethod
+    def _entry(checkpoint: RunCheckpoint) -> JournalEntry:
         return JournalEntry(
             run_id=checkpoint.run_id,
             plan=checkpoint.recovery_plan(),
-            suspended_by=None if checkpoint.status != "suspended" else "operator",
+            suspended_by=checkpoint.suspended_by,
+            suspension_note=checkpoint.suspension_note,
+            continued_by=checkpoint.continued_by,
         )
+
+    def read(self, context: RequestContext, run_id: RunId) -> JournalEntry | None:
+        """Metadata-only restart evidence for the run's owner; never dispatch."""
+        checkpoint = self.checkpoints.get(self.owner_of(context), run_id)
+        return None if checkpoint is None else self._entry(checkpoint)
 
     def suspend(
         self, context: RequestContext, run_id: RunId, confirmation: SuspensionConfirmation
@@ -179,15 +185,19 @@ class RunJournal:
             raise CheckpointStoreError("missing")
         if checkpoint.status != "running":
             raise CheckpointStoreError("invalid_transition")
+        # The claim is stored with the evidence it justifies, so a later process
+        # can still see who said the owning process had stopped.
         updated = self.checkpoints.replace(
-            checkpoint.model_copy(update={"status": "suspended"}),
+            checkpoint.model_copy(
+                update={
+                    "status": "suspended",
+                    "suspended_by": checked.operator,
+                    "suspension_note": checked.note,
+                }
+            ),
             expected_revision=checkpoint.revision,
         )
-        return JournalEntry(
-            run_id=updated.run_id,
-            plan=updated.recovery_plan(),
-            suspended_by=checked.operator,
-        )
+        return self._entry(updated)
 
     def continuation(
         self, state_run_id: RunId, context: RequestContext, parent: RunCheckpoint
@@ -202,6 +212,9 @@ class RunJournal:
                 "resumed_from": parent.run_id,
                 "continued_by": None,
                 "idempotency_key": None,
+                # A continuation is a fresh running run, not a suspended one.
+                "suspended_by": None,
+                "suspension_note": None,
             }
         )
         return JournalState(

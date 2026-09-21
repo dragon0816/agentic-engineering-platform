@@ -361,3 +361,93 @@ def test_a_journal_that_cannot_start_a_run_starts_no_run(tmp_path: Path) -> None
         assert engine.get(result.run.run_id) is None
     finally:
         store.close()
+
+
+def test_in_memory_resume_is_refused_for_a_journalled_run(host: Any) -> None:
+    """A journalled continuation belongs in the journal, which reserves it once."""
+    built = host()
+    engine = built.restart(FailOnce())
+    result = run(engine, built.workflow)
+    refused = asyncio.run(engine.resume(context(), result.run.run_id))
+    assert refused is not None and refused.run.failure is not None
+    assert refused.run.failure.code == "use_recovery"
+    assert engine.get(refused.run.run_id) is None
+    assert built.handler.calls == [context()]
+
+
+def test_a_run_is_continued_once_even_across_processes(host: Any) -> None:
+    built = host()
+    first = built.restart(FailOnce())
+    result = run(first, built.workflow)
+    run_id = result.run.run_id
+    first.suspend(context(), run_id, confirmation())
+    policy = ResumePolicy(uncertain="replay_read_only")
+    recovered = asyncio.run(first.recover(context(), run_id, policy))
+    assert recovered is not None and recovered.run.status == "succeeded"
+    calls = len(built.handler.calls)
+    # A second process cannot continue the same parent again.
+    again = asyncio.run(built.restart().recover(context(), run_id, policy))
+    assert again is not None and again.run.failure is not None
+    assert again.run.failure.code == "checkpoint_already_continued"
+    assert len(built.handler.calls) == calls
+
+
+def test_the_confirmation_outlives_the_process_that_recorded_it(host: Any) -> None:
+    built = host()
+    engine = built.restart(FailOnce())
+    result = run(engine, built.workflow)
+    engine.suspend(
+        context(), result.run.run_id, confirmation(note="bridge rebooted after a power cut")
+    )
+    entry = built.restart().inspect_journal(context(), result.run.run_id)
+    assert entry is not None
+    assert entry.suspended_by == "leo"
+    assert entry.suspension_note == "bridge rebooted after a power cut"
+
+
+def test_another_owners_run_is_indistinguishable_from_an_unknown_one(host: Any) -> None:
+    async def scenario() -> None:
+        built = host()
+        engine = built.restart(Stuck())
+        other = RequestContext(
+            trace=context().trace,
+            actor="someone-else",
+            namespace=context().namespace,
+            channel="test",
+            message="recover",
+        )
+        started = await engine.execute(
+            context(), built.workflow.metadata.identity, {"count": 1}, timeout_seconds=0.01
+        )
+        try:
+            # The run is alive here, but this caller may not learn even that.
+            with pytest.raises(CheckpointStoreError, match="missing"):
+                engine.suspend(other, started.run.run_id, confirmation())
+            assert engine.inspect_journal(other, started.run.run_id) is None
+            assert await engine.recover(other, started.run.run_id) is None
+            # An unusable identifier is not an exception either.
+            assert engine.inspect_journal(context(), "not a run id!") is None
+        finally:
+            engine._tasks[started.run.run_id].cancel()
+            await engine.wait(started.run.run_id)
+
+    asyncio.run(scenario())
+
+
+def test_a_duplicate_key_names_the_run_the_caller_should_inspect(host: Any) -> None:
+    built = host()
+    first = built.restart()
+    original = run(first, built.workflow, idempotency_key="release-1")
+    duplicate = run(built.restart(), built.workflow, idempotency_key="release-1")
+    assert duplicate.run.failure is not None
+    assert duplicate.run.failure.code == "idempotency_conflict"
+    # The rejection names the existing run, so the caller can go and read it.
+    assert duplicate.run.run_id == original.run.run_id
+
+
+@pytest.mark.parametrize("timeout", [0, -1, float("nan"), float("inf")])
+def test_recovery_rejects_an_unusable_timeout(host: Any, timeout: float) -> None:
+    built = host()
+    engine = built.restart()
+    with pytest.raises(ValueError):
+        asyncio.run(engine.recover(context(), "run-1", timeout_seconds=timeout))

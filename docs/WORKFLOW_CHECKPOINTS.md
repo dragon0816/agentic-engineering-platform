@@ -206,12 +206,23 @@ Write-ahead ordering, as specified in "State and write ordering":
    completion and the terminal marker are one write, never two.
 
 Recovery is manual, as approved. `inspect_journal(context, run_id)` returns the
-durable evidence for a run this process may know nothing about.
+durable evidence for a run this process may know nothing about, or `None` when
+the caller may not see it, the identifier is unusable or the store cannot
+answer — the caller learns nothing either way.
 `suspend(context, run_id, SuspensionConfirmation(...))` records a person's
-explicit claim that the owning process is gone — `process_confirmed_stopped`
-must be exactly `True`, the operator is recorded, and the platform never infers
-any of it. A run still executing in this engine is refused: a caller-wait
-timeout is not abandonment.
+explicit claim that the owning process is gone: `process_confirmed_stopped` must
+be exactly `True`, and the operator and any note are written into the checkpoint
+itself, so a later process can still see who said it. `RunCheckpoint` requires
+that claim for every suspended record and refuses to let it be rewritten.
+Ownership is checked before liveness, so another owner's run is `missing` rather
+than a hint that it is running; a run still executing in this engine is refused,
+because a caller-wait timeout is not abandonment.
+
+The in-memory `resume()` refuses a journalled run (`use_recovery`): a journalled
+continuation must itself be journalled, and the "continued once" guard lives in
+the store, which only `recover()` reserves. All durable writes run off the event
+loop, and the SQLite store serialises them so it stays a single writer wherever
+it is called from.
 
 `recover(context, run_id, policy)` continues a **suspended** run, in this
 process or a later one. The stored manifest is provenance: the same version must

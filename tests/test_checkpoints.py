@@ -70,6 +70,11 @@ def started(item: RunCheckpoint) -> RunCheckpoint:
     return changed(item, steps=[{"step_index": 0, "state": "started"}, {"step_index": 1}])
 
 
+def suspended(item: RunCheckpoint, operator: str = "operator") -> RunCheckpoint:
+    """A suspended record always names who confirmed the owning process stopped."""
+    return changed(item, status="suspended", suspended_by=operator)
+
+
 def completed(item: RunCheckpoint) -> RunCheckpoint:
     return changed(
         item,
@@ -93,7 +98,7 @@ def test_round_trip_and_recovery_are_metadata_only() -> None:
     assert [step.state for step in plan.steps] == ["uncertain", "never_started"]
     # A running record may still belong to a live process; only suspended needs input.
     assert plan.status == "running"
-    assert changed(item, status="suspended").recovery_plan().status == "needs_input"
+    assert suspended(item).recovery_plan().status == "needs_input"
     assert plan.next_step == 0
     assert "payload-1" not in plan.model_dump_json()
     assert "arguments" not in plan.model_dump_json()
@@ -232,12 +237,13 @@ def test_continuation_is_atomic_preserves_prefix_and_original_key(
     parent = store.create(record(idempotency_key="event-1"))
     parent = store.replace(started(parent), expected_revision=0)
     parent = store.replace(completed(parent), expected_revision=1)
-    parent = store.replace(changed(parent, status="suspended"), expected_revision=2)
+    parent = store.replace(suspended(parent), expected_revision=2)
     child = changed(
         parent,
         run_id="run-2",
         revision=0,
         status="running",
+        suspended_by=None,
         resumed_from=parent.run_id,
         idempotency_key=None,
     )
@@ -258,14 +264,24 @@ def test_continuation_keeps_the_unresolved_steps_uncertainty(make_store: StoreFa
     store = make_store()
     parent = store.create(record())
     parent = store.replace(started(parent), expected_revision=0)
-    parent = store.replace(changed(parent, status="suspended"), expected_revision=1)
+    parent = store.replace(suspended(parent), expected_revision=1)
     forgetful = changed(
-        parent, run_id="run-2", revision=0, status="running", resumed_from=parent.run_id
+        parent,
+        run_id="run-2",
+        revision=0,
+        status="running",
+        suspended_by=None,
+        resumed_from=parent.run_id,
     )
     forgetful = changed(forgetful, steps=[{"step_index": 0}, {"step_index": 1}])
     failing(lambda: store.continue_run(forgetful, expected_parent_revision=2), "invalid_transition")
     child = changed(
-        parent, run_id="run-2", revision=0, status="running", resumed_from=parent.run_id
+        parent,
+        run_id="run-2",
+        revision=0,
+        status="running",
+        suspended_by=None,
+        resumed_from=parent.run_id,
     )
     created = store.continue_run(child, expected_parent_revision=2)
     assert created.recovery_plan().steps[0].state == "uncertain"
@@ -278,9 +294,14 @@ def test_continuation_keeps_the_unresolved_steps_uncertainty(make_store: StoreFa
 def test_failed_continuation_leaves_no_half_link(make_store: StoreFactory) -> None:
     store = make_store(capacity=1)
     parent = store.create(record())
-    parent = store.replace(changed(parent, status="suspended"), expected_revision=0)
+    parent = store.replace(suspended(parent), expected_revision=0)
     child = changed(
-        parent, run_id="run-2", revision=0, status="running", resumed_from=parent.run_id
+        parent,
+        run_id="run-2",
+        revision=0,
+        status="running",
+        suspended_by=None,
+        resumed_from=parent.run_id,
     )
     failing(lambda: store.continue_run(child, expected_parent_revision=1), "capacity")
     assert store.get(parent.owner, parent.run_id) == parent
@@ -387,9 +408,14 @@ def test_continuation_rejects_changed_prefix_and_stale_writer(make_store: StoreF
     parent = store.create(record())
     parent = store.replace(started(parent), expected_revision=0)
     parent = store.replace(completed(parent), expected_revision=1)
-    parent = store.replace(changed(parent, status="suspended"), expected_revision=2)
+    parent = store.replace(suspended(parent), expected_revision=2)
     child = changed(
-        parent, run_id="run-2", revision=0, status="running", resumed_from=parent.run_id
+        parent,
+        run_id="run-2",
+        revision=0,
+        status="running",
+        suspended_by=None,
+        resumed_from=parent.run_id,
     )
     failing(lambda: store.continue_run(child, expected_parent_revision=2), "conflict")
     failing(
@@ -412,12 +438,13 @@ def test_lost_creation_acknowledgments_do_not_duplicate_relations(
         raise CheckpointStoreError("commit_unknown")
     parent = store.create(changed(original, run_id="run-2"))
     assert parent.run_id == original.run_id
-    parent = store.replace(changed(parent, status="suspended"), expected_revision=0)
+    parent = store.replace(suspended(parent), expected_revision=0)
     child = changed(
         parent,
         run_id="run-2",
         revision=0,
         status="running",
+        suspended_by=None,
         resumed_from=parent.run_id,
         idempotency_key=None,
     )

@@ -27,7 +27,7 @@ _RUN_ID: TypeAdapter[str] = TypeAdapter(RunId)
 _KEY: TypeAdapter[str] = TypeAdapter(IdempotencyKey)
 # Execution intent: what a keyed resubmission or a continuation must match exactly.
 INTENT_FIELDS = ("manifest", "runtime_contract", "intent_sha256", "arguments")
-_MUTABLE_FIELDS = {"status", "steps", "revision"}
+_MUTABLE_FIELDS = {"status", "steps", "revision", "suspended_by", "suspension_note"}
 _STEP_TRANSITIONS = {
     ("never_started", "started"),
     ("started", "started"),
@@ -106,6 +106,10 @@ def check_replace(old: RunCheckpoint, item: RunCheckpoint, expected_revision: in
     if old.status != "running":
         raise CheckpointStoreError("invalid_transition")
     if old.model_dump(exclude=_MUTABLE_FIELDS) != item.model_dump(exclude=_MUTABLE_FIELDS):
+        raise CheckpointStoreError("invalid_transition")
+    # A confirmation is written once, with the suspension it justifies, and the
+    # contract already ties it to that status.
+    if old.suspended_by is not None:
         raise CheckpointStoreError("invalid_transition")
     transitions = 0
     for before, after in zip(old.steps, item.steps, strict=True):

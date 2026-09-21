@@ -13,7 +13,7 @@ import uuid
 from copy import deepcopy
 from typing import Literal
 
-from pydantic import JsonValue, TypeAdapter
+from pydantic import JsonValue, TypeAdapter, ValidationError
 
 from capabilities.runtime import CapabilityInvocation
 from common.assets import (
@@ -334,17 +334,26 @@ class WorkflowEngine:
         )
         if self.journal is not None:
             # Durable evidence exists before anything executes; a store that
-            # cannot acknowledge the run means no run at all.
+            # cannot acknowledge the run means no run at all. The write is
+            # blocking, so it never runs on the event loop.
             try:
-                record.journal = self.journal.begin(
-                    record.run_id, checked, manifest, run_arguments, idempotency_key=token
+                record.journal = await asyncio.to_thread(
+                    self.journal.begin,
+                    record.run_id,
+                    checked,
+                    manifest,
+                    run_arguments,
+                    idempotency_key=token,
                 )
             except CheckpointStoreError as error:
                 return self._rejected(target, checked, f"checkpoint_{error.code}")
-            if record.journal.checkpoint.run_id != record.run_id:
+            existing = record.journal.checkpoint.run_id
+            if existing != record.run_id:
                 # The key already names a durable run, from this process or an
-                # earlier one: inspect that run rather than starting another.
-                return self._rejected(target, checked, "idempotency_conflict", "needs_input")
+                # earlier one: the rejection names it so the caller can inspect it.
+                return self._rejected(
+                    target, checked, "idempotency_conflict", "needs_input", run_id=existing
+                )
         if key is not None:
             # No await before reservation/task creation: duplicate submissions on
             # this event loop see this same record, even before execution starts.
@@ -483,6 +492,10 @@ class WorkflowEngine:
         policy allows. A run can be continued once; resume its continuation
         afterwards. Idempotency keys are neither consulted nor consumed.
         Returns None for unknown, evicted or other actors' runs.
+
+        This is the in-memory path. A journalled run is refused here
+        (`use_recovery`): its continuation belongs in the journal, which
+        `suspend` and `recover` reserve atomically.
         """
         if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
             raise ValueError("timeout must be finite and positive")
@@ -493,6 +506,11 @@ class WorkflowEngine:
             return None
         target = record.workflow
         manifest = record.manifest
+        if record.journal is not None:
+            # A journalled run's continuation must itself be journalled, and the
+            # durable "continued once" guard lives in the store. Recovery is the
+            # one path that reserves it: suspend the run, then recover it.
+            return self._rejected(target, checked, "use_recovery", "needs_input")
         if record.final is None:
             return self._rejected(target, checked, "run_active")
         if record.continued_by is not None:
@@ -667,10 +685,11 @@ class WorkflowEngine:
         context: RequestContext,
         code: str,
         status: Literal["unavailable", "needs_input", "failed"] = "unavailable",
+        run_id: str | None = None,
     ) -> WorkflowRunSnapshot:
         return WorkflowRunSnapshot(
             run=WorkflowRun(
-                run_id=f"run-{uuid.uuid4().hex}",
+                run_id=run_id if run_id is not None else f"run-{uuid.uuid4().hex}",
                 workflow=workflow,
                 trace=context.trace,
                 status=status,
@@ -710,7 +729,7 @@ class WorkflowEngine:
                     )
                     record.append_log(f"step {index + 1} needs_input workflow_input_missing")
                     return
-                if not self._journal_step_started(record, index):
+                if not await self._journal_step_started(record, index):
                     # Not acknowledged: the step must not be dispatched at all.
                     return
                 self._emit(record, "step_started", step_index=index)
@@ -726,7 +745,7 @@ class WorkflowEngine:
                     record.status = result.status
                     record.failure = result.failure
                     return
-                if not self._journal_step_completed(record, index, context, result.data):
+                if not await self._journal_step_completed(record, index, context, result.data):
                     # The step ran; its evidence stays `started`, so recovery
                     # treats the effect as uncertain, which it is.
                     return
@@ -756,33 +775,43 @@ class WorkflowEngine:
         )
         record.append_log(f"step {index + 1} checkpoint_{error.code}")
 
-    def _journal_step_started(self, record: _RunRecord, index: int) -> bool:
+    async def _journal_step_started(self, record: _RunRecord, index: int) -> bool:
+        """Durable writes are blocking; they never run on the event loop."""
         if self.journal is None or record.journal is None:
             return True
         try:
-            self.journal.step_started(record.journal, index)
+            await asyncio.to_thread(self.journal.step_started, record.journal, index)
         except CheckpointStoreError as error:
             self._journal_failure(record, index, error)
             return False
         return True
 
-    def _journal_step_completed(
+    async def _journal_step_completed(
         self, record: _RunRecord, index: int, context: RequestContext, data: JsonValue
     ) -> bool:
         if self.journal is None or record.journal is None:
             return True
         try:
-            self.journal.step_completed(record.journal, index, context, data)
+            await asyncio.to_thread(
+                self.journal.step_completed, record.journal, index, context, data
+            )
         except CheckpointStoreError as error:
             self._journal_failure(record, index, error)
             return False
         return True
 
     def inspect_journal(self, context: RequestContext, run_id: str) -> JournalEntry | None:
-        """Restart evidence for a run this process may know nothing about."""
+        """Restart evidence for a run this process may know nothing about.
+
+        None for a run this caller cannot see, an unusable identifier or a store
+        that cannot answer: the caller learns nothing either way.
+        """
         if self.journal is None:
             return None
-        return self.journal.read(RequestContext.model_validate(context), run_id)
+        try:
+            return self.journal.read(RequestContext.model_validate(context), run_id)
+        except (CheckpointStoreError, ValidationError):
+            return None
 
     def suspend(
         self, context: RequestContext, run_id: str, confirmation: SuspensionConfirmation
@@ -790,11 +819,14 @@ class WorkflowEngine:
         """Record a human's confirmation that the process owning a run is gone.
 
         Refused while the run is alive here: this engine can see that for itself,
-        and a caller-wait timeout is not abandonment.
+        and a caller-wait timeout is not abandonment. Ownership is checked first,
+        so another owner's run is `missing`, never a hint that it is running.
         """
         if self.journal is None:
             return None
         checked = RequestContext.model_validate(context)
+        if self.journal.checkpoints.get(self.journal.owner_of(checked), run_id) is None:
+            raise CheckpointStoreError("missing")
         task = self._tasks.get(run_id)
         if task is not None and not task.done():
             raise CheckpointStoreError("invalid_transition")
@@ -815,11 +847,16 @@ class WorkflowEngine:
         completed prefix is restored from verified payloads, and an uncertain
         step is replayed only as the policy allows.
         """
+        if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+            raise ValueError("timeout must be finite and positive")
         if self.journal is None:
             return None
         checked = RequestContext.model_validate(context)
         chosen = ResumePolicy.model_validate(policy) if policy is not None else ResumePolicy()
-        parent = self.journal.checkpoints.get(self.journal.owner_of(checked), run_id)
+        try:
+            parent = self.journal.checkpoints.get(self.journal.owner_of(checked), run_id)
+        except (CheckpointStoreError, ValidationError):
+            return None
         if parent is None:
             return None
         target = parent.manifest.metadata.identity
@@ -836,7 +873,7 @@ class WorkflowEngine:
         if start is None:
             return self._rejected(target, checked, "run_complete")
         try:
-            arguments, completed = self.journal.restore(checked, parent)
+            arguments, completed = await asyncio.to_thread(self.journal.restore, checked, parent)
         except CheckpointStoreError as error:
             return self._rejected(target, checked, f"checkpoint_{error.code}")
         rejection = self._preflight(installed, arguments)
@@ -871,7 +908,9 @@ class WorkflowEngine:
             for data in completed
         ]
         try:
-            resumed.journal = self.journal.continuation(resumed.run_id, checked, parent)
+            resumed.journal = await asyncio.to_thread(
+                self.journal.continuation, resumed.run_id, checked, parent
+            )
         except CheckpointStoreError as error:
             return self._rejected(target, checked, f"checkpoint_{error.code}")
         return await self._launch(

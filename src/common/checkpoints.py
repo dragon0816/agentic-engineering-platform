@@ -5,7 +5,7 @@ from typing import Literal, Self
 from pydantic import Field, model_validator
 
 from common.assets import WorkflowManifest
-from common.base import Contract, Sha256, Slug, Symbol
+from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.execution import IdempotencyKey, ResumePlan, RunId, StepStateRecord, TraceIdentifiers
 
 
@@ -58,6 +58,10 @@ class RunCheckpoint(Contract):
     idempotency_key: IdempotencyKey | None = None
     resumed_from: RunId | None = None
     continued_by: RunId | None = None
+    #: Who claimed the owning process had stopped, and why. The platform cannot
+    #: verify this, so the claim is kept with the evidence it justifies.
+    suspended_by: Symbol | None = None
+    suspension_note: Text | None = None
 
     @model_validator(mode="after")
     def linear_evidence(self) -> Self:
@@ -77,6 +81,10 @@ class RunCheckpoint(Contract):
             raise ValueError("a run cannot be continued by its own parent")
         if self.continued_by is not None and self.status != "suspended":
             raise ValueError("only a suspended run can have a continuation")
+        if (self.suspended_by is None) != (self.status != "suspended"):
+            raise ValueError("a suspended run records who confirmed it, and only then")
+        if self.suspension_note is not None and self.suspended_by is None:
+            raise ValueError("a suspension note belongs to a confirmation")
         if self.resumed_from is not None and self.idempotency_key is not None:
             raise ValueError("continuations do not consume submission keys")
         return self

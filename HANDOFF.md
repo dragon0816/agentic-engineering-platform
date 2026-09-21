@@ -35,7 +35,7 @@ never probes processes, reads PIDs or takes leases. Normative plan:
   `ResumePolicy`. The continuation is reserved atomically via `continue_run`.
 - An idempotency key that already names a durable run conflicts rather than
   starting a second one, even after a restart clears the in-memory key table.
-- 12 tests (`tests/test_engine_recovery.py`) over a real restart (a new engine
+- 21 tests (`tests/test_engine_recovery.py`) over a real restart (a new engine
   built on the same SQLite file and payload directory): evidence after success
   and failure, journal-free parity, manual suspension and its validation, refused
   suspension of a live run, continuation across processes with chained inputs,
@@ -46,10 +46,24 @@ never probes processes, reads PIDs or takes leases. Normative plan:
 - Docs: phase spec slice 12 (approved scope and why A over B/C), checkpoint plan
   "Engine recovery", `docs/CONTRACTS.md`, migration slice-12 decision, README.
 
+- PR #19 opened; pre-merge review applied (9 findings, three reproduced by the
+  reviewer): the in-memory `resume()` now refuses a journalled run
+  (`use_recovery`), which closes both the double-continuation hole and the
+  unjournalled-continuation hole, since only `recover()` reserves the durable
+  "continued once" guard; `SuspensionConfirmation` is written into the
+  checkpoint (`suspended_by`/`suspension_note`, required by the contract for
+  every suspended record and not rewritable) instead of being validated and
+  discarded; every durable write runs off the event loop via `asyncio.to_thread`
+  and the SQLite store serialises access so it stays a single writer;
+  `recover()` validates its timeout and, with `inspect_journal`, returns None
+  instead of letting store errors escape; `suspend()` checks ownership before
+  liveness; and a durable idempotency conflict names the existing run so the
+  caller can inspect it. The capacity finding is recorded under limitations.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #19 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
@@ -85,7 +99,7 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 431 tests (419 prior, unchanged, + 12 recovery)
+# PASS: 440 tests (419 prior, unchanged, + 21 recovery)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -117,6 +131,14 @@ CI runs ordinary pytest.
   by the store, not coordinated. Nothing detects an abandoned run automatically.
 - A journalled run pays a durable write before and after every step; this is the
   correctness gate, not a performance path.
+- **The checkpoint store's capacity now bounds the production start path.** It
+  has no TTL, eviction or deletion by design, so a host must size `capacity`
+  for its retention needs; at capacity, new journalled runs fail
+  `checkpoint_capacity` permanently and across restarts. A retention policy
+  (what may be pruned, and how without making a used key executable again) is
+  required before any long-lived deployment and needs its own scope.
+- The in-memory `resume()` is unavailable on a journalled engine by design; use
+  `suspend` + `recover`.
 
 ## Next Recommended Action
 

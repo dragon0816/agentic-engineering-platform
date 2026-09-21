@@ -351,6 +351,10 @@ write-ahead ordering (a step is never dispatched without an acknowledged
 `started`, and never recorded complete before its payload is committed), while
 `inspect_journal`, `suspend` and `recover` on the engine expose manual restart
 recovery. `SuspensionConfirmation` records a person's explicit claim that the
-owning process stopped; nothing probes processes or takes leases. Recovery
-requires the stored manifest to still be installed and identical, restores the
-completed prefix from verified payloads, and re-authorizes every remaining step.
+owning process stopped; the operator and note are written into the checkpoint,
+which requires them for every suspended record, and nothing probes processes or
+takes leases. Recovery requires the stored manifest to still be installed and
+identical, restores the completed prefix from verified payloads, and
+re-authorizes every remaining step. On a journalled engine the in-memory
+`resume()` is refused (`use_recovery`), because the durable "continued once"
+guard is reserved by `recover()` alone.

@@ -304,8 +304,11 @@ recorded. B (process liveness) and C (leases) can be layered on later.
    before the step is recorded complete; the final completion and the terminal
    marker are one write.
 3. `suspend` requires a `SuspensionConfirmation` whose
-   `process_confirmed_stopped` is exactly `True`, records the operator, and is
-   refused while the run is alive in this engine.
+   `process_confirmed_stopped` is exactly `True`, writes the operator and note
+   into the checkpoint (which requires them for every suspended record), checks
+   ownership before liveness, and is refused while the run is alive here. The
+   in-memory `resume()` refuses a journalled run so the durable
+   "continued once" guard is never bypassed.
 4. `recover` continues a suspended run in any process: the stored manifest must
    still be installed and identical, the completed prefix is restored from
    verified payloads and never re-run, pre-flight and per-step authorization run
