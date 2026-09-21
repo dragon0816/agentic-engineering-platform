@@ -1,83 +1,96 @@
-# Handoff — Phase 3 SQLite checkpoint backend (slice 10)
+# Handoff — Phase 3 protected payload storage (slice 11)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-3/checkpoint-sqlite`, based on `main` at `64a9521` (PR #16 merged).
+Branch: `phase-3/payload-storage`, based on `main` at `fac59f1` (PR #17 merged).
 
 ## Goal
 
-Phase 3 slice 10 under the owner-approved scope (recorded in
-`docs/phases/PHASE_3_WORKFLOW.md`, slice 10): a single-writer local SQLite
-backend for the `CheckpointStore` protocol — one transaction per write,
-acknowledged only after commit, standard library only — with no engine wiring,
-payload storage or automatic recovery. Normative plan:
-`docs/WORKFLOW_CHECKPOINTS.md` ("SQLite backend"); source decision:
-`docs/PHASE_3_MIGRATION.md` (slice 10).
+Phase 3 slice 11 under the owner-approved scope (recorded in
+`docs/phases/PHASE_3_WORKFLOW.md`, slice 11): a content-addressed local store
+for what a `PayloadRef` points at — beside the checkpoint file, schema validated
+before writing, digest and contract verified on reading, owner-isolated
+directories — with no secrets, no TTL/deletion and no engine wiring. Normative
+plan: `docs/WORKFLOW_CHECKPOINTS.md` ("Payload storage"); source decision:
+`docs/PHASE_3_MIGRATION.md` (slice 11).
 
 ## Completed
 
-- `workflow/checkpoints.py`: the slice-9 transition rules are now shared
-  functions (`check_create`, `check_replace`, `check_continue`, `same_intent`,
-  `linked_parent`, validators) used by both backends, so they cannot drift;
-  `MemoryCheckpointStore` is unchanged in behavior.
-- `workflow/checkpoints_sqlite.py`: `SqliteCheckpointStore(path, capacity=50)` —
-  schema with a `schema_version` meta row (unknown versions refuse to open),
-  owner/run/key-indexed rows holding the checkpoint JSON, `synchronous=FULL`,
-  `BEGIN IMMEDIATE` … `COMMIT` per write, `timeout=0` so a second writer is
-  refused (`unavailable`) rather than waited for, `unavailable` for any failure
-  before commit (rolled back) and `commit_unknown` when `COMMIT` itself raises,
-  owner-scoped reads outside transactions, capacity counted over persisted rows.
-- Tests: the contract suite in `tests/test_checkpoints.py` is parametrized over
-  both backends (`make_store` fixture); `tests/test_checkpoints_sqlite.py` adds
-  restart persistence of evidence/keys/links/capacity, key reuse after restart,
-  evidence-only rows, schema refusal, second-writer refusal, closed store,
-  invalid capacity, commit failure before and after the real commit (read back
-  decides), and a failure inside a transaction leaving nothing written and
-  allowing a plain retry.
-- Docs: phase spec slice 10 (approved scope) and sequence, checkpoint plan
-  "SQLite backend" section, `docs/CONTRACTS.md`, migration slice-10 decision,
+- `workflow/payloads.py`: `PayloadStore` protocol and `FilePayloadStore(root,
+  max_bytes=1_000_000)`. `put` canonicalises the value (sorted keys, ASCII, no
+  NaN/Infinity), stores a record of owner, contract and payload at
+  `root/<actor>/<namespace>/payload-<record digest>.json` and returns the
+  `PayloadRef` a checkpoint records: `ref_id` is that record digest, `sha256` is
+  the digest of the payload value. The same owner, contract and payload always
+  produce the same reference and file, so repeated writes are idempotent.
+  Writes are atomic (temp file, `fsync`, `os.replace`, best-effort directory
+  `fsync`); a failed write leaves nothing behind and an existing file that no
+  longer hashes to its name is rewritten.
+- `get` returns the payload only when the identifier is one this store issues
+  (else `invalid_transition`, checked before any path is built), the stored
+  bytes hash to it (else `unavailable`), the owner recorded inside the file is
+  the requesting owner (else `missing`), the payload hashes to `ref.sha256`
+  (else `unavailable`) and the stored contract matches (else
+  `invalid_transition`). An unstored reference is `missing`.
+- Oversized payloads are `capacity` and unserializable values are
+  `invalid_transition`, both before anything is written. Ownership is checked
+  from the record, so it holds even on a case-folding filesystem.
+- 23 tests (`tests/test_payloads.py`): round trips for every JSON shape,
+  contract preservation, deduplication and idempotent writes, the same value
+  under two contracts, owner isolation including case-folding filesystems,
+  unknown and malformed references, tampered/truncated/swapped/NaN files,
+  self-healing writes, disagreeing references, limits, invalid owner/contract,
+  failed writes, restart and the exact stored record shape.
+- PR #18 opened; pre-merge review applied: the storage identity is now the
+  digest of the whole record (owner, contract, payload), so the same value
+  under two contracts no longer collides into one unreadable reference; the
+  owner inside the record is checked on every read, so a case-folding
+  filesystem cannot fold ownership; `get` verifies the raw bytes before parsing
+  and rejects NaN/Infinity literals, so a corrupt file can no longer raise a
+  bare `ValueError`; `put` rewrites a file that no longer hashes to its name
+  instead of reporting success forever; and the directory is fsynced after the
+  rename where the platform supports it.
+- Docs: phase spec slice 11 (approved scope) and sequence, checkpoint plan
+  "Payload storage" section, `docs/CONTRACTS.md`, migration slice-11 decision,
   README.
-
-- PR #17 opened; pre-merge review applied: `_write` rolls back on any
-  `BaseException` so a corrupt record or an interrupt can never wedge the
-  connection/file; an undecodable record fails closed as `unavailable` instead
-  of leaking `ValidationError`; `SQLITE_BUSY`/`SQLITE_LOCKED` at `COMMIT` are
-  `unavailable` (known not committed) while other commit errors stay
-  `commit_unknown`; a failed constructor closes its handle and `close()` is
-  idempotent (context manager added); plain `INSERT`/`UPDATE` replace
-  `INSERT OR REPLACE` so the primary key enforces uniqueness (`IntegrityError`
-  → `conflict`); the idempotency-key index is UNIQUE (partial); test fixtures
-  close every SQLite store they open.
 
 ## In Progress
 
-- PR #17 is open with the review posted; CI results for the final head are
-  recorded on the PR.
+- PR #18 is open with the review posted and applied; CI passed on the final
+  head `c46615f`. Only the owner's merge decision remains.
 
 ## Remaining
 
-- Review and merge the SQLite backend PR after the posted review.
-- Next Phase 3 slices (each needs explicit scope): protected payload storage
-  (what `PayloadRef` points at, access control, digest verification) and engine
-  recovery wired through the existing Gateway/Bridge policy path with fresh
-  authorization; a coordinator that marks abandoned runs `suspended` only with
-  exclusive ownership.
+- Review and merge the payload storage PR after the posted review.
+- Next Phase 3 slice (needs explicit scope): engine recovery — `WorkflowEngine`
+  writing checkpoints on the real execution path (write-ahead `started` before
+  dispatch, `completed` only after the payload is committed) and manual restart
+  recovery through the existing Gateway/Bridge policy path with fresh
+  authorization. This first needs the coordinator ownership semantics of
+  `docs/WORKFLOW_CHECKPOINTS.md` item 5: who may mark an abandoned `running`
+  record `suspended`, and how they establish that the old process is gone.
 - Earlier deferred reviews remain: bounded Bridge event history, SkillRegistry
   parse cost, MCP installation round trips, Review `not_required` semantics,
   generic top-level package names, repeated RequestContext validation.
 
 ## Architecture decisions made
 
-- Durability is new platform semantics, not source parity: the source Bridge
-  keeps runs in memory and mirrors them best-effort to a dashboard, which is
-  neither a checkpoint store nor a restart contract.
-- One backend rule set: legality lives in shared functions; a backend only
-  decides how to commit atomically. The memory model stays the executable
-  specification the durable backend must match.
-- Failure vocabulary is the contract: `unavailable` = known not committed
-  (retry is safe), `commit_unknown` = read back before proceeding; a second
-  writer is refused, never queued; an unknown schema version fails closed.
-- The file path is host configuration and never inside the project; rows hold
-  evidence and payload references only.
+- The digest is the identity: a record is stored under its own SHA-256 and
+  verified again on every read, so recovery can never be fed something the run
+  did not produce. Deduplication is a consequence, not a goal.
+- The reference decides what is acceptable; the file never gets a vote. A
+  mismatch is a distinct closed code, never a best guess or a silent read.
+- `PayloadRef.ref_id` is `payload-<digest of the stored record>`: a digest may
+  start with a digit and `Symbol` may not, and deriving the file name from a
+  validated digest makes path traversal impossible by construction. `sha256`
+  remains the digest of the payload value itself.
+- Ownership is evidence, not a location: the owner is inside the record and is
+  checked on read, so the store does not depend on filesystem case semantics.
+- Payload evidence stays small (1 MB default). Attachments and run artefacts are
+  not payloads; the source's own 4 KB step-result summary cap informed the
+  modest default.
+- No deletion, TTL, eviction, encryption, secret resolution or access control:
+  directory permissions are the host's responsibility, and a retained checkpoint
+  may reference its payloads for as long as it exists.
 
 ## Exact verification commands and results
 
@@ -85,40 +98,38 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 396 tests (366 prior; contract suite now runs on both backends, plus 12 SQLite durability tests)
+# PASS: 419 tests (396 prior + 23 payload)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 54 source/test files
+# PASS: 56 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
-# PASS: sdist and wheel; the SQLite backend ships in the sdist
+# PASS: sdist and wheel; the payload store ships in the sdist
 git diff --check
 # PASS
 ```
 
-Tests were written together with the backend and two test fixtures were
-corrected during development (a manifest field name `secrets` tripped a
-too-broad assertion; fault-injecting subclasses must not fail the schema
-commit). No production service, database server, transport, model, job or n8n
-instance was invoked; SQLite files live under pytest's temporary directory.
-Local pytest uses `-p no:cacheprovider` because of temporary-directory ACLs on
-this machine; CI runs ordinary pytest.
+Payload files live under pytest's temporary directory. No production service,
+database server, transport, model, job or n8n instance was invoked. Local pytest
+uses `-p no:cacheprovider` because of temporary-directory ACLs on this machine;
+CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- Single process, single owning thread, single file; no WAL, no multi-process
-  coordination, no leases. Crash durability relies on SQLite's journal with
-  `synchronous=FULL`; the tests simulate commit failures rather than power loss.
-- Still no TTL, eviction, deletion, payload storage, engine wiring or automatic
-  recovery.
+- Nothing in the running platform writes or reads payloads yet; this is the
+  storage half of a boundary whose engine wiring is a later slice.
+- No encryption at rest and no access control beyond per-owner directories;
+  a host that shares a directory across owners breaks the isolation this store
+  assumes.
+- Digest verification detects tampering on read, but a host that can rewrite
+  both the payload and the checkpoint can still present a consistent lie; the
+  store is not an integrity authority against its own operator.
 
 ## Next Recommended Action
 
-Open the PR for `phase-3/checkpoint-sqlite` against `main`, run the review, apply
-confirmed findings and let the owner merge. Then scope the next slice with the
-owner: protected payload storage or engine recovery wiring (the latter needs the
-coordinator/ownership semantics from `docs/WORKFLOW_CHECKPOINTS.md` item 5).
+Merge PR #18 (owner's decision; review and CI are on the PR). Then scope engine
+recovery with the owner, starting with the coordinator ownership question above.

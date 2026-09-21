@@ -210,3 +210,20 @@ write acknowledged only after commit, and the slice-9 rules shared as code
 between backends. The source's best-effort mirroring remains the model for
 progress reporting, not for checkpoints. No source deprecation is claimed;
 rollback removes `workflow/checkpoints_sqlite.py` and its tests.
+
+## Slice 11 source-first decision
+
+The pinned source has no equivalent to migrate: `jobs/_steps.py` caps a step's
+`result` at 4 KB as a human-readable summary for the dashboard and explicitly
+calls it "a summary for people, not a data channel", while run artefacts are
+files a job declares and the router streams base64 from
+`GET /jobs/run/{runId}/files/{name}`. Neither is content-addressed storage of
+validated step data for restart recovery, and neither is a payload contract.
+
+Decision: **new platform semantics**, bounded by the owner-approved scope — a
+local content-addressed file store beside the checkpoint file, standard library
+only, verified on every read. The source's 4 KB summary cap informs the modest
+`max_bytes` default (payload evidence stays small; attachments and artefacts are
+not payloads), but no source behavior is adapted or deprecated. Rollback removes
+`workflow/payloads.py` and its tests; checkpoints keep referencing payloads a
+host stores some other way.

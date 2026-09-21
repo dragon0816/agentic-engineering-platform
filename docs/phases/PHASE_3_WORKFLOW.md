@@ -265,6 +265,31 @@ only — no engine wiring, no payload storage, no automatic recovery.
    schema refusal, second writer, closed store, commit failure before/after the
    real commit, failure inside a transaction).
 
+## Requirements and acceptance (slice 11 — protected payload storage)
+
+Owner approved scope (2026-09-21): a content-addressed local store beside the
+checkpoint file (file name is the digest), schema validated before writing,
+digest and contract verified on reading, owner-isolated directories whose
+permissions are the host's responsibility; no secrets, no TTL/deletion, no
+engine wiring.
+
+1. `PayloadStore.put(owner, contract, payload)` canonicalises the value, stores
+   it under its own SHA-256 and returns the `PayloadRef` a checkpoint records;
+   equal values share one file, so repeated writes are idempotent.
+2. Writes are atomic and never leave a partial payload; an oversized or
+   unserializable value is refused before anything is written.
+3. `get(owner, ref)` returns the payload only when the identifier is one this
+   store issues, the bytes still hash to it, the payload hashes to `ref.sha256`
+   and the stored contract matches; tampering, truncation, a swapped file, a
+   wrong contract and an unknown reference each fail closed with a distinct
+   closed code.
+4. The owner is part of the stored record and is checked on every read, so one
+   owner's reference cannot read another owner's payload even on a
+   case-folding filesystem, and a file name is derived from a validated digest
+   only, never from caller text.
+5. Tests cover round trips for every JSON shape, deduplication, restart,
+   tampering, mismatched references, owner isolation, limits and failed writes.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -279,8 +304,9 @@ only — no engine wiring, no payload storage, no automatic recovery.
 - Slice 8: optional offline n8n submission adapter through Gateway.
 - Slice 9: checkpoint contracts and memory reference model for manual recovery.
 - Slice 10: single-writer SQLite checkpoint backend.
-- Later Phase 3 slices: protected payload storage and explicit engine recovery
-  through the existing Gateway/Bridge policy path.
+- Slice 11: content-addressed protected payload storage.
+- Later Phase 3 slices: explicit engine recovery through the existing
+  Gateway/Bridge policy path, including coordinator ownership semantics.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks
