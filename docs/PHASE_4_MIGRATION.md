@@ -43,7 +43,7 @@ reason; they are pinned and reproduced, not reinvented.
 | `ingest.py` `Gateway`, prompts, `condense`, `plan_ingest` | OpenAI-compatible HTTP client with retries, Traditional-Chinese maintainer prompts, chunked condensation cached by content hash, two-pass planning | NOT MIGRATED in this slice; slice 5 through `ModelClient`, with condensation cache and two passes preserved as behaviors |
 | `conflicts.py` | append-only `decisions.md`, `⚠️` markers found by regex over `wiki/`, `clear_conflict` by line, page hashes in `.brain-state.json`, manual-edit detection excluding tool-written pages | Pinned now; ADAPT in slice 7 |
 | `brain.py` static `scan` | orphans (entry points excluded), dangling links by count, path-carrying links (with the `[[CLAUDE.md]]` exception), missing frontmatter, unresolved `source_path`, pending sources; `page_name` strips only `.md` | Inspected; pin and ADAPT in slice 6 |
-| `snapshot.py` | copy `wiki/`, `index.md`, `log.md`, `decisions.md`, `.brain-state.json` to `.brain-snapshot/<stamp>`; restore snapshots the current state first | Inspected; ADAPT in slice 9 as the migration adapter's safety net |
+| `snapshot.py` | copy `wiki/`, `index.md`, `log.md`, `decisions.md`, `.brain-state.json` to `.brain-snapshot/<stamp>`; restore snapshots the current state first | ADAPTED in slice 9 as the migration adapter's safety net |
 | `collect.py` | copy project READMEs and `docs/**/*.md` into `raw/Programming/<project>/`, hash-compare duplicate checkouts, exclude `HANDOFF.md` by name | NOT MIGRATED; a Drop intake (slice 2) subsumes it, and the exclusion becomes host configuration |
 | Runtime `CLAUDE.md` schema sent as the system prompt | conventions live in the vault and are read at run time | NOT MIGRATED: the platform encodes the conventions it enforces as contracts; a host may still keep a schema file for human maintainers |
 
@@ -104,7 +104,7 @@ existing file) rather than merely "never written by the tool". A drifted
 original keeps the old Raw and writes the new one beside it under a
 hash-suffixed name; the source's `--force` rebuilt the wiki page in place and
 left no trace of the earlier text. Existing Raw files without provenance are
-skipped by the index, not adopted; adoption is slice 9 with a snapshot first.
+skipped by the index until adopted (slice 9, ledger by content hash, snapshot first).
 The section marker is escaped inside body text so any original is
 representable, and line endings are normalized to `\n` on entry and on disk;
 the source stored whatever bytes the model or a human produced. Paths are
@@ -316,3 +316,38 @@ default trace is derived per request rather than constant. Rollback removes
 `knowledge/query.py`, `knowledge/modelcalls.py` (inlining the helper back into
 `describe.py` and `planning.py`), `knowledge.lint.body_of` and the query tests;
 nothing else imports them.
+
+## Slice 9 source-first decision
+
+Re-inspected `vault/snapshot.py` (copy `wiki/`, the root files and
+`.brain-state.json` to `.brain-snapshot/<stamp>`; a restore snapshots the
+current state first) and the README's "one sharp edge" (a sources page counts
+as ingested by the `source_path` it records, so a moved Raw file looks
+un-ingested and a changed one looks done).
+
+Decision (2026-09-21): **ADAPT** `snapshot.py` as the migration adapter's
+safety net (`knowledge.migrate.snapshot` / `restore`, the same managed set with
+the platform's state and ledger in place of `.brain-state.json`, a name that
+is one path component, and no clock: the stamp is injected) and **adopt
+legacy Raw through a ledger rather than by rewriting it**. Two other paths
+were rejected: rewriting each legacy file to carry provenance frontmatter
+would break the one rule the platform exists to keep (`raw/` is never
+written), and treating legacy files as new drops would duplicate every one
+of them under `raw/` with a hash-suffixed name and sever the sources pages
+that already point at the old paths. The ledger keeps the bytes where they
+are, gives each file a content identity the index, lint, planning and query
+share with ingested Raw, and makes drift visible: a file that no longer
+hashes to what was adopted is out of the index and reported until someone
+re-adopts it by name. The `source_path` sharp edge is closed the same way —
+a page's path is resolved once to a content identity and the typed lines are
+added beside it, so a later move of the file changes nothing the page relies
+on.
+
+Intentional differences: adoption is a dry run by default with the exact
+write list; an apply that writes is preceded by a snapshot; a Big5 or empty
+legacy file is reported, not adopted; a sources page keeps its `source_path:`
+and its line endings; and nothing here prints, exits or reads a clock.
+Rollback removes `knowledge/migrate.py`, `Vault.ledger_read` /
+`ledger_write`, the `ledger` branch of `RawIndex.scan`, `RawEntry.adopted`,
+`adopted_document` / `load_document` (query returns to `parse`) and the
+tests; nothing else imports them.

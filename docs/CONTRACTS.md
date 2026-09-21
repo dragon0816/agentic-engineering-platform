@@ -659,3 +659,42 @@ failure_from_exception`, shared with description and planning) and `no_match`
 passages and the question, under the given trace or one derived from the
 question and the engine's request count; the model is told to cite every
 claim and say so when the passages do not answer.
+
+## Migration adapter (Phase 4, slice 9)
+
+`knowledge.migrate.adopt(vault, mode="dry_run", today=, stamp=, readopt=())`
+returns an `AdoptionReport`: `raw_adopted` (`AdoptedRaw(raw_ref, source)` —
+legacy Raw files entered into the ledger by content hash, `source_for_legacy`
+deriving a `KnowledgeSource` whose `original_ref` and `raw_ref` are the file
+itself), `raw_readopted` (drifted files named in `readopt`, recorded at their
+current hash), `raw_drifted` (`DriftedRaw(raw_ref, recorded_sha256,
+current_sha256)`), `raw_skipped` (`SkippedRaw(raw_ref, reason)` with `reason`
+`undecodable` or `empty`), `pages_migrated` (`MigratedPage(page, source)` —
+`source_path:` sources pages given the provenance lines), `pages_unresolved`
+(`UnresolvedPage(page, source_path)`), `pages_skipped` (frontmatter never
+closes) and `written`, exactly what an apply writes: the pages, then the
+ledger. `snapshot` is set only on an apply that wrote. A page is written by
+`Vault.write` (backup under the stamp, the page's own line endings kept);
+the ledger by `Vault.ledger_write`. `raw/` is never written. `legacy_raw`
+lists the Raw files without provenance frontmatter.
+
+The ledger `.ingest-adopted.json` (`Vault.ledger_read` / `ledger_write`, `{}`
+when absent or corrupt) maps a Raw path to `{source_id, sha256, adopted}`.
+`RawIndex.scan(vault, ledger=True)` adds a `RawEntry(adopted=True, created=
+<adopted date>)` for each ledger file whose bytes still hash to `sha256`; a
+changed file is left out until re-adopted. `knowledge.raw.load_document(vault,
+entry)` returns the `RawDocument` behind any entry — parsed for a typed file,
+built by `adopted_document` for a legacy one (extractor `adopted.v1`, one text
+section per paragraph); `ValueError` for what cannot be read as a document.
+Query cites an adopted file's paragraphs by section number; lint counts an
+adopted file among `pending_sources` until a sources page carries its id.
+
+`snapshot(vault, stamp=, label="")` copies the generated half (`wiki/`,
+`index.md`, `log.md`, `decisions.md`, `.ingest-state.json`,
+`.ingest-adopted.json`) to `.ingest-snapshot/<stamp[-label]>` and returns the
+name; an existing name is `write_failed`, a name with a separator is a
+`ValueError`. `snapshots(vault)` lists them. `restore(vault, name, stamp=)`
+snapshots the current state as `<stamp>-before-restore`, then replaces the
+generated half with the named snapshot (files absent from it are removed);
+a missing snapshot is `missing_original`. `raw/` and `drop/` are never part
+of a snapshot or a restore.

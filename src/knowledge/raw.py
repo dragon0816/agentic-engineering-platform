@@ -390,29 +390,66 @@ class IntakeOutcome(Contract):
 
 
 class RawEntry(Contract):
-    """What the index knows about one Raw file from its head alone."""
+    """What the index knows about one Raw file from its head alone — or, for
+    a legacy file adopted by the migration adapter, from the ledger."""
 
     raw_ref: Text
     source: KnowledgeSource
     created: date
     supersedes: Symbol | None = None
+    adopted: bool = False
+
+
+ADOPTED_EXTRACTOR = "adopted.v1"
+
+
+def _adopted_entry(rel: str, record: object, data: bytes) -> RawEntry | None:
+    """The ledger's entry for a legacy file, when the file still holds the
+    bytes it was adopted at. A changed file is drift: a person's edit to what
+    is immutable by rule, kept out of the index until adopted again on purpose."""
+    if not isinstance(record, dict):
+        return None
+    source_id, sha256, adopted = (record.get(k) for k in ("source_id", "sha256", "adopted"))
+    if not all(isinstance(v, str) for v in (source_id, sha256, adopted)):
+        return None
+    if hashlib.sha256(data).hexdigest() != sha256:
+        return None
+    try:
+        return RawEntry(
+            raw_ref=rel,
+            source=KnowledgeSource(
+                source_id=source_id, original_ref=rel, sha256=sha256, raw_ref=rel
+            ),
+            created=date.fromisoformat(str(adopted)),
+            adopted=True,
+        )
+    except (ValidationError, ValueError):
+        return None
 
 
 class RawIndex:
     """The Raw files that carry this platform's provenance, read from their
-    heads once and kept current with the intake's own writes."""
+    heads once and kept current with the intake's own writes, plus the legacy
+    files the adoption ledger vouches for by content."""
 
     def __init__(self, entries: Iterable[RawEntry] = ()) -> None:
         self.entries: list[RawEntry] = list(entries)
 
     @classmethod
-    def scan(cls, vault: Vault) -> "RawIndex":
+    def scan(cls, vault: Vault, *, ledger: bool = True) -> "RawIndex":
         """Files without provenance, or whose head cannot be read, are skipped —
-        an existing vault's content is never a reason to fail, nor rewritten."""
+        an existing vault's content is never a reason to fail, nor rewritten.
+        With `ledger`, a file the adoption ledger records is an entry as long
+        as its bytes still hash to what was adopted."""
         entries: list[RawEntry] = []
+        adopted = vault.ledger_read() if ledger else {}
         for rel in vault.raw_files():
             head = frontmatter(vault.read_head(rel))
             if head is None or any(key not in head[0] for key in _PROVENANCE_KEYS):
+                if rel in adopted:
+                    entry = _adopted_entry(rel, adopted[rel], vault.read_bytes(rel))
+                    if entry is not None:
+                        entries.append(entry)
                 continue
             fields = head[0]
             try:
@@ -455,6 +492,29 @@ class RawIndex:
 
 def raw_index(vault: Vault) -> tuple[RawEntry, ...]:
     return tuple(RawIndex.scan(vault).entries)
+
+
+def adopted_document(entry: RawEntry, text: str) -> RawDocument:
+    """A legacy file as a document: its paragraphs are the sections, in order,
+    so query and planning read it like any other Raw without a byte of it
+    changing. A file with no text is a `ValueError`, like a malformed one."""
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", _lines(text)) if p.strip()]
+    if not paragraphs:
+        raise ValueError("an adopted file has no text")
+    return RawDocument(
+        source=entry.source,
+        extractor=ADOPTED_EXTRACTOR,
+        created=entry.created,
+        sections=tuple(RawSection(text=p) for p in paragraphs),
+    )
+
+
+def load_document(vault: Vault, entry: RawEntry) -> RawDocument:
+    """The document behind an index entry: parsed from a typed Raw file, or
+    built from a legacy one. Raises `ValueError` (or `UnicodeDecodeError`,
+    `VaultError`) for what cannot be read as a document."""
+    text = vault.read(entry.raw_ref)
+    return adopted_document(entry, text) if entry.adopted else parse(text)
 
 
 def _undescribed(sections: tuple[RawSection, ...]) -> int:

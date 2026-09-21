@@ -1,69 +1,71 @@
-# Handoff — Phase 4 query with provenance (slice 8)
+# Handoff — Phase 4 migration adapter (slice 9, the last Phase 4 slice)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-4/query`, based on `main` after PR #30 merged.
+Branch: `phase-4/migration`, based on `main` after PR #31 merged.
 
 ## Goal
 
-Phase 4 slice 8: questions over the vault answered with passages whose every
-citation names where the words came from — the Roadmap's "query answers can
-cite source provenance". The owner asked for all of Phase 4 (slices 3–9) to be
-completed without check-ins unless something cannot be decided; each slice is
-reviewed, merged on green CI and followed by the next. Requirements:
-`docs/phases/PHASE_4_KNOWLEDGE.md` (slice 8); decision:
-`docs/PHASE_4_MIGRATION.md` (slice 8); contracts: `docs/CONTRACTS.md` ("Query
-with provenance").
+Phase 4 slice 9: adopt an existing Obsidian vault under the platform's
+provenance and immutability rules without treating it as a greenfield corpus
+and without rewriting `raw/` — the Roadmap's "explicit migration adapter/path
+for existing Obsidian vault content, existing Raw data, images and metadata".
+The owner asked for all of Phase 4 (slices 3–9) to be completed without
+check-ins unless something cannot be decided; each slice is reviewed, merged
+on green CI and followed by the next. Requirements:
+`docs/phases/PHASE_4_KNOWLEDGE.md` (slice 9); decision:
+`docs/PHASE_4_MIGRATION.md` (slice 9); contracts: `docs/CONTRACTS.md`
+("Migration adapter").
 
 ## Completed
 
-- `knowledge/query.py`: `tokens` (lowercased words, scripts split, CJK
-  characters plus bigrams plus the run), `cited_numbers` (`[2]`, `[1, 3]`,
-  `[1-3]`), `retrieve(vault, question, k=)` (BM25 over every section with
-  text of every current Raw and every Wiki paragraph after its frontmatter,
-  ties by corpus order), `Citation` (`raw`: source, file, section,
-  page/slide; `wiki`: page and the source behind it when the page carries
-  `source_id`), `Passage`, `Answer` with closed statuses (`retrieved`,
-  `answered`, `unanswered`, `uncited`, `model_failed`, `no_match`), and
-  `QueryEngine(vault, model=, alias=).ask(question, k=, trace=)` whose
-  synthesis may cite only retrieved passages.
-- `knowledge/modelcalls.py`: `failure_from_exception`, the one place an
-  adapter's exception becomes a retryable `Failure`, used by description,
-  planning and query. `knowledge.lint.body_of` splits a page's body from its
-  frontmatter (CRLF tolerated; `head_fields` tolerates CRLF too).
-- 4 tests (`tests/test_query.py`) over a small corpus with pages, slides, a
-  CRLF sources page carrying provenance, an entity page without, and a
-  superseded Raw version.
-- Docs: phase spec slice 8 requirements, `docs/CONTRACTS.md`, migration slice 8
-  decision (lexical first, bigrams over a segmenter, strict synthesis) with the
-  review-driven changes recorded.
-- PR #31 review (10 findings) applied: superseded Raw excluded; Latin glued to
-  CJK tokenized; CJK unigrams; blank question is `no_match`, not a validation
-  error; frontmatter split shared with lint and CRLF-safe; honest "no answer"
-  is `unanswered`, not refused; `[1, 2]` and `[1-3]` citations; shared
-  adapter-failure helper; a real image-section assertion; per-request default
-  trace ids.
+- `knowledge/migrate.py`: `adopt(vault, mode=, today=, stamp=, readopt=)`
+  returning an `AdoptionReport` (adopted, re-adopted, drifted and skipped Raw;
+  migrated, unresolved and skipped pages; the exact write list; the snapshot
+  name on an apply that wrote), `source_for_legacy`, `legacy_raw`, `snapshot`,
+  `snapshots`, `restore` (adapted from the pinned `snapshot.py`).
+- `knowledge/vault.py`: `LEDGER_FILE` (`.ingest-adopted.json`),
+  `SNAPSHOT_DIR` (`.ingest-snapshot`), `Vault.ledger_read` / `ledger_write`
+  sharing the state file's JSON reader.
+- `knowledge/raw.py`: `RawEntry.adopted`, `RawIndex.scan(vault, ledger=True)`
+  including ledger files whose bytes still hash to what was adopted,
+  `adopted_document` / `load_document` so an adopted file is a `RawDocument`
+  (paragraph sections, extractor `adopted.v1`) for planning and query.
+- `knowledge/query.py`: the corpus reads every entry through `load_document`,
+  so adopted files are cited by paragraph.
+- 3 tests (`tests/test_migrate.py`): adoption in both modes over a legacy
+  vault (CRLF sources page, Big5 file, empty file, stale path, unclosed
+  frontmatter), Raw bytes unchanged, index/lint/planning/query seeing the
+  adopted file, idempotence, drift and re-adoption, ingested and adopted Raw
+  side by side, corrupt ledgers, snapshot/restore round trips.
+- Docs: phase spec slice 9 requirements (and the Phase 4 exit-criteria
+  note), `docs/CONTRACTS.md`, migration slice 9 decision (ADAPT `snapshot.py`;
+  ledger over rewriting Raw or re-dropping it).
 
 ## In Progress
 
-- Nothing; merge of PR #31 on green CI is authorized for Phase 4 slices.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available. Merge on green CI is authorized for Phase 4 slices.
 
 ## Remaining
 
-- Slice 9: migration adapter for an existing vault — adopt legacy Raw (no
-  provenance frontmatter) into the index without rewriting it, migrate
-  `source_path` sources pages to typed provenance with backups, report
-  path-versus-hash drift, snapshot and restore the generated half.
+- After this PR merges: a Phase 4 closure change — `docs/ROADMAP.md` status,
+  `README.md` Phase 4 paragraph, `CLAUDE.md` active-phase pointer — and the
+  Phase 5 specification (model gateway) before any Phase 5 code.
 - Deferred from Phase 3, each needing its own scope: a payload sweep,
   process-liveness or lease-based suspension, and the earlier deferred reviews.
+- Deferred from Phase 4: a retrieval cache (the corpus is rebuilt per query),
+  planning driven from an adopted document by a host (the planner takes any
+  `RawDocument` already; no host wiring exists yet).
 
 ## Architecture decisions made
 
-- Lexical, deterministic retrieval first; embeddings can come later behind the
-  same `retrieve` shape.
-- Words without a retrieved source behind them are not an answer: synthesized
-  text is refused unless every citation is real.
-- No provider named; synthesis is one `ModelRequest` like every other model
-  call in knowledge code.
+- Legacy Raw is adopted through a ledger keyed by path with the content hash,
+  never by rewriting the file or re-dropping it; drift is reported and
+  re-adopted only by name.
+- The generated half (wiki, root files, state, ledger) is snapshotted before
+  an apply that writes; `raw/` and `drop/` are never part of a snapshot.
+- An adopted file is a document whose sections are its paragraphs, so every
+  consumer of Raw sees one shape.
 
 ## Exact verification commands and results
 
@@ -71,7 +73,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 561 passed, 2 skipped (symlink privilege) in 4.7s
+# PASS: 564 passed, 2 skipped (symlink privilege)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -86,20 +88,22 @@ git diff --check
 # PASS
 ```
 
-No model, gateway, network, real vault, job or n8n instance was invoked; the
-model in tests is a fake. Local pytest uses `-p no:cacheprovider` because of
-temporary-directory ACLs on this machine; CI runs ordinary pytest.
+No model, gateway, network, real vault, job or n8n instance was invoked. Local
+pytest uses `-p no:cacheprovider` because of temporary-directory ACLs on this
+machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- Retrieval rebuilds the corpus on every call by reading every Raw and Wiki
-  file; fine for hundreds of pages, a cache is a later concern.
-- BM25 treats CJK as characters and character pairs; no stemming for any
-  language.
-- Legacy Raw files without provenance are not part of the corpus until slice 9
-  adopts them.
+- `RawIndex.scan` hashes every adopted file on each scan to detect drift;
+  fine for hundreds of files, a size-and-mtime shortcut is a later concern.
+- Images under a legacy `raw/` are not described or indexed by adoption; an
+  adopted file is text only. Describing them would mean writing a Raw file,
+  which adoption never does; a host can drop the originals instead.
+- A drifted file re-adopted by name gets a new `source_id`; a sources page
+  carrying the old id is then `unknown_source_id` in lint, by design.
 
 ## Next Recommended Action
 
-Merge PR #31 on green CI, then write the slice 9 requirements (migration
-adapter) and implement it on `phase-4/migration` — the last Phase 4 slice.
+Open the PR for `phase-4/migration`, run the review, apply confirmed findings,
+merge on green CI, then make the Phase 4 closure change and write the Phase 5
+specification.
