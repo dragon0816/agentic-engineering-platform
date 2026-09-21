@@ -1,92 +1,83 @@
-# Handoff — Phase 3 checkpoint contracts (slice 9)
+# Handoff — Phase 3 SQLite checkpoint backend (slice 10)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-3/checkpoint-contracts`, based on `main` at `85a463f` (PR #15 merged).
-
-## Takeover note
-
-This slice was started by another coding session in this same checkout (branch
-created, files written, uncommitted) and taken over by Claude Code at the owner's
-request after that session went idle. Takeover reconciliation: PR #15 (optional
-n8n adapter) was already merged, not "open" as the previous handoff said; the
-uncommitted checkpoint work passed the full verification baseline unchanged
-(363 tests, ruff, format, mypy 52 files) before any takeover edits. The owner's
-scope approval ("single-Bridge manual restart recovery") had only existed in the
-uncommitted phase-spec draft; committing this slice makes it durable.
+Branch: `phase-3/checkpoint-sqlite`, based on `main` at `64a9521` (PR #16 merged).
 
 ## Goal
 
-Phase 3 slice 9: a versioned, owner-scoped checkpoint contract and a bounded
-in-memory single-writer reference store that define what manual restart recovery
-would rely on — without a disk backend, engine integration or automatic recovery.
-Normative plan: `docs/WORKFLOW_CHECKPOINTS.md`. Requirements:
-`docs/phases/PHASE_3_WORKFLOW.md` (slice 9). Source decision:
-`docs/PHASE_3_MIGRATION.md` (slice 9).
+Phase 3 slice 10 under the owner-approved scope (recorded in
+`docs/phases/PHASE_3_WORKFLOW.md`, slice 10): a single-writer local SQLite
+backend for the `CheckpointStore` protocol — one transaction per write,
+acknowledged only after commit, standard library only — with no engine wiring,
+payload storage or automatic recovery. Normative plan:
+`docs/WORKFLOW_CHECKPOINTS.md` ("SQLite backend"); source decision:
+`docs/PHASE_3_MIGRATION.md` (slice 10).
 
 ## Completed
 
-- `common/checkpoints.py`: `CheckpointOwner`, `PayloadRef` (opaque protected
-  payload reference: id, SHA-256, contract — never inline data), `StepCheckpoint`
-  (`never_started` / `started` / `completed` with a result reference only when
-  completed), `RunCheckpoint` v1 (owner, trace, exact manifest snapshot, runtime
-  contract, intent digest, ordered step evidence, revision, key, parent /
-  continuation links) with linear-evidence validation and a metadata-only
-  `recovery_plan()` in which a started step is `uncertain`.
-- `workflow/checkpoints.py`: `CheckpointStore` protocol (`get`, `find_key`,
-  `create`, `replace` with revision compare-and-swap, `continue_run` atomic
-  parent/child reservation), closed `CheckpointStoreError` codes including
-  `unavailable` vs `commit_unknown`, and `MemoryCheckpointStore` (bounded, no
-  eviction or deletion, owner-isolated reads, immutable intent and completed
-  results, one step transition per write, atomic continuation).
-- 40 tests: JSON/version/shape validation, invalid step evidence, key scoping and
-  capacity, revision conflicts, immutability, deep-copy isolation, write-ahead
-  ordering, atomic continuation and half-link prevention, injected fault windows
-  (`unavailable` before/after an effect, `commit_unknown`) proving recovery never
-  claims an effect was not invoked, terminal success, stale writers and lost
-  acknowledgments.
-- Docs: `docs/WORKFLOW_CHECKPOINTS.md`, `docs/CONTRACTS.md` "Checkpoint
-  persistence boundary", migration slice-9 decision, phase spec slice 9 and
-  sequence, README pointer.
-- PR #16 opened; pre-merge review applied: `recovery_plan` reports a `running`
-  record as `running` (only `suspended` needs input); a continuation keeps the
-  parent's first unresolved step's evidence so a started step stays uncertain
-  until the child re-acknowledges it; run identifiers are owner-scoped so one
-  owner can neither observe nor block another's; a keyed `create` compares the
-  intent fields as well as the digest; a two-node parent/continuation cycle is
-  rejected; `replace` keys its compare-and-swap on `expected_revision` only;
-  TypeAdapters are hoisted and redundant copies removed; the contract heading
-  is an H2; tests assert exact error codes.
+- `workflow/checkpoints.py`: the slice-9 transition rules are now shared
+  functions (`check_create`, `check_replace`, `check_continue`, `same_intent`,
+  `linked_parent`, validators) used by both backends, so they cannot drift;
+  `MemoryCheckpointStore` is unchanged in behavior.
+- `workflow/checkpoints_sqlite.py`: `SqliteCheckpointStore(path, capacity=50)` —
+  schema with a `schema_version` meta row (unknown versions refuse to open),
+  owner/run/key-indexed rows holding the checkpoint JSON, `synchronous=FULL`,
+  `BEGIN IMMEDIATE` … `COMMIT` per write, `timeout=0` so a second writer is
+  refused (`unavailable`) rather than waited for, `unavailable` for any failure
+  before commit (rolled back) and `commit_unknown` when `COMMIT` itself raises,
+  owner-scoped reads outside transactions, capacity counted over persisted rows.
+- Tests: the contract suite in `tests/test_checkpoints.py` is parametrized over
+  both backends (`make_store` fixture); `tests/test_checkpoints_sqlite.py` adds
+  restart persistence of evidence/keys/links/capacity, key reuse after restart,
+  evidence-only rows, schema refusal, second-writer refusal, closed store,
+  invalid capacity, commit failure before and after the real commit (read back
+  decides), and a failure inside a transaction leaving nothing written and
+  allowing a plain retry.
+- Docs: phase spec slice 10 (approved scope) and sequence, checkpoint plan
+  "SQLite backend" section, `docs/CONTRACTS.md`, migration slice-10 decision,
+  README.
+
+- PR #17 opened; pre-merge review applied: `_write` rolls back on any
+  `BaseException` so a corrupt record or an interrupt can never wedge the
+  connection/file; an undecodable record fails closed as `unavailable` instead
+  of leaking `ValidationError`; `SQLITE_BUSY`/`SQLITE_LOCKED` at `COMMIT` are
+  `unavailable` (known not committed) while other commit errors stay
+  `commit_unknown`; a failed constructor closes its handle and `close()` is
+  idempotent (context manager added); plain `INSERT`/`UPDATE` replace
+  `INSERT OR REPLACE` so the primary key enforces uniqueness (`IntegrityError`
+  → `conflict`); the idempotency-key index is UNIQUE (partial); test fixtures
+  close every SQLite store they open.
 
 ## In Progress
 
-- PR #16 is open with the review posted; CI results for the final head are
+- PR #17 is open with the review posted; CI results for the final head are
   recorded on the PR.
 
 ## Remaining
 
-- Review and merge the checkpoint-contracts PR after the posted review.
-- Next Phase 3 slices (each needs explicit scope): a local durable backend with
-  real transaction/restart tests, protected payload storage, and engine recovery
-  wired through the existing Gateway/Bridge policy path with fresh authorization.
+- Review and merge the SQLite backend PR after the posted review.
+- Next Phase 3 slices (each needs explicit scope): protected payload storage
+  (what `PayloadRef` points at, access control, digest verification) and engine
+  recovery wired through the existing Gateway/Bridge policy path with fresh
+  authorization; a coordinator that marks abandoned runs `suspended` only with
+  exclusive ownership.
 - Earlier deferred reviews remain: bounded Bridge event history, SkillRegistry
   parse cost, MCP installation round trips, Review `not_required` semantics,
   generic top-level package names, repeated RequestContext validation.
 
 ## Architecture decisions made
 
-- Checkpoints are private execution-plane evidence: never a Registry asset, an
-  execution grant, a model route or an n8n runtime. A stored manifest is
-  provenance, not authority; recovery must re-check installed definitions,
-  compatibility, schemas, dependencies and authorization.
-- Durable acknowledgment is a correctness gate (write-ahead `started` before
-  dispatch, `completed` only after the validated payload is committed) and is
-  deliberately separate from the best-effort progress/log reporting hook.
-- At restart, `started` means `uncertain` even if dispatch may not have happened;
-  no step resumes automatically; the existing `ResumePolicy` and fresh Bridge
-  authorization govern any continuation. Caller-wait timeout is not abandonment.
-- No TTL, eviction or deletion in v1; capacity rejects new runs; keys and
-  continuation links are retained for the store lifetime so history deletion can
-  never silently make a used key executable again.
+- Durability is new platform semantics, not source parity: the source Bridge
+  keeps runs in memory and mirrors them best-effort to a dashboard, which is
+  neither a checkpoint store nor a restart contract.
+- One backend rule set: legality lives in shared functions; a backend only
+  decides how to commit atomically. The memory model stays the executable
+  specification the durable backend must match.
+- Failure vocabulary is the contract: `unavailable` = known not committed
+  (retry is safe), `commit_unknown` = read back before proceeding; a second
+  writer is refused, never queued; an unknown schema version fails closed.
+- The file path is host configuration and never inside the project; rows hold
+  evidence and payload references only.
 
 ## Exact verification commands and results
 
@@ -94,38 +85,40 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 363 tests (323 prior + 40 checkpoint)
+# PASS: 396 tests (366 prior; contract suite now runs on both backends, plus 12 SQLite durability tests)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
-# PASS: 75 files
+# PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 52 source/test files
+# PASS: 54 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
-# PASS: sdist and wheel; checkpoint modules, tests and doc ship in the sdist
+# PASS: sdist and wheel; the SQLite backend ships in the sdist
 git diff --check
 # PASS
 ```
 
-Memory tests simulate fault windows; they do not prove filesystem crash
-durability. No production service, transport, model, job, database or n8n
-instance was invoked. Local pytest uses `-p no:cacheprovider` because of
-temporary-directory ACLs on this machine; CI runs ordinary pytest.
+Tests were written together with the backend and two test fixtures were
+corrected during development (a manifest field name `secrets` tripped a
+too-broad assertion; fault-injecting subclasses must not fail the schema
+commit). No production service, database server, transport, model, job or n8n
+instance was invoked; SQLite files live under pytest's temporary directory.
+Local pytest uses `-p no:cacheprovider` because of temporary-directory ACLs on
+this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- `MemoryCheckpointStore` is a reference model on one owning thread; nothing in
-  the running platform reads or writes checkpoints yet.
-- `PayloadRef` integrity and access control are host obligations; the store
-  cannot verify a payload it never sees.
-- Two coding sessions sharing one checkout is unsafe; the takeover was only
-  possible because the other session had gone idle. Prefer separate worktrees.
+- Single process, single owning thread, single file; no WAL, no multi-process
+  coordination, no leases. Crash durability relies on SQLite's journal with
+  `synchronous=FULL`; the tests simulate commit failures rather than power loss.
+- Still no TTL, eviction, deletion, payload storage, engine wiring or automatic
+  recovery.
 
 ## Next Recommended Action
 
-Open the PR for `phase-3/checkpoint-contracts` against `main`, run the review,
-apply confirmed findings and let the owner merge. Then scope the next slice with
-the owner: the local durable backend (storage choice, transaction and restart
-tests) before any engine wiring.
+Open the PR for `phase-3/checkpoint-sqlite` against `main`, run the review, apply
+confirmed findings and let the owner merge. Then scope the next slice with the
+owner: protected payload storage or engine recovery wiring (the latter needs the
+coordinator/ownership semantics from `docs/WORKFLOW_CHECKPOINTS.md` item 5).

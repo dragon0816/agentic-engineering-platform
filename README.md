@@ -58,8 +58,9 @@ arguments for a host-bound workflow through `Gateway.execute_workflow`; normal
 routed workflows share this entry point. Offline tests cover delivery deduplication,
 policy and progress. No n8n runtime, HTTP endpoint or production connection is installed.
 [Workflow checkpoints](docs/WORKFLOW_CHECKPOINTS.md) define the owner-scoped restart
-evidence and store contract that manual recovery would rely on; a bounded in-memory
-reference store exists, but no durable backend or engine recovery is wired yet.
+evidence and store contract that manual recovery would rely on, with a bounded
+in-memory reference store and a single-writer SQLite backend; engine recovery is
+not wired yet.
 
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).

@@ -1,7 +1,8 @@
-"""Checkpoint store contract and single-writer memory reference model.
+"""Checkpoint store contract, shared transition rules and a memory reference model.
 
-Not connected to WorkflowEngine. No disk durability, authentication, payload
-resolution, policy enforcement or automatic recovery is provided here.
+Not connected to WorkflowEngine. The rules here decide whether a write is
+legal; each backend decides how to commit it atomically. No authentication,
+payload resolution, policy enforcement or automatic recovery is provided.
 """
 
 from typing import Literal, Protocol
@@ -61,20 +62,98 @@ class CheckpointStore(Protocol):
     ) -> RunCheckpoint: ...
 
 
-_StoreKey = tuple[str, str, str]
-
-
-def _checked(checkpoint: RunCheckpoint) -> RunCheckpoint:
+def checked_copy(checkpoint: RunCheckpoint) -> RunCheckpoint:
     """Validated private copy: manifests carry mutable input maps."""
     return RunCheckpoint.model_validate(checkpoint).model_copy(deep=True)
 
 
+def validate_owner(owner: CheckpointOwner) -> CheckpointOwner:
+    return CheckpointOwner.model_validate(owner)
+
+
+def validate_run_id(run_id: RunId) -> str:
+    return _RUN_ID.validate_python(run_id)
+
+
+def validate_key(key: IdempotencyKey) -> str:
+    return _KEY.validate_python(key)
+
+
+def same_intent(left: RunCheckpoint, right: RunCheckpoint) -> bool:
+    return all(getattr(left, field) == getattr(right, field) for field in INTENT_FIELDS)
+
+
+def check_revision(item: RunCheckpoint, expected: int) -> None:
+    if type(expected) is not int or expected < 0 or expected != item.revision:
+        raise CheckpointStoreError("conflict")
+
+
+def check_create(item: RunCheckpoint) -> None:
+    """A new run starts at revision 0 with no evidence and no relationships."""
+    if (
+        item.revision != 0
+        or item.resumed_from is not None
+        or item.continued_by is not None
+        or item.status != "running"
+        or any(s.state != "never_started" for s in item.steps)
+    ):
+        raise CheckpointStoreError("invalid_transition")
+
+
+def check_replace(old: RunCheckpoint, item: RunCheckpoint, expected_revision: int) -> None:
+    """Compare-and-swap on the expected revision, one legal step transition at most."""
+    check_revision(old, expected_revision)
+    if old.status != "running":
+        raise CheckpointStoreError("invalid_transition")
+    if old.model_dump(exclude=_MUTABLE_FIELDS) != item.model_dump(exclude=_MUTABLE_FIELDS):
+        raise CheckpointStoreError("invalid_transition")
+    transitions = 0
+    for before, after in zip(old.steps, item.steps, strict=True):
+        if before == after:
+            continue
+        transitions += 1
+        if (before.state, after.state) not in _STEP_TRANSITIONS:
+            raise CheckpointStoreError("invalid_transition")
+    if transitions > 1:
+        raise CheckpointStoreError("invalid_transition")
+
+
+def check_continue(
+    parent: RunCheckpoint, child: RunCheckpoint, expected_parent_revision: int
+) -> None:
+    """The child keeps the completed prefix and the first unresolved step's evidence."""
+    if parent.continued_by is not None:
+        raise CheckpointStoreError("already_continued")
+    check_revision(parent, expected_parent_revision)
+    if (
+        parent.status != "suspended"
+        or child.status != "running"
+        or child.revision != 0
+        or child.continued_by is not None
+        or not same_intent(parent, child)
+    ):
+        raise CheckpointStoreError("invalid_transition")
+    unresolved = False
+    for before, after in zip(parent.steps, child.steps, strict=True):
+        if before.state == "completed" or not unresolved:
+            # A started (uncertain) step stays started until the child itself
+            # re-acknowledges it; a completed step is immutable evidence.
+            unresolved = unresolved or before.state != "completed"
+            if before != after:
+                raise CheckpointStoreError("invalid_transition")
+        elif after.state != "never_started":
+            raise CheckpointStoreError("invalid_transition")
+
+
+def linked_parent(parent: RunCheckpoint, child: RunCheckpoint) -> RunCheckpoint:
+    return parent.model_copy(update={"continued_by": child.run_id, "revision": parent.revision + 1})
+
+
+_StoreKey = tuple[str, str, str]
+
+
 def _key(owner: CheckpointOwner, run_id: str) -> _StoreKey:
     return (owner.actor, owner.namespace, run_id)
-
-
-def _same_intent(left: RunCheckpoint, right: RunCheckpoint) -> bool:
-    return all(getattr(left, field) == getattr(right, field) for field in INTENT_FIELDS)
 
 
 class MemoryCheckpointStore:
@@ -96,11 +175,11 @@ class MemoryCheckpointStore:
         return self._runs.get(_key(owner, run_id))
 
     def get(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint | None:
-        item = self._lookup(CheckpointOwner.model_validate(owner), _RUN_ID.validate_python(run_id))
+        item = self._lookup(validate_owner(owner), validate_run_id(run_id))
         return item.model_copy(deep=True) if item is not None else None
 
     def find_key(self, owner: CheckpointOwner, key: IdempotencyKey) -> RunCheckpoint | None:
-        item = self._find_key(CheckpointOwner.model_validate(owner), _KEY.validate_python(key))
+        item = self._find_key(validate_owner(owner), validate_key(key))
         return item.model_copy(deep=True) if item is not None else None
 
     def _find_key(self, owner: CheckpointOwner, key: str) -> RunCheckpoint | None:
@@ -115,26 +194,13 @@ class MemoryCheckpointStore:
         if len(self._runs) >= self._capacity:
             raise CheckpointStoreError("capacity")
 
-    @staticmethod
-    def _revision(item: RunCheckpoint, expected: int) -> None:
-        if type(expected) is not int or expected < 0 or expected != item.revision:
-            raise CheckpointStoreError("conflict")
-
     def create(self, checkpoint: RunCheckpoint) -> RunCheckpoint:
-        item = _checked(checkpoint)
-        if (
-            item.revision != 0
-            or item.resumed_from is not None
-            or item.continued_by is not None
-            or item.status != "running"
-            or any(s.state != "never_started" for s in item.steps)
-        ):
-            raise CheckpointStoreError("invalid_transition")
+        item = checked_copy(checkpoint)
+        check_create(item)
         if item.idempotency_key is not None:
             existing = self._find_key(item.owner, item.idempotency_key)
             if existing is not None:
-                # The digest is the caller's fingerprint; the fields are checked too.
-                if not _same_intent(existing, item):
+                if not same_intent(existing, item):
                     raise CheckpointStoreError("key_conflict")
                 return existing.model_copy(deep=True)
         self._room(item)
@@ -142,62 +208,24 @@ class MemoryCheckpointStore:
         return item.model_copy(deep=True)
 
     def replace(self, checkpoint: RunCheckpoint, *, expected_revision: int) -> RunCheckpoint:
-        """Compare-and-swap on `expected_revision`; the stored revision advances once."""
-        item = _checked(checkpoint)
+        item = checked_copy(checkpoint)
         old = self._lookup(item.owner, item.run_id)
         if old is None:
             raise CheckpointStoreError("missing")
-        self._revision(old, expected_revision)
-        if old.status != "running":
-            raise CheckpointStoreError("invalid_transition")
-        if old.model_dump(exclude=_MUTABLE_FIELDS) != item.model_dump(exclude=_MUTABLE_FIELDS):
-            raise CheckpointStoreError("invalid_transition")
-        transitions = 0
-        for before, after in zip(old.steps, item.steps, strict=True):
-            if before == after:
-                continue
-            transitions += 1
-            if (before.state, after.state) not in _STEP_TRANSITIONS:
-                raise CheckpointStoreError("invalid_transition")
-        if transitions > 1:
-            raise CheckpointStoreError("invalid_transition")
+        check_replace(old, item, expected_revision)
         updated = item.model_copy(update={"revision": old.revision + 1})
         self._runs[_key(item.owner, item.run_id)] = updated
         return updated.model_copy(deep=True)
 
     def continue_run(self, child: RunCheckpoint, *, expected_parent_revision: int) -> RunCheckpoint:
-        item = _checked(child)
+        item = checked_copy(child)
         if item.resumed_from is None:
             raise CheckpointStoreError("invalid_transition")
         parent = self._lookup(item.owner, item.resumed_from)
         if parent is None:
             raise CheckpointStoreError("missing")
-        if parent.continued_by is not None:
-            raise CheckpointStoreError("already_continued")
-        self._revision(parent, expected_parent_revision)
-        if (
-            parent.status != "suspended"
-            or item.status != "running"
-            or item.revision != 0
-            or item.continued_by is not None
-            or not _same_intent(parent, item)
-        ):
-            raise CheckpointStoreError("invalid_transition")
-        unresolved = False
-        for before, after in zip(parent.steps, item.steps, strict=True):
-            if before.state == "completed" or not unresolved:
-                # The completed prefix and the first unresolved step keep the
-                # parent's evidence: a started step stays started (uncertain)
-                # until the child itself re-acknowledges it.
-                unresolved = unresolved or before.state != "completed"
-                if before != after:
-                    raise CheckpointStoreError("invalid_transition")
-            elif after.state != "never_started":
-                raise CheckpointStoreError("invalid_transition")
+        check_continue(parent, item, expected_parent_revision)
         self._room(item)
-        linked = parent.model_copy(
-            update={"continued_by": item.run_id, "revision": parent.revision + 1}
-        )
-        self._runs[_key(parent.owner, parent.run_id)] = linked
+        self._runs[_key(parent.owner, parent.run_id)] = linked_parent(parent, item)
         self._runs[_key(item.owner, item.run_id)] = item
         return item.model_copy(deep=True)
