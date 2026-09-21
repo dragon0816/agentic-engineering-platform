@@ -67,6 +67,10 @@ old process is gone, and continued from its completed prefix — through the sam
 `Gateway.inspect`/`suspend`/`resume` entry points a host already uses, and
 finished history can be retired without a used idempotency key ever running again.
 
+Phase 4 (knowledge platform) has begun with the vault safety model: `drop/` and
+`raw/` are never written, a dry run is the default, every overwrite is backed up,
+and a write plan that breaks a rule is rejected whole (`docs/phases/PHASE_4_KNOWLEDGE.md`).
+
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not

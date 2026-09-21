@@ -378,3 +378,44 @@ identical, restores the completed prefix from verified payloads, and
 re-authorizes every remaining step. On a journalled engine the in-memory
 `resume()` is refused (`use_recovery`), because the durable "continued once"
 guard is reserved by `recover()` alone.
+
+## Knowledge vault (Phase 4, slice 1)
+
+`knowledge.vault` is the safety model every later knowledge slice writes
+through. The layout is a contract: `drop/` and `raw/` are immutable
+(`immutable_area`); writes are confined to the `wiki/` area and to exactly the
+files `index.md`, `log.md` and `decisions.md` (`outside_writable` otherwise —
+`index.md.bak` is not `index.md`); a path with `..`, a drive letter or nothing
+at all is `escapes_vault`. `Vault.write` runs the same layout check on the
+*resolved* location too, so a link inside `wiki/` that points at `raw/` is
+refused as `immutable_area`, and a directory target is `unwritable_target`.
+`Vault.read` refuses to leave the vault as well. Every overwrite is backed up
+under `.ingest-backup/<stamp>/<path>` first; a stamp is one path component
+(anything else is a `ValueError` before any write), and an automatic stamp
+carries microseconds so two applies never share one.
+
+`WritePlan` is what one ingest proposes: `source` (a `KnowledgeSource`, the
+provenance the `wiki/sources/` page must carry as `source_id:` and
+`source_sha256:` frontmatter lines), whole-page `pages` (`create`/`update`,
+never a diff), `index_entries` per section, a `log_body` and `contradictions`.
+`check_plan` returns closed `PlanProblem` codes — `no_pages`,
+`no_sources_page`, `missing_provenance`, `outside_wiki`, `escapes_vault`,
+`duplicate_path`, `empty_content`, `path_in_wikilink` — and `Vault.check_against`
+adds the rules that depend on the vault's state: `unwritable_target` (with the
+refusal code as detail), `create_exists` for a `create` that would replace a
+page, `update_missing` for an `update` of a page that is not there. Any problem
+rejects the plan whole, before anything is written.
+Before validation, `repair_wikilinks` fixes the two unambiguous link mistakes
+(a path becomes the bare page name; `[[A / B]]` becomes `[[A]] / [[B]]`) and
+`ensure_conflicts_visible` writes a reported contradiction onto an entity or
+concept page as a `⚠️` block, so it is seen where a reader meets the claim.
+
+`Vault.apply(plan, mode="dry_run"|"apply", today=, stamp=)` returns a
+`VaultOutcome`: `written` (what was, or would be, written — `index.md` only
+when there are entries), `backed_up`, `repairs`, `conflict_marker_added` and
+`problems`. A dry run — the default — writes nothing and lists exactly what an
+apply would write; a rejected plan writes nothing in either mode, and the
+contract refuses an outcome that claims otherwise. An apply is whole or not at
+all: what every target held before is kept in memory, and a write that fails
+part-way puts it all back and raises `write_failed`. Nothing in this module
+calls a model.

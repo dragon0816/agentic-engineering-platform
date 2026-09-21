@@ -75,3 +75,34 @@ normalized to UTF-8/LF, two-space indentation. Projection SHA-256:
 URLs, headers, parameter defaults, credentials and unrelated node UI properties
 are excluded. Tests inspect this declarative graph; no JS expression or n8n node
 is executed. This is a source-behavior reference, not an importable workflow.
+
+## Pinned vault characterization
+
+Source commit: `dragon0816/knowledge_management@2f5e6d0431c5b6af8fbee05c6c0a5779e1a84bb9`
+(`main` at inspection, 2026-09-21). Retrieved by shallow clone at that exact ref.
+
+File: `vault/ingest.py`. UTF-8, LF-normalized full source SHA-256:
+`10a76ef235b1518e4f2d81e193350f7f3d44bb0554b88f0ddd1dc6977f226d06`.
+
+`source_vault_ingest.txt` retains verbatim source lines for the `re`, `datetime`
+and `pathlib` imports, `WRITE_ALLOWED`, the `Vault` class (`REQUIRED`, `read`,
+`raw_sources`, `ingested_paths`, `pending`, `wiki_inventory`, `safe_write`),
+`validate`, `repair_wikilinks`, `ensure_conflicts_visible`, `update_index` and
+`append_log`. The gateway client, prompts, condensation, review output, CLI and
+run loop are excluded and replaced by typed contracts or inert test doubles.
+Excerpt SHA-256 (UTF-8/LF):
+`5c59ef1e526fc483d89e627eb0509fbd44d07e33d6a171cea3c8001585a33143`.
+No formatting or implementation edits should be applied to the excerpt.
+
+File: `vault/conflicts.py`. UTF-8, LF-normalized full source SHA-256:
+`10c2d2f642c0f427c483ba7da02d163d686c1d136edc2c9f7eb52fcf34250b21`.
+
+`source_vault_conflicts.txt` retains the whole module verbatim except its module
+docstring (source lines 1–18); it is self-contained stdlib code. Excerpt SHA-256
+(UTF-8/LF):
+`82327028acf265d181209c8cd6fd4a3da78eddf51b8ae1702b68252f15bdaabb`.
+No formatting or implementation edits should be applied to the excerpt.
+
+Tests drive both excerpts against pytest-managed temporary vault directories; no
+model, gateway, network or real vault is touched. The excerpts are offline
+characterization oracles, not runtime dependencies.
