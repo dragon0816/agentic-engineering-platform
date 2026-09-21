@@ -1,5 +1,6 @@
 """Regression coverage for the adapted vault safety model (`knowledge.vault`)."""
 
+import os
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,8 @@ def make_vault(root: Path) -> Vault:
     (root / "index.md").write_text("# Index\n\n## Sources\n\n## Entities\n", encoding="utf-8")
     (root / "log.md").write_text("# Log\n", encoding="utf-8")
     (root / "raw" / "Study" / "report.md").write_text("original\n", encoding="utf-8")
+    # The entity page the plans update already exists; the sources page does not.
+    (root / "wiki" / "entities" / "Foo.md").write_text("old\n", encoding="utf-8")
     return Vault(root)
 
 
@@ -117,11 +120,11 @@ def test_writes_are_confined_and_overwrites_backed_up(tmp_path: Path) -> None:
     assert (tmp_path / "raw" / "Study" / "report.md").read_text(encoding="utf-8") == "original\n"
     assert not (tmp_path.parent / "escaped.md").exists()
 
-    assert vault.write("wiki/entities/Foo.md", "first\n", stamp=STAMP) is False
-    assert vault.write("wiki/entities/Foo.md", "second\n", stamp=STAMP) is True
-    backup = tmp_path / ".ingest-backup" / STAMP / "wiki" / "entities" / "Foo.md"
+    assert vault.write("wiki/entities/Bar.md", "first\n", stamp=STAMP) is False
+    assert vault.write("wiki/entities/Bar.md", "second\n", stamp=STAMP) is True
+    backup = tmp_path / ".ingest-backup" / STAMP / "wiki" / "entities" / "Bar.md"
     assert backup.read_text(encoding="utf-8") == "first\n"
-    assert vault.read("wiki/entities/Foo.md") == "second\n"
+    assert vault.read("wiki/entities/Bar.md") == "second\n"
     assert vault.read("wiki/entities/Nope.md") == ""
 
 
@@ -295,6 +298,157 @@ def test_repairs_happen_before_validation_and_are_reported(tmp_path: Path) -> No
         ("wiki/sources/Report.md", "[[Foo]]")
     ]
     assert "[[Foo]]" in vault.read("wiki/sources/Report.md")
+
+
+def test_root_files_match_exactly() -> None:
+    assert refusal_for("index.md.bak") == "outside_writable"
+    assert refusal_for("log.md/x") == "outside_writable"
+    assert refusal_for("decisions.md") is None
+
+
+def test_a_link_inside_wiki_cannot_reach_an_immutable_area(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    link = tmp_path / "wiki" / "link"
+    try:
+        os.symlink(tmp_path / "raw", link, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("directory links need privileges on this machine")
+    with pytest.raises(VaultError) as raised:
+        vault.write("wiki/link/into_raw.md", "x", stamp=STAMP)
+    assert raised.value.code == "immutable_area"
+    assert not (tmp_path / "raw" / "into_raw.md").exists()
+    sneaky = plan(
+        pages=(
+            sources_page(),
+            PlannedPage(path="wiki/link/into_raw.md", action="create", content="x"),
+        )
+    )
+    outcome = vault.apply(sneaky, mode="apply", today=TODAY, stamp=STAMP)
+    assert [(p.code, p.detail) for p in outcome.problems] == [
+        ("unwritable_target", "immutable_area")
+    ]
+    assert not (tmp_path / "wiki" / "sources").exists()
+
+
+def test_reads_stay_inside_the_vault(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    (tmp_path.parent / "outside.md").write_text("secret", encoding="utf-8")
+    try:
+        with pytest.raises(VaultError, match="escapes_vault"):
+            vault.read("../outside.md")
+        assert vault.read("raw/Study/report.md") == "original\n"
+        assert vault.read("wiki") == ""
+    finally:
+        (tmp_path.parent / "outside.md").unlink()
+
+
+def test_written_lists_only_what_apply_writes(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    quiet = plan(index_entries=())
+    preview = vault.apply(quiet)
+    assert preview.written == ("wiki/sources/Report.md", "wiki/entities/Foo.md", "log.md")
+    index_before = vault.read("index.md")
+    outcome = vault.apply(quiet, mode="apply", today=TODAY, stamp=STAMP)
+    assert outcome.written == preview.written and outcome.backed_up == ("wiki/entities/Foo.md",)
+    assert vault.read("index.md") == index_before
+
+
+def test_duplicate_pages_are_rejected_so_every_backup_is_real(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    (tmp_path / "wiki" / "entities" / "Foo.md").write_text("ORIGINAL\n", encoding="utf-8")
+    twice = plan(
+        pages=plan().pages
+        + (PlannedPage(path="wiki\\entities\\Foo.md", action="update", content="B"),)
+    )
+    outcome = vault.apply(twice, mode="apply", today=TODAY, stamp=STAMP)
+    assert [(p.code, p.path) for p in outcome.problems] == [
+        ("duplicate_path", "wiki\\entities\\Foo.md")
+    ]
+    assert vault.read("wiki/entities/Foo.md") == "ORIGINAL\n"
+    assert not (tmp_path / ".ingest-backup").exists()
+
+
+def test_a_stamp_is_a_single_path_component(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    for bad in ("../escaped", "a/b", "", ".hidden", "x\\y"):
+        with pytest.raises(ValueError, match="single path component"):
+            vault.apply(plan(), mode="apply", today=TODAY, stamp=bad)
+        with pytest.raises(ValueError, match="single path component"):
+            vault.write("wiki/entities/Foo.md", "x", stamp=bad)
+    assert not (tmp_path / "wiki" / "sources").exists()
+    assert not (tmp_path.parent / "escaped").exists()
+    # An automatic stamp is fine-grained enough that two applies do not share it.
+    first = vault.apply(plan(), mode="apply", today=TODAY)
+    assert first.accepted and (tmp_path / ".ingest-backup").is_dir()
+
+
+def test_actions_are_checked_against_the_vault(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    # Without Foo, an update of it is a mismatch the plan's author must see.
+    (tmp_path / "wiki" / "entities" / "Foo.md").unlink()
+    outcome = vault.apply(plan())
+    assert [(p.code, p.path) for p in outcome.problems] == [
+        ("update_missing", "wiki/entities/Foo.md")
+    ]
+    (tmp_path / "wiki" / "entities" / "Foo.md").write_text("old\n", encoding="utf-8")
+    assert vault.apply(plan()).accepted
+    applied = vault.apply(plan(), mode="apply", today=TODAY, stamp=STAMP)
+    assert applied.accepted
+    # Now the sources page exists, so creating it again would replace it.
+    again = vault.apply(plan(), mode="apply", today=TODAY, stamp="second")
+    assert [(p.code, p.path) for p in again.problems] == [
+        ("create_exists", "wiki/sources/Report.md")
+    ]
+    assert not (tmp_path / ".ingest-backup" / "second").exists()
+
+
+def test_a_directory_target_is_refused_before_anything_is_written(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    (tmp_path / "wiki" / "entities" / "Foo.md").write_text("old\n", encoding="utf-8")
+    before = {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+    bad = plan(
+        pages=plan().pages + (PlannedPage(path="wiki/entities/", action="create", content="x"),)
+    )
+    for mode in ("dry_run", "apply"):
+        outcome = vault.apply(bad, mode=mode, today=TODAY, stamp=STAMP)
+        assert [(p.code, p.detail) for p in outcome.problems] == [
+            ("unwritable_target", "unwritable_target")
+        ]
+    assert {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()} == before
+
+
+def test_a_failed_write_rolls_the_whole_plan_back(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vault = make_vault(tmp_path)
+    (tmp_path / "wiki" / "entities" / "Foo.md").write_text("old\n", encoding="utf-8")
+    before = {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+
+    def broken(rel: str, block: str) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(vault, "append", broken)
+    with pytest.raises(VaultError, match="write_failed"):
+        vault.apply(plan(contradictions=("X",)), mode="apply", today=TODAY, stamp=STAMP)
+    # Pages and index are back to what they were; the new sources page is gone.
+    files = {
+        p: p.read_bytes()
+        for p in tmp_path.rglob("*")
+        if p.is_file() and ".ingest-backup" not in p.parts
+    }
+    assert files == before
+    assert not (tmp_path / "wiki" / "sources" / "Report.md").exists()
+
+
+def test_contradiction_notes_are_trimmed_like_the_source() -> None:
+    padded = plan(contradictions=("  A vs B  ",))
+    assert padded.notes == ("A vs B",)
+    marked, added = ensure_conflicts_visible(padded)
+    assert added and marked.pages[1].content.endswith("⚠️ A vs B\n")
+    assert log_block(padded, TODAY).endswith("- ⚠️ A vs B\n")
+    # The source dropped blank notes after the fact; the contract refuses them.
+    with pytest.raises(ValidationError):
+        plan(contradictions=("   ",))
 
 
 def test_outcomes_and_plans_are_serializable_and_honest() -> None:

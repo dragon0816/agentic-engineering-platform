@@ -66,3 +66,16 @@ Intentional differences in the adapted implementation:
 - Dates and backup stamps are injected so behavior is reproducible.
 - No `print`, no `SystemExit`, no environment defaults: a missing vault is a
   typed refusal, and the vault root is always explicit.
+- The layout check runs on the resolved location as well as the requested
+  path, so a link inside `wiki/` cannot reach `raw/`; the root-level files
+  match exactly rather than by prefix; reads cannot leave the vault either.
+- `PlannedPage.action` is enforced (`create_exists`, `update_missing`) — the
+  source carried the field and ignored it, which let a model replace a page it
+  had never seen with only the backup as a trace.
+- A plan naming one page twice is `duplicate_path`; the source would have
+  backed the first write up over the original.
+- An apply is whole or not at all: a write that fails part-way is rolled back
+  from what the vault held before. The source wrote page by page and a failure
+  left the vault half-applied.
+- The backup stamp is a single path component and the automatic one carries
+  microseconds; the source used a second-resolution clock stamp.

@@ -34,14 +34,32 @@ every later knowledge slice writes through. Requirements:
   `repair_wikilinks` and `ensure_conflicts_visible` reproduced exactly;
   `insert_index_entries` and `log_block` as pure functions; `Vault.apply` with
   dry run by default, backup before overwrite, whole-plan rejection, injected
-  date and backup stamp. 10 regression tests (`tests/test_vault.py`).
+  date and backup stamp, whole-or-nothing writes with rollback, and every
+  target checked (including `create`/`update` against the vault) before any
+  write. 20 regression tests (`tests/test_vault.py`); the one that plants a
+  directory link from `wiki/` into `raw/` skips where links need privileges.
 - Provenance in a sources page is typed: the plan carries a `KnowledgeSource`
   and the page must carry its `source_id:` and `source_sha256:` lines.
 
+- PR #22 opened; pre-merge review applied (10 findings, seven of them real
+  holes in a *safety* model, several reproduced by the reviewer): a link inside
+  `wiki/` pointing at `raw/` could be written through, so the layout check now
+  runs on the resolved location too; an apply was not atomic, so every target
+  is checked first (directories, links, `create`/`update` against the vault)
+  and a write that fails part-way is rolled back from what the vault held and
+  raised as `write_failed`; a plan naming one page twice would back the first
+  write up over the original (`duplicate_path` now); `written` claimed
+  `index.md` even without entries; a caller's backup stamp could carry `..`
+  (one path component now, automatic stamps carry microseconds); the root
+  files matched by prefix (`index.md.bak` — exact match now); `Vault.read`
+  could leave the vault; `PlannedPage.action` was carried but ignored
+  (`create_exists` / `update_missing` now); contradiction notes were not
+  trimmed as the source trims them. Ten regression tests added for these.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #22 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
@@ -75,7 +93,8 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 494 tests (472 prior + 12 characterization + 10 regression)
+# PASS: 504 tests (472 prior + 12 characterization + 20 regression; 1 skipped
+#       on Windows without symlink privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
