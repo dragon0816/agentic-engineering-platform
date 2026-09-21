@@ -2,7 +2,7 @@
 not a filesystem durability claim and the SQLite backend has its own durability tests."""
 
 import itertools
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -25,16 +25,21 @@ StoreFactory = Callable[..., CheckpointStore]
 
 
 @pytest.fixture(params=["memory", "sqlite"])
-def make_store(request: pytest.FixtureRequest, tmp_path: Path) -> StoreFactory:
+def make_store(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[StoreFactory]:
     counter = itertools.count()
+    opened: list[SqliteCheckpointStore] = []
 
     def factory(*, capacity: int = 50) -> CheckpointStore:
         if request.param == "memory":
             return MemoryCheckpointStore(capacity=capacity)
         path = tmp_path / f"checkpoints-{next(counter)}.sqlite"
-        return SqliteCheckpointStore(path, capacity=capacity)
+        store = SqliteCheckpointStore(path, capacity=capacity)
+        opened.append(store)
+        return store
 
-    return factory
+    yield factory
+    for store in opened:
+        store.close()
 
 
 def record(**changes: Any) -> RunCheckpoint:

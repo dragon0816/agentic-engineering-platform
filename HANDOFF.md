@@ -37,10 +37,21 @@ payload storage or automatic recovery. Normative plan:
   "SQLite backend" section, `docs/CONTRACTS.md`, migration slice-10 decision,
   README.
 
+- PR #17 opened; pre-merge review applied: `_write` rolls back on any
+  `BaseException` so a corrupt record or an interrupt can never wedge the
+  connection/file; an undecodable record fails closed as `unavailable` instead
+  of leaking `ValidationError`; `SQLITE_BUSY`/`SQLITE_LOCKED` at `COMMIT` are
+  `unavailable` (known not committed) while other commit errors stay
+  `commit_unknown`; a failed constructor closes its handle and `close()` is
+  idempotent (context manager added); plain `INSERT`/`UPDATE` replace
+  `INSERT OR REPLACE` so the primary key enforces uniqueness (`IntegrityError`
+  → `conflict`); the idempotency-key index is UNIQUE (partial); test fixtures
+  close every SQLite store they open.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- PR #17 is open with the review posted; CI results for the final head are
+  recorded on the PR.
 
 ## Remaining
 
@@ -74,7 +85,7 @@ Windows, Python 3.12.14, repository root:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 394 tests (366 prior; contract suite now runs on both backends, plus 9 SQLite durability tests)
+# PASS: 396 tests (366 prior; contract suite now runs on both backends, plus 12 SQLite durability tests)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

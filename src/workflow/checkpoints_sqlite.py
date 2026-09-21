@@ -11,6 +11,10 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from types import TracebackType
+from typing import Self
+
+from pydantic import ValidationError
 
 from common.checkpoints import CheckpointOwner, RunCheckpoint
 from common.execution import IdempotencyKey, RunId
@@ -34,8 +38,12 @@ _SCHEMA = (
     " actor TEXT NOT NULL, namespace TEXT NOT NULL, run_id TEXT NOT NULL,"
     " idempotency_key TEXT, record TEXT NOT NULL,"
     " PRIMARY KEY (actor, namespace, run_id))",
-    "CREATE INDEX IF NOT EXISTS checkpoints_key ON checkpoints (actor, namespace, idempotency_key)",
+    # The database, not only the application, refuses a second binding of a key.
+    "CREATE UNIQUE INDEX IF NOT EXISTS checkpoints_key"
+    " ON checkpoints (actor, namespace, idempotency_key) WHERE idempotency_key IS NOT NULL",
 )
+# Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
+_NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
 
 
 class SqliteCheckpointStore:
@@ -47,6 +55,7 @@ class SqliteCheckpointStore:
             raise ValueError("capacity must be a positive integer")
         self._capacity = capacity
         self._path = Path(path)
+        self._conn: sqlite3.Connection | None = None
         try:
             self._conn = sqlite3.connect(self._path, isolation_level=None, timeout=0)
             self._conn.execute("PRAGMA synchronous=FULL")
@@ -63,79 +72,119 @@ class SqliteCheckpointStore:
                     )
                 elif row[0] != SCHEMA_VERSION:
                     raise CheckpointStoreError("unavailable")
-        except sqlite3.Error:
-            raise CheckpointStoreError("unavailable") from None
+        except BaseException:
+            # Never leak a half-built handle; on Windows it would pin the file.
+            self.close()
+            raise
 
     def close(self) -> None:
-        self._conn.close()
+        conn, self._conn = self._conn, None
+        if conn is not None:
+            conn.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def _connection(self) -> sqlite3.Connection:
+        if self._conn is None:
+            raise CheckpointStoreError("unavailable")
+        return self._conn
 
     @contextmanager
     def _write(self) -> Iterator[sqlite3.Connection]:
         """One atomic write. `unavailable` means known not committed; `commit_unknown`
-        means the acknowledgment was lost and the caller must read back."""
+        means the acknowledgment was lost and the caller must read back. Whatever
+        happens inside, the transaction never stays open on the connection."""
+        conn = self._connection()
         try:
-            self._conn.execute("BEGIN IMMEDIATE")
+            conn.execute("BEGIN IMMEDIATE")
         except sqlite3.Error:
             raise CheckpointStoreError("unavailable") from None
         try:
-            yield self._conn
-        except CheckpointStoreError:
+            yield conn
+        except BaseException as error:
             self._rollback()
+            if isinstance(error, CheckpointStoreError):
+                raise
+            if isinstance(error, sqlite3.IntegrityError):
+                raise CheckpointStoreError("conflict") from None
+            if isinstance(error, sqlite3.Error):
+                raise CheckpointStoreError("unavailable") from None
             raise
-        except sqlite3.Error:
-            self._rollback()
-            raise CheckpointStoreError("unavailable") from None
         try:
             self._commit()
-        except sqlite3.Error:
-            # The commit may or may not have reached the file; never guess.
+        except sqlite3.Error as error:
             self._rollback()
+            if getattr(error, "sqlite_errorname", "") in _NOT_COMMITTED:
+                raise CheckpointStoreError("unavailable") from None
+            # The commit may or may not have reached the file; never guess.
             raise CheckpointStoreError("commit_unknown") from None
 
     def _commit(self) -> None:
-        self._conn.execute("COMMIT")
+        self._connection().execute("COMMIT")
 
     def _rollback(self) -> None:
         try:
-            self._conn.execute("ROLLBACK")
+            if self._conn is not None and self._conn.in_transaction:
+                self._conn.execute("ROLLBACK")
         except sqlite3.Error:
             pass
 
     @staticmethod
     def _load(row: tuple[str] | None) -> RunCheckpoint | None:
-        return RunCheckpoint.model_validate_json(row[0]) if row is not None else None
+        if row is None:
+            return None
+        try:
+            return RunCheckpoint.model_validate_json(row[0])
+        except ValidationError:
+            # An undecodable record is unusable evidence; fail closed, never guess.
+            raise CheckpointStoreError("unavailable") from None
 
+    @staticmethod
     def _select(
-        self, conn: sqlite3.Connection, owner: CheckpointOwner, run_id: str
+        conn: sqlite3.Connection, owner: CheckpointOwner, run_id: str
     ) -> RunCheckpoint | None:
         row = conn.execute(
             "SELECT record FROM checkpoints WHERE actor = ? AND namespace = ? AND run_id = ?",
             (owner.actor, owner.namespace, run_id),
         ).fetchone()
-        return self._load(row)
+        return SqliteCheckpointStore._load(row)
 
+    @staticmethod
     def _select_key(
-        self, conn: sqlite3.Connection, owner: CheckpointOwner, key: str
+        conn: sqlite3.Connection, owner: CheckpointOwner, key: str
     ) -> RunCheckpoint | None:
         row = conn.execute(
             "SELECT record FROM checkpoints"
             " WHERE actor = ? AND namespace = ? AND idempotency_key = ?",
             (owner.actor, owner.namespace, key),
         ).fetchone()
-        return self._load(row)
+        return SqliteCheckpointStore._load(row)
 
     def _room(self, conn: sqlite3.Connection, item: RunCheckpoint) -> None:
-        if self._select(conn, item.owner, item.run_id) is not None:
+        exists = conn.execute(
+            "SELECT 1 FROM checkpoints WHERE actor = ? AND namespace = ? AND run_id = ?",
+            (item.owner.actor, item.owner.namespace, item.run_id),
+        ).fetchone()
+        if exists is not None:
             raise CheckpointStoreError("conflict")
         (count,) = conn.execute("SELECT COUNT(*) FROM checkpoints").fetchone()
         if count >= self._capacity:
             raise CheckpointStoreError("capacity")
 
     @staticmethod
-    def _put(conn: sqlite3.Connection, item: RunCheckpoint) -> None:
+    def _insert(conn: sqlite3.Connection, item: RunCheckpoint) -> None:
         conn.execute(
-            "INSERT OR REPLACE INTO checkpoints"
-            " (actor, namespace, run_id, idempotency_key, record) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO checkpoints (actor, namespace, run_id, idempotency_key, record)"
+            " VALUES (?, ?, ?, ?, ?)",
             (
                 item.owner.actor,
                 item.owner.namespace,
@@ -145,15 +194,24 @@ class SqliteCheckpointStore:
             ),
         )
 
+    @staticmethod
+    def _update(conn: sqlite3.Connection, item: RunCheckpoint) -> None:
+        changed = conn.execute(
+            "UPDATE checkpoints SET record = ? WHERE actor = ? AND namespace = ? AND run_id = ?",
+            (item.model_dump_json(), item.owner.actor, item.owner.namespace, item.run_id),
+        ).rowcount
+        if changed != 1:
+            raise CheckpointStoreError("missing")
+
     def get(self, owner: CheckpointOwner, run_id: RunId) -> RunCheckpoint | None:
         try:
-            return self._select(self._conn, validate_owner(owner), validate_run_id(run_id))
+            return self._select(self._connection(), validate_owner(owner), validate_run_id(run_id))
         except sqlite3.Error:
             raise CheckpointStoreError("unavailable") from None
 
     def find_key(self, owner: CheckpointOwner, key: IdempotencyKey) -> RunCheckpoint | None:
         try:
-            return self._select_key(self._conn, validate_owner(owner), validate_key(key))
+            return self._select_key(self._connection(), validate_owner(owner), validate_key(key))
         except sqlite3.Error:
             raise CheckpointStoreError("unavailable") from None
 
@@ -168,7 +226,7 @@ class SqliteCheckpointStore:
                         raise CheckpointStoreError("key_conflict")
                     return existing
             self._room(conn, item)
-            self._put(conn, item)
+            self._insert(conn, item)
         return item
 
     def replace(self, checkpoint: RunCheckpoint, *, expected_revision: int) -> RunCheckpoint:
@@ -179,7 +237,7 @@ class SqliteCheckpointStore:
                 raise CheckpointStoreError("missing")
             check_replace(old, item, expected_revision)
             updated = item.model_copy(update={"revision": old.revision + 1})
-            self._put(conn, updated)
+            self._update(conn, updated)
         return updated
 
     def continue_run(self, child: RunCheckpoint, *, expected_parent_revision: int) -> RunCheckpoint:
@@ -192,6 +250,6 @@ class SqliteCheckpointStore:
                 raise CheckpointStoreError("missing")
             check_continue(parent, item, expected_parent_revision)
             self._room(conn, item)
-            self._put(conn, linked_parent(parent, item))
-            self._put(conn, item)
+            self._update(conn, linked_parent(parent, item))
+            self._insert(conn, item)
         return item

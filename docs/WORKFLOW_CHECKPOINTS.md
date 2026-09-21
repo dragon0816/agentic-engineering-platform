@@ -119,11 +119,20 @@ returned. Outcomes:
 
 - `unavailable`: known not committed — the transaction could not start (for
   example a second writer holds the file), the file is closed, the schema version
-  is unknown, or a statement failed before commit and was rolled back. The same
-  write may be retried by the coordinator; nothing was recorded.
-- `commit_unknown`: `COMMIT` raised, so the write may or may not have reached the
-  file. Read the record back from a fresh handle before deciding anything;
-  never repeat a capability or pick a new run/key as a fallback.
+  is unknown, a stored record no longer decodes, a statement failed before commit
+  and was rolled back, or `COMMIT` itself reported `SQLITE_BUSY`/`SQLITE_LOCKED`.
+  The same write may be retried by the coordinator; nothing was recorded.
+- `commit_unknown`: `COMMIT` raised anything else (I/O class), so the write may
+  or may not have reached the file. Read the record back from a fresh handle
+  before deciding anything; never repeat a capability or pick a new run/key as
+  a fallback.
+
+Whatever happens inside a write — including an undecodable record or an
+interrupt — the transaction is rolled back before the error propagates, so a
+single failure can never wedge the connection or the file. A failed open closes
+its handle. The primary key and a unique partial index on the idempotency key
+are enforced by the database, not only by the application. The store is a
+context manager; `close()` is idempotent.
 
 Reads run outside transactions and are owner-scoped like the memory model.
 Records store the checkpoint JSON plus indexed owner/run/key columns; they hold
