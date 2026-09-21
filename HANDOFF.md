@@ -1,87 +1,61 @@
-# Handoff — Phase 4 ingest planning (slice 5)
+# Handoff — Phase 4 static lint (slice 6)
 
 Updated: 2026-09-21 (Asia/Taipei).
-Branch: `phase-4/ingest-planning`, based on `main` after PR #27 merged.
+Branch: `phase-4/static-lint`, based on `main` after PR #28 merged.
 
 ## Goal
 
-Phase 4 slice 5: from one Raw document to a `WritePlan` through the model
-interface, in the two passes the source tooling found cheaper and more accurate
-than one, with condensation cached by content. The owner asked for all of Phase
-4 (slices 3–9) to be completed without check-ins unless something cannot be
-decided; each slice is reviewed, merged on green CI and followed by the next.
-Requirements: `docs/phases/PHASE_4_KNOWLEDGE.md` (slice 5); source decision:
-`docs/PHASE_4_MIGRATION.md` (slice 5); contracts: `docs/CONTRACTS.md` ("Ingest
-planning").
+Phase 4 slice 6: everything about the wiki that can be established by reading
+it, as a typed report, with the one mechanical repair the source made. The
+owner asked for all of Phase 4 (slices 3–9) to be completed without check-ins
+unless something cannot be decided; each slice is reviewed, merged on green CI
+and followed by the next. Requirements: `docs/phases/PHASE_4_KNOWLEDGE.md`
+(slice 6); source decision: `docs/PHASE_4_MIGRATION.md` (slice 6); contracts:
+`docs/CONTRACTS.md` ("Static lint").
 
 ## Completed
 
-- `knowledge/planning.py`: `IngestPlanner(model, vault, alias=, conventions=,
-  max_output_tokens=, condense_over=, chunk_chars=)`. `plan(document, today=,
-  decisions=)` runs relevance (inventory of wiki paths and titles → existing
-  pages, capped at 8) then the writes (related pages in full, `index.md`,
-  settled decisions, source text), each a `ModelRequest` with a system message
-  (the conventions), `structured_output=True` and an output contract. A long
-  source is condensed chunk by chunk first and cached under
-  `.ingest-cache/<sha256>.md`. The answer is `structured_output` or JSON
-  extracted from fences/prose, validated loosely (`IngestProposal`) then
-  strictly (`WritePlan`), repaired to carry the provenance lines
-  (`ensure_provenance`), and validated by a vault dry run. `PlanningOutcome`
-  statuses: `planned`, `invalid` (plan + problems), `model_failed` (an adapter
-  that raises included), `unparseable`; plus `relevant`, `condensed`,
-  `cache_hit`. The planner writes nothing but the cache.
-- `Vault.wiki_pages()` (path, title from frontmatter or stem), `cache_read` /
-  `cache_write` confined to `.ingest-cache/` and keyed by a content hash.
-- `source_text(document)`: sections in order, each image as
-  `[image on page N: description]` or `(no description)`.
-- 9 tests (`tests/test_planning.py`) with a fake model: source text, JSON
-  extraction, provenance repair, both passes and their prompts with a plan the
-  vault applies end to end, prose answers, invalid and malformed plans,
-  failures on either pass and an adapter that raises, condensation with chunk
-  count and cache reuse across planners (and no partial cache on failure), and
-  the cache's confinement.
-- Docs: phase spec slice 5 requirements, `docs/CONTRACTS.md`, migration slice 5
-  decision (ADAPT the passes, condensation cache, JSON extraction and decision
-  injection; do not migrate the HTTP client, review output or runtime schema).
-
-- PR #28 opened; pre-merge review applied (10 findings): an empty condensed
-  part was cached for good — now a retryable `condense_empty` failure with no
-  cache; the cache was keyed by the original's hash alone although the text
-  depends on the rendered source, chunking, prompt and alias — keyed by all
-  of them; the prompt's example invited a literal "none" contradiction that
-  became a ⚠️ block — example emptied and such notes dropped; frontmatter
-  repair broke on CRLF or a trailing space and on odd path spellings —
-  normalized; `wiki_pages` raised on a link leaving the vault and listed
-  directories — skipped; relevant paths deduplicated; failure outcomes
-  report `condensed`/`cache_hit`; empty conventions refused at construction;
-  `action` is decided from the vault instead of asked of the model. One
-  regression test added and the rest extended.
+- Pinned `brain.py`'s static half as `tests/fixtures/source_vault_lint.txt`
+  (checksums in the fixtures README); 3 characterization tests
+  (`tests/test_source_lint.py`) execute it with the pinned ingest and conflicts
+  excerpts supplying what it imported.
+- `knowledge/lint.py`: `LintReport` (pages, types, orphans, dangling ranked,
+  path_links, missing_frontmatter, broken_source_path, unknown_source_id,
+  pending_sources, open_conflicts; `clean`), `scan(vault)`, `page_name`,
+  `fix_links(vault, report, stamp=)` writing through `Vault.write` with a
+  backup and keeping aliases and anchors. Nothing calls a model.
+- 4 regression tests (`tests/test_lint.py`): every finding as typed values
+  (including typed provenance and pending Raw sources), the repair with
+  aliases, anchors and backups, `page_name`, and a link leaving the vault not
+  counting as a page.
+- Docs: phase spec slice 6 requirements, `docs/CONTRACTS.md`, migration slice 6
+  decision, fixtures README.
 
 ## In Progress
 
-- PR #28 is open with the review posted; merge on green CI is authorized for
-  Phase 4 slices.
+- Opening the review PR for this branch; review and CI results are recorded on
+  the PR once available. Merge on green CI is authorized for Phase 4 slices.
 
 ## Remaining
 
-- Slice 6: static lint as a typed report (pin `brain.py`'s `scan` first).
-- Slice 7: conflicts and decisions (the `decisions` text the planner takes).
+- Slice 7: conflicts and decisions — append-only `Decision` record (the
+  `decisions` text the planner injects), resolving a conflict, page-hash state
+  and manual-edit detection added to the lint report.
 - Slice 8: query with provenance. Slice 9: migration adapter for an existing
-  vault.
+  vault (adopts legacy Raw so `pending_sources` and `broken_source_path` cover
+  it).
 - Deferred from Phase 3, each needing its own scope: a payload sweep,
   process-liveness or lease-based suspension, and the earlier deferred reviews.
 
 ## Architecture decisions made
 
-- The model proposes; the vault disposes. The plan goes back through
-  `Vault.apply`, which is slice 1's whole point; the planner never writes wiki
-  content.
-- Provenance lines are repaired in, not demanded of the model: they are
-  deterministic, and a rejected plan wastes the condensation.
-- Conventions are a platform default a host may replace; the planner does not
-  read a vault schema file and does not care which language the conventions
-  are in.
-- Every failure is a closed status, including an adapter that raises.
+- Computed, not modelled: the report is exact and free; judgement is a later,
+  optional pass that takes the report as context.
+- The source's rules are kept exactly where they encode a lesson (`.md` only,
+  the root-file exception, entry points, flagged-only repair with case
+  correction).
+- Typed provenance (`source_id`) is checked against the Raw index; the legacy
+  `source_path` check stays for an existing vault's pages.
 
 ## Exact verification commands and results
 
@@ -89,14 +63,14 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 544 tests (535 prior + 9 planning; 1 skipped on Windows without symlink
-#       privileges, runs on Linux CI)
+# PASS: 551 tests (544 prior + 3 characterization + 4 regression; 1 skipped on
+#       Windows without symlink privileges, runs on Linux CI)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
 # PASS
 .venv/Scripts/python.exe -m mypy
-# PASS: 71 source/test files
+# PASS: 74 source/test files
 .venv/Scripts/python.exe -m pip check
 # PASS
 .venv/Scripts/python.exe -m build
@@ -105,21 +79,24 @@ git diff --check
 # PASS
 ```
 
-No model, gateway, network, real vault, job or n8n instance was invoked; the
-model in tests is a fake. Local pytest uses `-p no:cacheprovider` because of
-temporary-directory ACLs on this machine; CI runs ordinary pytest.
+Two expectations in the first draft of the tests were wrong and the pinned
+excerpt corrected them: names match case-sensitively, so `[[Openhands]]` leaves
+`OpenHands.md` an orphan until `fix_links`; and `[[CLAUDE.md]]` dangles because
+it is not a wiki page, even though it is not a path violation. Vault
+directories live under pytest's temporary directory; no model, gateway,
+network or real vault touched. Local pytest uses `-p no:cacheprovider` because
+of temporary-directory ACLs on this machine; CI runs ordinary pytest.
 
 ## Known issues / limitations
 
-- The relevance pass sees at most `condense_over` characters of the source;
-  the plan pass sees the whole (condensed) text.
-- The condensation cache has no size bound or expiry; it is keyed by what the
-  text depends on, so it never goes stale, only large. A truncated (rather
-  than empty) condensed part cannot be detected and is cached.
-- One plan per source; batching several sources into one plan is not offered.
+- `scan` reads every wiki page in full on each call; fine for hundreds of
+  pages.
+- A legacy Raw file without provenance frontmatter is not in the Raw index and
+  so is not reported as pending; slice 9 adopts it.
+- No judgement pass yet; the report is the computed half only.
 
 ## Next Recommended Action
 
-Open the PR for `phase-4/ingest-planning`, run the review, apply confirmed
-findings, merge on green CI, then pin `brain.py`'s static `scan` and write the
-slice 6 requirements (static lint).
+Open the PR for `phase-4/static-lint`, run the review, apply confirmed
+findings, merge on green CI, then write the slice 7 requirements (conflicts and
+decisions) and implement it over the pinned conflicts excerpt.

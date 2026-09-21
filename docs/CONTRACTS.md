@@ -571,3 +571,24 @@ conventions are refused at construction. `Vault.wiki_pages` lists files
 only and skips a link that leaves the vault. `source_text(document)` is the
 text the model reads: sections in order, each image as
 `[image on page N: description]` or `(no description)`.
+
+## Static lint (Phase 4, slice 6)
+
+`knowledge.lint.scan(vault)` returns a `LintReport` computed by reading alone:
+`pages` and `types` (from the `type:` frontmatter, `(untyped)` otherwise),
+`orphans` (no inbound link; `wiki/overview.md` and `index.md` are entry points),
+`dangling` (`DanglingLink(target, count)`, ranked by references, ties in
+first-seen order), `path_links` (`PathLink(page, link)` — a link with a path,
+or a `.md` that names a wiki page; `[[CLAUDE.md]]` may name a root file and is
+left alone), `missing_frontmatter`, `broken_source_path` (a legacy
+`source_path:` that no longer resolves), `unknown_source_id` (a `source_id:`
+the Raw index does not know), `pending_sources` (Raw files no `wiki/sources/`
+page carries by `source_id`) and `open_conflicts` (`OpenConflict(page, line,
+text)` for every `⚠️` line). `report.clean` is true when every list is empty.
+`page_name` strips only `.md`, never a page's own dots. Nothing in this module
+calls a model.
+
+`fix_links(vault, report, stamp=)` rewrites exactly the flagged links to bare
+page names, case-corrected to an existing page and keeping any `|alias` or
+`#anchor`, through `Vault.write` with a backup under the stamp; it returns the
+pages it changed. `raw/` and `drop/` are never written.

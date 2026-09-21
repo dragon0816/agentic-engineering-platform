@@ -106,3 +106,16 @@ No formatting or implementation edits should be applied to the excerpt.
 Tests drive both excerpts against pytest-managed temporary vault directories; no
 model, gateway, network or real vault is touched. The excerpts are offline
 characterization oracles, not runtime dependencies.
+
+File: `vault/brain.py`. UTF-8, LF-normalized full source SHA-256:
+`016f5e5b327f955c0b332e337d606f8c900ed7fe318836b8d3e6f909a42704ab`.
+
+`source_vault_lint.txt` retains verbatim source lines for the `re`,
+`collections` and `pathlib` imports, `LINT_CONTENT_BUDGET`, `WIKILINK`,
+`page_name`, `scan` and `fix_links`. The report formatting, the judgement pass
+sent to a model, the CLI and the conflict/resolve subcommands are excluded.
+`scan` refers to `Vault`, `find_conflicts` and `detect_manual_edits`, which the
+tests supply from the pinned ingest and conflicts excerpts, as the source wired
+them. Excerpt SHA-256 (UTF-8/LF):
+`01f8c88b7f13b4793d7644e81ac1c8c697a3ab4e2cde7eee1e18c4c32a401155`.
+No formatting or implementation edits should be applied to the excerpt.

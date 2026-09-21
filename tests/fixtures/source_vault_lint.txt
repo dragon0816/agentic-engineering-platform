@@ -1,0 +1,131 @@
+import re
+
+from collections import Counter, defaultdict
+
+from pathlib import Path
+
+LINT_CONTENT_BUDGET = 120_000
+WIKILINK = re.compile(r"\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]")
+
+def page_name(rel: str) -> str:
+    """Page name from a path or a wikilink target.
+
+    Only `.md` is stripped, never `Path.stem`: a page called `Continue.dev`
+    would lose `.dev` and stop matching its own file, which made every one of
+    its 57 links read as dangling and the page itself as an orphan. The same
+    hit `Cognitum.One`. Any page name containing a dot is affected.
+    """
+    name = Path(rel).name
+    return name[:-3] if name.endswith(".md") else name
+
+
+def scan(vault: Vault) -> dict:
+    """Everything about the wiki that can be established by reading it."""
+    pages = {}
+    # index.md is part of the navigation surface and has the same link rules;
+    # log.md is append-only history and is left alone.
+    targets = sorted((vault.root / "wiki").rglob("*.md"))
+    if (vault.root / "index.md").exists():
+        targets.append(vault.root / "index.md")
+    for path in targets:
+        rel = path.relative_to(vault.root).as_posix()
+        text = path.read_text(encoding="utf-8")
+        pages[rel] = {
+            "text": text,
+            "name": page_name(rel),
+            "links": [link.strip() for link in WIKILINK.findall(text)],
+            "frontmatter": bool(re.match(r"^---\s*\n", text)),
+            "type": (re.search(r"^type:\s*(\S+)", text, re.M) or [None, ""])[1]
+                    if re.search(r"^type:\s*(\S+)", text, re.M) else "",
+            "source_path": (re.search(r"^source_path:\s*(.+)$", text, re.M).group(1).strip()
+                            if re.search(r"^source_path:\s*(.+)$", text, re.M) else ""),
+        }
+
+    by_name = defaultdict(list)
+    for rel in pages:
+        by_name[page_name(rel)].append(rel)
+
+    wiki_names = {page_name(rel).lower() for rel in pages if rel.startswith("wiki/")}
+
+    inbound = defaultdict(set)
+    dangling = Counter()
+    pathy = []
+    for rel, page in pages.items():
+        for link in page["links"]:
+            # A path is always wrong. A trailing .md is only wrong when it names
+            # a wiki page -- [[CLAUDE.md]] points at the schema file in the vault
+            # root and resolves correctly, so rewriting it to [[CLAUDE]] would
+            # break a working link rather than fix a broken one.
+            if "/" in link or (link.endswith(".md")
+                               and page_name(link).lower() in wiki_names):
+                pathy.append((rel, link))
+            target = page_name(link)
+            if target in by_name:
+                for hit in by_name[target]:
+                    if hit != rel:
+                        inbound[hit].add(rel)
+            else:
+                dangling[link] += 1
+
+    # These are entry points; nothing links to them by design.
+    entry_points = {"wiki/overview.md", "index.md"}
+    orphans = [rel for rel in pages
+               if rel not in entry_points and not inbound.get(rel)]
+
+    # index.md is scanned for links but is not a wiki page: it has no
+    # frontmatter by design, so counting it as a defect would make every
+    # report noisy about something that is correct.
+    wiki_pages = {rel: page for rel, page in pages.items() if rel.startswith("wiki/")}
+    missing_frontmatter = [rel for rel, page in wiki_pages.items() if not page["frontmatter"]]
+
+    broken_source_path = []
+    for rel, page in pages.items():
+        sp = page["source_path"]
+        if sp and not (vault.root / sp).exists():
+            broken_source_path.append((rel, sp))
+
+    return {
+        "pages": pages,
+        "wiki_pages": wiki_pages,
+        "inbound": inbound,
+        "orphans": sorted(orphans),
+        "dangling": dangling.most_common(),
+        "pathy_links": pathy,
+        "missing_frontmatter": sorted(missing_frontmatter),
+        "broken_source_path": broken_source_path,
+        "pending_sources": vault.pending(),
+        "open_conflicts": find_conflicts(vault.root),
+        "manual_edits": detect_manual_edits(vault.root),
+    }
+
+
+def fix_links(vault: Vault, report: dict) -> list:
+    """Rewrite [[wiki/x/Foo]] and [[raw/y/Foo]] to the bare [[Foo]] the schema asks for.
+
+    Mechanical, so no model is involved. Where a page with that name exists
+    under a different case, the real page name is used -- [[Openhands]] would
+    otherwise dangle beside the existing OpenHands page.
+    """
+    by_lower = {page_name(rel).lower(): page_name(rel) for rel in report["pages"]}
+    offenders = {(rel, link) for rel, link in report["pathy_links"]}
+    changed = []
+
+    for rel in {rel for rel, _ in report["pathy_links"]}:
+        text = report["pages"][rel]["text"]
+
+        def replace(match, _rel=rel):
+            inner = match.group(1).strip()
+            alias = match.group(0)[2:-2][len(inner):]  # keep any |alias or #anchor
+            # Only touch links the scan actually flagged, so a legitimate link
+            # to a vault-root file is left alone.
+            if (_rel, inner) not in offenders:
+                return match.group(0)
+            bare = page_name(inner)
+            return f"[[{by_lower.get(bare.lower(), bare)}{alias}]]"
+
+        fixed = re.sub(r"\[\[([^\]|#]+)((?:[|#][^\]]*)?)\]\]",
+                       lambda m: replace(m), text)
+        if fixed != text:
+            vault.safe_write(rel, fixed)
+            changed.append(rel)
+    return changed

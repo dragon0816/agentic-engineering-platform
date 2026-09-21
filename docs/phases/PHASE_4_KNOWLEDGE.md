@@ -210,13 +210,34 @@ enforced in code, never left to a prompt:
    failures on either pass, condensation with chunk count and cache reuse
    across planners, and the cache's confinement.
 
+## Requirements and acceptance (slice 6 — static lint)
+
+1. `knowledge.lint.scan(vault)` computes, by reading alone, a typed
+   `LintReport`: page and type counts; orphans (no inbound link, entry
+   points excepted); dangling links ranked by how often the missing page is
+   referenced; links that carry a path or a `.md` naming a wiki page;
+   pages without frontmatter; a legacy `source_path:` that no longer
+   resolves; a `source_id:` that names no Raw in the index; Raw sources no
+   `wiki/sources/` page carries; open `⚠️` conflicts with their line. Nothing
+   in it calls a model; a judgement pass may take the report as context
+   later.
+2. The pinned `brain.py` scan is characterized first, with the pinned ingest
+   and conflicts excerpts supplying what it imported; the adapted scan
+   reproduces its rules, including that only `.md` is stripped from a page
+   name and that a trailing `.md` is wrong only when it names a wiki page.
+3. `fix_links(vault, report, stamp=)` is the one mechanical repair: the
+   flagged path-carrying links become bare page names, case-corrected to an
+   existing page, aliases and anchors kept, untouched otherwise; every
+   rewritten page goes through `Vault.write` with a backup, and nothing under
+   `raw/` or `drop/` is ever written.
+4. Manual-edit detection and decision bookkeeping are slice 7; the report
+   gains them there.
+5. Tests: characterization of the excerpt and regression over the adapted
+   report as typed values, the repair with aliases, anchors and backups, and
+   a link that leaves the vault not counting as a page.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 6 — Static lint as a typed report: orphans, dangling links ranked by
-  reference count, path-carrying links, missing frontmatter, provenance that no
-  longer resolves, raw sources never ingested, open conflicts, manual edits.
-  Mechanical link repair with backups. Judgement-based lint through
-  `ModelClient` is a separate, optional pass.
 - Slice 7 — Conflicts and decisions: an append-only `Decision` record injected
   into later planning, `⚠️` conflict markers found by reading, resolution that
   records why, and manual-edit detection by page hash.
