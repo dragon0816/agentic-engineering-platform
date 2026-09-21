@@ -140,3 +140,50 @@ construction.
 
 Rollback removes `src/models/openai_compatible.py` and its tests; nothing else
 imports them.
+
+## Slice 3 source-first decision
+
+The pinned source contains no Ollama integration at all (`grep -i ollama`
+finds nothing across its Python, PowerShell, YAML and Markdown). There is
+nothing to characterize, so this slice is new platform work against the
+Roadmap's exit criterion that local Ollama and the internal gateway satisfy
+the same model client interface.
+
+Decision (2026-09-22): implement Ollama's **native `/api/chat`** rather than
+pointing the slice 2 adapter at Ollama's OpenAI-compatible endpoint.
+
+Both would satisfy the exit criterion, and the compatible shim would cost
+almost no code. Native was chosen for three reasons. The native API is
+Ollama's stable, first-class surface, while its OpenAI compatibility layer is
+documented as experimental and has historically lagged on options. The
+differences are real rather than cosmetic: images are bare base64 rather than
+`data:` URIs, the token limit is `options.num_predict`, structured output is
+`format: "json"`, `stream` must be stated because Ollama streams by default,
+usage is counted under `prompt_eval_count`/`eval_count`, and a stream is
+newline-delimited JSON rather than server-sent events. Implementing them
+proves the claim the architecture makes, that a second wire format does not
+reach platform contracts. And the local path is the one a host falls back to
+when the company gateway is unavailable, so it should not depend on a
+compatibility layer that may lag.
+
+Reversing this is a configuration change, not a rewrite: an endpoint whose
+`provider` is `openai_compatible` and whose `base_url` points at Ollama's
+`/v1` works with the slice 2 adapter today.
+
+This slice also extracts `models.wire` from `models.openai_compatible`. The
+extraction is pure movement, proven by the slice 2 tests passing unchanged
+apart from their import line. It is done here rather than earlier because a
+shared surface with one consumer is a guess; with two it is the set of rules
+that must not differ between providers, which is exactly what belongs in one
+place: what a failure means, that nothing escapes, that no credential leaves
+a header, and that a status is an answer.
+
+Review of the PR added `wire.provider_error`, used by both adapters: Ollama
+answers 200 with `{"error": ...}` for a model it does not have, and once a
+stream's status has been sent neither wire format has anywhere but the body to
+report a failure. Without it a refusal ended a stream as a plain `done`, so the
+caller read a provider failure as a successful empty completion and the
+server's own explanation was thrown away.
+
+Rollback removes `src/models/ollama.py` and its tests; `models.wire` would
+fold back into `models.openai_compatible`, which is the only other importer.

@@ -159,10 +159,48 @@ These hold for every slice and are enforced in code, never by convention:
    body; the credential resolved once per request and absent when none is
    given; and the default transport's request construction and error mapping.
 
+## Requirements and acceptance (slice 3 — Ollama adapter)
+
+1. `models.wire` holds everything two HTTP adapters must agree on: the
+   `Transport`/`Reply` protocols and the redirect-refusing `UrllibTransport`,
+   the failure mapping and redaction, credential resolution, the tool and
+   undeclared-streaming refusals, strict structured parsing, and the
+   response/event builders. A provider module is then its own payload shape,
+   its own reply shape and its own idea of a streaming chunk, so two adapters
+   cannot drift on what a failure means.
+2. `models.ollama.Ollama(endpoint, credential=, transport=, timeout_s=)`
+   implements `ModelClient` against Ollama's own `/api/chat`, not its
+   OpenAI-compatible shim. `base_url` is the server root, such as
+   `http://localhost:11434`.
+3. The wire differences are real and are handled here: images travel as bare
+   base64, so Phase 4's `data:` URIs are stripped and an image reference the
+   platform cannot inline is refused as `image_not_inline` before anything is
+   sent; the token limit is `options.num_predict`; structured output is
+   `format: "json"`; `stream` must be sent explicitly because Ollama streams
+   by default; and usage is `prompt_eval_count`/`eval_count`.
+4. `stream` reads newline-delimited JSON objects rather than server-sent
+   events: one `text` event per non-empty `message.content`, stopping at the
+   object whose `done` is true, then `done`. Lines are reassembled across
+   chunk boundaries, blank and half-written lines are skipped, and a 2xx body
+   with no JSON object in it at all is `model_unparseable`. An object carrying
+   `error` is `provider_error` and stops the stream: once the status has been
+   sent, a refusal can only arrive in the body, and reading past it would
+   report an empty success and discard the server's explanation. The same
+   holds for a 2xx reply to `generate`, in both adapters.
+5. Nothing about locality is enforced. `local` is a claim an endpoint makes in
+   the catalog and a host may run Ollama on another machine; this adapter
+   needs only an address. A credential is supported because a reverse proxy
+   in front of Ollama may want one, under the same rules as anywhere else.
+6. Tests: the generate round trip against Ollama's own field names; images as
+   base64 and the refusal of a reference; `format: "json"` and strict
+   structured parsing; streaming including a line split across chunks, a
+   blank line, the `done` flag ending it and a stream that stops without one;
+   a server that is not Ollama; and the shared rules holding identically here
+   (both tool shapes, undeclared streaming, per-request credential
+   resolution, a resolver that fails, and the construction errors).
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 3 — `ollama` adapter: the local provider, satisfying `local_only`.
-  New platform work; the source repository contains no Ollama integration.
 - Slice 4 — credential resolution boundary: a `CredentialResolver` the host
   supplies, with an environment-backed development implementation that lives
   outside the platform's import path, plus redaction coverage.

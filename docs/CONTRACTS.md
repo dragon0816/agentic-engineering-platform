@@ -797,9 +797,11 @@ a single `failed` event before anything is sent.
 Failure codes, all non-escaping: `model_timeout` and `model_unreachable`
 (retryable), `credential_unavailable` (retryable, because the token is
 rewritten on a schedule and the endpoint was never asked),
-`model_http_error` (retryable for 408, 429 and any 5xx), `model_unparseable`
-(a body that is not JSON, carries no choices, or in a stream carries no
-server-sent events at all), `model_error` (anything else raised, reported as
+`model_http_error` (retryable for 408, 429 and any 5xx), `provider_error` (a
+2xx body carrying `error` rather than an answer, in a reply or mid-stream),
+`model_unparseable` (a body that is not JSON, carries no choices, or in a
+stream carries no server-sent events at all), `model_error` (anything else
+raised, reported as
 retryable because a custom transport may raise its own transient types),
 `streaming_not_declared` and `tools_not_supported`. Tools are refused because
 `ModelTool.input_contract` names a platform contract and rendering it as a
@@ -822,3 +824,44 @@ default `UrllibTransport` uses the standard library through an opener that
 included, to wherever a 3xx points and drop the POST body on the way, so a
 redirect is reported as the status it is. The platform's install stays
 `pydantic` alone and no test opens a socket.
+
+## Shared adapter rules and the Ollama adapter (Phase 5, slice 3)
+
+`models.wire` is what every HTTP model adapter shares, so a second provider is
+its wire format and nothing else. It holds the `Transport` protocol
+(`send(url, body, headers, timeout_s) -> Reply`, whose arguments are plain
+values so an `Authorization` header never enters something serializable), the
+`Reply` protocol (`status`, `chunks()`, `close()`), `UrllibTransport` with its
+redirect-refusing opener, `transport_failure` and `status_failure`, `redacted`
+and `describe`, `authorized` (per-request credential resolution, with
+`credential_unavailable` when the resolver raises), `checked_base` (the
+construction-time refusals: no base url, a non-positive timeout, or an
+endpoint declaring a credential with no resolver), `provider_error` (a 2xx
+body that carries a refusal instead of an answer, which is how Ollama reports
+a missing model and how either wire format must report a failure once a
+stream's status has been sent; not retryable, because the provider understood
+and declined), `unsupported` (tools in either shape), `undeclared_streaming`,
+`structured` (strict JSON only when an `output_contract` was declared),
+`lines`, `token_count`, and the
+`failed_response`/`failed_event`/`answered` builders. `answered` is where the
+platform's alias, rather than a provider's echoed `model`, is put on a reply.
+
+`models.ollama.Ollama(endpoint, credential=None, transport=None,
+timeout_s=600.0)` implements `ModelClient` against Ollama's native
+`/api/chat`. `base_url` is the server root, such as `http://localhost:11434`.
+`generate` sends `model`, `messages`, `stream: false` (Ollama streams by
+default), `options.num_predict` from `max_output_tokens`, and `format: "json"`
+for a declared `output_contract`. A message's `images` are sent as bare base64:
+a `data:` URI is stripped to its payload, and any other reference is refused
+as `image_not_inline` before the call, because Ollama embeds bytes rather than
+fetching a URL. Usage is read from `prompt_eval_count` and `eval_count`.
+
+`stream` reads newline-delimited JSON objects: one `text` event per non-empty
+`message.content`, stopping at the object whose `done` is true, then `done`.
+Blank and half-written lines are skipped, lines are reassembled across chunk
+boundaries, and a 2xx body containing no JSON object is `model_unparseable`.
+A body or a streaming object carrying `error` is `provider_error`, so a
+refusal never reads as an empty success and the server's own explanation
+survives. Failure codes are the shared ones plus `image_not_inline`. Locality
+is not enforced: `local` is a catalog claim, and a host may run Ollama
+elsewhere.
