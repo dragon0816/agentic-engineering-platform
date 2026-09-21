@@ -2,17 +2,25 @@
   "case_id": "discover-sample-task",
   "category": "deterministic",
   "request": {
-    "trace": {"trace_id": "trace-proof", "request_id": "request-proof", "span_id": "span-proof"},
+    "trace": {
+      "trace_id": "trace-proof",
+      "request_id": "request-proof",
+      "span_id": "span-proof"
+    },
     "actor": "engineer",
     "namespace": "sample",
     "message": "Discover the sample inspect task",
     "channel": "test"
   },
-  "expected_route": {
-    "kind": "capability",
-    "target": {"namespace": "sample", "name": "inspect", "version": "1.0.0"},
-    "reason": "Explicit sample identity requires no model selection"
-  },
-  "forbidden_side_effects": ["write", "execute", "external_side_effect"],
-  "assertions": ["scoped_identity", "published_discovery", "bridge_advertisement", "no_execution"]
+  "forbidden_side_effects": [
+    "write",
+    "execute",
+    "external_side_effect"
+  ],
+  "assertions": [
+    "scoped_identity",
+    "published_discovery",
+    "bridge_advertisement",
+    "no_execution"
+  ]
 }

@@ -98,7 +98,10 @@ def test_engineering_profile_and_evaluation_case() -> None:
     case = EvaluationCase.model_validate_json(
         (ROOT / "evaluation/cases/discover-task.json").read_text()
     )
-    assert case.expected_route.target == sample().capability
+    # A discovery case names no route: what must hold is stated as assertions,
+    # and `tests/test_evaluation.py` grades them against the proof itself.
+    assert case.expected_route is None
+    assert "bridge_advertisement" in case.assertions
     assert set(case.forbidden_side_effects) == {"write", "execute", "external_side_effect"}
     assert json.loads(case.model_dump_json())["category"] == "deterministic"
 

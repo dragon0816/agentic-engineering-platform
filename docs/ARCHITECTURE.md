@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Architecture
 
-Status: Approved architecture baseline; Phases 1–5 implemented, Phase 6 evaluation next
+Status: Approved architecture baseline; Phases 1–5 implemented, Phase 6 evaluation active
 
 ## 1. Purpose
 
