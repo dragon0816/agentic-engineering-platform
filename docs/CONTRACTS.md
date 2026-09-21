@@ -334,3 +334,11 @@ non-commit and `commit_unknown` when the acknowledgment was lost (read back
 before proceeding), a refused rather than waiting second writer, and evidence,
 keys, links and capacity that survive a restart. The shared transition rules in
 `workflow.checkpoints` keep it and the memory model identical in behavior.
+
+`PayloadStore` (`workflow.payloads`) is the storage half of that boundary:
+`put` returns the `PayloadRef` a checkpoint records, `get` returns the payload
+only when the reference's own parts agree, the stored bytes hash to
+`ref.sha256` and the stored contract matches `ref.contract` — otherwise
+`invalid_transition`, `unavailable` or `missing`, never a guess.
+`FilePayloadStore` keeps one content-addressed file per payload per owner beside
+the checkpoint file, writes atomically and deletes nothing.

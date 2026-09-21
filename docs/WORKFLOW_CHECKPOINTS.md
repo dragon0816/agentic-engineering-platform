@@ -140,3 +140,34 @@ evidence and `PayloadRef`s only. Capacity counts every persisted record,
 including continuations, after a restart. A file whose `schema_version` is not
 `1` refuses to open. There is still no TTL, eviction, deletion, payload storage,
 engine wiring or automatic recovery.
+
+## Payload storage (slice 11)
+
+`workflow.payloads.FilePayloadStore(root, max_bytes=1_000_000)` is what a
+`PayloadRef` points at: the validated, secret-free JSON a recovery coordinator
+needs back — a run's arguments and each completed step's result. It lives beside
+the checkpoint file, under the host's own access controls, and is the storage
+half of the boundary whose evidence half is `RunCheckpoint`.
+
+The digest is the identity. `put(owner, contract, payload)` canonicalises the
+value (sorted keys, no NaN/Infinity), stores it under its own SHA-256 in
+`root/<actor>/<namespace>/payload-<digest>.json` and returns the reference to
+record. Equal values share one file, so writing the same payload twice is
+idempotent and costs nothing. Writes are atomic (temporary file, `fsync`,
+`os.replace`), so a crash or a failed write never leaves a partial payload.
+
+`get(owner, ref)` returns the payload only when everything agrees: the
+reference's `ref_id` must be `payload-<sha256>` (so a file name can never be
+caller text and a reference this store never issued is refused as
+`invalid_transition`), the stored bytes must hash to `ref.sha256`
+(`unavailable` otherwise — tampering, truncation or a swapped file), and the
+stored contract must equal `ref.contract` (`invalid_transition` otherwise).
+A reference to something that was never stored is `missing`. Payload directories
+are per owner, so one owner's reference cannot read another owner's file.
+
+Limits and omissions: a payload above `max_bytes` is `capacity` and an
+unserializable value is `invalid_transition`, both before anything is written.
+There is no deletion API, TTL or eviction — a retained checkpoint may reference
+its payloads for as long as it exists — and no encryption, secret resolution,
+access control or engine wiring. Storing a credential in a payload remains
+forbidden by the same rule that forbids it in a checkpoint.
