@@ -189,16 +189,20 @@ class Ollama:
         except Exception as error:  # noqa: BLE001 - a provider failure is a status here
             yield wire.failed_event(request, wire.transport_failure(error), duration_ms=elapsed.ms)
             return
+        sent = elapsed.ms
+        # Only the time spent waiting on the provider counts from here; a
+        # consumer that renders slowly must not make the model look slow.
+        waited = wire.Waited(reply.chunks())
         answered = False
         try:
             if reply.status // 100 != 2:
                 yield wire.failed_event(
                     request,
-                    wire.status_failure(reply.status, b"".join(reply.chunks())),
-                    duration_ms=elapsed.ms,
+                    wire.status_failure(reply.status, b"".join(waited)),
+                    duration_ms=sent + waited.ms,
                 )
                 return
-            for line in wire.lines(reply.chunks()):
+            for line in wire.lines(iter(waited)):
                 if not line.strip():
                     continue
                 try:
@@ -213,7 +217,7 @@ class Ollama:
                 if reported is not None:
                     # Ollama reports a mid-stream failure in the body, the
                     # status having been sent long before.
-                    yield wire.failed_event(request, reported, duration_ms=elapsed.ms)
+                    yield wire.failed_event(request, reported, duration_ms=sent + waited.ms)
                     return
                 text = _content(chunk)
                 if text:
@@ -221,7 +225,9 @@ class Ollama:
                 if chunk.get("done") is True:
                     break
         except Exception as error:  # noqa: BLE001 - a read can fail like a send
-            yield wire.failed_event(request, wire.transport_failure(error), duration_ms=elapsed.ms)
+            yield wire.failed_event(
+                request, wire.transport_failure(error), duration_ms=sent + waited.ms
+            )
             return
         finally:
             wire.close_quietly(reply)
@@ -231,7 +237,7 @@ class Ollama:
             yield wire.failed_event(
                 request,
                 Failure(code="model_unparseable", message="the reply carries no json objects"),
-                duration_ms=elapsed.ms,
+                duration_ms=sent + waited.ms,
             )
             return
-        yield ModelStreamEvent(trace=request.trace, kind="done", duration_ms=elapsed.ms)
+        yield ModelStreamEvent(trace=request.trace, kind="done", duration_ms=sent + waited.ms)

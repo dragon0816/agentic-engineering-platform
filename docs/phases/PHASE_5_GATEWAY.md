@@ -252,17 +252,20 @@ These hold for every slice and are enforced in code, never by convention:
 1. `ModelResponse.duration_ms` and `ModelStreamEvent.duration_ms` report how
    long the provider took, so evaluation can compare aliases on latency as
    well as on quality and usage, which `docs/ARCHITECTURE.md` requires of the
-   model router. Both adapters measure from just before the call goes out to
-   after the reply is read, using a monotonic clock so a clock adjustment
-   cannot produce a negative latency. A stream reports on the event that ends
-   it, whether `done` or `failed`. A request refused before any call reports
-   zero rather than a misleading number.
+   model router. `None` means nothing was measured, which a harness must be
+   able to tell from a call that took no time. Both adapters use a monotonic
+   clock and start it after the payload is serialized, so the same span is
+   measured on both sides of a comparison. A stream counts only the time
+   spent blocked on the provider, never the time its reader spends between
+   events, and the terminal event carries the total.
 2. `models.proof` is the model layer's counterpart to `workflow.proof`:
    something a host copies rather than infers. `SAMPLE_CATALOG` is plain data
    in the shape a host keeps in YAML or JSON, `clients_from` validates it and
    wires a resolver and a transport, and `ask` states what the work needs and
    sends one request to whichever endpoint satisfies it, naming no provider,
-   model id or URL.
+   model id or URL. A caller's own mistake, such as a blank prompt, is
+   `invalid_request` rather than an exception, since `ask` promises a value
+   either way.
 3. The example is inert. Nothing is installed, no socket is opened in a test,
    the sample catalog carries a `SecretRef` name rather than any value, and
    the repository's own `SECRET_PATTERN` guard finds nothing in it.
@@ -270,8 +273,9 @@ These hold for every slice and are enforced in code, never by convention:
    the whole chain answering through both providers with the alias decided by
    requirements, a routing failure that stays a `Failure`, a resolver needed
    only where a secret is declared, measured durations on a successful and a
-   failed call for each adapter with the clock replaced, and a stream
-   reporting on its terminal event only.
+   failed call for each adapter with the clock replaced, and a stream whose
+   reader pauses for seconds between events still reporting only what it
+   waited on the provider for.
 
 ## Phase 5 exit criteria
 

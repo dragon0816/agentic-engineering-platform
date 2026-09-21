@@ -41,23 +41,33 @@ the runtime install is still `pydantic` alone.
 ## Completed in this slice
 
 - `duration_ms` on `ModelResponse` and `ModelStreamEvent`, measured by both
-  adapters with `wire.Elapsed` on a monotonic clock, from just before the call
-  to after the reply is read. A stream reports on its terminal event; a
-  request refused before any call reports zero.
+  adapters on a monotonic clock started after the payload is serialized. A
+  stream adds `wire.Waited`, counting only time blocked on the provider, and
+  reports the total on its terminal event. `None` where nothing was measured.
 - `src/models/proof.py`: `SAMPLE_CATALOG` as plain data, `clients_from` and
   `ask`, the whole chain from declared requirements to an answer without
   naming a provider, a model id or a URL.
-- 5 tests (`tests/test_models_proof.py`), none opening a socket: the sample
-  catalog validating and passing the repository's own secret guard, the chain
-  answering through both providers, a routing failure staying a `Failure`, a
-  resolver needed only where a secret is declared, measured durations with the
-  clock replaced, and a stream timing only its terminal event.
+- 5 test functions, 6 cases (`tests/test_models_proof.py`), none opening a
+  socket: the sample catalog validating and passing the repository's own
+  secret guard, the chain answering through both providers, a routing failure
+  and a caller's own mistake both staying a `Failure`, a resolver needed only
+  where a secret is declared, measured durations with the clock replaced, and
+  a stream whose reader pauses between events still reporting only what it
+  waited on the provider for.
 - Phase 5 closed in `docs/ROADMAP.md`, `docs/ARCHITECTURE.md` and `README.md`.
+- PR #38 review (5 findings) applied: a stream now counts only the time it
+  spent blocked on the provider (`wire.Waited`), so a reader that renders
+  slowly no longer makes a model look slow and a chatty-but-fast alias is no
+  longer ranked slowest; both adapters start the clock after serializing, so
+  a multi-megabyte image is charged to neither provider; `ask` returns
+  `invalid_request` for a blank prompt instead of raising, as its own
+  docstring promised; the vacuous stream-timing assertion is replaced by one
+  that drives a fake clock from both sides; and `duration_ms` is `int | None`
+  so a harness can tell an unmeasured refusal from an instant answer.
 
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -83,8 +93,11 @@ the runtime install is still `pydantic` alone.
 - Latency belongs on the response beside usage, because evaluation compares
   aliases on both and a separate observation channel would have to be
   correlated back.
-- A stream is timed on its terminal event rather than per delta: the question
-  is how long the provider took, not how far apart its tokens were.
+- A stream is timed on its terminal event rather than per delta, and counts
+  only time blocked on the provider: the question is how long the provider
+  took, not how fast the reader consumed it.
+- An unmeasured duration is `None` rather than zero, because a harness that
+  averages latency per alias would otherwise rank a failing alias fastest.
 
 ## Exact verification commands and results
 
@@ -119,7 +132,8 @@ anywhere in Phase 5.
   the streaming `done` flag. The same caution applies to the company gateway:
   no real endpoint was contacted in this phase.
 - `duration_ms` measures the adapter's view, which includes transport and
-  parsing. It is not the provider's own reported latency.
+  parsing but not serialization. It is not the provider's own reported
+  latency.
 - Credential resolution is not counted in `duration_ms`, deliberately, since
   it is not the provider's time.
 - `SecretRef.name` is a `Symbol` and a JWT matches that pattern, so the type
@@ -127,7 +141,6 @@ anywhere in Phase 5.
 
 ## Next Recommended Action
 
-Open the PR for `phase-5/observability`, run the review, apply confirmed
-findings and merge on green CI. Then agree the two Phase 6 decisions above
+Merge PR #38 on green CI. Then agree the two Phase 6 decisions above
 with the owner, write `docs/phases/PHASE_6_EVALUATION.md`, repoint `CLAUDE.md`
 at it, and start the first Phase 6 slice on a `phase-6/...` branch.

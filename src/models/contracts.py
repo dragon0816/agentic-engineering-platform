@@ -83,8 +83,10 @@ class ModelResponse(Contract):
     input_tokens: int = Field(default=0, ge=0, strict=True)
     output_tokens: int = Field(default=0, ge=0, strict=True)
     # How long the provider took, so evaluation can compare aliases on latency
-    # as well as on quality and usage. Zero when no call was made.
-    duration_ms: int = Field(default=0, ge=0, strict=True)
+    # as well as on quality and usage. None when nothing was measured, which
+    # is not the same as a call that took no time: a refusal made before any
+    # request must not be averaged in as an instant answer.
+    duration_ms: int | None = Field(default=None, ge=0, strict=True)
 
 
 class ModelStreamEvent(Contract):
@@ -93,8 +95,10 @@ class ModelStreamEvent(Contract):
     text: str | None = None
     tool_call: ModelToolCall | None = None
     failure: Failure | None = None
-    # Set on a terminal event, so a stream is comparable to a single call.
-    duration_ms: int = Field(default=0, ge=0, strict=True)
+    # Set on a terminal event, counting only time spent waiting on the
+    # provider, so a stream is comparable to a single call. None when nothing
+    # was measured.
+    duration_ms: int | None = Field(default=None, ge=0, strict=True)
 
     @model_validator(mode="after")
     def event_payload(self) -> Self:

@@ -84,6 +84,15 @@ def test_the_worked_example_runs_end_to_end_without_a_socket() -> None:
     )
     assert isinstance(impossible, Failure) and impossible.code == "no_model_for_requirements"
 
+    # A caller's own mistake is a value too: this promises one either way.
+    blank = ask(
+        local_clients,
+        requirements=ModelRequirements(reasoning="low", local_only=True),
+        prompt="   ",
+        trace=TRACE,
+    )
+    assert isinstance(blank, Failure) and blank.code == "invalid_request"
+
 
 def test_the_example_needs_a_resolver_only_where_a_secret_is_declared() -> None:
     # The local endpoint declares none, so no resolver is needed to reach it.
@@ -128,7 +137,27 @@ def test_every_answer_reports_how_long_the_provider_took(
     assert refused.failure is not None and refused.duration_ms == 500
 
 
-def test_a_stream_reports_its_duration_on_the_event_that_ends_it() -> None:
+def test_a_stream_is_timed_by_what_it_waited_for_not_by_its_reader(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clock = [0.0]
+    monkeypatch.setattr(wire, "monotonic", lambda: clock[0])
+
+    class Slow:
+        """A provider that takes ten milliseconds to produce each chunk."""
+
+        status = 200
+
+        def __init__(self, chunks: list[bytes]) -> None:
+            self._chunks = chunks
+
+        def chunks(self) -> Any:
+            for chunk in self._chunks:
+                clock[0] += 0.010
+                yield chunk
+
+        def close(self) -> None: ...
+
     endpoint = ModelEndpoint.model_validate(
         {
             "alias": "alias",
@@ -138,23 +167,29 @@ def test_a_stream_reports_its_duration_on_the_event_that_ends_it() -> None:
             "capabilities": ModelCapabilities(max_context_tokens=1_000, streaming=True),
         }
     )
-    chunks = [b'data: {"choices": [{"delta": {"content": "hi"}}]}\n', b"data: [DONE]\n"]
-    events = list(
-        OpenAICompatible(endpoint, transport=Transport(Reply(200, chunks))).stream(
-            ModelRequest(
-                trace=TRACE,
-                model_alias="alias",
-                messages=(ModelMessage(role="user", text="ask"),),
-                requirements=ModelRequirements(streaming=True),
-            )
+    source = Slow([b'data: {"choices": [{"delta": {"content": "hi"}}]}\n', b"data: [DONE]\n"])
+    events = []
+    for event in OpenAICompatible(endpoint, transport=Transport(source)).stream(  # type: ignore[arg-type]
+        ModelRequest(
+            trace=TRACE,
+            model_alias="alias",
+            messages=(ModelMessage(role="user", text="ask"),),
+            requirements=ModelRequirements(streaming=True),
         )
-    )
-    assert [event.kind for event in events] == ["text", "done"]
-    # Only the terminal event carries it; the deltas are not each timed.
-    assert events[0].duration_ms == 0 and events[1].duration_ms >= 0
+    ):
+        # A reader that renders slowly, or is a human staring at a terminal.
+        clock[0] += 1.0
+        events.append(event)
 
-    # A request refused before any call reports nothing rather than a
-    # misleading number.
+    assert [event.kind for event in events] == ["text", "done"]
+    # Two chunks at ten milliseconds each. The two seconds the reader spent
+    # between events belong to the reader, not to the model.
+    assert events[1].duration_ms == 20
+    # Only the terminal event carries it; the deltas are not each timed.
+    assert events[0].duration_ms is None
+
+    # A request refused before any call measured nothing, which is not the
+    # same as a call that took no time.
     undeclared = list(
         OpenAICompatible(endpoint, transport=Transport(Reply(200, []))).stream(
             ModelRequest(
@@ -164,4 +199,4 @@ def test_a_stream_reports_its_duration_on_the_event_that_ends_it() -> None:
             )
         )
     )
-    assert undeclared[0].kind == "failed" and undeclared[0].duration_ms == 0
+    assert undeclared[0].kind == "failed" and undeclared[0].duration_ms is None

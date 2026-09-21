@@ -924,16 +924,25 @@ per request without rebuilding a transport each time.
 
 `ModelResponse.duration_ms` and `ModelStreamEvent.duration_ms` report how long
 the provider took, in milliseconds, so evaluation can compare aliases on
-latency as well as on quality and usage. Both adapters measure with
-`wire.Elapsed`, from just before the call goes out to after the reply is read,
-on a monotonic clock so a clock adjustment cannot produce a negative latency.
-A stream carries it on the event that ends it, `done` or `failed`; the text
-deltas are not each timed. A request refused before any call reports zero.
+latency as well as on quality and usage. `None` means nothing was measured,
+which is not the same as a call that took no time: a refusal made before any
+request must not be averaged in as an instant answer.
+
+Both adapters measure with `wire.Elapsed`, on a monotonic clock so a clock
+adjustment cannot produce a negative latency, starting **after** the payload
+is serialized so the two adapters measure the same span and a large image is
+charged to neither provider. A stream adds `wire.Waited`, which counts only
+the time spent blocked on the source: a stream is read as its caller
+iterates, so measuring to the last event would charge the provider for a
+harness that renders slowly, and a model sending many small deltas would rank
+as the slow one. The terminal event (`done` or `failed`) carries the total;
+the text deltas are not each timed.
 
 `models.proof` is a copyable host path, not a default. `SAMPLE_CATALOG` is
 plain data in the shape a host keeps in YAML or JSON, declaring a credential
 as a `SecretRef` name so the whole catalog is safe to commit. `clients_from(
 data, resolver=, transport=)` validates it and returns `ModelClients`.
 `ask(clients, requirements=, prompt=, trace=, max_output_tokens=)` returns a
-`ModelResponse` or a `Failure`: a `Failure` from `ask` is a routing problem,
+`ModelResponse` or a `Failure`: a `Failure` from `ask` is a routing problem
+(or `invalid_request` for a caller's own mistake, such as a blank prompt),
 one on the response is a provider problem, and neither becomes an exception.

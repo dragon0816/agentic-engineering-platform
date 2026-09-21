@@ -22,6 +22,8 @@ exercised in CI.
 
 from typing import Any
 
+from pydantic import ValidationError
+
 from common.execution import Failure, TraceIdentifiers
 from models.catalog import ModelCatalog
 from models.clients import ModelClients
@@ -93,12 +95,16 @@ def ask(
     if isinstance(chosen, Failure):
         return chosen
     alias, client = chosen
-    return client.generate(
-        ModelRequest(
+    try:
+        asked = ModelRequest(
             trace=trace,
             model_alias=alias,
             messages=(ModelMessage(role="user", text=prompt),),
             requirements=requirements,
             max_output_tokens=max_output_tokens,
         )
-    )
+    except ValidationError as error:
+        # A blank prompt or an impossible limit is the caller's mistake, and
+        # this promises a value either way.
+        return Failure(code="invalid_request", message=str(error)[:200], retryable=False)
+    return client.generate(asked)
