@@ -225,6 +225,20 @@ Plan: pin a source-graph projection and regression tests; add optional
 `integrations.n8n` and shared Gateway exact-workflow dispatch; document the offline
 host wiring; verify, commit, PR and handoff. No persistence code in this slice.
 
+## Requirements and acceptance (slice 9 — checkpoint contracts)
+
+Owner approved single-Bridge manual restart recovery scope after PR #15 merged.
+The first slice defines contracts and a memory reference model, not disk storage
+or engine recovery. See `docs/WORKFLOW_CHECKPOINTS.md` for the normative plan,
+retention, sensitive-data boundary, write ordering and failure semantics.
+
+- Add versioned owner-scoped run/step evidence and opaque protected payload refs.
+- Define atomic creation/key binding, revision checks and parent/continuation creation.
+- Completed results are immutable; incomplete started steps are uncertain on restart.
+- No automatic resume; retain existing ResumePolicy and fresh Bridge authorization.
+- Tests precede implementation, including validation and failed/ambiguous write windows.
+- Preserve all existing engine/Gateway/n8n behavior; full tests, lint, types and build.
+
 ## Incremental sequence
 
 - Slice 1: pin and inspect the source; commit a reproducible characterization
@@ -237,8 +251,9 @@ host wiring; verify, commit, PR and handoff. No persistence code in this slice.
 - Slice 6: Gateway run-control entry points (`inspect`/`resume`).
 - Slice 7: bounded progress streaming (`watch`).
 - Slice 8: optional offline n8n submission adapter through Gateway.
-- Later Phase 3 slices: durable step-state/persistence contracts and the
-  optional n8n adapter invoking the same Gateway/engine contracts.
+- Slice 9: checkpoint contracts and memory reference model for manual recovery.
+- Later Phase 3 slices: local durable backend, protected payload storage and
+  explicit engine recovery through the existing Gateway/Bridge policy path.
 
 No HTTP server, n8n integration, COM/browser/terminal services, production jobs,
 scheduling or persistence are migrated by this slice. Cooperative asyncio tasks
