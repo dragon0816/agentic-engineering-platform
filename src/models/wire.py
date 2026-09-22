@@ -95,29 +95,31 @@ class UrllibTransport:
 
 
 def redacted(text: str) -> str:
-    trimmed = text[:MAX_ERROR_CHARS].strip()
-    return SECRET_PATTERN.sub(REDACTED, trimmed)
+    """Redact, then trim: a credential that straddles the cut would otherwise
+    survive as a fragment the pattern no longer recognizes."""
+    return SECRET_PATTERN.sub(REDACTED, text)[:MAX_ERROR_CHARS].strip()
 
 
 def describe(error: BaseException) -> str:
     return redacted(f"{type(error).__name__}: {error}") or type(error).__name__
 
 
-def transport_failure(error: BaseException) -> Failure:
+def transport_failure(error: BaseException, *, prefix: str = "model") -> Failure:
     """Which kind of unreachable, because only one of them suggests trying a
-    different endpoint rather than the same one again."""
+    different endpoint rather than the same one again. `prefix` names the
+    wire that failed; every HTTP adapter in the repository uses this one rule."""
     reason = getattr(error, "reason", None)
     if isinstance(error, TimeoutError) or isinstance(reason, TimeoutError):
-        return Failure(code="model_timeout", message=describe(error), retryable=True)
+        return Failure(code=f"{prefix}_timeout", message=describe(error), retryable=True)
     if isinstance(error, OSError):
-        return Failure(code="model_unreachable", message=describe(error), retryable=True)
-    return Failure(code="model_error", message=describe(error), retryable=True)
+        return Failure(code=f"{prefix}_unreachable", message=describe(error), retryable=True)
+    return Failure(code=f"{prefix}_error", message=describe(error), retryable=True)
 
 
-def status_failure(status: int, body: bytes) -> Failure:
+def status_failure(status: int, body: bytes, *, prefix: str = "model") -> Failure:
     detail = redacted(body.decode("utf-8", "replace")) or "(no body)"
     return Failure(
-        code="model_http_error",
+        code=f"{prefix}_http_error",
         message=f"{status}: {detail}",
         retryable=status in RETRYABLE_STATUS or status >= 500,
     )

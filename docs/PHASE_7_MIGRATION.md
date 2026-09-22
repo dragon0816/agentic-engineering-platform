@@ -122,3 +122,53 @@ Rollback removes `common.local_agent`, `host_runtime.agent`,
 `host_runtime.state` and their tests, and moves `verify_installation` back
 into the in-memory reference. The Gateway, engine, Bridge, enrollment and
 distribution references are unchanged.
+
+## Telegram ingress
+
+Source: `dragon0816/telegram-local-agent` at
+`4b40a215909e4fdd4b65519d70669a84e9abd43d`, `core/channels/telegram_handler.py`
+(606 lines), `telegram_channel.py`, `channels/base.py` and `config.yaml`,
+cloned read-only into `.scratch/` and inspected on 2026-09-22.
+
+| Source behaviour | Observed | Decision |
+|---|---|---|
+| Outbound long polling (`run_polling`, webhook deleted at start) | No inbound port; the library retries network errors; a second instance on the same token is a `Conflict` | **ADAPT**: `getUpdates` over the platform's own `Transport`; HTTP 409 is `telegram_conflict` and stops the loop |
+| Sender check `_is_allowed(user_id)` before every handler | Numeric Telegram user ids from `allowed_users`; **an empty list admits everyone** | **ADAPT the check, invert the default**: a sender map of id to exactly one platform actor; an empty map admits nobody |
+| `/run`, `/release`, `/build` route straight to a named skill, bypassing the LLM | Hard-coded command-to-skill table | **ADAPT generically**: `/skill command rest` becomes the platform's `skill.command rest`, which the deterministic router already understands; no table |
+| Free text routed through the LLM | `router.route(user_message, ...)` | Already the platform's path: the Gateway routes deterministically first and a model only if configured |
+| `bot_token` in `config.yaml`; a real token and a GitLab token are committed there | Plain text in a tracked file | **NOT MIGRATED**: the token is a `SecretRef` resolved per call and never held; the shape is added to `SECRET_PATTERN` so it cannot be pasted into any record. The source's committed tokens were reported to the owner and not copied |
+| `user_info` (username, first name, id) passed to the router | Identity by Telegram id, presentation by name | Only the mapped platform actor is carried; names are not |
+| HTML `ParseMode`, `esc()` everywhere, 4000-character chunking | Presentation coupled to Telegram's HTML rules | **ADAPT chunking only**: plain text, no markup, so nothing needs escaping |
+| Document and photo download into `FileManager`, `pending_files` per user | Attachments stored on disk and attached to the next command | **NOT MIGRATED in this slice**: a non-text message is `unsupported_content`; attachments are a later slice with their own storage rule |
+| `/skills`, `/mcps`, `/status`, `/reload` queries | Router-internal queries | `/status` answers from the Agent's snapshot; `/help` is static; the rest have no platform equivalent yet |
+
+Decision (2026-09-22): **ADAPT** polling, the numeric sender check and the
+direct-command idea; **REFUSE** the token-in-file, the empty-allowlist default,
+the HTML coupling and, for now, attachments. The adapter adds no authority:
+mapping decides which actor a sender is, and the resident Agent's membership
+rule and the Gateway decide everything after that, as they do for every
+ingress. The runtime install stays `pydantic` alone; no Telegram library is
+imported.
+
+Review of the first version found four things worth recording. An exception
+from the Agent or the state store escaped `poll_once`, killed the loop and
+lost the update; handling is guarded and what raised becomes a `failed`
+delivery. The loop stopped only on a conflict and re-polled a revoked token
+once a second forever; it stops on anything not retryable and backs off
+otherwise. `models.wire.redacted` trimmed before it redacted, so a token
+straddling the cut survived as a fragment, which the token-in-URL made
+reachable; the shared helper redacts first, and the wire's failure rules are
+parametrized by prefix rather than copied, so a 429 is retryable here as it
+is for a model. And an unmapped sender was answered, letting a stranger drive
+unbounded outbound calls; the source ignored disallowed senders silently on
+every handler but `/start`, and so does this adapter, on every handler.
+
+Known limitation: an update handled in this process is not handled again on
+redelivery, but the offset lives in memory, so a batch handled just before a
+restart may be redelivered once. The engine's idempotency key does not cover a
+routed message; a durable offset belongs with the durable local state in a
+later slice.
+
+Rollback removes `src/channels/` and `tests/test_telegram_ingress.py` and the
+two additions to `SECRET_KEYS` and `SECRET_PATTERN`; nothing else depends on
+them.
