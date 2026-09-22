@@ -22,13 +22,20 @@ from capabilities.runtime import CapabilityGrant
 from common.assets import AssetIdentity
 from common.authorization import DeviceAssetSelection, DeviceAuthorization
 from common.base import Symbol
+from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeExecutionSubject
+from common.identity import AuthenticatedActor, entitled
 from control_plane.distribution import InMemoryPackageRegistry
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 
 AuthorizationErrorCode = Literal[
+    "session_expired",
+    "actor_mismatch",
+    "actor_unknown",
+    "actor_disabled",
     "actor_not_admitted",
     "asset_not_published",
+    "asset_not_entitled",
     "kind_mismatch",
     "tool_not_advertised",
     "tool_not_grantable",
@@ -82,16 +89,64 @@ class InMemoryAuthorizationRegistry:
             (item for item in advertisement.capabilities if item.identity.key == asset.key), None
         )
 
+    def _member_groups(self, actor: str) -> tuple[str, ...]:
+        """What the platform recorded when this member accepted their
+        invitation, which is the only place entitlement is read from. Somebody
+        the platform does not know, or has disabled, is not entitled to
+        anything, and saying so beats answering as if they had no groups."""
+        try:
+            user = self.enrollment.user(actor)
+        except EnrollmentError:
+            raise AuthorizationError("actor_unknown") from None
+        if user.status != "active":
+            raise AuthorizationError("actor_disabled")
+        return user.groups
+
+    def _valid(self, identity: AuthenticatedActor, now: datetime | None) -> AuthenticatedActor:
+        who = AuthenticatedActor.model_validate(identity)
+        if not who.valid_at(now if now is not None else datetime.now(UTC)):
+            raise AuthorizationError("session_expired")
+        return who
+
+    def available(
+        self, identity: AuthenticatedActor, *, now: datetime | None = None
+    ) -> tuple[PublishedAssetPackage, ...]:
+        """Which published Workflows and Skills this member may use: the list
+        they choose from. It answers only for a member the platform knows,
+        has not disabled, and whose session is still valid, because a list of
+        what somebody may use is itself something only they should see.
+        Being entitled to one grants no execution."""
+        who = self._valid(identity, now)
+        groups = self._member_groups(who.actor)
+        return tuple(
+            package
+            for package in self.packages.discover()
+            # A decision names a Workflow, a Skill or a tool, and tools come
+            # from the device rather than the Registry, so offering any other
+            # published kind here would offer what cannot be chosen.
+            if package.kind in ("workflow", "skill")
+            and entitled(package.metadata, who.actor, groups)
+        )
+
     def select(
-        self, selection: DeviceAssetSelection, *, now: datetime | None = None
+        self,
+        identity: AuthenticatedActor,
+        selection: DeviceAssetSelection,
+        *,
+        now: datetime | None = None,
     ) -> DeviceAssetSelection:
         """Record one decision, or say why the member may not make it."""
+        moment = now if now is not None else datetime.now(UTC)
+        who = self._valid(identity, moment)
         item = DeviceAssetSelection.model_validate(selection)
+        if who.actor != item.actor:
+            # A member decides as themselves; nobody decides for anyone else.
+            raise AuthorizationError("actor_mismatch")
         # A decision dated in the future could never appear in an
         # authorization, because a bundle refuses a decision newer than
         # itself; one such record would leave the device with no bundle at
         # all, so it is refused where it arrives.
-        if item.decided_at > (now if now is not None else datetime.now(UTC)):
+        if item.decided_at > moment:
             raise AuthorizationError("decision_in_future")
         if not self._member(item.actor, item.bridge_id):
             raise AuthorizationError("actor_not_admitted")
@@ -117,6 +172,8 @@ class InMemoryAuthorizationRegistry:
                 raise AuthorizationError("asset_not_published")
             if package.kind != item.kind:
                 raise AuthorizationError("kind_mismatch")
+            if not entitled(package.metadata, item.actor, self._member_groups(item.actor)):
+                raise AuthorizationError("asset_not_entitled")
         current = self._selections.get(item.key)
         if current is not None and current.status == "active":
             raise AuthorizationError("duplicate_selection")
@@ -124,11 +181,19 @@ class InMemoryAuthorizationRegistry:
         return item.model_copy(deep=True)
 
     def revoke(
-        self, bridge_id: Symbol, actor: Symbol, asset: AssetIdentity
+        self,
+        identity: AuthenticatedActor,
+        bridge_id: Symbol,
+        asset: AssetIdentity,
+        *,
+        now: datetime | None = None,
     ) -> DeviceAssetSelection:
+        """A member takes back their own decision. Like making one, it needs
+        a session that is still valid."""
+        who = self._valid(identity, now)
         key = (
             TypeAdapter(Symbol).validate_python(bridge_id),
-            TypeAdapter(Symbol).validate_python(actor),
+            who.actor,
             AssetIdentity.model_validate(asset).key,
         )
         current = self._selections.get(key)

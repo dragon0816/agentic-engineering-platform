@@ -99,13 +99,22 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("invitation_used")
         if item.actor != checked_actor:
             raise EnrollmentError("invitation_actor_mismatch")
-        user = PlatformUser(actor=checked_actor, invitation_id=key)
+        user = PlatformUser(actor=checked_actor, invitation_id=key, groups=item.groups)
         accepted = Invitation.model_validate(
             {**item.model_dump(), "status": "accepted", "accepted_by": checked_actor}
         )
         self._invitations = {**self._invitations, key: accepted}
         self._users = {**self._users, checked_actor: user}
         return _copy(user)
+
+    def user(self, actor: Symbol) -> PlatformUser:
+        """The platform's own record of one member, including the groups the
+        accepted invitation granted. Entitlement is decided from this."""
+        key = TypeAdapter(Symbol).validate_python(actor)
+        item = self._users.get(key)
+        if item is None:
+            raise EnrollmentError("user_missing")
+        return _copy(item)
 
     def register_device(
         self, device: BridgeDevice, advertisement: BridgeRegistration
