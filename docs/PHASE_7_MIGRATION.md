@@ -72,3 +72,53 @@ Keep source repositories and the old Host Bridge frozen at recorded revisions
 through parity and rollback rehearsal. Disable one entry point at a time only
 after its evidence passes. Archive remains a later owner decision; deletion is
 outside Phase 7.
+
+## Resident local Agent and durable local state
+
+Two source behaviours overlap this slice. The pinned `rs_workflow_system` Host
+Bridge keeps job state on the Windows computer that runs the job and reports it
+outward, characterized in `docs/PHASE_3_MIGRATION.md` when its job runner became
+the workflow engine. The pinned `telegram-local-agent` runs a resident local
+Agent that routes deterministically before anything else, characterized in
+`docs/PHASE_2_MIGRATION.md`. Decision (2026-09-22): **ADAPT** both through the
+contracts this repository already has, and write no new runtime. The resident
+Agent is a thin admission layer over the existing `Gateway`; local run state is
+the existing `LocalRunSummary` on a SQLite file that follows the checkpoint
+store's single-writer rule. Neither source's transport, token handling or
+process model is copied.
+
+Three choices were made here. Admission happens on the Bridge from its own copy
+of membership, not by asking the control plane, because company work must not
+stop when the shared platform is unreachable (Architecture, "Local-first
+resilience"); the device half of the rule is one function in
+`common.enrollment` that the control plane's reference and the Agent both call,
+and the membership copy carries the company-owner rule in its own validator,
+so the two cannot drift. Review of the first version found the rule written
+twice with two vocabularies, which is exactly the drift the slice claimed to
+prevent. The ingress becomes the request's channel
+and nothing more, so a Telegram sender, a polled job and a local operator are
+refused or admitted by one rule and routed by one Gateway. And the installation
+rule was lifted out of the in-memory reference into `common.distribution` so
+the durable store and the reference cannot disagree about what a valid install
+is; the reference now reports the shared rule's refusals in its own codes.
+
+Review also found that the Agent recorded the engine's pre-flight rejections as
+runs (the engine mints a run id for a rejection it never starts, and the Agent
+projected it), wrote a timed-out run once and never again although the engine
+keeps driving it, executed a redelivered job twice, and raised a state error
+over a workflow result that had already happened. The Agent now records only
+runs the engine knows, settles a timed-out run in the background, uses the job
+id as the idempotency key, and reports a failed record on the outcome. The
+engine, not the durable inventory, answers for what is installed on the
+Bridge: packages obtained from the Registry and manifests loaded into the
+engine are two records today, and joining them is transport work for slice 2f.
+
+Slice 2d was split from the "local Agent and transports" row into three: this
+slice needs no network, while Telegram polling (2e) and the authenticated
+shared-platform transports (2f) each need an authentication design that is
+better reviewed on its own.
+
+Rollback removes `common.local_agent`, `host_runtime.agent`,
+`host_runtime.state` and their tests, and moves `verify_installation` back
+into the in-memory reference. The Gateway, engine, Bridge, enrollment and
+distribution references are unchanged.

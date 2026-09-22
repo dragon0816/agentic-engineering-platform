@@ -84,3 +84,23 @@ class BridgeExecutionSubject(Contract):
 
     actor: Symbol
     bridge_id: Symbol
+
+
+DeviceAdmissionCode = Literal[
+    "device_identity_mismatch", "device_disabled", "company_owner_required"
+]
+
+
+def admit_device(device: BridgeDevice, *, actor: str, bridge_id: str) -> DeviceAdmissionCode | None:
+    """The device half of admission, written once for the control plane and
+    the Bridge computer: the request names this device, the device is active,
+    and on a company workstation the actor is its registered owner. Whether
+    the actor is bound is the caller's question, answered from whichever
+    membership record it holds."""
+    if bridge_id != device.bridge_id:
+        return "device_identity_mismatch"
+    if device.status != "active":
+        return "device_disabled"
+    if device.device_kind == "company_workstation" and actor != device.registered_by:
+        return "company_owner_required"
+    return None
