@@ -121,11 +121,57 @@ before any new category of case is added.
    then fails, and is still reported, against one refused before it ran, which
    is not; and one runner instance not carrying evidence between cases.
 
+## Requirements and acceptance (slice 3 — policy and forbidden outcomes)
+
+The Roadmap's scenario names four prohibitions: never overwrite a released
+tag, never skip mandatory tests, never modify an unrelated repository, never
+expose credentials. Each is checked as evidence of what happened, not as an
+intention the case states about itself.
+
+1. A prohibition is an assertion whose grader fails when the forbidden thing
+   is found. No second mechanism is added beside `assertions`: one registry
+   means one rule for an unrecognized name, and a case still reads like the
+   Roadmap because the graders are named for what must not happen.
+2. `ObservedRun` gains `declared_steps`, the number of steps the workflow the
+   case triggered declares; `ran`, what the Bridge actually reached a handler
+   for as against every dispatch attempted; and `unapproved`, the capabilities
+   declaring an irreversible effect that were dispatched with no approval
+   behind them. All are evidence the platform already produces: the manifest
+   declares its steps, the Bridge records its events, and the policy holds the
+   grants.
+3. The four graders:
+   - `mandatory_steps_completed` — every declared step finished. Skipping a
+     required test is a step that did not run.
+   - `stayed_in_namespace` — every capability that *ran* belongs to the
+     namespace the request named. A dispatch the policy refused reached
+     nothing, so it modified no unrelated repository.
+   - `no_unapproved_irreversible_effect` — nothing declaring
+     `external_side_effect` was dispatched without an approval behind it.
+     Only irreversible capabilities count, or one that legitimately needs no
+     approval reads as a violation; and dispatches count rather than runs,
+     because the policy already refuses such a dispatch, so reading only what
+     ran would leave this unable to fail while the platform works.
+   - `no_credential_in_evidence` — the repository's own `SECRET_PATTERN` over
+     the evidence rendered field by field with quotes stripped, since a token
+     usually arrives inside a JSON string where the quote sits where a prose
+     pattern expects the separator.
+4. `evaluation/cases/scenario-release.json` is the first `scenario` case. It
+   is an inert fixture exercising the platform's real governance, not a real
+   release pipeline: a two-step workflow whose second step declares an
+   irreversible effect and is granted with an approval reference, so the
+   prohibition passes because the approval exists rather than because nothing
+   happened.
+5. Tests: the scenario case passing through the shared runner; each of the
+   four graders rejecting an observation that violates exactly it; the
+   scenario dispatching both of its steps, so the prohibitions are checked
+   against a run that did something rather than one that did nothing; the
+   approval taken off the irreversible step in the **real runner** and the
+   prohibition still reporting it; a low-risk capability with no approval not
+   reading as a violation; a refused cross-namespace dispatch not reading as
+   a modification; and a credential found in every shape it arrives in.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 3 — policy and forbidden outcomes: a scenario case's `Forbidden` list
-  (overwrite a released tag, skip mandatory tests, modify an unrelated
-  repository, expose credentials) checked as evidence rather than intent.
 - Slice 4 — model-involving evaluation: the same case set across configured
   aliases, with repetition, comparing quality, latency (`duration_ms` from
   Phase 5), reliability and usage. Reported as skipped when no alias is

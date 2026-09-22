@@ -1,61 +1,55 @@
-# Handoff — Phase 6 evaluation, slice 2 (observable execution)
+# Handoff — Phase 6 evaluation, slice 3 (policy and forbidden outcomes)
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-6/observable-execution`, based on `main` after PR #40 merged.
+Branch: `phase-6/forbidden-outcomes`, based on `main` after PR #41 merged.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-Close the one grader slice 1 left unable to fail, before adding any new
-category of case. Requirements: `docs/phases/PHASE_6_EVALUATION.md` (slice 2);
-contracts: `docs/CONTRACTS.md` ("Evaluation harness").
+The Roadmap's scenario names four prohibitions. Check each as evidence of
+what happened rather than as an intention the case states about itself.
+Requirements: `docs/phases/PHASE_6_EVALUATION.md` (slice 3); contracts:
+`docs/CONTRACTS.md` ("Evaluation harness").
 
 ## Owner decisions in force
 
 Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
-**Codex and Claude Code are out of scope for Phase 6 entirely** (2026-09-22),
-so they are not evaluated, not driven and not a capability the platform
-invokes.
-
-## The gap this slice closed
-
-Slice 1's review found that `no_execution` passed for four of the six cases
-without being able to fail: their observations came from a bare `RequestRouter`
-or the registry proof, neither of which can execute anything, so an empty
-effect list was not evidence, it was the absence of a witness.
+**Codex and Claude Code are out of scope for Phase 6 entirely** (2026-09-22).
 
 ## Completed
 
-- `ObservedRun.observable` names the effects a run could detect, and
-  `ObservedRun.dispatched` names every capability the Bridge was asked to run.
-  `no_execution` now fails when `execute` was not observable, and the
-  always-on forbidden check fails for any forbidden effect the run could not
-  have seen. Absence of evidence stopped counting as evidence of absence.
-- `CaseRunner` and `run_cases(cases, runner)` move the wiring out of the
-  contract: the harness grades what a runner returns and does not decide how a
-  case is exercised.
-- `tests/evaluation_runner.py` is the repository's runner. One `Gateway` holds
-  all three shipped skill manifests, the release workflow, and a Bridge whose
-  `events` supply both `dispatched` and the declared side effect of anything
-  that ran. Every routed case goes through it.
-- 20 test cases in `tests/test_evaluation.py`, including: every case still
-  passing through the shared runner; every routed case dispatching something
-  except the one that refuses; `legacy/run-testing` dispatched and recorded
-  although the repository deliberately installs no implementation for it; a
-  check that could not have seen its evidence failing rather than passing; and
-  the effect reader proven behaviourally rather than by its own declaration.
-- PR #41 review (5 findings) applied, all fixed. Four were the evidence being
-  weaker than the docs claimed: a dispatch that failed *after* the handler ran
-  contributed no effect, so a capability that did its damage and then raised
-  read as a clean run; one `GatewayRunner` instance carried its Bridge's event
-  log between cases; `DiscoveryRunner` declared it watched everything while
-  watching nothing, moving the hole from the grader into the runner; and the
-  observability test compared the runner's declaration against the constant
-  the runner itself used. The fifth was a trap for later: the repository
-  runner chose the discovery wiring from a missing route, which a slice 3
-  scenario case could legitimately have.
+- A prohibition is an assertion whose grader fails when the forbidden thing is
+  found. No second mechanism beside `assertions`, so one registry keeps one
+  rule for an unrecognized name, and a case still reads like the Roadmap
+  because the graders are named for what must not happen.
+- `ObservedRun.declared_steps`, `ObservedRun.ran` and `ObservedRun.unapproved`,
+  all read from what the platform already produces: the workflow manifest
+  declares its steps, the Bridge records its events, and the policy holds the
+  grants.
+- Four graders: `mandatory_steps_completed`, `stayed_in_namespace`,
+  `no_unapproved_irreversible_effect` and `no_credential_in_evidence`.
+- `evaluation/cases/scenario-release.json`, the first `scenario` case, and
+  the fixture behind it in `tests/evaluation_runner.py`: a two-step workflow
+  whose second step declares `external_side_effect` and is granted with an
+  approval reference.
+- 30 test cases in `tests/test_evaluation.py`, including each prohibition
+  rejecting an observation that violates exactly it, a reason naming what it
+  found without echoing the credential it found, and the scenario being
+  graded against a run that actually dispatched both steps.
+- PR #42 review (5 findings) applied, all fixed. Two were serious and in
+  opposite directions: `no_unapproved_irreversible_effect` could not fail for
+  what it names, because the policy already refuses an unapproved high-risk
+  dispatch, so nothing unapproved ever *ran*; and it fired for any unapproved
+  capability regardless of side effect, so a read that legitimately needs no
+  approval read as an overwritten tag. It now counts dispatches rather than
+  runs, and only irreversible ones. A test drives the real runner with the
+  approval removed and asserts the prohibition reports it. The credential
+  scan missed JSON, which is the shape a leaked token actually arrives in.
+  `stayed_in_namespace` read attempted dispatches, so a refused cross-namespace
+  call read as a modification; it reads what ran. And the invoked-event filter
+  was duplicated, now one `invoked` helper.
 
 ## In Progress
 
@@ -63,26 +57,23 @@ effect list was not evidence, it was the absence of a witness.
 
 ## Remaining
 
-Listed in `docs/TASKS.md`. Next is slice 3, the first `scenario` case with its
-forbidden outcomes checked as evidence.
+Listed in `docs/TASKS.md`. Next is slice 4, model-involving evaluation across
+configured aliases with repetition, reported as skipped when no alias is
+configured rather than quietly passed.
 
 ## Architecture decisions made
 
-- The Bridge already records every dispatch in `events`, so no recording
-  wrapper was added. The evidence the harness needs was already produced by
-  the platform.
-- Effects are read from the installed capability's declared `side_effect` for
-  anything that ran, not from what a handler did. A route to a capability
-  declared `execute` is caught by the declaration, which is what a case
-  forbids.
-- The filesystem capability is installed but never granted. A case about
-  routing must not touch this machine's disk in order to prove that routing
-  executed nothing.
-- The registry proof declares that it observes nothing. A proof that
-  dispatches nothing has not watched for an effect, and saying it did would
-  move this slice's hole out of the grader and into the runner.
-- Which cases are discovery proofs is named rather than inferred from a
-  missing route, so a scenario case that legitimately omits one is routed.
+- The scenario's irreversible step passes its prohibition because an approval
+  exists, not because nothing ran. A prohibition proved by a run where nothing
+  happened proves nothing, and a test asserts the scenario really does perform
+  an `external_side_effect`.
+- `no_unapproved_irreversible_effect` fails when `external_side_effect` was
+  not observable at all, following the slice 2 rule that absence of evidence
+  is not evidence of absence.
+- The scenario forbids only `write` at the side-effect level. Forbidding
+  `external_side_effect` there would have contradicted the case: the point is
+  that an irreversible effect is permitted **under approval**, which is a
+  different check from forbidding it outright.
 
 ## Exact verification commands and results
 
@@ -90,7 +81,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 632 passed, 3 skipped (link privileges)
+# PASS: 646 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -109,25 +100,21 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Known issues / limitations
 
-- `observable` is still declared by the runner rather than derived, so a
-  runner that wires no Bridge and claimed to watch everything would be
-  believed. What the review forced is that the two runners here are honest
-  about it, and that the Gateway runner's claim is now backed behaviourally:
-  a capability that declares `execute`, runs and then fails is reported, and
-  one refused before it ran is not.
-- The discovery case now forbids no side effects and no longer asserts
-  `no_execution`. It issues no request, so there is no request whose effects
-  could be forbidden; what discovery must not expose is asserted structurally
-  in `tests/test_registry.py`, which checks the registry and the advertisement
-  have no `execute` at all. Nothing was lost, but the case is narrower than it
-  looked.
-- All six cases remain category `deterministic`. No `agent` or `scenario` case
-  exists yet.
-- Two test modules still load individual case files for their own unit
-  assertions. That overlap is deliberate: they test one component, the suite
-  is the cross-cutting gate.
+- The scenario is an inert fixture exercising the platform's real governance,
+  not a real release pipeline. Its workflow, capabilities and grants are
+  defined in `tests/evaluation_runner.py`. What it proves is that the harness
+  catches a scenario-level violation, not that any particular release process
+  is correct.
+- `stayed_in_namespace` compares the namespace of what ran against the
+  request's. A capability legitimately shared across namespaces would need a
+  case-level allowance that does not exist yet.
+- `no_credential_in_evidence` scans the evidence field by field with quotes
+  stripped, so a token inside a JSON string is caught. A credential that never
+  reaches the observation, because a handler logged it elsewhere, is not
+  caught here; the adapters' own redaction covers that path.
+- No `agent` case exists yet. That category arrives with slice 4.
 
 ## Next Recommended Action
 
-Merge PR #41 on green CI. Then write the slice 3 requirements and add the
-first `scenario` case with its forbidden outcomes.
+Merge PR #42 on green CI. Then write the slice 4 requirements and add
+model-involving evaluation.

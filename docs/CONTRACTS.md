@@ -981,6 +981,33 @@ assertion name the repository's cases declare: `no_model_call`, `no_execution`,
 `workflow_succeeds`, `scoped_identity`, `published_discovery` and
 `bridge_advertisement`.
 
+A prohibition is an assertion whose grader fails when the forbidden thing is
+found, so the Roadmap's `Forbidden` list needs no second mechanism beside
+`assertions`. `ObservedRun.declared_steps` is how many steps the triggered
+workflow declares, `ObservedRun.ran` is what the Bridge actually reached a
+handler for as opposed to every dispatch attempted, and
+`ObservedRun.unapproved` is the capabilities declaring an irreversible effect
+that were *dispatched* with no approval behind them. All come from what the
+platform already produces: the manifest, the Bridge's events and the policy's
+grants. The four prohibitions:
+
+- `mandatory_steps_completed` — a skipped mandatory test is a declared step
+  that did not finish.
+- `stayed_in_namespace` — touching an unrelated repository is *running* a
+  capability outside the namespace the request named. A dispatch the policy
+  refused reached nothing and so modified nothing.
+- `no_unapproved_irreversible_effect` — overwriting a released tag is an
+  `external_side_effect` nobody approved. Only irreversible capabilities
+  count, since a low-risk one legitimately carries no approval; and every
+  dispatch counts, not only what ran, because the policy refuses such a
+  dispatch today and reading only what ran would leave this unable to fail
+  while the platform works and silent about the moment it stops. It also
+  fails when an irreversible effect was not observable at all.
+- `no_credential_in_evidence` — the repository's own `SECRET_PATTERN` over
+  the evidence, rendered field by field with quotes stripped, because a token
+  usually arrives inside a JSON string where the quote sits exactly where a
+  prose pattern expects the separator.
+
 `grade(case, observed, graders=)` returns a `CaseResult` (`case_id`, `passed`,
 `grades`, `unknown_assertions`, and `reasons()`). The expected route is checked
 when the case names one, and a mismatch names the target reached rather than

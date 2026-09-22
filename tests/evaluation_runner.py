@@ -28,10 +28,10 @@ from agent.skills import SkillManifest, SkillRegistry
 from capabilities.contracts import CapabilitySpec
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
-from common.assets import ExecutionDependencies, TaskManifest, WorkflowManifest
+from common.assets import AssetIdentity, ExecutionDependencies, TaskManifest, WorkflowManifest
 from common.base import Contract
 from common.evaluation import EvaluationCase, ObservedRun
-from common.execution import RequestContext, SideEffect
+from common.execution import RequestContext, RouteDecision, SideEffect
 from models.contracts import ModelRequest, ModelResponse
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
@@ -53,15 +53,25 @@ INVOKED_CODES = frozenset({"timeout", "transient_failure", "handler_error", "inv
 DISCOVERY_CASES = frozenset({"discover-sample-task"})
 
 
-def effects_of(bridge: BridgeExecutor, installed: InstalledCapabilities) -> tuple[SideEffect, ...]:
-    """The declared side effect of everything the Bridge actually put in
-    motion. A capability that ran and then failed still ran, so its effect
-    counts; a dispatch refused before the handler was reached did not."""
-    effects: list[SideEffect] = []
+def invoked(bridge: BridgeExecutor) -> tuple[AssetIdentity, ...]:
+    """What the Bridge actually reached a handler for. A capability that ran
+    and then failed still ran; a dispatch refused before the handler did not.
+    One definition, so effects and approvals read the same events."""
+    seen: list[AssetIdentity] = []
     for event in bridge.events:
         if event.status != "succeeded" and event.code not in INVOKED_CODES:
             continue
-        binding = installed.get(event.asset)
+        if event.asset not in seen:
+            seen.append(event.asset)
+    return tuple(seen)
+
+
+def effects_of(bridge: BridgeExecutor, installed: InstalledCapabilities) -> tuple[SideEffect, ...]:
+    """The declared side effect of everything the Bridge actually put in
+    motion."""
+    effects: list[SideEffect] = []
+    for identity in invoked(bridge):
+        binding = installed.get(identity)
         if binding is not None and binding.spec.side_effect not in effects:
             effects.append(binding.spec.side_effect)
     return tuple(effects)
@@ -144,6 +154,92 @@ def release_workflow() -> WorkflowManifest:
     )
 
 
+def publish_artifact_spec() -> CapabilitySpec:
+    """The irreversible half of the scenario. Declaring
+    `external_side_effect` is what makes "was this approved?" a question the
+    platform can answer."""
+    return CapabilitySpec.model_validate(
+        {
+            "identity": {
+                "namespace": "engineering",
+                "name": "publish-artifact",
+                "version": "1.0.0",
+            },
+            "name": "engineering.publish_artifact",
+            "description": "Inert artifact publication fixture",
+            "input_contract": "engineering.validate-release.input.v1",
+            "output_contract": "engineering.validate-release.output.v1",
+            "side_effect": "external_side_effect",
+            "policy": {
+                "required_permissions": ["engineering.publish"],
+                "policy_refs": ["release-policy"],
+                "risk": "high",
+                "approval_required": True,
+            },
+        }
+    )
+
+
+def release_package_workflow() -> WorkflowManifest:
+    """Two steps, so that "a mandatory step was skipped" is a thing that can
+    be seen rather than asserted."""
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {
+                    "namespace": "engineering",
+                    "name": "release-package",
+                    "version": "1.0.0",
+                },
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "private",
+                "lifecycle": "draft",
+            },
+            "kind": "workflow",
+            "description": "Inert two-step release fixture: validate, then publish",
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False},
+            "input_contract": "engineering.validate-release.input.v1",
+            "output_contract": "engineering.validate-release.output.v1",
+            "steps": [
+                {"namespace": "engineering", "name": "validate-release", "version": "1.0.0"},
+                {"namespace": "engineering", "name": "publish-artifact", "version": "1.0.0"},
+            ],
+        }
+    )
+
+
+def shipment_skill() -> SkillManifest:
+    return SkillManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {
+                    "namespace": "engineering",
+                    "name": "shipment-skill",
+                    "version": "1.0.0",
+                },
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "private",
+                "lifecycle": "draft",
+            },
+            "alias": "shipment",
+            "instructions": "Trigger the inert two-step release fixture used by the scenario case.",
+            "commands": [
+                {
+                    "name": "run",
+                    "kind": "workflow",
+                    "target": {
+                        "namespace": "engineering",
+                        "name": "release-package",
+                        "version": "1.0.0",
+                    },
+                }
+            ],
+            "default_command": "run",
+        }
+    )
+
+
 def grants() -> tuple[CapabilityGrant, ...]:
     """What the evaluation actor may do. The filesystem read is installed but
     never granted: a case about routing must not touch this machine's disk to
@@ -158,7 +254,24 @@ def grants() -> tuple[CapabilityGrant, ...]:
                 "approval_ref": "release-approval",
             }
         ),
+        CapabilityGrant.model_validate(
+            {
+                "actor": "engineer",
+                "asset": publish_artifact_spec().identity,
+                "permissions": ["engineering.publish"],
+                "policy_refs": ["release-policy"],
+                # The scenario's irreversible step passes its prohibition
+                # because somebody approved it, not because nothing ran.
+                "approval_ref": "release-approval",
+            }
+        ),
     )
+
+
+def approvals() -> dict[AssetIdentity, str | None]:
+    """Which identities may run under an approval, read from the grants the
+    Bridge policy actually holds."""
+    return {grant.asset: grant.approval_ref for grant in grants()}
 
 
 class GatewayRunner:
@@ -170,20 +283,31 @@ class GatewayRunner:
     def __init__(self) -> None:
         self.model = CountingModel()
         self.handler = RecordingHandler()
+        self.publisher = RecordingHandler()
         self.installed = InstalledCapabilities()
         self.bridge = BridgeExecutor(self.installed)
+        self.workflows = InstalledWorkflows()
 
     def _build(self) -> Gateway:
         self.model = CountingModel()
         self.handler = RecordingHandler()
+        self.publisher = RecordingHandler()
         skills = SkillRegistry()
         for name in SKILL_FILES:
             for data in json.loads((ROOT / "skills" / name).read_text(encoding="utf-8")):
                 skills.register(SkillManifest.model_validate(data))
+        skills.register(shipment_skill())
         installed = InstalledCapabilities()
         installed.register(
             validate_release_spec(),
             self.handler,
+            Probe,
+            Report,
+            ExecutionDependencies(central_required=False),
+        )
+        installed.register(
+            publish_artifact_spec(),
+            self.publisher,
             Probe,
             Report,
             ExecutionDependencies(central_required=False),
@@ -199,11 +323,40 @@ class GatewayRunner:
         self.bridge = BridgeExecutor(installed, LocalPolicy(grants()))
         workflows = InstalledWorkflows()
         workflows.register(release_workflow())
+        workflows.register(release_package_workflow())
+        self.workflows = workflows
         return Gateway(
             RequestRouter(CommandRouter(skills), model=self.model),
             self.bridge,
             WorkflowEngine(workflows, self.bridge),
         )
+
+    def _declared_steps(self, decision: RouteDecision) -> int:
+        """What the manifest the request triggered says must happen."""
+        if decision.kind != "workflow" or decision.target is None:
+            return 0
+        manifest = self.workflows.get(decision.target)
+        return len(manifest.steps) if manifest is not None else 0
+
+    def _unapproved(self) -> tuple[AssetIdentity, ...]:
+        """Irreversible capabilities the request tried to run with no
+        approval behind them.
+
+        Two choices here, both found by review. Only irreversible ones count,
+        or a low-risk capability that legitimately needs no approval reads as
+        a violation. And every *dispatch* counts, not only what ran: the
+        policy refuses an unapproved high-risk dispatch today, so reading
+        only what ran would make this unable to fail while the platform works
+        and silent about the moment it stops."""
+        granted = approvals()
+        seen: list[AssetIdentity] = []
+        for event in self.bridge.events:
+            binding = self.installed.get(event.asset)
+            if binding is None or binding.spec.side_effect != "external_side_effect":
+                continue
+            if not granted.get(event.asset) and event.asset not in seen:
+                seen.append(event.asset)
+        return tuple(seen)
 
     def run(self, case: EvaluationCase) -> ObservedRun:
         gateway = self._build()
@@ -216,8 +369,11 @@ class GatewayRunner:
             side_effects=effects_of(self.bridge, self.installed),
             observable=WATCHED,
             dispatched=tuple(event.asset for event in self.bridge.events),
+            ran=invoked(self.bridge),
             status=workflow.run.status if workflow is not None else None,
             completed_steps=workflow.run.completed_steps if workflow is not None else 0,
+            declared_steps=self._declared_steps(result.routing.decision),
+            unapproved=self._unapproved(),
             failure=result.routing.failure,
         )
 

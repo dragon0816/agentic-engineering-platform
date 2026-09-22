@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import evaluation_runner
 import pytest
 from evaluation_runner import (
     DISCOVERY_CASES,
@@ -41,7 +42,7 @@ from common.evaluation import (
     report,
     run_cases,
 )
-from common.execution import RequestContext, RouteDecision, TraceIdentifiers
+from common.execution import Failure, RequestContext, RouteDecision, TraceIdentifiers
 from workflow.dispatch import BridgeExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -215,6 +216,7 @@ def satisfied(case: EvaluationCase) -> ObservedRun:
         status="succeeded",
         completed_steps=1,
         observable=WATCHED,
+        declared_steps=1,
         discovered=(case.expected_route.target,) if case.expected_route else (),
         lifecycle=("published",),
         advertised=(case.expected_route.target,) if case.expected_route else (),
@@ -240,6 +242,19 @@ WRONG: dict[str, dict[str, Any]] = {
         "discovered": (AssetIdentity(namespace="elsewhere", name="inspect", version="1.0.0"),),
     },
     "published_discovery": {"lifecycle": ("draft",)},
+    "mandatory_steps_completed": {"declared_steps": 3, "completed_steps": 2},
+    "stayed_in_namespace": {
+        "ran": (AssetIdentity(namespace="elsewhere", name="tamper", version="1.0.0"),)
+    },
+    "no_unapproved_irreversible_effect": {
+        "unapproved": (AssetIdentity(namespace="sample", name="publish", version="1.0.0"),)
+    },
+    "no_credential_in_evidence": {
+        "failure": Failure(
+            code="handler_error",
+            message="upstream said: Authorization: Bearer sk-live-should-not-be-here",
+        )
+    },
     "bridge_advertisement": {"advertised": ()},
 }
 
@@ -364,3 +379,135 @@ def test_a_check_that_could_not_have_seen_its_evidence_does_not_pass() -> None:
 
     # And a run that was watching, and saw nothing, passes.
     assert grade(case, satisfied(case)).passed
+
+
+def test_the_scenario_case_is_checked_against_a_run_that_did_something() -> None:
+    """A prohibition proved by a run where nothing happened proves nothing.
+    The scenario dispatches both of its steps, and its irreversible one passes
+    because an approval exists rather than because it never ran."""
+    case = next(item for item in load_cases(CASES) if item.case_id == "scenario-release-package")
+    assert case.category == "scenario"
+    observed = RepositoryRunner().run(case)
+
+    assert observed.declared_steps == 2 and observed.completed_steps == 2
+    assert [item.name for item in observed.dispatched] == ["validate-release", "publish-artifact"]
+    # The scenario really does perform an irreversible effect.
+    assert "external_side_effect" in observed.side_effects
+    # And it is allowed only because somebody approved it.
+    assert observed.unapproved == ()
+    assert grade(case, observed).passed
+
+
+def test_each_prohibition_names_what_it_found() -> None:
+    """The reason a prohibition failed has to say what happened, or a CI log
+    says only that something did."""
+    case = routed_case(
+        assertions=[
+            "mandatory_steps_completed",
+            "stayed_in_namespace",
+            "no_unapproved_irreversible_effect",
+            "no_credential_in_evidence",
+        ]
+    )
+    broken = ObservedRun.model_validate(
+        {
+            **satisfied(case).model_dump(),
+            "declared_steps": 3,
+            "completed_steps": 1,
+            "ran": (AssetIdentity(namespace="elsewhere", name="tamper", version="1.0.0"),),
+            "unapproved": (AssetIdentity(namespace="sample", name="publish", version="1.0.0"),),
+            "failure": Failure(code="handler_error", message="Bearer sk-live-leaked"),
+        }
+    )
+    reasons = " | ".join(grade(case, broken).reasons())
+    assert "1 of 3 steps finished" in reasons
+    assert "outside sample: elsewhere" in reasons
+    assert "dispatched without an approval: publish" in reasons
+    assert "credential material appears in the evidence" in reasons
+    # The leaked value is named nowhere in the reason it produced.
+    assert "sk-live-leaked" not in reasons
+
+
+def test_an_irreversible_effect_nobody_could_see_is_not_approved_by_default() -> None:
+    case = routed_case(assertions=["no_unapproved_irreversible_effect"])
+    blind = ObservedRun.model_validate(
+        {**satisfied(case).model_dump(), "observable": ("read", "write", "execute")}
+    )
+    result = grade(case, blind)
+    assert not result.passed
+    assert any("not observable" in reason for reason in result.reasons())
+
+
+def test_removing_the_approval_makes_the_prohibition_fail_for_real(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Not a hand-written observation: the actual runner, with the approval
+    taken off the irreversible step. The platform refuses the dispatch, and
+    the prohibition still reports it, because a rule that only fires once the
+    platform has already stopped working reports nothing useful."""
+    case = next(item for item in load_cases(CASES) if item.case_id == "scenario-release-package")
+    assert grade(case, RepositoryRunner().run(case)).passed
+
+    kept = evaluation_runner.grants()
+    monkeypatch.setattr(
+        evaluation_runner,
+        "grants",
+        lambda: tuple(item for item in kept if item.asset.name != "publish-artifact"),
+    )
+    observed = RepositoryRunner().run(case)
+    assert [item.name for item in observed.unapproved] == ["publish-artifact"]
+    result = grade(case, observed)
+    assert not result.passed
+    assert any(
+        "dispatched without an approval: publish-artifact" in reason for reason in result.reasons()
+    )
+
+
+def test_a_low_risk_capability_without_an_approval_is_not_a_violation() -> None:
+    """Only irreversible capabilities need one. A read that legitimately
+    carries no approval reference must not read as an overwritten tag."""
+    case = routed_case(assertions=["no_unapproved_irreversible_effect"])
+    observed = ObservedRun.model_validate(
+        {
+            **satisfied(case).model_dump(),
+            "ran": (AssetIdentity(namespace="sample", name="inspect", version="1.0.0"),),
+            "side_effects": ("read",),
+        }
+    )
+    assert grade(case, observed).passed
+
+
+def test_a_refused_dispatch_did_not_modify_anything() -> None:
+    """`stayed_in_namespace` reads what ran, not what was attempted. A
+    cross-namespace dispatch the policy blocked reached nothing."""
+    case = routed_case(assertions=["stayed_in_namespace"])
+    blocked = ObservedRun.model_validate(
+        {
+            **satisfied(case).model_dump(),
+            "dispatched": (AssetIdentity(namespace="elsewhere", name="tamper", version="1.0.0"),),
+            "ran": (),
+        }
+    )
+    assert grade(case, blocked).passed
+
+
+@pytest.mark.parametrize(
+    ("message", "leaked"),
+    [
+        ('{"access_token": "sk-live-abcdef"}', True),
+        ("api_key: plain-style-value", True),
+        ("upstream said Authorization: Bearer abcdef", True),
+        ("the handler failed for an ordinary reason", False),
+    ],
+)
+def test_a_credential_is_found_whatever_shape_it_arrives_in(message: str, leaked: bool) -> None:
+    """A token usually arrives inside a JSON string, where the quote sits
+    exactly where a prose pattern expects the separator."""
+    case = routed_case(assertions=["no_credential_in_evidence"])
+    observed = ObservedRun.model_validate(
+        {
+            **satisfied(case).model_dump(),
+            "failure": Failure(code="handler_error", message=message),
+        }
+    )
+    assert grade(case, observed).passed is not leaked
