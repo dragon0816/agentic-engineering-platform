@@ -281,6 +281,16 @@ what the control plane checks and stores. The shape of the answer already has
 a place to land: `AuthenticatedActor` is what an entry point produces once it
 has decided, whatever it did to decide.
 
+Review of the first version found the one new unguarded entry point: the
+list of what a member may use answered for an expired session, for somebody
+the platform had never invited and for a disabled member, while making a
+decision refused all three. A list of what somebody may use is itself
+something only they should see, so it is guarded like a decision. The same
+review found the `team` branch of `entitled` unreachable, which was true and
+worth saying out loud rather than deleting quietly: team visibility is
+decided by the owning-group test above it, and for a group-owned asset
+`team` and `private` mean the same thing.
+
 Rollback removes `src/common/identity.py`, the `groups` fields and the
 identity parameters on `select`, `revoke` and `available`; the selections and
 bundles from slice 2g keep working.

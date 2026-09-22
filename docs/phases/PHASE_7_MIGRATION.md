@@ -527,8 +527,10 @@ that can be widened by whoever sends it.
    actor may use one published asset. An unpublished asset is never usable.
    The owner may always use it, whether the owner is that actor or a group
    the actor belongs to, and so may a recorded contributor. Otherwise
-   `public` and `organization` are usable by any member of the platform,
-   `team` by members of the owning group, and `private` by nobody else.
+   `public` and `organization` are usable by any member of the platform, and
+   nothing else is usable by anybody else. That last line decides `team` and
+   `private` together, and for a group-owned asset they come to the same
+   answer, because the owning group is the team.
 4. `InMemoryAuthorizationRegistry.select(identity, selection)` requires an
    authenticated actor whose session is still valid and who is the member the
    decision belongs to: a member decides as themselves, and an expired
@@ -538,7 +540,10 @@ that can be widened by whoever sends it.
 5. `available(identity)` answers the question the decision names directly:
    which published Workflows and Skills this member may use. It is the list a
    member chooses from, and choosing is still a separate act that grants
-   nothing by itself.
+   nothing by itself. A list of what somebody may use is itself something
+   only they should see, so it answers for the same people a decision does: a
+   valid session, a member the platform knows, and one it has not disabled.
+   It offers only the kinds a decision can name.
 6. Entitlement is checked when a decision is made, not when a run happens: an
    authorization is a record of what was decided, and a member whose
    entitlement is withdrawn keeps their device's existing bundle until the
@@ -552,5 +557,7 @@ against an owner, a group member, a contributor and a stranger, and an
 unpublished asset usable by nobody; a member deciding as themselves only; an
 expired session deciding nothing; a Workflow the member is not entitled to
 refused while one they own is not; groups read from the platform's record and
-not from the identity; and the available list naming exactly what a member may
-use.
+not from the identity; the available list naming exactly what a member may use and
+refusing an expired session, an unknown actor and a disabled one; and a
+group-owned asset answering the same at `team` and `private` while a
+user-owned one marked `team` stays with its owner.

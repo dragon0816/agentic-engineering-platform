@@ -31,6 +31,8 @@ from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 AuthorizationErrorCode = Literal[
     "session_expired",
     "actor_mismatch",
+    "actor_unknown",
+    "actor_disabled",
     "actor_not_admitted",
     "asset_not_published",
     "asset_not_entitled",
@@ -87,22 +89,43 @@ class InMemoryAuthorizationRegistry:
             (item for item in advertisement.capabilities if item.identity.key == asset.key), None
         )
 
-    def _groups(self, actor: str) -> tuple[str, ...]:
+    def _member_groups(self, actor: str) -> tuple[str, ...]:
         """What the platform recorded when this member accepted their
-        invitation, which is the only place entitlement is read from."""
+        invitation, which is the only place entitlement is read from. Somebody
+        the platform does not know, or has disabled, is not entitled to
+        anything, and saying so beats answering as if they had no groups."""
         try:
-            return self.enrollment.user(actor).groups
+            user = self.enrollment.user(actor)
         except EnrollmentError:
-            return ()
+            raise AuthorizationError("actor_unknown") from None
+        if user.status != "active":
+            raise AuthorizationError("actor_disabled")
+        return user.groups
 
-    def available(self, identity: AuthenticatedActor) -> tuple[PublishedAssetPackage, ...]:
+    def _valid(self, identity: AuthenticatedActor, now: datetime | None) -> AuthenticatedActor:
+        who = AuthenticatedActor.model_validate(identity)
+        if not who.valid_at(now if now is not None else datetime.now(UTC)):
+            raise AuthorizationError("session_expired")
+        return who
+
+    def available(
+        self, identity: AuthenticatedActor, *, now: datetime | None = None
+    ) -> tuple[PublishedAssetPackage, ...]:
         """Which published Workflows and Skills this member may use: the list
-        they choose from. Being entitled to one grants no execution."""
-        groups = self._groups(identity.actor)
+        they choose from. It answers only for a member the platform knows,
+        has not disabled, and whose session is still valid, because a list of
+        what somebody may use is itself something only they should see.
+        Being entitled to one grants no execution."""
+        who = self._valid(identity, now)
+        groups = self._member_groups(who.actor)
         return tuple(
             package
             for package in self.packages.discover()
-            if entitled(package.metadata, identity.actor, groups)
+            # A decision names a Workflow, a Skill or a tool, and tools come
+            # from the device rather than the Registry, so offering any other
+            # published kind here would offer what cannot be chosen.
+            if package.kind in ("workflow", "skill")
+            and entitled(package.metadata, who.actor, groups)
         )
 
     def select(
@@ -113,11 +136,9 @@ class InMemoryAuthorizationRegistry:
         now: datetime | None = None,
     ) -> DeviceAssetSelection:
         """Record one decision, or say why the member may not make it."""
-        who = AuthenticatedActor.model_validate(identity)
-        item = DeviceAssetSelection.model_validate(selection)
         moment = now if now is not None else datetime.now(UTC)
-        if not who.valid_at(moment):
-            raise AuthorizationError("session_expired")
+        who = self._valid(identity, moment)
+        item = DeviceAssetSelection.model_validate(selection)
         if who.actor != item.actor:
             # A member decides as themselves; nobody decides for anyone else.
             raise AuthorizationError("actor_mismatch")
@@ -151,7 +172,7 @@ class InMemoryAuthorizationRegistry:
                 raise AuthorizationError("asset_not_published")
             if package.kind != item.kind:
                 raise AuthorizationError("kind_mismatch")
-            if not entitled(package.metadata, item.actor, self._groups(item.actor)):
+            if not entitled(package.metadata, item.actor, self._member_groups(item.actor)):
                 raise AuthorizationError("asset_not_entitled")
         current = self._selections.get(item.key)
         if current is not None and current.status == "active":
@@ -169,9 +190,7 @@ class InMemoryAuthorizationRegistry:
     ) -> DeviceAssetSelection:
         """A member takes back their own decision. Like making one, it needs
         a session that is still valid."""
-        who = AuthenticatedActor.model_validate(identity)
-        if not who.valid_at(now if now is not None else datetime.now(UTC)):
-            raise AuthorizationError("session_expired")
+        who = self._valid(identity, now)
         key = (
             TypeAdapter(Symbol).validate_python(bridge_id),
             who.actor,

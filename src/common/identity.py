@@ -50,8 +50,14 @@ def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bo
 
     The owner may always use what it owns, whether the owner is this actor or
     a group they belong to, and so may a recorded contributor. Beyond that,
-    `public` and `organization` are for any member of the platform, `team` is
-    for members of the owning group, and `private` is for nobody else.
+    `public` and `organization` are for any member of the platform, and
+    nothing else is for anybody else.
+
+    That last line is where `team` and `private` are decided, and they come to
+    the same answer for a group-owned asset: the members of the owning group
+    may use it and nobody else may, because the owning group is the team. A
+    user-owned asset marked `team` names no team to check, so it stays with
+    its owner rather than widening to everyone.
 
     Being entitled to an asset is not permission to run it anywhere: a member
     still chooses which of their devices may, and the Bridge policy still
@@ -63,10 +69,4 @@ def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bo
     owned = owner.id == actor if owner.type == "user" else owner.id in groups
     if owned or actor in metadata.contributors:
         return True
-    if metadata.visibility in ("public", "organization"):
-        return True
-    if metadata.visibility == "team":
-        # A user-owned asset marked for a team names no team to check, so it
-        # stays with its owner rather than becoming visible to everyone.
-        return owner.type != "user" and owner.id in groups
-    return False
+    return metadata.visibility in ("public", "organization")

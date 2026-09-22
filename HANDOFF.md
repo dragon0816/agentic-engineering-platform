@@ -32,8 +32,12 @@ shared platform runs on an internal-network shared workstation.
 - `InMemoryAuthorizationRegistry.select` and `revoke` take an
   `AuthenticatedActor` and refuse `session_expired`, `actor_mismatch` and
   `asset_not_entitled`; `available(identity)` lists what a member may use.
-- `tests/test_member_authorization.py` grew to 14 tests, as listed at the end
+- `tests/test_member_authorization.py` grew to 15 tests, as listed at the end
   of the slice 2h requirements section.
+- PR #60 review (4 findings) applied: `available` answered for an expired
+  session, an uninvited stranger and a disabled member, and offered kinds a
+  decision cannot name; and the `team` branch of `entitled` was unreachable,
+  which is now said plainly instead of written twice.
 
 ## In Progress
 
@@ -71,7 +75,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 773 passed, 3 skipped (link privileges)
+# PASS: 774 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

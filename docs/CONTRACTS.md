@@ -1461,9 +1461,11 @@ point, and an evidence trail needs the name of it either way.
 may use one published asset. Nothing unpublished is usable. The owner may
 always use what it owns, whether the owner is that actor or a group they
 belong to, and so may a recorded contributor; beyond that, `public` and
-`organization` are for any member of the platform, `team` is for members of
-the owning group, and `private` is for nobody else. A user-owned asset marked
-`team` names no team to check, so it stays with its owner.
+`organization` are for any member of the platform, and nothing else is for
+anybody else. That decides `team` and `private` together: for a group-owned
+asset they come to the same answer, the owning group and nobody else, because
+the owning group is the team. A user-owned asset marked `team` names no team
+to check, so it stays with its owner.
 
 `InMemoryAuthorizationRegistry.select(identity, selection)` and
 `revoke(identity, bridge_id, asset)` require an authenticated actor whose
@@ -1472,6 +1474,10 @@ belongs to (`actor_mismatch`): a member decides as themselves. A Workflow or
 Skill the actor is not entitled to is `asset_not_entitled`, and the groups
 come from the platform's record of that user. `available(identity)` is the
 list a member chooses from: the published Workflows and Skills they may use.
+It is guarded like a decision, because a list of what somebody may use is
+itself something only they should see: a valid session, a member the platform
+knows (`actor_unknown`) and has not disabled (`actor_disabled`), and only the
+kinds a decision can name.
 
 Entitlement is checked when a decision is made, not when a run happens. An
 authorization records what was decided, so a member whose entitlement is

@@ -304,9 +304,20 @@ def test_what_a_member_may_use_follows_from_who_they_are() -> None:
         assert entitled(metadata, "engineer", ("engineering",))
     # Organization visibility is for any member of the platform.
     assert entitled(owned, "stranger", ())
-    # A team asset is for the owning group, and a private one for nobody else.
+    # A group-owned asset marked `team` or `private` comes to the same
+    # answer: the owning group and nobody else, because the owner is the team.
     assert not entitled(shared, "stranger", ("other-team",))
     assert not entitled(private, "stranger", ())
+    assert entitled(shared, "colleague", ("engineering",))
+    assert entitled(private, "colleague", ("engineering",))
+    # A user-owned asset marked for a team names no team, so it stays with
+    # its owner rather than widening to everyone.
+    personal = AssetMetadata.model_validate(
+        {**shared.model_dump(), "owner": {"type": "user", "id": "engineer"}}
+    )
+    assert entitled(personal, "engineer", ()) and not entitled(
+        personal, "colleague", ("engineering",)
+    )
     # A recorded contributor may use it even when it is private.
     assert entitled(with_helper, "tester", ())
     # Nothing unpublished is usable, however it is owned.
@@ -411,6 +422,32 @@ def test_a_member_cannot_choose_what_they_are_not_entitled_to_use() -> None:
     enrollment.accept("invite-auditor", "auditor")
     assert [item.metadata.identity.name for item in registry.available(identity("auditor"))] == [
         "secret-workflow",
+        "shipment-skill",
+        "weekly-report",
+    ]
+
+
+def test_the_list_of_what_a_member_may_use_is_guarded_like_a_decision() -> None:
+    """A list of what somebody may use is itself something only they should
+    see, so it answers for the same people a decision does."""
+    enrollment, packages, registry = platform()
+    with pytest.raises(AuthorizationError, match="session_expired"):
+        registry.available(identity(), now=NOW + timedelta(days=366))
+    with pytest.raises(AuthorizationError, match="actor_unknown"):
+        registry.available(identity("stranger"))
+    enrollment.disable_user("platform-admin", "tester")
+    with pytest.raises(AuthorizationError, match="actor_disabled"):
+        registry.available(identity("tester"))
+    # A decision is stopped earlier, by the device admission that already
+    # refuses a disabled member. `available` names no device, which is why
+    # it needs the check of its own.
+    with pytest.raises(AuthorizationError, match="actor_not_admitted"):
+        registry.select(identity("tester"), selection(actor="tester", bridge_id="bridge-shared"))
+    # Only what a decision can name: a Workflow or a Skill, never a published
+    # kind that `select` could answer only with a mismatch.
+    knowledge = AssetIdentity(namespace="engineering", name="handbook", version="1.0.0")
+    packages.publish(package(knowledge, "knowledge"))
+    assert [item.metadata.identity.name for item in registry.available(identity())] == [
         "shipment-skill",
         "weekly-report",
     ]
