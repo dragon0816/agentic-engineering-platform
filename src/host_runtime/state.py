@@ -17,6 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
 from typing import Self
+from urllib.request import pathname2url
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -31,7 +32,10 @@ from common.distribution import (
 )
 from common.enrollment import BridgeDevice
 
-SCHEMA_VERSION = "1"
+# Version 2 adds the channel cursor. The table is additive and every open
+# creates it, so a version-1 file is migrated rather than refused.
+SCHEMA_VERSION = "2"
+_MIGRATABLE = frozenset({"1"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS installed ("
@@ -40,6 +44,10 @@ _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS runs ("
     " run_id TEXT PRIMARY KEY, actor TEXT NOT NULL, updated_at TEXT NOT NULL,"
     " record TEXT NOT NULL)",
+    # How far an ingress has consumed its channel. One row per channel, so a
+    # restart resumes where the last confirmed batch ended.
+    "CREATE TABLE IF NOT EXISTS channel_cursor ("
+    " channel TEXT PRIMARY KEY, position INTEGER NOT NULL)",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
@@ -52,25 +60,57 @@ class SqliteLocalState:
     writes share one lock, so a reader never sees the inside of a
     transaction that may yet roll back."""
 
-    def __init__(self, path: Path, *, bridge_id: Symbol) -> None:
+    def __init__(self, path: Path, *, bridge_id: Symbol, read_only: bool = False) -> None:
         self.bridge_id = TypeAdapter(Symbol).validate_python(bridge_id)
         self._path = Path(path)
+        self.read_only = read_only
         self._conn: sqlite3.Connection | None = None
         self._lock = threading.RLock()
         try:
-            self._conn = sqlite3.connect(
-                self._path, isolation_level=None, timeout=0, check_same_thread=False
-            )
-            self._conn.execute("PRAGMA synchronous=FULL")
-            with self._write() as conn:
-                for statement in _SCHEMA:
-                    conn.execute(statement)
-                self._claim(conn, "schema_version", SCHEMA_VERSION)
-                self._claim(conn, "bridge_id", self.bridge_id)
-        except BaseException:
+            self._conn = self._connect()
+            if read_only:
+                self._verify()
+            else:
+                with self._write() as conn:
+                    for statement in _SCHEMA:
+                        conn.execute(statement)
+                    self._version(conn)
+                    self._claim(conn, "bridge_id", self.bridge_id)
+        except BaseException as error:
             # Never leak a half-built handle; on Windows it would pin the file.
             self.close()
+            # A corrupt or unreadable file is this class's own closed answer,
+            # not a SQLite exception escaping into a caller that promised not
+            # to echo one.
+            if isinstance(error, sqlite3.Error):
+                raise LocalStateError("unavailable") from None
             raise
+
+    def _connect(self) -> sqlite3.Connection:
+        """A read-only open never creates the file and never writes to it, so
+        a report can look without changing what it is looking at."""
+        if not self.read_only:
+            conn = sqlite3.connect(
+                self._path, isolation_level=None, timeout=0, check_same_thread=False
+            )
+            conn.execute("PRAGMA synchronous=FULL")
+            return conn
+        if not self._path.is_file():
+            raise LocalStateError("unavailable")
+        uri = f"file:{pathname2url(str(self._path.resolve()))}?mode=ro"
+        return sqlite3.connect(
+            uri, uri=True, isolation_level=None, timeout=0, check_same_thread=False
+        )
+
+    def _verify(self) -> None:
+        """What a read-only open can still insist on: this file belongs to
+        this device and its schema is one this code understands."""
+        with self._read() as conn:
+            marks = dict(conn.execute("SELECT key, value FROM local_meta").fetchall())
+        if marks.get("bridge_id") != self.bridge_id:
+            raise LocalStateError("unavailable")
+        if marks.get("schema_version") not in {SCHEMA_VERSION, *_MIGRATABLE}:
+            raise LocalStateError("unavailable")
 
     @staticmethod
     def _claim(conn: sqlite3.Connection, key: str, value: str) -> None:
@@ -79,6 +119,24 @@ class SqliteLocalState:
         if row is None:
             conn.execute("INSERT INTO local_meta (key, value) VALUES (?, ?)", (key, value))
         elif row[0] != value:
+            raise LocalStateError("unavailable")
+
+    @staticmethod
+    def _version(conn: sqlite3.Connection) -> None:
+        """Mark a fresh file, move a migratable one forward, refuse the rest.
+        Every schema change so far has been an added table that every open
+        creates, so migrating is only moving the mark."""
+        row = conn.execute("SELECT value FROM local_meta WHERE key = 'schema_version'").fetchone()
+        if row is None:
+            conn.execute(
+                "INSERT INTO local_meta (key, value) VALUES ('schema_version', ?)",
+                (SCHEMA_VERSION,),
+            )
+        elif row[0] in _MIGRATABLE:
+            conn.execute(
+                "UPDATE local_meta SET value = ? WHERE key = 'schema_version'", (SCHEMA_VERSION,)
+            )
+        elif row[0] != SCHEMA_VERSION:
             raise LocalStateError("unavailable")
 
     def close(self) -> None:
@@ -109,6 +167,8 @@ class SqliteLocalState:
         read back rather than retry blindly. Whatever happens inside, the
         transaction never stays open on the connection."""
         with self._lock:
+            if self.read_only:
+                raise LocalStateError("unavailable")
             conn = self._connection()
             try:
                 conn.execute("BEGIN IMMEDIATE")
@@ -211,6 +271,34 @@ class SqliteLocalState:
         with self._read() as conn:
             rows = conn.execute("SELECT record FROM runs ORDER BY updated_at, run_id").fetchall()
             return tuple(LocalRunSummary.model_validate_json(row[0]) for row in rows)
+
+    def cursor(self, channel: Symbol) -> int | None:
+        """How far this ingress has consumed its channel, or None if it never
+        has. Durable, so a restart resumes instead of replaying."""
+        key = TypeAdapter(Symbol).validate_python(channel)
+        with self._read() as conn:
+            row = conn.execute(
+                "SELECT position FROM channel_cursor WHERE channel = ?", (key,)
+            ).fetchone()
+            return int(row[0]) if row is not None else None
+
+    def advance_cursor(self, channel: Symbol, position: int) -> int:
+        """Move a channel's cursor forward. Backwards is refused: a cursor
+        that can rewind replays messages that were already acted on."""
+        key = TypeAdapter(Symbol).validate_python(channel)
+        if isinstance(position, bool) or not isinstance(position, int) or position < 0:
+            raise ValueError("a cursor position is a non-negative integer")
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT position FROM channel_cursor WHERE channel = ?", (key,)
+            ).fetchone()
+            if row is not None and position < int(row[0]):
+                raise LocalStateError("cursor_rewind")
+            conn.execute(
+                "INSERT OR REPLACE INTO channel_cursor (channel, position) VALUES (?, ?)",
+                (key, position),
+            )
+        return position
 
     def snapshot(self, device: BridgeDevice, *, observed_at: datetime) -> BridgeStateSnapshot:
         """The authoritative state the control plane may project. The

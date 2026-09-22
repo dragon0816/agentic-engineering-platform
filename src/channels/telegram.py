@@ -28,6 +28,7 @@ from pydantic import Field, JsonValue, StrictBool, field_validator, model_valida
 
 from common.assets import REDACTED, SECRET_PATTERN, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
+from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
@@ -41,6 +42,8 @@ from models.wire import (
     transport_failure,
 )
 
+# The channel this ingress consumes, as the durable cursor names it.
+TELEGRAM_CHANNEL = "telegram"
 # Telegram refuses a message over 4096 characters; the source split at 4000.
 MAX_MESSAGE_CHARS = 4000
 # Telegram caps long polling at 50 seconds; the transport waits a little longer.
@@ -146,6 +149,10 @@ class TelegramDelivery(Contract):
 
 
 class TelegramPollResult(Contract):
+    """What one poll did. A `failure` beside no deliveries means the poll
+    never happened; a failure beside deliveries means the batch was handled
+    but could not be confirmed, so Telegram will offer it again."""
+
     deliveries: tuple[TelegramDelivery, ...] = ()
     failure: Failure | None = None
     next_offset: int | None = None
@@ -254,8 +261,15 @@ class TelegramIngress:
         self.agent = agent
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
-        self.offset: int | None = None
+        # Within a process, a duplicate inside one response is skipped; across
+        # a restart, the durable cursor is what stops a batch being replayed.
         self._seen: dict[int, None] = {}
+
+    def offset(self) -> int | None:
+        """How far this bot has been consumed, from the Bridge's own durable
+        state rather than from memory, so a restart resumes where the last
+        confirmed batch ended."""
+        return self.agent.state.cursor(TELEGRAM_CHANNEL)
 
     def _call(self, method: str, payload: Mapping[str, JsonValue]) -> tuple[int, bytes]:
         """One Bot API call. The token is resolved here, used in the URL and
@@ -283,8 +297,19 @@ class TelegramIngress:
             "timeout": self.config.poll_timeout_seconds,
             "allowed_updates": ["message"],
         }
-        if self.offset is not None:
-            payload["offset"] = self.offset
+        try:
+            offset = await asyncio.to_thread(self.offset)
+        except LocalStateError as error:
+            # Without the cursor this poll would replay a confirmed batch.
+            # Worth trying again: the usual reason is another process holding
+            # the state file for a moment, not a broken ingress.
+            return TelegramPollResult(
+                failure=Failure(
+                    code="telegram_cursor_unavailable", message=error.code, retryable=True
+                )
+            )
+        if offset is not None:
+            payload["offset"] = offset
         try:
             status, body = await asyncio.to_thread(self._call, "getUpdates", payload)
         except CredentialMisconfigured as error:
@@ -318,7 +343,7 @@ class TelegramIngress:
                 )
             )
         deliveries: list[TelegramDelivery] = []
-        highest = self.offset
+        highest = offset
         for raw in items:
             # Every update is confirmed, including the kinds this adapter does
             # not handle; otherwise Telegram would redeliver them forever.
@@ -335,8 +360,21 @@ class TelegramIngress:
                 replied = await asyncio.to_thread(self._reply, update.chat_id, delivery.reply)
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
-        self.offset = highest
-        return TelegramPollResult(deliveries=tuple(deliveries), next_offset=self.offset)
+        if highest is None or highest == offset:
+            return TelegramPollResult(deliveries=tuple(deliveries), next_offset=offset)
+        try:
+            await asyncio.to_thread(self.agent.state.advance_cursor, TELEGRAM_CHANNEL, highest)
+        except LocalStateError as error:
+            # The batch was handled; it just is not confirmed. Telegram will
+            # offer it again, and `_seen` keeps this process from repeating it.
+            return TelegramPollResult(
+                deliveries=tuple(deliveries),
+                failure=Failure(
+                    code="telegram_cursor_unconfirmed", message=error.code, retryable=True
+                ),
+                next_offset=offset,
+            )
+        return TelegramPollResult(deliveries=tuple(deliveries), next_offset=highest)
 
     def _remember(self, update_id: int) -> None:
         self._seen[update_id] = None

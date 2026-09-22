@@ -1328,3 +1328,64 @@ are plain text in pieces of at most 4000 characters, name identities, statuses
 and codes, never a payload, and pass through the shared redaction without the
 error helper's truncation (`scrub`). `api_base` is normalized without a
 trailing slash.
+
+## Company host runtime (Phase 7, slice 2f)
+
+`host_runtime.host.HostLayout` names every file a company host reads, all
+under one `workspace_root`: `membership.json`, `grants.json`,
+`assets/skills/`, `assets/workflows/`, `telegram.json` and `state.sqlite`.
+`HostLayout.under(root)` derives them, so the installer and the operator agree
+without a second configuration file.
+
+`CompanyHostConfiguration` gains `namespace` (which namespace this host's work
+addresses, with no default because the platform does not guess) and
+`credentials`, a tuple of `CredentialBinding` naming which environment
+variable holds the value for a declared `SecretRef`. Both halves of a binding
+are names; the value is never written down. The schema version is unchanged
+because a file without either field is still valid and means exactly that.
+`workspace_root` must be absolute, as a Windows path or as an absolute path of
+the running platform, so a host file written on the company computer stays
+valid wherever it is inspected.
+
+`build_runtime(config, layout=, resolver=)` returns a `HostRuntime` holding
+the `LocalAgent`, the `SqliteLocalState` and the optional `TelegramIngress`;
+closing it closes the state file. It raises `HostError` with a closed code
+(`membership_missing`, `membership_invalid`, `membership_mismatch`,
+`grants_invalid`, `asset_invalid`, `telegram_invalid`, `credential_unmapped`,
+`state_unavailable`) and the path at fault, never its contents. A membership
+record that describes another device is refused rather than reconciled.
+
+`build_gateway` registers the one capability handler this package ships
+(`filesystem/read-file`, rooted at the workspace) and nothing else: a manifest
+naming another capability is installed but its steps fail closed, because
+installing a manifest does not install code. Routing is deterministic only, so
+an unrecognized message is `needs_input`. A grants file is optional and its
+absence means default deny.
+
+`DoctorCheck` gains the names `membership`, `assets` and `state` and the
+status `pending`, for what a host has not been given yet as opposed to what is
+broken. `HostDoctorReport.status` remains this machine's preflight, so a host
+that is merely not enrolled is not reported as a broken installation;
+`runtime` is `ready` when this Bridge knows who may use it and nothing it
+needs is broken, and a state file that does not exist yet is not an obstacle
+because the Agent creates it. `host_report(config, layout)` combines the
+device preflight with those checks and writes nothing: the state file is
+opened only if it exists, and then read-only.
+
+`SqliteLocalState` gains `cursor(channel)` and `advance_cursor(channel,
+position)` on a `channel_cursor` table, refusing to rewind (`cursor_rewind`).
+The schema version is 2 and a version-1 file is migrated on a writing open,
+because every change so far has been an added table that each open creates.
+`SqliteLocalState(path, bridge_id=, read_only=True)` opens an existing file
+through a `mode=ro` connection: it creates nothing, migrates nothing, refuses
+every write with `unavailable`, and still insists the file belongs to this
+device and carries a schema this code understands. Any SQLite error on open,
+including a corrupt file, is `LocalStateError("unavailable")` rather than an
+exception from the driver.
+
+`TelegramIngress.offset()` reads that cursor instead of memory, so a restart
+resumes where the last confirmed batch ended; a cursor that cannot be read is
+`telegram_cursor_unavailable` and no poll happens, and one that cannot be
+advanced is `telegram_cursor_unconfirmed` beside the deliveries that were
+handled. Both are retryable, because the usual cause is another process
+holding the file for a moment.

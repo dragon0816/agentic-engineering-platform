@@ -42,6 +42,20 @@ jobs:
           $installedConfig = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
           if ($installedConfig.device.bridge_id -notlike 'bridge-*') { throw 'Computer-name Bridge ID was not generated.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
+          $pending = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
+          if ($pending -notcontains 'resident agent: pending') { throw 'A freshly installed host should report a pending resident agent.' }
+          $device = $installedConfig.device
+          $membership = [ordered]@{
+              device = $device
+              bindings = @([ordered]@{ bridge_id = $device.bridge_id; actor = $device.registered_by; role = "operator" })
+          }
+          $membership | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath "$installRoot\workspace\membership.json" -Encoding UTF8
+          $ready = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
+          if ($ready -notcontains 'resident agent: ready') { throw 'A host that knows its members should report a ready resident agent.' }
+          & "$installRoot\.venv\Scripts\aep-host.exe" ask --config "$installRoot\host.json" --namespace engineering "files.read nothing.txt"
+          if ($LASTEXITCODE -ne 0) { throw 'The resident agent did not answer a local request.' }
+          & "$installRoot\.venv\Scripts\aep-host.exe" status --config "$installRoot\host.json"
+          if ($LASTEXITCODE -ne 0) { throw 'The resident agent could not report its status.' }
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
       - name: Upload Windows technical preview

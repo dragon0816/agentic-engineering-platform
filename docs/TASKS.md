@@ -31,7 +31,7 @@ when its base branch was deleted and landed through #51). A row says `done` only
 its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 738 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 753 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -128,7 +128,8 @@ privileges and run on Linux CI.
 | 2c local-first control contracts | #50, landed via #51 | done | Registry package acquisition, verified local inventory, timestamped status projection and actor/device-scoped remote jobs |
 | 2d resident local Agent and durable local state | #53 | done | `LocalAgent` admits by the shared device rule and the device's own membership copy on every ingress, routes through the existing Gateway, executes exact remote jobs idempotently, settles timed-out runs, and records runs in a single-writer SQLite local state that outlives the process |
 | 2e Telegram ingress | #54 | done | `channels.telegram`: outbound long polling over the platform's transport, numeric sender mapped to exactly one actor with an empty map admitting nobody, `/skill command` translated to the deterministic form, token through `SecretRef` and its shape added to `SECRET_PATTERN`, the same Agent admission and Gateway path |
-| 2f authenticated shared-platform transports | — | planned | Registry package synchronization, Bridge job polling and snapshot reporting over an authenticated transport; needs an authentication design first |
+| 2f company host runtime | #56 | in review | `aep-host` assembles the resident Agent from the workspace files (membership, grants, Skill and Workflow manifests) and gains `ask`, `status` and `telegram`; `doctor` reports what the host has been given; the Telegram offset is durable |
+| 2g authenticated shared-platform transports | — | planned | Registry package synchronization, Bridge job polling and snapshot reporting over an authenticated transport; needs an authentication design first |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
 | 5 knowledge parity | — | planned | Adopt, query, update and restore a full copy of the source vault |

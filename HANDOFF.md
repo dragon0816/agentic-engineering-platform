@@ -1,77 +1,90 @@
-# Handoff — Phase 7 slice 2e, Telegram ingress
+# Handoff — Phase 7 slice 2f, company host runtime
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `main`, after PR #54 (slice 2e) merged with its review applied.
+Branch: `phase-7/host-agent-cli`, based on `main` after PR #55 merged.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-Telegram as an ingress to the resident local Agent, adapted from the pinned
-`telegram-local-agent` channel: outbound polling, a numeric sender mapped to
-exactly one platform actor, slash commands reaching the deterministic router,
-the token through `SecretRef`. Requirements: the "Slice 2e" section of
-`docs/phases/PHASE_7_MIGRATION.md`; contracts: `docs/CONTRACTS.md` ("Telegram
-ingress"); source characterization and decisions: `docs/PHASE_7_MIGRATION.md`
-("Telegram ingress").
+Make the two pieces built in slices 2d and 2e usable on a real company
+computer: assemble the resident Agent from files in the host's workspace and
+drive it from `aep-host`, and keep the Telegram poll offset in the Bridge's
+durable state instead of in memory. Requirements: the "Slice 2f" section of
+`docs/phases/PHASE_7_MIGRATION.md`; contracts: `docs/CONTRACTS.md` ("Company
+host runtime"); decisions: `docs/PHASE_7_MIGRATION.md` (same heading).
 
 ## Owner decisions in force
 
 Listed with their dates in `docs/TASKS.md`. The ones that shape this slice:
-the local-first deployment decision, member-scoped remote control, and that a
-Telegram adapter may deliver commands to the resident Agent only after mapping
-the sender to a platform actor (Architecture, "Team Platform Plane").
+the local-first deployment decision (installed assets, run state and
+credentials stay on the Bridge computer) and member-scoped remote control.
 
 ## Completed
 
-- Source inspected read-only at `4b40a215909e4fdd4b65519d70669a84e9abd43d`
-  (`.scratch/telegram-source`, ignored by Git); the behaviour table and the
-  ADAPT/REFUSE decisions are in `docs/PHASE_7_MIGRATION.md`.
-- `src/channels/telegram.py`: `TelegramIngressConfig`, `TelegramSender`,
-  `TelegramDelivery`, `TelegramPollResult`, `TelegramIngress` (`poll_once`,
-  `run`), `command_to_message`, `chunks`. No Telegram library; the wire is
-  `models.wire.Transport` with the standard-library default.
-- `common.assets`: the Telegram bot token shape added to `SECRET_PATTERN`
-  and `bot_token` to `SECRET_KEYS`, so the registry, the evidence grader,
-  the trace, the model adapters and this adapter all refuse or redact it.
-- `models.wire`: `transport_failure` and `status_failure` take a code
-  `prefix`, and `redacted` redacts before it trims.
-- `tests/test_telegram_ingress.py`, 13 tests, as listed at the end of the
-  slice 2e requirements section. The slice 2d row flipped to `done` in
-  `docs/TASKS.md`.
-- PR #54 review (10 findings) applied. The serious ones: an exception in
-  handling killed the poll loop and lost the update; the loop re-polled a
-  revoked token forever; the shared error redaction trimmed before it
-  redacted; an unmapped sender was answered, so a stranger could drive
-  unbounded outbound calls; `/status` read the store on the event loop.
+- `src/host_runtime/host.py`: `HostLayout` (every file a host reads, under
+  one workspace), `build_runtime` returning a `HostRuntime` (Agent, durable
+  state, optional Telegram ingress), `build_gateway` (skills and workflows
+  from the assets directory, the one shipped capability handler rooted at the
+  workspace, grants from the grants file, deterministic routing only),
+  `load_membership`, `inspect_runtime` and `host_report`. Every failure is a
+  `HostError` with a closed code and the path at fault, never its contents.
+- `aep-host` gains `ask`, `status` and `telegram`; `doctor` now reports
+  `membership`, `assets` and `state` beside the device checks and prints
+  `resident agent: ready|pending`. Reporting writes nothing.
+- `CompanyHostConfiguration` gains `namespace` (no default; the platform does
+  not guess) and `credentials` (`CredentialBinding`: a secret's name and the
+  environment variable holding its value). `workspace_root` accepts an
+  absolute path of the running platform as well as a Windows one, so the
+  wiring is exercised on Linux CI too.
+- `SqliteLocalState` gains a `channel_cursor` table with `cursor` and
+  `advance_cursor` (no rewind), schema version 2 migrated from 1.
+  `TelegramIngress.offset()` reads it, so a restart resumes where the last
+  confirmed batch ended.
+- `deploy/windows-preview`: the installer creates the asset directories,
+  accepts `-Namespace`, and tells the operator the Agent is pending until
+  membership exists. The README documents the workspace layout, the
+  membership record, `ask`/`status`, grants and the Telegram setup.
+- CI's Windows preview step now writes a membership record, asserts `doctor`
+  moves from `pending` to `ready`, and runs `ask` and `status` on a real
+  Windows machine.
+- `tests/test_host_wiring.py`, 13 tests, and 2 more in
+  `tests/test_telegram_ingress.py`, as listed at the end of the slice 2f
+  requirements section.
+- PR #56 review (5 findings) applied. The serious ones: `doctor` created
+  tables and migrated the schema version of the file it was only meant to
+  report on, so `SqliteLocalState` gained a read-only mode; a corrupt file
+  escaped as a SQLite exception because the opening `PRAGMA` runs outside
+  the write transaction; and the new checks were allowed to change the
+  device preflight `status`, which would abort a reinstall over a stale
+  membership record.
 
 ## In Progress
 
-- Nothing. `main` is the state to resume from.
+- PR #56 open for review. Nothing else uncommitted.
 
 ## Remaining
 
-- Slice 2f, authenticated shared-platform transports: Registry package
+- Slice 2g, authenticated shared-platform transports: Registry package
   synchronization, Bridge job polling and snapshot reporting, and loading an
   installed package's manifest into the engine so the durable inventory and
-  the engine's registry become one record. Needs an authentication design
-  (what a Bridge presents, what the control plane checks) before any code;
-  that design is an owner decision.
-- Wiring the Windows preview CLI (`aep-host`) to the resident Agent and the
-  Telegram ingress, so a company computer can run them; a durable poll
-  offset beside the durable local state.
-- Then migration steps 5 to 9 as listed in `docs/TASKS.md`.
+  the engine's registry become one record. Blocked on the owner's
+  authentication design: what a Bridge presents, what the control plane
+  checks and stores, how membership reaches the Bridge and is kept current,
+  and where the shared platform runs.
+- Then migration steps 5 to 9 in `docs/TASKS.md` (workflow 7, workflow 13,
+  knowledge, live model smoke checks, controlled cutover).
 
 ## Architecture decisions made
 
-- The adapter adds no authority: mapping decides which actor a sender is;
-  the Agent's membership rule and the Gateway decide everything after.
-- An empty sender map admits nobody, inverting the source's default.
-- The token is resolved per call and held nowhere; its shape is credential
-  material everywhere in the repository.
-- A slash command is translated to the platform's `skill.command` form rather
-  than to a hard-coded table of skills.
+- The host layout is convention under one configured workspace, and the
+  layout itself is a contract so `doctor` can show it.
+- The host installs exactly one capability handler, the one the package
+  ships. A manifest naming another capability installs but fails closed.
+- A company host configures no model; routing there is deterministic only.
+- `doctor` distinguishes `pending` from `failed`, so a freshly installed host
+  is not reported as broken.
 
 ## Exact verification commands and results
 
@@ -79,7 +92,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 738 passed, 3 skipped (link privileges)
+# PASS: 753 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -95,28 +108,27 @@ git diff --check
 ```
 
 No socket, Telegram call, model, gateway, network, real vault, job or n8n
-instance was invoked.
+instance was invoked. The state files and workspaces live under pytest's
+temporary directory.
 
 ## Known issues / limitations
 
-- The poll offset lives in memory. A batch handled just before a restart may
-  be redelivered once; within a process a redelivered id is not handled
-  again. A durable offset belongs with `SqliteLocalState`.
-- Attachments are `unsupported_content`. The source stored them on disk and
-  attached them to the next command; that needs its own storage rule.
-- `/status` reads the Agent's snapshot at the wall clock; the Agent's own
-  `clock` is not used there because the snapshot contract requires a real
-  observation time.
-- The source repository's `config.yaml` commits a Telegram bot token (marked
-  expired there) and a GitLab personal access token. They were not copied.
-  The owner was told; revoking and removing them is the owner's action in
-  that repository.
+- Membership is a file the operator writes. How it is delivered from the
+  control plane and kept current is slice 2g.
+- The engine's `InstalledWorkflows`, not the durable inventory, decides what
+  may run. Packages obtained from the Registry and manifests loaded into the
+  engine are still two records; joining them is slice 2g.
+- The engine is built without a `RunJournal`, so a run interrupted by a
+  restart is not recoverable on a company host yet. The checkpoint store
+  exists (Phase 3); wiring it to the host is a later slice.
+- `aep-host telegram` runs in the foreground until interrupted. There is no
+  service, autostart or supervision, deliberately: the pinned source's
+  autostart was declined in slice 2a.
+- A host with no namespace must be told one per request. The installer
+  records one only when `-Namespace` is passed.
 
 ## Next Recommended Action
 
-Put the slice 2f authentication design to the owner before writing its
-requirements: what a Bridge presents to the shared platform (a device
-credential issued at enrollment, or a per-request signature), what the
-control plane checks and stores, how membership is delivered to the Bridge
-and kept current, and where the shared platform runs. Until then, work is
-what the owner asks for plus the open items in `docs/TASKS.md`.
+Merge PR #56 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
+put the slice 2g authentication design to the owner before writing its
+requirements.
