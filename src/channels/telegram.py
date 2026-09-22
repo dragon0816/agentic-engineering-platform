@@ -13,24 +13,33 @@ The adapter adds no authority. It maps a sender to exactly one platform actor
 and hands the Agent a `LocalAgentRequest`; the Agent admits or refuses by the
 same membership rule as every other ingress, and the Gateway routes the same
 way. Nothing here imports the Bot API library: the wire is the standard
-library behind the same `Transport` the model adapters use.
+library behind the same `Transport` the model adapters use, with the same
+failure rules.
 """
 
 import asyncio
 import json
 import re
 from collections.abc import Iterator, Mapping
+from datetime import UTC, datetime
 from typing import Literal, Self
 
-from pydantic import Field, JsonValue, StrictBool, model_validator
+from pydantic import Field, JsonValue, StrictBool, field_validator, model_validator
 
-from common.assets import SecretRef, reject_embedded_secrets
+from common.assets import REDACTED, SECRET_PATTERN, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from models.credentials import CredentialMisconfigured, CredentialResolver
-from models.wire import Transport, UrllibTransport, close_quietly, describe, redacted
+from models.wire import (
+    Transport,
+    UrllibTransport,
+    close_quietly,
+    describe,
+    status_failure,
+    transport_failure,
+)
 
 # Telegram refuses a message over 4096 characters; the source split at 4000.
 MAX_MESSAGE_CHARS = 4000
@@ -39,6 +48,8 @@ POLL_MARGIN_SECONDS = 10
 # Update ids already handled in this process, so a redelivered batch does not
 # run a command twice. Bounded, because the process may live a long time.
 SEEN_UPDATES = 1000
+# How long `run` waits after a retryable failure before polling again, at most.
+MAX_BACKOFF_SECONDS = 60.0
 SLASH_COMMAND = re.compile(
     r"^/([a-zA-Z_][a-zA-Z0-9_]*)(?:@[A-Za-z0-9_]+)?(?:\s+([a-zA-Z_][a-zA-Z0-9_]*))?(?:\s+(.*))?$",
     re.DOTALL,
@@ -48,7 +59,15 @@ HELP = (
     "words. /status shows this Bridge's state. Attachments are not accepted."
 )
 
-Disposition = Literal["unmapped_sender", "unsupported_content", "answered", "refused", "routed"]
+Disposition = Literal[
+    "unmapped_sender", "unsupported_content", "answered", "refused", "routed", "failed"
+]
+
+
+def scrub(text: str) -> str:
+    """The shared redaction without the error helper's truncation: a reply is
+    shown to a person and split for length separately."""
+    return SECRET_PATTERN.sub(REDACTED, text)
 
 
 class TelegramSender(Contract):
@@ -68,6 +87,11 @@ class TelegramIngressConfig(Contract):
     senders: tuple[TelegramSender, ...] = ()
     poll_timeout_seconds: int = Field(default=25, ge=0, le=50, strict=True)
     api_base: Text = "https://api.telegram.org"
+
+    @field_validator("api_base")
+    @classmethod
+    def without_trailing_slash(cls, value: str) -> str:
+        return value.rstrip("/")
 
     @model_validator(mode="after")
     def one_actor_per_sender_and_no_secret(self) -> Self:
@@ -91,15 +115,17 @@ class TelegramIngressConfig(Contract):
 
 class TelegramDelivery(Contract):
     """What became of one update. `outcome` is the Agent's answer when the
-    update reached it; the other dispositions never did."""
+    update reached it; `failure` is why handling it raised; an unmapped
+    sender gets no reply at all, so `reply` is None there."""
 
     update_id: int = Field(ge=0, strict=True)
     chat_id: int = Field(strict=True)
     sender_id: int | None = Field(default=None, strict=True)
     disposition: Disposition
-    reply: Text
-    replied: StrictBool = True
+    reply: Text | None = None
+    replied: StrictBool = False
     outcome: LocalAgentOutcome | None = None
+    failure: Failure | None = None
 
     @model_validator(mode="after")
     def outcome_matches_disposition(self) -> Self:
@@ -110,6 +136,12 @@ class TelegramDelivery(Contract):
             self.outcome.refusal is not None
         ):
             raise ValueError("refused means the Agent refused")
+        if (self.disposition == "failed") != (self.failure is not None):
+            raise ValueError("failed means handling raised, and says why")
+        if (self.disposition == "unmapped_sender") != (self.reply is None):
+            raise ValueError("an unmapped sender is the only update that gets no reply")
+        if self.replied and self.reply is None:
+            raise ValueError("nothing was sent when there was nothing to send")
         return self
 
 
@@ -147,17 +179,27 @@ def _parse(raw: object) -> _Update | None:
     )
 
 
+def slash_command(text: str) -> tuple[str, str | None, str | None] | None:
+    """`(alias, command, rest)` for a slash command, with Telegram's group
+    suffix `@botname` dropped; None for anything else."""
+    match = SLASH_COMMAND.match(text.strip())
+    if match is None:
+        return None
+    rest = match.group(3)
+    return match.group(1), match.group(2), rest.strip() if rest and rest.strip() else None
+
+
 def command_to_message(text: str) -> str:
     """`/skill command rest` becomes `skill.command rest`, the platform's
     deterministic form, so a slash command reaches the router without a model
     as the source's direct commands did. `/skill` alone is the bare word, and
     anything else is passed through as the person wrote it."""
-    match = SLASH_COMMAND.match(text.strip())
-    if match is None:
+    parsed = slash_command(text)
+    if parsed is None:
         return text.strip()
-    alias, command, rest = match.group(1), match.group(2), match.group(3)
+    alias, command, rest = parsed
     head = f"{alias}.{command}" if command else alias
-    return f"{head} {rest.strip()}" if rest and rest.strip() else head
+    return f"{head} {rest}" if rest else head
 
 
 def chunks(text: str, limit: int = MAX_MESSAGE_CHARS) -> Iterator[str]:
@@ -171,15 +213,6 @@ def chunks(text: str, limit: int = MAX_MESSAGE_CHARS) -> Iterator[str]:
         remaining = remaining[cut:].lstrip("\n")
     if remaining or not text:
         yield remaining
-
-
-def _transport_failure(error: BaseException) -> Failure:
-    reason = getattr(error, "reason", None)
-    if isinstance(error, TimeoutError) or isinstance(reason, TimeoutError):
-        return Failure(code="telegram_timeout", message=describe(error), retryable=True)
-    if isinstance(error, OSError):
-        return Failure(code="telegram_unreachable", message=describe(error), retryable=True)
-    return Failure(code="telegram_error", message=describe(error), retryable=True)
 
 
 def _describe(outcome: LocalAgentOutcome) -> str:
@@ -259,7 +292,7 @@ class TelegramIngress:
                 failure=Failure(code="telegram_credential_unavailable", message=describe(error))
             )
         except Exception as error:  # noqa: BLE001 - every transport fault is a typed answer
-            return TelegramPollResult(failure=_transport_failure(error))
+            return TelegramPollResult(failure=transport_failure(error, prefix="telegram"))
         if status == 409:
             return TelegramPollResult(
                 failure=Failure(
@@ -268,14 +301,7 @@ class TelegramIngress:
                 )
             )
         if status != 200:
-            detail = redacted(body.decode("utf-8", "replace")) or "(no body)"
-            return TelegramPollResult(
-                failure=Failure(
-                    code="telegram_http_error",
-                    message=f"{status}: {detail}",
-                    retryable=status >= 500,
-                )
-            )
+            return TelegramPollResult(failure=status_failure(status, body, prefix="telegram"))
         try:
             data = json.loads(body)
         except ValueError:
@@ -304,9 +330,11 @@ class TelegramIngress:
             if update.update_id in self._seen:
                 continue
             self._remember(update.update_id)
-            delivery = await self._deliver(update)
-            replied = await asyncio.to_thread(self._reply, update.chat_id, delivery.reply)
-            deliveries.append(delivery.model_copy(update={"replied": replied}))
+            delivery = await self._deliver_guarded(update)
+            if delivery.reply is not None:
+                replied = await asyncio.to_thread(self._reply, update.chat_id, delivery.reply)
+                delivery = delivery.model_copy(update={"replied": replied})
+            deliveries.append(delivery)
         self.offset = highest
         return TelegramPollResult(deliveries=tuple(deliveries), next_offset=self.offset)
 
@@ -314,6 +342,22 @@ class TelegramIngress:
         self._seen[update_id] = None
         while len(self._seen) > SEEN_UPDATES:
             del self._seen[next(iter(self._seen))]
+
+    async def _deliver_guarded(self, update: _Update) -> TelegramDelivery:
+        """Handling one update never takes the poll loop down with it. What
+        raised is recorded on the delivery with its type and a redacted
+        message, and the sender is told the request could not be handled."""
+        try:
+            return await self._deliver(update)
+        except Exception as error:  # noqa: BLE001 - recorded, not propagated
+            return TelegramDelivery(
+                update_id=update.update_id,
+                chat_id=update.chat_id,
+                sender_id=update.sender_id,
+                disposition="failed",
+                reply="That request could not be handled on this Bridge.",
+                failure=Failure(code="telegram_delivery_failed", message=describe(error)),
+            )
 
     async def _deliver(self, update: _Update) -> TelegramDelivery:
         base = {
@@ -323,13 +367,9 @@ class TelegramIngress:
         }
         actor = self.config.actor_for(update.sender_id)
         if actor is None:
-            # Refused before the text is even looked at, and without naming
-            # who would have been allowed.
-            return TelegramDelivery(
-                **base,
-                disposition="unmapped_sender",
-                reply="This sender is not mapped to a platform actor on this Bridge.",
-            )
+            # Refused before the text is even looked at, and not answered: a
+            # stranger who found the bot learns nothing and spends nothing.
+            return TelegramDelivery(**base, disposition="unmapped_sender")
         if update.text is None or not update.text.strip():
             return TelegramDelivery(
                 **base,
@@ -337,10 +377,13 @@ class TelegramIngress:
                 reply="Only text messages are accepted here.",
             )
         text = update.text.strip()
-        if text in ("/start", "/help"):
+        parsed = slash_command(text)
+        if parsed is not None and parsed[0] in ("start", "help"):
             return TelegramDelivery(**base, disposition="answered", reply=HELP)
-        if text == "/status":
-            return TelegramDelivery(**base, disposition="answered", reply=self._status())
+        if parsed is not None and parsed[0] == "status":
+            # A durable read under the store's lock, so never on the event loop.
+            report = await asyncio.to_thread(self._status)
+            return TelegramDelivery(**base, disposition="answered", reply=report)
         try:
             request = LocalAgentRequest(
                 ingress="telegram",
@@ -372,12 +415,10 @@ class TelegramIngress:
                 outcome=outcome,
             )
         return TelegramDelivery(
-            **base, disposition="routed", reply=redacted(_describe(outcome)), outcome=outcome
+            **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
         )
 
     def _status(self) -> str:
-        from datetime import UTC, datetime
-
         snapshot = self.agent.snapshot(observed_at=datetime.now(UTC))
         lines = [
             f"Bridge {snapshot.device.bridge_id}: {len(snapshot.installed)} installed asset(s), "
@@ -386,7 +427,7 @@ class TelegramIngress:
         lines.extend(
             f"{item.workflow.name} run {item.run_id}: {item.status}" for item in snapshot.runs[-3:]
         )
-        return redacted("\n".join(lines))
+        return scrub("\n".join(lines))
 
     def _reply(self, chat_id: int, text: str) -> bool:
         """Plain text, in pieces Telegram accepts. A reply that cannot be
@@ -401,14 +442,21 @@ class TelegramIngress:
         return True
 
     async def run(self, stop: asyncio.Event, *, interval_s: float = 1.0) -> Failure | None:
-        """Poll until asked to stop. A conflict ends the loop, because two
-        pollers on one bot steal each other's updates and neither can tell."""
+        """Poll until asked to stop. A failure that will not fix itself (a
+        conflict, a revoked token, a credential the host cannot produce) ends
+        the loop and is returned; a retryable one is waited out with a
+        doubling delay, so a dead endpoint is not hammered once a second."""
+        delay = interval_s
         while not stop.is_set():
             result = await self.poll_once()
-            if result.failure is not None and result.failure.code == "telegram_conflict":
+            if result.failure is not None and not result.failure.retryable:
                 return result.failure
+            if result.failure is None:
+                delay = interval_s
             try:
-                await asyncio.wait_for(stop.wait(), timeout=interval_s)
+                await asyncio.wait_for(stop.wait(), timeout=delay)
             except TimeoutError:
-                continue
+                pass
+            if result.failure is not None:
+                delay = min(delay * 2, MAX_BACKOFF_SECONDS)
         return None

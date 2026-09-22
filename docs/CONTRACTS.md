@@ -1292,21 +1292,31 @@ nowhere. It returns a `TelegramPollResult`: `deliveries`, or a `Failure`
 (`telegram_credential_unavailable`, `telegram_timeout`,
 `telegram_unreachable`, `telegram_error`, `telegram_conflict` for HTTP 409,
 `telegram_http_error`, `telegram_bad_reply`) with the token already redacted,
-in which case the offset stays where it was. `run(stop)` loops `poll_once`
-until asked to stop and returns early on a conflict, because two pollers on
-one bot steal each other's updates.
+in which case the offset stays where it was. The failure rules are
+`models.wire.transport_failure` and `status_failure`, now parametrized by a
+code prefix so every HTTP adapter shares one rule (a 408 or 429 is retryable;
+a 5xx is retryable; a 401 is not), and `models.wire.redacted` redacts before
+it trims so a credential straddling the cut cannot survive as a fragment.
+`run(stop)` loops `poll_once` until asked to stop; it returns on any failure
+that is not retryable (a conflict, a revoked token, a credential the host
+cannot produce) and waits out a retryable one with a doubling delay capped at
+sixty seconds.
 
 `TelegramDelivery` is what became of one update: `unmapped_sender` (refused
-before the text is looked at), `unsupported_content` (no text, empty text, or
-text the request contract refused for credential material), `answered`
-(`/help`, `/start`, `/status`, handled locally without a run), `refused` (the
-Agent's membership refusal, with its `LocalAgentOutcome`) or `routed` (the
-Agent's outcome). The contract requires an outcome exactly for `refused` and
-`routed`, and `refused` exactly when the outcome carries a refusal. `replied`
-records whether the reply could be sent; a failed reply is never raised over
-the outcome. Every update id in a batch is confirmed by advancing the offset
-after the batch was handled, and an id handled in this process is not handled
-again if redelivered.
+before the text is looked at, and not answered, so `reply` is None),
+`unsupported_content` (no text, empty text, or text the request contract
+refused for credential material), `answered` (`/help`, `/start`, `/status` in
+any spelling Telegram sends, handled locally without a run), `refused` (the
+Agent's membership refusal, with its `LocalAgentOutcome`), `routed` (the
+Agent's outcome) or `failed` (handling raised; `failure` names the error,
+redacted, and the sender is told the request could not be handled). The
+contract requires an outcome exactly for `refused` and `routed`, `refused`
+exactly when the outcome carries a refusal, `failure` exactly for `failed`,
+and no reply exactly for `unmapped_sender`. `replied` records whether the
+reply could be sent; a failed reply is never raised over the outcome. Every
+update id in a batch is confirmed by advancing the offset after the batch was
+handled, and an id handled in this process is not handled again if
+redelivered. `/status` reads the Agent's snapshot off the event loop.
 
 `command_to_message` turns `/skill command rest` into the platform's
 `skill.command rest` form (a trailing `@botname` is dropped) so a slash command
@@ -1315,4 +1325,6 @@ word and other text is passed as written. Requests carry
 `ingress="telegram"`, the mapped actor, the configured Bridge and namespace, a
 trace named `telegram-<update_id>` and a session named for the chat. Replies
 are plain text in pieces of at most 4000 characters, name identities, statuses
-and codes, never a payload, and pass through the shared redaction.
+and codes, never a payload, and pass through the shared redaction without the
+error helper's truncation (`scrub`). `api_base` is normalized without a
+trailing slash.

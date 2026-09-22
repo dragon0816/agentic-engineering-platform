@@ -35,9 +35,16 @@ the sender to a platform actor (Architecture, "Team Platform Plane").
 - `common.assets`: the Telegram bot token shape added to `SECRET_PATTERN`
   and `bot_token` to `SECRET_KEYS`, so the registry, the evidence grader,
   the trace, the model adapters and this adapter all refuse or redact it.
-- `tests/test_telegram_ingress.py`, 12 tests, as listed at the end of the
+- `models.wire`: `transport_failure` and `status_failure` take a code
+  `prefix`, and `redacted` redacts before it trims.
+- `tests/test_telegram_ingress.py`, 13 tests, as listed at the end of the
   slice 2e requirements section. The slice 2d row flipped to `done` in
   `docs/TASKS.md`.
+- PR #54 review (10 findings) applied. The serious ones: an exception in
+  handling killed the poll loop and lost the update; the loop re-polled a
+  revoked token forever; the shared error redaction trimmed before it
+  redacted; an unmapped sender was answered, so a stranger could drive
+  unbounded outbound calls; `/status` read the store on the event loop.
 
 ## In Progress
 
@@ -72,7 +79,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 737 passed, 3 skipped (link privileges)
+# PASS: 738 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

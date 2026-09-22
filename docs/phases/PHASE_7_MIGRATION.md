@@ -296,17 +296,27 @@ presentation, and attachment handling.
    registry, the evidence grader, the trace and the model adapters refuse or
    redact it too. An empty map admits nobody.
 2. `TelegramIngress.poll_once` calls `getUpdates` over the same `Transport`
-   the model adapters use, resolving the token through the host's
+   the model adapters use, with the same failure rules (`models.wire`,
+   parametrized by a code prefix), resolving the token through the host's
    `CredentialResolver` on every call and holding it nowhere. A transport
    fault, a non-200 status, a malformed reply or an unresolvable credential is
-   a typed `Failure` with the token already redacted, and the offset stays
-   where it was. HTTP 409 is `telegram_conflict`: another process is polling
-   this bot, and `run` stops rather than compete with it.
+   a typed `Failure` with the token already redacted (the shared helper now
+   redacts before it trims, so a token straddling the cut cannot survive as a
+   fragment), and the offset stays where it was. HTTP 409 is
+   `telegram_conflict`. `run` stops on any failure that will not fix itself
+   (a conflict, a revoked token, a credential the host cannot produce) and
+   returns it; a retryable failure is waited out with a doubling delay.
 3. Every update is a `TelegramDelivery`. A sender not in the map is
-   `unmapped_sender` before its text is looked at. A non-text message, an
-   empty one, or one the request contract refuses for credential material is
-   `unsupported_content` and is not forwarded. `/help` and `/status` are
-   `answered` locally; `/status` is the Agent's snapshot in words.
+   `unmapped_sender` before its text is looked at, and is not answered: a
+   stranger who finds the bot learns nothing and drives no outbound call. A
+   non-text message, an empty one, or one the request contract refuses for
+   credential material is `unsupported_content` and is not forwarded.
+   `/help`, `/start` and `/status`, in any spelling Telegram sends
+   (`/status@botname`, trailing words), are `answered` locally; `/status` is
+   the Agent's snapshot in words, read off the event loop. Handling one update
+   never takes the loop down: what raised becomes a `failed` delivery with the
+   error named and redacted, and the sender is told the request could not be
+   handled.
 4. Everything else becomes a `LocalAgentRequest` with ingress `telegram`, the
    mapped actor, the configured Bridge and namespace, a trace named for the
    update and a session named for the chat. `/skill command rest` is
@@ -327,13 +337,20 @@ presentation, and attachment handling.
    an attachment. The runtime install stays `pydantic` alone.
 
 Tests precede implementation and cover: the configuration refusing a pasted
-token, a duplicate sender or actor, and a non-https origin; an unmapped
-sender and an unbound actor both refused with nothing dispatched; a mapped and
-bound sender's text and slash command reaching the real release workflow
-through the Agent and being recorded under the actor with a trace named for
-the update; `/help` and `/status` answered without a run; the token appearing
-in the Bot API URL and nowhere on the ingress, resolved once per call; a
-transport error carrying the URL reported without the token; a conflict
-stopping the loop; a redelivered update handled once and a batch handled in
-order with the offset confirmed; non-text and credential-bearing messages not
-forwarded; reply chunking; and a failed reply recorded, not raised.
+token, a duplicate sender or actor, and a non-https origin, and normalizing a
+trailing slash; the token shape and the `bot_token` field name refused by the
+shared secret scanner; an unmapped sender neither routed nor answered, with
+one credential resolution for the poll itself; an unbound actor refused by the
+Agent with nothing dispatched; a mapped and bound sender's text and slash
+command reaching the real release workflow through the Agent and being
+recorded under the actor with a trace named for the update; `/help`,
+`/start@botname extra` and `/status@botname` answered without a run; the token
+appearing in the Bot API URL and nowhere on the ingress, resolved once per
+call; a transport error carrying the URL deep in its text reported without any
+token fragment, an unresolvable credential non-retryable and a 429 retryable;
+the loop stopping on a conflict, a 401 and a missing credential and backing
+off on a 503; a redelivered update handled once and a batch handled in order
+with the offset confirmed; non-text and credential-bearing messages not
+forwarded; an update whose handling raised recorded as `failed` while the
+next one in the batch is still handled; reply chunking and scrubbing without
+truncation; and a failed reply recorded, not raised.

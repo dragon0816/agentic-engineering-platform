@@ -150,6 +150,19 @@ rule and the Gateway decide everything after that, as they do for every
 ingress. The runtime install stays `pydantic` alone; no Telegram library is
 imported.
 
+Review of the first version found four things worth recording. An exception
+from the Agent or the state store escaped `poll_once`, killed the loop and
+lost the update; handling is guarded and what raised becomes a `failed`
+delivery. The loop stopped only on a conflict and re-polled a revoked token
+once a second forever; it stops on anything not retryable and backs off
+otherwise. `models.wire.redacted` trimmed before it redacted, so a token
+straddling the cut survived as a fragment, which the token-in-URL made
+reachable; the shared helper redacts first, and the wire's failure rules are
+parametrized by prefix rather than copied, so a 429 is retryable here as it
+is for a model. And an unmapped sender was answered, letting a stranger drive
+unbounded outbound calls; the source ignored disallowed senders silently on
+every handler but `/start`, and so does this adapter, on every handler.
+
 Known limitation: an update handled in this process is not handled again on
 redelivery, but the offset lives in memory, so a batch handled just before a
 restart may be redelivered once. The engine's idempotency key does not cover a
