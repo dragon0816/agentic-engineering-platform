@@ -1,7 +1,7 @@
 # Handoff — Phase 7 slice 2h, identity-derived entitlement
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-7/identity-entitlement`, based on `main` after PR #59 merged.
+Branch: `main`, after PR #60 (slice 2h) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -41,7 +41,7 @@ shared platform runs on an internal-network shared workstation.
 
 ## In Progress
 
-- PR #60 open for review. Nothing else uncommitted.
+- Nothing. `main` is the state to resume from.
 
 ## Remaining
 
@@ -107,6 +107,7 @@ instance was invoked.
 
 ## Next Recommended Action
 
-Merge PR #60 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-put the two questions under "Remaining" to the owner; they are the last thing
-between this phase and the transports every later slice needs.
+Put the two questions under "Remaining" to the owner: what a Bridge presents
+to prove it is acting for its bound user, and whose identity a shared test
+workstation acts as when several members share one Windows account. They are
+the last thing between this phase and the transports every later slice needs.
