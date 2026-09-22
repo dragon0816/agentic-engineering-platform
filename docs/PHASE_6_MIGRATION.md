@@ -47,3 +47,38 @@ the report for a deterministic suite.
 Rollback removes the additions to `src/common/evaluation.py` and
 `tests/test_evaluation.py`; `EvaluationCase` and the case files predate this
 phase and stay.
+
+## Slice 5 decisions (trace capture with redaction)
+
+Decision (2026-09-22): the trace is a **new contract built from what the
+platform already records**, not a new logging path. The source repository has
+no tracing to migrate; its benchmark writes a scoreboard, which slice 1
+declined. `ExecutionTrace.build` reads the routing outcome and the Bridge's
+`ExecutionEvent`s, so the record cannot disagree with the evidence the graders
+read, and a run that produced no event produces no dispatch in its trace.
+
+Redaction is **by construction, then verified**: everything stored passes
+through `redact`, and the contract's validator scans the whole record and
+refuses one that still carries credential material. Both use the same rule as
+`no_credential_in_evidence`, so there is one definition of "a credential" in
+the repository. Two consequences were found while writing the tests and are
+kept as rules. The marker is removed before the validator's scan, because
+`SECRET_PATTERN` is written as `password: <anything>` and matched its own
+replacement, which would have made a trace for a run that leaked nothing
+refuse to exist. And a string is replaced whole when it still scans as a
+credential beside its field name, because a JSON document inside a message
+hides the match from a substitution behind its quotes.
+
+The record lists `approved` as well as `unapproved`. The Roadmap asks for
+approvals in the trace, and a reader asking "who allowed that" needs the
+dispatches that were allowed, not only the ones that were not. In the scenario
+fixture both grants carry an approval reference, so both dispatches appear.
+
+`common.trace` reads Bridge events through a protocol rather than importing
+`workflow.dispatch.ExecutionEvent`, keeping `common` free of a dependency on
+`workflow`. The alternative, placing the trace in `workflow`, was rejected
+because a trace also covers a request that was refused before any dispatch.
+
+Rollback removes `src/common/trace.py` and `tests/test_trace.py`, the
+`trace`/`observe` methods on the test runners, and renames `labelled` back;
+nothing outside the evaluation harness depends on it.

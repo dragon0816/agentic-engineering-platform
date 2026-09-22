@@ -32,6 +32,7 @@ from common.assets import AssetIdentity, ExecutionDependencies, TaskManifest, Wo
 from common.base import Contract
 from common.evaluation import EvaluationCase, ObservedRun
 from common.execution import RequestContext, RouteDecision, SideEffect
+from common.trace import ExecutionTrace
 from models.catalog import ModelEndpoint
 from models.contracts import ModelClient, ModelRequest, ModelResponse
 from models.openai_compatible import OpenAICompatible
@@ -374,6 +375,16 @@ class GatewayRunner:
                 seen.append(event.asset)
         return tuple(seen)
 
+    def trace(self, case: EvaluationCase, observed: ObservedRun) -> ExecutionTrace:
+        """The record of the run just made: joined to the case's request, and
+        built from the same Bridge events the observation was read from, so
+        the two cannot disagree about what was dispatched."""
+        granted = approvals()
+        approved = tuple(dict.fromkeys(i for i in observed.dispatched if granted.get(i)))
+        return ExecutionTrace.build(
+            case.request.trace, observed, self.bridge.events, approved=approved
+        )
+
     def run(
         self,
         case: EvaluationCase,
@@ -533,16 +544,34 @@ class AgentRunner:
 class RepositoryRunner:
     """Every case in the repository, sent to the wiring that can answer it.
     A fresh Gateway per case, so one case's dispatches are never read as
-    another's."""
+    another's. Every run leaves its trace in `traces`, keyed by case, so the
+    suite can hold the records to the same standard as the observations."""
+
+    def __init__(self) -> None:
+        self.traces: dict[str, ExecutionTrace] = {}
 
     def run(self, case: EvaluationCase) -> ObservedRun:
+        observed, _ = self.observe(case)
+        return observed
+
+    def observe(self, case: EvaluationCase) -> tuple[ObservedRun, ExecutionTrace]:
         if case.case_id in DISCOVERY_CASES:
-            return DiscoveryRunner().run(case)
-        if case.category == "agent":
+            observed = DiscoveryRunner().run(case)
+            # Nothing is dispatched by a discovery proof, so its record is a
+            # route that was never taken and an outcome in which nothing ran.
+            trace = ExecutionTrace.build(case.request.trace, observed, ())
+        elif case.category == "agent":
             proposal = AGENT_PROPOSALS.get(case.case_id)
             if proposal is None:
                 # Named, like the discovery cases: a stub fixed to one answer
                 # must not silently grade a case it was never written for.
                 raise LookupError(f"no stub proposal is registered for {case.case_id}")
-            return AgentRunner(ROUTING_ALIAS, proposing(proposal)).run(case)
-        return GatewayRunner().run(case)
+            agent = AgentRunner(ROUTING_ALIAS, proposing(proposal))
+            observed = agent.run(case)
+            trace = agent.gateway.trace(case, observed)
+        else:
+            gateway = GatewayRunner()
+            observed = gateway.run(case)
+            trace = gateway.trace(case, observed)
+        self.traces[case.case_id] = trace
+        return observed, trace
