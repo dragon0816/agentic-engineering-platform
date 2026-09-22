@@ -1,7 +1,7 @@
 # Handoff — Phase 7 slice 2g, member-decided asset authorization
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-7/member-authorization`, based on `main` after PR #57 merged.
+Branch: `main`, after PR #58 (slice 2g) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -51,7 +51,7 @@ and still unable to use company LDAP.
 
 ## In Progress
 
-- PR #58 open for review. Nothing else uncommitted.
+- Nothing. `main` is the state to resume from.
 
 ## Remaining
 
@@ -115,6 +115,7 @@ instance was invoked.
 
 ## Next Recommended Action
 
-Merge PR #58 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-put the remaining authentication design to the owner: it is the only thing
+Put the remaining authentication design to the owner: what a Bridge presents
+to the shared platform, what the control plane checks and stores, and how an
+authorization reaches a device and stays current. It is the only thing
 blocking slices 2b and 2h, and every later slice depends on them.
