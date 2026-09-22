@@ -121,7 +121,7 @@ privileges and run on Linux CI.
 
 | Slice | PR | Status | What it covers |
 |---|---|---|---|
-| 1 enrollment foundation | pending | in progress | Invitation-only users, independent Bridge device identity, single-user company workstation and multi-user shared test workstation contracts plus an inert reference registry |
+| 1 enrollment foundation | #48 | in review | Invitation-only users, independent Bridge device identity, single-user company workstation and multi-user shared test workstation contracts plus an inert reference registry |
 | 2 company Bridge deployment | — | planned | Install Agent + Bridge, enroll the company workstation, advertise capabilities and run a read-only connectivity probe |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |

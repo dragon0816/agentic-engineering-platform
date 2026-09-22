@@ -2,6 +2,8 @@
 
 Updated: 2026-09-22 (Asia/Taipei).
 Branch: `phase-7/enrollment-foundation`, based on `main` at `201071e`.
+Implementation commit: `de1f1b2`.
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/48 (open).
 
 Progress across phases is in `docs/TASKS.md`. This file records only where the
 current work stopped and how to resume it.
@@ -42,8 +44,8 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 
 ## In Progress
 
-- The coherent enrollment-foundation slice is ready to commit, push and open for
-  review. `docs/TASKS.md` uses `pending` until the PR number is known.
+- PR #48 is open for review and cross-platform CI. This follow-up records the PR
+  number in the persistent progress and handoff files.
 
 ## Remaining
 
