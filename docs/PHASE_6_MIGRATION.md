@@ -47,3 +47,55 @@ the report for a deterministic suite.
 Rollback removes the additions to `src/common/evaluation.py` and
 `tests/test_evaluation.py`; `EvaluationCase` and the case files predate this
 phase and stay.
+
+## Slice 5 decisions (trace capture with redaction)
+
+Decision (2026-09-22): the trace is a **new contract built from what the
+platform already records**, not a new logging path. The source repository has
+no tracing to migrate; its benchmark writes a scoreboard, which slice 1
+declined. `ExecutionTrace.build` reads the routing outcome and the Bridge's
+`ExecutionEvent`s, so the record cannot disagree with the evidence the graders
+read, and a run that produced no event produces no dispatch in its trace.
+
+Redaction is **by construction, then verified**: everything stored passes
+through `redact`, and the contract's validator scans the whole record and
+refuses one that still carries credential material. Both use the same rule as
+`no_credential_in_evidence`, so there is one definition of "a credential" in
+the repository. Review of the first version found that rule insufficient in
+three ways, all the same root cause: `SECRET_PATTERN` was written to *detect*
+a credential, so it located the start of one and stopped at the first space,
+and it matched its own replacement (`password: [redacted]`). A private key
+lost only its header and kept its body; a quoted password with a space kept
+its tail; and a mapping under a `password` key relabelled its children with
+their own innocent names, so nothing scanned. The pattern now spans the whole
+secret (a quoted value to its closing quote, a key block to its `END` line or
+the end of the text) and refuses to match the marker, which makes redaction
+idempotent and removes the special case that had stripped the marker before
+scanning. A field named for a secret loses its whole value whatever its
+shape, and the shared `labelled` scan inherits such a label downward. The
+pattern is defined once in `common.assets`, so the model adapters' error
+redaction and the registry's rejection of embedded secrets gained the same
+reach. A string is still replaced whole when it scans as a credential beside
+its field name after substitution, because JSON inside a message hides the
+match behind its quotes.
+
+The validator also holds a stored trace to internal consistency: the dispatch
+events and `dispatched` name the same identities in order, `ran`, `approved`
+and `unapproved` are subsets of `dispatched`, and nothing is both approved and
+unapproved. Review pointed out that "approved" is defined as a dispatched
+identity, and a host-assembled record could otherwise name an approval for
+something never dispatched.
+
+The record lists `approved` as well as `unapproved`. The Roadmap asks for
+approvals in the trace, and a reader asking "who allowed that" needs the
+dispatches that were allowed, not only the ones that were not. In the scenario
+fixture both grants carry an approval reference, so both dispatches appear.
+
+`common.trace` reads Bridge events through a protocol rather than importing
+`workflow.dispatch.ExecutionEvent`, keeping `common` free of a dependency on
+`workflow`. The alternative, placing the trace in `workflow`, was rejected
+because a trace also covers a request that was refused before any dispatch.
+
+Rollback removes `src/common/trace.py` and `tests/test_trace.py`, the
+`trace`/`observe` methods on the test runners, and renames `labelled` back;
+nothing outside the evaluation harness depends on it.

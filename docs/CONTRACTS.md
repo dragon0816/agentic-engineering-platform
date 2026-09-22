@@ -1078,3 +1078,59 @@ only when every attempt was measured, because a total over some of them would
 read as faster exactly when the alias failed to answer. Nothing in this layer contacts a provider: the comparison takes
 a `run` callable, so a host supplies live clients and the repository's tests
 supply Phase 5 adapters over an injected transport.
+
+## Trace capture with redaction (Phase 6, slice 5)
+
+`ObservedRun` is evidence read while grading. `common.trace.ExecutionTrace`
+is the record read afterwards, by a person or a later evaluation, so it has
+three duties the evidence does not: it joins to the request that produced it,
+it keeps the order things happened in, and it is safe to store.
+
+`ExecutionTrace.build(trace, observed, dispatches, approved=)` takes the
+request's `TraceIdentifiers`, the observation, and the Bridge's events for that
+request. An event carrying another request's identifiers is refused with
+`ValueError` rather than filed. The record holds `events` in order (a `route`
+event first, one `dispatch` event per Bridge event with its identity, status
+and code, and an `outcome` event last), the route and its `origin`,
+`dispatched`, `ran`, `approved` (dispatched identities whose grant carried an
+approval reference), `unapproved`, the workflow `status`, `completed_steps` and
+`declared_steps`, `model_calls`, `duration_ms`, `input_tokens`,
+`output_tokens`, the redacted `failure`, and `redactions`, how many secrets
+were removed on the way in. `TraceEvent`s carry identities, statuses and codes
+and never a payload. The outcome event's status is the workflow's when one
+ran, else the last dispatch's, else `unresolved` for a routing failure, else
+`nothing_ran`.
+
+`redact(value, label=)` returns a copy of any JSON-shaped value with every
+credential replaced by `common.assets.REDACTED` (`[redacted]`), and the
+count. Three rules, in order: a field whose name matches `SECRET_FIELD`
+(`password`, `api_key`, `access_token`, `secret_value`) loses its whole value
+whatever its shape, nested mapping included; a `SECRET_PATTERN` match inside a
+string is cut out so the rest of a message survives; and a string that still
+scans as a credential beside its field name (JSON inside a message, whose
+quotes hide the match from a substitution) is replaced whole. Redacting the
+output again changes nothing and counts nothing. The scan is
+`common.evaluation.labelled`, the same one the `no_credential_in_evidence`
+grader uses, and a label that names a secret is inherited by everything
+beneath it, so what redaction removes and what the grader refuses are decided
+by one rule.
+
+`SECRET_PATTERN` itself spans the whole secret rather than locating its start:
+a quoted value with spaces is matched to its closing quote, and a private key
+block to its `END` line or the end of the text. It refuses to match
+`REDACTED`, so the one pattern detects a credential and reads its own
+replacement as clean, in the trace, the evidence grader, the model adapters'
+error redaction and the registry's rejection of embedded secrets alike.
+
+`carries_credential(value)` is that scan applied to anything. The
+`ExecutionTrace` validator runs it on the whole record and refuses a trace
+that carries credential material, whether built by the platform or assembled
+from stored parts. It also refuses events not numbered from zero without gaps,
+a record that does not open with the route and close with the outcome, a
+`dispatched` list that does not match the dispatch events in order, `ran`,
+`approved` or `unapproved` naming an identity that was never dispatched, and
+an identity both approved and unapproved.
+
+`common.trace` depends on `common.evaluation`, never the reverse, and reads
+Bridge events through a `DispatchRecord` protocol so that `common` does not
+import `workflow`.

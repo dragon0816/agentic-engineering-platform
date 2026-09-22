@@ -206,10 +206,72 @@ is kept apart from the deterministic suite.
    single attempt refused; and `model_selected_route` rejecting a route the
    deterministic layer resolved.
 
+## Requirements and acceptance (slice 5 — trace capture with redaction)
+
+The Roadmap asks for one record of a request's journey: route, calls,
+approvals, duration, model usage and final status, with secrets redacted.
+`ObservedRun` is evidence for grading; a trace is the record a person or a
+later evaluation reads, so it is correlated to the request's
+`TraceIdentifiers`, ordered, and safe to store.
+
+1. `common.trace.redact(value)` returns a copy of any JSON-shaped value with
+   every match of the repository's `SECRET_PATTERN` replaced by `[redacted]`,
+   and the number of replacements. It scans strings field by field with
+   quotes stripped, the same rule the credential grader uses, so a token
+   inside a JSON string is removed rather than missed. A field named for a
+   secret loses its whole value whatever its shape; the pattern spans the
+   whole secret (a quoted value, a private key block) and never matches its
+   own marker, so redacting twice changes nothing.
+2. `common.trace.TraceEvent` is one ordered thing that happened: `sequence`,
+   `kind` (`route`, `dispatch`, `outcome`), the asset it concerns, its status
+   and code. It is built from what the platform already records, the routing
+   outcome and the Bridge's `ExecutionEvent`s, and carries no payload.
+3. `common.trace.ExecutionTrace` is the record: `trace` (the request's
+   identifiers, so it joins to journal entries and Bridge events), `events`
+   in order, the route and its origin, `dispatched`, `ran`, `approved` and
+   `unapproved` (dispatched identities with and without an approval behind
+   them), `status`, `completed_steps`, `declared_steps`, `model_calls`,
+   `duration_ms`, `input_tokens`, `output_tokens`, a redacted `failure`, and
+   `redactions`, how many secrets were removed on the way in.
+4. `ExecutionTrace.build(trace, observed, dispatches, approved=)` applies
+   `redact` to the fields that can hold free text, so a trace is safe to
+   persist by construction. The contract's validator refuses a trace that
+   carries credential material, whose events are out of order or not
+   bracketed by the route and the outcome, or whose identity lists name
+   something the dispatch events do not record, wherever the trace came from.
+5. `RepositoryRunner` produces a trace beside every observation, and the
+   suite asserts that every trace in the repository joins to its case's
+   `TraceIdentifiers`, is ordered, and scans clean.
+6. Tests: a failure message carrying a bearer token arriving redacted with
+   `redactions == 1`; a JSON-shaped credential redacted; a trace refusing to
+   be built around unredactable material; the event order matching the
+   Bridge's; the trace identifiers matching the case's request; and the
+   scenario case's trace showing its two dispatches and their statuses.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 5 — trace capture with redaction: route, plan, tool and workflow calls,
-  approvals, duration, model usage and final status.
+None planned. With slice 5 the phase's named deliverables are complete; see
+"Phase 6 exit criteria" below.
+
+## Phase 6 exit criteria
+
+Roadmap: the evaluation suite runs in CI without production side effects and
+blocks known regressions.
+
+- **Runs in CI without production side effects.** `tests/test_evaluation.py`
+  grades every case in `evaluation/cases/` on every CI run. No model, network,
+  process or filesystem outside the repository is touched; the filesystem
+  capability is installed but never granted.
+- **Blocks known regressions.** A case's declared assertions decide whether it
+  passed, an unrecognized assertion fails it, every grader is proven to
+  reject, and a check that could not have seen its evidence does not pass.
+  A routing, policy or workflow regression fails the suite with the reason.
+- **All three categories exist.** Six `deterministic` cases, one `scenario`
+  case with the Roadmap's four prohibitions checked as evidence, and one
+  `agent` case routed by a model through the real Phase 5 adapter, compared
+  across aliases with repetition and reported as skipped when none is
+  configured.
+- **Trace capture with redaction** is slice 5.
 
 ## Out of scope for Phase 6
 

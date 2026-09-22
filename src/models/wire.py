@@ -15,7 +15,7 @@ from collections.abc import Callable, Iterator, Mapping
 from time import monotonic
 from typing import Any, Protocol
 
-from common.assets import SECRET_PATTERN
+from common.assets import REDACTED, SECRET_PATTERN
 from common.execution import Failure
 from models.catalog import ModelEndpoint
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
@@ -96,7 +96,7 @@ class UrllibTransport:
 
 def redacted(text: str) -> str:
     trimmed = text[:MAX_ERROR_CHARS].strip()
-    return SECRET_PATTERN.sub("[redacted]", trimmed)
+    return SECRET_PATTERN.sub(REDACTED, trimmed)
 
 
 def describe(error: BaseException) -> str:

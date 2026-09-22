@@ -23,13 +23,13 @@ the history is complete; this table is the index into them.
 
 ## Status
 
-Phases 0 to 5 complete. Phase 6 active, three slices of five done and a
-fourth in review. 39 pull requests merged (#1 to #42; #5 was closed unmerged
+Phases 0 to 5 complete. Phase 6 active, four slices of five done and the
+fifth in review. 41 pull requests merged (#1 to #44; #5 was closed unmerged
 and superseded by #6, and #24 and #25 were never pull requests). A row says
 `done` only once its pull request has merged; until then it says `in review`,
 so the committed record never asserts a merge that has not happened.
 
-The suite is 654 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 677 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -38,6 +38,7 @@ privileges and run on Linux CI.
 | Work | PR | What landed |
 |---|---|---|
 | Progress record | #40 | This file, backfilled from the merged pull requests, and named in the reading order of `CLAUDE.md` and `AGENTS.md` |
+| Flaky progress test | #44 | `test_workflow_progress` compared payload digits against the whole event, including a random run id that contained them about once in a few hundred runs |
 
 ## Phase 0 — Architecture and inventory (complete)
 
@@ -111,8 +112,8 @@ privileges and run on Linux CI.
 | 1 grading harness | #39 | done | A case's declared assertions decide whether it passed; every grader proven to reject |
 | 2 observable execution | #41 | done | One shared runner sends every routed case through a real Gateway; a check that could not see its evidence no longer passes |
 | 3 policy and forbidden outcomes | #42 | done | The first `scenario` case; the Roadmap's four prohibitions checked as evidence of what happened |
-| 4 model-involving evaluation | #43 | in review | The `agent` category, and one case across configured aliases with repetition, compared on correctness, reliability, latency and usage |
-| 5 trace capture | — | next | Route, plan, calls, approvals, duration and usage, with redaction |
+| 4 model-involving evaluation | #43 | done | The `agent` category, and one case across configured aliases with repetition, compared on correctness, reliability, latency and usage |
+| 5 trace capture | #45 | in review | `ExecutionTrace` beside every observation: route, dispatches in Bridge order, approvals, workflow progress, model usage, duration and outcome, redacted by construction and refused if a credential remains |
 
 ## Open items carried forward
 
