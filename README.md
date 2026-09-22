@@ -118,3 +118,9 @@ The Phase 7 Windows company-host technical preview is built with
 Python 3.12 wheels, validates the host with `aep-host doctor`, and exports an empty,
 credential-free Bridge enrollment request. See `deploy/windows-preview/README.md`.
 It has no shared-platform transport and cannot execute workflow 7 or 13 yet.
+
+Phase 7 keeps the Personal Agent, installed assets and authoritative run state on
+each Bridge computer. The shared platform distributes published packages and holds
+timestamped status projections. Remote jobs are actor/device scoped: a company
+computer accepts its bound owner, a shared test computer accepts its bound users,
+and future Telegram polling maps a sender to the same platform actor before routing.
