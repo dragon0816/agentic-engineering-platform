@@ -132,6 +132,16 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("device_missing")
         return _copy(item)
 
+    def advertisement(self, bridge_id: Symbol) -> BridgeRegistration:
+        """What this device said it can run when it enrolled. It is the
+        device's own claim, not an authorization: what a member may run is
+        decided separately and enforced by the Bridge policy."""
+        key = TypeAdapter(Symbol).validate_python(bridge_id)
+        item = self._advertisements.get(key)
+        if item is None:
+            raise EnrollmentError("device_missing")
+        return _copy(item)
+
     def _may_administer(self, requested_by: str, device: BridgeDevice) -> bool:
         if requested_by in self._administrators:
             return True

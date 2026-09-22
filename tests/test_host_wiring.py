@@ -15,6 +15,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
+from capabilities.files import READ_FILE_SPEC
 from channels.telegram import TELEGRAM_CHANNEL
 from common.distribution import LocalStateError
 from host_runtime.cli import main
@@ -411,6 +412,128 @@ def test_reporting_on_a_state_file_changes_nothing_about_it(tmp_path: Path) -> N
     # Opening it for writing is what migrates it, and only then.
     with build_runtime(config) as runtime:
         assert runtime.state.cursor(TELEGRAM_CHANNEL) is None
+
+
+def authorization(*kinds: str, actor: str = "engineer") -> dict[str, Any]:
+    """What the members of this device decided it may run, as the control
+    plane would issue it. The shipped read capability's own policy requires
+    an approval, so choosing it as a tool carries one."""
+    chosen: list[dict[str, Any]] = []
+    for kind in kinds:
+        asset = {
+            "skill": {"namespace": "engineering", "name": "file-skill", "version": "1.0.0"},
+            "workflow": {"namespace": "engineering", "name": "read-local-file", "version": "1.0.0"},
+            "capability": {"namespace": "filesystem", "name": "read-file", "version": "1.0.0"},
+        }[kind]
+        decision: dict[str, Any] = {
+            "bridge_id": BRIDGE,
+            "actor": actor,
+            "kind": kind,
+            "asset": asset,
+            "decided_at": "2026-09-22T12:00:00+00:00",
+        }
+        if kind == "capability":
+            decision["approval_ref"] = "workspace-read-approval"
+            decision["approved_by"] = actor
+        chosen.append(decision)
+    return {
+        "bridge_id": BRIDGE,
+        "issued_at": "2026-09-22T12:30:00+00:00",
+        "selections": chosen,
+    }
+
+
+def test_the_host_runs_what_its_members_chose_and_nothing_else(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    config, layout = workspace(tmp_path, membership=membership_record())
+    layout.authorization.write_text(
+        json.dumps(authorization("skill", "workflow", "capability")), encoding="utf-8"
+    )
+    target = layout.workspace_root / "notes.txt"
+    path = host_json(tmp_path, config)
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    printed = capsys.readouterr().out
+    assert "route: workflow engineering/read-local-file@1.0.0" in printed
+    assert "succeeded, 1 step(s) completed" in printed
+    # The grant came from the capability's own specification, not from the
+    # decision, which named no permission at all.
+    with build_runtime(config) as runtime:
+        grant = runtime.agent.gateway.bridge.policy._grants[  # noqa: SLF001 - the policy is the subject
+            ("engineer", ("filesystem", "read-file", "1.0.0"))
+        ]
+    assert grant.permissions == READ_FILE_SPEC.policy.required_permissions
+    assert grant.policy_refs == READ_FILE_SPEC.policy.policy_refs
+    assert grant.approval_ref == "workspace-read-approval"
+
+
+def test_an_asset_nobody_chose_is_not_installed(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The manifests are all sitting in the assets directory. What the device
+    installs is what its members chose, so an unchosen Workflow is not there
+    to run and an unchosen Skill is not there to route to."""
+    config, layout = workspace(tmp_path, membership=membership_record())
+    target = layout.workspace_root / "notes.txt"
+    path = host_json(tmp_path, config)
+    layout.authorization.write_text(
+        json.dumps(authorization("skill", "capability")), encoding="utf-8"
+    )
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "workflow_not_installed" in capsys.readouterr().out
+    layout.authorization.write_text(json.dumps(authorization("capability")), encoding="utf-8")
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "needs_input (unknown_skill)" in capsys.readouterr().out
+    with build_runtime(config) as runtime:
+        assert runtime.agent.runs() == ()
+
+
+def test_a_revoked_tool_stops_authorizing_the_same_run(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    config, layout = workspace(tmp_path, membership=membership_record())
+    target = layout.workspace_root / "notes.txt"
+    path = host_json(tmp_path, config)
+    layout.authorization.write_text(
+        json.dumps(authorization("skill", "workflow", "capability")), encoding="utf-8"
+    )
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "succeeded" in capsys.readouterr().out
+    # The member changed their mind; the control plane reissues without it.
+    layout.authorization.write_text(
+        json.dumps(authorization("skill", "workflow")), encoding="utf-8"
+    )
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "failure: permission_denied" in capsys.readouterr().out
+    # Another member's decision authorizes nothing for this one.
+    layout.authorization.write_text(
+        json.dumps(authorization("skill", "workflow", "capability", actor="tester")),
+        encoding="utf-8",
+    )
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert "failure: permission_denied" in capsys.readouterr().out
+
+
+def test_two_answers_to_one_question_are_refused(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    layout.authorization.write_text(json.dumps(authorization("capability")), encoding="utf-8")
+    with pytest.raises(HostError) as conflict:
+        build_runtime(config)
+    assert conflict.value.code == "authorization_conflict"
+    layout.grants.unlink()
+    # A bundle that is valid in itself but was issued for another device.
+    foreign = authorization("capability")
+    foreign["bridge_id"] = "bridge-other"
+    for decision in foreign["selections"]:
+        decision["bridge_id"] = "bridge-other"
+    layout.authorization.write_text(json.dumps(foreign), encoding="utf-8")
+    with pytest.raises(HostError) as mismatch:
+        build_runtime(config)
+    assert mismatch.value.code == "authorization_mismatch"
+    layout.authorization.write_text('{"bridge_id": "bridge-company"}', encoding="utf-8")
+    with pytest.raises(HostError) as invalid:
+        build_runtime(config)
+    assert invalid.value.code == "authorization_invalid"
 
 
 def test_a_telegram_ingress_is_built_only_when_its_secret_is_mapped(tmp_path: Path) -> None:

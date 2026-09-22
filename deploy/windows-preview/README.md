@@ -59,6 +59,7 @@ created:
 ```text
 workspace\membership.json        who may use this Bridge
 workspace\grants.json            what those people may run (optional; nothing by default)
+workspace\authorization.json     what the members chose, once the shared platform tells this Bridge
 workspace\assets\skills\*.json   installed Skill manifests
 workspace\assets\workflows\*.json installed Workflow manifests
 workspace\telegram.json          the Telegram ingress (optional)
@@ -88,9 +89,16 @@ aep-host status --config host.json
 A route resolves whether or not it may run. Installing a Skill or Workflow is
 not permission to execute it: a dispatch is refused unless `grants.json` names
 the actor, the capability, its required permissions and policy, and an approval
-reference when the capability's policy asks for one. `--namespace` selects which
-namespace a request addresses; pass `-Namespace` at install time to record a
-default in `host.json`.
+reference when the capability's policy asks for one.
+
+When the shared platform has told this Bridge what its members chose, that
+arrives as `workspace\authorization.json` and replaces `grants.json`; having
+both is refused. Only the Workflows and Skills named there are installed, and
+the grants are derived from the tool selections against each capability's own
+declaration, so a decision never has to name a permission.
+
+`--namespace` selects which namespace a request addresses; pass `-Namespace`
+at install time to record a default in `host.json`.
 
 ## Telegram (optional)
 
