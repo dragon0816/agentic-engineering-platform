@@ -1,7 +1,7 @@
 # Handoff — Phase 6 closed; Phase 7 awaits owner decisions
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-6/closure`, based on `main` after PR #45 merged.
+Branch: `main`, after PR #46 (the Phase 6 closure) merged.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -35,7 +35,8 @@ code and the platform never starts a provider process (2026-09-21).
 
 ## In Progress
 
-- PR #46 (this closure) open for review. Nothing else uncommitted.
+- Nothing. PR #46 merged with its review applied; `main` is the state to
+  resume from.
 
 ## Remaining
 
@@ -85,6 +86,7 @@ across namespaces.
 
 ## Next Recommended Action
 
-Merge PR #46 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-put the four pending owner decisions in `docs/TASKS.md` to the owner; do not
-write `docs/phases/PHASE_7_*.md` until they are answered.
+Put the four pending owner decisions in `docs/TASKS.md` to the owner. Do not
+write `docs/phases/PHASE_7_*.md` until they are answered; until then, work
+is what the owner asks for plus the open items carried forward in
+`docs/TASKS.md`.
