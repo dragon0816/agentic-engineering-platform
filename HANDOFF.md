@@ -45,6 +45,10 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 - Performed a real local offline install from the extracted ZIP, received four
   passing doctor checks, exported and inspected enrollment JSON, exercised dry-run
   uninstall, and removed the isolated installation.
+- Owner-reported company-computer validation succeeded on 2026-09-22: installed
+  `aep-host` reported version `0.1.0`; doctor returned `ready` with Windows, Python
+  3.12, company device profile and writable workspace all passed; enrollment request
+  export wrote successfully to the user's Desktop. No credential values were shared.
 - Local deliverable (ignored by Git):
   `dist/agentic-engineering-platform-windows-preview-0.1.0-d1a97fbda097.zip`.
   SHA-256: `18A24BBC1782BF326CD993D439CE289647A1D7E0C651C62CB71364884958A370`.
@@ -63,6 +67,7 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 - On the company computer, confirm 64-bit Python 3.12, extract the ZIP, run
   `install.cmd -Actor <platform-actor>`, confirm the printed computer-name-derived
   Bridge ID, retain the complete doctor output and inspect the enrollment request.
+  Installation and doctor are now confirmed; JSON inspection remains.
 - Slice 2b: implement the shared-platform authenticated invitation/device enrollment
   endpoint and Bridge client, then add a read-only connectivity probe. Do not treat
   the JSON exported by this preview as authentication proof.
@@ -120,6 +125,14 @@ apply removed it.
 PR #49 CI: Ubuntu 3.11/3.12 and Windows 3.11/3.12 all passed. The Windows
 3.12 job also passed the bundle build, offline install, doctor, enrollment export,
 dry-run uninstall, applied uninstall and artifact upload steps.
+
+Company computer, owner-reported PowerShell run:
+
+```text
+aep-host version -> 0.1.0
+aep-host doctor -> ready; 4/4 checks passed
+aep-host enrollment-request -> Desktop/enrollment-request.json written
+```
 
 ## Known issues
 
