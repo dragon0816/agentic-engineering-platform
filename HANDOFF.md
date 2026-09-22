@@ -1,93 +1,78 @@
-# Handoff — Phase 6 evaluation, slice 5 (trace capture with redaction)
+# Handoff — Phase 6 closed; Phase 7 awaits owner decisions
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-6/trace-capture`, based on `main` after PR #44 merged.
+Branch: `phase-6/closure`, based on `main` after PR #45 merged.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-The Roadmap asks for one record of a request's journey: route, plan, tool and
-workflow calls, approvals, duration, model usage and final status, with
-secrets redacted. Requirements: `docs/phases/PHASE_6_EVALUATION.md` (slice 5);
-contracts: `docs/CONTRACTS.md` ("Trace capture with redaction"); decisions:
-`docs/PHASE_6_MIGRATION.md` ("Slice 5 decisions").
+Record Phase 6 as complete against its Roadmap exit criterion ("evaluation
+suite runs in CI without production side effects and blocks known
+regressions") and leave the repository ready for Phase 7 to be specified.
 
 ## Owner decisions in force
 
-Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
-**Codex and Claude Code are out of scope for Phase 6 entirely** (2026-09-22).
+Listed with their dates in `docs/TASKS.md`. The ones that shaped Phases 5 and
+6: Codex and Claude Code are excluded as model providers (2026-09-21) and out
+of scope for Phase 6 entirely (2026-09-22); provider adapters are in-process
+code and the platform never starts a provider process (2026-09-21).
 
 ## Completed
 
-- `src/common/trace.py`: `redact`, `carries_credential`, `TraceEvent` and
-  `ExecutionTrace`, with `ExecutionTrace.build(trace, observed, dispatches,
-  approved=)` reading the routing outcome and the Bridge's events. The record
-  is redacted by construction and its validator refuses one that still
-  carries credential material, is out of order, or does not open with the
-  route and close with the outcome. Bridge events are read through a
-  `DispatchRecord` protocol so `common` does not import `workflow`.
-- `common.evaluation.labelled` (was `_labelled`) is shared, so redaction and
-  the `no_credential_in_evidence` grader use one definition of a credential;
-  a label that names a secret is inherited by everything beneath it.
-- `common.assets.SECRET_PATTERN` spans whole secrets (quoted values, private
-  key blocks to their `END` line) and refuses to match `REDACTED`, which is
-  defined beside it with `SECRET_FIELD`. The model adapters and the registry
-  redact and reject with the same pattern, so they gained the same reach.
-- PR #45 review (9 findings) applied. Three were real leaks with one root
-  cause: the pattern located the start of a secret and matched its own
-  marker, so a private key kept its body, a quoted password kept its tail,
-  and a mapping under `password` was never scanned. The validator now also
-  holds a stored trace to internal consistency (dispatch events match
-  `dispatched`; `ran`, `approved`, `unapproved` are subsets of it).
-- `tests/evaluation_runner.py`: `GatewayRunner.trace(case, observed)` and
-  `RepositoryRunner.observe(case)`, which returns the observation and its
-  trace and files every trace in `RepositoryRunner.traces`.
-- `tests/test_trace.py`, 16 tests: every repository trace joins its case's
-  request, is ordered and scans clean; the scenario trace shows both
-  dispatches in Bridge order under approval; a refused request traces as
-  `unresolved` with its code; the agent trace records model usage; a bearer
-  token in a failure arrives redacted and counted; a private key is removed
-  whole; a quoted credential with a space is removed whole; a JSON-shaped
-  credential is redacted; a secret under a credential key goes whatever its
-  shape; redaction is idempotent; the marker is not itself a credential; a
-  trace cannot be built around credential material; a stored trace cannot
-  claim more than its dispatches; a foreign event cannot join; out-of-order
-  or out-of-shape events are refused.
-- Slice 5 requirements and the "Phase 6 exit criteria" section in
-  `docs/phases/PHASE_6_EVALUATION.md`; PR #43 flipped to `done` and PR #44
-  recorded in `docs/TASKS.md`.
+- Phase 6, five slices, PRs #39, #41, #42, #43 and #45 (`docs/TASKS.md`).
+  Each was reviewed and every finding applied before merge.
+- This closure: the Roadmap status line and a dated "Met" paragraph under
+  Phase 6, the Architecture status line, a Phase 6 paragraph in the README,
+  the "Met" note in `docs/phases/PHASE_6_EVALUATION.md`, and the Phase 6
+  section of `docs/TASKS.md` marked complete with the open items carried
+  forward.
+- `CLAUDE.md` and `AGENTS.md` still name `docs/phases/PHASE_6_EVALUATION.md`
+  as the active specification, as they named Phase 5's until Phase 6 began.
+  That specification now says the phase is met, so a reader is not misled;
+  the pointer moves when a Phase 7 specification exists.
 
 ## In Progress
 
-- PR #45 open for review. Nothing else uncommitted.
+- PR #46 (this closure) open for review. Nothing else uncommitted.
 
 ## Remaining
 
-Close Phase 6 against its exit criteria once PR #45 merges: mark the phase met
-in `docs/ROADMAP.md` (dated, with a paragraph like Phase 5's), update the
-status lines of `docs/ARCHITECTURE.md` and the README, flip the slice 5 row
-and add a closure row in `docs/TASKS.md`, and decide with the owner what the
-active phase pointer in `CLAUDE.md` and `AGENTS.md` should name, since no
-Phase 7 specification exists yet and writing one needs owner decisions about
-which source components are deprecated and what parity means.
+Phase 7, "End-to-end migration and deprecation", has no specification yet.
+The Roadmap says: run representative production-like scenarios against old
+and new paths; deprecate source components only after parity and acceptance
+criteria are met; keep rollback documentation during the transition. Writing
+that specification needs decisions only the owner can make:
+
+1. **Which source components are candidates for deprecation**, and in what
+   order. The source inventory in `docs/ARCHITECTURE.md` names five
+   repositories; Phases 2 to 6 migrated or deliberately declined pieces of
+   each, and `docs/PHASE_N_MIGRATION.md` records what was declined and why.
+2. **What "parity" means for each**, in terms this platform can measure. The
+   evaluation harness can express a parity check as a case, but somebody who
+   uses the source tools has to say which behaviours matter.
+3. **What production-like means here.** Every test in the repository is
+   inert by design. A Phase 7 scenario that talks to a real Ollama, the real
+   company gateway, a real vault or a real n8n needs a host, credentials and
+   a place to run that is not CI, and the owner decides where that is.
+4. **Rollback and retention** for source repositories: archived, frozen or
+   deleted, and who owns them during the transition.
+
+A smaller piece of work that needs no decision: neither model adapter has
+been run against a live endpoint (`docs/TASKS.md`, "Never exercised against a
+live endpoint"). One real request against each would confirm the field names
+before Phase 7 relies on them.
 
 ## Architecture decisions made
 
-- The trace is built from evidence the platform already records, never from
-  a new logging path, so it cannot disagree with what the graders read.
-- Redaction and the credential grader share one rule (`labelled` over
-  `SECRET_PATTERN`), and the pattern is the repository's single definition
-  of a credential: it spans the whole secret and refuses its own marker, so
-  there is no special case for the marker anywhere. A string is replaced
-  whole when it still scans as a credential beside its field name.
-- `approved` is recorded beside `unapproved`: the Roadmap asks for approvals,
-  and "who allowed that" needs the allowed dispatches too.
+None in this closure. Phase 6's are in `docs/PHASE_6_MIGRATION.md`.
 
 ## Exact verification commands and results
 
-Windows, Python 3.12.14, repository root, with the `office` extra installed:
+Windows, Python 3.12.14, repository root, with the `office` extra installed.
+This branch changes documentation only; the suite was run to confirm nothing
+reads the changed files:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
@@ -98,10 +83,6 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 # PASS
 .venv/Scripts/python.exe -m mypy
 # PASS
-.venv/Scripts/python.exe -m pip check
-# PASS
-.venv/Scripts/python.exe -m build
-# PASS: sdist and wheel
 git diff --check
 # PASS
 ```
@@ -110,24 +91,14 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Known issues / limitations
 
-- Nothing persists a trace yet. `ExecutionTrace` is safe to store and
-  round-trips through JSON, but no store, file or journal entry writes one;
-  the test runners keep them in memory for the suite. A host that wants
-  durable traces writes them beside its checkpoints.
-- `SECRET_PATTERN` is the repository's one definition of a credential and is
-  deliberately narrow (password, API key, access token, secret value, bearer
-  token, private key block). A provider-specific token shape it does not
-  name is not redacted; extending the pattern extends redaction, the grader
-  and the registry's rejection together.
-- The trace does not carry the plan beyond `declared_steps` and the route's
-  target. The workflow manifest that names the steps is the plan, and the
-  target identity is enough to find it.
-- The Bridge's events carry the request's own `TraceIdentifiers` because the
-  workflow engine does not open child spans. If it ever does, the join rule
-  in `ExecutionTrace.build` (strict equality) needs to compare `trace_id` and
-  `request_id` instead.
+Carried forward in `docs/TASKS.md` under "Open items carried forward". For
+Phase 6 specifically: nothing persists an `ExecutionTrace` yet; the
+repository's single credential pattern is deliberately narrow; and
+`stayed_in_namespace` has no allowance for a capability legitimately shared
+across namespaces.
 
 ## Next Recommended Action
 
-Merge PR #45 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-close Phase 6 as described under "Remaining".
+Merge PR #46 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
+put the four Phase 7 questions above to the owner; do not write
+`docs/phases/PHASE_7_*.md` until they are answered.

@@ -256,7 +256,8 @@ None planned. With slice 5 the phase's named deliverables are complete; see
 ## Phase 6 exit criteria
 
 Roadmap: the evaluation suite runs in CI without production side effects and
-blocks known regressions.
+blocks known regressions. **Met 2026-09-22**, with PR #45 closing the fifth
+slice; the record is in `docs/TASKS.md` and the Roadmap.
 
 - **Runs in CI without production side effects.** `tests/test_evaluation.py`
   grades every case in `evaluation/cases/` on every CI run. No model, network,
@@ -271,7 +272,10 @@ blocks known regressions.
   `agent` case routed by a model through the real Phase 5 adapter, compared
   across aliases with repetition and reported as skipped when none is
   configured.
-- **Trace capture with redaction** is slice 5.
+- **Trace capture with redaction.** Every run in the repository leaves an
+  `ExecutionTrace` joined to its request, in Bridge order, redacted by
+  construction and refused by its own validator if a credential remains,
+  and the suite holds each one to that standard (slice 5).
 
 ## Out of scope for Phase 6
 

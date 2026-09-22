@@ -23,9 +23,10 @@ the history is complete; this table is the index into them.
 
 ## Status
 
-Phases 0 to 5 complete. Phase 6 active, four slices of five done and the
-fifth in review. 41 pull requests merged (#1 to #44; #5 was closed unmerged
-and superseded by #6, and #24 and #25 were never pull requests). A row says
+Phases 0 to 6 complete; the Phase 6 closure record is in review. Phase 7 is
+not started and its specification needs owner decisions (see `HANDOFF.md`).
+42 pull requests merged (#1 to #45; #5 was closed unmerged and superseded
+by #6, and #24 and #25 were never pull requests). A row says
 `done` only once its pull request has merged; until then it says `in review`,
 so the committed record never asserts a merge that has not happened.
 
@@ -105,7 +106,7 @@ privileges and run on Linux CI.
 | 4 credentials and construction | #37 | `SecretRef` resolved per request, clients built from a catalog |
 | 5 observability and example | #38 | `duration_ms` on responses and streams, `models.proof` |
 
-## Phase 6 — Evaluation, policy and observability (active)
+## Phase 6 — Evaluation, policy and observability (complete 2026-09-22, 5 slices)
 
 | Slice | PR | Status | What it covers |
 |---|---|---|---|
@@ -113,7 +114,8 @@ privileges and run on Linux CI.
 | 2 observable execution | #41 | done | One shared runner sends every routed case through a real Gateway; a check that could not see its evidence no longer passes |
 | 3 policy and forbidden outcomes | #42 | done | The first `scenario` case; the Roadmap's four prohibitions checked as evidence of what happened |
 | 4 model-involving evaluation | #43 | done | The `agent` category, and one case across configured aliases with repetition, compared on correctness, reliability, latency and usage |
-| 5 trace capture | #45 | in review | `ExecutionTrace` beside every observation: route, dispatches in Bridge order, approvals, workflow progress, model usage, duration and outcome, redacted by construction and refused if a credential remains |
+| 5 trace capture | #45 | done | `ExecutionTrace` beside every observation: route, dispatches in Bridge order, approvals, workflow progress, model usage, duration and outcome, redacted by construction and refused if a credential remains; `SECRET_PATTERN` spans whole secrets and refuses its own marker |
+| closure | #46 | in review | Exit criteria recorded as met in the roadmap and the phase specification; architecture status and README updated |
 
 ## Open items carried forward
 
@@ -124,7 +126,7 @@ Recorded where they were found, and not blocking the active phase.
 | Phase 3 | A payload sweep, and process-liveness or lease-based suspension |
 | Phase 4 | A retrieval cache, host wiring that plans from an adopted document, a size-and-mtime shortcut for adopted-file drift checks, image description for legacy `raw/` |
 | Phase 5 | Tool calling in either adapter (it needs a registry that can render a contract as a provider schema), reading `tool_calls` back, retry behaviour, a pooled or async transport, a production credential backend |
-| Phase 6 | Closed in slice 2: every routed case is now exercised where execution could be seen |
+| Phase 6 | Nothing persists an `ExecutionTrace` yet (a host writes them beside its checkpoints); `SECRET_PATTERN` is deliberately narrow and a provider-specific token shape it does not name is not redacted; `stayed_in_namespace` has no allowance for a capability legitimately shared across namespaces; neither model adapter has been run against a live endpoint |
 
 **Never exercised against a live endpoint.** Neither the Ollama adapter nor
 the company gateway has been run against a real server. Both are written to
