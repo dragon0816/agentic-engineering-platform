@@ -32,6 +32,7 @@ EnrollmentErrorCode = Literal[
     "device_disabled",
     "advertisement_identity_mismatch",
     "binding_forbidden",
+    "binding_missing",
     "duplicate_binding",
     "company_device_single_user",
 ]
@@ -151,6 +152,15 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("device_missing")
         return _copy(item)
 
+    def may_administer(self, requested_by: Symbol, bridge_id: Symbol) -> bool:
+        """Whether this actor may change what happens on that device: a
+        platform administrator, the member who registered it, or a bound
+        device administrator. Asked by anything that acts on a device's
+        records, so one rule answers for all of them."""
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
+        device = self._devices.get(TypeAdapter(Symbol).validate_python(bridge_id))
+        return device is not None and self._may_administer(requester, device)
+
     def _may_administer(self, requested_by: str, device: BridgeDevice) -> bool:
         if requested_by in self._administrators:
             return True
@@ -180,8 +190,11 @@ class InMemoryEnrollmentRegistry:
         if user.status != "active":
             raise EnrollmentError("user_disabled")
         key = (item.bridge_id, item.actor)
-        if key in self._bindings:
+        existing = self._bindings.get(key)
+        if existing is not None and existing.status == "active":
             raise EnrollmentError("duplicate_binding")
+        # A withdrawn binding is history, not a bar: somebody who was taken
+        # off a device can be put back on it.
         active = [
             current
             for current in self._bindings.values()
@@ -193,6 +206,26 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("binding_forbidden")
         self._bindings = {**self._bindings, key: item}
         return _copy(item)
+
+    def unbind(self, requested_by: Symbol, bridge_id: Symbol, actor: Symbol) -> BridgeBinding:
+        """Withdraw a member's use of one device. Whoever may bind may also
+        unbind; what a withdrawn binding justified stops with it."""
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
+        key = (
+            TypeAdapter(Symbol).validate_python(bridge_id),
+            TypeAdapter(Symbol).validate_python(actor),
+        )
+        device = self._devices.get(key[0])
+        if device is None:
+            raise EnrollmentError("device_missing")
+        if not self._may_administer(requester, device):
+            raise EnrollmentError("binding_forbidden")
+        current = self._bindings.get(key)
+        if current is None or current.status != "active":
+            raise EnrollmentError("binding_missing")
+        withdrawn = BridgeBinding.model_validate({**current.model_dump(), "status": "revoked"})
+        self._bindings = {**self._bindings, key: withdrawn}
+        return _copy(withdrawn)
 
     def members(self, bridge_id: Symbol) -> tuple[BridgeBinding, ...]:
         key = TypeAdapter(Symbol).validate_python(bridge_id)

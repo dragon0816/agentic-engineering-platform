@@ -1483,3 +1483,55 @@ Entitlement is checked when a decision is made, not when a run happens. An
 authorization records what was decided, so a member whose entitlement is
 withdrawn keeps their device's existing bundle until the control plane issues
 a new one.
+
+## Bridge access tokens (Phase 7, slice 2b)
+
+`common.identity.BridgeAccessGrant` is the platform's record of one access
+token: `token_id`, the `actor` and `bridge_id` it was issued for, a
+`fingerprint` of the secret, `issued_at`, an optional `expires_at` that must
+be after it, and `status`. Binding a member to a device is what justifies one,
+so a grant always names both, and several members on one machine hold several
+tokens. The secret is not in it.
+
+`common.identity.IssuedAccessToken` is the one moment the secret exists
+outside the Bridge: the grant and the value, returned once by issuing.
+Deliberately not a `Contract`, for the reason `models.credentials` gives: a
+contract is serializable, validated and loggable, which is everything a secret
+must not be. Its `repr` names the token and redacts the value, and it has no
+other attributes to put one in.
+
+`control_plane.identity.InMemoryAccessTokens.issue(requested_by, actor,
+bridge_id, issued_at=, expires_at=, secret=)` issues only for a member the
+platform currently admits on that device (`actor_not_admitted`), only for a
+caller who is that member or may administer the device (`token_forbidden`),
+and one usable token per pair (`duplicate_token`); a token that has expired is
+spent and no longer in the way. It generates the secret with `secrets.token_urlsafe`
+and refuses a supplied one below 32 characters (`weak_secret`), because the
+fingerprint comparison is sound only for a value nobody can guess;
+`fingerprint` is a plain SHA-256, which is enough for 32 random bytes and
+would not be for a password.
+
+`authenticate(token_id, secret, now=, session=)` verifies the secret before it
+says anything about the token's state, comparing with `hmac.compare_digest`
+against a fingerprint that matches nothing when the token is unknown: an
+unknown `token_id` and a wrong secret are both `authentication_failed`, so
+somebody who holds neither cannot learn that a token exists. Once the secret
+matched, the holder is told which of `token_revoked`, `token_expired` or
+`binding_withdrawn` applies; the last covers a withdrawn binding, a disabled
+member and a disabled device alike. A `token_id` that is not even the shape of
+one is answered like any other unknown token rather than raising. Success is an
+`AuthenticatedActor` naming the member and the `bridge_id` the token was issued
+for, whose `method` is `bridge-access-token` and whose session ends no later
+than the token does; an entry point where somebody signs in directly leaves
+the device absent.
+
+`grants_for(bridge_id, now=)` lists the tokens a device can currently be used
+with, excluding the spent ones, with no secret in any of them.
+`revoke(requested_by, token_id)` and `revoke_for(requested_by, actor,
+bridge_id)` take them back under the same caller rule as issuing, and
+`InMemoryEnrollmentRegistry.unbind` withdraws the binding that justified them
+(`binding_missing` when there is none, `binding_forbidden` for a caller who may
+not administer that device). A withdrawn binding is history rather than a bar:
+`bind` refuses only a binding that is still active, so a member taken off a
+device can be put back on it. `may_administer(actor, bridge_id)` is that one
+rule, asked by everything that acts on a device's records.

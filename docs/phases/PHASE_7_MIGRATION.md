@@ -561,3 +561,74 @@ not from the identity; the available list naming exactly what a member may use a
 refusing an expired session, an unknown actor and a disabled one; and a
 group-owned asset answering the same at `team` and `private` while a
 user-owned one marked `team` stays with its owner.
+
+## Slice 2b — Bridge access tokens
+
+Owner decision (2026-09-23): **binding a user to a machine issues an access
+token for that pair, kept on the Bridge; several members on one machine hold
+several tokens, and a Bridge presents one of them to authenticate with the
+shared platform.** The owner named the precedent: the pinned Host Bridge asks
+for a user sign-in when a machine is not bound and exchanges it for that
+machine's own token (`docs/PHASE_7_MIGRATION.md`, "Bridge access tokens").
+
+This is the last piece of who-may-do-what. It produces the
+`AuthenticatedActor` slice 2h already consumes, so a token turns into an
+identity, an identity into entitlement, and entitlement into what a member may
+choose for their devices.
+
+1. `common.identity.BridgeAccessGrant` is the platform's record of one token:
+   `token_id`, the `actor` and `bridge_id` it was issued for, a `fingerprint`
+   of the secret, when it was issued, when it expires if it does, and its
+   status. The secret is not in it, and no contract in the repository has a
+   field it could be put in.
+2. `common.identity.IssuedAccessToken` is the one moment the secret exists
+   outside the Bridge: the grant plus the value, returned once by issuing and
+   deliberately not a `Contract`, because a contract is serializable,
+   validated and loggable, which is everything a secret must not be.
+3. `control_plane.identity.InMemoryAccessTokens.issue(requested_by, actor,
+   bridge_id)` issues only for a member the platform currently admits on that
+   device, so a token cannot exist without the binding that justifies it, and
+   only for a caller who is that member or may administer the device: minting
+   a secret that authenticates as somebody is no smaller an act than binding
+   them, and takes the same check. Revoking takes it too. It generates the
+   secret itself with the standard library's `secrets`; a caller-supplied one
+   is refused below a minimum length, because the verification below is sound
+   only for a value with real entropy. One pair holds one active token.
+4. `authenticate(token_id, secret, now=)` verifies the secret before it says
+   anything about the token's state, and an unknown `token_id` and a wrong
+   secret are the same answer: `authentication_failed`. Telling them apart
+   would tell somebody who holds neither that a token exists. Comparison is
+   `hmac.compare_digest` over the fingerprint, as the source compares its own
+   token.
+5. Once the secret matched, the holder is told exactly why it did not work:
+   `token_revoked`, `token_expired`, or `binding_withdrawn` when the platform
+   no longer admits that member on that device, which covers a revoked
+   binding, a disabled member and a disabled device alike.
+6. A successful authentication produces an `AuthenticatedActor` naming the
+   member and the machine the token was issued for, whose session ends no
+   later than the token does. The `method` names the token so the evidence
+   says how the decision was made. An entry point where somebody signs in
+   directly has no machine, so that stays absent rather than invented.
+7. A token that has expired is spent: it stops being listed as one the device
+   can be used with, and stops standing in the way of issuing another for that
+   pair. A withdrawn binding is history in the same way, so a member taken off
+   a machine can be put back on it.
+8. `InMemoryEnrollmentRegistry.unbind` withdraws a binding, and
+   `revoke_for(requested_by, actor, bridge_id)` revokes the tokens that
+   binding justified.
+   Revoking means a person has to be at that keyboard again, which is what
+   makes revoking mean something.
+
+Tests precede implementation and cover: a token issued only for an admitted
+member; two members on one machine holding two tokens with different secrets;
+the grant never carrying the secret and the issued token not being a contract;
+authentication producing an identity that the entitlement registry accepts; an
+unknown token and a wrong secret answering identically; a revoked, expired and
+withdrawn token each naming its own reason only after the secret matched; an
+identity naming the machine its token was issued for; a token id that is not
+even the shape of one answering like any other unknown token; issuing and
+revoking refused for a caller who is neither the member nor an administrator
+of that device; a session ending no later than its token; a supplied secret
+refused when it is too short; a spent token no longer listed and no longer in
+the way of a new one; and unbinding revoking the tokens it justified while
+leaving the member able to be bound again.
