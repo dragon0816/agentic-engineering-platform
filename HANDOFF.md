@@ -1,73 +1,79 @@
-# Handoff — Phase 7 slice 2h, identity-derived entitlement
+# Handoff — Phase 7 slice 2b, Bridge access tokens
 
-Updated: 2026-09-22 (Asia/Taipei).
-Branch: `main`, after PR #60 (slice 2h) merged with its review applied.
+Updated: 2026-09-23 (Asia/Taipei).
+Branch: `phase-7/bridge-access-tokens`, based on `main` after PR #61 merged.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-Implement the owner's rule of 2026-09-22: a Bridge is bound to a user, and the
-user's authentication decides which Workflows and Skills they may use.
-Requirements: the "Slice 2h" section of `docs/phases/PHASE_7_MIGRATION.md`;
-contracts: `docs/CONTRACTS.md` ("Identity-derived entitlement"); decisions:
+Implement the owner's rule of 2026-09-23: binding a user to a machine issues
+an access token for that pair, kept on the Bridge, and a Bridge presents one
+to authenticate with the shared platform. Requirements: the "Slice 2b"
+section of `docs/phases/PHASE_7_MIGRATION.md`; contracts: `docs/CONTRACTS.md`
+("Bridge access tokens"); source characterization and decisions:
 `docs/PHASE_7_MIGRATION.md` (same heading).
 
 ## Owner decisions in force
 
-Listed with their dates in `docs/TASKS.md`. The three that shape this part of
-the phase: a member decides what their own devices may run; a Bridge is bound
-to a user and that user's authentication decides what they may use; and the
-shared platform runs on an internal-network shared workstation.
+Listed with their dates in `docs/TASKS.md`. The four that settle who may do
+what: a member decides what their own devices may run; a Bridge is bound to a
+user and that user's authentication decides what they may use; group
+membership comes from the invitation; and binding issues a per-member,
+per-machine access token. With this one, nothing about identity or
+authorization is still open.
 
 ## Completed
 
-- `Invitation.groups` and `PlatformUser.groups`, carried through `accept`,
-  with `InMemoryEnrollmentRegistry.user` to read them back. Both default to
-  none, so every record written before this slice stays valid.
-- `src/common/identity.py`: `AuthenticatedActor` (actor, method,
-  authenticated_at, expires_at, `valid_at`; no credential and no group) and
-  `entitled(metadata, actor, groups)`.
-- `InMemoryAuthorizationRegistry.select` and `revoke` take an
-  `AuthenticatedActor` and refuse `session_expired`, `actor_mismatch` and
-  `asset_not_entitled`; `available(identity)` lists what a member may use.
-- `tests/test_member_authorization.py` grew to 15 tests, as listed at the end
-  of the slice 2h requirements section.
-- PR #60 review (4 findings) applied: `available` answered for an expired
-  session, an uninvited stranger and a disabled member, and offered kinds a
-  decision cannot name; and the `team` branch of `entitled` was unreachable,
-  which is now said plainly instead of written twice.
+- Source inspected read-only at `896046e8` (`.scratch/rs-source`, ignored by
+  Git). The behaviour table and the PRESERVE/ADAPT/REFUSE decisions are in
+  `docs/PHASE_7_MIGRATION.md`.
+- `common.identity.BridgeAccessGrant` (the platform's record: member, device,
+  fingerprint, issue and expiry, status) and `IssuedAccessToken` (the one
+  moment the secret exists outside the Bridge, deliberately not a `Contract`,
+  with a redacting `repr` and no attribute to put a secret in).
+- `control_plane.identity.InMemoryAccessTokens`: `issue` for an admitted
+  member only, one active token per pair, a generated secret and a minimum
+  length for a supplied one; `authenticate` verifying the secret before the
+  state, with an unknown token and a wrong secret giving one answer;
+  `grants_for`, `revoke`, `revoke_for`.
+- `InMemoryEnrollmentRegistry.unbind`, so a binding can be withdrawn and the
+  tokens it justified revoked with it.
+- `tests/test_access_tokens.py`, 9 tests, as listed at the end of the slice
+  2b requirements section, including the whole chain: a secret becomes an
+  identity, an identity decides entitlement, entitlement allows a decision.
 
 ## In Progress
 
-- Nothing. `main` is the state to resume from.
+- PR #62 open for review. Nothing else uncommitted.
 
 ## Remaining
 
-- Slices 2b and 2i are blocked on one remaining owner decision: what a Bridge
-  presents to the shared platform to prove it is acting for its bound user,
-  and what the control plane checks and stores. Everything else about who may
-  do what is now settled. `AuthenticatedActor` is where the answer lands,
-  whatever the entry point does to decide.
-- A second question the owner may want to answer with it: on a shared test
-  workstation several members share one Windows account with no OS isolation,
-  so a credential held there for one member is readable by the others. Either
-  each request carries its own proof, or a shared device acts only as its
-  registering owner. This needs deciding before a shared device gets a
-  transport.
+- Slice 2i, the transports, is now unblocked and is the next thing to build:
+  Registry package synchronization, delivering an authorization to a device,
+  capability advertisement, a read-only connectivity probe, Bridge job polling
+  and snapshot reporting, over a transport that presents an access token. Two
+  invariants come from the source: unreachable is never treated as revoked,
+  and re-binding needs a person at that keyboard.
+- Wiring the token into the host: the Bridge holds the secret through a
+  `SecretRef` and the host's `CredentialResolver`, as the Telegram token does,
+  and `host.json` carries the non-secret `token_id`. That belongs with the
+  transport, since nothing presents a token until there is somewhere to
+  present it.
 - Then migration steps 3 to 6 in `docs/TASKS.md` (workflow 7, workflow 13,
   knowledge, controlled cutover).
 
 ## Architecture decisions made
 
-- Groups live on the platform's record of a user, not on the authentication:
-  an authentication that carries its own group list is an authorization
-  whoever issues it can widen.
-- Entitlement is checked when a decision is made, not when a run happens, so
-  a Bridge never depends on a control plane it is built to work without. The
-  cost is staleness until an authorization is reissued.
-- A member decides as themselves, with a session that is still valid.
+- The platform keeps a fingerprint and never a secret, so its own store is
+  not worth stealing.
+- The secret is verified before anything is said about the token's state: an
+  unknown token and a wrong secret are one answer.
+- A plain SHA-256 is used because the secret is 32 random bytes rather than a
+  password, which is also why a short supplied secret is refused.
+- One token per member and machine, not one per machine: that is what makes
+  several members on one machine distinguishable and separately revocable.
 
 ## Exact verification commands and results
 
@@ -75,7 +81,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 774 passed, 3 skipped (link privileges)
+# PASS: 783 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -90,24 +96,30 @@ git diff --check
 # PASS
 ```
 
-No socket, Telegram call, model, gateway, network, real vault, job or n8n
-instance was invoked.
+No socket, model, gateway, network, real vault, job or n8n instance was
+invoked, and no token was written to any file.
 
 ## Known issues / limitations
 
-- Nothing authenticates anybody yet. `AuthenticatedActor` is the shape of an
-  entry point's answer; producing one is slice 2b.
-- A member whose entitlement is withdrawn keeps their device's existing
-  authorization until a new one is issued. Reissuing on a change belongs
-  with delivery in slice 2i.
-- Group membership changes only through a new invitation today: there is no
-  way to add an existing user to a group.
+- **The shared workstation.** Tokens live on the Bridge, and a shared test
+  workstation's members share one Windows account with no OS-level isolation,
+  so one member can read another's token and act as them. One token per
+  member and machine makes their requests distinguishable and separately
+  revocable, which a single shared token never could, but not unforgeable
+  between people who already share that account. Narrowing it needs
+  per-member Windows accounts or a proof that cannot be replayed from a file.
+  This is the owner's to decide before a shared device gets a transport.
+- Nothing presents a token yet: there is no transport, and the host does not
+  hold one.
 - The registries are in memory. They are the reference model for the shared
   platform's rules, not a database.
+- Issuing is a trusted host call. What a person types to prove who they are
+  before the platform issues them a token, the source's ops username and
+  password, is the entry point's business and is not modelled here.
 
 ## Next Recommended Action
 
-Put the two questions under "Remaining" to the owner: what a Bridge presents
-to prove it is acting for its bound user, and whose identity a shared test
-workstation acts as when several members share one Windows account. They are
-the last thing between this phase and the transports every later slice needs.
+Merge PR #62 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
+write the slice 2i requirements: the transport that presents these tokens,
+starting with the read-only connectivity probe and the authorization delivery,
+since those are the two a company host needs before anything else.

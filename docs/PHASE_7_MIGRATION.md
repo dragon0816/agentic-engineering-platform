@@ -294,3 +294,41 @@ decided by the owning-group test above it, and for a group-owned asset
 Rollback removes `src/common/identity.py`, the `groups` fields and the
 identity parameters on `select`, `revoke` and `available`; the selections and
 bundles from slice 2g keep working.
+
+## Bridge access tokens
+
+Source: `dragon0816/rs_workflow_system` at
+`896046e8fe2170d21f9213e56e5ce2f93c05ba43`, `host-bridge/app/auth.py`,
+`host-bridge/app/config.py` and `host-bridge/run-bridge.ps1`, cloned read-only
+into `.scratch/` and inspected on 2026-09-23. The owner named this flow as the
+precedent for the decision.
+
+| Source behaviour | Observed | Decision |
+|---|---|---|
+| `X-Bridge-Token` on every endpoint but `/health`, compared with `hmac.compare_digest` | One shared token per Bridge, generated at first run, stored in a gitignored `config/bridge.json` and mirrored into `container/.env` | **PRESERVE the comparison, REFUSE the model.** Already recorded here when the enrollment foundation landed: a single shared token cannot tell two members of one machine apart. `hmac.compare_digest` is kept |
+| `Request-DeviceBinding`: a person at the keyboard signs in with their ops username and password, and the dashboard returns this machine's own token | The token is stored in the machine's config and presented as `X-Ops-Token`; the response also reports `boundUsers`, "this machine may be used by: ..." | **ADAPT.** This is the decision's shape: a person exchanges their own credential for a machine-scoped token. The source issues one per machine and treats the user list as information; the platform issues one per member and machine, which is what makes several members on one machine distinguishable and separately revocable |
+| `Test-DeviceBinding`: only an explicit `DEVICE_UNBOUND` means revoked; unreachable does not | "Treating a closed laptop lid or a changed network as you have been thrown out would ask people to type their password for no reason" | **ADAPT as an invariant for the transport slice**: unreachable is not revoked. The reference model already separates the two answers, `binding_withdrawn` against everything else |
+| Binding again needs a person at that keyboard | "Both are meant to need a person at this keyboard, that is what makes revoking mean something" | **PRESERVE** as the meaning of revocation: `unbind` plus `revoke_for` leaves the machine unable to act for that member until somebody signs in again |
+| The token is written to a config file in plain text, and printed to the console for pasting into `.env` | Gitignored, but on disk and in the scrollback | **REFUSE.** The value is handed over once by `issue` and then belongs to the host's own credential store, reached through a `SecretRef` and a `CredentialResolver`, as the Telegram bot token already is. Nothing writes it into a workspace file |
+| The platform stores the token it expects and compares the presented value against it | A stolen server-side store yields working tokens | **REFUSE.** The platform keeps a SHA-256 fingerprint and never the value |
+
+Two choices worth recording beyond the table. The secret is verified before
+anything is said about the token's state, so an unknown token and a wrong
+secret are one answer: telling them apart tells somebody who holds neither
+that a token exists. And a plain digest is used rather than a slow one,
+because the secret is 32 random bytes from `secrets`, not a password; that is
+also why a caller-supplied secret under 32 characters is refused rather than
+accepted and hashed.
+
+Known limitation, and the one the owner may want to answer next: the tokens
+live on the Bridge, and on a shared test workstation the members share one
+Windows account with no OS-level isolation, so one member can read another's
+token and act as them. Issuing one token per member and machine makes their
+requests distinguishable and separately revocable, which a single shared token
+never could, but it does not make them unforgeable between people who already
+share that account. Narrowing that needs either per-member Windows accounts on
+shared machines, or a proof the Bridge cannot replay from a file.
+
+Rollback removes `src/control_plane/identity.py`, the token contracts in
+`common.identity`, `InMemoryEnrollmentRegistry.unbind` and their tests;
+enrollment, entitlement and the member decisions keep working.
