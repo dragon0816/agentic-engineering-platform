@@ -1181,3 +1181,31 @@ The offline bundle's `manifest.json` records schema version, bundle name, Git so
 revision, Python minor, platform and each payload's relative path, byte size and
 SHA-256 digest. The manifest is checked before install; it deliberately excludes
 runtime configuration and state.
+
+## Local-first distribution and remote control (Phase 7, slice 2b)
+
+`PublishedAssetPackage` wraps the existing governed `AssetMetadata` with an asset
+kind. It accepts only `published` metadata with an exact `PackageMetadata` artifact
+reference and SHA-256. `InstallationPlan` selects non-duplicate exact versions for
+one actor and Bridge. Neither contract contains an execution authorization.
+
+`InMemoryLocalInventory.apply` takes an installation plan and already-retrieved byte
+payloads. It verifies every digest before changing one inventory entry, then records
+`InstalledAsset` identity, kind, source artifact/digest and installing actor. It does
+not import or execute the bytes. This reference demonstrates that installed state is
+local and remains available without a Registry connection.
+
+`BridgeStateSnapshot` is explicitly authoritative at the Bridge and carries its
+device, observation time, installed inventory and compact local run summaries.
+`BridgeStatusProjection` keeps that snapshot plus the central receipt time and an
+`online` or `stale` connectivity label. The reference control plane derives staleness
+from elapsed time and never rewrites a local run status.
+
+`RemoteWorkflowJob` accepts only `shared_platform` or `telegram` ingress, an exact
+Workflow identity, actor, Bridge, arguments, trace and matching allowed
+`ExecutionAuthorization`. It has no arbitrary command/shell field and refuses secret
+fields or values. `InMemoryRemoteControl` also requires device admission: a company
+workstation admits only its registered owner, while a shared test workstation admits
+its bound actors. Telegram identity mapping occurs before this contract and cannot
+bypass the same membership and policy path. Polling returns bounded queued records;
+cancellation is a request state and does not claim a running side effect stopped.

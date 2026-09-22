@@ -46,6 +46,26 @@ Excel and Git capability adapters do not yet exist, it cannot execute workflows 
 or 13. Rollback removes the installed version directory or reverts the preview
 package files; the old Host Bridge remains unchanged and usable.
 
+## Local-first control and Telegram ingress
+
+The pinned `telegram-local-agent` source at
+`4b40a215909e4fdd4b65519d70669a84e9abd43d` already runs a resident local Agent,
+uses Telegram polling so it needs no public inbound port, checks numeric Telegram
+user IDs before routing, preserves direct `/run`, `/release` and `/build` paths, and
+supports status/Skill discovery plus attachments. Decision: **ADAPT** those proven
+channel and deterministic-routing behaviors in a later transport slice. Do not copy
+its bot token configuration, HTML presentation, provider coupling, path handling or
+unsafe empty-allowlist behavior (the source permits every sender when the list is
+empty).
+
+This contract slice records `telegram` as an ingress but performs no Telegram call.
+A future adapter resolves its token through `SecretRef`, maps an allowed numeric
+sender to exactly one platform actor, uses outbound polling, and passes the same
+device membership, exact Workflow authorization and Bridge policy checks as the
+shared-platform ingress. The company device admits only its registered/bound owner;
+the shared test device admits its active bindings. Rollback removes the new contracts
+and references without touching the pinned local agent.
+
 ## Retirement rule
 
 Keep source repositories and the old Host Bridge frozen at recorded revisions

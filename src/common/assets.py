@@ -40,7 +40,9 @@ def reject_embedded_secrets(value: object) -> None:
     if isinstance(value, str) and SECRET_PATTERN.search(value):
         raise ValueError("asset text must not contain credentials; declare a SecretRef")
     if isinstance(value, dict):
-        for item in value.values():
+        for key, item in value.items():
+            if isinstance(key, str) and SECRET_FIELD.fullmatch(key):
+                raise ValueError("asset fields must not contain credential values")
             reject_embedded_secrets(item)
     elif isinstance(value, (list, tuple)):
         for item in value:
