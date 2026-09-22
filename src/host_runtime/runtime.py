@@ -15,7 +15,8 @@ from host_runtime.contracts import (
 from workflow.host_bridge import BridgeRegistration
 
 LIMITATIONS = (
-    "No shared-platform transport or authenticated enrollment is included.",
+    "Enrollment (invitation, device registration, binding, token issue) happens on the "
+    "shared platform; this host presents a token it was given and cannot obtain one.",
     "No Jira, Excel, Git, browser, email, DUT or instrument capability is included.",
     "This preview cannot execute workflow 7 or workflow 13.",
 )

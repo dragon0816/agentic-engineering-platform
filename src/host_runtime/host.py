@@ -33,8 +33,13 @@ from common.distribution import LocalStateError
 from common.local_agent import BridgeMembership
 from host_runtime.agent import LocalAgent
 from host_runtime.contracts import CompanyHostConfiguration, DoctorCheck, HostDoctorReport
+
+# Re-exported: the layout moved to the contracts module so the platform client
+# can take one without importing this module, and callers still find it here.
+from host_runtime.contracts import HostLayout as HostLayout
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
+from host_runtime.sync import PlatformClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
@@ -53,6 +58,7 @@ HostErrorCode = Literal[
     "telegram_invalid",
     "credential_unmapped",
     "state_unavailable",
+    "platform_missing",
 ]
 
 ContractT = TypeVar("ContractT", bound=Contract)
@@ -66,34 +72,6 @@ class HostError(Exception):
         self.code: HostErrorCode = code
         self.path = path
         super().__init__(f"{code}: {path}" if path is not None else code)
-
-
-class HostLayout(Contract):
-    """Where a company host keeps what it needs, all under one workspace, so
-    an operator and the installer agree without a second configuration file."""
-
-    workspace_root: Path
-    membership: Path
-    grants: Path
-    authorization: Path
-    skills: Path
-    workflows: Path
-    telegram: Path
-    state: Path
-
-    @classmethod
-    def under(cls, workspace_root: Path | str) -> Self:
-        root = Path(workspace_root)
-        return cls(
-            workspace_root=root,
-            membership=root / "membership.json",
-            grants=root / "grants.json",
-            authorization=root / "authorization.json",
-            skills=root / "assets" / "skills",
-            workflows=root / "assets" / "workflows",
-            telegram=root / "telegram.json",
-            state=root / "state.sqlite",
-        )
 
 
 def _documents(path: Path) -> Iterator[object]:
@@ -126,8 +104,9 @@ def _load_all(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]:
 
 class HostRuntime:
     """One assembled company host: its Agent, its durable state and, when the
-    operator configured one, its Telegram ingress. Closing it closes the
-    state file, which on Windows would otherwise stay pinned."""
+    operator configured them, its Telegram ingress and its shared-platform
+    client. Closing it closes the state file, which on Windows would
+    otherwise stay pinned."""
 
     def __init__(
         self,
@@ -136,12 +115,14 @@ class HostRuntime:
         agent: LocalAgent,
         state: SqliteLocalState,
         telegram: TelegramIngress | None,
+        platform: PlatformClient | None = None,
     ) -> None:
         self.config = config
         self.layout = layout
         self.agent = agent
         self.state = state
         self.telegram = telegram
+        self.platform = platform
 
     @property
     def actor(self) -> str:
@@ -310,6 +291,44 @@ def build_telegram(
         raise HostError("telegram_invalid", layout.telegram) from error
 
 
+def build_platform(
+    config: CompanyHostConfiguration, resolver: CredentialResolver | None
+) -> PlatformClient | None:
+    """The shared-platform client, if this host was given a token. As with
+    Telegram, the secret's name must be mapped now: a host that would fail
+    at its first sync is refused when it is built."""
+    if config.platform is None:
+        return None
+    if resolver is None:
+        mapped = config.credential_environment()
+        if config.platform.credential.name not in mapped:
+            raise HostError("credential_unmapped")
+        resolver = EnvironmentCredentials(mapped)
+    return PlatformClient(config.platform, resolver)
+
+
+def inspect_platform(config: CompanyHostConfiguration) -> DoctorCheck:
+    """Whether this host could reach a shared platform, read from its
+    configuration alone: no socket is opened by a diagnostic."""
+    if config.platform is None:
+        return DoctorCheck(
+            name="platform",
+            status="pending",
+            detail="no shared platform is configured; this host works locally",
+        )
+    if config.platform.credential.name not in config.credential_environment():
+        return DoctorCheck(
+            name="platform",
+            status="failed",
+            detail="the platform token's secret is not mapped to an environment variable",
+        )
+    return DoctorCheck(
+        name="platform",
+        status="passed",
+        detail=f"configured for {config.platform.base_url} as {config.platform.token_id}",
+    )
+
+
 def inspect_runtime(
     config: CompanyHostConfiguration, layout: HostLayout
 ) -> tuple[DoctorCheck, ...]:
@@ -408,7 +427,7 @@ def inspect_runtime(
                 status="failed",
                 detail=f"the local state file cannot be read: {type(error).__name__}",
             )
-    return (membership, authorization, assets, state)
+    return (membership, authorization, assets, state, inspect_platform(config))
 
 
 def host_report(
@@ -469,7 +488,8 @@ def build_runtime(
     try:
         agent = LocalAgent(membership, gateway, state)
         telegram = build_telegram(checked, place, agent, resolver)
+        platform = build_platform(checked, resolver)
     except BaseException:
         state.close()
         raise
-    return HostRuntime(checked, place, agent, state, telegram)
+    return HostRuntime(checked, place, agent, state, telegram, platform)

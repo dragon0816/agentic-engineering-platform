@@ -329,6 +329,31 @@ never could, but it does not make them unforgeable between people who already
 share that account. Narrowing that needs either per-member Windows accounts on
 shared machines, or a proof the Bridge cannot replay from a file.
 
+(Superseded on 2026-09-23 by slice 2j: a shared test workstation is bound to a
+virtual member of its own and no real employee binds to it, so there is no
+colleague's credential on that machine to take. The limitation above is
+recorded as it stood.)
+
+## Shared-platform transport
+
+Source: `dragon0816/rs_workflow_system` at
+`896046e8fe2170d21f9213e56e5ce2f93c05ba43`, `host-bridge/app/auth.py`,
+`host-bridge/app/services/relay_worker.py`, `host-bridge/app/services/ops_client.py`
+and `host-bridge/run-bridge.ps1`, read in `.scratch/rs-source` on 2026-09-23.
+
+| Source behaviour | Observed | Decision |
+|---|---|---|
+| The Bridge pulls work from the dashboard's relay instead of being called: outbound long-poll (`CLAIM_WAIT_SEC = 25`), run with the ordinary job runner, post the answer back | "This is what lets the bridge stop listening ... the machine it runs on needs no inbound firewall rule, and therefore no administrator" | **PRESERVE the shape.** `poll` and `settle` are outbound only; a company computer opens no inbound port. The Telegram ingress already followed the same rule |
+| A lease on each claimed job, extended by a heartbeat thread every 5 s against a 90 s lease, and a pool of four in-flight runs | Needed so "a twenty-five-minute C4C scrape keeps its claim" | **DEFER.** The platform's `poll` hands the Bridge every open job and `settle` closes it; a job whose settle is lost stays open and is offered again, and the job id as idempotency key keeps it from running twice. That is correct without a lease; a lease and concurrency belong with the first workflow that needs them |
+| `OpsClient` telemetry is fire-and-forget and drops when its queue is full; the relay explicitly does not reuse it because "a dropped `complete` leaves a caller hanging for sixteen minutes" | Two transports with two loss rules | **ADAPT.** One client, two rules stated where they apply: `report` is best effort and its failure is reported, never raised; `settle` is never dropped, because an unsettled job is re-offered |
+| `X-Ops-Token` / `X-Bridge-Token` headers compared with `hmac.compare_digest` | One token per machine | **ADAPT.** `Authorization: Bearer <token_id>:<secret>`; the platform compares a fingerprint with `hmac.compare_digest` (slice 2b) and the token names one member on one machine |
+| `Test-DeviceBinding`: only an explicit `DEVICE_UNBOUND` means revoked; unreachable leaves the token alone and lets the bridge start | "treating a closed laptop lid or a changed network as you have been thrown out would ask people to type their password for no reason" | **PRESERVE as the transport's invariant.** The client classifies every answer, and only `token_revoked`, `token_expired` and `binding_withdrawn`, told to a Bridge that proved its secret, are `withdrawn`. A transport fault, a 5xx, a reply that is not one, and an intermediary's bare 401 are all `unreachable`, retryable, and change nothing on the Bridge |
+| Exponential back-off on ingest failure, 15 s doubling to 300 s, with a circuit that blocks sends meanwhile | | **ADAPT.** `run_jobs` doubles its delay to a 300 s cap on a retryable failure and resets on success, the same rule the Telegram loop has; no circuit, because there is one loop and it is the thing being slowed |
+| FastAPI application behind `requests`; the relay and the ops client each build their own HTTP session | | **REFUSE the dependencies.** The platform's install is `pydantic` alone: the server is `http.server.ThreadingHTTPServer`, the client is the `UrllibTransport` every adapter already uses, and there is no redirect following anywhere |
+| `/health` answers without a token and everything else requires one | | **PRESERVE.** `GET /v1/health` says only that the process is up; every operation authenticates |
+| The relay enrolls a worker with `POST /api/relay/enroll` during install and the token is useless "until an administrator" acts | Enrollment is a member's action at the dashboard | **PRESERVE the boundary.** Nothing member-facing is on this wire: invitation, registration, binding and token issue stay trusted-host calls on the platform, and a Bridge presents a token it was given |
+| The dashboard is the durable store of workers, runs and events | | **DEFER.** The service serves the in-memory references and says so; a durable platform store is a later slice |
+
 Review of the first version found two lifecycle holes and two missing caller
 checks. A withdrawn binding was written as a tombstone that `bind` then read
 as a duplicate, so a member taken off a device could never be put back on it;

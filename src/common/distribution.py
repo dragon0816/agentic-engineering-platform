@@ -115,6 +115,10 @@ class RemoteWorkflowJob(RegistryContract):
     job_id: Symbol
     ingress: Literal["shared_platform", "telegram"]
     actor: Symbol
+    # The member who asked, when the machine runs the work for somebody who is
+    # not bound to it. Recorded for attribution and never for authorization,
+    # which reads `actor` alone, as everywhere else since slice 2j.
+    on_behalf_of: Symbol | None = None
     bridge_id: Symbol
     workflow: AssetIdentity
     arguments: dict[Symbol, JsonValue]
@@ -128,13 +132,39 @@ class RemoteWorkflowJob(RegistryContract):
             raise ValueError("remote jobs require an explicit allow decision")
         if grant.actor != self.actor or grant.asset != self.workflow or grant.trace != self.trace:
             raise ValueError("remote job authorization must match actor, workflow and trace")
+        if self.on_behalf_of == self.actor:
+            raise ValueError("a job on your own behalf names nobody else")
         reject_embedded_secrets(self.arguments)
         return self
 
 
+# Open means the Bridge has not settled it yet; the last three are final.
+JobStatus = Literal["queued", "cancel_requested", "ran", "rejected", "cancelled"]
+
+
 class RemoteJobRecord(Contract):
+    """One job as the platform holds it. `run` is what the Bridge recorded
+    when the job ran, and is present exactly then."""
+
     request: RemoteWorkflowJob
-    status: Literal["queued", "cancel_requested"] = "queued"
+    status: JobStatus = "queued"
+    run: LocalRunSummary | None = None
+
+    @model_validator(mode="after")
+    def a_run_when_it_ran(self) -> Self:
+        if (self.status == "ran") != (self.run is not None):
+            raise ValueError("a job that ran carries its run, and only that one does")
+        if self.run is not None and (
+            self.run.actor != self.request.actor
+            or self.run.on_behalf_of != self.request.on_behalf_of
+            or self.run.workflow != self.request.workflow
+        ):
+            raise ValueError("a job's run names the job's actor and workflow")
+        return self
+
+    @property
+    def open(self) -> bool:
+        return self.status in ("queued", "cancel_requested")
 
 
 LocalStateErrorCode = Literal[

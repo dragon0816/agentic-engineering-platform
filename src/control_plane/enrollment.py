@@ -143,14 +143,30 @@ class InMemoryEnrollmentRegistry:
         return _copy(item)
 
     def advertisement(self, bridge_id: Symbol) -> BridgeRegistration:
-        """What this device said it can run when it enrolled. It is the
-        device's own claim, not an authorization: what a member may run is
-        decided separately and enforced by the Bridge policy."""
+        """What this device last said it can run. It is the device's own
+        claim, not an authorization: what a member may run is decided
+        separately and enforced by the Bridge policy."""
         key = TypeAdapter(Symbol).validate_python(bridge_id)
         item = self._advertisements.get(key)
         if item is None:
             raise EnrollmentError("device_missing")
         return _copy(item)
+
+    def advertise(self, bridge_id: Symbol, advertisement: BridgeRegistration) -> BridgeRegistration:
+        """Replace what a device says it can run. The same identity rule as
+        enrolling: the advertisement names this device and its registering
+        owner, so a Bridge cannot describe another machine."""
+        key = TypeAdapter(Symbol).validate_python(bridge_id)
+        advert = BridgeRegistration.model_validate(advertisement).model_copy(deep=True)
+        device = self._devices.get(key)
+        if device is None:
+            raise EnrollmentError("device_missing")
+        if device.status != "active":
+            raise EnrollmentError("device_disabled")
+        if advert.bridge_id != key or advert.owner_id != device.registered_by:
+            raise EnrollmentError("advertisement_identity_mismatch")
+        self._advertisements = {**self._advertisements, key: advert}
+        return _copy(advert)
 
     def may_administer(self, requested_by: Symbol, bridge_id: Symbol) -> bool:
         """Whether this actor may change what happens on that device: a
