@@ -42,3 +42,11 @@ jobs:
           & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
+      - name: Upload Windows technical preview
+        if: runner.os == 'Windows' && matrix.python == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-company-host-preview-${{ github.sha }}
+          path: dist/agentic-engineering-platform-windows-preview-*.zip
+          if-no-files-found: error
+          retention-days: 14
