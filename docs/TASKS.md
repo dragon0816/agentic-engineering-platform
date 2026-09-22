@@ -23,9 +23,9 @@ the history is complete; this table is the index into them.
 
 ## Status
 
-Phases 0 to 6 complete, closure records included. Phase 7 is not started:
-its specification waits on the questions under "Pending owner decisions" at
-the end of this file. 43 pull requests merged (#1 to #46; #5 was closed
+Phases 0 to 6 complete, closure records included. Phase 7 is active under
+`docs/phases/PHASE_7_MIGRATION.md`; its first slice is in progress. 44 pull
+requests merged (#1 to #47; #5 was closed
 unmerged and superseded by #6, and #24 and #25 were never pull requests). A row says
 `done` only once its pull request has merged; until then it says `in review`,
 so the committed record never asserts a merge that has not happened.
@@ -117,6 +117,17 @@ privileges and run on Linux CI.
 | 5 trace capture | #45 | done | `ExecutionTrace` beside every observation: route, dispatches in Bridge order, approvals, workflow progress, model usage, duration and outcome, redacted by construction and refused if a credential remains; `SECRET_PATTERN` spans whole secrets and refuses its own marker |
 | closure | #46 | done | Exit criteria recorded as met in the roadmap and the phase specification; architecture status and README updated |
 
+## Phase 7 — End-to-end migration and controlled deprecation (active)
+
+| Slice | PR | Status | What it covers |
+|---|---|---|---|
+| 1 enrollment foundation | #48 | in review | Invitation-only users, independent Bridge device identity, single-user company workstation and multi-user shared test workstation contracts plus an inert reference registry |
+| 2 company Bridge deployment | — | planned | Install Agent + Bridge, enroll the company workstation, advertise capabilities and run a read-only connectivity probe |
+| 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
+| 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
+| 5 knowledge parity | — | planned | Adopt, query, update and restore a full copy of the source vault |
+| 6 controlled cutover | — | planned | Per-entry-point evidence, rollback rehearsal, owner approval and observation before freezing old entry points |
+
 ## Open items carried forward
 
 Recorded where they were found. None blocks a completed phase's exit criteria
@@ -144,18 +155,22 @@ streaming `done` flag.
 | 2026-09-21 | Phase 5 providers are Ollama and the internal OpenAI-compatible gateway; Codex and Claude Code are excluded as model providers |
 | 2026-09-22 | Codex and Claude Code are out of scope for Phase 6 entirely: not evaluated, not driven, not a capability the platform invokes |
 | 2026-09-22 | Remaining slices are completed without check-ins unless something cannot be decided |
+| 2026-09-22 | Phase 7 prioritizes workflow 7 (`jira_team_tickets`) then workflow 13 (`release_package`), followed by knowledge on a copy |
+| 2026-09-22 | Platform registration is invitation-only; the shared-platform host cannot use company LDAP |
+| 2026-09-22 | Production-like execution occurs on an enrolled company Agent + Bridge; the current old Host Bridge can run workflows 7 and 13 and remains the parity/rollback baseline |
+| 2026-09-22 | A company workstation has one employee/platform member and corporate resource access; a shared test workstation has multiple invited platform users, no corporate access, one shared Windows account and no claimed OS-level isolation |
+| 2026-09-22 | CI remains inert. Source repositories and old entry points are retained at pinned revisions until parity and rollback rehearsal; archive is a later decision and deletion is outside Phase 7 |
 
-## Pending owner decisions (Phase 7)
+## Resolved owner decisions (Phase 7)
 
-Phase 7, "End-to-end migration and deprecation", has no specification. The
-Roadmap says: run representative production-like scenarios against old and
-new paths; deprecate source components only after parity and acceptance
-criteria are met; keep rollback documentation during the transition. Writing
-`docs/phases/PHASE_7_*.md` waits on these, and nobody should write it first.
+The four decisions that previously blocked the specification are resolved by
+the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 
-| # | Question | Why only the owner can answer |
-|---|---|---|
-| 1 | Which source components are candidates for deprecation, and in what order | The inventory in `docs/ARCHITECTURE.md` names five repositories; Phases 2 to 6 migrated or declined pieces of each (`docs/PHASE_N_MIGRATION.md`), and which remaining pieces anyone still depends on is not visible from this repository |
-| 2 | What "parity" means for each, in terms the harness can check as a case | The evaluation harness can express a parity check, but somebody who uses the source tools has to say which behaviours matter |
-| 3 | Where production-like scenarios run, and with whose credentials | Every test here is inert by design and CI must stay so. A scenario against a real Ollama, the company gateway, a real vault or a real n8n needs a host and a credential source outside CI. The one live request against each model adapter (the paragraph above) waits on this too |
-| 4 | Rollback and retention for the source repositories | Archived, frozen or deleted, and who owns them during the transition |
+1. Candidates/order: workflow 7, workflow 13, then knowledge; retire individual
+   entry points only after evidence, never an entire mixed repository first.
+2. Parity: normalized source/platform behavior and safety gates are explicit for
+   each candidate; timestamps and container metadata are not byte-parity targets.
+3. Environment: shared platform here, real work on an enrolled company Bridge;
+   external credentials remain on that Bridge. CI never performs live validation.
+4. Rollback/retention: pin and retain the source plus working old Host Bridge;
+   rehearse rollback before cutover. Archive later; do not delete in Phase 7.
