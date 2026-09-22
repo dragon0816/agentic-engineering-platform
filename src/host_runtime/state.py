@@ -17,6 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
 from typing import Self
+from urllib.request import pathname2url
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -59,25 +60,57 @@ class SqliteLocalState:
     writes share one lock, so a reader never sees the inside of a
     transaction that may yet roll back."""
 
-    def __init__(self, path: Path, *, bridge_id: Symbol) -> None:
+    def __init__(self, path: Path, *, bridge_id: Symbol, read_only: bool = False) -> None:
         self.bridge_id = TypeAdapter(Symbol).validate_python(bridge_id)
         self._path = Path(path)
+        self.read_only = read_only
         self._conn: sqlite3.Connection | None = None
         self._lock = threading.RLock()
         try:
-            self._conn = sqlite3.connect(
-                self._path, isolation_level=None, timeout=0, check_same_thread=False
-            )
-            self._conn.execute("PRAGMA synchronous=FULL")
-            with self._write() as conn:
-                for statement in _SCHEMA:
-                    conn.execute(statement)
-                self._version(conn)
-                self._claim(conn, "bridge_id", self.bridge_id)
-        except BaseException:
+            self._conn = self._connect()
+            if read_only:
+                self._verify()
+            else:
+                with self._write() as conn:
+                    for statement in _SCHEMA:
+                        conn.execute(statement)
+                    self._version(conn)
+                    self._claim(conn, "bridge_id", self.bridge_id)
+        except BaseException as error:
             # Never leak a half-built handle; on Windows it would pin the file.
             self.close()
+            # A corrupt or unreadable file is this class's own closed answer,
+            # not a SQLite exception escaping into a caller that promised not
+            # to echo one.
+            if isinstance(error, sqlite3.Error):
+                raise LocalStateError("unavailable") from None
             raise
+
+    def _connect(self) -> sqlite3.Connection:
+        """A read-only open never creates the file and never writes to it, so
+        a report can look without changing what it is looking at."""
+        if not self.read_only:
+            conn = sqlite3.connect(
+                self._path, isolation_level=None, timeout=0, check_same_thread=False
+            )
+            conn.execute("PRAGMA synchronous=FULL")
+            return conn
+        if not self._path.is_file():
+            raise LocalStateError("unavailable")
+        uri = f"file:{pathname2url(str(self._path.resolve()))}?mode=ro"
+        return sqlite3.connect(
+            uri, uri=True, isolation_level=None, timeout=0, check_same_thread=False
+        )
+
+    def _verify(self) -> None:
+        """What a read-only open can still insist on: this file belongs to
+        this device and its schema is one this code understands."""
+        with self._read() as conn:
+            marks = dict(conn.execute("SELECT key, value FROM local_meta").fetchall())
+        if marks.get("bridge_id") != self.bridge_id:
+            raise LocalStateError("unavailable")
+        if marks.get("schema_version") not in {SCHEMA_VERSION, *_MIGRATABLE}:
+            raise LocalStateError("unavailable")
 
     @staticmethod
     def _claim(conn: sqlite3.Connection, key: str, value: str) -> None:
@@ -134,6 +167,8 @@ class SqliteLocalState:
         read back rather than retry blindly. Whatever happens inside, the
         transaction never stays open on the connection."""
         with self._lock:
+            if self.read_only:
+                raise LocalStateError("unavailable")
             conn = self._connection()
             try:
                 conn.execute("BEGIN IMMEDIATE")

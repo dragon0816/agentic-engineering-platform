@@ -49,9 +49,16 @@ credentials stay on the Bridge computer) and member-scoped remote control.
 - CI's Windows preview step now writes a membership record, asserts `doctor`
   moves from `pending` to `ready`, and runs `ask` and `status` on a real
   Windows machine.
-- `tests/test_host_wiring.py`, 11 tests, and 2 more in
+- `tests/test_host_wiring.py`, 13 tests, and 2 more in
   `tests/test_telegram_ingress.py`, as listed at the end of the slice 2f
   requirements section.
+- PR #56 review (5 findings) applied. The serious ones: `doctor` created
+  tables and migrated the schema version of the file it was only meant to
+  report on, so `SqliteLocalState` gained a read-only mode; a corrupt file
+  escaped as a SQLite exception because the opening `PRAGMA` runs outside
+  the write transaction; and the new checks were allowed to change the
+  device preflight `status`, which would abort a reinstall over a stale
+  membership record.
 
 ## In Progress
 
@@ -85,7 +92,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 751 passed, 3 skipped (link privileges)
+# PASS: 753 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

@@ -286,14 +286,18 @@ def inspect_runtime(
         )
     else:
         try:
-            with SqliteLocalState(layout.state, bridge_id=config.device.bridge_id) as store:
+            # Read-only, so looking at the file changes nothing about it:
+            # no table is created and no schema version is migrated.
+            with SqliteLocalState(
+                layout.state, bridge_id=config.device.bridge_id, read_only=True
+            ) as store:
                 counted = f"{len(store.installed())} asset(s), {len(store.runs())} run(s) recorded"
             state = DoctorCheck(name="state", status="passed", detail=counted)
         except (LocalStateError, OSError, ValueError) as error:
             state = DoctorCheck(
                 name="state",
                 status="failed",
-                detail=f"the local state file cannot be opened: {type(error).__name__}",
+                detail=f"the local state file cannot be read: {type(error).__name__}",
             )
     return (membership, assets, state)
 
@@ -316,19 +320,22 @@ def host_report(
         workspace_exists=workspace_exists,
         workspace_writable=workspace_writable,
     )
-    checks = device.checks + inspect_runtime(config, layout)
-    failed = any(item.status == "failed" for item in checks)
-    # A host is ready to run when it knows who may use it and nothing is
-    # broken. A state file that does not exist yet is not an obstacle: the
-    # Agent creates it.
-    runtime_pending = failed or any(
-        item.status != "passed" for item in checks if item.name == "membership"
-    )
+    runtime_checks = inspect_runtime(config, layout)
+    # `status` stays what it has always been, this machine's preflight, so a
+    # host that is merely not enrolled yet is not reported as a broken
+    # installation. What the host was given is `runtime` and the checks
+    # themselves: a membership record that is missing or refused, or a state
+    # file that cannot be read, keeps the resident Agent pending.
+    named = {item.name: item.status for item in runtime_checks}
+    # Ready means the Agent would start: this Bridge knows who may use it and
+    # nothing it needs is broken. A state file that does not exist yet is not
+    # an obstacle, because the Agent creates it on its first run.
+    ready = named.get("membership") == "passed" and named.get("state") != "failed"
     return HostDoctorReport(
-        status="not_ready" if failed else device.status,
-        checks=checks,
+        status=device.status,
+        checks=device.checks + runtime_checks,
         limitations=device.limitations,
-        runtime="pending" if runtime_pending else "ready",
+        runtime="ready" if ready else "pending",
     )
 
 
@@ -345,7 +352,7 @@ def build_runtime(
     gateway = build_gateway(checked, place)
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
-    except (LocalStateError, OSError) as error:
+    except (LocalStateError, OSError, ValueError) as error:
         raise HostError("state_unavailable", place.state) from error
     try:
         agent = LocalAgent(membership, gateway, state)

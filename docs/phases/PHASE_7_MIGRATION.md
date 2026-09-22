@@ -393,15 +393,20 @@ offset lived in memory, so a restart replayed whatever was not confirmed.
    is: `membership`, `assets` and `state`, with a third check status
    `pending` for what has not arrived yet. A freshly installed host is not
    broken, it is not enrolled, and the report says `resident agent: pending`
-   without failing. Reporting creates nothing: the state file is opened only
-   if it already exists.
+   without failing. `status` remains this machine's preflight and nothing
+   else, so a stale membership record in a retained workspace never aborts a
+   reinstall; what the host was given is `runtime` and the checks themselves.
+   Reporting changes nothing: the state file is opened only if it exists, and
+   then read-only, so no table is created and no schema version is migrated.
+   A file that cannot be read is a failed check, never a traceback.
 7. The Telegram offset is durable. `SqliteLocalState` keeps one cursor per
    channel, refuses to rewind it, and the ingress reads and advances it
    instead of holding it in memory, so a restart resumes where the last
    confirmed batch ended. A cursor that cannot be read stops the poll, because
    polling without it would replay a batch that was already acted on; a cursor
    that cannot be advanced is reported beside the deliveries that were
-   handled.
+   handled. Both are retryable: the usual cause is another process holding the
+   file for a moment, which is not a reason to end the ingress.
 
 Tests precede implementation and cover: the layout under one workspace and a
 relative workspace refused; a complete host reading a real workspace file end
@@ -410,7 +415,10 @@ the operator sees for a run and for `status`; a dispatch refused without a
 grant and without an approval; an unbound actor refused with nothing recorded;
 a missing, invalid and foreign membership record each named; an unreadable
 asset named without its contents; `doctor` reporting pending, ready and failed
-without writing anything; a Telegram ingress built only when its secret is
+without writing anything, and a corrupt state file reported by `doctor` and
+refused by `ask` rather than raised; a version-1 state file still at version 1
+after a report, and the read-only store refusing to write, refusing another
+device's file and refusing one that is not there; a Telegram ingress built only when its secret is
 mapped and refused when it names another Bridge; the `telegram` command
 without a configured ingress; a host that will not guess a namespace; the
 durable offset surviving a restart and refusing to rewind; and a cursor that

@@ -301,8 +301,12 @@ class TelegramIngress:
             offset = await asyncio.to_thread(self.offset)
         except LocalStateError as error:
             # Without the cursor this poll would replay a confirmed batch.
+            # Worth trying again: the usual reason is another process holding
+            # the state file for a moment, not a broken ingress.
             return TelegramPollResult(
-                failure=Failure(code="telegram_cursor_unavailable", message=error.code)
+                failure=Failure(
+                    code="telegram_cursor_unavailable", message=error.code, retryable=True
+                )
             )
         if offset is not None:
             payload["offset"] = offset

@@ -414,6 +414,16 @@ def test_a_cursor_that_cannot_be_read_or_written_is_a_typed_answer(tmp_path: Pat
     # not happen at all: nothing was sent and nothing was routed.
     assert result.failure is not None and result.failure.code == "telegram_cursor_unavailable"
     assert result.deliveries == () and runner.bridge.events == ()
+    # The usual cause is another process holding the file for a moment, so
+    # the loop waits and tries again rather than giving up for good.
+    assert result.failure.retryable
+
+    async def stop_soon() -> None:
+        stop = asyncio.Event()
+        asyncio.get_running_loop().call_later(0.05, stop.set)
+        assert await item.run(stop, interval_s=0.01) is None
+
+    asyncio.run(stop_soon())
 
 
 def test_a_redelivered_update_is_handled_once_and_the_batch_is_confirmed(tmp_path: Path) -> None:

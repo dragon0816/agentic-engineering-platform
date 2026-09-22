@@ -1364,16 +1364,28 @@ absence means default deny.
 
 `DoctorCheck` gains the names `membership`, `assets` and `state` and the
 status `pending`, for what a host has not been given yet as opposed to what is
-broken. `HostDoctorReport.runtime` is `ready` only when this Bridge knows who
-may use it. `host_report(config, layout)` combines the device preflight with
-those checks and writes nothing: the state file is opened only if it exists.
+broken. `HostDoctorReport.status` remains this machine's preflight, so a host
+that is merely not enrolled is not reported as a broken installation;
+`runtime` is `ready` when this Bridge knows who may use it and nothing it
+needs is broken, and a state file that does not exist yet is not an obstacle
+because the Agent creates it. `host_report(config, layout)` combines the
+device preflight with those checks and writes nothing: the state file is
+opened only if it exists, and then read-only.
 
 `SqliteLocalState` gains `cursor(channel)` and `advance_cursor(channel,
 position)` on a `channel_cursor` table, refusing to rewind (`cursor_rewind`).
-The schema version is 2 and a version-1 file is migrated, because every change
-so far has been an added table that each open creates. `TelegramIngress.offset()`
-reads that cursor instead of memory, so a restart resumes where the last
-confirmed batch ended; a cursor that cannot be read is
+The schema version is 2 and a version-1 file is migrated on a writing open,
+because every change so far has been an added table that each open creates.
+`SqliteLocalState(path, bridge_id=, read_only=True)` opens an existing file
+through a `mode=ro` connection: it creates nothing, migrates nothing, refuses
+every write with `unavailable`, and still insists the file belongs to this
+device and carries a schema this code understands. Any SQLite error on open,
+including a corrupt file, is `LocalStateError("unavailable")` rather than an
+exception from the driver.
+
+`TelegramIngress.offset()` reads that cursor instead of memory, so a restart
+resumes where the last confirmed batch ended; a cursor that cannot be read is
 `telegram_cursor_unavailable` and no poll happens, and one that cannot be
 advanced is `telegram_cursor_unconfirmed` beside the deliveries that were
-handled.
+handled. Both are retryable, because the usual cause is another process
+holding the file for a moment.

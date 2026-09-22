@@ -8,6 +8,7 @@ No socket is opened and no external system is touched.
 """
 
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -15,9 +16,11 @@ import pytest
 from pydantic import ValidationError
 
 from channels.telegram import TELEGRAM_CHANNEL
+from common.distribution import LocalStateError
 from host_runtime.cli import main
 from host_runtime.contracts import CompanyHostConfiguration
 from host_runtime.host import HostError, HostLayout, build_runtime, host_report
+from host_runtime.state import SqliteLocalState
 from models.credentials import StaticCredentials
 
 TOKEN = "1234567890:AAE" + "x" * 32
@@ -333,16 +336,81 @@ def test_doctor_reports_what_the_host_has_been_given_without_writing_anything(
     # Once the operator adds membership, the host is ready to run.
     layout.membership.write_text(json.dumps(membership_record()), encoding="utf-8")
     assert host_report(config, layout, **probe).runtime == "ready"  # type: ignore[arg-type]
-    # A membership record for another device is a failure, not a pending item.
+    # A membership record for another device is a failure, not a pending
+    # item. It keeps the Agent pending without claiming the installation
+    # itself is broken, which is what `status` answers and what the
+    # installer acts on.
     layout.membership.write_text(
         json.dumps(membership_record(device={"bridge_id": "bridge-other"})), encoding="utf-8"
     )
     broken = host_report(config, layout, **probe)  # type: ignore[arg-type]
-    assert broken.status == "not_ready" and broken.runtime == "pending"
+    assert broken.status == "ready" and broken.runtime == "pending"
     assert {item.name for item in broken.checks if item.status == "failed"} == {"membership"}
     # Through the command line, on this machine, doctor says the same.
     assert main(["doctor", "--config", str(host_json(tmp_path, config)), "--json"]) in (0, 1)
     assert "membership" in capsys.readouterr().out
+
+
+def test_a_state_file_that_cannot_be_read_is_reported_not_raised(tmp_path: Path) -> None:
+    """A corrupt state file is SQLite's problem to report and this host's to
+    translate: `doctor` says so and `ask` refuses, neither with a traceback."""
+    config, layout = ready(tmp_path)
+    layout.state.write_bytes(b"this is not a database")
+    report = host_report(
+        config,
+        layout,
+        system_name="Windows",
+        python_version=(3, 12),
+        workspace_exists=True,
+        workspace_writable=True,
+    )
+    named = {item.name: item for item in report.checks}
+    assert named["state"].status == "failed" and "cannot be read" in named["state"].detail
+    assert report.status == "ready" and report.runtime == "pending"
+    with pytest.raises(HostError) as error:
+        build_runtime(config)
+    assert error.value.code == "state_unavailable"
+    assert main(["ask", "--config", str(host_json(tmp_path, config)), "files.read x"]) == 2
+
+
+def test_reporting_on_a_state_file_changes_nothing_about_it(tmp_path: Path) -> None:
+    """A diagnostic that writes is not a diagnostic. Opening the store to
+    count its rows must not create a table or migrate a schema version."""
+    config, layout = ready(tmp_path)
+    with build_runtime(config) as runtime:
+        runtime.state.advance_cursor(TELEGRAM_CHANNEL, 3)
+    # Put the file back to the schema the previous package wrote.
+    with sqlite3.connect(layout.state) as conn:
+        conn.execute("UPDATE local_meta SET value = '1' WHERE key = 'schema_version'")
+        conn.execute("DROP TABLE channel_cursor")
+        conn.commit()
+    before = layout.state.read_bytes()
+    probe = {
+        "system_name": "Windows",
+        "python_version": (3, 12),
+        "workspace_exists": True,
+        "workspace_writable": True,
+    }
+    report = host_report(config, layout, **probe)  # type: ignore[arg-type]
+    assert {item.name: item.status for item in report.checks}["state"] == "passed"
+    assert layout.state.read_bytes() == before
+    with sqlite3.connect(layout.state) as conn:
+        version = conn.execute(
+            "SELECT value FROM local_meta WHERE key = 'schema_version'"
+        ).fetchone()[0]
+    assert version == "1"
+    # A read-only store refuses to write, and refuses another device's file.
+    with SqliteLocalState(layout.state, bridge_id=BRIDGE, read_only=True) as store:
+        assert store.runs() == ()
+        with pytest.raises(LocalStateError, match="unavailable"):
+            store.advance_cursor(TELEGRAM_CHANNEL, 9)
+    with pytest.raises(LocalStateError, match="unavailable"):
+        SqliteLocalState(layout.state, bridge_id="bridge-other", read_only=True)
+    with pytest.raises(LocalStateError, match="unavailable"):
+        SqliteLocalState(layout.workspace_root / "absent.sqlite", bridge_id=BRIDGE, read_only=True)
+    # Opening it for writing is what migrates it, and only then.
+    with build_runtime(config) as runtime:
+        assert runtime.state.cursor(TELEGRAM_CHANNEL) is None
 
 
 def test_a_telegram_ingress_is_built_only_when_its_secret_is_mapped(tmp_path: Path) -> None:

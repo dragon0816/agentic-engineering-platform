@@ -204,6 +204,18 @@ which closes the redelivery gap recorded when slice 2e landed. A cursor that
 can rewind replays messages that were already acted on, so `advance_cursor`
 refuses to move backwards, as `record_run` refuses a stale update.
 
+Review of the first version found the diagnostic doing exactly what its own
+comment forbade: opening the state store created its tables and migrated the
+schema mark from 1 to 2, so a rollback to the previous package could no longer
+open its own file. `SqliteLocalState` gained a read-only mode, which is also
+the honest way to say that a report looks and does not touch. The same review
+found a corrupt file escaping as a SQLite exception, because the opening
+`PRAGMA` runs outside the write transaction; every SQLite error on open is now
+this class's own `unavailable`. And the new checks had been allowed to change
+`status`, which would abort a reinstall over a stale membership record; the
+preflight answers for the machine and `runtime` answers for what the host was
+given.
+
 Rollback removes `src/host_runtime/host.py`, the new `aep-host` subcommands,
 the cursor table and its two methods, and the additions to
 `CompanyHostConfiguration` and `DoctorCheck`; the Agent, the ingress and the
