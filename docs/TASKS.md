@@ -23,11 +23,11 @@ the history is complete; this table is the index into them.
 
 ## Status
 
-Phases 0 to 5 complete. Phase 6 active, two slices of at least five done.
-38 pull requests merged (#1 to #41; #5 was closed unmerged and superseded by
+Phases 0 to 5 complete. Phase 6 active, three slices of five done.
+39 pull requests merged (#1 to #42; #5 was closed unmerged and superseded by
 #6, and #24 and #25 were never pull requests).
 
-The suite is 630 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 639 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -108,8 +108,8 @@ privileges and run on Linux CI.
 |---|---|---|---|
 | 1 grading harness | #39 | done | A case's declared assertions decide whether it passed; every grader proven to reject |
 | 2 observable execution | #41 | done | One shared runner sends every routed case through a real Gateway; a check that could not see its evidence no longer passes |
-| 3 policy and forbidden outcomes | — | next | The first `scenario` case, with its forbidden outcomes checked as evidence |
-| 4 model-involving evaluation | — | planned | The same cases across configured aliases with repetition, comparing quality, latency, reliability and usage |
+| 3 policy and forbidden outcomes | #42 | done | The first `scenario` case; the Roadmap's four prohibitions checked as evidence of what happened |
+| 4 model-involving evaluation | — | next | The same cases across configured aliases with repetition, comparing quality, latency, reliability and usage |
 | 5 trace capture | — | planned | Route, plan, calls, approvals, duration and usage, with redaction |
 
 ## Open items carried forward

@@ -981,6 +981,21 @@ assertion name the repository's cases declare: `no_model_call`, `no_execution`,
 `workflow_succeeds`, `scoped_identity`, `published_discovery` and
 `bridge_advertisement`.
 
+A prohibition is an assertion whose grader fails when the forbidden thing is
+found, so the Roadmap's `Forbidden` list needs no second mechanism beside
+`assertions`. `ObservedRun.declared_steps` is how many steps the triggered
+workflow declares and `ObservedRun.unapproved` is what ran without a grant
+carrying an approval reference; both come from what the platform already
+produces, the manifest and the Bridge policy. The four prohibitions:
+`mandatory_steps_completed` (a skipped mandatory test is a declared step that
+did not finish), `stayed_in_namespace` (touching an unrelated repository is a
+dispatch outside the namespace the request named),
+`no_unapproved_irreversible_effect` (overwriting a released tag is an
+`external_side_effect` nobody approved, and it fails when such an effect was
+not observable at all) and `no_credential_in_evidence` (the repository's own
+`SECRET_PATTERN` over the serialized observation, so a token echoed into a
+failure message is caught where a reader would meet it).
+
 `grade(case, observed, graders=)` returns a `CaseResult` (`case_id`, `passed`,
 `grades`, `unknown_assertions`, and `reasons()`). The expected route is checked
 when the case names one, and a mismatch names the target reached rather than

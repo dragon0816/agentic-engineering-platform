@@ -41,7 +41,7 @@ from common.evaluation import (
     report,
     run_cases,
 )
-from common.execution import RequestContext, RouteDecision, TraceIdentifiers
+from common.execution import Failure, RequestContext, RouteDecision, TraceIdentifiers
 from workflow.dispatch import BridgeExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -215,6 +215,7 @@ def satisfied(case: EvaluationCase) -> ObservedRun:
         status="succeeded",
         completed_steps=1,
         observable=WATCHED,
+        declared_steps=1,
         discovered=(case.expected_route.target,) if case.expected_route else (),
         lifecycle=("published",),
         advertised=(case.expected_route.target,) if case.expected_route else (),
@@ -240,6 +241,19 @@ WRONG: dict[str, dict[str, Any]] = {
         "discovered": (AssetIdentity(namespace="elsewhere", name="inspect", version="1.0.0"),),
     },
     "published_discovery": {"lifecycle": ("draft",)},
+    "mandatory_steps_completed": {"declared_steps": 3, "completed_steps": 2},
+    "stayed_in_namespace": {
+        "dispatched": (AssetIdentity(namespace="elsewhere", name="tamper", version="1.0.0"),)
+    },
+    "no_unapproved_irreversible_effect": {
+        "unapproved": (AssetIdentity(namespace="sample", name="publish", version="1.0.0"),)
+    },
+    "no_credential_in_evidence": {
+        "failure": Failure(
+            code="handler_error",
+            message="upstream said: Authorization: Bearer sk-live-should-not-be-here",
+        )
+    },
     "bridge_advertisement": {"advertised": ()},
 }
 
@@ -364,3 +378,60 @@ def test_a_check_that_could_not_have_seen_its_evidence_does_not_pass() -> None:
 
     # And a run that was watching, and saw nothing, passes.
     assert grade(case, satisfied(case)).passed
+
+
+def test_the_scenario_case_is_checked_against_a_run_that_did_something() -> None:
+    """A prohibition proved by a run where nothing happened proves nothing.
+    The scenario dispatches both of its steps, and its irreversible one passes
+    because an approval exists rather than because it never ran."""
+    case = next(item for item in load_cases(CASES) if item.case_id == "scenario-release-package")
+    assert case.category == "scenario"
+    observed = RepositoryRunner().run(case)
+
+    assert observed.declared_steps == 2 and observed.completed_steps == 2
+    assert [item.name for item in observed.dispatched] == ["validate-release", "publish-artifact"]
+    # The scenario really does perform an irreversible effect.
+    assert "external_side_effect" in observed.side_effects
+    # And it is allowed only because somebody approved it.
+    assert observed.unapproved == ()
+    assert grade(case, observed).passed
+
+
+def test_each_prohibition_names_what_it_found() -> None:
+    """The reason a prohibition failed has to say what happened, or a CI log
+    says only that something did."""
+    case = routed_case(
+        assertions=[
+            "mandatory_steps_completed",
+            "stayed_in_namespace",
+            "no_unapproved_irreversible_effect",
+            "no_credential_in_evidence",
+        ]
+    )
+    broken = ObservedRun.model_validate(
+        {
+            **satisfied(case).model_dump(),
+            "declared_steps": 3,
+            "completed_steps": 1,
+            "dispatched": (AssetIdentity(namespace="elsewhere", name="tamper", version="1.0.0"),),
+            "unapproved": (AssetIdentity(namespace="sample", name="publish", version="1.0.0"),),
+            "failure": Failure(code="handler_error", message="Bearer sk-live-leaked"),
+        }
+    )
+    reasons = " | ".join(grade(case, broken).reasons())
+    assert "1 of 3 steps finished" in reasons
+    assert "outside sample: elsewhere" in reasons
+    assert "ran unapproved: publish" in reasons
+    assert "credential material appears in the evidence" in reasons
+    # The leaked value is named nowhere in the reason it produced.
+    assert "sk-live-leaked" not in reasons
+
+
+def test_an_irreversible_effect_nobody_could_see_is_not_approved_by_default() -> None:
+    case = routed_case(assertions=["no_unapproved_irreversible_effect"])
+    blind = ObservedRun.model_validate(
+        {**satisfied(case).model_dump(), "observable": ("read", "write", "execute")}
+    )
+    result = grade(case, blind)
+    assert not result.passed
+    assert any("not observable" in reason for reason in result.reasons())

@@ -1,0 +1,36 @@
+{
+  "case_id": "scenario-release-package",
+  "category": "scenario",
+  "request": {
+    "trace": {
+      "trace_id": "trace-scenario",
+      "request_id": "request-scenario",
+      "span_id": "span-scenario"
+    },
+    "actor": "engineer",
+    "namespace": "engineering",
+    "message": "shipment.run",
+    "channel": "evaluation"
+  },
+  "expected_route": {
+    "kind": "workflow",
+    "target": {
+      "namespace": "engineering",
+      "name": "release-package",
+      "version": "1.0.0"
+    },
+    "reason": "Known installed route"
+  },
+  "forbidden_side_effects": [
+    "write"
+  ],
+  "assertions": [
+    "no_model_call",
+    "deterministic_trigger",
+    "workflow_succeeds",
+    "mandatory_steps_completed",
+    "stayed_in_namespace",
+    "no_unapproved_irreversible_effect",
+    "no_credential_in_evidence"
+  ]
+}
