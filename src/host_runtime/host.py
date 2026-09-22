@@ -27,6 +27,7 @@ from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, R
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from channels.telegram import TelegramIngress, TelegramIngressConfig
 from common.assets import ExecutionDependencies, WorkflowManifest
+from common.authorization import DeviceAuthorization
 from common.base import Contract
 from common.distribution import LocalStateError
 from common.local_agent import BridgeMembership
@@ -43,6 +44,10 @@ HostErrorCode = Literal[
     "membership_invalid",
     "membership_mismatch",
     "grants_invalid",
+    "authorization_invalid",
+    "authorization_mismatch",
+    "authorization_conflict",
+    "authorization_ungrantable",
     "asset_invalid",
     "telegram_missing",
     "telegram_invalid",
@@ -70,6 +75,7 @@ class HostLayout(Contract):
     workspace_root: Path
     membership: Path
     grants: Path
+    authorization: Path
     skills: Path
     workflows: Path
     telegram: Path
@@ -82,6 +88,7 @@ class HostLayout(Contract):
             workspace_root=root,
             membership=root / "membership.json",
             grants=root / "grants.json",
+            authorization=root / "authorization.json",
             skills=root / "assets" / "skills",
             workflows=root / "assets" / "workflows",
             telegram=root / "telegram.json",
@@ -169,22 +176,92 @@ def load_membership(config: CompanyHostConfiguration, layout: HostLayout) -> Bri
     return membership
 
 
-def build_gateway(config: CompanyHostConfiguration, layout: HostLayout) -> Gateway:
+def load_authorization(
+    config: CompanyHostConfiguration, layout: HostLayout
+) -> DeviceAuthorization | None:
+    """What the members of this device decided it may run, when the control
+    plane has told it. A host without one is configured by hand through
+    `grants.json`; having both is two answers to one question, so it is
+    refused rather than merged."""
+    if not layout.authorization.is_file():
+        return None
+    if layout.grants.is_file():
+        raise HostError("authorization_conflict", layout.authorization)
+    decided = _load_one(layout.authorization, DeviceAuthorization, "authorization_invalid")
+    if decided.bridge_id != config.device.bridge_id:
+        raise HostError("authorization_mismatch", layout.authorization)
+    return decided
+
+
+def _configured_grants(layout: HostLayout) -> tuple[CapabilityGrant, ...]:
+    """Grants an operator wrote by hand, for a host with no control plane."""
+    if not layout.grants.is_file():
+        return ()
+    try:
+        return tuple(CapabilityGrant.model_validate(item) for item in _documents(layout.grants))
+    except (OSError, ValidationError, ValueError) as error:
+        raise HostError("grants_invalid", layout.grants) from error
+
+
+def _decided_grants(
+    authorization: DeviceAuthorization, installed: InstalledCapabilities
+) -> tuple[CapabilityGrant, ...]:
+    """A member's tool selections, read against the capability this host
+    actually has. The permissions and policy references come from that
+    specification and never from the selection, so the shared platform and
+    this Bridge reach the same grant without either trusting the other's
+    arithmetic. A tool that is not installed here grants nothing."""
+    grants: list[CapabilityGrant] = []
+    for selection in authorization.tools():
+        binding = installed.get(selection.asset)
+        if binding is None:
+            continue
+        if not binding.spec.policy.policy_refs:
+            # A grant names the policy it was made under, so a capability
+            # that declares none cannot be granted. Saying so beats building
+            # a host that quietly refuses every dispatch of it.
+            raise HostError("authorization_ungrantable")
+        grants.append(
+            CapabilityGrant(
+                actor=selection.actor,
+                asset=binding.spec.identity,
+                permissions=binding.spec.policy.required_permissions,
+                policy_refs=binding.spec.policy.policy_refs,
+                approval_ref=selection.approval_ref,
+            )
+        )
+    return tuple(grants)
+
+
+def build_gateway(
+    config: CompanyHostConfiguration,
+    layout: HostLayout,
+    authorization: DeviceAuthorization | None = None,
+) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
     Routing is deterministic only: no model is configured on a company host
     in this slice, so an unrecognized message is `needs_input` rather than a
     guess. The one capability handler the package ships is installed and
     rooted at the workspace; every other capability a manifest names is
-    absent, and a step that reaches for one fails closed."""
+    absent, and a step that reaches for one fails closed.
+
+    When the members' decisions are present, only the Workflows and Skills
+    they chose are installed: a manifest sitting in the assets directory that
+    nobody selected is not something this device may run."""
+    allowed = authorization.allows if authorization is not None else None
     skills = SkillRegistry()
     for manifest in _load_all(layout.skills, SkillManifest):
+        if allowed is not None and not allowed("skill", manifest.metadata.identity):
+            continue
         try:
             skills.register(manifest)
         except ValueError as error:
             raise HostError("asset_invalid", layout.skills) from error
     workflows = InstalledWorkflows()
     for workflow in _load_all(layout.workflows, WorkflowManifest):
+        if allowed is not None and not allowed("workflow", workflow.metadata.identity):
+            continue
         try:
             workflows.register(workflow)
         except ValueError as error:
@@ -197,14 +274,11 @@ def build_gateway(config: CompanyHostConfiguration, layout: HostLayout) -> Gatew
         ReadFileOutput,
         ExecutionDependencies(central_required=False),
     )
-    grants: tuple[CapabilityGrant, ...] = ()
-    if layout.grants.is_file():
-        try:
-            grants = tuple(
-                CapabilityGrant.model_validate(item) for item in _documents(layout.grants)
-            )
-        except (OSError, ValidationError, ValueError) as error:
-            raise HostError("grants_invalid", layout.grants) from error
+    grants = (
+        _decided_grants(authorization, installed)
+        if authorization is not None
+        else _configured_grants(layout)
+    )
     try:
         policy = LocalPolicy(grants)
     except ValueError as error:
@@ -263,6 +337,32 @@ def inspect_runtime(
             membership = DoctorCheck(
                 name="membership", status="passed", detail="a membership record names this device"
             )
+    decided: DeviceAuthorization | None = None
+    authorization: DoctorCheck
+    try:
+        decided = load_authorization(config, layout)
+    except HostError as error:
+        authorization = DoctorCheck(
+            name="authorization",
+            status="failed",
+            detail=f"the members' decisions cannot be used: {error.code}",
+        )
+    else:
+        authorization = (
+            DoctorCheck(
+                name="authorization",
+                status="passed",
+                detail=(
+                    f"{len(decided.selections)} decision(s), issued {decided.issued_at.isoformat()}"
+                ),
+            )
+            if decided is not None
+            else DoctorCheck(
+                name="authorization",
+                status="pending",
+                detail="no decisions from the shared platform; grants.json configures this host",
+            )
+        )
     try:
         skills = _load_all(layout.skills, SkillManifest)
         workflows = _load_all(layout.workflows, WorkflowManifest)
@@ -271,6 +371,15 @@ def inspect_runtime(
             name="assets", status="failed", detail=f"an asset manifest is unreadable: {error.code}"
         )
     else:
+        # Count what this host would actually install, which is what the
+        # members chose when they have chosen.
+        if decided is not None:
+            skills = tuple(
+                item for item in skills if decided.allows("skill", item.metadata.identity)
+            )
+            workflows = tuple(
+                item for item in workflows if decided.allows("workflow", item.metadata.identity)
+            )
         detail = f"{len(skills)} skill(s) and {len(workflows)} workflow(s) installed"
         assets = DoctorCheck(
             name="assets", status="passed" if skills or workflows else "pending", detail=detail
@@ -299,7 +408,7 @@ def inspect_runtime(
                 status="failed",
                 detail=f"the local state file cannot be read: {type(error).__name__}",
             )
-    return (membership, assets, state)
+    return (membership, authorization, assets, state)
 
 
 def host_report(
@@ -329,8 +438,11 @@ def host_report(
     named = {item.name: item.status for item in runtime_checks}
     # Ready means the Agent would start: this Bridge knows who may use it and
     # nothing it needs is broken. A state file that does not exist yet is not
-    # an obstacle, because the Agent creates it on its first run.
-    ready = named.get("membership") == "passed" and named.get("state") != "failed"
+    # an obstacle, because the Agent creates it on its first run, and neither
+    # is the absence of decisions from a shared platform this host may
+    # not have.
+    broken = {item.name for item in runtime_checks if item.status == "failed"}
+    ready = named.get("membership") == "passed" and not broken
     return HostDoctorReport(
         status=device.status,
         checks=device.checks + runtime_checks,
@@ -349,7 +461,7 @@ def build_runtime(
     checked = CompanyHostConfiguration.model_validate(config)
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
     membership = load_membership(checked, place)
-    gateway = build_gateway(checked, place)
+    gateway = build_gateway(checked, place, load_authorization(checked, place))
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:

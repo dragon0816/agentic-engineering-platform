@@ -17,7 +17,10 @@ Agent + Bridge + corporate resource access       Agent + Bridge, many platform u
 old Host Bridge remains available for parity     one shared Windows account
 ```
 
-The shared-platform computer cannot use company LDAP or company resources. A
+The shared-platform computer is an internal-network shared workstation
+(owner decision, 2026-09-22). It is reachable from company computers on the
+internal network and several people can sign in to it, so its own store is not
+confidential from them, and it cannot use company LDAP or company resources. A
 user first receives an invitation, registers at the shared-platform entry point,
 and then enrolls a Bridge. Platform identity, Bridge device identity, runtime
 authorization, and credentials for Jira/GitLab/SAP-C4C remain separate.
@@ -423,3 +426,74 @@ mapped and refused when it names another Bridge; the `telegram` command
 without a configured ingress; a host that will not guess a namespace; the
 durable offset surviving a restart and refusing to rewind; and a cursor that
 cannot be read stopping the poll.
+
+## Slice 2g — the member decides what a device may run
+
+Owner decision (2026-09-22): **a platform user decides, for each device they
+may use, which Workflows, which Skills and which tools that device may run for
+them.** Nobody decides for anyone else, and a decision reaches no further than
+the devices that user is bound to.
+
+The three lists are different things and stay different. A Workflow or Skill
+selection decides what the device **installs**, so an unselected manifest sitting
+in the assets directory is not installed and a route to it resolves to nothing.
+A tool selection decides what the Bridge policy **grants**, because a tool is a
+capability and the policy is what authorizes a dispatch. A Workflow whose steps
+need a tool the user did not select still installs, and its step still fails
+closed: choosing a Workflow is not choosing the tools it reaches for.
+
+1. `common.authorization.DeviceAssetSelection` is one user's decision that one
+   device may run one asset for them: `bridge_id`, `actor`, `kind`
+   (`workflow`, `skill` or `capability`), `asset`, `decided_at`, `status`, and
+   for a tool an `approval_ref` with the `approved_by` who gave it. A selection
+   names no permission and no policy reference: a user chooses **which** assets,
+   never what they are allowed to do, so a decision cannot widen itself.
+2. `common.authorization.DeviceAuthorization` is every active decision for one
+   device at one moment: the device, when it was issued, and the selections.
+   It refuses a selection for another device and two selections of the same
+   asset by the same actor. `for_actor`, `installable` and `tools` read it.
+3. `control_plane.authorization.InMemoryAuthorizationRegistry` refuses a
+   selection whose actor is not an active bound member of that device, a
+   Workflow or Skill that is not published in the Registry with that kind, and
+   a tool the device does not advertise. A device says what it can run; a user
+   cannot select a tool that is not there.
+4. A tool whose own `CapabilitySpec` requires approval cannot be selected
+   without an `approval_ref`, and the `approved_by` must itself be an active
+   member of that device. On a company workstation the one member is the owner,
+   so the owner approves their own irreversible tools and the record says who
+   and when; on a shared test workstation another bound member may approve.
+   Whether an irreversible tool should need a second party is an open question
+   for the owner, recorded rather than decided here.
+5. A decision dated in the future is refused where it arrives, because a
+   bundle refuses a decision newer than itself and one such record would
+   leave that device with no authorization at all. A tool whose
+   specification declares no policy reference is refused too: a grant names
+   the policy it was made under, so such a tool cannot be granted to
+   anybody, and refusing it when it is chosen keeps one unusable tool from
+   breaking the whole device's authorization later.
+6. `grants(bridge_id)` derives the device's `CapabilityGrant`s from the
+   advertised `CapabilitySpec`, not from the selection: the permissions and
+   policy references are the ones the capability itself declares. Grants are
+   per actor, so on a shared test workstation one member's decision authorizes
+   that member's runs and nobody else's, which is what the platform already
+   guarantees by keeping the actor on every run.
+7. A company host reads `authorization.json` when it is there. Only the
+   Workflows and Skills it names are installed, and the grants are derived from
+   its tool selections; `grants.json` remains the way to configure a host that
+   has no control plane, and both files at once is refused rather than
+   merged. `doctor` reports the decisions as their own check, counts the
+   assets this host would actually install, and shows a conflict before a
+   command fails on it.
+
+Tests precede implementation and cover: a selection refusing a permission it
+was not asked for, approval only for a tool, `approval_ref` and `approved_by`
+together, and credential material refused; a bundle refusing a foreign device
+and a repeated asset; an unbound actor, an unpublished Workflow, a kind that
+does not match the publication, and an unadvertised tool each refused; a tool
+requiring approval refused without one and refused when the approver is not a
+member; a derived grant carrying the specification's permissions and policy
+references rather than anything the user wrote; two members of a shared device
+each getting their own grants and neither authorizing the other; revocation
+removing a grant; and, on a real host, only the selected Workflow installed,
+the selected tool authorizing a run end to end, the same run refused once the
+tool is revoked, and both authorization files at once refused.

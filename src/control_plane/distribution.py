@@ -86,6 +86,12 @@ class InMemoryPackageRegistry:
                 result.append(item)
         return tuple(result)
 
+    def get(self, identity: AssetIdentity) -> PublishedAssetPackage | None:
+        """One published package, or None. Discovery grants no execution, and
+        neither does this."""
+        payload = self._packages.get(AssetIdentity.model_validate(identity).key)
+        return PublishedAssetPackage.model_validate_json(payload) if payload is not None else None
+
     def plan(
         self,
         *,

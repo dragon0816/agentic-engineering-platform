@@ -220,3 +220,39 @@ Rollback removes `src/host_runtime/host.py`, the new `aep-host` subcommands,
 the cursor table and its two methods, and the additions to
 `CompanyHostConfiguration` and `DoctorCheck`; the Agent, the ingress and the
 preview package keep working as they did.
+
+## Member-decided asset authorization
+
+No source repository is migrated here: neither pinned source has accounts,
+devices or per-member authorization, which `docs/PHASE_7_MIGRATION.md` already
+recorded when the enrollment foundation was written. This is new control-plane
+behaviour required by the owner's rule of 2026-09-22, and it is built from
+contracts this repository already has.
+
+Four choices worth recording. A selection names an asset and nothing else,
+because a decision that could also name permissions would be a decision that
+can widen itself; the capability's own `CapabilitySpec` stays the only place
+that says what a tool may do. The three lists stay separate and are enforced
+in different places, because installing a Workflow and granting a tool are
+different acts: choosing a Workflow is not choosing the tools its steps reach
+for, and a step that reaches for an unchosen tool fails closed, which is the
+behaviour the platform already had. Each plane derives the grant from the
+specification it holds, the shared platform from what the device advertised
+and the Bridge from what it installed, rather than sharing a derivation
+function across a boundary the architecture keeps apart; both read the same
+declaration, so a difference between them is a difference between the device's
+claim and its reality, which is worth seeing rather than hiding. And a bundle
+carries only the decisions in force, so nothing has to read a status to know
+what applies.
+
+Open question for the owner, recorded rather than decided: on a company
+workstation the single member approves their own irreversible tools, because
+there is nobody else bound to that device. The record says who approved and
+when, and the Phase 6 prohibition against an unapproved irreversible effect is
+satisfied by construction, but a second approver would be a different rule. On
+a shared test workstation another bound member may already be the approver.
+
+Rollback removes `src/common/authorization.py`,
+`src/control_plane/authorization.py`, their tests, the `authorization.json`
+branch in `host_runtime.host` and the two accessors added to the enrollment
+and package registries; `grants.json` keeps working exactly as before.

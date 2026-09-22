@@ -32,7 +32,7 @@ when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 753 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 768 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -130,7 +130,8 @@ privileges and run on Linux CI.
 | 2d resident local Agent and durable local state | #53 | done | `LocalAgent` admits by the shared device rule and the device's own membership copy on every ingress, routes through the existing Gateway, executes exact remote jobs idempotently, settles timed-out runs, and records runs in a single-writer SQLite local state that outlives the process |
 | 2e Telegram ingress | #54 | done | `channels.telegram`: outbound long polling over the platform's transport, numeric sender mapped to exactly one actor with an empty map admitting nobody, `/skill command` translated to the deterministic form, token through `SecretRef` and its shape added to `SECRET_PATTERN`, the same Agent admission and Gateway path |
 | 2f company host runtime | #56 | done | `aep-host` assembles the resident Agent from the workspace files (membership, grants, Skill and Workflow manifests) and gains `ask`, `status` and `telegram`; `doctor` reports what the host has been given; the Telegram offset is durable |
-| 2g authenticated shared-platform transports | — | planned | Registry package synchronization, Bridge job polling and snapshot reporting over an authenticated transport; needs an authentication design first |
+| 2g member-decided asset authorization | #58 | in review | A member chooses which Workflows, Skills and tools their devices may run; the control plane refuses a decision they may not make and derives the Bridge's grants from the capability's own specification; a host installs and grants only what was chosen |
+| 2h authenticated shared-platform transports | — | planned | Registry package synchronization, authorization delivery, Bridge job polling and snapshot reporting over an authenticated transport; still needs the authentication design (what a Bridge presents, what the control plane checks and stores, how an authorization reaches a device and stays current) |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
 | 5 knowledge parity | — | planned | Adopt, query, update and restore a full copy of the source vault |
@@ -168,8 +169,16 @@ streaming `done` flag.
 | 2026-09-22 | Production-like execution occurs on an enrolled company Agent + Bridge; the current old Host Bridge can run workflows 7 and 13 and remains the parity/rollback baseline |
 | 2026-09-22 | A company workstation has one employee/platform member and corporate resource access; a shared test workstation has multiple invited platform users, no corporate access, one shared Windows account and no claimed OS-level isolation |
 | 2026-09-22 | CI remains inert. Source repositories and old entry points are retained at pinned revisions until parity and rollback rehearsal; archive is a later decision and deletion is outside Phase 7 |
+| 2026-09-22 | A platform user decides, for each device they may use, which Workflows, which Skills and which tools that device may run for them; nobody decides for anyone else |
+| 2026-09-22 | The shared platform runs on an internal-network shared workstation: reachable from company computers, signed in to by several people, and still unable to use company LDAP |
 
 ## Resolved owner decisions (Phase 7)
+
+Who decides what a device may run, and where the shared platform runs, were
+answered on 2026-09-22 and are in the table above. What is still open is the
+authentication design the transports need, which is why slices 2b and 2h stay
+planned: what a Bridge presents to the shared platform, what the control plane
+checks and stores, and how an authorization reaches a device and stays current.
 
 The four decisions that previously blocked the specification are resolved by
 the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:

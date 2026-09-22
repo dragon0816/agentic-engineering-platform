@@ -1389,3 +1389,50 @@ resumes where the last confirmed batch ended; a cursor that cannot be read is
 advanced is `telegram_cursor_unconfirmed` beside the deliveries that were
 handled. Both are retryable, because the usual cause is another process
 holding the file for a moment.
+
+## Member-decided asset authorization (Phase 7, slice 2g)
+
+`common.authorization.DeviceAssetSelection` is one member's decision that one
+device may run one asset for them: `bridge_id`, `actor`, `kind` (`workflow`,
+`skill` or `capability`), `asset`, `decided_at`, `status`, and for a tool an
+`approval_ref` with the `approved_by` who gave it. It names no permission and
+no policy reference, and the closed schema gives nowhere to write one: a
+member chooses **which** assets, never what they are allowed to do, so a
+decision cannot widen itself. An approval belongs only to a tool, and always
+names who gave it.
+
+`DeviceAuthorization` is every decision in force for one device at one moment:
+`bridge_id`, `issued_at` and the selections. It refuses a decision for another
+device, a revoked decision (what is in force is what is present), two
+decisions by one member about one asset, and a decision newer than the
+authorization carrying it. `for_actor`, `installable` (Workflows and Skills),
+`tools` (capabilities) and `allows(kind, asset)` read it.
+
+`control_plane.authorization.InMemoryAuthorizationRegistry(enrollment,
+packages)` records decisions and refuses the ones a member may not make:
+`actor_not_admitted` for a device they are not bound to, `asset_not_published`
+and `kind_mismatch` against the Registry, `tool_not_advertised` for a
+capability the device does not say it has, `approval_required` for a tool
+whose own `CapabilitySpec` requires one, `approver_not_member` when the
+approver is not a member of that device, `tool_not_grantable` for a
+capability that declares no policy reference and so cannot be granted to
+anybody, `decision_in_future` for a decision no bundle could carry,
+`duplicate_selection`, and `selection_missing` on revocation. `grants(bridge_id)` derives the device's
+`CapabilityGrant`s through `grant_from(spec, selection)`: the permissions and
+policy references are the capability's own declaration and the approval is the
+member's, so a decision about which tools never becomes a decision about what
+they may do. Grants are per actor, so on a shared test workstation one
+member's decision authorizes that member's runs and nobody else's.
+
+A company host reads `authorization.json` from its workspace when it is there.
+`build_gateway` then installs only the Workflows and Skills the members chose,
+and derives the policy grants from its tool selections against the
+`CapabilitySpec` it actually installed: each plane derives from the
+declaration it holds, so neither trusts the other's arithmetic, and a tool
+that is not installed here grants nothing. `grants.json` remains the way to
+configure a host with no control plane; both files at once is
+`authorization_conflict`, a bundle for another device is
+`authorization_mismatch`, an unreadable one is `authorization_invalid`, and
+a tool this host cannot grant is `authorization_ungrantable`. `DoctorCheck`
+gains the name `authorization`, reporting those states before a command
+fails on them, and the `assets` count is taken after the selection filter.
