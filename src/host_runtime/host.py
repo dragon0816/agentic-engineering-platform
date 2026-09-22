@@ -47,6 +47,7 @@ HostErrorCode = Literal[
     "authorization_invalid",
     "authorization_mismatch",
     "authorization_conflict",
+    "authorization_ungrantable",
     "asset_invalid",
     "telegram_missing",
     "telegram_invalid",
@@ -215,6 +216,11 @@ def _decided_grants(
         binding = installed.get(selection.asset)
         if binding is None:
             continue
+        if not binding.spec.policy.policy_refs:
+            # A grant names the policy it was made under, so a capability
+            # that declares none cannot be granted. Saying so beats building
+            # a host that quietly refuses every dispatch of it.
+            raise HostError("authorization_ungrantable")
         grants.append(
             CapabilityGrant(
                 actor=selection.actor,
@@ -331,6 +337,32 @@ def inspect_runtime(
             membership = DoctorCheck(
                 name="membership", status="passed", detail="a membership record names this device"
             )
+    decided: DeviceAuthorization | None = None
+    authorization: DoctorCheck
+    try:
+        decided = load_authorization(config, layout)
+    except HostError as error:
+        authorization = DoctorCheck(
+            name="authorization",
+            status="failed",
+            detail=f"the members' decisions cannot be used: {error.code}",
+        )
+    else:
+        authorization = (
+            DoctorCheck(
+                name="authorization",
+                status="passed",
+                detail=(
+                    f"{len(decided.selections)} decision(s), issued {decided.issued_at.isoformat()}"
+                ),
+            )
+            if decided is not None
+            else DoctorCheck(
+                name="authorization",
+                status="pending",
+                detail="no decisions from the shared platform; grants.json configures this host",
+            )
+        )
     try:
         skills = _load_all(layout.skills, SkillManifest)
         workflows = _load_all(layout.workflows, WorkflowManifest)
@@ -339,6 +371,15 @@ def inspect_runtime(
             name="assets", status="failed", detail=f"an asset manifest is unreadable: {error.code}"
         )
     else:
+        # Count what this host would actually install, which is what the
+        # members chose when they have chosen.
+        if decided is not None:
+            skills = tuple(
+                item for item in skills if decided.allows("skill", item.metadata.identity)
+            )
+            workflows = tuple(
+                item for item in workflows if decided.allows("workflow", item.metadata.identity)
+            )
         detail = f"{len(skills)} skill(s) and {len(workflows)} workflow(s) installed"
         assets = DoctorCheck(
             name="assets", status="passed" if skills or workflows else "pending", detail=detail
@@ -367,7 +408,7 @@ def inspect_runtime(
                 status="failed",
                 detail=f"the local state file cannot be read: {type(error).__name__}",
             )
-    return (membership, assets, state)
+    return (membership, authorization, assets, state)
 
 
 def host_report(
@@ -397,8 +438,11 @@ def host_report(
     named = {item.name: item.status for item in runtime_checks}
     # Ready means the Agent would start: this Bridge knows who may use it and
     # nothing it needs is broken. A state file that does not exist yet is not
-    # an obstacle, because the Agent creates it on its first run.
-    ready = named.get("membership") == "passed" and named.get("state") != "failed"
+    # an obstacle, because the Agent creates it on its first run, and neither
+    # is the absence of decisions from a shared platform this host may
+    # not have.
+    broken = {item.name for item in runtime_checks if item.status == "failed"}
+    ready = named.get("membership") == "passed" and not broken
     return HostDoctorReport(
         status=device.status,
         checks=device.checks + runtime_checks,

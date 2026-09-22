@@ -76,7 +76,14 @@ class DoctorCheck(Contract):
     a freshly installed host is not enrolled, and says so without failing."""
 
     name: Literal[
-        "operating_system", "python", "device_profile", "workspace", "membership", "assets", "state"
+        "operating_system",
+        "python",
+        "device_profile",
+        "workspace",
+        "membership",
+        "authorization",
+        "assets",
+        "state",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text

@@ -242,6 +242,52 @@ def test_a_tool_that_requires_approval_needs_one_from_a_member() -> None:
     assert registry.select(tool()).approval_ref is None
 
 
+def test_a_decision_dated_in_the_future_is_refused_where_it_arrives() -> None:
+    """A bundle refuses a decision newer than itself, so one future-dated
+    record would leave the device with no authorization at all."""
+    _, _, registry = platform()
+    later = selection(decided_at=NOW + timedelta(days=1))
+    with pytest.raises(AuthorizationError, match="decision_in_future"):
+        registry.select(later, now=NOW)
+    assert registry.select(later, now=NOW + timedelta(days=2)).decided_at == NOW + timedelta(days=1)
+    assert registry.authorization("bridge-company", issued_at=NOW + timedelta(days=2)).selections
+
+
+def test_a_tool_that_declares_no_policy_cannot_be_granted_to_anybody() -> None:
+    """A grant names the policy it was made under. A capability that declares
+    none is refused when it is chosen, rather than breaking the whole
+    device's authorization when the grants are derived."""
+    enrollment = InMemoryEnrollmentRegistry(administrators=("platform-admin",))
+    enrollment.issue(
+        Invitation(invitation_id="invite-engineer", actor="engineer", issued_by="platform-admin")
+    )
+    enrollment.accept("invite-engineer", "engineer")
+    described = device("company_workstation")
+    unpolicied = CapabilitySpec.model_validate(
+        {
+            **read_tool().model_dump(),
+            "policy": {"approval_required": False, "required_permissions": [], "policy_refs": []},
+        }
+    )
+    enrollment.register_device(
+        described,
+        BridgeRegistration(
+            bridge_id=described.bridge_id,
+            owner_id="engineer",
+            trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+            capabilities=(unpolicied,),
+        ),
+    )
+    enrollment.bind(
+        "engineer",
+        BridgeBinding(bridge_id=described.bridge_id, actor="engineer", role="device_admin"),
+    )
+    registry = InMemoryAuthorizationRegistry(enrollment, InMemoryPackageRegistry())
+    with pytest.raises(AuthorizationError, match="tool_not_grantable"):
+        registry.select(tool())
+    assert registry.grants("bridge-company") == ()
+
+
 def test_the_grant_comes_from_the_specification_and_not_from_the_decision() -> None:
     _, _, registry = platform()
     registry.select(tool())

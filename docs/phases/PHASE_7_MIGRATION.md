@@ -464,16 +464,26 @@ closed: choosing a Workflow is not choosing the tools it reaches for.
    and when; on a shared test workstation another bound member may approve.
    Whether an irreversible tool should need a second party is an open question
    for the owner, recorded rather than decided here.
-5. `grants(bridge_id)` derives the device's `CapabilityGrant`s from the
+5. A decision dated in the future is refused where it arrives, because a
+   bundle refuses a decision newer than itself and one such record would
+   leave that device with no authorization at all. A tool whose
+   specification declares no policy reference is refused too: a grant names
+   the policy it was made under, so such a tool cannot be granted to
+   anybody, and refusing it when it is chosen keeps one unusable tool from
+   breaking the whole device's authorization later.
+6. `grants(bridge_id)` derives the device's `CapabilityGrant`s from the
    advertised `CapabilitySpec`, not from the selection: the permissions and
    policy references are the ones the capability itself declares. Grants are
    per actor, so on a shared test workstation one member's decision authorizes
    that member's runs and nobody else's, which is what the platform already
    guarantees by keeping the actor on every run.
-6. A company host reads `authorization.json` when it is there. Only the
+7. A company host reads `authorization.json` when it is there. Only the
    Workflows and Skills it names are installed, and the grants are derived from
    its tool selections; `grants.json` remains the way to configure a host that
-   has no control plane, and both files at once is refused rather than merged.
+   has no control plane, and both files at once is refused rather than
+   merged. `doctor` reports the decisions as their own check, counts the
+   assets this host would actually install, and shows a conflict before a
+   command fails on it.
 
 Tests precede implementation and cover: a selection refusing a permission it
 was not asked for, approval only for a tool, `approval_ref` and `approved_by`

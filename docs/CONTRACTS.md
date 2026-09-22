@@ -1414,8 +1414,10 @@ packages)` records decisions and refuses the ones a member may not make:
 and `kind_mismatch` against the Registry, `tool_not_advertised` for a
 capability the device does not say it has, `approval_required` for a tool
 whose own `CapabilitySpec` requires one, `approver_not_member` when the
-approver is not a member of that device, `duplicate_selection`, and
-`selection_missing` on revocation. `grants(bridge_id)` derives the device's
+approver is not a member of that device, `tool_not_grantable` for a
+capability that declares no policy reference and so cannot be granted to
+anybody, `decision_in_future` for a decision no bundle could carry,
+`duplicate_selection`, and `selection_missing` on revocation. `grants(bridge_id)` derives the device's
 `CapabilityGrant`s through `grant_from(spec, selection)`: the permissions and
 policy references are the capability's own declaration and the approval is the
 member's, so a decision about which tools never becomes a decision about what
@@ -1430,4 +1432,7 @@ declaration it holds, so neither trusts the other's arithmetic, and a tool
 that is not installed here grants nothing. `grants.json` remains the way to
 configure a host with no control plane; both files at once is
 `authorization_conflict`, a bundle for another device is
-`authorization_mismatch`, and an unreadable one is `authorization_invalid`.
+`authorization_mismatch`, an unreadable one is `authorization_invalid`, and
+a tool this host cannot grant is `authorization_ungrantable`. `DoctorCheck`
+gains the name `authorization`, reporting those states before a command
+fails on them, and the `assets` count is taken after the selection filter.

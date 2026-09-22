@@ -15,12 +15,22 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from capabilities.files import READ_FILE_SPEC
+from capabilities.contracts import CapabilitySpec
+from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
+from capabilities.runtime import InstalledCapabilities
 from channels.telegram import TELEGRAM_CHANNEL
+from common.assets import ExecutionDependencies
+from common.authorization import DeviceAuthorization
 from common.distribution import LocalStateError
 from host_runtime.cli import main
 from host_runtime.contracts import CompanyHostConfiguration
-from host_runtime.host import HostError, HostLayout, build_runtime, host_report
+from host_runtime.host import (
+    HostError,
+    HostLayout,
+    _decided_grants,
+    build_runtime,
+    host_report,
+)
 from host_runtime.state import SqliteLocalState
 from models.credentials import StaticCredentials
 
@@ -512,6 +522,72 @@ def test_a_revoked_tool_stops_authorizing_the_same_run(
     )
     assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
     assert "failure: permission_denied" in capsys.readouterr().out
+
+
+def test_doctor_reports_the_members_decisions_and_what_they_leave_installed(
+    tmp_path: Path,
+) -> None:
+    config, layout = workspace(tmp_path, membership=membership_record())
+    probe = {
+        "system_name": "Windows",
+        "python_version": (3, 12),
+        "workspace_exists": True,
+        "workspace_writable": True,
+    }
+    named = {item.name: item for item in host_report(config, layout, **probe).checks}  # type: ignore[arg-type]
+    assert named["authorization"].status == "pending"
+    assert "grants.json" in named["authorization"].detail
+    assert named["assets"].detail == "1 skill(s) and 1 workflow(s) installed"
+    # With decisions, the count is what this host would actually install.
+    layout.authorization.write_text(json.dumps(authorization("skill")), encoding="utf-8")
+    report = host_report(config, layout, **probe)  # type: ignore[arg-type]
+    named = {item.name: item for item in report.checks}
+    assert named["authorization"].status == "passed" and "1 decision(s)" in (
+        named["authorization"].detail
+    )
+    assert named["assets"].detail == "1 skill(s) and 0 workflow(s) installed"
+    assert report.runtime == "ready"
+    # Two answers to one question is a failure the operator can see before
+    # a command fails on it.
+    layout.grants.write_text(json.dumps(grant_record()), encoding="utf-8")
+    report = host_report(config, layout, **probe)  # type: ignore[arg-type]
+    named = {item.name: item for item in report.checks}
+    assert named["authorization"].status == "failed"
+    assert "authorization_conflict" in named["authorization"].detail
+    assert report.status == "ready" and report.runtime == "pending"
+
+
+def test_a_tool_this_host_cannot_grant_is_named_rather_than_silently_ignored(
+    tmp_path: Path,
+) -> None:
+    """A grant names the policy it was made under, so a capability that
+    declares none cannot be granted. The host says so instead of building a
+    policy that refuses every dispatch of it."""
+    config, layout = workspace(tmp_path, membership=membership_record())
+    layout.authorization.write_text(json.dumps(authorization("capability")), encoding="utf-8")
+    decided = DeviceAuthorization.model_validate_json(layout.authorization.read_text())
+    installed = InstalledCapabilities()
+    installed.register(
+        CapabilitySpec.model_validate(
+            {
+                **READ_FILE_SPEC.model_dump(),
+                "policy": {
+                    "approval_required": False,
+                    "required_permissions": [],
+                    "policy_refs": [],
+                },
+            }
+        ),
+        ReadFileHandler(layout.workspace_root),
+        ReadFileInput,
+        ReadFileOutput,
+        ExecutionDependencies(central_required=False),
+    )
+    with pytest.raises(HostError) as error:
+        _decided_grants(decided, installed)
+    assert error.value.code == "authorization_ungrantable"
+    # The capability this package actually ships does declare one.
+    assert READ_FILE_SPEC.policy.policy_refs
 
 
 def test_two_answers_to_one_question_are_refused(tmp_path: Path) -> None:

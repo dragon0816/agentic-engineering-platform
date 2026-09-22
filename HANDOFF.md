@@ -42,6 +42,12 @@ and still unable to use company LDAP.
   `tests/test_host_wiring.py`, as listed at the end of the slice 2g
   requirements section.
 - The Windows preview README documents `authorization.json`.
+- PR #58 review (3 findings) applied: a capability declaring no policy
+  reference is refused where it is chosen rather than breaking the whole
+  device's grant derivation; a decision dated in the future is refused
+  against an injectable clock, because a bundle refuses one newer than
+  itself; and `doctor` reports the decisions as their own check and counts
+  what this host would actually install.
 
 ## In Progress
 
@@ -74,7 +80,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 764 passed, 3 skipped (link privileges)
+# PASS: 768 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -102,8 +108,8 @@ instance was invoked.
   issue one and a host can read one from its workspace; the transport between
   them is slice 2h, so today an operator copies the file.
 - A tool a member chose that is not installed on the device grants nothing,
-  silently. `doctor` does not yet report the difference between what was
-  chosen and what is installed.
+  silently. `doctor` reports how many decisions there are and what would be
+  installed, but not which chosen tool is absent.
 - The registry is in memory. It is the reference model for the shared
   platform's rules, not a database.
 

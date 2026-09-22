@@ -12,7 +12,7 @@ platform's side of the owner's rule, and the transport that delivers an
 authorization to a device is a later slice.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import TypeAdapter
@@ -31,10 +31,12 @@ AuthorizationErrorCode = Literal[
     "asset_not_published",
     "kind_mismatch",
     "tool_not_advertised",
+    "tool_not_grantable",
     "approval_required",
     "approver_not_member",
     "duplicate_selection",
     "selection_missing",
+    "decision_in_future",
 ]
 
 
@@ -80,9 +82,17 @@ class InMemoryAuthorizationRegistry:
             (item for item in advertisement.capabilities if item.identity.key == asset.key), None
         )
 
-    def select(self, selection: DeviceAssetSelection) -> DeviceAssetSelection:
+    def select(
+        self, selection: DeviceAssetSelection, *, now: datetime | None = None
+    ) -> DeviceAssetSelection:
         """Record one decision, or say why the member may not make it."""
         item = DeviceAssetSelection.model_validate(selection)
+        # A decision dated in the future could never appear in an
+        # authorization, because a bundle refuses a decision newer than
+        # itself; one such record would leave the device with no bundle at
+        # all, so it is refused where it arrives.
+        if item.decided_at > (now if now is not None else datetime.now(UTC)):
+            raise AuthorizationError("decision_in_future")
         if not self._member(item.actor, item.bridge_id):
             raise AuthorizationError("actor_not_admitted")
         if item.kind == "capability":
@@ -91,6 +101,12 @@ class InMemoryAuthorizationRegistry:
                 # A device says what it can run; a member cannot choose a tool
                 # that is not there.
                 raise AuthorizationError("tool_not_advertised")
+            if not spec.policy.policy_refs:
+                # A grant names the policy it was made under, so a capability
+                # that declares none cannot be granted to anybody. Refusing
+                # here keeps one unusable tool from breaking the whole
+                # device's authorization later.
+                raise AuthorizationError("tool_not_grantable")
             if spec.policy.approval_required and item.approval_ref is None:
                 raise AuthorizationError("approval_required")
             if item.approved_by is not None and not self._member(item.approved_by, item.bridge_id):
@@ -145,6 +161,9 @@ class InMemoryAuthorizationRegistry:
             if item.bridge_id != key or item.status != "active" or item.kind != "capability":
                 continue
             spec = self._advertised(key, item.asset)
-            if spec is not None:
+            # A tool the device has stopped advertising, or one that declares
+            # no policy to be granted under, contributes nothing rather than
+            # taking the other members' grants down with it.
+            if spec is not None and spec.policy.policy_refs:
                 derived.append(grant_from(spec, item))
         return tuple(derived)
