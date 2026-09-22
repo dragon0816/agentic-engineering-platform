@@ -218,22 +218,27 @@ later evaluation reads, so it is correlated to the request's
    every match of the repository's `SECRET_PATTERN` replaced by `[redacted]`,
    and the number of replacements. It scans strings field by field with
    quotes stripped, the same rule the credential grader uses, so a token
-   inside a JSON string is removed rather than missed.
+   inside a JSON string is removed rather than missed. A field named for a
+   secret loses its whole value whatever its shape; the pattern spans the
+   whole secret (a quoted value, a private key block) and never matches its
+   own marker, so redacting twice changes nothing.
 2. `common.trace.TraceEvent` is one ordered thing that happened: `sequence`,
    `kind` (`route`, `dispatch`, `outcome`), the asset it concerns, its status
    and code. It is built from what the platform already records, the routing
    outcome and the Bridge's `ExecutionEvent`s, and carries no payload.
 3. `common.trace.ExecutionTrace` is the record: `trace` (the request's
    identifiers, so it joins to journal entries and Bridge events), `events`
-   in order, the route and its origin, `dispatched`, `ran`, `unapproved`,
-   `status`, `completed_steps`, `declared_steps`, `model_calls`,
+   in order, the route and its origin, `dispatched`, `ran`, `approved` and
+   `unapproved` (dispatched identities with and without an approval behind
+   them), `status`, `completed_steps`, `declared_steps`, `model_calls`,
    `duration_ms`, `input_tokens`, `output_tokens`, a redacted `failure`, and
    `redactions`, how many secrets were removed on the way in.
-4. `ExecutionTrace.build(trace, observed, events)` applies `redact` to
-   everything it stores, so a trace is safe to persist by construction. A
-   trace that would still carry credential material after redaction cannot
-   be built: the constructor validates with the same scan the credential
-   grader uses.
+4. `ExecutionTrace.build(trace, observed, dispatches, approved=)` applies
+   `redact` to the fields that can hold free text, so a trace is safe to
+   persist by construction. The contract's validator refuses a trace that
+   carries credential material, whose events are out of order or not
+   bracketed by the route and the outcome, or whose identity lists name
+   something the dispatch events do not record, wherever the trace came from.
 5. `RepositoryRunner` produces a trace beside every observation, and the
    suite asserts that every trace in the repository joins to its case's
    `TraceIdentifiers`, is ordered, and scans clean.
@@ -247,7 +252,6 @@ later evaluation reads, so it is correlated to the request's
 
 None planned. With slice 5 the phase's named deliverables are complete; see
 "Phase 6 exit criteria" below.
-
 
 ## Phase 6 exit criteria
 

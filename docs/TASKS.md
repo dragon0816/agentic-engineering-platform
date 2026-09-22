@@ -29,7 +29,7 @@ and superseded by #6, and #24 and #25 were never pull requests). A row says
 `done` only once its pull request has merged; until then it says `in review`,
 so the committed record never asserts a merge that has not happened.
 
-The suite is 673 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 677 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 

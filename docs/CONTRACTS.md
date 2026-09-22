@@ -1102,21 +1102,34 @@ ran, else the last dispatch's, else `unresolved` for a routing failure, else
 `nothing_ran`.
 
 `redact(value, label=)` returns a copy of any JSON-shaped value with every
-`SECRET_PATTERN` match replaced by `[redacted]`, and the count. A match inside
-a string is cut out so the rest of a message survives; when a string still
-scans as a credential beside its field name (a field called `password`, or
-JSON inside a string whose quotes hid the match) the whole value is replaced.
-The scan is `common.evaluation.labelled`, the same one the
-`no_credential_in_evidence` grader uses, so what redaction removes and what
-the grader refuses are decided by one rule.
+credential replaced by `common.assets.REDACTED` (`[redacted]`), and the
+count. Three rules, in order: a field whose name matches `SECRET_FIELD`
+(`password`, `api_key`, `access_token`, `secret_value`) loses its whole value
+whatever its shape, nested mapping included; a `SECRET_PATTERN` match inside a
+string is cut out so the rest of a message survives; and a string that still
+scans as a credential beside its field name (JSON inside a message, whose
+quotes hide the match from a substitution) is replaced whole. Redacting the
+output again changes nothing and counts nothing. The scan is
+`common.evaluation.labelled`, the same one the `no_credential_in_evidence`
+grader uses, and a label that names a secret is inherited by everything
+beneath it, so what redaction removes and what the grader refuses are decided
+by one rule.
 
-`carries_credential(value)` is that scan applied to anything, with the marker
-removed before the pattern runs: `password: <anything>` would otherwise match
-its own replacement, and nothing could be stored under such a key. The
+`SECRET_PATTERN` itself spans the whole secret rather than locating its start:
+a quoted value with spaces is matched to its closing quote, and a private key
+block to its `END` line or the end of the text. It refuses to match
+`REDACTED`, so the one pattern detects a credential and reads its own
+replacement as clean, in the trace, the evidence grader, the model adapters'
+error redaction and the registry's rejection of embedded secrets alike.
+
+`carries_credential(value)` is that scan applied to anything. The
 `ExecutionTrace` validator runs it on the whole record and refuses a trace
 that carries credential material, whether built by the platform or assembled
-from stored parts; it also refuses events not numbered from zero without gaps
-and a record that does not open with the route and close with the outcome.
+from stored parts. It also refuses events not numbered from zero without gaps,
+a record that does not open with the route and close with the outcome, a
+`dispatched` list that does not match the dispatch events in order, `ran`,
+`approved` or `unapproved` naming an identity that was never dispatched, and
+an identity both approved and unapproved.
 
 `common.trace` depends on `common.evaluation`, never the reverse, and reads
 Bridge events through a `DispatchRecord` protocol so that `common` does not

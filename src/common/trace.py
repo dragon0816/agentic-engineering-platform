@@ -5,9 +5,9 @@ person or a later evaluation reads back afterwards, so it has three duties the
 evidence does not: it joins to the request that produced it, it keeps the
 order things happened in, and it is safe to write down. The last is the hard
 one. A failure message is the usual route by which a credential leaves a
-process, and this record is built so that it cannot carry one: everything
-stored passes through `redact`, and the contract refuses to exist around
-anything redaction missed.
+process, and this record is built so that it cannot carry one: the two fields
+that can hold free text pass through `redact`, and the contract refuses to
+exist around anything redaction missed, wherever the record came from.
 """
 
 from collections.abc import Iterable, Mapping, Sequence
@@ -15,12 +15,11 @@ from typing import Literal, Protocol, Self
 
 from pydantic import Field, model_validator
 
-from common.assets import SECRET_PATTERN, AssetIdentity
+from common.assets import REDACTED, SECRET_FIELD, SECRET_PATTERN, AssetIdentity
 from common.base import Contract, Symbol
 from common.evaluation import ObservedRun, Origin, labelled
 from common.execution import Failure, RouteDecision, RunStatus, TraceIdentifiers
 
-MARKER = "[redacted]"
 Kind = Literal["route", "dispatch", "outcome"]
 
 
@@ -39,27 +38,32 @@ class DispatchRecord(Protocol):
 
 
 def carries_credential(value: object, label: str = "") -> bool:
-    """The scan `no_credential_in_evidence` runs, applied to anything. A
-    redaction marker is the absence of a credential, so it is removed before
-    the pattern is applied: `password: <anything>` would otherwise match its
-    own replacement, and nothing could ever be stored under that key."""
-    return any(SECRET_PATTERN.search(line.replace(MARKER, "")) for line in labelled(value, label))
+    """The scan `no_credential_in_evidence` runs, applied to anything. The
+    pattern itself refuses to match `REDACTED`, so a record that has been
+    redacted reads clean without any special case here."""
+    return any(SECRET_PATTERN.search(line) for line in labelled(value, label))
 
 
 def redact(value: object, label: str = "") -> tuple[object, int]:
-    """A copy with every recognizable credential replaced by the marker, and
-    how many were replaced.
+    """A copy with every recognizable credential replaced by `REDACTED`, and
+    how many were replaced. Three rules, in this order.
 
-    A match inside a string is cut out of it, so the rest of a failure message
-    survives. When the string still scans as a credential beside its field
-    name, the whole value goes: either the field is named `password` and the
-    value alone is the secret, or the string holds JSON whose quotes hid the
-    match from the substitution, and in both cases there is nothing worth
-    keeping."""
+    A field named for a secret (`password`, `api_key`, ...) holds one whatever
+    the shape of its value, so the whole value goes, a nested mapping
+    included. A match inside a string is cut out of it, so the rest of a
+    failure message survives; `SECRET_PATTERN` spans the whole secret, quoted
+    value or private key block included. And a string that still scans as a
+    credential beside its field name is replaced whole, because JSON inside a
+    message hides the match from a substitution behind its quotes. Applying
+    `redact` to its own output changes nothing and counts nothing."""
+    if value is None or value == "" or value == REDACTED:
+        return value, 0
+    if label and SECRET_FIELD.match(label):
+        return REDACTED, 1
     if isinstance(value, str):
-        cleaned, count = SECRET_PATTERN.subn(MARKER, value)
+        cleaned, count = SECRET_PATTERN.subn(REDACTED, value)
         if carries_credential(cleaned, label):
-            return MARKER, count + 1
+            return REDACTED, count + 1
         return cleaned, count
     if isinstance(value, Mapping):
         total = 0
@@ -122,13 +126,31 @@ class ExecutionTrace(Contract):
     redactions: int = Field(default=0, ge=0, strict=True)
 
     @model_validator(mode="after")
-    def ordered_and_clean(self) -> Self:
+    def ordered_consistent_and_clean(self) -> Self:
+        """Held here and not only in `build`, so a trace assembled from stored
+        parts is held to the same rules as one the platform produced: the
+        events are in order and bracketed by the route and the outcome, the
+        identity lists describe the dispatches the events record, and no
+        field carries credential material."""
         if [event.sequence for event in self.events] != list(range(len(self.events))):
             raise ValueError("trace events are numbered from zero without gaps")
         if self.events[0].kind != "route" or self.events[-1].kind != "outcome":
             raise ValueError("a trace opens with the route and closes with the outcome")
-        # Validated here and not only in `build`, so a trace assembled from
-        # stored parts is held to the same rule as one the platform produced.
+        recorded = [event.asset for event in self.events if event.kind == "dispatch"]
+        if recorded != list(self.dispatched):
+            raise ValueError(
+                "the dispatch events and `dispatched` name the same identities in order"
+            )
+        dispatched = set(self.dispatched)
+        for name, items in (
+            ("ran", self.ran),
+            ("approved", self.approved),
+            ("unapproved", self.unapproved),
+        ):
+            if not dispatched.issuperset(items):
+                raise ValueError(f"`{name}` names an identity that was never dispatched")
+        if dispatched and set(self.approved) & set(self.unapproved):
+            raise ValueError("an identity was dispatched under an approval or without one")
         if carries_credential(self.model_dump(mode="json")):
             raise ValueError("a trace must not carry credential material")
         return self
@@ -172,30 +194,33 @@ class ExecutionTrace(Contract):
         )
         status, code = _outcome(observed, records)
         events.append(TraceEvent(sequence=len(events), kind="outcome", status=status, code=code))
-        raw = {
-            "trace": trace.model_dump(mode="json"),
-            "events": [event.model_dump(mode="json") for event in events],
-            "decision": decision.model_dump(mode="json") if decision is not None else None,
-            "origin": observed.origin,
-            "dispatched": [item.model_dump(mode="json") for item in observed.dispatched],
-            "ran": [item.model_dump(mode="json") for item in observed.ran],
-            "approved": [item.model_dump(mode="json") for item in approved],
-            "unapproved": [item.model_dump(mode="json") for item in observed.unapproved],
-            "status": observed.status,
-            "completed_steps": observed.completed_steps,
-            "declared_steps": observed.declared_steps,
-            "model_calls": observed.model_calls,
-            "duration_ms": observed.duration_ms,
-            "input_tokens": observed.input_tokens,
-            "output_tokens": observed.output_tokens,
-            "failure": (
-                observed.failure.model_dump(mode="json") if observed.failure is not None else None
-            ),
-        }
-        cleaned, redactions = redact(raw)
-        if not isinstance(cleaned, dict):  # pragma: no cover - a mapping redacts to a mapping
-            raise TypeError("redaction changed the shape of the record")
-        return cls.model_validate({**cleaned, "redactions": redactions})
+        # Only the route's reason and the failure's message are free text.
+        # Every other field is an identity, a Symbol or a number, and none of
+        # those can hold a match, so they are stored as they are; the
+        # validator's scan of the whole record stands behind that claim.
+        route, redactions = redact(decision.model_dump(mode="json") if decision else None)
+        failure, more = redact(
+            observed.failure.model_dump(mode="json") if observed.failure else None
+        )
+        return cls(
+            trace=trace,
+            events=tuple(events),
+            decision=RouteDecision.model_validate(route) if route is not None else None,
+            origin=observed.origin,
+            dispatched=observed.dispatched,
+            ran=observed.ran,
+            approved=tuple(approved),
+            unapproved=observed.unapproved,
+            status=observed.status,
+            completed_steps=observed.completed_steps,
+            declared_steps=observed.declared_steps,
+            model_calls=observed.model_calls,
+            duration_ms=observed.duration_ms,
+            input_tokens=observed.input_tokens,
+            output_tokens=observed.output_tokens,
+            failure=Failure.model_validate(failure) if failure is not None else None,
+            redactions=redactions + more,
+        )
 
 
 def _outcome(observed: ObservedRun, records: Sequence[DispatchRecord]) -> tuple[str, str | None]:

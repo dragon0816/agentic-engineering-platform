@@ -29,18 +29,32 @@ Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
   route and close with the outcome. Bridge events are read through a
   `DispatchRecord` protocol so `common` does not import `workflow`.
 - `common.evaluation.labelled` (was `_labelled`) is shared, so redaction and
-  the `no_credential_in_evidence` grader use one definition of a credential.
+  the `no_credential_in_evidence` grader use one definition of a credential;
+  a label that names a secret is inherited by everything beneath it.
+- `common.assets.SECRET_PATTERN` spans whole secrets (quoted values, private
+  key blocks to their `END` line) and refuses to match `REDACTED`, which is
+  defined beside it with `SECRET_FIELD`. The model adapters and the registry
+  redact and reject with the same pattern, so they gained the same reach.
+- PR #45 review (9 findings) applied. Three were real leaks with one root
+  cause: the pattern located the start of a secret and matched its own
+  marker, so a private key kept its body, a quoted password kept its tail,
+  and a mapping under `password` was never scanned. The validator now also
+  holds a stored trace to internal consistency (dispatch events match
+  `dispatched`; `ran`, `approved`, `unapproved` are subsets of it).
 - `tests/evaluation_runner.py`: `GatewayRunner.trace(case, observed)` and
   `RepositoryRunner.observe(case)`, which returns the observation and its
   trace and files every trace in `RepositoryRunner.traces`.
-- `tests/test_trace.py`, 12 tests: every repository trace joins its case's
+- `tests/test_trace.py`, 16 tests: every repository trace joins its case's
   request, is ordered and scans clean; the scenario trace shows both
   dispatches in Bridge order under approval; a refused request traces as
   `unresolved` with its code; the agent trace records model usage; a bearer
-  token in a failure arrives redacted and counted; a JSON-shaped credential is
-  redacted; the marker is not itself a credential; a trace cannot be built
-  around credential material; a foreign event cannot join; out-of-order or
-  out-of-shape events are refused.
+  token in a failure arrives redacted and counted; a private key is removed
+  whole; a quoted credential with a space is removed whole; a JSON-shaped
+  credential is redacted; a secret under a credential key goes whatever its
+  shape; redaction is idempotent; the marker is not itself a credential; a
+  trace cannot be built around credential material; a stored trace cannot
+  claim more than its dispatches; a foreign event cannot join; out-of-order
+  or out-of-shape events are refused.
 - Slice 5 requirements and the "Phase 6 exit criteria" section in
   `docs/phases/PHASE_6_EVALUATION.md`; PR #43 flipped to `done` and PR #44
   recorded in `docs/TASKS.md`.
@@ -63,10 +77,11 @@ which source components are deprecated and what parity means.
 
 - The trace is built from evidence the platform already records, never from
   a new logging path, so it cannot disagree with what the graders read.
-- Redaction and the credential grader share one rule (`labelled`). The
-  marker is removed before the validator's scan because `SECRET_PATTERN`
-  matches `password: [redacted]`; a string is replaced whole when it still
-  scans as a credential beside its field name.
+- Redaction and the credential grader share one rule (`labelled` over
+  `SECRET_PATTERN`), and the pattern is the repository's single definition
+  of a credential: it spans the whole secret and refuses its own marker, so
+  there is no special case for the marker anywhere. A string is replaced
+  whole when it still scans as a credential beside its field name.
 - `approved` is recorded beside `unapproved`: the Roadmap asks for approvals,
   and "who allowed that" needs the allowed dispatches too.
 
@@ -76,7 +91,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 673 passed, 3 skipped (link privileges)
+# PASS: 677 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

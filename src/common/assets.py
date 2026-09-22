@@ -14,11 +14,25 @@ SEMVER = re.compile(
     r"(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?",
     re.ASCII,
 )
+SECRET_KEYS = r"password|api[_-]?key|access[_-]?token|secret[_-]?value"
+# What stands where a credential was. Named here because the pattern below
+# must know it: a redaction is not itself a credential.
+REDACTED = "[redacted]"
+# What credential material looks like in text. Each alternative spans the
+# whole secret, a quoted value with spaces in it or a private key block to
+# its END line or the end of the text, so that a substitution removes all of
+# it and not only its first word. None of them matches `REDACTED`, so the
+# same pattern detects a credential and refuses to see one in its own
+# replacement. `models.wire`, `common.evaluation` and `common.trace` all
+# detect and redact with this one definition.
 SECRET_PATTERN = re.compile(
-    r"(?:password|api[_-]?key|access[_-]?token|secret[_-]?value)\s*[=:]\s*\S+"
-    r"|\bBearer\s+\S+|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----",
+    rf"(?:{SECRET_KEYS})\s*[=:]\s*(?!\[redacted\])(?:\"[^\"]*\"|'[^']*'|\S+)"
+    r"|\bBearer\s+(?!\[redacted\])\S+"
+    r"|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----[\s\S]*?(?:-----END (?:[A-Z]+ )?PRIVATE KEY-----|\Z)",
     re.IGNORECASE,
 )
+# A field named for a secret holds one whatever the shape of its value.
+SECRET_FIELD = re.compile(rf"^(?:{SECRET_KEYS})$", re.IGNORECASE)
 
 
 def reject_embedded_secrets(value: object) -> None:

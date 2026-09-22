@@ -61,13 +61,30 @@ Redaction is **by construction, then verified**: everything stored passes
 through `redact`, and the contract's validator scans the whole record and
 refuses one that still carries credential material. Both use the same rule as
 `no_credential_in_evidence`, so there is one definition of "a credential" in
-the repository. Two consequences were found while writing the tests and are
-kept as rules. The marker is removed before the validator's scan, because
-`SECRET_PATTERN` is written as `password: <anything>` and matched its own
-replacement, which would have made a trace for a run that leaked nothing
-refuse to exist. And a string is replaced whole when it still scans as a
-credential beside its field name, because a JSON document inside a message
-hides the match from a substitution behind its quotes.
+the repository. Review of the first version found that rule insufficient in
+three ways, all the same root cause: `SECRET_PATTERN` was written to *detect*
+a credential, so it located the start of one and stopped at the first space,
+and it matched its own replacement (`password: [redacted]`). A private key
+lost only its header and kept its body; a quoted password with a space kept
+its tail; and a mapping under a `password` key relabelled its children with
+their own innocent names, so nothing scanned. The pattern now spans the whole
+secret (a quoted value to its closing quote, a key block to its `END` line or
+the end of the text) and refuses to match the marker, which makes redaction
+idempotent and removes the special case that had stripped the marker before
+scanning. A field named for a secret loses its whole value whatever its
+shape, and the shared `labelled` scan inherits such a label downward. The
+pattern is defined once in `common.assets`, so the model adapters' error
+redaction and the registry's rejection of embedded secrets gained the same
+reach. A string is still replaced whole when it scans as a credential beside
+its field name after substitution, because JSON inside a message hides the
+match behind its quotes.
+
+The validator also holds a stored trace to internal consistency: the dispatch
+events and `dispatched` name the same identities in order, `ran`, `approved`
+and `unapproved` are subsets of `dispatched`, and nothing is both approved and
+unapproved. Review pointed out that "approved" is defined as a dispatched
+identity, and a host-assembled record could otherwise name an approval for
+something never dispatched.
 
 The record lists `approved` as well as `unapproved`. The Roadmap asks for
 approvals in the trace, and a reader asking "who allowed that" needs the

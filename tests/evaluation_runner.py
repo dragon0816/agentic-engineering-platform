@@ -301,11 +301,13 @@ class GatewayRunner:
         self.installed = InstalledCapabilities()
         self.bridge = BridgeExecutor(self.installed)
         self.workflows = InstalledWorkflows()
+        self.approved: tuple[AssetIdentity, ...] = ()
 
     def _build(self, model: ModelClient | None = None, alias: str = ROUTING_ALIAS) -> Gateway:
         self.model = CountingModel()
         self.handler = RecordingHandler()
         self.publisher = RecordingHandler()
+        self.approved = ()
         skills = SkillRegistry()
         for name in SKILL_FILES:
             for data in json.loads((ROOT / "skills" / name).read_text(encoding="utf-8")):
@@ -355,34 +357,41 @@ class GatewayRunner:
         manifest = self.workflows.get(decision.target)
         return len(manifest.steps) if manifest is not None else 0
 
-    def _unapproved(self) -> tuple[AssetIdentity, ...]:
-        """Irreversible capabilities the request tried to run with no
-        approval behind them.
+    def _approvals(self) -> tuple[tuple[AssetIdentity, ...], tuple[AssetIdentity, ...]]:
+        """What the request tried to run, split by whether an approval stood
+        behind it: `(approved, unapproved)`, from one read of the grants and
+        one pass over the events.
 
-        Two choices here, both found by review. Only irreversible ones count,
-        or a low-risk capability that legitimately needs no approval reads as
-        a violation. And every *dispatch* counts, not only what ran: the
-        policy refuses an unapproved high-risk dispatch today, so reading
-        only what ran would make this unable to fail while the platform works
-        and silent about the moment it stops."""
+        `unapproved` makes two choices, both found by review. Only
+        irreversible capabilities count, or a low-risk capability that
+        legitimately needs no approval reads as a violation. And every
+        *dispatch* counts, not only what ran: the policy refuses an unapproved
+        high-risk dispatch today, so reading only what ran would make the
+        grader unable to fail while the platform works and silent about the
+        moment it stops. `approved` is every dispatch a grant with an approval
+        reference stood behind, whatever its side effect, because the trace
+        records who allowed what."""
         granted = approvals()
-        seen: list[AssetIdentity] = []
+        approved: list[AssetIdentity] = []
+        unapproved: list[AssetIdentity] = []
         for event in self.bridge.events:
+            if granted.get(event.asset):
+                if event.asset not in approved:
+                    approved.append(event.asset)
+                continue
             binding = self.installed.get(event.asset)
             if binding is None or binding.spec.side_effect != "external_side_effect":
                 continue
-            if not granted.get(event.asset) and event.asset not in seen:
-                seen.append(event.asset)
-        return tuple(seen)
+            if event.asset not in unapproved:
+                unapproved.append(event.asset)
+        return tuple(approved), tuple(unapproved)
 
     def trace(self, case: EvaluationCase, observed: ObservedRun) -> ExecutionTrace:
         """The record of the run just made: joined to the case's request, and
-        built from the same Bridge events the observation was read from, so
-        the two cannot disagree about what was dispatched."""
-        granted = approvals()
-        approved = tuple(dict.fromkeys(i for i in observed.dispatched if granted.get(i)))
+        built from the same Bridge events and the same approvals the
+        observation was read from, so the two cannot disagree."""
         return ExecutionTrace.build(
-            case.request.trace, observed, self.bridge.events, approved=approved
+            case.request.trace, observed, self.bridge.events, approved=self.approved
         )
 
     def run(
@@ -395,6 +404,7 @@ class GatewayRunner:
         gateway = self._build(model, alias)
         result = asyncio.run(gateway.handle(case.request))
         workflow = result.workflow
+        self.approved, unapproved = self._approvals()
         return ObservedRun(
             decision=result.routing.decision,
             origin=result.routing.origin,
@@ -406,7 +416,7 @@ class GatewayRunner:
             status=workflow.run.status if workflow is not None else None,
             completed_steps=workflow.run.completed_steps if workflow is not None else 0,
             declared_steps=self._declared_steps(result.routing.decision),
-            unapproved=self._unapproved(),
+            unapproved=unapproved,
             failure=result.routing.failure,
         )
 
