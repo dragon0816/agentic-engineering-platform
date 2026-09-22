@@ -9,7 +9,7 @@ Before modifying code:
 2. Read `AGENTS.md` for shared repository engineering rules.
 3. Read `docs/ROADMAP.md`.
 4. Read `docs/TASKS.md` for what is done and what is next.
-5. Read the active phase specification, currently `docs/phases/PHASE_6_EVALUATION.md`.
+5. Read the most recent phase specification, `docs/phases/PHASE_6_EVALUATION.md`. Phase 6 is complete and no phase is active; Phase 7 waits on the pending owner decisions in `docs/TASKS.md`.
 6. Read `HANDOFF.md`.
 7. Inspect `git status`, recent commits and the current diff.
 8. Use the applicable procedures under `.agents/skills/`.
@@ -18,7 +18,7 @@ Before modifying code:
 
 `docs/ARCHITECTURE.md` is the architectural source of truth. Do not redesign the architecture during an implementation task unless the task explicitly requests an architecture change.
 
-`docs/phases/PHASE_6_EVALUATION.md` defines the current implementation scope. `docs/TASKS.md` is the progress record: completed slices are kept there, never deleted, and every slice adds a row rather than replacing one. `HANDOFF.md` records resumable execution state, not architecture and not progress; it is rewritten each time and carries only where the current work stopped.
+No phase specification is active: Phase 6 is met (`docs/phases/PHASE_6_EVALUATION.md`) and Phase 7 is not specified. Do not write `docs/phases/PHASE_7_*.md` until the pending owner decisions in `docs/TASKS.md` are answered; until then the scope of any task is what the owner asks for, plus the open items carried forward in `docs/TASKS.md`. `docs/TASKS.md` is the progress record: completed slices are kept there, never deleted, and every slice adds a row rather than replacing one. `HANDOFF.md` records resumable execution state, not architecture and not progress; it is rewritten each time and carries only where the current work stopped.
 
 ## Required workflow
 

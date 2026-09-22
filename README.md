@@ -94,6 +94,15 @@ behind an injected transport whose default is the standard library, so the
 runtime install is still `pydantic` alone and no test opens a socket.
 `models.proof` is a complete inert example a host can copy.
 
+Phase 6 (evaluation, policy and observability, `src/common/evaluation.py` and
+`src/common/trace.py`) is complete (`docs/phases/PHASE_6_EVALUATION.md`). The
+cases under `evaluation/cases/` are graded by what they declare, every grader
+is proven to reject, every routed case runs through a real `Gateway` where
+execution can be seen, and every run leaves an `ExecutionTrace` that is
+redacted by construction. The suite runs on every CI push with no model,
+network or host process; the criteria-by-criteria record is in
+[the Roadmap](docs/ROADMAP.md#phase-6--evaluation-policy-and-observability).
+
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not

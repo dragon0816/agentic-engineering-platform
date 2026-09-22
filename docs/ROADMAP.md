@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–5 complete; Phase 6 — Evaluation, policy and observability active
+Status: Phases 1–6 complete; Phase 7 — End-to-end migration and deprecation not started (its specification waits on the pending owner decisions listed in `docs/TASKS.md`)
 
 ## Objective
 
@@ -126,6 +126,8 @@ Forbidden:
 Capture route, plan, tool/workflow calls, approvals, duration, model usage and final status with secret redaction.
 
 Exit criteria: evaluation suite runs in CI without production side effects and blocks known regressions.
+
+Met 2026-09-22 in five slices (`docs/phases/PHASE_6_EVALUATION.md`, decisions in `docs/PHASE_6_MIGRATION.md`): a case's declared assertions decide whether it passed and an unrecognized assertion fails it; every grader is proven to reject; every routed case is exercised through a real Gateway where execution could be seen, and a check that could not have seen its evidence does not pass; the scenario above is a case whose four prohibitions are checked as evidence of what happened; the `agent` category is routed by a model through the real Phase 5 adapter and compared across aliases with repetition, reported as skipped rather than passed when no alias is configured; and every run leaves an `ExecutionTrace` that joins to its request, keeps the Bridge's order, and is redacted by construction and refused if a credential remains. The suite runs on every CI push with no model, network or host process. The source's coding benchmark was deliberately not migrated: it measures a model, needs a live endpoint and executes generated code, which the exit criterion rules out. Codex and Claude Code were excluded from this phase entirely by the owner.
 
 ## Phase 7 — End-to-end migration and deprecation
 
