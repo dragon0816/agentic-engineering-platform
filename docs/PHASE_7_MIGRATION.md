@@ -329,6 +329,18 @@ never could, but it does not make them unforgeable between people who already
 share that account. Narrowing that needs either per-member Windows accounts on
 shared machines, or a proof the Bridge cannot replay from a file.
 
+Review of the first version found two lifecycle holes and two missing caller
+checks. A withdrawn binding was written as a tombstone that `bind` then read
+as a duplicate, so a member taken off a device could never be put back on it;
+and an expired token was never marked spent, so it both blocked its pair from
+being issued another and was listed as if it still worked. Issuing and
+revoking took no requester, although every other change to a device's records
+does, so any caller could mint a secret that authenticates as any admitted
+member; both now take the same check as binding. The review also found the
+specification claiming a test for a behaviour that was not expressible, since
+an authentication carried no device: it carries one now, which the transport
+slice needs anyway.
+
 Rollback removes `src/control_plane/identity.py`, the token contracts in
 `common.identity`, `InMemoryEnrollmentRegistry.unbind` and their tests;
 enrollment, entitlement and the member decisions keep working.

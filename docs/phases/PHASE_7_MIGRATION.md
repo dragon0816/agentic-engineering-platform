@@ -585,9 +585,12 @@ choose for their devices.
    outside the Bridge: the grant plus the value, returned once by issuing and
    deliberately not a `Contract`, because a contract is serializable,
    validated and loggable, which is everything a secret must not be.
-3. `control_plane.identity.InMemoryAccessTokens.issue(actor, bridge_id)`
-   issues only for a member the platform currently admits on that device, so a
-   token cannot exist without the binding that justifies it. It generates the
+3. `control_plane.identity.InMemoryAccessTokens.issue(requested_by, actor,
+   bridge_id)` issues only for a member the platform currently admits on that
+   device, so a token cannot exist without the binding that justifies it, and
+   only for a caller who is that member or may administer the device: minting
+   a secret that authenticates as somebody is no smaller an act than binding
+   them, and takes the same check. Revoking takes it too. It generates the
    secret itself with the standard library's `secrets`; a caller-supplied one
    is refused below a minimum length, because the verification below is sound
    only for a value with real entropy. One pair holds one active token.
@@ -601,11 +604,18 @@ choose for their devices.
    `token_revoked`, `token_expired`, or `binding_withdrawn` when the platform
    no longer admits that member on that device, which covers a revoked
    binding, a disabled member and a disabled device alike.
-6. A successful authentication produces an `AuthenticatedActor` whose session
-   ends no later than the token does. The `method` names the token so the
-   evidence says how the decision was made.
-7. `InMemoryEnrollmentRegistry.unbind` withdraws a binding, and
-   `revoke_for(actor, bridge_id)` revokes the tokens that binding justified.
+6. A successful authentication produces an `AuthenticatedActor` naming the
+   member and the machine the token was issued for, whose session ends no
+   later than the token does. The `method` names the token so the evidence
+   says how the decision was made. An entry point where somebody signs in
+   directly has no machine, so that stays absent rather than invented.
+7. A token that has expired is spent: it stops being listed as one the device
+   can be used with, and stops standing in the way of issuing another for that
+   pair. A withdrawn binding is history in the same way, so a member taken off
+   a machine can be put back on it.
+8. `InMemoryEnrollmentRegistry.unbind` withdraws a binding, and
+   `revoke_for(requested_by, actor, bridge_id)` revokes the tokens that
+   binding justified.
    Revoking means a person has to be at that keyboard again, which is what
    makes revoking mean something.
 
@@ -614,8 +624,11 @@ member; two members on one machine holding two tokens with different secrets;
 the grant never carrying the secret and the issued token not being a contract;
 authentication producing an identity that the entitlement registry accepts; an
 unknown token and a wrong secret answering identically; a revoked, expired and
-withdrawn token each naming its own reason only after the secret matched; a
-token of one member not authenticating as another and a token of one machine
-not authenticating on another; a session ending no later than its token; a
-supplied secret refused when it is too short; and unbinding revoking the
-tokens it justified.
+withdrawn token each naming its own reason only after the secret matched; an
+identity naming the machine its token was issued for; a token id that is not
+even the shape of one answering like any other unknown token; issuing and
+revoking refused for a caller who is neither the member nor an administrator
+of that device; a session ending no later than its token; a supplied secret
+refused when it is too short; a spent token no longer listed and no longer in
+the way of a new one; and unbinding revoking the tokens it justified while
+leaving the member able to be bound again.

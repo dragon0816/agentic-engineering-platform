@@ -35,6 +35,10 @@ class AuthenticatedActor(RegistryContract):
     """
 
     actor: Symbol
+    # The device this authentication was made on, when it was made with that
+    # device's token. An entry point where a person signs in directly has no
+    # device, so it stays absent rather than being invented.
+    bridge_id: Symbol | None = None
     method: Symbol
     authenticated_at: AwareDatetime
     expires_at: AwareDatetime

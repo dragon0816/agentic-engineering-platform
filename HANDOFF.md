@@ -40,7 +40,12 @@ authorization is still open.
   `grants_for`, `revoke`, `revoke_for`.
 - `InMemoryEnrollmentRegistry.unbind`, so a binding can be withdrawn and the
   tokens it justified revoked with it.
-- `tests/test_access_tokens.py`, 9 tests, as listed at the end of the slice
+- PR #62 review (6 findings) applied: a withdrawn binding barred rebinding;
+  an expired token blocked reissue and was listed as live; issuing and
+  revoking took no requester; a malformed token id raised instead of being
+  refused like any unknown one; and an authentication now names the machine
+  its token was issued for, which the specification had claimed a test for.
+- `tests/test_access_tokens.py`, 13 tests, as listed at the end of the slice
   2b requirements section, including the whole chain: a secret becomes an
   identity, an identity decides entitlement, entitlement allows a decision.
 
@@ -81,7 +86,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 783 passed, 3 skipped (link privileges)
+# PASS: 787 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

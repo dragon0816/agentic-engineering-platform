@@ -44,6 +44,7 @@ DEFAULT_SESSION = timedelta(hours=1)
 
 AccessErrorCode = Literal[
     "actor_not_admitted",
+    "token_forbidden",
     "duplicate_token",
     "weak_secret",
     "authentication_failed",
@@ -78,8 +79,22 @@ class InMemoryAccessTokens:
     def _admitted(self, actor: str, bridge_id: str) -> bool:
         return self.enrollment.admit(BridgeExecutionSubject(actor=actor, bridge_id=bridge_id))
 
+    def _permitted(self, requested_by: str, actor: str, bridge_id: str) -> None:
+        """Who may act on a member's token for a device: that member, at the
+        keyboard getting their own token, or somebody who may administer the
+        device. The same rule the enrollment registry uses for a binding,
+        because a token is what a binding justifies."""
+        if requested_by == actor:
+            return
+        if not self.enrollment.may_administer(requested_by, bridge_id):
+            raise AccessError("token_forbidden")
+
+    def _usable(self, grant: BridgeAccessGrant, now: datetime) -> bool:
+        return grant.status == "active" and not grant.expired_at(now)
+
     def issue(
         self,
+        requested_by: Symbol,
         actor: Symbol,
         bridge_id: Symbol,
         *,
@@ -90,16 +105,21 @@ class InMemoryAccessTokens:
         """Issue the token that binding this member to this machine justifies.
 
         A token cannot exist without a binding the platform still honours, so
-        this refuses unless the member is admitted on that device right now.
+        this refuses unless the member is admitted on that device right now,
+        and unless the caller is that member or may administer the device.
         """
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
         who = TypeAdapter(Symbol).validate_python(actor)
         device = TypeAdapter(Symbol).validate_python(bridge_id)
+        self._permitted(requester, who, device)
         if not self._admitted(who, device):
             raise AccessError("actor_not_admitted")
         if any(
-            item.actor == who and item.bridge_id == device and item.status == "active"
+            item.actor == who and item.bridge_id == device and self._usable(item, issued_at)
             for item in self._grants.values()
         ):
+            # Only a token that still works stands in the way. One that has
+            # expired is spent, and a pair may be given another.
             raise AccessError("duplicate_token")
         value = secret if secret is not None else secrets.token_urlsafe(SECRET_BYTES)
         if len(value) < MIN_SECRET_CHARS:
@@ -130,9 +150,11 @@ class InMemoryAccessTokens:
         same either way: somebody who does not hold a secret cannot learn
         that a token exists.
         """
-        key = TypeAdapter(Symbol).validate_python(token_id)
         moment = now if now is not None else datetime.now(UTC)
-        grant = self._grants.get(key)
+        # A token id that is not even the shape of one is simply not a token
+        # anybody holds, and gets the same answer as one that does not exist:
+        # refusing it differently would be a way to ask what exists.
+        grant = self._grants.get(token_id) if isinstance(token_id, str) else None
         expected = grant.fingerprint if grant is not None else fingerprint("")
         if not hmac.compare_digest(expected, fingerprint(secret)) or grant is None:
             raise AccessError("authentication_failed")
@@ -153,6 +175,7 @@ class InMemoryAccessTokens:
             ends = grant.expires_at
         return AuthenticatedActor(
             actor=grant.actor,
+            bridge_id=grant.bridge_id,
             method=ACCESS_TOKEN_METHOD,
             authenticated_at=moment,
             expires_at=ends,
@@ -165,32 +188,44 @@ class InMemoryAccessTokens:
             raise AccessError("token_missing")
         return item.model_copy(deep=True)
 
-    def grants_for(self, bridge_id: Symbol) -> tuple[BridgeAccessGrant, ...]:
-        """Which tokens a device holds, for an operator to look at. There is
-        no secret in any of them."""
+    def grants_for(
+        self, bridge_id: Symbol, *, now: datetime | None = None
+    ) -> tuple[BridgeAccessGrant, ...]:
+        """Which tokens a device can currently be used with, for an operator
+        to look at. An expired one is spent and is not listed as if it were
+        live. There is no secret in any of them."""
         key = TypeAdapter(Symbol).validate_python(bridge_id)
+        moment = now if now is not None else datetime.now(UTC)
         return tuple(
             item.model_copy(deep=True)
             for item in sorted(self._grants.values(), key=lambda entry: entry.token_id)
-            if item.bridge_id == key and item.status == "active"
+            if item.bridge_id == key and self._usable(item, moment)
         )
 
-    def revoke(self, token_id: Symbol) -> BridgeAccessGrant:
+    def revoke(self, requested_by: Symbol, token_id: Symbol) -> BridgeAccessGrant:
+        """Take back one token. Its own member may, and so may somebody who
+        administers the device it belongs to; nobody else."""
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
         key = TypeAdapter(Symbol).validate_python(token_id)
         item = self._grants.get(key)
         if item is None:
             raise AccessError("token_missing")
+        self._permitted(requester, item.actor, item.bridge_id)
         revoked = BridgeAccessGrant.model_validate({**item.model_dump(), "status": "revoked"})
         self._grants[key] = revoked
         return revoked.model_copy(deep=True)
 
-    def revoke_for(self, actor: Symbol, bridge_id: Symbol) -> tuple[BridgeAccessGrant, ...]:
+    def revoke_for(
+        self, requested_by: Symbol, actor: Symbol, bridge_id: Symbol
+    ) -> tuple[BridgeAccessGrant, ...]:
         """Take back the tokens a binding justified. Withdrawing the binding
         is what should make them stop working; this makes them stop being."""
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
         who = TypeAdapter(Symbol).validate_python(actor)
         device = TypeAdapter(Symbol).validate_python(bridge_id)
+        self._permitted(requester, who, device)
         return tuple(
-            self.revoke(item.token_id)
+            self.revoke(requester, item.token_id)
             for item in sorted(self._grants.values(), key=lambda entry: entry.token_id)
             if item.actor == who and item.bridge_id == device and item.status == "active"
         )

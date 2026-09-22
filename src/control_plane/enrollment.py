@@ -152,6 +152,15 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("device_missing")
         return _copy(item)
 
+    def may_administer(self, requested_by: Symbol, bridge_id: Symbol) -> bool:
+        """Whether this actor may change what happens on that device: a
+        platform administrator, the member who registered it, or a bound
+        device administrator. Asked by anything that acts on a device's
+        records, so one rule answers for all of them."""
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
+        device = self._devices.get(TypeAdapter(Symbol).validate_python(bridge_id))
+        return device is not None and self._may_administer(requester, device)
+
     def _may_administer(self, requested_by: str, device: BridgeDevice) -> bool:
         if requested_by in self._administrators:
             return True
@@ -181,8 +190,11 @@ class InMemoryEnrollmentRegistry:
         if user.status != "active":
             raise EnrollmentError("user_disabled")
         key = (item.bridge_id, item.actor)
-        if key in self._bindings:
+        existing = self._bindings.get(key)
+        if existing is not None and existing.status == "active":
             raise EnrollmentError("duplicate_binding")
+        # A withdrawn binding is history, not a bar: somebody who was taken
+        # off a device can be put back on it.
         active = [
             current
             for current in self._bindings.values()

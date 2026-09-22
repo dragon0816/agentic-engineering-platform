@@ -95,7 +95,10 @@ def platform() -> tuple[InMemoryEnrollmentRegistry, InMemoryAccessTokens]:
 def issued(
     tokens: InMemoryAccessTokens, actor: str, bridge_id: str, **changes: Any
 ) -> IssuedAccessToken:
-    return tokens.issue(actor, bridge_id, **{"issued_at": NOW, **changes})
+    """A member asking for their own token, which is the flow the source had:
+    a person at that keyboard exchanging their sign-in for a machine token."""
+    requester = changes.pop("requested_by", actor)
+    return tokens.issue(requester, actor, bridge_id, **{"issued_at": NOW, **changes})
 
 
 def test_a_token_is_issued_only_for_a_member_the_platform_admits() -> None:
@@ -172,7 +175,7 @@ def test_the_holder_of_a_real_secret_is_told_what_is_wrong() -> None:
     )
     with pytest.raises(AccessError, match="token_expired"):
         tokens.authenticate(ending.grant.token_id, ending.secret, now=NOW + timedelta(hours=2))
-    tokens.revoke(token.grant.token_id)
+    tokens.revoke("engineer", token.grant.token_id)
     with pytest.raises(AccessError, match="token_revoked"):
         tokens.authenticate(token.grant.token_id, LONG_ENOUGH, now=NOW)
     # A member the platform no longer admits on that machine, whether the
@@ -183,6 +186,67 @@ def test_the_holder_of_a_real_secret_is_told_what_is_wrong() -> None:
     # And the wrong secret still says nothing about any of that.
     with pytest.raises(AccessError, match="authentication_failed"):
         tokens.authenticate(token.grant.token_id, "another-secret-that-is-long-enough", now=NOW)
+
+
+def test_only_the_member_or_a_device_administrator_may_act_on_a_token() -> None:
+    """Every other change to a device's records takes a requester and checks
+    it; minting a secret that authenticates as somebody is no different."""
+    _, tokens = platform()
+    with pytest.raises(AccessError, match="token_forbidden"):
+        issued(tokens, "tester", "bridge-shared", requested_by="stranger")
+    # The member who registered the device administers it, so they may.
+    theirs = issued(tokens, "tester", "bridge-shared", requested_by="engineer")
+    assert theirs.grant.actor == "tester"
+    with pytest.raises(AccessError, match="token_forbidden"):
+        tokens.revoke("stranger", theirs.grant.token_id)
+    with pytest.raises(AccessError, match="token_forbidden"):
+        tokens.revoke_for("stranger", "tester", "bridge-shared")
+    # An operator on a shared machine administers nothing, so they may not
+    # reach another member's token, only their own.
+    mine = issued(tokens, "engineer", "bridge-shared")
+    with pytest.raises(AccessError, match="token_forbidden"):
+        tokens.revoke("tester", mine.grant.token_id)
+    assert tokens.revoke("tester", theirs.grant.token_id).status == "revoked"
+
+
+def test_a_token_id_that_is_not_one_gets_the_same_answer_as_any_other() -> None:
+    _, tokens = platform()
+    for shape in ("", "not a symbol!", "..", 17, None):
+        with pytest.raises(AccessError, match="authentication_failed"):
+            tokens.authenticate(shape, LONG_ENOUGH, now=NOW)  # type: ignore[arg-type]
+
+
+def test_an_authentication_names_the_machine_it_was_made_on() -> None:
+    """A token is issued for one member on one machine, so the identity it
+    produces says which machine. An entry point where somebody signs in
+    directly has no device and leaves it absent."""
+    _, tokens = platform()
+    token = issued(tokens, "engineer", "bridge-shared")
+    identity = tokens.authenticate(token.grant.token_id, token.secret, now=NOW)
+    assert identity.bridge_id == "bridge-shared" and identity.actor == "engineer"
+    company = issued(tokens, "engineer", "bridge-company")
+    assert (
+        tokens.authenticate(company.grant.token_id, company.secret, now=NOW).bridge_id
+        == "bridge-company"
+    )
+
+
+def test_a_spent_token_stops_standing_in_the_way_of_a_new_one() -> None:
+    _, tokens = platform()
+    ending = issued(tokens, "engineer", "bridge-company", expires_at=NOW + timedelta(hours=1))
+    later = NOW + timedelta(days=1)
+    # While it works, one pair holds one token.
+    with pytest.raises(AccessError, match="duplicate_token"):
+        issued(tokens, "engineer", "bridge-company")
+    assert tokens.grants_for("bridge-company", now=NOW)
+    # Once it has expired it is spent: it is not listed as live, and the pair
+    # may be given another.
+    assert tokens.grants_for("bridge-company", now=later) == ()
+    replacement = issued(tokens, "engineer", "bridge-company", issued_at=later)
+    assert replacement.grant.token_id != ending.grant.token_id
+    assert tokens.authenticate(replacement.grant.token_id, replacement.secret, now=later)
+    with pytest.raises(AccessError, match="token_expired"):
+        tokens.authenticate(ending.grant.token_id, ending.secret, now=later)
 
 
 def test_a_session_ends_no_later_than_its_token() -> None:
@@ -204,7 +268,7 @@ def test_unbinding_revokes_what_the_binding_justified() -> None:
     shared = issued(tokens, "tester", "bridge-shared", secret=LONG_ENOUGH)
     company = issued(tokens, "engineer", "bridge-company", secret=LONG_ENOUGH + "-mine")
     enrollment.unbind("engineer", "bridge-shared", "tester")
-    assert tokens.revoke_for("tester", "bridge-shared")[0].status == "revoked"
+    assert tokens.revoke_for("engineer", "tester", "bridge-shared")[0].status == "revoked"
     with pytest.raises(AccessError, match="token_revoked"):
         tokens.authenticate(shared.grant.token_id, shared.secret, now=NOW)
     assert tokens.grants_for("bridge-shared") == ()
@@ -215,6 +279,14 @@ def test_unbinding_revokes_what_the_binding_justified() -> None:
         enrollment.unbind("engineer", "bridge-shared", "tester")
     with pytest.raises(EnrollmentError, match="binding_forbidden"):
         enrollment.unbind("tester", "bridge-company", "engineer")
+    # Being taken off a machine is not a bar to being put back on it, and the
+    # member gets a new token when they are.
+    enrollment.bind(
+        "engineer", BridgeBinding(bridge_id="bridge-shared", actor="tester", role="operator")
+    )
+    again = issued(tokens, "tester", "bridge-shared")
+    assert tokens.authenticate(again.grant.token_id, again.secret, now=NOW).actor == "tester"
+    assert again.secret != shared.secret
 
 
 def test_a_token_becomes_the_identity_that_decides_what_a_member_may_use() -> None:

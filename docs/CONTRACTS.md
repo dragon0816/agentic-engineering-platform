@@ -1500,10 +1500,12 @@ contract is serializable, validated and loggable, which is everything a secret
 must not be. Its `repr` names the token and redacts the value, and it has no
 other attributes to put one in.
 
-`control_plane.identity.InMemoryAccessTokens.issue(actor, bridge_id,
-issued_at=, expires_at=, secret=)` issues only for a member the platform
-currently admits on that device (`actor_not_admitted`), one active token per
-pair (`duplicate_token`). It generates the secret with `secrets.token_urlsafe`
+`control_plane.identity.InMemoryAccessTokens.issue(requested_by, actor,
+bridge_id, issued_at=, expires_at=, secret=)` issues only for a member the
+platform currently admits on that device (`actor_not_admitted`), only for a
+caller who is that member or may administer the device (`token_forbidden`),
+and one usable token per pair (`duplicate_token`); a token that has expired is
+spent and no longer in the way. It generates the secret with `secrets.token_urlsafe`
 and refuses a supplied one below 32 characters (`weak_secret`), because the
 fingerprint comparison is sound only for a value nobody can guess;
 `fingerprint` is a plain SHA-256, which is enough for 32 random bytes and
@@ -1516,12 +1518,20 @@ unknown `token_id` and a wrong secret are both `authentication_failed`, so
 somebody who holds neither cannot learn that a token exists. Once the secret
 matched, the holder is told which of `token_revoked`, `token_expired` or
 `binding_withdrawn` applies; the last covers a withdrawn binding, a disabled
-member and a disabled device alike. Success is an `AuthenticatedActor` whose
-`method` is `bridge-access-token` and whose session ends no later than the
-token does.
+member and a disabled device alike. A `token_id` that is not even the shape of
+one is answered like any other unknown token rather than raising. Success is an
+`AuthenticatedActor` naming the member and the `bridge_id` the token was issued
+for, whose `method` is `bridge-access-token` and whose session ends no later
+than the token does; an entry point where somebody signs in directly leaves
+the device absent.
 
-`grants_for(bridge_id)` lists a device's active tokens for an operator, with
-no secret in any of them. `revoke(token_id)` and `revoke_for(actor,
-bridge_id)` take them back, and `InMemoryEnrollmentRegistry.unbind` withdraws
-the binding that justified them (`binding_missing` when there is none,
-`binding_forbidden` for a caller who may not administer that device).
+`grants_for(bridge_id, now=)` lists the tokens a device can currently be used
+with, excluding the spent ones, with no secret in any of them.
+`revoke(requested_by, token_id)` and `revoke_for(requested_by, actor,
+bridge_id)` take them back under the same caller rule as issuing, and
+`InMemoryEnrollmentRegistry.unbind` withdraws the binding that justified them
+(`binding_missing` when there is none, `binding_forbidden` for a caller who may
+not administer that device). A withdrawn binding is history rather than a bar:
+`bind` refuses only a binding that is still active, so a member taken off a
+device can be put back on it. `may_administer(actor, bridge_id)` is that one
+rule, asked by everything that acts on a device's records.
