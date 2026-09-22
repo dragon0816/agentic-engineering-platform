@@ -1,129 +1,130 @@
-# Handoff — Phase 7 enrollment foundation
+# Handoff — Phase 7 Windows company-host preview
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-7/enrollment-foundation`, based on `main` at `201071e`.
-Implementation commit: `de1f1b2`.
-PR: https://github.com/dragon0816/agentic-engineering-platform/pull/48 (open).
+Branch: `phase-7/windows-preview-bundle`, stacked on
+`phase-7/enrollment-foundation` at `552e04a`.
+Implementation commits: `633e4e3`, `36edaff`.
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/49 (open,
+base PR #48 must merge first).
 
 Progress across phases is in `docs/TASKS.md`. This file records only where the
 current work stopped and how to resume it.
 
 ## Goal
 
-Start Phase 7 from the owner's resolved deployment and migration decisions. Define
-invitation-only platform users and independent Bridge device identity for a one-user
-company workstation and a multi-user shared test workstation, without claiming OS
-isolation or adding a production authentication/RBAC server. Record explicit parity
-gates for source workflows 7 and 13 before their implementation migration.
+Give the owner a real Windows artifact to carry to the company computer while the
+authenticated enrollment transport and workflow 7/13 capability adapters are still
+pending. Prove offline installation, local company-device configuration, host
+preflight and credential-free enrollment-request export without claiming that this
+preview is a running Agent/Bridge service.
 
 Active specification: `docs/phases/PHASE_7_MIGRATION.md`.
 Source decision: `docs/PHASE_7_MIGRATION.md`.
 
 ## Completed
 
-- Reconciled Phase 6 closure and the accumulating progress record on main.
-- Recorded owner decisions: invitation-only registration; shared platform as control
-  plane; real validation on a company Agent + Bridge; company workstation single
-  employee; shared test workstation multiple platform users on one Windows account;
-  workflow 7, then 13, then knowledge; inert CI and retained old paths for rollback.
-- Inspected pinned `rs_workflow_system` workflow 7/workflow 13 graphs and their
-  `jira_weekly_report.py` / `release_package.py` jobs at
-  `896046e8fe2170d21f9213e56e5ce2f93c05ba43` without changing the source.
-- Added the Phase 7 specification with normalized, harness-checkable report/package
-  parity gates, company/test workstation boundaries, migration order and rollback.
-- Added closed contracts: Invitation, PlatformUser, BridgeDevice, BridgeBinding and
-  BridgeExecutionSubject. They contain no invitation token, password, session,
-  credential, permission grant, capability grant or SecretRef value.
-- Added `InMemoryEnrollmentRegistry`, a side-effect-free trusted-host reference for
-  issuing/accepting one-time invitations, enrolling Bridge advertisements, binding
-  one/many users by device kind, use-time admission and independent disable state.
-- Added 18 tests before/with implementation. Initial collection failed because the
-  contract did not exist; focused and full suites now pass.
-- Updated Architecture/Roadmap/Contracts/README/CLAUDE/TASKS so Phase 7 is active
-  and a later agent does not rely on this conversation.
+- Inspected the pinned `rs_workflow_system` deployment scripts at
+  `896046e8fe2170d21f9213e56e5ce2f93c05ba43` without modifying the source.
+- Decision **ADAPT**: retained its no-credential offline bundle, recorded target,
+  integrity verification, per-user install and safe uninstall invariants. Did not
+  copy token login, HTTP server, jobs, browser state, prerequisites or autostart.
+- Added closed `CompanyHostConfiguration`, `HostDoctorReport` and
+  `EnrollmentRequest` contracts. They cannot carry invitation proof, credentials,
+  permissions or capability grants.
+- Added the `aep-host` CLI. `doctor` checks Windows, Python 3.12, the approved company
+  device profile and workspace without network/capability calls. `enrollment-request`
+  exports matching `BridgeDevice` and empty `BridgeRegistration` metadata.
+- Added a deterministic bundle builder and Windows cmd/PowerShell install, verify
+  and uninstall entry points. Install verifies SHA-256 for every payload before an
+  offline wheel install. Uninstall is dry-run by default and path constrained.
+- Added nine contract/bundle tests and Windows CI that builds, installs, checks,
+  exports and removes the preview locally, then uploads its ZIP artifact for 14 days.
+- Performed a real local offline install from the extracted ZIP, received four
+  passing doctor checks, exported and inspected enrollment JSON, exercised dry-run
+  uninstall, and removed the isolated installation.
+- Local deliverable (ignored by Git):
+  `dist/agentic-engineering-platform-windows-preview-0.1.0-633e4e34236f.zip`.
+  SHA-256: `2B7F23A873BAAA43BEC322411AFB3A54FEA1057F124EEF1BB9D3A3A5316A4BD6`.
 
 ## In Progress
 
-- PR #48 is open for review and cross-platform CI. This follow-up records the PR
-  number in the persistent progress and handoff files.
+- PR #49 is awaiting stacked review/CI. Its base PR #48 is the enrollment foundation
+  and must merge before #49 is retargeted or merged.
+- The owner can copy the local ZIP to a company computer now. CI will also expose a
+  fresh ZIP under `windows-company-host-preview-<commit>` after its Windows 3.12 job.
 
 ## Remaining
 
-- Review and merge the enrollment foundation after cross-platform CI.
-- Slice 2: define/package the company Agent + Bridge installation, authenticated
-  invitation acceptance/device enrollment host flow and read-only connectivity
-  probe. This requires a deployment design; this slice is not an installer/server.
-- Slice 3: characterize and adapt workflow 7 through typed Jira/Excel capabilities,
-  inert fixtures first, then production-like comparison on the company computer.
-- Slice 4: characterize and adapt workflow 13 through typed Git/file capabilities,
-  dry-run and an isolated test repository before any approved push.
-- Knowledge parity, model live smoke checks and controlled cutover follow in the
-  order specified. No source entry point is deprecated yet.
-- Existing carried items remain in `docs/TASKS.md`.
+- On the company computer, confirm 64-bit Python 3.12, extract the ZIP, run
+  `install.cmd -Actor <platform-actor> -BridgeId <stable-bridge-id>`, retain the
+  complete doctor output and inspect the generated enrollment request.
+- Slice 2b: implement the shared-platform authenticated invitation/device enrollment
+  endpoint and Bridge client, then add a read-only connectivity probe. Do not treat
+  the JSON exported by this preview as authentication proof.
+- Add governed Jira/Excel capabilities and migrate workflow 7 only after enrollment
+  and connectivity evidence. Workflow 13 and knowledge remain later in the approved
+  order. The old Host Bridge stays available as parity baseline and rollback.
 
 ## Architecture decisions and invariants
 
-- Invitation identifiers are metadata, not bearer secrets. A future host validates
-  out-of-band proof and authenticates callers before invoking registry methods.
-- Platform user, Bridge device, runtime capability authorization and external-system
-  credentials are distinct. Enrollment never grants a workflow/capability or secret.
-- The shared test computer's per-user workspaces are cooperative organization only;
-  a shared Windows account provides no confidentiality from other local users.
-- `interactive_slots=1` records the initial serialized-interaction requirement; no
-  runtime scheduler/lease is implemented by this slice.
-- The shared platform does not execute Jira/Excel/Git work. Company resources and
-  their credentials remain on the company Bridge.
-- Preserve and adapt source behavior; keep the old Host Bridge as parity baseline
-  and rollback until candidate-specific gates and rollback rehearsal pass.
+- This is explicitly an installation/device preflight, not a production Agent or
+  Bridge. It has no server transport and cannot execute workflows 7 or 13.
+- The ZIP targets Windows AMD64 and CPython 3.12 exactly because `pydantic-core` is
+  platform/Python-specific. The target is recorded in its manifest and checked.
+- The bundle carries code and dependency wheels only. Actor/Bridge ID and workspace
+  configuration are created during installation; passwords and tokens are forbidden.
+- An enrollment request is an inspectable advertisement with no capabilities. It
+  grants neither device membership nor workflow/capability execution permission.
+- Installation is per Windows user because later Excel/browser work needs an
+  interactive user session. No autostart or service is installed by this preview.
+- CI and doctor stay inert. Real company-resource verification occurs only on the
+  company computer after capability adapters and explicit authorization exist.
 
 ## Exact verification commands and results
 
-Windows, Python 3.12.14, repository root, office extra installed:
+Windows, Python 3.12.14, repository root:
 
 ```powershell
-.venv/Scripts/python.exe -m pytest tests/test_enrollment.py -q -p no:cacheprovider
-# RED before implementation: ModuleNotFoundError: common.enrollment
-# PASS after implementation: 18 passed
-.venv/Scripts/python.exe -m pytest tests/test_enrollment.py tests/test_contracts.py tests/test_registry.py -q -p no:cacheprovider
-# PASS: 61 passed
-.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 695 passed, 3 skipped (Windows symlink privileges)
+.venv/Scripts/python.exe -m pytest tests/test_host_runtime.py tests/test_windows_preview_bundle.py -q -p no:cacheprovider --basetemp .scratch/pytest-preview
+# 9 passed
+
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider --basetemp .scratch/pytest-full
+# 704 passed, 3 skipped (Windows symbolic-link privileges)
+
 .venv/Scripts/python.exe -m ruff check .
-# PASS
+# All checks passed
 .venv/Scripts/python.exe -m ruff format --check .
-# PASS: 133 files
+# 141 files already formatted
 .venv/Scripts/python.exe -m mypy
-# PASS: 101 source/test files
-.venv/Scripts/python.exe -m pip check
-# PASS
+# Success: no issues found in 107 source files
 .venv/Scripts/python.exe -m build
-# PASS: sdist and wheel; new common/control_plane modules included
-.scratch/wheel-env/Scripts/python.exe -m pip install --no-deps --force-reinstall dist/agentic_engineering_platform-0.1.0-py3-none-any.whl
-# PASS
-.scratch/wheel-env/Scripts/python.exe -I -c "from common.enrollment import BridgeDevice; from control_plane.enrollment import InMemoryEnrollmentRegistry; item=BridgeDevice(bridge_id='bridge-test',registered_by='engineer',device_kind='shared_test_workstation',windows_account_mode='shared_user',resource_scope='external_only',local_isolation='cooperative_workspace'); assert BridgeDevice.model_validate_json(item.model_dump_json()) == item; assert InMemoryEnrollmentRegistry(administrators=('admin',)); import control_plane; print(control_plane.__file__); print('phase7 wheel smoke passed')"
-# PASS from isolated wheel site-packages
+# Successfully built wheel and sdist
+.venv/Scripts/python.exe -m pip check
+# No broken requirements found
 git diff --check
-# PASS
+# clean
 ```
 
-No LDAP, network service, live model, Jira, Excel, Git write, production Bridge or
-n8n instance was invoked by the implementation or tests. Source inspection was
-read-only through GitHub.
+Bundle verification used `scripts/build_windows_preview.py`, expanded the result,
+ran `install.ps1` with an isolated LocalAppData install root, ran `aep-host doctor`
+and `enrollment-request`, then ran `uninstall.ps1` first without and then with
+`-Apply`. Result: offline dependencies installed, host status `ready`, all four
+checks passed, empty advertisement exported, dry-run reported the exact target and
+apply removed it.
 
-## Known issues / limitations
+## Known issues
 
-- This is contract/reference behavior only: no login UI, invitation-token storage,
-  password/session service, durable enrollment DB, device certificate or installer.
-- Registry methods assume a trusted authenticated host. Calling them directly is
-  not proof of identity and must not become a public API unchanged.
-- Interactive serialization is declared but not enforced by a scheduler/lease.
-- Shared Windows users can inspect local files/processes regardless of platform
-  membership. Sensitive corporate data must not be placed on that workstation.
-- Real parity evidence does not exist yet; inert CI must not be reported as parity.
-- User/Claude's untracked `.claude/` directory remains untouched and uncommitted.
+- PR #49 CI is pending at this handoff and the PR is stacked on unmerged PR #48.
+- Python 3.11 and ARM64 are unsupported by this artifact. The library remains tested
+  on Python 3.11/3.12, but the offline dependency wheel fixes this ZIP to 3.12 AMD64.
+- There is no shared-platform login/enrollment server, persistent device record,
+  Bridge pull loop, capability adapter, service/autostart or connectivity probe yet.
+- `verify.cmd` uses the default versioned install location. A custom `-InstallRoot`
+  must be checked by invoking its installed `aep-host.exe` directly.
+- `.claude/` is user-owned, remains untracked and was not modified or committed.
 
 ## Next Recommended Action
 
-After review/merge, scope Phase 7 slice 2 around an installable company Agent +
-Bridge host and authenticated enrollment protocol. Prove a read-only connection and
-capability advertisement before migrating workflow 7.
+Merge PR #48 after review, let PR #49 rebase/retarget to `main`, wait for all CI
+checks, then use its Windows artifact (or the local ZIP above) for the company-PC
+installation preflight. Record that output before designing slice 2b transport.
