@@ -1,7 +1,7 @@
 # Handoff — Phase 7 slice 2e, Telegram ingress
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-7/telegram-ingress`, based on `main` after PR #53 merged.
+Branch: `main`, after PR #54 (slice 2e) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -48,7 +48,7 @@ the sender to a platform actor (Architecture, "Team Platform Plane").
 
 ## In Progress
 
-- PR #54 open for review. Nothing else uncommitted.
+- Nothing. `main` is the state to resume from.
 
 ## Remaining
 
@@ -114,6 +114,9 @@ instance was invoked.
 
 ## Next Recommended Action
 
-Merge PR #54 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-put the slice 2f authentication design to the owner before writing its
-requirements.
+Put the slice 2f authentication design to the owner before writing its
+requirements: what a Bridge presents to the shared platform (a device
+credential issued at enrollment, or a per-request signature), what the
+control plane checks and stores, how membership is delivered to the Bridge
+and kept current, and where the shared platform runs. Until then, work is
+what the owner asks for plus the open items in `docs/TASKS.md`.
