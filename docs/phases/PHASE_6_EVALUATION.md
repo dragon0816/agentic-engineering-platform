@@ -170,12 +170,44 @@ intention the case states about itself.
    reading as a violation; a refused cross-namespace dispatch not reading as
    a modification; and a credential found in every shape it arrives in.
 
+## Requirements and acceptance (slice 4 — model-involving evaluation)
+
+The first three slices grade a deterministic platform: the same request gives
+the same answer, so one run is proof. A model does not, and the Architecture
+asks the same case set to run across configured aliases and be compared on
+quality, latency, reliability and usage. That is a different class of test and
+is kept apart from the deterministic suite.
+
+1. An `agent` case is one whose route the deterministic layer cannot resolve,
+   so a model selects it. `model_selected_route` is its grader: the route was
+   reached with origin `model`, and a model really was asked. It is the
+   mirror of `deterministic_trigger` and `no_model_call`, and a deterministic
+   case asserting it fails.
+2. `compare_aliases(case, aliases, run, repeat=)` runs one case once per
+   alias per repetition and returns a `ModelEvaluation`: `measured` with one
+   `AliasTrial` per alias, or `skipped` with the reason. An empty alias list
+   is **skipped, never passed**: a comparison with nothing to compare is not
+   a clean result.
+3. A single attempt is refused. `repeat` below two raises, because the source
+   repository's benchmark learned it in as many words: one cell is not a
+   measurement when the thing measured is not deterministic.
+4. An `AliasTrial` carries every `Attempt`, and each attempt carries whether
+   it passed, the `duration_ms` Phase 5 records, the tokens it used and the
+   reasons it failed. `reliability` is passes over attempts, so an alias that
+   answers correctly nine times in ten is visibly different from one that
+   always does.
+5. Nothing here contacts a provider. The comparison takes a `run` callable,
+   so a host supplies live clients and the repository's tests supply adapters
+   over an injected transport. The deterministic suite stays the CI gate; a
+   comparison reports, and reports `skipped` when no alias is configured.
+6. Tests: an agent case routed by a model through the real Phase 5 adapter
+   and the real router; a comparison over two aliases that disagree, showing
+   different reliability; the skipped result when no alias is configured; a
+   single attempt refused; and `model_selected_route` rejecting a route the
+   deterministic layer resolved.
+
 ## Later slices (each needs its own requirements section before work starts)
 
-- Slice 4 — model-involving evaluation: the same case set across configured
-  aliases, with repetition, comparing quality, latency (`duration_ms` from
-  Phase 5), reliability and usage. Reported as skipped when no alias is
-  configured, never quietly passed.
 - Slice 5 — trace capture with redaction: route, plan, tool and workflow calls,
   approvals, duration, model usage and final status.
 

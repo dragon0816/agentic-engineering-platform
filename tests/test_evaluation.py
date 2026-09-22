@@ -16,13 +16,18 @@ import evaluation_runner
 import pytest
 from evaluation_runner import (
     DISCOVERY_CASES,
+    ROUTING_ALIAS,
     WATCHED,
+    AgentRunner,
     GatewayRunner,
     Probe,
     Report,
     RepositoryRunner,
     effects_of,
+    proposing,
+    validate_release_spec,
 )
+from pydantic import ValidationError
 
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import (
@@ -34,9 +39,13 @@ from capabilities.runtime import (
 from common.assets import AssetIdentity, ExecutionDependencies
 from common.evaluation import (
     GRADERS,
+    AliasTrial,
+    Attempt,
     CaseResult,
     EvaluationCase,
+    ModelEvaluation,
     ObservedRun,
+    compare_aliases,
     grade,
     load_cases,
     report,
@@ -255,6 +264,7 @@ WRONG: dict[str, dict[str, Any]] = {
             message="upstream said: Authorization: Bearer sk-live-should-not-be-here",
         )
     },
+    "model_selected_route": {"origin": "deterministic", "model_calls": 0},
     "bridge_advertisement": {"advertised": ()},
 }
 
@@ -265,6 +275,12 @@ def test_every_grader_rejects_a_deliberately_wrong_observation(assertion: str) -
     believed. Each one is shown a run that violates exactly what it checks."""
     case = routed_case(assertions=[assertion])
     passing = satisfied(case)
+    if assertion == "model_selected_route":
+        # This one is satisfied by a model having chosen, so its passing
+        # shape is the opposite of a deterministic case's.
+        passing = ObservedRun.model_validate(
+            {**passing.model_dump(), "origin": "model", "model_calls": 1}
+        )
     if assertion == "fail_closed":
         # This one is satisfied by refusing, so its passing shape is different.
         case = routed_case(
@@ -511,3 +527,116 @@ def test_a_credential_is_found_whatever_shape_it_arrives_in(message: str, leaked
         }
     )
     assert grade(case, observed).passed is not leaked
+
+
+def agent_case() -> EvaluationCase:
+    return next(item for item in load_cases(CASES) if item.category == "agent")
+
+
+def test_an_agent_case_is_routed_by_a_model_through_the_real_adapter() -> None:
+    """The deterministic layer cannot resolve it, so the model chooses, and
+    the route it proposes is validated against what is installed."""
+    case = agent_case()
+    runner = AgentRunner(ROUTING_ALIAS, proposing(validate_release_spec().identity))
+    observed = runner.run(case)
+
+    assert observed.origin == "model" and observed.model_calls == 1
+    assert runner.transport.calls == 1  # a real request went down the real wire
+    assert observed.input_tokens == 12 and observed.output_tokens == 5
+    assert grade(case, observed).passed
+
+
+def test_a_deterministic_route_does_not_satisfy_the_model_grader() -> None:
+    case = routed_case(assertions=["model_selected_route"])
+    settled = grade(case, satisfied(case))
+    assert not settled.passed
+    assert any("reached by deterministic" in reason for reason in settled.reasons())
+
+    asked = ObservedRun.model_validate(
+        {**satisfied(case).model_dump(), "origin": "model", "model_calls": 1}
+    )
+    assert grade(case, asked).passed
+    # Claiming a model chose while never asking one is not a route either.
+    unasked = ObservedRun.model_validate(
+        {**satisfied(case).model_dump(), "origin": "model", "model_calls": 0}
+    )
+    assert not grade(case, unasked).passed
+
+
+def test_two_aliases_are_compared_on_more_than_correctness() -> None:
+    """One alias proposes a route that exists, the other proposes one that
+    does not. The comparison shows the difference rather than a single
+    pass or fail for the pair."""
+    case = agent_case()
+    elsewhere = AssetIdentity(namespace="engineering", name="not-installed", version="1.0.0")
+
+    def run(item: EvaluationCase, alias: str) -> ObservedRun:
+        target = validate_release_spec().identity if alias == "reliable" else elsewhere
+        return AgentRunner(alias, proposing(target)).run(item)
+
+    measured = compare_aliases(case, ("reliable", "confused"), run, repeat=3)
+    assert measured.status == "measured"
+    assert [trial.alias for trial in measured.trials] == ["reliable", "confused"]
+
+    good, bad = measured.trials
+    assert good.reliability == 1.0 and good.passes == 3
+    assert bad.reliability == 0.0
+    assert len(good.attempts) == 3 and len(bad.attempts) == 3
+    # Usage and latency travel with every attempt, so an alias can be ranked
+    # on cost and speed and not only on being right.
+    assert all(item.input_tokens == 12 for item in good.attempts)
+    assert good.total_duration_ms is not None
+    # A failure says why, in the comparison as everywhere else.
+    assert any("routed to" in reason for reason in bad.attempts[0].reasons)
+
+
+def test_an_alias_that_is_sometimes_right_is_visibly_different() -> None:
+    case = agent_case()
+    elsewhere = AssetIdentity(namespace="engineering", name="not-installed", version="1.0.0")
+    seen = {"n": 0}
+
+    def flaky(item: EvaluationCase, alias: str) -> ObservedRun:
+        seen["n"] += 1
+        target = validate_release_spec().identity if seen["n"] % 2 else elsewhere
+        return AgentRunner(alias, proposing(target)).run(item)
+
+    measured = compare_aliases(case, ("flaky",), flaky, repeat=4)
+    (trial,) = measured.trials
+    assert trial.passes == 2 and trial.reliability == 0.5
+
+
+def test_a_comparison_with_nothing_to_compare_is_skipped_not_passed() -> None:
+    case = agent_case()
+
+    def unused(item: EvaluationCase, alias: str) -> ObservedRun:
+        raise AssertionError("no alias was configured, so nothing should run")
+
+    skipped = compare_aliases(case, (), unused, repeat=3)
+    assert skipped.status == "skipped" and skipped.trials == ()
+    assert "no alias is configured" in skipped.detail
+    assert ModelEvaluation.model_validate_json(skipped.model_dump_json()) == skipped
+
+    # The contract refuses to describe a measurement it does not have.
+    with pytest.raises(ValidationError):
+        ModelEvaluation(case_id="x", status="measured", detail="d")
+
+
+def test_a_single_attempt_is_refused_rather_than_reported() -> None:
+    """One cell is not a measurement when the thing measured is not
+    deterministic, which the source repository's benchmark states outright."""
+    case = agent_case()
+
+    def unused(item: EvaluationCase, alias: str) -> ObservedRun:
+        raise AssertionError("nothing should run")
+
+    for repeat in (1, 0, -1):
+        with pytest.raises(ValueError, match="not a measurement"):
+            compare_aliases(case, ("one",), unused, repeat=repeat)
+
+
+def test_a_trial_needs_at_least_one_attempt() -> None:
+    with pytest.raises(ValidationError):
+        AliasTrial(alias="none", attempts=())
+    single = AliasTrial(alias="one", attempts=(Attempt(passed=True, duration_ms=None),))
+    # Nothing was measured, so there is no total to report.
+    assert single.total_duration_ms is None and single.reliability == 1.0
