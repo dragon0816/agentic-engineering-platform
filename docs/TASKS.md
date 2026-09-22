@@ -24,9 +24,9 @@ the history is complete; this table is the index into them.
 ## Status
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
-`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a and 2c to 2h have
-merged, and 2i is now unblocked. 56 pull
-requests merged (#1 to #60; #5 was closed unmerged and superseded by #6, the
+`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b and 2c to 2h
+have merged, and 2i is the next to build. 58 pull requests merged (#1 to
+#62; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
 when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
@@ -125,7 +125,7 @@ privileges and run on Linux CI.
 |---|---|---|---|
 | 1 enrollment foundation | #48 | done | Invitation-only users, independent Bridge device identity, single-user company workstation and multi-user shared test workstation contracts plus an inert reference registry |
 | 2a company host preview | #49, landed via #51 | done | Hash-verified offline Windows package, per-user install, local doctor and credential-free empty enrollment request; company-computer install/doctor/export confirmed, no live transport or workflow capability |
-| 2b Bridge access tokens | #62 | in review | Binding a member to a machine issues a token for that pair; the platform keeps a fingerprint and never the secret, an unknown token and a wrong secret are one answer, and a token becomes the `AuthenticatedActor` entitlement is read from |
+| 2b Bridge access tokens | #62 | done | Binding a member to a machine issues a token for that pair; the platform keeps a fingerprint and never the secret, an unknown token and a wrong secret are one answer, and a token becomes the `AuthenticatedActor` entitlement is read from |
 | 2c local-first control contracts | #50, landed via #51 | done | Registry package acquisition, verified local inventory, timestamped status projection and actor/device-scoped remote jobs |
 | 2d resident local Agent and durable local state | #53 | done | `LocalAgent` admits by the shared device rule and the device's own membership copy on every ingress, routes through the existing Gateway, executes exact remote jobs idempotently, settles timed-out runs, and records runs in a single-writer SQLite local state that outlives the process |
 | 2e Telegram ingress | #54 | done | `channels.telegram`: outbound long polling over the platform's transport, numeric sender mapped to exactly one actor with an empty map admitting nobody, `/skill command` translated to the deterministic form, token through `SecretRef` and its shape added to `SECRET_PATTERN`, the same Agent admission and Gateway path |

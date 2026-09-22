@@ -1,7 +1,7 @@
 # Handoff — Phase 7 slice 2b, Bridge access tokens
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `phase-7/bridge-access-tokens`, based on `main` after PR #61 merged.
+Branch: `main`, after PR #62 (slice 2b) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -51,7 +51,7 @@ authorization is still open.
 
 ## In Progress
 
-- PR #62 open for review. Nothing else uncommitted.
+- Nothing. `main` is the state to resume from.
 
 ## Remaining
 
@@ -124,7 +124,8 @@ invoked, and no token was written to any file.
 
 ## Next Recommended Action
 
-Merge PR #62 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-write the slice 2i requirements: the transport that presents these tokens,
+Write the slice 2i requirements: the transport that presents these tokens,
 starting with the read-only connectivity probe and the authorization delivery,
-since those are the two a company host needs before anything else.
+since those are the two a company host needs before anything else. Put the
+shared-workstation question under "Known issues" to the owner first, because
+it decides whether a shared device gets a transport at all.
