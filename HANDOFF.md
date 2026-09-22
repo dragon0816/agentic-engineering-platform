@@ -48,10 +48,12 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 
 ## In Progress
 
-- PR #49 is awaiting stacked review/CI. Its base PR #48 is the enrollment foundation
-  and must merge before #49 is retargeted or merged.
+- PR #49 is awaiting stacked review. Its base PR #48 is the enrollment foundation
+  and must merge before #49 is retargeted or merged. All eight reported matrix
+  checks passed (duplicate push/pull-request runs for four matrix cells).
 - The owner can copy the local ZIP to a company computer now. CI will also expose a
-  fresh ZIP under `windows-company-host-preview-<commit>` after its Windows 3.12 job.
+  fresh ZIP under `windows-company-host-preview-<commit>` for 14 days; the successful
+  run is https://github.com/dragon0816/agentic-engineering-platform/actions/runs/35696109156.
 
 ## Remaining
 
@@ -112,9 +114,13 @@ and `enrollment-request`, then ran `uninstall.ps1` first without and then with
 checks passed, empty advertisement exported, dry-run reported the exact target and
 apply removed it.
 
+PR #49 CI: Ubuntu 3.11/3.12 and Windows 3.11/3.12 all passed. The Windows
+3.12 job also passed the bundle build, offline install, doctor, enrollment export,
+dry-run uninstall, applied uninstall and artifact upload steps.
+
 ## Known issues
 
-- PR #49 CI is pending at this handoff and the PR is stacked on unmerged PR #48.
+- PR #49 is stacked on unmerged PR #48; review/merge must preserve that dependency.
 - Python 3.11 and ARM64 are unsupported by this artifact. The library remains tested
   on Python 3.11/3.12, but the offline dependency wheel fixes this ZIP to 3.12 AMD64.
 - There is no shared-platform login/enrollment server, persistent device record,
