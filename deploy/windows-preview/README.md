@@ -116,8 +116,14 @@ actors, and map the token's name to an environment variable in `host.json`:
 
 Never put the token in a file. Set the environment variable for your Windows user
 and run `aep-host telegram --config host.json`, which polls outbound only and needs
-no inbound firewall rule. A sender that is not in the map is ignored, and a mapped
-sender still has to be a bound member of this Bridge.
+no inbound firewall rule. A sender that is not in the map is ignored.
+
+On a company workstation, a mapped sender still has to be this Bridge's one bound
+owner: a request on anybody else's behalf is refused. On a shared test workstation
+the machine runs as a virtual member of its own, so a mapped sender's request runs
+as that member and records who asked. **This file is therefore the access list for
+a shared machine.** Disabling somebody on the shared platform does not close this
+door — removing their entry here does — so offboarding has to include editing it.
 
 ## Remove
 

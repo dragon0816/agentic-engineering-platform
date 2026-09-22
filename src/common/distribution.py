@@ -60,9 +60,19 @@ class InstalledAsset(Contract):
 class LocalRunSummary(Contract):
     run_id: Symbol
     actor: Symbol
+    # The member who asked, when a machine ran the work for somebody who is
+    # not bound to it. Recorded for attribution and never for authorization,
+    # which reads `actor` alone.
+    on_behalf_of: Symbol | None = None
     workflow: AssetIdentity
     status: RunStatus
     updated_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def asked_by_somebody_else(self) -> Self:
+        if self.on_behalf_of == self.actor:
+            raise ValueError("a run on your own behalf names nobody else")
+        return self
 
 
 class BridgeStateSnapshot(Contract):

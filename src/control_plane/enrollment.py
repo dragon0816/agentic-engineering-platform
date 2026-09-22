@@ -34,7 +34,7 @@ EnrollmentErrorCode = Literal[
     "binding_forbidden",
     "binding_missing",
     "duplicate_binding",
-    "company_device_single_user",
+    "device_single_user",
 ]
 
 
@@ -200,8 +200,12 @@ class InMemoryEnrollmentRegistry:
             for current in self._bindings.values()
             if current.bridge_id == item.bridge_id and current.status == "active"
         ]
-        if device.device_kind == "company_workstation" and active:
-            raise EnrollmentError("company_device_single_user")
+        if active:
+            # One member per machine, whatever its kind. A shared test machine
+            # is bound to a virtual member of its own; the employees who need
+            # it reach it through an ingress, and no colleague's credential
+            # ever sits on it.
+            raise EnrollmentError("device_single_user")
         if item.role == "device_admin" and item.actor != device.registered_by:
             raise EnrollmentError("binding_forbidden")
         self._bindings = {**self._bindings, key: item}

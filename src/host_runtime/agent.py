@@ -32,7 +32,7 @@ from common.local_agent import BridgeMembership, Ingress, LocalAgentRequest
 from host_runtime.state import SqliteLocalState
 from workflow.engine import WorkflowRunSnapshot
 
-LocalRefusalCode = DeviceAdmissionCode | Literal["actor_not_bound"]
+LocalRefusalCode = DeviceAdmissionCode | Literal["actor_not_bound", "delegation_not_allowed"]
 
 
 class LocalAgentOutcome(Contract):
@@ -47,6 +47,8 @@ class LocalAgentOutcome(Contract):
     trace: TraceIdentifiers
     ingress: Ingress
     actor: Symbol
+    # Who asked, when the machine ran the work for somebody not bound to it.
+    on_behalf_of: Symbol | None = None
     refusal: LocalRefusalCode | None = None
     decision: RouteDecision | None = None
     capability: CapabilityResult | None = None
@@ -86,15 +88,24 @@ class LocalAgent:
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._settling: set[asyncio.Task[None]] = set()
 
-    def admit(self, actor: str, bridge_id: str) -> LocalRefusalCode | None:
+    def admit(
+        self, actor: str, bridge_id: str, on_behalf_of: str | None = None
+    ) -> LocalRefusalCode | None:
         """The membership rule, the same for a local operator, a polled job
         and a Telegram sender. The device half is `admit_device`, shared with
-        the control plane; the binding half reads this device's own copy."""
+        the control plane; the binding half reads this device's own copy.
+
+        Only the acting member is admitted. Who asked is recorded and never
+        weighed, except for one refusal: a company workstation accepts only
+        its one bound owner, and work done on somebody else's behalf is not
+        that, so it is refused outright rather than attributed."""
         refused = admit_device(self.membership.device, actor=actor, bridge_id=bridge_id)
         if refused is not None:
             return refused
         if self.membership.binding_for(actor) is None:
             return "actor_not_bound"
+        if on_behalf_of is not None and self.membership.device.device_kind == "company_workstation":
+            return "delegation_not_allowed"
         return None
 
     async def handle(
@@ -103,10 +114,14 @@ class LocalAgent:
         """Route a message through the Gateway: deterministic first, the Bridge
         policy on every dispatch, the engine on every workflow."""
         item = LocalAgentRequest.model_validate(request)
-        refusal = self.admit(item.actor, item.bridge_id)
+        refusal = self.admit(item.actor, item.bridge_id, item.on_behalf_of)
         if refusal is not None:
             return LocalAgentOutcome(
-                trace=item.trace, ingress=item.ingress, actor=item.actor, refusal=refusal
+                trace=item.trace,
+                ingress=item.ingress,
+                actor=item.actor,
+                on_behalf_of=item.on_behalf_of,
+                refusal=refusal,
             )
         context = RequestContext(
             trace=item.trace,
@@ -119,11 +134,12 @@ class LocalAgent:
         result = await self.gateway.handle(
             context, workflow_timeout_seconds=workflow_timeout_seconds
         )
-        run, unrecorded = await self._record(item.actor, result.workflow)
+        run, unrecorded = await self._record(item.actor, item.on_behalf_of, result.workflow)
         return LocalAgentOutcome(
             trace=item.trace,
             ingress=item.ingress,
             actor=item.actor,
+            on_behalf_of=item.on_behalf_of,
             decision=result.routing.decision,
             capability=result.capability,
             workflow=result.workflow,
@@ -160,7 +176,7 @@ class LocalAgent:
             workflow_timeout_seconds=workflow_timeout_seconds,
             workflow_idempotency_key=item.job_id,
         )
-        run, unrecorded = await self._record(item.actor, snapshot)
+        run, unrecorded = await self._record(item.actor, None, snapshot)
         return LocalAgentOutcome(
             trace=item.trace,
             ingress=item.ingress,
@@ -171,7 +187,7 @@ class LocalAgent:
         )
 
     async def _record(
-        self, actor: str, snapshot: WorkflowRunSnapshot | None
+        self, actor: str, on_behalf_of: str | None, snapshot: WorkflowRunSnapshot | None
     ) -> tuple[LocalRunSummary | None, LocalStateErrorCode | None]:
         """Record a run the engine actually started. A pre-flight rejection
         carries a run id that names no run, and recording it would project a
@@ -180,20 +196,23 @@ class LocalAgent:
         if snapshot is None or self.gateway.engine.get(snapshot.run.run_id) is None:
             return None, None
         try:
-            run = await self._write(actor, snapshot)
+            run = await self._write(actor, on_behalf_of, snapshot)
         except LocalStateError as error:
             return None, error.code
         failure = snapshot.run.failure
         if failure is not None and failure.code == "workflow_timeout":
-            task = asyncio.create_task(self._settle(actor, snapshot.run.run_id))
+            task = asyncio.create_task(self._settle(actor, on_behalf_of, snapshot.run.run_id))
             self._settling.add(task)
             task.add_done_callback(self._settling.discard)
         return run, None
 
-    async def _write(self, actor: str, snapshot: WorkflowRunSnapshot) -> LocalRunSummary:
+    async def _write(
+        self, actor: str, on_behalf_of: str | None, snapshot: WorkflowRunSnapshot
+    ) -> LocalRunSummary:
         summary = LocalRunSummary(
             run_id=snapshot.run.run_id,
             actor=actor,
+            on_behalf_of=on_behalf_of,
             workflow=snapshot.run.workflow,
             status=snapshot.run.status,
             updated_at=self._clock(),
@@ -202,7 +221,7 @@ class LocalAgent:
         # runs on the event loop the in-flight runs share.
         return await asyncio.to_thread(self.state.record_run, summary)
 
-    async def _settle(self, actor: str, run_id: str) -> None:
+    async def _settle(self, actor: str, on_behalf_of: str | None, run_id: str) -> None:
         """Join a run that outlived its caller's wait and record where it
         ended. A record that cannot be written is left as it stands: the
         engine still holds the truth, and `settled()` reports nothing."""
@@ -210,7 +229,7 @@ class LocalAgent:
         if final is None:
             return
         try:
-            await self._write(actor, final)
+            await self._write(actor, on_behalf_of, final)
         except LocalStateError:
             return
 

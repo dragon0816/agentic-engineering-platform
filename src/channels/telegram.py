@@ -422,10 +422,16 @@ class TelegramIngress:
             # A durable read under the store's lock, so never on the event loop.
             report = await asyncio.to_thread(self._status)
             return TelegramDelivery(**base, disposition="answered", reply=report)
+        # Whose machine this is. A sender who is that member drives it as
+        # themselves; anybody else has it done on their behalf, and the
+        # Agent decides whether this kind of machine allows that.
+        member = self.agent.membership.member()
+        acting = member if member is not None and member != actor else actor
         try:
             request = LocalAgentRequest(
                 ingress="telegram",
-                actor=actor,
+                actor=acting,
+                on_behalf_of=actor if acting != actor else None,
                 bridge_id=self.config.bridge_id,
                 namespace=self.config.namespace,
                 message=command_to_message(text),

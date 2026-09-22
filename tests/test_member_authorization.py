@@ -110,7 +110,9 @@ def platform() -> tuple[
     """An invitation-only platform with one company and one shared device,
     both advertising the two tools, and two published assets."""
     enrollment = InMemoryEnrollmentRegistry(administrators=("platform-admin",))
-    for actor in ("engineer", "tester"):
+    # `shared-bot` is the virtual member the shared machine runs as. A real
+    # employee reaches that machine through an ingress and is never bound.
+    for actor in ("engineer", "tester", "shared-bot"):
         enrollment.issue(
             Invitation(invitation_id=f"invite-{actor}", actor=actor, issued_by="platform-admin")
         )
@@ -126,12 +128,13 @@ def platform() -> tuple[
                 capabilities=(read_tool(), publish_tool()),
             ),
         )
-        enrollment.bind(
-            "engineer",
-            BridgeBinding(bridge_id=described.bridge_id, actor="engineer", role="device_admin"),
-        )
+        if kind == "company_workstation":
+            enrollment.bind(
+                "engineer",
+                BridgeBinding(bridge_id=described.bridge_id, actor="engineer", role="device_admin"),
+            )
     enrollment.bind(
-        "engineer", BridgeBinding(bridge_id="bridge-shared", actor="tester", role="operator")
+        "engineer", BridgeBinding(bridge_id="bridge-shared", actor="shared-bot", role="operator")
     )
     packages = InMemoryPackageRegistry()
     packages.publish(package(REPORT, "workflow"))
@@ -238,7 +241,11 @@ def test_only_a_bound_member_decides_and_only_about_what_exists() -> None:
 
 
 def test_a_tool_that_requires_approval_needs_one_from_a_member() -> None:
-    _, _, registry = platform()
+    """The approver is any member the platform knows and has not disabled,
+    which since slice 2j is no longer the same as a member of that device. It
+    is not required to be a second person: on a company workstation the one
+    member has always approved their own, and nothing here changes that."""
+    enrollment, _, registry = platform()
     publish = tool(asset=PUBLISH.model_dump())
     with pytest.raises(AuthorizationError, match="approval_required"):
         registry.select(identity(), publish)
@@ -249,13 +256,29 @@ def test_a_tool_that_requires_approval_needs_one_from_a_member() -> None:
                 update={"approval_ref": "release-approval", "approved_by": "stranger"}
             ),
         )
-    # On a company workstation the one member is the owner, so the owner
-    # approves their own irreversible tool and the record says who and when.
+    # A colleague who is not bound to this device may approve, and a member the
+    # platform has disabled may not.
+    enrollment.disable_user("platform-admin", "tester")
+    with pytest.raises(AuthorizationError, match="approver_not_member"):
+        registry.select(
+            identity(),
+            publish.model_copy(
+                update={"approval_ref": "release-approval", "approved_by": "tester"}
+            ),
+        )
+    enrollment.enable_user("platform-admin", "tester")
+    colleague = registry.select(
+        identity(),
+        publish.model_copy(update={"approval_ref": "release-approval", "approved_by": "tester"}),
+    )
+    assert colleague.approved_by == "tester" and colleague.decided_at == NOW
+    # And the acting member's own approval is still accepted.
+    registry.revoke(identity(), "bridge-company", PUBLISH)
     approved = registry.select(
         identity(),
         publish.model_copy(update={"approval_ref": "release-approval", "approved_by": "engineer"}),
     )
-    assert approved.approved_by == "engineer" and approved.decided_at == NOW
+    assert approved.approved_by == "engineer"
     # A tool that needs no approval needs none.
     assert registry.select(identity(), tool()).approval_ref is None
 
@@ -475,44 +498,51 @@ def test_the_grant_comes_from_the_specification_and_not_from_the_decision() -> N
     assert len(registry.grants("bridge-company")) == 2
 
 
-def test_two_members_of_a_shared_device_each_decide_for_themselves() -> None:
+def test_a_shared_device_is_decided_for_by_the_virtual_member_it_runs_as() -> None:
+    """A shared test machine is wired to instruments and laid out as a test
+    environment; it belongs to that environment rather than to a desk. It runs
+    as a virtual member of its own, and that member's decisions are the whole
+    of its authorization."""
     _, _, registry = platform()
-    registry.select(identity(), tool(bridge_id="bridge-shared"))
-    registry.select(identity("tester"), tool(bridge_id="bridge-shared", actor="tester"))
+    registry.select(identity("shared-bot"), tool(bridge_id="bridge-shared", actor="shared-bot"))
     registry.select(
-        identity(),
+        identity("shared-bot"),
         tool(
             bridge_id="bridge-shared",
+            actor="shared-bot",
             asset=PUBLISH.model_dump(),
             approval_ref="release-approval",
             approved_by="engineer",
         ),
     )
     grants = registry.grants("bridge-shared")
-    # Each member's decision authorizes that member's runs and nobody else's.
-    held = {(item.actor, item.asset.name) for item in grants}
-    assert held == {
-        ("engineer", "read-file"),
-        ("engineer", "publish-artifact"),
-        ("tester", "read-file"),
+    assert {(item.actor, item.asset.name) for item in grants} == {
+        ("shared-bot", "read-file"),
+        ("shared-bot", "publish-artifact"),
     }
-    # On a shared device another bound member may be the approver, but the
-    # decision is still the tester's own to make.
-    approved = registry.select(
-        identity("tester"),
-        tool(
-            bridge_id="bridge-shared",
-            actor="tester",
-            asset=PUBLISH.model_dump(),
-            approval_ref="release-approval",
-            approved_by="engineer",
-        ),
-    )
-    assert approved.actor == "tester" and approved.approved_by == "engineer"
+    # An employee who drives that machine through an ingress is not bound to
+    # it, so they cannot decide what it may run.
+    with pytest.raises(AuthorizationError, match="actor_not_admitted"):
+        registry.select(identity("tester"), tool(bridge_id="bridge-shared", actor="tester"))
+    # The approver is a colleague the platform knows, not the machine
+    # approving for itself; somebody the platform does not know is refused.
+    assert next(item for item in grants if item.approval_ref).actor == "shared-bot"
+    with pytest.raises(AuthorizationError, match="approver_not_member"):
+        registry.select(
+            identity("shared-bot"),
+            tool(
+                bridge_id="bridge-shared",
+                actor="shared-bot",
+                asset=PUBLISH.model_dump(),
+                approval_ref="release-approval",
+                approved_by="stranger",
+            ),
+        )
     # The company device is untouched by any of it.
     assert registry.grants("bridge-company") == ()
     bundle = registry.authorization("bridge-shared", issued_at=NOW)
-    assert bundle.bridge_id == "bridge-shared" and len(bundle.selections) == 4
+    assert bundle.bridge_id == "bridge-shared" and len(bundle.selections) == 2
+    assert {item.approved_by for item in bundle.tools()} == {None, "engineer"}
     assert DeviceAuthorization.model_validate_json(bundle.model_dump_json()) == bundle
 
 
