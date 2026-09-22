@@ -111,4 +111,10 @@ network or host process; the criteria-by-criteria record is in
 See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
 [Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not
-require runtime edits. Future package distribution is outside this slice.
+require runtime edits. Production host distribution remains outside this preview.
+
+The Phase 7 Windows company-host technical preview is built with
+`scripts/build_windows_preview.py`. It installs a local `aep-host` CLI from bundled
+Python 3.12 wheels, validates the host with `aep-host doctor`, and exports an empty,
+credential-free Bridge enrollment request. See `deploy/windows-preview/README.md`.
+It has no shared-platform transport and cannot execute workflow 7 or 13 yet.

@@ -1153,3 +1153,26 @@ an identity both approved and unapproved.
 `common.trace` depends on `common.evaluation`, never the reverse, and reads
 Bridge events through a `DispatchRecord` protocol so that `common` does not
 import `workflow`.
+
+## Company host technical preview (Phase 7, slice 2a)
+
+`host_runtime.contracts.CompanyHostConfiguration` is closed, frozen and restricted
+to the approved company-workstation `BridgeDevice` profile. It contains only the
+device identity/profile and an absolute Windows workspace path. Credential-shaped
+content and unknown fields are refused; invitation proof, sessions, permissions,
+capability grants and secret values have no representation.
+
+`HostDoctorReport` contains four explicit `DoctorCheck`s: operating system, exact
+Python minor, device profile and workspace. `ready` means those local prerequisites
+passed. It says nothing about control-plane connectivity, enrollment, authorization
+or production capability availability, which are listed as limitations.
+
+`EnrollmentRequest` joins the configured device to an empty `BridgeRegistration`
+with matching Bridge/owner identity and trace identifiers. It is inspectable input
+for a later authenticated host call. It is neither an authentication credential nor
+an authorization decision, and publication/discovery still grants no execution.
+
+The offline bundle's `manifest.json` records schema version, bundle name, Git source
+revision, Python minor, platform and each payload's relative path, byte size and
+SHA-256 digest. The manifest is checked before install; it deliberately excludes
+runtime configuration and state.

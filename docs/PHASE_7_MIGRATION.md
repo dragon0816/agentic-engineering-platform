@@ -29,6 +29,23 @@ identity model and do not implement production authentication/RBAC in this slice
 Rollback removes `common.enrollment`, `control_plane.enrollment`, their tests and
 Phase 7 docs. Existing Bridge/Gateway behavior and every source path remain intact.
 
+## Windows preview deployment
+
+The pinned source contains an offline bundle builder, a per-user Bridge installer,
+interactive-session startup and a safe uninstall path. Decision: **ADAPT** the
+proven packaging invariants only: no credentials/configuration/state in the bundle,
+target Python/platform recorded, payload hashes checked before install, per-user
+versioned installation, and dry-run removal of owned files. Do not copy its token
+login, HTTP server, job implementations, browser profile, system-wide prerequisites
+or autostart behavior into this preflight slice.
+
+The new preview packages the provider-neutral wheel and its Python 3.12 Windows
+dependencies. Its CLI can inspect the local host and export a credential-free empty
+Bridge advertisement. Because the shared-platform enrollment transport and Jira,
+Excel and Git capability adapters do not yet exist, it cannot execute workflows 7
+or 13. Rollback removes the installed version directory or reverts the preview
+package files; the old Host Bridge remains unchanged and usable.
+
 ## Retirement rule
 
 Keep source repositories and the old Host Bridge frozen at recorded revisions

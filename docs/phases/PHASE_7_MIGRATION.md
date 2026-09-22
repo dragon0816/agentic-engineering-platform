@@ -140,3 +140,32 @@ Tests precede implementation and cover validation, one-time invitations, owner
 isolation, the two device profiles, single/multi-user binding, disable behavior,
 Bridge advertisement matching, snapshot isolation and the absence of credentials
 or execution authority.
+
+## Slice 2a — company host technical preview acceptance
+
+The first deployment artifact intentionally stops before authenticated transport
+and production capabilities. It establishes a reviewable installation boundary
+that can be carried to a company computer while the enrollment host is designed.
+
+1. The artifact is one hash-manifested ZIP for Windows AMD64 and CPython 3.12.
+   It installs from bundled wheels without network access and records the source
+   revision and exact target in `manifest.json`.
+2. Installation is per Windows user in a versioned directory. It requires an
+   explicit platform actor and Bridge ID, creates only its workspace, venv and
+   non-secret `host.json`, and is safe to repeat.
+3. `aep-host doctor` checks the OS, exact Python minor, company device profile and
+   workspace without opening a socket or invoking a capability. It states that no
+   live transport and no workflow 7/13 capability exist in this preview.
+4. `aep-host enrollment-request` exports a closed `BridgeDevice` plus an empty
+   `BridgeRegistration`. The output is not invitation proof, authentication,
+   authorization or a secret, and does not grant execution.
+5. Every bundled payload is SHA-256 checked before install. The bundle contains no
+   local configuration, token, password, browser profile, company path or state.
+6. Uninstall is dry-run by default and may remove only the versioned directory
+   beneath `%LOCALAPPDATA%\\AgenticEngineeringPlatform`.
+7. CI builds and installs the package locally on Windows without any live endpoint
+   or external-system call. A real company-computer run remains owner evidence.
+
+This sub-slice is installation and device preflight, not completion of Phase 7
+deployment. Slice 2b must add the authenticated invitation/device enrollment host
+flow and read-only shared-platform connectivity probe before workflow migration.
