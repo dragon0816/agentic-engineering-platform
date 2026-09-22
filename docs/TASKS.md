@@ -23,11 +23,10 @@ the history is complete; this table is the index into them.
 
 ## Status
 
-Phases 0 to 6 complete; the Phase 6 closure record is in review. Phase 7 is
-not started: its specification waits on the questions under "Pending owner
-decisions" at the end of this file.
-42 pull requests merged (#1 to #45; #5 was closed unmerged and superseded
-by #6, and #24 and #25 were never pull requests). A row says
+Phases 0 to 6 complete, closure records included. Phase 7 is not started:
+its specification waits on the questions under "Pending owner decisions" at
+the end of this file. 43 pull requests merged (#1 to #46; #5 was closed
+unmerged and superseded by #6, and #24 and #25 were never pull requests). A row says
 `done` only once its pull request has merged; until then it says `in review`,
 so the committed record never asserts a merge that has not happened.
 
@@ -116,7 +115,7 @@ privileges and run on Linux CI.
 | 3 policy and forbidden outcomes | #42 | done | The first `scenario` case; the Roadmap's four prohibitions checked as evidence of what happened |
 | 4 model-involving evaluation | #43 | done | The `agent` category, and one case across configured aliases with repetition, compared on correctness, reliability, latency and usage |
 | 5 trace capture | #45 | done | `ExecutionTrace` beside every observation: route, dispatches in Bridge order, approvals, workflow progress, model usage, duration and outcome, redacted by construction and refused if a credential remains; `SECRET_PATTERN` spans whole secrets and refuses its own marker |
-| closure | #46 | in review | Exit criteria recorded as met in the roadmap and the phase specification; architecture status and README updated |
+| closure | #46 | done | Exit criteria recorded as met in the roadmap and the phase specification; architecture status and README updated |
 
 ## Open items carried forward
 
