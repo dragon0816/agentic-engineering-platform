@@ -15,17 +15,21 @@ Do not add a password, token, cookie or API key to `host.json`.
 
 ## Install and inspect
 
-Open Command Prompt in the extracted bundle and choose stable IDs containing only
-letters, numbers, `_`, `.`, or `-`:
+Open Command Prompt in the extracted bundle and enter the platform actor/user:
 
 ```bat
-install.cmd -Actor employee.id -BridgeId bridge-company-001
+install.cmd -Actor employee.id
 ```
+
+The default Bridge ID is `bridge-<windows-computer-name>`, normalized to lowercase.
+The installer prints it before making changes. A computer name is only a stable
+device label; it does not authenticate the device. If two enrolled computers have
+the same name, use the optional override `-BridgeId bridge-company-001`.
 
 If Python is not on PATH:
 
 ```bat
-install.cmd -Actor employee.id -BridgeId bridge-company-001 -PythonExe "C:\Python312\python.exe"
+install.cmd -Actor employee.id -PythonExe "C:\Python312\python.exe"
 ```
 
 The installer verifies every bundled file, creates a versioned virtual environment

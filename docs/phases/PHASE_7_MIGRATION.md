@@ -151,8 +151,10 @@ that can be carried to a company computer while the enrollment host is designed.
    It installs from bundled wheels without network access and records the source
    revision and exact target in `manifest.json`.
 2. Installation is per Windows user in a versioned directory. It requires an
-   explicit platform actor and Bridge ID, creates only its workspace, venv and
-   non-secret `host.json`, and is safe to repeat.
+   explicit platform actor and derives a stable default Bridge ID from the normalized
+   Windows computer name, with an explicit override for collisions. It creates only
+   its workspace, venv and non-secret `host.json`, and is safe to repeat. A computer
+   name is device metadata and never authentication proof.
 3. `aep-host doctor` checks the OS, exact Python minor, company device profile and
    workspace without opening a socket or invoking a capability. It states that no
    live transport and no workflow 7/13 capability exist in this preview.

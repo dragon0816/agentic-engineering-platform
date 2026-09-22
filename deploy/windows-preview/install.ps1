@@ -1,12 +1,25 @@
 param(
     [Parameter(Mandatory = $true)][ValidatePattern('^[a-zA-Z_][a-zA-Z0-9_.-]*$')][string]$Actor,
-    [Parameter(Mandatory = $true)][ValidatePattern('^[a-zA-Z_][a-zA-Z0-9_.-]*$')][string]$BridgeId,
+    [string]$BridgeId,
     [string]$PythonExe = "python",
     [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0"
 )
 $ErrorActionPreference = "Stop"
 $BundleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Manifest = Get-Content -LiteralPath (Join-Path $BundleRoot "manifest.json") -Raw | ConvertFrom-Json
+
+if ([string]::IsNullOrWhiteSpace($BridgeId)) {
+    $NormalizedComputerName = [Environment]::MachineName.ToLowerInvariant() -replace '[^a-z0-9_.-]', '-'
+    $NormalizedComputerName = $NormalizedComputerName.Trim([char[]]"-.")
+    if ([string]::IsNullOrWhiteSpace($NormalizedComputerName)) {
+        throw "Could not derive a Bridge ID from the Windows computer name."
+    }
+    $BridgeId = "bridge-$NormalizedComputerName"
+    Write-Host "Using Bridge ID $BridgeId derived from this computer name."
+}
+if ($BridgeId -notmatch '^[a-zA-Z_][a-zA-Z0-9_.-]*$') {
+    throw "BridgeId must contain only letters, numbers, underscore, dot or hyphen."
+}
 
 foreach ($File in $Manifest.files) {
     $Relative = $File.path.Replace('/', [IO.Path]::DirectorySeparatorChar)

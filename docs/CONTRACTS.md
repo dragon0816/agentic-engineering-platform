@@ -1162,6 +1162,11 @@ device identity/profile and an absolute Windows workspace path. Credential-shape
 content and unknown fields are refused; invitation proof, sessions, permissions,
 capability grants and secret values have no representation.
 
+The Windows installer derives the default `bridge_id` as
+`bridge-<normalized-windows-computer-name>` and accepts an explicit override for a
+name collision. This is stable device metadata only. The later authenticated
+enrollment host must still establish device identity and reject duplicate IDs.
+
 `HostDoctorReport` contains four explicit `DoctorCheck`s: operating system, exact
 Python minor, device profile and workspace. `ready` means those local prerequisites
 passed. It says nothing about control-plane connectivity, enrollment, authorization

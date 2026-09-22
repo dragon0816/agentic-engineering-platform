@@ -38,7 +38,9 @@ jobs:
           Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/preview-expanded
           $bundle = Get-ChildItem dist/preview-expanded -Directory | Select-Object -First 1
           $installRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\ci-preview"
-          & "$($bundle.FullName)\install.ps1" -Actor ci-user -BridgeId bridge-ci -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          $installedConfig = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
+          if ($installedConfig.device.bridge_id -notlike 'bridge-*') { throw 'Computer-name Bridge ID was not generated.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
