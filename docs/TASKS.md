@@ -24,11 +24,12 @@ the history is complete; this table is the index into them.
 ## Status
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
-`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a and 2c have merged. 47 pull
-requests merged (#1 to #51; #5 was closed unmerged and superseded by #6, the
+`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2c, 2d, 2e and 2f have
+merged, and 2b and 2g wait on the owner's authentication design. 52 pull
+requests merged (#1 to #56; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
-when its base branch was deleted and landed through #51). A row says `done` only once
-its pull request has merged; until then it says `in review`, so the
+when its base branch was deleted and landed through #51). A row says `done`
+only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
 The suite is 753 passed, 3 skipped on Windows, with `ruff`, `mypy`,
@@ -128,7 +129,7 @@ privileges and run on Linux CI.
 | 2c local-first control contracts | #50, landed via #51 | done | Registry package acquisition, verified local inventory, timestamped status projection and actor/device-scoped remote jobs |
 | 2d resident local Agent and durable local state | #53 | done | `LocalAgent` admits by the shared device rule and the device's own membership copy on every ingress, routes through the existing Gateway, executes exact remote jobs idempotently, settles timed-out runs, and records runs in a single-writer SQLite local state that outlives the process |
 | 2e Telegram ingress | #54 | done | `channels.telegram`: outbound long polling over the platform's transport, numeric sender mapped to exactly one actor with an empty map admitting nobody, `/skill command` translated to the deterministic form, token through `SecretRef` and its shape added to `SECRET_PATTERN`, the same Agent admission and Gateway path |
-| 2f company host runtime | #56 | in review | `aep-host` assembles the resident Agent from the workspace files (membership, grants, Skill and Workflow manifests) and gains `ask`, `status` and `telegram`; `doctor` reports what the host has been given; the Telegram offset is durable |
+| 2f company host runtime | #56 | done | `aep-host` assembles the resident Agent from the workspace files (membership, grants, Skill and Workflow manifests) and gains `ask`, `status` and `telegram`; `doctor` reports what the host has been given; the Telegram offset is durable |
 | 2g authenticated shared-platform transports | — | planned | Registry package synchronization, Bridge job polling and snapshot reporting over an authenticated transport; needs an authentication design first |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |

@@ -1,7 +1,7 @@
 # Handoff — Phase 7 slice 2f, company host runtime
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-7/host-agent-cli`, based on `main` after PR #55 merged.
+Branch: `main`, after PR #56 (slice 2f) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -62,7 +62,7 @@ credentials stay on the Bridge computer) and member-scoped remote control.
 
 ## In Progress
 
-- PR #56 open for review. Nothing else uncommitted.
+- Nothing. `main` is the state to resume from.
 
 ## Remaining
 
@@ -129,6 +129,8 @@ temporary directory.
 
 ## Next Recommended Action
 
-Merge PR #56 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-put the slice 2g authentication design to the owner before writing its
-requirements.
+Put the slice 2g authentication design to the owner before writing its
+requirements: what a Bridge presents to the shared platform, what the control
+plane checks and stores, how membership reaches the Bridge and is kept
+current, and where the shared platform runs. Until then, work is what the
+owner asks for plus the open items in `docs/TASKS.md`.
