@@ -18,6 +18,7 @@ from pydantic import ValidationError
 from channels.telegram import (
     HELP,
     MAX_MESSAGE_CHARS,
+    TELEGRAM_CHANNEL,
     TelegramIngress,
     TelegramIngressConfig,
     chunks,
@@ -25,6 +26,7 @@ from channels.telegram import (
     scrub,
 )
 from common.assets import SECRET_FIELD, SECRET_PATTERN, reject_embedded_secrets
+from common.distribution import LocalStateError
 from common.enrollment import BridgeBinding, BridgeDevice
 from common.local_agent import BridgeMembership
 from host_runtime.agent import LocalAgent
@@ -327,13 +329,13 @@ def test_a_transport_error_is_reported_without_the_token_wherever_it_sits(tmp_pa
     prefix = "connection refused after " + "retrying, " * 60
     error = OSError(f"{prefix}to https://api.telegram.org/bot{TOKEN}/getUpdates")
     transport = FakeTransport(error=error)
-    item, _, _ = ingress(tmp_path, transport)
-    item.offset = 5
+    item, agent, _ = ingress(tmp_path, transport)
+    agent.state.advance_cursor(TELEGRAM_CHANNEL, 5)
     result = poll(item)
     assert result.failure is not None
     assert result.failure.code == "telegram_unreachable" and result.failure.retryable
     assert TOKEN not in result.failure.message and TOKEN[:20] not in result.failure.message
-    assert result.deliveries == () and item.offset == 5
+    assert result.deliveries == () and item.offset() == 5
     assert TOKEN[:20] not in redacted(f"{prefix}{TOKEN}")
     # A credential the host cannot produce is a different, non-retryable answer.
     item, _, _ = ingress(tmp_path / "b", FakeTransport(), resolver=CountingCredentials({}))
@@ -379,6 +381,41 @@ def test_the_loop_stops_on_what_will_not_fix_itself_and_backs_off_otherwise(
     assert 2 <= len(transport.polls()) <= 5
 
 
+def test_the_offset_is_durable_so_a_restart_does_not_replay_a_confirmed_batch(
+    tmp_path: Path,
+) -> None:
+    """The cursor lives in the Bridge's own state, not in the ingress, so a
+    new process resumes where the last confirmed batch ended."""
+    transport = FakeTransport([[update(41, OWNER, "/help")]])
+    item, agent, _ = ingress(tmp_path, transport)
+    assert item.offset() is None
+    poll(item)
+    assert item.offset() == 42
+    assert agent.state.cursor(TELEGRAM_CHANNEL) == 42
+    # A second ingress over the same Bridge, as a restart would build.
+    successor = TelegramIngress(
+        config(), agent, CountingCredentials({"telegram_bot": TOKEN}), transport=transport
+    )
+    assert successor.offset() == 42
+    poll(successor)
+    assert transport.polls()[-1]["offset"] == 42
+    # Cursors are per channel and never rewind.
+    assert agent.state.cursor("other") is None
+    with pytest.raises(LocalStateError, match="cursor_rewind"):
+        agent.state.advance_cursor(TELEGRAM_CHANNEL, 41)
+    assert agent.state.cursor(TELEGRAM_CHANNEL) == 42
+
+
+def test_a_cursor_that_cannot_be_read_or_written_is_a_typed_answer(tmp_path: Path) -> None:
+    item, agent, runner = ingress(tmp_path, FakeTransport([[update(1, OWNER, "/help")]]))
+    agent.state.close()
+    result = poll(item)
+    # Without the cursor the poll would replay a confirmed batch, so it does
+    # not happen at all: nothing was sent and nothing was routed.
+    assert result.failure is not None and result.failure.code == "telegram_cursor_unavailable"
+    assert result.deliveries == () and runner.bridge.events == ()
+
+
 def test_a_redelivered_update_is_handled_once_and_the_batch_is_confirmed(tmp_path: Path) -> None:
     transport = FakeTransport(
         [
@@ -418,18 +455,25 @@ def test_non_text_and_credential_bearing_messages_are_not_forwarded(tmp_path: Pa
     assert result.next_offset == 5
 
 
-def test_an_update_that_raises_is_recorded_and_the_loop_survives(tmp_path: Path) -> None:
-    transport = FakeTransport([[update(1, OWNER, "/status"), update(2, OWNER, "/help")]])
+def test_an_update_that_raises_is_recorded_and_the_loop_survives(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transport = FakeTransport([[update(1, OWNER, "shipment.run"), update(2, OWNER, "/help")]])
     item, agent, _ = ingress(tmp_path, transport)
-    agent.state.close()
+
+    async def boom(*_: Any, **__: Any) -> None:
+        raise RuntimeError("the gateway fell over")
+
+    monkeypatch.setattr(agent, "handle", boom)
     result = poll(item)
     assert result.failure is None
     failed, answered = result.deliveries
     assert failed.disposition == "failed" and failed.failure is not None
     assert failed.failure.code == "telegram_delivery_failed"
-    assert "LocalStateError" in failed.failure.message and failed.replied
+    assert "RuntimeError" in failed.failure.message and failed.replied
     assert answered.disposition == "answered" and answered.reply == HELP
-    assert result.next_offset == 3
+    # The batch is still confirmed: it was handled, one of them badly.
+    assert result.next_offset == 3 and item.offset() == 3
     with pytest.raises(ValidationError, match="failed means handling raised"):
         failed.model_copy(update={"failure": None}).model_validate(
             failed.model_copy(update={"failure": None}).model_dump()

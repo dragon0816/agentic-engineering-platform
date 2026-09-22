@@ -172,3 +172,39 @@ later slice.
 Rollback removes `src/channels/` and `tests/test_telegram_ingress.py` and the
 two additions to `SECRET_KEYS` and `SECRET_PATTERN`; nothing else depends on
 them.
+
+## Company host runtime
+
+No source repository is migrated here. The pinned `rs_workflow_system` Host
+Bridge reads its configuration from a directory beside the installation and
+keeps job state on the machine that runs the job; both were characterized in
+`docs/PHASE_3_MIGRATION.md`. Decision (2026-09-22): **ADAPT that shape**, a
+workspace of readable files plus a local state file, and write no new runtime:
+the host module wires the Gateway, policy and engine this repository already
+has. Its token login, HTTP server and job implementations remain out.
+
+Three choices worth recording. The layout is convention under one configured
+workspace rather than a set of configured paths, because an installer and an
+operator have to agree on it and a second configuration file is a second thing
+to get wrong; the layout is a contract, so `doctor` can print it. The host
+installs exactly one capability handler, the one the package ships, and says
+so: a manifest can be installed without its code existing, and a step that
+reaches for an absent capability fails closed rather than silently doing
+nothing. And a company host configures no model, so routing is deterministic
+only; a model on the company computer is a later decision with its own
+credential and endpoint questions.
+
+`doctor` gained a third check status rather than reporting a freshly installed
+host as broken. "Not enrolled yet" is the expected state of a new preview
+installation, and an installer that prints a failure for the normal case
+teaches the operator to ignore it.
+
+The Telegram cursor moved from memory into the Bridge's own durable state,
+which closes the redelivery gap recorded when slice 2e landed. A cursor that
+can rewind replays messages that were already acted on, so `advance_cursor`
+refuses to move backwards, as `record_run` refuses a stale update.
+
+Rollback removes `src/host_runtime/host.py`, the new `aep-host` subcommands,
+the cursor table and its two methods, and the additions to
+`CompanyHostConfiguration` and `DoctorCheck`; the Agent, the ingress and the
+preview package keep working as they did.

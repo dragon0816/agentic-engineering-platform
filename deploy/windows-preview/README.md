@@ -1,9 +1,11 @@
 # Company Bridge host — Windows technical preview
 
 This preview proves a credential-free, per-user installation and company-device
-configuration before the shared-platform enrollment transport exists. It does
-not run workflow 7 or 13 and contains no Jira, Excel, Git, browser, email, DUT or
-instrument adapter.
+configuration before the shared-platform enrollment transport exists. It installs
+a resident Agent that runs the Skills and Workflows you place in its workspace,
+using the one capability this package ships (a bounded read of a file inside the
+workspace). It does not run workflow 7 or 13 and contains no Jira, Excel, Git,
+browser, email, DUT or instrument adapter.
 
 ## Prerequisite
 
@@ -47,6 +49,67 @@ verify.cmd
 
 Inspect `enrollment-request.json` before transferring it. It is identity and
 capability-advertisement metadata, not proof that the device may execute anything.
+
+## Run the resident Agent
+
+`aep-host doctor` reports `resident agent: pending` until this Bridge knows who
+may use it. Everything the Agent reads lives in the workspace the installer
+created:
+
+```text
+workspace\membership.json        who may use this Bridge
+workspace\grants.json            what those people may run (optional; nothing by default)
+workspace\assets\skills\*.json   installed Skill manifests
+workspace\assets\workflows\*.json installed Workflow manifests
+workspace\telegram.json          the Telegram ingress (optional)
+workspace\state.sqlite           what is installed and what has run (the Agent creates it)
+```
+
+`membership.json` names this device and its one bound owner. Until the
+authenticated enrollment transport exists, you write it yourself from the same
+values as `host.json`:
+
+```json
+{
+  "device": { "bridge_id": "bridge-your-computer", "registered_by": "employee.id",
+              "device_kind": "company_workstation", "windows_account_mode": "dedicated_user",
+              "resource_scope": "corporate_internal", "local_isolation": "single_user" },
+  "bindings": [{ "bridge_id": "bridge-your-computer", "actor": "employee.id", "role": "operator" }]
+}
+```
+
+Then ask the Agent to do something, and see what this Bridge has run:
+
+```bat
+aep-host ask --config host.json "files.read C:\...\workspace\notes.txt"
+aep-host status --config host.json
+```
+
+A route resolves whether or not it may run. Installing a Skill or Workflow is
+not permission to execute it: a dispatch is refused unless `grants.json` names
+the actor, the capability, its required permissions and policy, and an approval
+reference when the capability's policy asks for one. `--namespace` selects which
+namespace a request addresses; pass `-Namespace` at install time to record a
+default in `host.json`.
+
+## Telegram (optional)
+
+Add `workspace\telegram.json` with the bot's numeric senders mapped to platform
+actors, and map the token's name to an environment variable in `host.json`:
+
+```json
+{ "credential": { "name": "telegram_bot" }, "bridge_id": "bridge-your-computer",
+  "namespace": "engineering", "senders": [{ "sender_id": 123456789, "actor": "employee.id" }] }
+```
+
+```json
+"credentials": [{ "secret": "telegram_bot", "environment_variable": "AEP_TELEGRAM_BOT_TOKEN" }]
+```
+
+Never put the token in a file. Set the environment variable for your Windows user
+and run `aep-host telegram --config host.json`, which polls outbound only and needs
+no inbound firewall rule. A sender that is not in the map is ignored, and a mapped
+sender still has to be a bound member of this Bridge.
 
 ## Remove
 

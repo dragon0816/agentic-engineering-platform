@@ -134,6 +134,7 @@ LocalStateErrorCode = Literal[
     "duplicate_install",
     "run_owner_fixed",
     "run_update_stale",
+    "cursor_rewind",
     "unavailable",
     "commit_unknown",
 ]

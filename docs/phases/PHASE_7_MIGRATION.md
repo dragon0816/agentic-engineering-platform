@@ -354,3 +354,64 @@ with the offset confirmed; non-text and credential-bearing messages not
 forwarded; an update whose handling raised recorded as `failed` while the
 next one in the batch is still handled; reply chunking and scrubbing without
 truncation; and a failed reply recorded, not raised.
+
+## Slice 2f — the company host runs what it was given
+
+Slices 2d and 2e built the resident Agent and a channel into it, but nothing
+assembled either on a real computer: the only wiring was in a test module, the
+preview CLI could inspect the machine and nothing else, and the Telegram
+offset lived in memory, so a restart replayed whatever was not confirmed.
+
+1. `host_runtime.host.HostLayout.under(workspace_root)` is the one place a
+   company host keeps what it needs: `membership.json`, `grants.json`,
+   `assets/skills/*.json`, `assets/workflows/*.json`, `telegram.json` and
+   `state.sqlite`. The installer creates the directories; the operator fills
+   them. There is no second configuration file naming paths.
+2. `build_runtime(config)` assembles the Agent from those files and returns a
+   `HostRuntime` holding the Agent, the durable state and, when configured,
+   the Telegram ingress. Nothing is discovered: a manifest is loaded because
+   it is in the assets directory, a capability handler exists because the
+   package ships it, and a grant applies because the grants file says so. A
+   file that is missing, describes another device, or cannot be read is a
+   `HostError` naming the file and the reason, never its contents.
+3. Routing on a company host is deterministic only. No model is configured,
+   so an unrecognized message is `needs_input` rather than a guess. The one
+   capability handler the package ships (`filesystem/read-file`) is installed
+   and rooted at the workspace; a step naming any other capability fails
+   closed, because installing a manifest does not install code.
+4. Installing an asset is not permission to run it. With no grants file the
+   policy refuses every dispatch, and a grant that omits an approval the
+   capability's own policy requires refuses it too. The route still resolves
+   and the run is still recorded: what did not happen is the dispatch.
+5. `aep-host` gains `ask`, `status` and `telegram` beside `doctor` and
+   `enrollment-request`. `ask` sends one local request as the device owner or
+   `--actor`, in the host's namespace or `--namespace`; the platform does not
+   guess a namespace, so a host that names none must be told per request.
+   `status` prints the Bridge's own snapshot. `telegram` polls until
+   interrupted, or once with `--once`.
+6. `doctor` reports what the host has been given as well as what the machine
+   is: `membership`, `assets` and `state`, with a third check status
+   `pending` for what has not arrived yet. A freshly installed host is not
+   broken, it is not enrolled, and the report says `resident agent: pending`
+   without failing. Reporting creates nothing: the state file is opened only
+   if it already exists.
+7. The Telegram offset is durable. `SqliteLocalState` keeps one cursor per
+   channel, refuses to rewind it, and the ingress reads and advances it
+   instead of holding it in memory, so a restart resumes where the last
+   confirmed batch ended. A cursor that cannot be read stops the poll, because
+   polling without it would replay a batch that was already acted on; a cursor
+   that cannot be advanced is reported beside the deliveries that were
+   handled.
+
+Tests precede implementation and cover: the layout under one workspace and a
+relative workspace refused; a complete host reading a real workspace file end
+to end through the CLI and recording the run under the actor who asked; what
+the operator sees for a run and for `status`; a dispatch refused without a
+grant and without an approval; an unbound actor refused with nothing recorded;
+a missing, invalid and foreign membership record each named; an unreadable
+asset named without its contents; `doctor` reporting pending, ready and failed
+without writing anything; a Telegram ingress built only when its secret is
+mapped and refused when it names another Bridge; the `telegram` command
+without a configured ingress; a host that will not guess a namespace; the
+durable offset surviving a restart and refusing to rewind; and a cursor that
+cannot be read stopping the poll.

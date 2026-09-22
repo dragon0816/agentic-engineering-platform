@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][ValidatePattern('^[a-zA-Z_][a-zA-Z0-9_.-]*$')][string]$Actor,
     [string]$BridgeId,
+    [ValidatePattern('^[a-z0-9]+(-[a-z0-9]+)*$')][string]$Namespace,
     [string]$PythonExe = "python",
     [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0"
 )
@@ -45,6 +46,10 @@ if ($LASTEXITCODE -ne 0 -or $Architecture -notin @("amd64", "x86_64")) {
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 $Workspace = Join-Path $InstallRoot "workspace"
 New-Item -ItemType Directory -Force -Path $Workspace | Out-Null
+# The layout the resident Agent reads. The directories are created empty:
+# this package installs no Skill, Workflow or grant, and says so.
+New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\skills") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\workflows") | Out-Null
 $Venv = Join-Path $InstallRoot ".venv"
 if (-not (Test-Path -LiteralPath (Join-Path $Venv "Scripts\python.exe"))) {
     & $PythonExe -m venv $Venv
@@ -71,7 +76,11 @@ $Config = [ordered]@{
     }
     workspace_root = $Workspace
 }
+if (-not [string]::IsNullOrWhiteSpace($Namespace)) {
+    $Config.namespace = $Namespace
+}
 $Config | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $InstallRoot "host.json") -Encoding UTF8
 & (Join-Path $Venv "Scripts\aep-host.exe") doctor --config (Join-Path $InstallRoot "host.json")
 if ($LASTEXITCODE -ne 0) { throw "Host doctor failed." }
 Write-Host "Installed the local-only preview at $InstallRoot"
+Write-Host "The resident Agent is pending: it runs once $Workspace\membership.json names who may use this Bridge."
