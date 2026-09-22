@@ -24,9 +24,9 @@ the history is complete; this table is the index into them.
 ## Status
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
-`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2c, 2d, 2e, 2f and 2g
-have merged, and 2b and 2i wait on the owner's authentication design. 54 pull
-requests merged (#1 to #58; #5 was closed unmerged and superseded by #6, the
+`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a and 2c to 2h have
+merged, and 2b and 2i wait on the owner's authentication design. 56 pull
+requests merged (#1 to #60; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
 when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
@@ -131,7 +131,7 @@ privileges and run on Linux CI.
 | 2e Telegram ingress | #54 | done | `channels.telegram`: outbound long polling over the platform's transport, numeric sender mapped to exactly one actor with an empty map admitting nobody, `/skill command` translated to the deterministic form, token through `SecretRef` and its shape added to `SECRET_PATTERN`, the same Agent admission and Gateway path |
 | 2f company host runtime | #56 | done | `aep-host` assembles the resident Agent from the workspace files (membership, grants, Skill and Workflow manifests) and gains `ask`, `status` and `telegram`; `doctor` reports what the host has been given; the Telegram offset is durable |
 | 2g member-decided asset authorization | #58 | done | A member chooses which Workflows, Skills and tools their devices may run; the control plane refuses a decision they may not make and derives the Bridge's grants from the capability's own specification; a host installs and grants only what was chosen |
-| 2h identity-derived entitlement | #60 | in review | An invitation records which groups accepting it grants; an authenticated actor says who and until when and carries no group; what a member may use follows from the platform's record, and a decision needs a valid session and the member's own name |
+| 2h identity-derived entitlement | #60 | done | An invitation records which groups accepting it grants; an authenticated actor says who and until when and carries no group; what a member may use follows from the platform's record, and a decision needs a valid session and the member's own name |
 | 2i authenticated shared-platform transports | — | planned | Registry package synchronization, authorization delivery, Bridge job polling and snapshot reporting over an authenticated transport; still needs the authentication design (what a Bridge presents, what the control plane checks and stores, how an authorization reaches a device and stays current) |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
