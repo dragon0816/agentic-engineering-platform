@@ -28,3 +28,27 @@ jobs:
       - run: python -m mypy
       - run: python -m build
       - run: python -m pip check
+      - name: Build and install Windows offline preview
+        if: runner.os == 'Windows' && matrix.python == '3.12'
+        shell: pwsh
+        run: |
+          python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3"
+          python scripts/build_windows_preview.py --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/windows-preview-wheels
+          $archive = Get-ChildItem dist/agentic-engineering-platform-windows-preview-*.zip | Select-Object -First 1
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/preview-expanded
+          $bundle = Get-ChildItem dist/preview-expanded -Directory | Select-Object -First 1
+          $installRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\ci-preview"
+          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          $installedConfig = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
+          if ($installedConfig.device.bridge_id -notlike 'bridge-*') { throw 'Computer-name Bridge ID was not generated.' }
+          & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
+          & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
+          & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
+      - name: Upload Windows technical preview
+        if: runner.os == 'Windows' && matrix.python == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-company-host-preview-${{ github.sha }}
+          path: dist/agentic-engineering-platform-windows-preview-*.zip
+          if-no-files-found: error
+          retention-days: 14

@@ -289,6 +289,24 @@ The shared Team Platform is primarily a **control plane**, not the default locat
 - team observability and governance;
 - discovery, installation, update and publishing services.
 
+Its two primary deployment purposes are deliberately narrow:
+
+1. the shared Registry where users publish, discover and obtain versioned Skills,
+   Workflows and other governed assets for explicit local installation; and
+2. the remote control plane for shared test computers, where authenticated platform
+   actors may submit governed jobs and inspect projected status.
+
+The authoritative installed-asset inventory, detailed run state and execution
+credentials remain on each Bridge. A Team Platform status view is a timestamped
+projection and becomes `stale` when the Bridge stops reporting. A company workstation
+accepts remote requests only from its one bound owner; a shared test workstation may
+accept them from any currently bound platform actor. Telegram may be an ingress to
+the resident local Agent after its sender is mapped to that actor. Every ingress uses
+the same typed job, device-membership, Workflow authorization and side-effect policy
+checks. Remote control initially means typed job submission, status, cancellation
+request and result references; it does not mean arbitrary shell or remote-desktop
+access.
+
 A future centralized/service agent may exist for use cases such as scheduled background work or team-wide services, but it must use the same Agent/Workflow/Capability contracts. It is not a prerequisite for Personal Engineering Agents.
 
 ### Local-first resilience

@@ -30,6 +30,16 @@ organization and cleanup, but this is not an OS security boundary: users of the
 same Windows account can read one another's local files and processes. Interactive
 work is serialized to one user/run at a time.
 
+The company workstation's Agent interface, installed Skills/Workflows and complete
+run state are local. It uses the shared platform to publish, discover and obtain
+assets, but already-installed local behavior does not require that connection unless
+its manifest declares `central_required`. The shared platform additionally controls
+Bridge computers through governed remote jobs. A company workstation accepts only
+its one bound owner; a shared test workstation accepts its bound platform users. A
+Telegram adapter may deliver commands to the resident local Agent only after mapping
+the sender to that platform actor. The shared platform never becomes the authority
+for local run state.
+
 CI remains inert. Production-like evidence is produced only by an explicitly
 enrolled company/test Bridge. Secrets stay in its execution environment and are
 never copied into Registry assets, invitations, evaluation cases, traces or Git.
@@ -40,14 +50,19 @@ never copied into Registry assets, invitations, evaluation cases, traces or Git.
    one-user company workstation and multi-user shared test workstation contracts.
 2. Deployment: package and install Agent + Bridge on a company workstation;
    verify registration, binding, capability advertisement and a read-only probe.
-3. Workflow 7: `07_jira_team_tickets_to_excel.json` /
+3. Local-first control contracts: Registry package acquisition and verified local
+   inventory; timestamped shared status projection; governed, member-scoped remote
+   jobs for enrolled Bridge computers.
+4. Local Agent interface and authenticated transports: operate company work locally,
+   synchronize Registry packages, and let shared test Bridges poll approved jobs.
+5. Workflow 7: `07_jira_team_tickets_to_excel.json` /
    `jira_weekly_report.py`, report generation against a test workbook.
-4. Workflow 13: `13_release_package.json` / `release_package.py`, first in dry-run
+6. Workflow 13: `13_release_package.json` / `release_package.py`, first in dry-run
    and an isolated test repository, then an explicitly approved non-production push.
-5. Knowledge platform: adopt and exercise a copy before any source vault changes.
-6. Model adapter live smoke checks when a host and approved endpoint credentials
+7. Knowledge platform: adopt and exercise a copy before any source vault changes.
+8. Model adapter live smoke checks when a host and approved endpoint credentials
    are available; these do not block workflows that do not use a model.
-7. Cut over each source entry point separately after its parity gate and rollback
+9. Cut over each source entry point separately after its parity gate and rollback
    rehearsal pass. Repository-level deprecation is last.
 
 ## Parity gates
@@ -140,3 +155,52 @@ Tests precede implementation and cover validation, one-time invitations, owner
 isolation, the two device profiles, single/multi-user binding, disable behavior,
 Bridge advertisement matching, snapshot isolation and the absence of credentials
 or execution authority.
+
+## Slice 2a — company host technical preview acceptance
+
+The first deployment artifact intentionally stops before authenticated transport
+and production capabilities. It establishes a reviewable installation boundary
+that can be carried to a company computer while the enrollment host is designed.
+
+1. The artifact is one hash-manifested ZIP for Windows AMD64 and CPython 3.12.
+   It installs from bundled wheels without network access and records the source
+   revision and exact target in `manifest.json`.
+2. Installation is per Windows user in a versioned directory. It requires an
+   explicit platform actor and derives a stable default Bridge ID from the normalized
+   Windows computer name, with an explicit override for collisions. It creates only
+   its workspace, venv and non-secret `host.json`, and is safe to repeat. A computer
+   name is device metadata and never authentication proof.
+3. `aep-host doctor` checks the OS, exact Python minor, company device profile and
+   workspace without opening a socket or invoking a capability. It states that no
+   live transport and no workflow 7/13 capability exist in this preview.
+4. `aep-host enrollment-request` exports a closed `BridgeDevice` plus an empty
+   `BridgeRegistration`. The output is not invitation proof, authentication,
+   authorization or a secret, and does not grant execution.
+5. Every bundled payload is SHA-256 checked before install. The bundle contains no
+   local configuration, token, password, browser profile, company path or state.
+6. Uninstall is dry-run by default and may remove only the versioned directory
+   beneath `%LOCALAPPDATA%\\AgenticEngineeringPlatform`.
+7. CI builds and installs the package locally on Windows without any live endpoint
+   or external-system call. A real company-computer run remains owner evidence.
+
+This sub-slice is installation and device preflight, not completion of Phase 7
+deployment. Following slices must add the authenticated enrollment transport, local
+Agent interface and read-only connectivity probe before workflow migration.
+
+## Slice 2b — local-first distribution and member-scoped control acceptance
+
+1. A published asset package is a Registry record with an exact scoped identity,
+   artifact reference and SHA-256. Discovering or planning it grants no execution.
+2. A local host verifies every selected artifact before changing its installed
+   inventory. The inventory remains usable without the Registry once installed.
+3. The Bridge owns authoritative installed-asset and run state. A shared-platform
+   view records when the snapshot was observed/received and reports `stale` after a
+   declared interval; it never invents current state while disconnected.
+4. A remote job names an ingress (`shared_platform` or `telegram`), exact Workflow,
+   actor, Bridge, trace and matching runtime authorization. Secret values and
+   arbitrary shell commands have no field.
+5. Company workstations accept only their registered/bound owner. Shared test
+   workstations accept their bound actors. Both preserve the actor and expose a
+   bounded poll queue; Telegram never bypasses the same membership/policy checks.
+6. This slice has no socket, downloader, code loader or process execution. It is the
+   contract/reference proof for later authenticated transports and local UI work.

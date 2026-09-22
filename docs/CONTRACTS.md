@@ -1153,3 +1153,59 @@ an identity both approved and unapproved.
 `common.trace` depends on `common.evaluation`, never the reverse, and reads
 Bridge events through a `DispatchRecord` protocol so that `common` does not
 import `workflow`.
+
+## Company host technical preview (Phase 7, slice 2a)
+
+`host_runtime.contracts.CompanyHostConfiguration` is closed, frozen and restricted
+to the approved company-workstation `BridgeDevice` profile. It contains only the
+device identity/profile and an absolute Windows workspace path. Credential-shaped
+content and unknown fields are refused; invitation proof, sessions, permissions,
+capability grants and secret values have no representation.
+
+The Windows installer derives the default `bridge_id` as
+`bridge-<normalized-windows-computer-name>` and accepts an explicit override for a
+name collision. This is stable device metadata only. The later authenticated
+enrollment host must still establish device identity and reject duplicate IDs.
+
+`HostDoctorReport` contains four explicit `DoctorCheck`s: operating system, exact
+Python minor, device profile and workspace. `ready` means those local prerequisites
+passed. It says nothing about control-plane connectivity, enrollment, authorization
+or production capability availability, which are listed as limitations.
+
+`EnrollmentRequest` joins the configured device to an empty `BridgeRegistration`
+with matching Bridge/owner identity and trace identifiers. It is inspectable input
+for a later authenticated host call. It is neither an authentication credential nor
+an authorization decision, and publication/discovery still grants no execution.
+
+The offline bundle's `manifest.json` records schema version, bundle name, Git source
+revision, Python minor, platform and each payload's relative path, byte size and
+SHA-256 digest. The manifest is checked before install; it deliberately excludes
+runtime configuration and state.
+
+## Local-first distribution and remote control (Phase 7, slice 2b)
+
+`PublishedAssetPackage` wraps the existing governed `AssetMetadata` with an asset
+kind. It accepts only `published` metadata with an exact `PackageMetadata` artifact
+reference and SHA-256. `InstallationPlan` selects non-duplicate exact versions for
+one actor and Bridge. Neither contract contains an execution authorization.
+
+`InMemoryLocalInventory.apply` takes an installation plan and already-retrieved byte
+payloads. It verifies every digest before changing one inventory entry, then records
+`InstalledAsset` identity, kind, source artifact/digest and installing actor. It does
+not import or execute the bytes. This reference demonstrates that installed state is
+local and remains available without a Registry connection.
+
+`BridgeStateSnapshot` is explicitly authoritative at the Bridge and carries its
+device, observation time, installed inventory and compact local run summaries.
+`BridgeStatusProjection` keeps that snapshot plus the central receipt time and an
+`online` or `stale` connectivity label. The reference control plane derives staleness
+from elapsed time and never rewrites a local run status.
+
+`RemoteWorkflowJob` accepts only `shared_platform` or `telegram` ingress, an exact
+Workflow identity, actor, Bridge, arguments, trace and matching allowed
+`ExecutionAuthorization`. It has no arbitrary command/shell field and refuses secret
+fields or values. `InMemoryRemoteControl` also requires device admission: a company
+workstation admits only its registered owner, while a shared test workstation admits
+its bound actors. Telegram identity mapping occurs before this contract and cannot
+bypass the same membership and policy path. Polling returns bounded queued records;
+cancellation is a request state and does not claim a running side effect stopped.
