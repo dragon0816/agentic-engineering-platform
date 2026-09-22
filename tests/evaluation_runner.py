@@ -53,15 +53,25 @@ INVOKED_CODES = frozenset({"timeout", "transient_failure", "handler_error", "inv
 DISCOVERY_CASES = frozenset({"discover-sample-task"})
 
 
-def effects_of(bridge: BridgeExecutor, installed: InstalledCapabilities) -> tuple[SideEffect, ...]:
-    """The declared side effect of everything the Bridge actually put in
-    motion. A capability that ran and then failed still ran, so its effect
-    counts; a dispatch refused before the handler was reached did not."""
-    effects: list[SideEffect] = []
+def invoked(bridge: BridgeExecutor) -> tuple[AssetIdentity, ...]:
+    """What the Bridge actually reached a handler for. A capability that ran
+    and then failed still ran; a dispatch refused before the handler did not.
+    One definition, so effects and approvals read the same events."""
+    seen: list[AssetIdentity] = []
     for event in bridge.events:
         if event.status != "succeeded" and event.code not in INVOKED_CODES:
             continue
-        binding = installed.get(event.asset)
+        if event.asset not in seen:
+            seen.append(event.asset)
+    return tuple(seen)
+
+
+def effects_of(bridge: BridgeExecutor, installed: InstalledCapabilities) -> tuple[SideEffect, ...]:
+    """The declared side effect of everything the Bridge actually put in
+    motion."""
+    effects: list[SideEffect] = []
+    for identity in invoked(bridge):
+        binding = installed.get(identity)
         if binding is not None and binding.spec.side_effect not in effects:
             effects.append(binding.spec.side_effect)
     return tuple(effects)
@@ -329,12 +339,20 @@ class GatewayRunner:
         return len(manifest.steps) if manifest is not None else 0
 
     def _unapproved(self) -> tuple[AssetIdentity, ...]:
-        """Anything that ran under no grant, or under one carrying no
-        approval reference."""
+        """Irreversible capabilities the request tried to run with no
+        approval behind them.
+
+        Two choices here, both found by review. Only irreversible ones count,
+        or a low-risk capability that legitimately needs no approval reads as
+        a violation. And every *dispatch* counts, not only what ran: the
+        policy refuses an unapproved high-risk dispatch today, so reading
+        only what ran would make this unable to fail while the platform works
+        and silent about the moment it stops."""
         granted = approvals()
         seen: list[AssetIdentity] = []
         for event in self.bridge.events:
-            if event.status != "succeeded" and event.code not in INVOKED_CODES:
+            binding = self.installed.get(event.asset)
+            if binding is None or binding.spec.side_effect != "external_side_effect":
                 continue
             if not granted.get(event.asset) and event.asset not in seen:
                 seen.append(event.asset)
@@ -351,6 +369,7 @@ class GatewayRunner:
             side_effects=effects_of(self.bridge, self.installed),
             observable=WATCHED,
             dispatched=tuple(event.asset for event in self.bridge.events),
+            ran=invoked(self.bridge),
             status=workflow.run.status if workflow is not None else None,
             completed_steps=workflow.run.completed_steps if workflow is not None else 0,
             declared_steps=self._declared_steps(result.routing.decision),

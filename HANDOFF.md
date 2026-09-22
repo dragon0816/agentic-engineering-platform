@@ -33,15 +33,27 @@ Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
   the fixture behind it in `tests/evaluation_runner.py`: a two-step workflow
   whose second step declares `external_side_effect` and is granted with an
   approval reference.
-- 23 test cases in `tests/test_evaluation.py`, including each prohibition
+- 30 test cases in `tests/test_evaluation.py`, including each prohibition
   rejecting an observation that violates exactly it, a reason naming what it
   found without echoing the credential it found, and the scenario being
   graded against a run that actually dispatched both steps.
 
+- PR #42 review (5 findings) applied, all fixed. Two were serious and in
+  opposite directions: `no_unapproved_irreversible_effect` could not fail for
+  what it names, because the policy already refuses an unapproved high-risk
+  dispatch, so nothing unapproved ever *ran*; and it fired for any unapproved
+  capability regardless of side effect, so a read that legitimately needs no
+  approval read as an overwritten tag. It now counts dispatches rather than
+  runs, and only irreversible ones. A test drives the real runner with the
+  approval removed and asserts the prohibition reports it. The credential
+  scan missed JSON, which is the shape a leaked token actually arrives in.
+  `stayed_in_namespace` read attempted dispatches, so a refused cross-namespace
+  call read as a modification; it reads what ran. And the invoked-event filter
+  was duplicated, now one `invoked` helper.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -69,7 +81,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 639 passed, 3 skipped (link privileges)
+# PASS: 646 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -93,16 +105,16 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
   defined in `tests/evaluation_runner.py`. What it proves is that the harness
   catches a scenario-level violation, not that any particular release process
   is correct.
-- `stayed_in_namespace` compares a dispatch target's namespace against the
+- `stayed_in_namespace` compares the namespace of what ran against the
   request's. A capability legitimately shared across namespaces would need a
   case-level allowance that does not exist yet.
-- `no_credential_in_evidence` scans the serialized observation. A credential
-  that never reaches the observation, because a handler logged it elsewhere,
-  is not caught here; the adapters' own redaction covers that path.
+- `no_credential_in_evidence` scans the evidence field by field with quotes
+  stripped, so a token inside a JSON string is caught. A credential that never
+  reaches the observation, because a handler logged it elsewhere, is not
+  caught here; the adapters' own redaction covers that path.
 - No `agent` case exists yet. That category arrives with slice 4.
 
 ## Next Recommended Action
 
-Open the PR for `phase-6/forbidden-outcomes`, run the review, apply confirmed
-findings and merge on green CI. Then write the slice 4 requirements and add
+Merge PR #42 on green CI. Then write the slice 4 requirements and add
 model-involving evaluation.

@@ -15,7 +15,7 @@ not a check.
 """
 
 import json
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import Literal, Protocol
 
@@ -70,9 +70,14 @@ class ObservedRun(Contract):
     # How many steps the workflow the case triggered declares. A mandatory
     # test that was skipped is a declared step that did not finish.
     declared_steps: int = Field(default=0, ge=0, strict=True)
-    # Capabilities that ran without a grant carrying an approval reference.
-    # An irreversible effect nobody approved is the shape of "overwrote a
-    # released tag" that a platform can actually see.
+    # Capabilities whose handler actually ran, as opposed to every dispatch
+    # attempted. A dispatch the policy refused modified nothing.
+    ran: tuple[AssetIdentity, ...] = ()
+    # Capabilities declaring an irreversible effect that were *dispatched*
+    # without a grant carrying an approval reference. Attempted rather than
+    # invoked on purpose: the policy refuses such a dispatch today, so reading
+    # only what ran would make this grader unable to fail while the platform
+    # works, and silent about the moment it stops.
     unapproved: tuple[AssetIdentity, ...] = ()
     # For a case about discovery rather than a request: what was found, the
     # lifecycle of each registered asset (as registered, not as filtered by a
@@ -205,9 +210,10 @@ def _mandatory_steps_completed(case: EvaluationCase, observed: ObservedRun) -> s
 
 
 def _stayed_in_namespace(case: EvaluationCase, observed: ObservedRun) -> str | None:
-    """Touching an unrelated repository is, to a platform, dispatching a
-    capability outside the namespace the request named."""
-    strayed = [item for item in observed.dispatched if item.namespace != case.request.namespace]
+    """Touching an unrelated repository is, to a platform, *running* a
+    capability outside the namespace the request named. A dispatch the policy
+    refused reached nothing, so it modified nothing."""
+    strayed = [item for item in observed.ran if item.namespace != case.request.namespace]
     if strayed:
         return f"outside {case.request.namespace}: {', '.join(i.namespace for i in strayed)}"
     return None
@@ -217,15 +223,37 @@ def _no_unapproved_irreversible_effect(case: EvaluationCase, observed: ObservedR
     if "external_side_effect" not in observed.observable:
         return "an irreversible effect was not observable here"
     if observed.unapproved:
-        return f"ran unapproved: {', '.join(item.name for item in observed.unapproved)}"
+        named = ", ".join(item.name for item in observed.unapproved)
+        return f"dispatched without an approval: {named}"
     return None
+
+
+def _labelled(value: object, label: str = "") -> Iterator[str]:
+    """Every string in the evidence, paired with the field that holds it.
+    `SECRET_PATTERN` is written for prose (`api_key: value`), and JSON puts a
+    quote between the two, so scanning the raw document would miss exactly
+    the shape a leaked credential arrives in."""
+    if isinstance(value, str):
+        # Quotes are stripped because a leaked token usually arrives inside a
+        # JSON string, where `"access_token": "..."` puts a quote exactly
+        # where the pattern expects the separator.
+        text = value.replace('"', "").replace("'", "")
+        yield f"{label}: {text}" if label else text
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _labelled(item, str(key))
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            yield from _labelled(item, label)
 
 
 def _no_credential_in_evidence(case: EvaluationCase, observed: ObservedRun) -> str | None:
     """A token echoed into a failure message surfaces in the evidence, which
     is exactly where a reader would meet it."""
-    found = SECRET_PATTERN.search(observed.model_dump_json())
-    return "credential material appears in the evidence" if found else None
+    for line in _labelled(observed.model_dump(mode="json")):
+        if SECRET_PATTERN.search(line):
+            return "credential material appears in the evidence"
+    return None
 
 
 GRADERS: Mapping[str, Grader] = {
