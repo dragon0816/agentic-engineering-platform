@@ -1,11 +1,15 @@
 # Handoff — Phase 7 local-first distribution and remote control
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `phase-7/local-first-control`, stacked on
-`phase-7/windows-preview-bundle` at `cc7cfc9`.
-Implementation commit: `88fec63`.
-PR: https://github.com/dragon0816/agentic-engineering-platform/pull/50 (open;
-PR #48 then PR #49 must merge first).
+Branch: `main`, after the Phase 7 stack merged (#48, then #49 and #50
+together through #51). Implementation commit of the last slice: `88fec63`.
+
+How the stack landed: #48 merged into `main`. Deleting its head branch made
+GitHub close #49 rather than retarget it, and a closed pull request cannot be
+reopened or retargeted. #50 had already merged into #49's head branch, so
+that branch, carrying both slices with a clean trial merge against `main`,
+was opened as #51 and merged after its own CI passed. Nothing in either slice
+was changed on the way.
 
 Progress across phases is in `docs/TASKS.md`. This file records only where the
 current work stopped and how to resume it.
@@ -55,13 +59,10 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 
 ## In Progress
 
-- PR #50 is open and stacked on PR #49. All eight reported matrix checks passed
-  (duplicate push/pull-request runs for Linux/Windows and Python 3.11/3.12).
+- Nothing. The stack is merged and `main` is the state to resume from.
 
 ## Remaining
 
-- Merge stack in order: enrollment PR #48, Windows preview PR #49, then local-first
-  contracts PR #50. Retarget/rebase each dependent PR without flattening its scope.
 - Slice 2d: implement a resident local Agent host/interface and durable local
   inventory/run-state adapter. Company work must remain usable offline for assets
   whose manifests do not require central services.
@@ -119,22 +120,24 @@ git diff --check
 All tests are inert. No socket, Telegram call, artifact download, executable import,
 process launch, filesystem production write or Workflow execution occurred.
 
-PR #50 CI: Ubuntu 3.11/3.12 and Windows 3.11/3.12 all passed.
+PR #50 CI: Ubuntu 3.11/3.12 and Windows 3.11/3.12 all passed. #51 (the
+combined #49 and #50 branch) passed the same matrix, and the chain above was
+re-run on `main` after it merged with the same results.
 
 ## Known issues
 
-- PR #50 is stacked and its two base PRs are unmerged.
 - The reference stores are in memory. They are contract proofs, not a production
   Registry, installer, local run database or authenticated transport.
 - Telegram is represented only as an ingress value and migration decision. There is
   no Telegram dependency, polling process, sender mapper or token resolver yet.
-- The installed Windows preview remains preflight-only and does not contain this
-  branch until the PR stack merges and a later preview package is built.
+- The installed Windows preview remains preflight-only. A preview package built
+  before the stack merged does not contain slice 2c; a later package must be
+  built from `main`.
 - `.claude/` is user-owned, remains untracked and was not modified or committed.
 
 ## Next Recommended Action
 
-After the PR stack is merged, implement slice 2d as a resident local Agent host with
+Implement slice 2d as a resident local Agent host with
 a minimal local interface and persistent local inventory/status. Add Telegram sender
 mapping and outbound polling as a separate adapter over the same local Agent request
 contract; first prove an unauthorized sender and an unbound actor are both refused.

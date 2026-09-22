@@ -24,13 +24,14 @@ the history is complete; this table is the index into them.
 ## Status
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
-`docs/phases/PHASE_7_MIGRATION.md`; its first slice is in progress. 44 pull
-requests merged (#1 to #47; #5 was closed
-unmerged and superseded by #6, and #24 and #25 were never pull requests). A row says
-`done` only once its pull request has merged; until then it says `in review`,
-so the committed record never asserts a merge that has not happened.
+`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a and 2c have merged. 47 pull
+requests merged (#1 to #51; #5 was closed unmerged and superseded by #6, the
+numbers #24 and #25 were never pull requests, and #49 was closed unmerged
+when its base branch was deleted and landed through #51). A row says `done` only once
+its pull request has merged; until then it says `in review`, so the
+committed record never asserts a merge that has not happened.
 
-The suite is 677 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 711 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -121,10 +122,10 @@ privileges and run on Linux CI.
 
 | Slice | PR | Status | What it covers |
 |---|---|---|---|
-| 1 enrollment foundation | #48 | in review | Invitation-only users, independent Bridge device identity, single-user company workstation and multi-user shared test workstation contracts plus an inert reference registry |
-| 2a company host preview | #49 | in review | Hash-verified offline Windows package, per-user install, local doctor and credential-free empty enrollment request; company-computer install/doctor/export confirmed, no live transport or workflow capability |
+| 1 enrollment foundation | #48 | done | Invitation-only users, independent Bridge device identity, single-user company workstation and multi-user shared test workstation contracts plus an inert reference registry |
+| 2a company host preview | #49, landed via #51 | done | Hash-verified offline Windows package, per-user install, local doctor and credential-free empty enrollment request; company-computer install/doctor/export confirmed, no live transport or workflow capability |
 | 2b company Bridge enrollment | — | planned | Authenticated invitation/device enrollment, capability advertisement transport and a read-only shared-platform connectivity probe |
-| 2c local-first control contracts | #50 | in review | Registry package acquisition, verified local inventory, timestamped status projection and actor/device-scoped remote jobs |
+| 2c local-first control contracts | #50, landed via #51 | done | Registry package acquisition, verified local inventory, timestamped status projection and actor/device-scoped remote jobs |
 | 2d local Agent and transports | — | planned | Resident local Agent interface, Registry synchronization, authenticated Bridge polling and Telegram ingress with actor mapping |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
