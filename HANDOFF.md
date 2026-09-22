@@ -55,7 +55,8 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 
 ## In Progress
 
-- PR #50 is open and stacked on PR #49. Cross-platform CI is running.
+- PR #50 is open and stacked on PR #49. All eight reported matrix checks passed
+  (duplicate push/pull-request runs for Linux/Windows and Python 3.11/3.12).
 
 ## Remaining
 
@@ -118,9 +119,11 @@ git diff --check
 All tests are inert. No socket, Telegram call, artifact download, executable import,
 process launch, filesystem production write or Workflow execution occurred.
 
+PR #50 CI: Ubuntu 3.11/3.12 and Windows 3.11/3.12 all passed.
+
 ## Known issues
 
-- PR #50 CI is pending and its two base PRs are unmerged.
+- PR #50 is stacked and its two base PRs are unmerged.
 - The reference stores are in memory. They are contract proofs, not a production
   Registry, installer, local run database or authenticated transport.
 - Telegram is represented only as an ingress value and migration decision. There is
