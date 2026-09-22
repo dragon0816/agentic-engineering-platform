@@ -3,6 +3,7 @@ consumer never blocks the run, terminal events always arrive, and events carry
 identities, statuses and codes only."""
 
 import asyncio
+import json
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -118,8 +119,14 @@ def test_live_run_streams_every_change_then_ends() -> None:
         assert not any(e.lagged for e in events)
         assert all(e.run_id == run_id for e in events)
         for event in events:
-            assert "4141" not in event.model_dump_json()
-            assert "4142" not in event.model_dump_json()
+            # A progress event carries identities, statuses and codes, never a
+            # payload. The check is over every field but the run id: that is
+            # a random hexadecimal identifier, and one in a few hundred runs
+            # it happens to contain the digits being looked for.
+            exposed = event.model_dump(mode="json")
+            exposed.pop("run_id")
+            assert "4141" not in json.dumps(exposed)
+            assert "4142" not in json.dumps(exposed)
         final = await runner.wait(run_id)
         assert final is not None and final.step_results[0].data == {"count": 4142}
 
