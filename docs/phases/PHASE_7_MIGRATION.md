@@ -224,28 +224,41 @@ state it owns. It is exercised entirely in-process; no socket is opened.
    material and unknown fields. A remote job arrives as the existing
    `RemoteWorkflowJob`, unchanged.
 3. `host_runtime.agent.LocalAgent` admits before it routes, on every ingress
-   alike: the request names this device, the device is active, the actor holds
-   an active binding, and on a company workstation the actor is the registered
-   owner. A refusal is a typed `LocalAgentOutcome` with a code; nothing is
-   dispatched, nothing is recorded, and the Bridge's event log stays empty.
+   alike: the request names this device, the device is active, on a company
+   workstation the actor is the registered owner, and the actor holds an active
+   binding. The device half of that rule is `common.enrollment.admit_device`,
+   the same function the control plane's remote-job reference applies, so the
+   two cannot drift. A refusal is a typed `LocalAgentOutcome` with a code and
+   nothing else; nothing is dispatched, nothing is recorded, and the Bridge's
+   event log stays empty.
 4. An admitted message goes through the existing `Gateway` with the request's
    actor, namespace and trace and the ingress as its channel, so deterministic
    routing, Bridge policy and the workflow engine apply exactly as they do for
    any other caller. An admitted `RemoteWorkflowJob` executes its exact workflow
-   through `Gateway.execute_workflow` with no routing and no model; a workflow
-   not installed on this Bridge is refused before anything runs.
-5. Every workflow run the Agent starts is recorded as a `LocalRunSummary` in
-   durable local state under the platform actor who started it. A later record
-   for the same run may change its status, never its actor: actor switching
-   never changes an existing run's ownership (slice 1, item 5).
+   through `Gateway.execute_workflow` with no routing and no model, with the
+   job id as the idempotency key so a job delivered twice joins the run it
+   already started. The engine answers for what is installed on this Bridge:
+   its pre-flight rejection comes back as a workflow result that started
+   nothing, and no run is recorded for it.
+5. Every workflow run the engine actually starts is recorded as a
+   `LocalRunSummary` in durable local state under the platform actor who
+   started it. A later record for the same run may change its status, never
+   its actor: actor switching never changes an existing run's ownership
+   (slice 1, item 5). A run that outlives the caller's wait is recorded as it
+   stands and settled to its final state in the background; `settled()` waits
+   for that. A record that cannot be written is reported on the outcome as
+   `unrecorded`, never raised over the workflow's result, because the result
+   is what the caller needs most.
 6. `host_runtime.state.SqliteLocalState` is the durable local inventory and run
    state on one local SQLite file, single-writer, every write one committed
-   transaction. Installation applies the same verification rule as the in-memory
-   reference (`common.distribution.verify_installation`, now shared): every
-   artifact's digest is checked and the whole plan is refused before one row
-   changes. The inventory and runs survive closing and reopening the file, and
-   `snapshot(observed_at)` yields the authoritative `BridgeStateSnapshot` the
-   control plane projects.
+   transaction, reads under the same lock, timestamps stored in UTC, and every
+   failure a `LocalStateError` code with nothing echoed. Installation applies
+   the same verification rule as the in-memory reference
+   (`common.distribution.verify_installation`, now shared): every artifact's
+   digest is checked and the whole plan is refused before one row changes. The
+   inventory and runs survive closing and reopening the file, the file refuses
+   another device's identifier, and `snapshot(observed_at)` yields the
+   authoritative `BridgeStateSnapshot` the control plane projects.
 7. Company work needs no control plane present. A test drives a workflow whose
    manifest declares no central service through the Agent with no Registry,
    control plane or transport object in the process at all.
@@ -256,7 +269,11 @@ Tests precede implementation and cover: membership validation; request
 validation; owner-only admission on a company device and bound-actor admission
 on a shared test device, with the refusal codes and an empty event log; a routed
 message reaching a real workflow through the Gateway; a remote job executing its
-exact workflow and a job for an uninstalled workflow refused; run ownership that
-cannot change; whole-plan install refusal leaving the SQLite inventory untouched;
-inventory and runs surviving reopen; the snapshot carrying both; and a run with
-no control plane in the process.
+exact workflow once however often it is delivered; a pre-flight rejection that
+starts nothing and records no ghost run; a run that outlives the wait settled
+to its final state; a workflow that ran reported even when its record cannot
+be written; run ownership that cannot change and updates that never go
+backwards; time order independent of the clock's offset; whole-plan install
+refusal leaving the SQLite inventory untouched; inventory and runs surviving
+reopen, the snapshot carrying both, and the file refusing another device; and a
+run with no control plane in the process.

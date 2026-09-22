@@ -20,7 +20,7 @@ from common.distribution import (
     RemoteWorkflowJob,
     verify_installation,
 )
-from common.enrollment import BridgeDevice, BridgeExecutionSubject
+from common.enrollment import BridgeDevice, BridgeExecutionSubject, admit_device
 
 ControlErrorCode = Literal[
     "duplicate_package",
@@ -182,12 +182,10 @@ class InMemoryRemoteControl:
     def submit(self, job: RemoteWorkflowJob, device: BridgeDevice) -> RemoteJobRecord:
         request = RemoteWorkflowJob.model_validate(job)
         target = BridgeDevice.model_validate(device)
-        if target.bridge_id != request.bridge_id:
-            raise ControlError("device_identity_mismatch")
-        if target.status != "active":
-            raise ControlError("device_disabled")
-        if target.device_kind == "company_workstation" and request.actor != target.registered_by:
-            raise ControlError("company_owner_required")
+        # The same device rule the resident Agent applies on the Bridge.
+        refused = admit_device(target, actor=request.actor, bridge_id=request.bridge_id)
+        if refused is not None:
+            raise ControlError(refused)
         subject = BridgeExecutionSubject(actor=request.actor, bridge_id=request.bridge_id)
         if not self._admission(subject):
             raise ControlError("subject_not_admitted")

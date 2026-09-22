@@ -30,22 +30,33 @@ bound platform users.
   who may use it, with the company-owner rule in its validator) and
   `LocalAgentRequest` (one request from `local`, `shared_platform` or
   `telegram` ingress, closed, no credential material).
+- `common.enrollment.admit_device`: the device half of admission, one function
+  called by the control plane's remote-job reference and by the Agent.
 - `src/host_runtime/agent.py`: `LocalAgent.admit`, `handle` (through the
   existing `Gateway`, ingress as channel) and `execute` (a `RemoteWorkflowJob`'s
-  exact workflow through `Gateway.execute_workflow`, only if installed here);
-  `LocalAgentOutcome` whose contract refuses a refusal that also reports a
-  result, and requires a run record beside every workflow result.
+  exact workflow through `Gateway.execute_workflow`, job id as idempotency
+  key); runs recorded only when the engine started them; a timed-out run
+  settled in the background (`settled()` waits); a record that cannot be
+  written reported as `unrecorded` on the outcome. `LocalAgentOutcome`'s
+  contract refuses a refusal that also reports a result, a run record that
+  names another workflow, and `run` beside `unrecorded`.
 - `src/host_runtime/state.py`: `SqliteLocalState`, single-writer, one committed
-  transaction per write, file bound to one Bridge identifier, whole-plan
-  install refusal, run ownership fixed and updates never backwards, and
-  `snapshot()` for the control plane to project.
+  transaction per write, reads under the same lock, `commit_unknown` kept
+  apart from `unavailable`, file bound to one Bridge identifier, whole-plan
+  install refusal, run ownership fixed and updates never backwards, UTC
+  timestamps, and `snapshot()` for the control plane to project.
 - `common.distribution.verify_installation` and `LocalStateError`: the
   installation rule lifted out of `InMemoryLocalInventory`, which now applies
   it and maps its codes.
 - `tests/evaluation_runner.py` exposes `GatewayRunner.gateway()` so a host test
   can drive the repository's real wiring directly.
-- `tests/test_local_agent.py`, 11 tests, as listed at the end of the slice 2d
+- `tests/test_local_agent.py`, 14 tests, as listed at the end of the slice 2d
   requirements section.
+- PR #53 review (10 findings) applied. The serious ones: reads ran outside the
+  writer's lock; the engine's pre-flight rejections were recorded as runs;
+  a timed-out run was recorded once and never settled; a redelivered job ran
+  twice; a state error was raised over a workflow result that had happened;
+  and the device admission rule existed twice with two vocabularies.
 - The "2d local Agent and transports" row split into 2d, 2e and 2f in
   `docs/TASKS.md`.
 
@@ -83,7 +94,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 722 passed, 3 skipped (link privileges)
+# PASS: 725 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .
@@ -111,6 +122,11 @@ invoked. The SQLite files live under pytest's temporary directory.
   with the Telegram or transport slice, whichever lands first.
 - `SqliteLocalState` refuses a second writer with `unavailable` rather than
   waiting, like the checkpoint store; a host runs one Agent per state file.
+- The engine's `InstalledWorkflows`, not the durable inventory, answers for
+  what may run on this Bridge. Packages obtained from the Registry and
+  manifests loaded into the engine are two records today; a test shows a
+  workflow running with an empty inventory. Joining them (loading an
+  installed package's manifest into the engine) is slice 2f work.
 - Membership on the Bridge is a contract the host supplies. How it is
   delivered from the control plane and kept current is part of slice 2f.
 

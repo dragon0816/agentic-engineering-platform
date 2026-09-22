@@ -135,6 +135,7 @@ LocalStateErrorCode = Literal[
     "run_owner_fixed",
     "run_update_stale",
     "unavailable",
+    "commit_unknown",
 ]
 
 

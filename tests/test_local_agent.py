@@ -7,15 +7,34 @@ Requirements: `docs/phases/PHASE_7_MIGRATION.md`, slice 2d.
 
 import asyncio
 import hashlib
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 import pytest
-from evaluation_runner import GatewayRunner
+from evaluation_runner import (
+    CountingModel,
+    GatewayRunner,
+    Probe,
+    Report,
+    grants,
+    release_workflow,
+    validate_release_spec,
+)
 from pydantic import ValidationError
 
-from common.assets import AssetIdentity, AssetMetadata, Owner, PackageMetadata
+from agent.gateway import Gateway
+from agent.routing import CommandRouter, RequestRouter
+from agent.skills import SkillRegistry
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import (
+    AssetIdentity,
+    AssetMetadata,
+    ExecutionDependencies,
+    Owner,
+    PackageMetadata,
+)
+from common.base import Contract
 from common.distribution import (
     InstallationPlan,
     LocalRunSummary,
@@ -24,13 +43,16 @@ from common.distribution import (
     RemoteWorkflowJob,
 )
 from common.enrollment import BridgeBinding, BridgeDevice
-from common.execution import ExecutionAuthorization, TraceIdentifiers
+from common.execution import ExecutionAuthorization, RequestContext, TraceIdentifiers
 from common.local_agent import BridgeMembership, LocalAgentRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.state import SqliteLocalState
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import InstalledWorkflows, WorkflowEngine
 
 NOW = datetime(2026, 9, 22, 9, 0, tzinfo=UTC)
 RELEASE = AssetIdentity(namespace="engineering", name="release-package", version="1.0.0")
+VALIDATION = AssetIdentity(namespace="engineering", name="release-validation", version="1.0.0")
 
 
 def device(kind: str = "company_workstation", **changes: Any) -> BridgeDevice:
@@ -116,14 +138,46 @@ def job(**changes: Any) -> RemoteWorkflowJob:
     )
 
 
+def state_for(membership: BridgeMembership, tmp_path: Path) -> SqliteLocalState:
+    tmp_path.mkdir(exist_ok=True)
+    return SqliteLocalState(tmp_path / "local-state.sqlite", bridge_id=membership.device.bridge_id)
+
+
 def agent(membership: BridgeMembership, tmp_path: Path) -> tuple[LocalAgent, GatewayRunner]:
     """The Agent over the repository's real Gateway wiring: three skills, the
     two release workflows, a Bridge with a policy, and no control plane."""
     runner = GatewayRunner()
-    tmp_path.mkdir(exist_ok=True)
-    state = SqliteLocalState(tmp_path / "local-state.sqlite", bridge_id=membership.device.bridge_id)
-    resident = LocalAgent(membership, runner.gateway(), state, clock=lambda: NOW)
+    resident = LocalAgent(
+        membership, runner.gateway(), state_for(membership, tmp_path), clock=lambda: NOW
+    )
     return resident, runner
+
+
+class SlowHandler:
+    """A step that outlives a short caller wait, so the engine reports a
+    timeout while the run continues to its real end."""
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        await asyncio.sleep(0.2)
+        return Report()
+
+
+def slow_gateway() -> tuple[Gateway, BridgeExecutor]:
+    installed = InstalledCapabilities()
+    installed.register(
+        validate_release_spec(),
+        SlowHandler(),
+        Probe,
+        Report,
+        ExecutionDependencies(central_required=False),
+    )
+    bridge = BridgeExecutor(installed, LocalPolicy(grants()))
+    workflows = InstalledWorkflows()
+    workflows.register(release_workflow())
+    router = RequestRouter(
+        CommandRouter(SkillRegistry()), model=CountingModel(), model_alias="routing"
+    )
+    return Gateway(router, bridge, WorkflowEngine(workflows, bridge)), bridge
 
 
 def package(name: str, payload: bytes) -> PublishedAssetPackage:
@@ -184,7 +238,7 @@ def test_a_company_device_admits_only_its_owner_and_records_nothing_on_refusal(
         outcome = asyncio.run(resident.handle(request(actor="tester", ingress=ingress)))
         assert outcome.refusal == "company_owner_required"
     assert asyncio.run(resident.handle(request(bridge_id="bridge-other"))).refusal == (
-        "device_mismatch"
+        "device_identity_mismatch"
     )
     assert runner.bridge.events == ()
 
@@ -230,7 +284,9 @@ def test_an_admitted_message_reaches_a_real_workflow_through_the_gateway(
     assert LocalAgentOutcome.model_validate_json(outcome.model_dump_json()) == outcome
 
 
-def test_a_remote_job_executes_its_exact_workflow_without_routing(tmp_path: Path) -> None:
+def test_a_remote_job_executes_its_exact_workflow_once_however_often_delivered(
+    tmp_path: Path,
+) -> None:
     resident, runner = agent(company(), tmp_path)
     outcome = asyncio.run(resident.execute(job()))
     assert outcome.refusal is None and outcome.decision is None
@@ -238,20 +294,98 @@ def test_a_remote_job_executes_its_exact_workflow_without_routing(tmp_path: Path
     assert outcome.workflow.run.trace == trace("job")
     assert outcome.run is not None and outcome.run.actor == "engineer"
     assert len(runner.bridge.events) == 2
+    # Delivered again, the job joins the run it already started: the job id
+    # is the idempotency key, so nothing dispatches a second time.
+    again = asyncio.run(resident.execute(job()))
+    assert again.workflow is not None
+    assert again.workflow.run.run_id == outcome.workflow.run.run_id
+    assert len(runner.bridge.events) == 2
+    assert len(resident.runs()) == 1
     # The membership rule applies to jobs as it does to messages.
     refused = asyncio.run(resident.execute(job(actor="tester", job_id="job-2")))
     assert refused.refusal == "company_owner_required"
     assert len(runner.bridge.events) == 2
 
 
-def test_a_job_for_a_workflow_not_installed_here_is_refused_before_anything_runs(
-    tmp_path: Path,
-) -> None:
+def test_a_pre_flight_rejection_starts_nothing_and_records_no_ghost_run(tmp_path: Path) -> None:
+    """The engine answers for what is installed here. Its rejection carries
+    a run id that names no run, and the Agent does not project one."""
     resident, runner = agent(company(), tmp_path)
     missing = AssetIdentity(namespace="engineering", name="not-here", version="1.0.0")
     outcome = asyncio.run(resident.execute(job(workflow=missing)))
-    assert outcome.refusal == "workflow_not_installed"
+    assert outcome.refusal is None
+    assert outcome.workflow is not None and outcome.workflow.run.status == "unavailable"
+    assert outcome.workflow.run.failure is not None
+    assert outcome.workflow.run.failure.code == "workflow_not_installed"
+    assert outcome.run is None and outcome.unrecorded is None
     assert runner.bridge.events == () and resident.runs() == ()
+    assert runner.gateway().engine.get(outcome.workflow.run.run_id) is None
+    with pytest.raises(ValidationError, match="belongs to the workflow result"):
+        LocalAgentOutcome.model_validate(
+            {
+                **outcome.model_dump(),
+                "run": LocalRunSummary(
+                    run_id="run-other",
+                    actor="engineer",
+                    workflow=missing,
+                    status="succeeded",
+                    updated_at=NOW,
+                ),
+            }
+        )
+
+
+def test_a_run_that_outlives_the_wait_is_settled_to_its_final_state(tmp_path: Path) -> None:
+    gateway, bridge = slow_gateway()
+    resident = LocalAgent(company(), gateway, state_for(company(), tmp_path), clock=lambda: NOW)
+
+    async def scenario() -> tuple[LocalAgentOutcome, tuple[LocalRunSummary, ...]]:
+        outcome = await resident.execute(job(workflow=VALIDATION), workflow_timeout_seconds=0.02)
+        assert outcome.run is not None and outcome.run.status == "failed"
+        assert outcome.workflow is not None and outcome.workflow.run.failure is not None
+        assert outcome.workflow.run.failure.code == "workflow_timeout"
+        assert resident.runs()[0].status == "failed"
+        await resident.settled()
+        return outcome, resident.runs()
+
+    outcome, runs = asyncio.run(scenario())
+    assert outcome.run is not None
+    assert runs == (
+        LocalRunSummary(
+            run_id=outcome.run.run_id,
+            actor="engineer",
+            workflow=VALIDATION,
+            status="succeeded",
+            updated_at=NOW,
+        ),
+    )
+    assert [event.status for event in bridge.events] == ["succeeded"]
+
+
+def test_a_workflow_that_ran_is_reported_even_when_its_record_cannot_be_written(
+    tmp_path: Path,
+) -> None:
+    resident, runner = agent(company(), tmp_path)
+    resident.state.close()
+    outcome = asyncio.run(resident.handle(request()))
+    assert outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
+    assert len(runner.bridge.events) == 2
+    assert outcome.run is None and outcome.unrecorded == "unavailable"
+    with pytest.raises(ValidationError, match="not both"):
+        LocalAgentOutcome.model_validate(
+            {
+                **outcome.model_dump(),
+                "run": LocalRunSummary(
+                    run_id=outcome.workflow.run.run_id,
+                    actor="engineer",
+                    workflow=RELEASE,
+                    status="succeeded",
+                    updated_at=NOW,
+                ),
+            }
+        )
+    with pytest.raises(LocalStateError, match="unavailable"):
+        resident.runs()
 
 
 def test_a_run_keeps_its_owner_and_never_moves_backwards(tmp_path: Path) -> None:
@@ -268,6 +402,24 @@ def test_a_run_keeps_its_owner_and_never_moves_backwards(tmp_path: Path) -> None
     with pytest.raises(LocalStateError, match="run_update_stale"):
         state.record_run(first)
     assert state.runs() == (later,)
+
+
+def test_runs_are_listed_in_time_order_whatever_offset_the_clock_carried(tmp_path: Path) -> None:
+    state = SqliteLocalState(tmp_path / "state.sqlite", bridge_id="bridge-company")
+    taipei = timezone(timedelta(hours=8))
+    earlier = LocalRunSummary(
+        run_id="run-earlier",
+        actor="engineer",
+        workflow=RELEASE,
+        status="succeeded",
+        updated_at=datetime(2026, 9, 22, 17, 0, tzinfo=taipei),  # 09:00 UTC
+    )
+    later = earlier.model_copy(
+        update={"run_id": "run-later", "updated_at": datetime(2026, 9, 22, 10, 0, tzinfo=UTC)}
+    )
+    state.record_run(later)
+    state.record_run(earlier)
+    assert [item.run_id for item in state.runs()] == ["run-earlier", "run-later"]
 
 
 def test_whole_plan_refusal_leaves_the_sqlite_inventory_untouched(tmp_path: Path) -> None:
@@ -321,6 +473,8 @@ def test_inventory_and_runs_survive_reopening_the_file_and_fill_the_snapshot(
                 updated_at=NOW,
             )
         )
+    with pytest.raises(LocalStateError, match="unavailable"):
+        state.installed()
     with SqliteLocalState(path, bridge_id="bridge-company") as reopened:
         assert [item.identity.name for item in reopened.installed()] == ["report"]
         assert reopened.installed()[0].installed_by == "engineer"

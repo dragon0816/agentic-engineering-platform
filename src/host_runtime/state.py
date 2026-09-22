@@ -5,19 +5,20 @@ and what has run there; the control plane only projects it. This is that
 record: one file, one writer, every write one committed transaction, following
 the checkpoint store in `workflow.checkpoints_sqlite`. It holds installed-asset
 rows and compact run summaries and nothing else: no artifact bytes, no payload,
-no credential, no session.
+no credential, no session. Every failure surfaces as a `LocalStateError` with a
+code and nothing else; no path, record or SQLite message is echoed.
 """
 
 import sqlite3
 import threading
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
 from typing import Self
 
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from common.base import Symbol
 from common.distribution import (
@@ -40,12 +41,16 @@ _SCHEMA = (
     " run_id TEXT PRIMARY KEY, actor TEXT NOT NULL, updated_at TEXT NOT NULL,"
     " record TEXT NOT NULL)",
 )
+# Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
+_NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
 
 
 class SqliteLocalState:
     """One process, one owning thread, one file, one device. The file records
     which Bridge it belongs to on first open and refuses another, so a state
-    file cannot quietly become some other device's inventory."""
+    file cannot quietly become some other device's inventory. Reads and
+    writes share one lock, so a reader never sees the inside of a
+    transaction that may yet roll back."""
 
     def __init__(self, path: Path, *, bridge_id: Symbol) -> None:
         self.bridge_id = TypeAdapter(Symbol).validate_python(bridge_id)
@@ -99,9 +104,10 @@ class SqliteLocalState:
 
     @contextmanager
     def _write(self) -> Iterator[sqlite3.Connection]:
-        """One atomic write. Whatever happens inside, the transaction never
-        stays open on the connection, and a rule that refuses leaves the file
-        exactly as it was."""
+        """One atomic write. `unavailable` means known not committed;
+        `commit_unknown` means the acknowledgment was lost and the caller must
+        read back rather than retry blindly. Whatever happens inside, the
+        transaction never stays open on the connection."""
         with self._lock:
             conn = self._connection()
             try:
@@ -110,26 +116,48 @@ class SqliteLocalState:
                 raise LocalStateError("unavailable") from None
             try:
                 yield conn
-            except BaseException:
-                conn.execute("ROLLBACK")
+            except BaseException as error:
+                self._rollback()
+                if isinstance(error, LocalStateError):
+                    raise
+                if isinstance(error, sqlite3.Error):
+                    raise LocalStateError("unavailable") from None
                 raise
             try:
                 conn.execute("COMMIT")
-            except sqlite3.Error:
-                conn.execute("ROLLBACK")
+            except sqlite3.Error as error:
+                self._rollback()
+                if getattr(error, "sqlite_errorname", "") in _NOT_COMMITTED:
+                    raise LocalStateError("unavailable") from None
+                # The commit may or may not have reached the file; never guess.
+                raise LocalStateError("commit_unknown") from None
+
+    def _rollback(self) -> None:
+        try:
+            if self._conn is not None and self._conn.in_transaction:
+                self._conn.execute("ROLLBACK")
+        except sqlite3.Error:
+            pass
+
+    @contextmanager
+    def _read(self) -> Iterator[sqlite3.Connection]:
+        """A read under the same lock as the writes, so it never observes an
+        open transaction, and with the same closed vocabulary on failure."""
+        with self._lock:
+            conn = self._connection()
+            try:
+                yield conn
+            except (sqlite3.Error, ValidationError):
+                # A locked file or an undecodable record is unusable evidence;
+                # fail closed rather than guess or echo it.
                 raise LocalStateError("unavailable") from None
 
-    def _read(self) -> sqlite3.Connection:
-        with self._lock:
-            return self._connection()
-
     def installed(self) -> tuple[InstalledAsset, ...]:
-        rows = (
-            self._read()
-            .execute("SELECT record FROM installed ORDER BY namespace, name, version")
-            .fetchall()
-        )
-        return tuple(InstalledAsset.model_validate_json(row[0]) for row in rows)
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT record FROM installed ORDER BY namespace, name, version"
+            ).fetchall()
+            return tuple(InstalledAsset.model_validate_json(row[0]) for row in rows)
 
     def install(
         self, plan: InstallationPlan, artifacts: Mapping[str, bytes]
@@ -165,18 +193,24 @@ class SqliteLocalState:
                     raise LocalStateError("run_owner_fixed")
                 if item.updated_at < stored.updated_at:
                     raise LocalStateError("run_update_stale")
+            # Stored in UTC so the column's text order is chronological
+            # whatever offset the caller's clock carried.
             conn.execute(
                 "INSERT OR REPLACE INTO runs (run_id, actor, updated_at, record)"
                 " VALUES (?, ?, ?, ?)",
-                (item.run_id, item.actor, item.updated_at.isoformat(), item.model_dump_json()),
+                (
+                    item.run_id,
+                    item.actor,
+                    item.updated_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                ),
             )
         return item
 
     def runs(self) -> tuple[LocalRunSummary, ...]:
-        rows = (
-            self._read().execute("SELECT record FROM runs ORDER BY updated_at, run_id").fetchall()
-        )
-        return tuple(LocalRunSummary.model_validate_json(row[0]) for row in rows)
+        with self._read() as conn:
+            rows = conn.execute("SELECT record FROM runs ORDER BY updated_at, run_id").fetchall()
+            return tuple(LocalRunSummary.model_validate_json(row[0]) for row in rows)
 
     def snapshot(self, device: BridgeDevice, *, observed_at: datetime) -> BridgeStateSnapshot:
         """The authoritative state the control plane may project. The

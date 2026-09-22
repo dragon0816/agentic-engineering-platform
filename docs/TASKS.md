@@ -31,7 +31,7 @@ when its base branch was deleted and landed through #51). A row says `done` only
 its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 722 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 725 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -126,7 +126,7 @@ privileges and run on Linux CI.
 | 2a company host preview | #49, landed via #51 | done | Hash-verified offline Windows package, per-user install, local doctor and credential-free empty enrollment request; company-computer install/doctor/export confirmed, no live transport or workflow capability |
 | 2b company Bridge enrollment | — | planned | Authenticated invitation/device enrollment, capability advertisement transport and a read-only shared-platform connectivity probe |
 | 2c local-first control contracts | #50, landed via #51 | done | Registry package acquisition, verified local inventory, timestamped status projection and actor/device-scoped remote jobs |
-| 2d resident local Agent and durable local state | #53 | in review | `LocalAgent` admits by the device's own membership copy on every ingress, routes through the existing Gateway, executes exact remote jobs, and records runs in a single-writer SQLite local state that outlives the process |
+| 2d resident local Agent and durable local state | #53 | in review | `LocalAgent` admits by the shared device rule and the device's own membership copy on every ingress, routes through the existing Gateway, executes exact remote jobs idempotently, settles timed-out runs, and records runs in a single-writer SQLite local state that outlives the process |
 | 2e Telegram ingress | — | planned | Outbound polling, numeric sender mapped to exactly one bound actor, fail closed on an empty or unmapped allowlist, token through `SecretRef`, the same admission and Gateway path |
 | 2f authenticated shared-platform transports | — | planned | Registry package synchronization, Bridge job polling and snapshot reporting over an authenticated transport; needs an authentication design first |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
