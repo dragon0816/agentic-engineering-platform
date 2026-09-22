@@ -24,9 +24,10 @@ Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
   found. No second mechanism beside `assertions`, so one registry keeps one
   rule for an unrecognized name, and a case still reads like the Roadmap
   because the graders are named for what must not happen.
-- `ObservedRun.declared_steps` and `ObservedRun.unapproved`, both read from
-  what the platform already produces: the workflow manifest declares its
-  steps, and the Bridge policy holds the grants.
+- `ObservedRun.declared_steps`, `ObservedRun.ran` and `ObservedRun.unapproved`,
+  all read from what the platform already produces: the workflow manifest
+  declares its steps, the Bridge records its events, and the policy holds the
+  grants.
 - Four graders: `mandatory_steps_completed`, `stayed_in_namespace`,
   `no_unapproved_irreversible_effect` and `no_credential_in_evidence`.
 - `evaluation/cases/scenario-release.json`, the first `scenario` case, and
@@ -37,7 +38,6 @@ Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
   rejecting an observation that violates exactly it, a reason naming what it
   found without echoing the credential it found, and the scenario being
   graded against a run that actually dispatched both steps.
-
 - PR #42 review (5 findings) applied, all fixed. Two were serious and in
   opposite directions: `no_unapproved_irreversible_effect` could not fail for
   what it names, because the policy already refuses an unapproved high-risk
