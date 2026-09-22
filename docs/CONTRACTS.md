@@ -1269,3 +1269,50 @@ stored one (`run_update_stale`) and stores timestamps in UTC so listing order
 is chronological whatever offset the clock carried. `LocalStateError` carries
 a code and nothing else; no path, record or SQLite message is echoed. Nothing
 here authenticates, downloads, polls or opens a socket.
+
+## Telegram ingress (Phase 7, slice 2e)
+
+`channels.telegram.TelegramIngressConfig` is host configuration for one bot
+serving one Bridge: the token as a `SecretRef` named `credential`, the
+`bridge_id`, the `namespace` requests are routed in, `senders` (numeric
+Telegram ids mapped to platform actors, one to one), a long-poll timeout and
+the https origin of the Bot API. It refuses a duplicate sender or actor, a
+non-https origin or one carrying a token, and any credential material in the
+record. `actor_for(sender_id)` is `None` for a sender not in the map, so an
+empty map admits nobody. The shape of a Telegram bot token
+(`<8-10 digits>:<35 token characters>`) is now an alternative of
+`SECRET_PATTERN`, and `bot_token` a `SECRET_FIELD` name, so the registry, the
+evidence grader, the trace and the model adapters refuse or redact it too.
+
+`TelegramIngress(config, agent, resolver, transport=)` serves the `LocalAgent`
+of the configured device and refuses another. `poll_once()` calls
+`getUpdates` over `models.wire.Transport`, resolving the token through the
+host's `CredentialResolver` on every call, using it in the URL and holding it
+nowhere. It returns a `TelegramPollResult`: `deliveries`, or a `Failure`
+(`telegram_credential_unavailable`, `telegram_timeout`,
+`telegram_unreachable`, `telegram_error`, `telegram_conflict` for HTTP 409,
+`telegram_http_error`, `telegram_bad_reply`) with the token already redacted,
+in which case the offset stays where it was. `run(stop)` loops `poll_once`
+until asked to stop and returns early on a conflict, because two pollers on
+one bot steal each other's updates.
+
+`TelegramDelivery` is what became of one update: `unmapped_sender` (refused
+before the text is looked at), `unsupported_content` (no text, empty text, or
+text the request contract refused for credential material), `answered`
+(`/help`, `/start`, `/status`, handled locally without a run), `refused` (the
+Agent's membership refusal, with its `LocalAgentOutcome`) or `routed` (the
+Agent's outcome). The contract requires an outcome exactly for `refused` and
+`routed`, and `refused` exactly when the outcome carries a refusal. `replied`
+records whether the reply could be sent; a failed reply is never raised over
+the outcome. Every update id in a batch is confirmed by advancing the offset
+after the batch was handled, and an id handled in this process is not handled
+again if redelivered.
+
+`command_to_message` turns `/skill command rest` into the platform's
+`skill.command rest` form (a trailing `@botname` is dropped) so a slash command
+reaches the deterministic router without a model; `/skill` alone is the bare
+word and other text is passed as written. Requests carry
+`ingress="telegram"`, the mapped actor, the configured Bridge and namespace, a
+trace named `telegram-<update_id>` and a session named for the chat. Replies
+are plain text in pieces of at most 4000 characters, name identities, statuses
+and codes, never a payload, and pass through the shared redaction.

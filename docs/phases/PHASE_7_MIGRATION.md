@@ -277,3 +277,63 @@ backwards; time order independent of the clock's offset; whole-plan install
 refusal leaving the SQLite inventory untouched; inventory and runs surviving
 reopen, the snapshot carrying both, and the file refusing another device; and a
 run with no control plane in the process.
+
+## Slice 2e — Telegram ingress acceptance
+
+The pinned `telegram-local-agent` channel was inspected read-only at
+`4b40a215909e4fdd4b65519d70669a84e9abd43d` (`docs/PHASE_7_MIGRATION.md`,
+"Telegram ingress"). What survives: outbound long polling, a numeric sender
+checked before anything is routed, and a slash command that reaches the
+deterministic router without a model. What does not: a token in a
+configuration file, an empty allowlist that admits everyone, HTML
+presentation, and attachment handling.
+
+1. `channels.telegram.TelegramIngressConfig` names the bot token as a
+   `SecretRef`, the Bridge it serves, the namespace requests are routed in,
+   and a sender map of numeric Telegram ids to platform actors, one to one. A
+   token pasted anywhere in the record is refused: the shape of a Telegram
+   bot token is now part of the repository's one `SECRET_PATTERN`, so the
+   registry, the evidence grader, the trace and the model adapters refuse or
+   redact it too. An empty map admits nobody.
+2. `TelegramIngress.poll_once` calls `getUpdates` over the same `Transport`
+   the model adapters use, resolving the token through the host's
+   `CredentialResolver` on every call and holding it nowhere. A transport
+   fault, a non-200 status, a malformed reply or an unresolvable credential is
+   a typed `Failure` with the token already redacted, and the offset stays
+   where it was. HTTP 409 is `telegram_conflict`: another process is polling
+   this bot, and `run` stops rather than compete with it.
+3. Every update is a `TelegramDelivery`. A sender not in the map is
+   `unmapped_sender` before its text is looked at. A non-text message, an
+   empty one, or one the request contract refuses for credential material is
+   `unsupported_content` and is not forwarded. `/help` and `/status` are
+   `answered` locally; `/status` is the Agent's snapshot in words.
+4. Everything else becomes a `LocalAgentRequest` with ingress `telegram`, the
+   mapped actor, the configured Bridge and namespace, a trace named for the
+   update and a session named for the chat. `/skill command rest` is
+   translated to the platform's `skill.command rest` form so it reaches the
+   deterministic router; other text is passed as written. The Agent admits or
+   refuses by the same membership rule as every ingress: a mapped sender whose
+   actor is not bound on the Bridge is `refused` with the Agent's code, and
+   nothing is dispatched or recorded.
+5. Replies are plain text in pieces Telegram accepts, naming identities,
+   statuses and codes and never a payload, and redacted. A reply that cannot
+   be sent is recorded on the delivery as `replied=false`, never raised over
+   the outcome.
+6. An update id handled in this process is not handled again if Telegram
+   redelivers it; the batch is confirmed by advancing the offset only after
+   its updates were handled. Redelivery across a restart is a known
+   limitation recorded in the handoff.
+7. Nothing here imports a Telegram library, opens an inbound port or stores
+   an attachment. The runtime install stays `pydantic` alone.
+
+Tests precede implementation and cover: the configuration refusing a pasted
+token, a duplicate sender or actor, and a non-https origin; an unmapped
+sender and an unbound actor both refused with nothing dispatched; a mapped and
+bound sender's text and slash command reaching the real release workflow
+through the Agent and being recorded under the actor with a trace named for
+the update; `/help` and `/status` answered without a run; the token appearing
+in the Bot API URL and nowhere on the ingress, resolved once per call; a
+transport error carrying the URL reported without the token; a conflict
+stopping the loop; a redelivered update handled once and a batch handled in
+order with the offset confirmed; non-text and credential-bearing messages not
+forwarded; reply chunking; and a failed reply recorded, not raised.

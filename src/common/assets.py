@@ -14,7 +14,7 @@ SEMVER = re.compile(
     r"(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?",
     re.ASCII,
 )
-SECRET_KEYS = r"password|api[_-]?key|access[_-]?token|secret[_-]?value"
+SECRET_KEYS = r"password|api[_-]?key|access[_-]?token|secret[_-]?value|bot[_-]?token"
 # What stands where a credential was. Named here because the pattern below
 # must know it: a redaction is not itself a credential.
 REDACTED = "[redacted]"
@@ -23,12 +23,15 @@ REDACTED = "[redacted]"
 # its END line or the end of the text, so that a substitution removes all of
 # it and not only its first word. None of them matches `REDACTED`, so the
 # same pattern detects a credential and refuses to see one in its own
-# replacement. `models.wire`, `common.evaluation` and `common.trace` all
-# detect and redact with this one definition.
+# replacement. `models.wire`, `common.evaluation`, `common.trace` and
+# `channels.telegram` all detect and redact with this one definition. The
+# last alternative is the shape of a Telegram bot token, which travels inside
+# the Bot API URL and so would otherwise surface in any transport error.
 SECRET_PATTERN = re.compile(
     rf"(?:{SECRET_KEYS})\s*[=:]\s*(?!\[redacted\])(?:\"[^\"]*\"|'[^']*'|\S+)"
     r"|\bBearer\s+(?!\[redacted\])\S+"
-    r"|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----[\s\S]*?(?:-----END (?:[A-Z]+ )?PRIVATE KEY-----|\Z)",
+    r"|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----[\s\S]*?(?:-----END (?:[A-Z]+ )?PRIVATE KEY-----|\Z)"
+    r"|(?<!\d)\d{8,10}:[A-Za-z0-9_-]{35}(?![A-Za-z0-9_-])",
     re.IGNORECASE,
 )
 # A field named for a secret holds one whatever the shape of its value.
