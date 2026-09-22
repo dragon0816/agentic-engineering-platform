@@ -1,0 +1,34 @@
+{
+  "case_id": "agent-ambiguous-release",
+  "category": "agent",
+  "request": {
+    "trace": {
+      "trace_id": "trace-agent",
+      "request_id": "request-agent",
+      "span_id": "span-agent"
+    },
+    "actor": "engineer",
+    "namespace": "engineering",
+    "message": "could you look over the build before we ship it",
+    "channel": "evaluation"
+  },
+  "expected_route": {
+    "kind": "capability",
+    "target": {
+      "namespace": "engineering",
+      "name": "validate-release",
+      "version": "1.0.0"
+    },
+    "reason": "Model selected an installed route"
+  },
+  "forbidden_side_effects": [
+    "write",
+    "execute"
+  ],
+  "assertions": [
+    "model_selected_route",
+    "exact_scoped_target",
+    "stayed_in_namespace",
+    "no_credential_in_evidence"
+  ]
+}

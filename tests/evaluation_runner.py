@@ -32,7 +32,9 @@ from common.assets import AssetIdentity, ExecutionDependencies, TaskManifest, Wo
 from common.base import Contract
 from common.evaluation import EvaluationCase, ObservedRun
 from common.execution import RequestContext, RouteDecision, SideEffect
-from models.contracts import ModelRequest, ModelResponse
+from models.catalog import ModelEndpoint
+from models.contracts import ModelClient, ModelRequest, ModelResponse
+from models.openai_compatible import OpenAICompatible
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 from workflow.host_bridge import BridgeRegistration
@@ -51,6 +53,17 @@ INVOKED_CODES = frozenset({"timeout", "transient_failure", "handler_error", "inv
 # rather than inferred, so a later case that legitimately omits a route is
 # routed instead of being silently graded as the registry proof.
 DISCOVERY_CASES = frozenset({"discover-sample-task"})
+# The alias an `agent` case is routed under when the suite runs it once. A
+# comparison across aliases supplies its own.
+ROUTING_ALIAS = "routing"
+# What the stub model answers for each agent case the suite runs. Named
+# per case for the same reason DISCOVERY_CASES is: a fixture fixed to one
+# answer must not be inferred onto a case it was never written for.
+AGENT_PROPOSALS: dict[str, AssetIdentity] = {
+    "agent-ambiguous-release": AssetIdentity(
+        namespace="engineering", name="validate-release", version="1.0.0"
+    ),
+}
 
 
 def invoked(bridge: BridgeExecutor) -> tuple[AssetIdentity, ...]:
@@ -288,7 +301,7 @@ class GatewayRunner:
         self.bridge = BridgeExecutor(self.installed)
         self.workflows = InstalledWorkflows()
 
-    def _build(self) -> Gateway:
+    def _build(self, model: ModelClient | None = None, alias: str = ROUTING_ALIAS) -> Gateway:
         self.model = CountingModel()
         self.handler = RecordingHandler()
         self.publisher = RecordingHandler()
@@ -325,8 +338,11 @@ class GatewayRunner:
         workflows.register(release_workflow())
         workflows.register(release_package_workflow())
         self.workflows = workflows
+        # A deterministic case keeps the model that refuses to be called; an
+        # agent case supplies one that answers, and the router validates it.
+        chosen: ModelClient = self.model if model is None else model
         return Gateway(
-            RequestRouter(CommandRouter(skills), model=self.model),
+            RequestRouter(CommandRouter(skills), model=chosen, model_alias=alias),
             self.bridge,
             WorkflowEngine(workflows, self.bridge),
         )
@@ -358,8 +374,14 @@ class GatewayRunner:
                 seen.append(event.asset)
         return tuple(seen)
 
-    def run(self, case: EvaluationCase) -> ObservedRun:
-        gateway = self._build()
+    def run(
+        self,
+        case: EvaluationCase,
+        *,
+        model: ModelClient | None = None,
+        alias: str = ROUTING_ALIAS,
+    ) -> ObservedRun:
+        gateway = self._build(model, alias)
         result = asyncio.run(gateway.handle(case.request))
         workflow = result.workflow
         return ObservedRun(
@@ -407,6 +429,107 @@ class DiscoveryRunner:
         )
 
 
+class StubTransport:
+    """An OpenAI-shaped reply, so an `agent` case exercises the real Phase 5
+    adapter and the real router without a provider existing."""
+
+    def __init__(self, content: str, status: int = 200) -> None:
+        self.content = content
+        self.status = status
+        self.calls = 0
+
+    def send(self, url: str, body: bytes, headers: Any, timeout_s: float) -> Any:
+        self.calls += 1
+        payload = json.dumps(
+            {
+                "choices": [{"message": {"content": self.content}}],
+                "usage": {"prompt_tokens": 12, "completion_tokens": 5},
+            }
+        ).encode("utf-8")
+        return _StubReply(self.status, payload)
+
+
+class _StubReply:
+    def __init__(self, status: int, body: bytes) -> None:
+        self.status = status
+        self._body = body
+
+    def chunks(self) -> Any:
+        yield self._body
+
+    def close(self) -> None:
+        return None
+
+
+class RecordingClient:
+    """Wraps a `ModelClient` so the evaluation can see what the call cost.
+    The router returns a routing outcome, not the model's reply, and a
+    comparison needs the latency and usage Phase 5 records."""
+
+    def __init__(self, inner: ModelClient) -> None:
+        self.inner = inner
+        self.calls = 0
+        self.responses: list[ModelResponse] = []
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        # Counted before delegating: a call that raised was still a call, and
+        # evidence that says no model was contacted must not be produced by
+        # one that was.
+        self.calls += 1
+        response = self.inner.generate(request)
+        self.responses.append(response)
+        return response
+
+    def stream(self, request: ModelRequest) -> Any:
+        return self.inner.stream(request)
+
+
+def routing_endpoint(alias: str) -> ModelEndpoint:
+    return ModelEndpoint.model_validate(
+        {
+            "alias": alias,
+            "provider": "openai_compatible",
+            "model": "fixture",
+            "base_url": "https://model.invalid/api",
+            "capabilities": {"structured_output": True, "max_context_tokens": 32_000},
+        }
+    )
+
+
+def proposing(target: AssetIdentity, kind: str = "capability") -> str:
+    """What a model would have to answer for the router to accept it."""
+    return json.dumps({"kind": kind, "target": target.model_dump(mode="json"), "arguments": {}})
+
+
+class AgentRunner:
+    """A case whose route the deterministic layer cannot resolve, so a model
+    selects it. The model is a real Phase 5 adapter over a stub transport, so
+    the wire, the contract check and the router's validation all run."""
+
+    def __init__(self, alias: str, content: str) -> None:
+        self.alias = alias
+        self.transport = StubTransport(content)
+        self.client = RecordingClient(
+            OpenAICompatible(routing_endpoint(alias), transport=self.transport)
+        )
+        self.gateway = GatewayRunner()
+
+    def run(self, case: EvaluationCase) -> ObservedRun:
+        # The alias under comparison is the one the request carries, so two
+        # aliases are never the same endpoint under two labels.
+        observed = self.gateway.run(case, model=self.client, alias=self.alias)
+        answered = self.client.responses[-1] if self.client.responses else None
+        return ObservedRun.model_validate(
+            {
+                **observed.model_dump(),
+                "model_calls": self.client.calls,
+                "duration_ms": answered.duration_ms if answered is not None else None,
+                "input_tokens": answered.input_tokens if answered is not None else 0,
+                "output_tokens": answered.output_tokens if answered is not None else 0,
+            }
+        )
+
+
 class RepositoryRunner:
     """Every case in the repository, sent to the wiring that can answer it.
     A fresh Gateway per case, so one case's dispatches are never read as
@@ -415,4 +538,11 @@ class RepositoryRunner:
     def run(self, case: EvaluationCase) -> ObservedRun:
         if case.case_id in DISCOVERY_CASES:
             return DiscoveryRunner().run(case)
+        if case.category == "agent":
+            proposal = AGENT_PROPOSALS.get(case.case_id)
+            if proposal is None:
+                # Named, like the discovery cases: a stub fixed to one answer
+                # must not silently grade a case it was never written for.
+                raise LookupError(f"no stub proposal is registered for {case.case_id}")
+            return AgentRunner(ROUTING_ALIAS, proposing(proposal)).run(case)
         return GatewayRunner().run(case)

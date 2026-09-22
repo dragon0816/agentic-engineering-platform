@@ -1039,3 +1039,42 @@ its assertions instead.
 in a stable order, refusing a duplicate `case_id` where the cases are loaded.
 `report(results)` returns one line per case with the reason under every
 failure, so a CI log says what broke rather than that something did.
+
+## Model-involving evaluation (Phase 6, slice 4)
+
+The first three slices grade a deterministic platform, where one run is
+proof. A model is not deterministic, so its evaluation is a separate class of
+test and is kept out of the CI gate.
+
+`model_selected_route` is the `agent` category's grader: the route was reached
+with origin `model` **and** a model really was asked. It is the mirror of
+`deterministic_trigger` and `no_model_call`, so a deterministic case that
+asserts it fails, and so does an observation claiming a model chose while
+never calling one.
+
+`ObservedRun` carries `duration_ms`, `input_tokens` and `output_tokens` from
+the Phase 5 response, so an alias can be ranked on cost and speed rather than
+only on being right.
+
+`compare_aliases(case, aliases, run, repeat=3, graders=)` runs one case once
+per alias per repetition and returns a `ModelEvaluation`: `measured` with one
+`AliasTrial` per alias and no `detail`, or `skipped` with the reason in
+`detail`; the contract refuses each without the other. An empty alias list is
+**skipped, never passed**. A repeated alias is refused for the reason
+`load_cases` refuses a repeated id. `repeat` below two raises: one cell is not
+a measurement when the thing measured is not deterministic, which the source
+repository's benchmark states outright. A `run` that raises is recorded as a
+failed attempt with the exception named and redacted, not the end of the
+comparison: a measurement of unreliability that aborted on the first
+unreliable call could not report the alias it was built to find.
+
+An `AliasTrial` holds at least two `Attempt`s, enforced on the contract so
+stored attempts cannot be reassembled into a one-cell reliability of 1.0.
+Each attempt records whether it passed, its `duration_ms`, its tokens and the
+reasons it failed. The trial exposes `passes`, `reliability` (passes over
+attempts), `unmeasured` (attempts with no duration, usually refused before any
+call), `mean_duration_ms` over the measured attempts, and `total_duration_ms`
+only when every attempt was measured, because a total over some of them would
+read as faster exactly when the alias failed to answer. Nothing in this layer contacts a provider: the comparison takes
+a `run` callable, so a host supplies live clients and the repository's tests
+supply Phase 5 adapters over an injected transport.
