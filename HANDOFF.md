@@ -37,14 +37,17 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 - Added a deterministic bundle builder and Windows cmd/PowerShell install, verify
   and uninstall entry points. Install verifies SHA-256 for every payload before an
   offline wheel install. Uninstall is dry-run by default and path constrained.
+- The installer requires only `-Actor` for identity input. It derives
+  `bridge-<normalized-computer-name>` by default, prints it, and retains optional
+  `-BridgeId` for a collision. The name is metadata, never authentication proof.
 - Added nine contract/bundle tests and Windows CI that builds, installs, checks,
   exports and removes the preview locally, then uploads its ZIP artifact for 14 days.
 - Performed a real local offline install from the extracted ZIP, received four
   passing doctor checks, exported and inspected enrollment JSON, exercised dry-run
   uninstall, and removed the isolated installation.
 - Local deliverable (ignored by Git):
-  `dist/agentic-engineering-platform-windows-preview-0.1.0-633e4e34236f.zip`.
-  SHA-256: `2B7F23A873BAAA43BEC322411AFB3A54FEA1057F124EEF1BB9D3A3A5316A4BD6`.
+  `dist/agentic-engineering-platform-windows-preview-0.1.0-d1a97fbda097.zip`.
+  SHA-256: `18A24BBC1782BF326CD993D439CE289647A1D7E0C651C62CB71364884958A370`.
 
 ## In Progress
 
@@ -58,8 +61,8 @@ Source decision: `docs/PHASE_7_MIGRATION.md`.
 ## Remaining
 
 - On the company computer, confirm 64-bit Python 3.12, extract the ZIP, run
-  `install.cmd -Actor <platform-actor> -BridgeId <stable-bridge-id>`, retain the
-  complete doctor output and inspect the generated enrollment request.
+  `install.cmd -Actor <platform-actor>`, confirm the printed computer-name-derived
+  Bridge ID, retain the complete doctor output and inspect the enrollment request.
 - Slice 2b: implement the shared-platform authenticated invitation/device enrollment
   endpoint and Bridge client, then add a read-only connectivity probe. Do not treat
   the JSON exported by this preview as authentication proof.
