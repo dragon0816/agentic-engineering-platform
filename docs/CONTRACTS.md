@@ -1209,3 +1209,47 @@ workstation admits only its registered owner, while a shared test workstation ad
 its bound actors. Telegram identity mapping occurs before this contract and cannot
 bypass the same membership and policy path. Polling returns bounded queued records;
 cancellation is a request state and does not claim a running side effect stopped.
+
+## Resident local Agent and durable local state (Phase 7, slice 2d)
+
+`common.local_agent.BridgeMembership` is the Bridge computer's own copy of who
+may use it: its `BridgeDevice` and the `BridgeBinding`s for that device. It
+refuses a binding for another device, a repeated actor, and on a company
+workstation more than one active binding or an active binding that is not the
+registering owner, so the local rule cannot drift from the control plane's. It
+grants use of the device and nothing else. `LocalAgentRequest` is one request
+from any ingress (`local`, `shared_platform`, `telegram`): actor, Bridge,
+namespace, message, trace and optional session, closed and refusing credential
+material. A remote job is the existing `RemoteWorkflowJob`.
+
+`host_runtime.agent.LocalAgent` admits before it routes, by one rule on every
+ingress: the request names this device, the device is active, the actor holds
+an active binding, and on a company workstation the actor is the registered
+owner. A refusal is a `LocalAgentOutcome` carrying only its code
+(`device_mismatch`, `device_disabled`, `company_owner_required`,
+`actor_not_bound`, `workflow_not_installed`); the contract refuses a refusal
+that also reports a decision, a result or a run. An admitted message goes
+through the existing `Gateway` as a `RequestContext` whose channel is the
+ingress, so deterministic routing, Bridge policy and the workflow engine apply
+unchanged. An admitted `RemoteWorkflowJob` runs its exact workflow through
+`Gateway.execute_workflow` with no routing and no model, and only if that
+workflow is installed on this Bridge. The job's `ExecutionAuthorization` is the
+control plane's decision; the Bridge policy still decides every step.
+
+Every workflow the Agent starts is recorded as a `LocalRunSummary` under the
+actor who asked; the outcome contract requires a run beside every workflow
+result and only there. `LocalAgent.snapshot(observed_at)` is the authoritative
+`BridgeStateSnapshot` for the control plane to project.
+
+`host_runtime.state.SqliteLocalState` is that record on one local SQLite file:
+one process, one writer, every write one `BEGIN IMMEDIATE` transaction that is
+rolled back whole if any rule refuses, following `workflow.checkpoints_sqlite`.
+The file records the Bridge it belongs to on first open and refuses another
+device's identifier with `unavailable`. `install` applies
+`common.distribution.verify_installation`, the one installation rule now shared
+with `InMemoryLocalInventory`: the plan names this Bridge, every artifact is
+present and matches its digest, nothing is installed twice, and the whole plan
+is checked before one row changes. `record_run` keeps a run's actor fixed
+(`run_owner_fixed`) and refuses an update older than the stored one
+(`run_update_stale`). `LocalStateError` carries a code and nothing else.
+Nothing here authenticates, downloads, polls or opens a socket.

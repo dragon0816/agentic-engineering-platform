@@ -72,3 +72,38 @@ Keep source repositories and the old Host Bridge frozen at recorded revisions
 through parity and rollback rehearsal. Disable one entry point at a time only
 after its evidence passes. Archive remains a later owner decision; deletion is
 outside Phase 7.
+
+## Resident local Agent and durable local state
+
+Two source behaviours overlap this slice. The pinned `rs_workflow_system` Host
+Bridge keeps job state on the Windows computer that runs the job and reports it
+outward, characterized in `docs/PHASE_3_MIGRATION.md` when its job runner became
+the workflow engine. The pinned `telegram-local-agent` runs a resident local
+Agent that routes deterministically before anything else, characterized in
+`docs/PHASE_2_MIGRATION.md`. Decision (2026-09-22): **ADAPT** both through the
+contracts this repository already has, and write no new runtime. The resident
+Agent is a thin admission layer over the existing `Gateway`; local run state is
+the existing `LocalRunSummary` on a SQLite file that follows the checkpoint
+store's single-writer rule. Neither source's transport, token handling or
+process model is copied.
+
+Three choices were made here. Admission happens on the Bridge from its own copy
+of membership, not by asking the control plane, because company work must not
+stop when the shared platform is unreachable (Architecture, "Local-first
+resilience"); the copy carries the same company-owner rule in its own
+validator so the two cannot drift. The ingress becomes the request's channel
+and nothing more, so a Telegram sender, a polled job and a local operator are
+refused or admitted by one rule and routed by one Gateway. And the installation
+rule was lifted out of the in-memory reference into `common.distribution` so
+the durable store and the reference cannot disagree about what a valid install
+is; the reference now reports the shared rule's refusals in its own codes.
+
+Slice 2d was split from the "local Agent and transports" row into three: this
+slice needs no network, while Telegram polling (2e) and the authenticated
+shared-platform transports (2f) each need an authentication design that is
+better reviewed on its own.
+
+Rollback removes `common.local_agent`, `host_runtime.agent`,
+`host_runtime.state` and their tests, and moves `verify_installation` back
+into the in-memory reference. The Gateway, engine, Bridge, enrollment and
+distribution references are unchanged.

@@ -1,6 +1,5 @@
 """Inert references for Registry distribution and member-scoped job control."""
 
-import hashlib
 from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
 from typing import Literal, TypeVar
@@ -14,9 +13,12 @@ from common.distribution import (
     BridgeStatusProjection,
     InstallationPlan,
     InstalledAsset,
+    LocalStateError,
+    LocalStateErrorCode,
     PublishedAssetPackage,
     RemoteJobRecord,
     RemoteWorkflowJob,
+    verify_installation,
 )
 from common.enrollment import BridgeDevice, BridgeExecutionSubject
 
@@ -43,6 +45,16 @@ class ControlError(Exception):
     def __init__(self, code: ControlErrorCode) -> None:
         self.code: ControlErrorCode = TypeAdapter(ControlErrorCode).validate_python(code)
         super().__init__(self.code)
+
+
+# The installation rule is shared with the durable local state and reports in
+# its own vocabulary; these are the codes it can raise, in this one's.
+_INSTALL_CODES: dict[LocalStateErrorCode, ControlErrorCode] = {
+    "installation_bridge_mismatch": "installation_bridge_mismatch",
+    "artifact_missing": "artifact_missing",
+    "artifact_hash_mismatch": "artifact_hash_mismatch",
+    "duplicate_install": "duplicate_install",
+}
 
 
 ContractT = TypeVar("ContractT", PublishedAssetPackage, InstalledAsset, RemoteJobRecord)
@@ -101,33 +113,18 @@ class InMemoryLocalInventory:
     def apply(
         self, plan: InstallationPlan, artifacts: Mapping[str, bytes]
     ) -> tuple[InstalledAsset, ...]:
-        checked = InstallationPlan.model_validate(plan)
-        if checked.bridge_id != self.bridge_id:
-            raise ControlError("installation_bridge_mismatch")
-        candidate = dict(self._installed)
-        added = []
-        for package in checked.packages:
-            metadata = package.metadata
-            package_metadata = metadata.package
-            if package_metadata is None:  # defensive narrowing; contract already refuses this
-                raise ControlError("artifact_missing")
-            payload = artifacts.get(package_metadata.artifact_ref)
-            if payload is None:
-                raise ControlError("artifact_missing")
-            if hashlib.sha256(payload).hexdigest() != package_metadata.sha256:
-                raise ControlError("artifact_hash_mismatch")
-            if metadata.identity.key in candidate:
-                raise ControlError("duplicate_install")
-            installed = InstalledAsset(
-                identity=metadata.identity,
-                kind=package.kind,
-                artifact_ref=package_metadata.artifact_ref,
-                sha256=package_metadata.sha256,
-                installed_by=checked.actor,
+        # The same rule the durable local state applies, so the reference and
+        # the Bridge computer cannot disagree about what a valid install is.
+        try:
+            added = verify_installation(
+                plan, artifacts, bridge_id=self.bridge_id, installed=self._installed
             )
-            candidate[metadata.identity.key] = installed
-            added.append(installed)
-        self._installed = candidate
+        except LocalStateError as error:
+            raise ControlError(_INSTALL_CODES[error.code]) from None
+        self._installed = {
+            **self._installed,
+            **{item.identity.key: item for item in added},
+        }
         return tuple(_copy(item) for item in added)
 
     def installed(self) -> tuple[InstalledAsset, ...]:

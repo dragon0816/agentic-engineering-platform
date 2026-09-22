@@ -204,3 +204,59 @@ Agent interface and read-only connectivity probe before workflow migration.
    bounded poll queue; Telegram never bypasses the same membership/policy checks.
 6. This slice has no socket, downloader, code loader or process execution. It is the
    contract/reference proof for later authenticated transports and local UI work.
+
+## Slice 2d — resident local Agent and durable local state acceptance
+
+Migration step 4 names three things: a local Agent interface, Registry
+synchronization and authenticated Bridge polling. They are three slices, because
+the first needs no network and the other two need an authentication design.
+This slice is the resident Agent on the Bridge computer and the durable local
+state it owns. It is exercised entirely in-process; no socket is opened.
+
+1. `common.local_agent.BridgeMembership` is the Bridge computer's own copy of
+   who may use it: its `BridgeDevice` and the `BridgeBinding`s for that device.
+   The contract refuses a binding for another device, a repeated actor, and, on
+   a company workstation, more than one active binding or an active binding that
+   is not the registering owner. It grants nothing beyond use of the device.
+2. `common.local_agent.LocalAgentRequest` is one request to the resident Agent
+   from any ingress (`local`, `shared_platform`, `telegram`): actor, Bridge,
+   namespace, message, trace and optional session. It refuses credential
+   material and unknown fields. A remote job arrives as the existing
+   `RemoteWorkflowJob`, unchanged.
+3. `host_runtime.agent.LocalAgent` admits before it routes, on every ingress
+   alike: the request names this device, the device is active, the actor holds
+   an active binding, and on a company workstation the actor is the registered
+   owner. A refusal is a typed `LocalAgentOutcome` with a code; nothing is
+   dispatched, nothing is recorded, and the Bridge's event log stays empty.
+4. An admitted message goes through the existing `Gateway` with the request's
+   actor, namespace and trace and the ingress as its channel, so deterministic
+   routing, Bridge policy and the workflow engine apply exactly as they do for
+   any other caller. An admitted `RemoteWorkflowJob` executes its exact workflow
+   through `Gateway.execute_workflow` with no routing and no model; a workflow
+   not installed on this Bridge is refused before anything runs.
+5. Every workflow run the Agent starts is recorded as a `LocalRunSummary` in
+   durable local state under the platform actor who started it. A later record
+   for the same run may change its status, never its actor: actor switching
+   never changes an existing run's ownership (slice 1, item 5).
+6. `host_runtime.state.SqliteLocalState` is the durable local inventory and run
+   state on one local SQLite file, single-writer, every write one committed
+   transaction. Installation applies the same verification rule as the in-memory
+   reference (`common.distribution.verify_installation`, now shared): every
+   artifact's digest is checked and the whole plan is refused before one row
+   changes. The inventory and runs survive closing and reopening the file, and
+   `snapshot(observed_at)` yields the authoritative `BridgeStateSnapshot` the
+   control plane projects.
+7. Company work needs no control plane present. A test drives a workflow whose
+   manifest declares no central service through the Agent with no Registry,
+   control plane or transport object in the process at all.
+8. Nothing here authenticates, downloads, polls or opens a socket. Registry
+   synchronization is slice 2f; Telegram sender mapping and polling is slice 2e.
+
+Tests precede implementation and cover: membership validation; request
+validation; owner-only admission on a company device and bound-actor admission
+on a shared test device, with the refusal codes and an empty event log; a routed
+message reaching a real workflow through the Gateway; a remote job executing its
+exact workflow and a job for an uninstalled workflow refused; run ownership that
+cannot change; whole-plan install refusal leaving the SQLite inventory untouched;
+inventory and runs surviving reopen; the snapshot carrying both; and a run with
+no control plane in the process.

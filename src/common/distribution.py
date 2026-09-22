@@ -1,5 +1,7 @@
 """Local-first package, Bridge-state and member-scoped remote-job contracts."""
 
+import hashlib
+from collections.abc import Collection, Mapping
 from typing import Literal, Self
 
 from pydantic import AwareDatetime, JsonValue, model_validator
@@ -123,3 +125,67 @@ class RemoteWorkflowJob(RegistryContract):
 class RemoteJobRecord(Contract):
     request: RemoteWorkflowJob
     status: Literal["queued", "cancel_requested"] = "queued"
+
+
+LocalStateErrorCode = Literal[
+    "installation_bridge_mismatch",
+    "artifact_missing",
+    "artifact_hash_mismatch",
+    "duplicate_install",
+    "run_owner_fixed",
+    "run_update_stale",
+    "unavailable",
+]
+
+
+class LocalStateError(Exception):
+    """A local inventory or run-state rule refused a change. The code is the
+    whole message: no artifact bytes, path or record is echoed."""
+
+    def __init__(self, code: LocalStateErrorCode) -> None:
+        self.code: LocalStateErrorCode = code
+        super().__init__(code)
+
+
+def verify_installation(
+    plan: InstallationPlan,
+    artifacts: Mapping[str, bytes],
+    *,
+    bridge_id: str,
+    installed: Collection[tuple[str, str, str]],
+) -> tuple[InstalledAsset, ...]:
+    """The rows an installation would add, or the reason it adds none.
+
+    One rule for every local inventory, in memory or on disk: the plan names
+    this Bridge, every artifact is present and matches its declared digest,
+    and nothing in it is installed already. The whole plan is checked before
+    the first row is returned, so a caller that applies the result applies
+    all of it or none."""
+    checked = InstallationPlan.model_validate(plan)
+    if checked.bridge_id != bridge_id:
+        raise LocalStateError("installation_bridge_mismatch")
+    present = set(installed)
+    added: list[InstalledAsset] = []
+    for package in checked.packages:
+        metadata = package.metadata
+        artifact = metadata.package
+        if artifact is None:  # the contract already refuses this; narrowing only
+            raise LocalStateError("artifact_missing")
+        payload = artifacts.get(artifact.artifact_ref)
+        if payload is None:
+            raise LocalStateError("artifact_missing")
+        if hashlib.sha256(payload).hexdigest() != artifact.sha256:
+            raise LocalStateError("artifact_hash_mismatch")
+        if metadata.identity.key in present:
+            raise LocalStateError("duplicate_install")
+        present.add(metadata.identity.key)
+        added.append(
+            InstalledAsset(
+                identity=metadata.identity,
+                kind=package.kind,
+                artifact_ref=artifact.artifact_ref,
+                sha256=artifact.sha256,
+                installed_by=checked.actor,
+            )
+        )
+    return tuple(added)

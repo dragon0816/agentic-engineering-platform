@@ -350,6 +350,10 @@ class GatewayRunner:
             WorkflowEngine(workflows, self.bridge),
         )
 
+    def gateway(self) -> Gateway:
+        """The same wiring, for a host that drives the Gateway directly."""
+        return self._build()
+
     def _declared_steps(self, decision: RouteDecision) -> int:
         """What the manifest the request triggered says must happen."""
         if decision.kind != "workflow" or decision.target is None:

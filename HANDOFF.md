@@ -1,143 +1,121 @@
-# Handoff — Phase 7 local-first distribution and remote control
+# Handoff — Phase 7 slice 2d, resident local Agent and durable local state
 
 Updated: 2026-09-22 (Asia/Taipei).
-Branch: `main`, after the Phase 7 stack merged (#48, then #49 and #50
-together through #51). Implementation commit of the last slice: `88fec63`.
+Branch: `phase-7/local-agent`, based on `main` after PR #52 merged.
 
-How the stack landed: #48 merged into `main`. Deleting its head branch made
-GitHub close #49 rather than retarget it, and a closed pull request cannot be
-reopened or retargeted. #50 had already merged into #49's head branch, so
-that branch, carrying both slices with a clean trial merge against `main`,
-was opened as #51 and merged after its own CI passed. Nothing in either slice
-was changed on the way.
-
-Progress across phases is in `docs/TASKS.md`. This file records only where the
-current work stopped and how to resume it.
+Progress across every phase is in `docs/TASKS.md`. This file is only where
+the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-Apply the owner's local-first deployment decision: the resident Personal Agent,
-installed Skills/Workflows, complete run state and corporate credentials belong on
-the Bridge computer. The shared platform distributes published assets and projects
-Bridge state. Remote requests remain member-scoped: a company workstation accepts
-its one bound owner and a shared test workstation accepts its bound platform users.
-Telegram is a future ingress to the same resident Agent and policy path.
+Migration step 4 of `docs/phases/PHASE_7_MIGRATION.md` names a local Agent
+interface, Registry synchronization and authenticated Bridge polling. This
+slice is the first of those: the resident Agent on the Bridge computer and the
+durable local state it owns, with no network at all. Requirements: the
+"Slice 2d" section of the phase specification; contracts: `docs/CONTRACTS.md`
+("Resident local Agent and durable local state"); decisions:
+`docs/PHASE_7_MIGRATION.md` (same heading).
 
-Active specification: `docs/phases/PHASE_7_MIGRATION.md`.
-Implementation plan: `docs/PHASE_7_LOCAL_FIRST_CONTROL.md`.
-Source decision: `docs/PHASE_7_MIGRATION.md`.
+## Owner decisions in force
+
+Listed with their dates in `docs/TASKS.md`. The ones that shape this slice: the
+local-first deployment decision (installed assets, run state and credentials
+stay on the Bridge computer), and that a company workstation is operated only
+by its one bound owner while a shared test workstation is operated by its
+bound platform users.
 
 ## Completed
 
-- Reconciled the owner decision with the already-approved Personal Engineering Plane
-  and Team Platform Plane. The shared platform's primary purposes are Registry/package
-  distribution and remote control/status projection; it is not local run authority.
-- Added `PublishedAssetPackage`, `InstallationPlan` and `InstalledAsset`. A published
-  exact package can be discovered and planned, but neither action grants execution.
-- Added an in-memory Registry and local inventory reference. It verifies every byte
-  payload SHA-256 before one inventory mutation, records exact provenance, imports no
-  code and remains readable after the Registry is unavailable.
-- Added `BridgeStateSnapshot`, `LocalRunSummary` and `BridgeStatusProjection`. The
-  Bridge snapshot is authoritative; the central projection preserves it and becomes
-  `stale` after a declared interval rather than inventing current state.
-- Added `RemoteWorkflowJob` with explicit `shared_platform`/`telegram` ingress,
-  actor, Bridge, exact Workflow, arguments, trace and matching allowed runtime grant.
-  Secret fields/values and arbitrary command/shell fields are refused.
-- Added a bounded inert remote queue. It calls an enrollment admission boundary,
-  enforces that company requests come from the registered/bound owner, permits bound
-  users of a shared test computer, preserves actor/channel and models cancellation as
-  a request rather than a false claim that an effect stopped.
-- Strengthened `reject_embedded_secrets` to reject secret-named mapping fields, not
-  only recognizable credential strings in their values.
-- Inspected the pinned `telegram-local-agent` Telegram channel/handler at
-  `4b40a215909e4fdd4b65519d70669a84e9abd43d`. Decision **ADAPT** outbound polling,
-  numeric sender checking and deterministic direct commands in a later slice. Do not
-  copy embedded token configuration, provider/UI coupling or its unsafe behavior
-  that allows every sender when `allowed_users` is empty.
-- Added seven tests after recording requirements; initial collection failed because
-  `common.distribution` did not exist, then focused/full verification passed.
+- `src/common/local_agent.py`: `BridgeMembership` (the device's own copy of
+  who may use it, with the company-owner rule in its validator) and
+  `LocalAgentRequest` (one request from `local`, `shared_platform` or
+  `telegram` ingress, closed, no credential material).
+- `src/host_runtime/agent.py`: `LocalAgent.admit`, `handle` (through the
+  existing `Gateway`, ingress as channel) and `execute` (a `RemoteWorkflowJob`'s
+  exact workflow through `Gateway.execute_workflow`, only if installed here);
+  `LocalAgentOutcome` whose contract refuses a refusal that also reports a
+  result, and requires a run record beside every workflow result.
+- `src/host_runtime/state.py`: `SqliteLocalState`, single-writer, one committed
+  transaction per write, file bound to one Bridge identifier, whole-plan
+  install refusal, run ownership fixed and updates never backwards, and
+  `snapshot()` for the control plane to project.
+- `common.distribution.verify_installation` and `LocalStateError`: the
+  installation rule lifted out of `InMemoryLocalInventory`, which now applies
+  it and maps its codes.
+- `tests/evaluation_runner.py` exposes `GatewayRunner.gateway()` so a host test
+  can drive the repository's real wiring directly.
+- `tests/test_local_agent.py`, 11 tests, as listed at the end of the slice 2d
+  requirements section.
+- The "2d local Agent and transports" row split into 2d, 2e and 2f in
+  `docs/TASKS.md`.
 
 ## In Progress
 
-- Nothing. The stack is merged and `main` is the state to resume from.
+- PR #53 open for review. Nothing else uncommitted.
 
 ## Remaining
 
-- Slice 2d: implement a resident local Agent host/interface and durable local
-  inventory/run-state adapter. Company work must remain usable offline for assets
-  whose manifests do not require central services.
-- Implement authenticated Registry synchronization/download around the exact package
-  contract. Installation still must be explicit, digest verified and separate from
-  execution authorization.
-- Implement Telegram polling as an optional local ingress. Resolve bot token through
-  `SecretRef`, fail closed when no numeric sender mapping exists, map one sender to a
-  platform actor, then use the same routing, binding and policy path.
-- Implement authenticated shared-platform Bridge polling/status transport. No
-  arbitrary shell/desktop control. Then migrate workflow 7, workflow 13 and knowledge
-  in the approved order.
+- Slice 2e, Telegram ingress: clone the pinned `telegram-local-agent`
+  (`4b40a215909e4fdd4b65519d70669a84e9abd43d`) read-only and characterize its
+  channel before writing the adapter. Outbound polling over an injected
+  transport, bot token through `SecretRef`, a numeric sender mapped to exactly
+  one bound actor, fail closed when the map is empty or the sender unmapped,
+  then `LocalAgentRequest(ingress="telegram")` into the same `LocalAgent`.
+  First prove an unmapped sender and an unbound actor are both refused.
+- Slice 2f, authenticated shared-platform transports: Registry package
+  synchronization, Bridge job polling and snapshot reporting. Needs an
+  authentication design (what a Bridge presents, what the control plane
+  checks) before any code; that design is an owner decision.
+- Then migration steps 5 to 9 as listed in `docs/TASKS.md`.
 
-## Architecture decisions and invariants
+## Architecture decisions made
 
-- Local installed assets and detailed run state are authoritative. Central status is
-  a timestamped projection and must display stale when reports stop.
-- A company workstation may be remotely operated, but only by its single bound owner.
-  A shared test workstation may be operated by its active bound users.
-- Telegram and shared-platform ingress converge before routing/authorization. A
-  channel allowlist cannot replace platform actor/device admission.
-- Telegram uses outbound polling and needs no inbound company firewall opening.
-- Publication, package discovery, installation, device membership and execution
-  authorization remain distinct decisions.
-- Remote jobs name exact Workflows. The initial remote-control contract has no shell,
-  desktop-control or raw capability-execution field.
-- Tokens and corporate credentials stay local and are references/host configuration,
-  never Registry packages, jobs, snapshots, traces or Git content.
+- The Bridge admits from its own membership copy, never by asking the control
+  plane, so company work continues while the shared platform is unreachable.
+- The ingress is the request's channel and nothing more; one admission rule
+  and one Gateway for every ingress.
+- The installation rule lives in `common.distribution` and is shared by the
+  in-memory reference and the durable store.
 
 ## Exact verification commands and results
 
-Windows, Python 3.12.14, repository root:
+Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
-.venv/Scripts/python.exe -m pytest tests/test_local_first_control.py -q -p no:cacheprovider --basetemp .scratch/pytest-local-first
-# 7 passed
-
-.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider --basetemp .scratch/pytest-local-control-full
-# 711 passed, 3 skipped (Windows symbolic-link privileges)
-
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
+# PASS: 722 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
-# All checks passed
+# PASS
 .venv/Scripts/python.exe -m ruff format --check .
-# 145 files already formatted
+# PASS
 .venv/Scripts/python.exe -m mypy
-# Success: no issues found in 110 source files
-.venv/Scripts/python.exe -m build
-# Successfully built wheel and sdist
+# PASS
 .venv/Scripts/python.exe -m pip check
-# No broken requirements found
+# PASS
+.venv/Scripts/python.exe -m build
+# PASS: sdist and wheel
 git diff --check
-# clean
+# PASS
 ```
 
-All tests are inert. No socket, Telegram call, artifact download, executable import,
-process launch, filesystem production write or Workflow execution occurred.
+No socket, model, gateway, network, real vault, job or n8n instance was
+invoked. The SQLite files live under pytest's temporary directory.
 
-PR #50 CI: Ubuntu 3.11/3.12 and Windows 3.11/3.12 all passed. #51 (the
-combined #49 and #50 branch) passed the same matrix, and the chain above was
-re-run on `main` after it merged with the same results.
+## Known issues / limitations
 
-## Known issues
-
-- The reference stores are in memory. They are contract proofs, not a production
-  Registry, installer, local run database or authenticated transport.
-- Telegram is represented only as an ingress value and migration decision. There is
-  no Telegram dependency, polling process, sender mapper or token resolver yet.
-- The installed Windows preview remains preflight-only. A preview package built
-  before the stack merged does not contain slice 2c; a later package must be
-  built from `main`.
-- `.claude/` is user-owned, remains untracked and was not modified or committed.
+- `LocalAgent` keeps run summaries, not full run history; the engine's journal
+  and checkpoint store remain where a run's steps live. The summary is what
+  the control plane projects.
+- The Agent has no local interface beyond the Python API. The Windows preview
+  CLI (`aep-host`) does not yet expose it; wiring the CLI to the Agent belongs
+  with the Telegram or transport slice, whichever lands first.
+- `SqliteLocalState` refuses a second writer with `unavailable` rather than
+  waiting, like the checkpoint store; a host runs one Agent per state file.
+- Membership on the Bridge is a contract the host supplies. How it is
+  delivered from the control plane and kept current is part of slice 2f.
 
 ## Next Recommended Action
 
-Implement slice 2d as a resident local Agent host with
-a minimal local interface and persistent local inventory/status. Add Telegram sender
-mapping and outbound polling as a separate adapter over the same local Agent request
-contract; first prove an unauthorized sender and an unbound actor are both refused.
+Merge PR #53 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
+start slice 2e by cloning the pinned Telegram source read-only and writing its
+requirements section before any adapter code.
