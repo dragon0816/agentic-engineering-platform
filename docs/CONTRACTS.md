@@ -5,6 +5,25 @@ Pydantic `model_dump_json` / `model_validate_json`. Metadata is frozen; Registry
 ingress revalidates and stores serialized snapshots so caller mutations cannot alter
 registered assets. Pydantic is a validation dependency, not a provider contract.
 
+## Phase 7 enrollment boundary
+
+`Invitation` is non-secret metadata for one named actor. A host validates the
+out-of-band invitation proof before calling the reference registry; no password,
+token or session is represented. `PlatformUser` and `BridgeDevice` have independent
+active/disabled lifecycle. `BridgeBinding` grants use of one Bridge only, while
+`BridgeExecutionSubject` makes actor and device explicit on new work.
+
+`company_workstation` requires a dedicated Windows user, corporate resource scope,
+single-user local boundary and one active platform member. `shared_test_workstation`
+requires a shared Windows user, external-only scope and cooperative workspace; it
+may have several platform members but one interactive slot. Cooperative workspace
+is organizational separation, not confidentiality from users of the same OS account.
+
+`InMemoryEnrollmentRegistry` demonstrates invitation acceptance, device enrollment,
+membership and use-time checks. It is not an authentication server, RBAC server,
+session store, installer or durable database. Enrollment never grants a capability,
+resolves a SecretRef or authorizes a side effect.
+
 - `AssetIdentity`: namespace/name/full SemVer tuple, exact and case-sensitive.
   Namespace and name use lowercase slugs. Versions include prerelease/build metadata;
   no implicit latest-version resolution. Owner and visibility are independent fields.

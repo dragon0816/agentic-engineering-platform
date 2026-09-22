@@ -2,6 +2,11 @@
 
 Unified engineering automation platform for agentic reasoning, deterministic workflows, enterprise knowledge, tools/MCP capabilities, and evaluation.
 
+Phase 7 is active with invitation-only platform enrollment and separate Bridge
+device identity as its first slice. Production-like validation will run on an
+enrolled company Agent + Bridge, beginning with Jira report workflow 7 and release
+package workflow 13; CI and this shared-platform host remain side-effect-free.
+
 Phase 1 provides validated contracts and an in-memory Task discovery / Bridge
 advertisement proof. Phase 2 adds deterministic-first routing, installed Skills,
 permission-checked local dispatch and an injected MCP client adapter. No production

@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 complete; Phase 7 — End-to-end migration and deprecation not started (its specification waits on the pending owner decisions listed in `docs/TASKS.md`)
+Status: Phases 1–6 complete; Phase 7 — End-to-end migration and controlled deprecation active
 
 ## Objective
 
@@ -132,6 +132,19 @@ Met 2026-09-22 in five slices (`docs/phases/PHASE_6_EVALUATION.md`, decisions in
 ## Phase 7 — End-to-end migration and deprecation
 
 Run representative production-like scenarios against old and new paths. Deprecate source components only after parity/acceptance criteria are met. Keep rollback documentation during transition.
+
+Owner scope set 2026-09-22: the shared-platform computer is the control plane;
+real validation runs on an enrolled company computer with Agent + Bridge. Start
+with workflow 7 (Jira report), then workflow 13 (release package), then a copy of
+the knowledge vault. Accounts are invitation-only. A company workstation is bound
+to its one employee; a shared test workstation may bind several platform users
+who share one Windows account and therefore have no OS-level isolation from each
+other. CI remains inert and all source paths remain available for rollback.
+
+Exit criteria: both priority workflows pass their explicit source/platform parity
+gates on the company Bridge; knowledge passes on a copy; account/device/run identity
+is attributable; rollback is rehearsed; and each retired entry point has owner
+approval and retained source evidence. See `docs/phases/PHASE_7_MIGRATION.md`.
 
 ## First implementation slice after Phase 0
 
