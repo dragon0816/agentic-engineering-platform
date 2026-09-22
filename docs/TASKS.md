@@ -24,9 +24,9 @@ the history is complete; this table is the index into them.
 ## Status
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
-`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b and 2c to 2h
-have merged, 2j is in review, and 2i is the next to build. 58 pull requests
-merged (#1 to #62; #5 was closed unmerged and superseded by #6, the
+`docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b, 2c to 2h and 2j
+have merged, and 2i is the next to build. 59 pull requests
+merged (#1 to #64; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
 when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
@@ -132,7 +132,7 @@ privileges and run on Linux CI.
 | 2f company host runtime | #56 | done | `aep-host` assembles the resident Agent from the workspace files (membership, grants, Skill and Workflow manifests) and gains `ask`, `status` and `telegram`; `doctor` reports what the host has been given; the Telegram offset is durable |
 | 2g member-decided asset authorization | #58 | done | A member chooses which Workflows, Skills and tools their devices may run; the control plane refuses a decision they may not make and derives the Bridge's grants from the capability's own specification; a host installs and grants only what was chosen |
 | 2h identity-derived entitlement | #60 | done | An invitation records which groups accepting it grants; an authenticated actor says who and until when and carries no group; what a member may use follows from the platform's record, and a decision needs a valid session and the member's own name |
-| 2j one member per machine, and who asked | — | in review | Every machine holds one active binding, whatever its kind: a shared test workstation runs as a virtual member of its own, so no colleague's credential sits on a machine other people can read. A request and a run record who asked when that is not who runs; the field is recorded and never consulted. A company workstation refuses delegation outright, and a Telegram sender who is not the machine's member drives a shared machine as the virtual member on their behalf |
+| 2j one member per machine, and who asked | #64 | done | Every machine holds one active binding, whatever its kind: a shared test workstation runs as a virtual member of its own, so no colleague's credential sits on a machine other people can read. A request and a run record who asked when that is not who runs; the field is recorded and never consulted. A company workstation refuses delegation outright, and a Telegram sender who is not the machine's member drives a shared machine as the virtual member on their behalf |
 | 2i authenticated shared-platform transports | — | planned | Registry package synchronization, authorization delivery, capability advertisement, a read-only connectivity probe, Bridge job polling and snapshot reporting, over a transport that presents a Bridge access token; unreachable is never treated as revoked |
 | 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
