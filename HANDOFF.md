@@ -39,7 +39,6 @@ Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
 - 46 test cases in `tests/test_evaluation.py`, including two aliases compared
   on a case they disagree about, an alias that is right half the time showing
   a reliability of 0.5, the skipped result, and a single attempt refused.
-
 - PR #43 review (9 findings) applied, all fixed. The alias under comparison
   never reached the model request, so two aliases would have been the same
   endpoint under two labels; it is passed explicitly and a test reads it back
@@ -115,6 +114,6 @@ No model, gateway, network, real vault, job or n8n instance was invoked.
 
 ## Next Recommended Action
 
-Open the PR for `phase-6/model-evaluation`, run the review, apply confirmed
-findings and merge on green CI. Then write the slice 5 requirements, add trace
-capture with redaction, and close Phase 6 against its exit criteria.
+Merge PR #43 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
+write the slice 5 requirements, add trace capture with redaction, and close
+Phase 6 against its exit criteria.
