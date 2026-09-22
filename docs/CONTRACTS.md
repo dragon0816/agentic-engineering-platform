@@ -1058,15 +1058,23 @@ only on being right.
 
 `compare_aliases(case, aliases, run, repeat=3, graders=)` runs one case once
 per alias per repetition and returns a `ModelEvaluation`: `measured` with one
-`AliasTrial` per alias, or `skipped` with the reason. An empty alias list is
-**skipped, never passed**, and the contract refuses to call a comparison
-measured when it holds no trials. `repeat` below two raises: one cell is not a
-measurement when the thing measured is not deterministic, which the source
-repository's benchmark states outright.
+`AliasTrial` per alias and no `detail`, or `skipped` with the reason in
+`detail`; the contract refuses each without the other. An empty alias list is
+**skipped, never passed**. A repeated alias is refused for the reason
+`load_cases` refuses a repeated id. `repeat` below two raises: one cell is not
+a measurement when the thing measured is not deterministic, which the source
+repository's benchmark states outright. A `run` that raises is recorded as a
+failed attempt with the exception named and redacted, not the end of the
+comparison: a measurement of unreliability that aborted on the first
+unreliable call could not report the alias it was built to find.
 
-An `AliasTrial` keeps every `Attempt` (whether it passed, its `duration_ms`,
-its tokens and the reasons it failed) and exposes `passes`, `reliability`
-(passes over attempts) and `total_duration_ms`, which is `None` when nothing
-was measured. Nothing in this layer contacts a provider: the comparison takes
+An `AliasTrial` holds at least two `Attempt`s, enforced on the contract so
+stored attempts cannot be reassembled into a one-cell reliability of 1.0.
+Each attempt records whether it passed, its `duration_ms`, its tokens and the
+reasons it failed. The trial exposes `passes`, `reliability` (passes over
+attempts), `unmeasured` (attempts with no duration, usually refused before any
+call), `mean_duration_ms` over the measured attempts, and `total_duration_ms`
+only when every attempt was measured, because a total over some of them would
+read as faster exactly when the alias failed to answer. Nothing in this layer contacts a provider: the comparison takes
 a `run` callable, so a host supplies live clients and the repository's tests
 supply Phase 5 adapters over an injected transport.

@@ -613,7 +613,7 @@ def test_a_comparison_with_nothing_to_compare_is_skipped_not_passed() -> None:
 
     skipped = compare_aliases(case, (), unused, repeat=3)
     assert skipped.status == "skipped" and skipped.trials == ()
-    assert "no alias is configured" in skipped.detail
+    assert skipped.detail is not None and "no alias is configured" in skipped.detail
     assert ModelEvaluation.model_validate_json(skipped.model_dump_json()) == skipped
 
     # The contract refuses to describe a measurement it does not have.
@@ -634,9 +634,116 @@ def test_a_single_attempt_is_refused_rather_than_reported() -> None:
             compare_aliases(case, ("one",), unused, repeat=repeat)
 
 
-def test_a_trial_needs_at_least_one_attempt() -> None:
+def test_a_trial_needs_at_least_two_attempts_where_the_data_lives() -> None:
+    """The rule is enforced on the contract, not only in the function that
+    builds it, so stored attempts cannot be reassembled into a one-cell 1.0."""
     with pytest.raises(ValidationError):
         AliasTrial(alias="none", attempts=())
-    single = AliasTrial(alias="one", attempts=(Attempt(passed=True, duration_ms=None),))
-    # Nothing was measured, so there is no total to report.
-    assert single.total_duration_ms is None and single.reliability == 1.0
+    with pytest.raises(ValidationError):
+        AliasTrial(alias="one", attempts=(Attempt(passed=True, duration_ms=None),))
+    two = AliasTrial(
+        alias="two",
+        attempts=(Attempt(passed=True, duration_ms=None), Attempt(passed=False, duration_ms=400)),
+    )
+    assert two.reliability == 0.5 and two.unmeasured == 1
+    # One unmeasured attempt means no honest total; the mean is over what was
+    # measured and says so through `unmeasured`.
+    assert two.total_duration_ms is None and two.mean_duration_ms == 400.0
+
+
+def test_durations_are_compared_per_measured_call() -> None:
+    """Alias B refused twice and answered once slowly. Summing what was
+    measured would have read B as faster than A."""
+    a = AliasTrial(
+        alias="a", attempts=tuple(Attempt(passed=True, duration_ms=400) for _ in range(3))
+    )
+    b = AliasTrial(
+        alias="b",
+        attempts=(
+            Attempt(passed=False, duration_ms=None),
+            Attempt(passed=False, duration_ms=None),
+            Attempt(passed=True, duration_ms=900),
+        ),
+    )
+    assert a.total_duration_ms == 1200 and a.mean_duration_ms == 400.0 and a.unmeasured == 0
+    assert b.total_duration_ms is None and b.mean_duration_ms == 900.0 and b.unmeasured == 2
+
+
+def test_a_skipped_comparison_says_why_and_a_measured_one_says_nothing() -> None:
+    with pytest.raises(ValidationError, match="says why"):
+        ModelEvaluation(case_id="c", status="skipped")
+    trial = AliasTrial(alias="a", attempts=(Attempt(passed=True), Attempt(passed=True)))
+    with pytest.raises(ValidationError, match="no detail"):
+        ModelEvaluation(case_id="c", status="measured", detail="but why", trials=(trial,))
+    assert ModelEvaluation(case_id="c", status="measured", trials=(trial,)).detail is None
+
+
+def test_the_same_alias_is_compared_once() -> None:
+    case = agent_case()
+
+    def unused(item: EvaluationCase, alias: str) -> ObservedRun:
+        raise AssertionError("nothing should run")
+
+    with pytest.raises(ValueError, match="compared once"):
+        compare_aliases(case, ("fast", "fast", "accurate"), unused, repeat=2)
+
+
+def test_a_run_that_raises_is_a_failed_attempt_not_the_end_of_the_comparison() -> None:
+    """A measurement of unreliability that aborts on the first unreliable
+    call cannot report the alias it was built to find."""
+    case = agent_case()
+    calls = {"n": 0}
+
+    def flaky(item: EvaluationCase, alias: str) -> ObservedRun:
+        calls["n"] += 1
+        if alias == "broken" and calls["n"] % 2 == 0:
+            raise ConnectionError("upstream closed; header was Authorization: Bearer sk-live-abc")
+        return AgentRunner(alias, proposing(validate_release_spec().identity)).run(item)
+
+    measured = compare_aliases(case, ("steady", "broken"), flaky, repeat=2)
+    steady, broken = measured.trials
+    assert steady.reliability == 1.0
+    assert broken.reliability == 0.5
+    raised = next(item for item in broken.attempts if not item.passed)
+    assert raised.duration_ms is None
+    assert any("the run raised ConnectionError" in reason for reason in raised.reasons)
+    # The exception text is redacted before it becomes evidence.
+    assert not any("sk-live-abc" in reason for reason in raised.reasons)
+
+
+def test_the_alias_under_comparison_reaches_the_model_request() -> None:
+    """Two aliases must never be the same endpoint under two labels. The
+    adapter echoes the request's alias, so the recorded reply shows which
+    alias each trial was really issued under."""
+    case = agent_case()
+    runner = AgentRunner("accurate", proposing(validate_release_spec().identity))
+    runner.run(case)
+    assert runner.client.responses[-1].model_alias == "accurate"
+
+
+def test_a_model_call_that_raised_still_counts_as_a_call() -> None:
+    case = agent_case()
+
+    class Exploding:
+        def generate(self, request: Any) -> Any:
+            raise RuntimeError("provider exploded")
+
+        def stream(self, request: Any) -> Any:
+            raise NotImplementedError
+
+    from evaluation_runner import RecordingClient
+
+    client = RecordingClient(Exploding())
+    observed = GatewayRunner().run(case, model=client, alias="exploding")
+    assert client.calls == 1 and client.responses == []
+    # The router turned the exception into needs_input, and the evidence must
+    # still say a model was contacted.
+    assert observed.decision is not None and observed.decision.kind == "needs_input"
+
+
+def test_an_agent_case_the_stub_was_not_written_for_is_refused_not_misrouted() -> None:
+    stray = EvaluationCase.model_validate(
+        {**agent_case().model_dump(mode="json"), "case_id": "agent-unregistered"}
+    )
+    with pytest.raises(LookupError, match="no stub proposal"):
+        RepositoryRunner().run(stray)

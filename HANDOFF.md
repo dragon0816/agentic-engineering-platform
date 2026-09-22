@@ -36,14 +36,27 @@ Listed with their dates in `docs/TASKS.md`. The one that shapes this phase:
   `OpenAICompatible` adapter over a stub transport, so the wire format, the
   structured-output parse and the router's validation all run without a
   provider existing.
-- 38 test cases in `tests/test_evaluation.py`, including two aliases compared
+- 46 test cases in `tests/test_evaluation.py`, including two aliases compared
   on a case they disagree about, an alias that is right half the time showing
   a reliability of 0.5, the skipped result, and a single attempt refused.
 
+- PR #43 review (9 findings) applied, all fixed. The alias under comparison
+  never reached the model request, so two aliases would have been the same
+  endpoint under two labels; it is passed explicitly and a test reads it back
+  off the reply. A `run` that raised aborted the whole comparison, discarding
+  every completed attempt; it is a failed attempt now. Durations were totalled
+  over different numbers of measured calls, so an alias that refused twice
+  read as faster; `mean_duration_ms` and `unmeasured` replace that, and a
+  total exists only when everything was measured. The two-attempt minimum
+  lived only in the function, not the contract. A skipped result carried
+  `detail="measured"`. Duplicate aliases were not refused. The stub proposal
+  was inferred onto every agent case rather than named per case. A model call
+  that raised counted as zero calls. And `docs/TASKS.md` recorded this PR as
+  merged before it was; a row now says `in review` until its PR merges.
+
 ## In Progress
 
-- Opening the review PR for this branch; review and CI results are recorded on
-  the PR once available.
+- Nothing; the PR is open with the review applied.
 
 ## Remaining
 
@@ -71,7 +84,7 @@ Windows, Python 3.12.14, repository root, with the `office` extra installed:
 
 ```powershell
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 654 passed, 3 skipped (link privileges)
+# PASS: 661 passed, 3 skipped (link privileges)
 .venv/Scripts/python.exe -m ruff check .
 # PASS
 .venv/Scripts/python.exe -m ruff format --check .

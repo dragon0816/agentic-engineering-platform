@@ -56,6 +56,14 @@ DISCOVERY_CASES = frozenset({"discover-sample-task"})
 # The alias an `agent` case is routed under when the suite runs it once. A
 # comparison across aliases supplies its own.
 ROUTING_ALIAS = "routing"
+# What the stub model answers for each agent case the suite runs. Named
+# per case for the same reason DISCOVERY_CASES is: a fixture fixed to one
+# answer must not be inferred onto a case it was never written for.
+AGENT_PROPOSALS: dict[str, AssetIdentity] = {
+    "agent-ambiguous-release": AssetIdentity(
+        namespace="engineering", name="validate-release", version="1.0.0"
+    ),
+}
 
 
 def invoked(bridge: BridgeExecutor) -> tuple[AssetIdentity, ...]:
@@ -293,7 +301,7 @@ class GatewayRunner:
         self.bridge = BridgeExecutor(self.installed)
         self.workflows = InstalledWorkflows()
 
-    def _build(self, model: ModelClient | None = None) -> Gateway:
+    def _build(self, model: ModelClient | None = None, alias: str = ROUTING_ALIAS) -> Gateway:
         self.model = CountingModel()
         self.handler = RecordingHandler()
         self.publisher = RecordingHandler()
@@ -333,7 +341,6 @@ class GatewayRunner:
         # A deterministic case keeps the model that refuses to be called; an
         # agent case supplies one that answers, and the router validates it.
         chosen: ModelClient = self.model if model is None else model
-        alias = "routing" if model is None else getattr(model, "alias", "routing")
         return Gateway(
             RequestRouter(CommandRouter(skills), model=chosen, model_alias=alias),
             self.bridge,
@@ -367,8 +374,14 @@ class GatewayRunner:
                 seen.append(event.asset)
         return tuple(seen)
 
-    def run(self, case: EvaluationCase, *, model: ModelClient | None = None) -> ObservedRun:
-        gateway = self._build(model)
+    def run(
+        self,
+        case: EvaluationCase,
+        *,
+        model: ModelClient | None = None,
+        alias: str = ROUTING_ALIAS,
+    ) -> ObservedRun:
+        gateway = self._build(model, alias)
         result = asyncio.run(gateway.handle(case.request))
         workflow = result.workflow
         return ObservedRun(
@@ -455,9 +468,14 @@ class RecordingClient:
 
     def __init__(self, inner: ModelClient) -> None:
         self.inner = inner
+        self.calls = 0
         self.responses: list[ModelResponse] = []
 
     def generate(self, request: ModelRequest) -> ModelResponse:
+        # Counted before delegating: a call that raised was still a call, and
+        # evidence that says no model was contacted must not be produced by
+        # one that was.
+        self.calls += 1
         response = self.inner.generate(request)
         self.responses.append(response)
         return response
@@ -497,12 +515,14 @@ class AgentRunner:
         self.gateway = GatewayRunner()
 
     def run(self, case: EvaluationCase) -> ObservedRun:
-        observed = self.gateway.run(case, model=self.client)
+        # The alias under comparison is the one the request carries, so two
+        # aliases are never the same endpoint under two labels.
+        observed = self.gateway.run(case, model=self.client, alias=self.alias)
         answered = self.client.responses[-1] if self.client.responses else None
         return ObservedRun.model_validate(
             {
                 **observed.model_dump(),
-                "model_calls": len(self.client.responses),
+                "model_calls": self.client.calls,
                 "duration_ms": answered.duration_ms if answered is not None else None,
                 "input_tokens": answered.input_tokens if answered is not None else 0,
                 "output_tokens": answered.output_tokens if answered is not None else 0,
@@ -519,5 +539,10 @@ class RepositoryRunner:
         if case.case_id in DISCOVERY_CASES:
             return DiscoveryRunner().run(case)
         if case.category == "agent":
-            return AgentRunner(ROUTING_ALIAS, proposing(validate_release_spec().identity)).run(case)
+            proposal = AGENT_PROPOSALS.get(case.case_id)
+            if proposal is None:
+                # Named, like the discovery cases: a stub fixed to one answer
+                # must not silently grade a case it was never written for.
+                raise LookupError(f"no stub proposal is registered for {case.case_id}")
+            return AgentRunner(ROUTING_ALIAS, proposing(proposal)).run(case)
         return GatewayRunner().run(case)
