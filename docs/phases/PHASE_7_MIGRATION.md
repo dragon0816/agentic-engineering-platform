@@ -497,3 +497,60 @@ each getting their own grants and neither authorizing the other; revocation
 removing a grant; and, on a real host, only the selected Workflow installed,
 the selected tool authorizing a run end to end, the same run refused once the
 tool is revoked, and both authorization files at once refused.
+
+## Slice 2h — a member's identity decides what they may use
+
+Owner decision (2026-09-22): **a Bridge is bound to a user, and the user's
+authentication decides which Workflows and Skills they may use.** Slice 2g let
+a member choose what their devices run; this decides what there is to choose
+from, and it is the platform's own record that decides it, not a claim
+arriving with the request.
+
+The platform has no company directory, so where a member's groups come from
+has to be answered: the invitation says. An invitation already names one
+actor and is accepted once; it now also names the teams or organizations that
+acceptance grants, and the platform user records them. An authenticated actor
+therefore carries who they are and until when, and never what they belong to,
+because a membership claim that travels with a request is a membership claim
+that can be widened by whoever sends it.
+
+1. `Invitation.groups` and `PlatformUser.groups` record which teams,
+   organizations or services accepting an invitation makes the actor a member
+   of. Both default to none, so an invitation that grants no membership still
+   makes a platform user, and the existing records stay valid.
+2. `common.identity.AuthenticatedActor` is what an entry point produces after
+   it decided who someone is: the actor, the `method` it used, when it
+   happened and when it stops being true. It carries no credential and no
+   group. `valid_at(now)` is false once it expires, and the contract refuses
+   an expiry that is not after the authentication.
+3. `common.identity.entitled(metadata, actor, groups)` decides whether one
+   actor may use one published asset. An unpublished asset is never usable.
+   The owner may always use it, whether the owner is that actor or a group
+   the actor belongs to, and so may a recorded contributor. Otherwise
+   `public` and `organization` are usable by any member of the platform,
+   `team` by members of the owning group, and `private` by nobody else.
+4. `InMemoryAuthorizationRegistry.select(identity, selection)` requires an
+   authenticated actor whose session is still valid and who is the member the
+   decision belongs to: a member decides as themselves, and an expired
+   session decides nothing. A Workflow or Skill the actor is not entitled to
+   is refused, and the groups are read from the platform's record of that
+   user, never from the identity. Revocation takes the same identity.
+5. `available(identity)` answers the question the decision names directly:
+   which published Workflows and Skills this member may use. It is the list a
+   member chooses from, and choosing is still a separate act that grants
+   nothing by itself.
+6. Entitlement is checked when a decision is made, not when a run happens: an
+   authorization is a record of what was decided, and a member whose
+   entitlement is withdrawn keeps their device's existing bundle until the
+   control plane issues a new one. Reissuing on a change is part of the
+   delivery slice, and the staleness is recorded rather than hidden.
+
+Tests precede implementation and cover: an invitation carrying groups and an
+accepted user recording them; an authenticated actor refusing an expiry that
+is not after its authentication, and expiring; entitlement for each visibility
+against an owner, a group member, a contributor and a stranger, and an
+unpublished asset usable by nobody; a member deciding as themselves only; an
+expired session deciding nothing; a Workflow the member is not entitled to
+refused while one they own is not; groups read from the platform's record and
+not from the identity; and the available list naming exactly what a member may
+use.

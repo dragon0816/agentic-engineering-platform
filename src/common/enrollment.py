@@ -16,6 +16,10 @@ class Invitation(Contract):
     invitation_id: Symbol
     actor: Symbol
     issued_by: Symbol
+    # Which teams, organizations or services accepting this makes the actor a
+    # member of. The platform has no company directory, so the invitation is
+    # where membership comes from, and the accepted user is where it is kept.
+    groups: tuple[Symbol, ...] = ()
     status: Literal["pending", "accepted", "revoked"] = "pending"
     accepted_by: Symbol | None = None
 
@@ -31,6 +35,9 @@ class Invitation(Contract):
 class PlatformUser(Contract):
     actor: Symbol
     invitation_id: Symbol
+    # What the accepted invitation granted. Entitlement is read from here and
+    # never from a claim arriving with a request.
+    groups: tuple[Symbol, ...] = ()
     status: Literal["active", "disabled"] = "active"
 
 

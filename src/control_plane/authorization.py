@@ -22,13 +22,18 @@ from capabilities.runtime import CapabilityGrant
 from common.assets import AssetIdentity
 from common.authorization import DeviceAssetSelection, DeviceAuthorization
 from common.base import Symbol
+from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeExecutionSubject
+from common.identity import AuthenticatedActor, entitled
 from control_plane.distribution import InMemoryPackageRegistry
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 
 AuthorizationErrorCode = Literal[
+    "session_expired",
+    "actor_mismatch",
     "actor_not_admitted",
     "asset_not_published",
+    "asset_not_entitled",
     "kind_mismatch",
     "tool_not_advertised",
     "tool_not_grantable",
@@ -82,16 +87,45 @@ class InMemoryAuthorizationRegistry:
             (item for item in advertisement.capabilities if item.identity.key == asset.key), None
         )
 
+    def _groups(self, actor: str) -> tuple[str, ...]:
+        """What the platform recorded when this member accepted their
+        invitation, which is the only place entitlement is read from."""
+        try:
+            return self.enrollment.user(actor).groups
+        except EnrollmentError:
+            return ()
+
+    def available(self, identity: AuthenticatedActor) -> tuple[PublishedAssetPackage, ...]:
+        """Which published Workflows and Skills this member may use: the list
+        they choose from. Being entitled to one grants no execution."""
+        groups = self._groups(identity.actor)
+        return tuple(
+            package
+            for package in self.packages.discover()
+            if entitled(package.metadata, identity.actor, groups)
+        )
+
     def select(
-        self, selection: DeviceAssetSelection, *, now: datetime | None = None
+        self,
+        identity: AuthenticatedActor,
+        selection: DeviceAssetSelection,
+        *,
+        now: datetime | None = None,
     ) -> DeviceAssetSelection:
         """Record one decision, or say why the member may not make it."""
+        who = AuthenticatedActor.model_validate(identity)
         item = DeviceAssetSelection.model_validate(selection)
+        moment = now if now is not None else datetime.now(UTC)
+        if not who.valid_at(moment):
+            raise AuthorizationError("session_expired")
+        if who.actor != item.actor:
+            # A member decides as themselves; nobody decides for anyone else.
+            raise AuthorizationError("actor_mismatch")
         # A decision dated in the future could never appear in an
         # authorization, because a bundle refuses a decision newer than
         # itself; one such record would leave the device with no bundle at
         # all, so it is refused where it arrives.
-        if item.decided_at > (now if now is not None else datetime.now(UTC)):
+        if item.decided_at > moment:
             raise AuthorizationError("decision_in_future")
         if not self._member(item.actor, item.bridge_id):
             raise AuthorizationError("actor_not_admitted")
@@ -117,6 +151,8 @@ class InMemoryAuthorizationRegistry:
                 raise AuthorizationError("asset_not_published")
             if package.kind != item.kind:
                 raise AuthorizationError("kind_mismatch")
+            if not entitled(package.metadata, item.actor, self._groups(item.actor)):
+                raise AuthorizationError("asset_not_entitled")
         current = self._selections.get(item.key)
         if current is not None and current.status == "active":
             raise AuthorizationError("duplicate_selection")
@@ -124,11 +160,21 @@ class InMemoryAuthorizationRegistry:
         return item.model_copy(deep=True)
 
     def revoke(
-        self, bridge_id: Symbol, actor: Symbol, asset: AssetIdentity
+        self,
+        identity: AuthenticatedActor,
+        bridge_id: Symbol,
+        asset: AssetIdentity,
+        *,
+        now: datetime | None = None,
     ) -> DeviceAssetSelection:
+        """A member takes back their own decision. Like making one, it needs
+        a session that is still valid."""
+        who = AuthenticatedActor.model_validate(identity)
+        if not who.valid_at(now if now is not None else datetime.now(UTC)):
+            raise AuthorizationError("session_expired")
         key = (
             TypeAdapter(Symbol).validate_python(bridge_id),
-            TypeAdapter(Symbol).validate_python(actor),
+            who.actor,
             AssetIdentity.model_validate(asset).key,
         )
         current = self._selections.get(key)

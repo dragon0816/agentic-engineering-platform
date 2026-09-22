@@ -256,3 +256,31 @@ Rollback removes `src/common/authorization.py`,
 `src/control_plane/authorization.py`, their tests, the `authorization.json`
 branch in `host_runtime.host` and the two accessors added to the enrollment
 and package registries; `grants.json` keeps working exactly as before.
+
+## Identity-derived entitlement
+
+Owner decision (2026-09-22): a Bridge is bound to a user, and the user's
+authentication decides which Workflows and Skills they may use. No source
+repository is migrated here; neither pinned source has accounts or
+entitlement, and the pinned Telegram agent's numeric allowlist was already
+declined as an identity model in slice 2e.
+
+Two choices worth recording. Groups live on the platform's record of a user
+rather than on the authentication, because an authentication that carries its
+own group list is an authorization that whoever issues it can widen; the
+invitation says what accepting it grants, acceptance records it, and
+entitlement is read from there. And entitlement is checked when a decision is
+made rather than when a run happens, because an authorization is a record of
+what was decided: re-deciding at dispatch would make a Bridge's behaviour
+depend on a control plane it is designed to work without. The cost is
+staleness, which the delivery slice has to close by reissuing.
+
+Still open, and the reason slices 2b and 2i stay planned: what a Bridge
+presents to the shared platform to prove it is acting for its bound user, and
+what the control plane checks and stores. The shape of the answer already has
+a place to land: `AuthenticatedActor` is what an entry point produces once it
+has decided, whatever it did to decide.
+
+Rollback removes `src/common/identity.py`, the `groups` fields and the
+identity parameters on `select`, `revoke` and `available`; the selections and
+bundles from slice 2g keep working.
