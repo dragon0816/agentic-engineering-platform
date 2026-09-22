@@ -241,7 +241,11 @@ def test_only_a_bound_member_decides_and_only_about_what_exists() -> None:
 
 
 def test_a_tool_that_requires_approval_needs_one_from_a_member() -> None:
-    _, _, registry = platform()
+    """The approver is any member the platform knows and has not disabled,
+    which since slice 2j is no longer the same as a member of that device. It
+    is not required to be a second person: on a company workstation the one
+    member has always approved their own, and nothing here changes that."""
+    enrollment, _, registry = platform()
     publish = tool(asset=PUBLISH.model_dump())
     with pytest.raises(AuthorizationError, match="approval_required"):
         registry.select(identity(), publish)
@@ -252,13 +256,29 @@ def test_a_tool_that_requires_approval_needs_one_from_a_member() -> None:
                 update={"approval_ref": "release-approval", "approved_by": "stranger"}
             ),
         )
-    # On a company workstation the one member is the owner, so the owner
-    # approves their own irreversible tool and the record says who and when.
+    # A colleague who is not bound to this device may approve, and a member the
+    # platform has disabled may not.
+    enrollment.disable_user("platform-admin", "tester")
+    with pytest.raises(AuthorizationError, match="approver_not_member"):
+        registry.select(
+            identity(),
+            publish.model_copy(
+                update={"approval_ref": "release-approval", "approved_by": "tester"}
+            ),
+        )
+    enrollment.enable_user("platform-admin", "tester")
+    colleague = registry.select(
+        identity(),
+        publish.model_copy(update={"approval_ref": "release-approval", "approved_by": "tester"}),
+    )
+    assert colleague.approved_by == "tester" and colleague.decided_at == NOW
+    # And the acting member's own approval is still accepted.
+    registry.revoke(identity(), "bridge-company", PUBLISH)
     approved = registry.select(
         identity(),
         publish.model_copy(update={"approval_ref": "release-approval", "approved_by": "engineer"}),
     )
-    assert approved.approved_by == "engineer" and approved.decided_at == NOW
+    assert approved.approved_by == "engineer"
     # A tool that needs no approval needs none.
     assert registry.select(identity(), tool()).approval_ref is None
 

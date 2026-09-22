@@ -683,11 +683,25 @@ colleague's credential there to take.
    keyboard is the bound member and there is nobody else to record. The sender
    map stays trusted host configuration, so the operator decides who may drive
    a machine, and the platform does not.
-6. An approver on a tool selection is checked against the platform's active
+6. Follows from 5, and is the price of the owner's decision not to have the
+   control plane deliver the requester list: **taking somebody off a shared
+   machine is a host action, not a platform one.** Disabling a member or
+   withdrawing a binding does not stop their sender-map entry from driving that
+   machine, because the request runs as the virtual member and `on_behalf_of`
+   is never consulted. Before this slice the same request was refused
+   `actor_not_bound`. Removing the entry from the host's `telegram.json` is
+   what revokes the access; offboarding has to include it. Slice 2i does not
+   change this, and moving the list into the authorization bundle is the
+   change that would.
+7. An approver on a tool selection is checked against the platform's active
    members rather than the device's. One member per machine would otherwise
-   leave `approved_by` able to name only the member giving the approval, which
-   is no approval at all; a colleague the platform knows may approve work on a
-   machine they are not bound to.
+   leave `approved_by` able to name only the acting member, so a colleague the
+   platform knows may now approve work on a machine they are not bound to. The
+   rule is not that the approver is a second person: `approved_by == actor` is
+   still accepted, as it was on a company workstation before this slice, where
+   the device's one member was the only approver available. Requiring a second
+   person is a policy the owner has not asked for and is recorded as an open
+   item in `docs/TASKS.md`.
 
 Tests precede implementation and cover: a second binding refused on both kinds
 of device, and a Bridge membership refusing one too; a request and a run
@@ -696,5 +710,7 @@ workstation refusing delegation; a mapped Telegram sender who is the bound
 member running as themselves with nothing recorded; a mapped sender who is not
 running as the virtual member on their behalf, with the run naming both; an
 unmapped sender still ignored; a shared machine with one virtual member holding
-exactly one token; and an approver who is an active platform member accepted
-while a stranger is refused.
+exactly one token; an approver who is an active platform member accepted while a
+stranger and a disabled member are refused and the acting member's own approval
+still stands; and the sender map alone granting access to a shared machine, with
+an actor the platform has never heard of driving it.

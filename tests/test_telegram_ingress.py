@@ -280,6 +280,26 @@ def test_a_shared_device_runs_an_employees_request_as_its_virtual_member(
     assert runner.bridge.events == () and agent.runs() == ()
 
 
+def test_the_sender_map_is_what_grants_access_to_a_shared_machine(tmp_path: Path) -> None:
+    """The consequence of recording who asked without consulting it, and of the
+    owner's decision that the sender list stays host configuration: nothing in
+    this path asks the platform anything about the person who asked. An actor
+    the platform has never heard of drives the machine as its virtual member,
+    so removing the entry from `telegram.json` is what revokes the access, and
+    offboarding on the shared platform does not."""
+    transport = FakeTransport([[update(1, STRANGER, "shipment.run")]])
+    item, agent, runner = ingress(
+        tmp_path,
+        transport,
+        "shared_test_workstation",
+        senders=[{"sender_id": STRANGER, "actor": "nobody"}],
+    )
+    result = poll(item)
+    assert result.deliveries[0].disposition == "routed"
+    assert [(run.actor, run.on_behalf_of) for run in agent.runs()] == [("shared-bot", "nobody")]
+    assert runner.bridge.events != ()
+
+
 def test_a_bound_sender_reaches_the_real_workflow_and_is_recorded_under_the_actor(
     tmp_path: Path,
 ) -> None:

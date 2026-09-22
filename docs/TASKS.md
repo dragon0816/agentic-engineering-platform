@@ -32,7 +32,7 @@ when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 788 passed, 3 skipped on Windows, with `ruff`, `mypy`,
+The suite is 789 passed, 3 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. The three skips need symbolic-link
 privileges and run on Linux CI.
 
@@ -142,7 +142,9 @@ privileges and run on Linux CI.
 ## Open items carried forward
 
 Recorded where they were found. None blocks a completed phase's exit criteria
-or the start of Phase 7.
+or the start of Phase 7. The two Phase 7 entries are consequences of owner
+decisions rather than defects; they are here so that whoever operates a Bridge
+knows about them.
 
 | From | Item |
 |---|---|
@@ -150,6 +152,8 @@ or the start of Phase 7.
 | Phase 4 | A retrieval cache, host wiring that plans from an adopted document, a size-and-mtime shortcut for adopted-file drift checks, image description for legacy `raw/` |
 | Phase 5 | Tool calling in either adapter (it needs a registry that can render a contract as a provider schema), reading `tool_calls` back, retry behaviour, a pooled or async transport, a production credential backend |
 | Phase 6 | Nothing persists an `ExecutionTrace` yet (a host writes them beside its checkpoints); `SECRET_PATTERN` is deliberately narrow and a provider-specific token shape it does not name is not redacted; `stayed_in_namespace` has no allowance for a capability legitimately shared across namespaces |
+| Phase 7, slice 2j | Taking somebody off a shared machine is a host action: their `telegram.json` entry keeps working after `disable_user` or `unbind`, because the request runs as the virtual member and `on_behalf_of` is never consulted. Offboarding has to include editing that file. Moving the sender list into the authorization bundle is the change that would make it a platform action, and the owner decided against it |
+| Phase 7, slice 2j | An approval on a tool selection may still name the acting member (`approved_by == actor`), as it could on a company workstation before the slice. Whether an approval must come from a second person is an owner policy decision that has not been asked for |
 
 **Never exercised against a live endpoint.** Neither the Ollama adapter nor
 the company gateway has been run against a real server. Both are written to
