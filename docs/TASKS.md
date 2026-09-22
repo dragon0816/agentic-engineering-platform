@@ -24,7 +24,8 @@ the history is complete; this table is the index into them.
 ## Status
 
 Phases 0 to 6 complete; the Phase 6 closure record is in review. Phase 7 is
-not started and its specification needs owner decisions (see `HANDOFF.md`).
+not started: its specification waits on the questions under "Pending owner
+decisions" at the end of this file.
 42 pull requests merged (#1 to #45; #5 was closed unmerged and superseded
 by #6, and #24 and #25 were never pull requests). A row says
 `done` only once its pull request has merged; until then it says `in review`,
@@ -119,14 +120,15 @@ privileges and run on Linux CI.
 
 ## Open items carried forward
 
-Recorded where they were found, and not blocking the active phase.
+Recorded where they were found. None blocks a completed phase's exit criteria
+or the start of Phase 7.
 
 | From | Item |
 |---|---|
 | Phase 3 | A payload sweep, and process-liveness or lease-based suspension |
 | Phase 4 | A retrieval cache, host wiring that plans from an adopted document, a size-and-mtime shortcut for adopted-file drift checks, image description for legacy `raw/` |
 | Phase 5 | Tool calling in either adapter (it needs a registry that can render a contract as a provider schema), reading `tool_calls` back, retry behaviour, a pooled or async transport, a production credential backend |
-| Phase 6 | Nothing persists an `ExecutionTrace` yet (a host writes them beside its checkpoints); `SECRET_PATTERN` is deliberately narrow and a provider-specific token shape it does not name is not redacted; `stayed_in_namespace` has no allowance for a capability legitimately shared across namespaces; neither model adapter has been run against a live endpoint |
+| Phase 6 | Nothing persists an `ExecutionTrace` yet (a host writes them beside its checkpoints); `SECRET_PATTERN` is deliberately narrow and a provider-specific token shape it does not name is not redacted; `stayed_in_namespace` has no allowance for a capability legitimately shared across namespaces |
 
 **Never exercised against a live endpoint.** Neither the Ollama adapter nor
 the company gateway has been run against a real server. Both are written to
@@ -143,3 +145,18 @@ streaming `done` flag.
 | 2026-09-21 | Phase 5 providers are Ollama and the internal OpenAI-compatible gateway; Codex and Claude Code are excluded as model providers |
 | 2026-09-22 | Codex and Claude Code are out of scope for Phase 6 entirely: not evaluated, not driven, not a capability the platform invokes |
 | 2026-09-22 | Remaining slices are completed without check-ins unless something cannot be decided |
+
+## Pending owner decisions (Phase 7)
+
+Phase 7, "End-to-end migration and deprecation", has no specification. The
+Roadmap says: run representative production-like scenarios against old and
+new paths; deprecate source components only after parity and acceptance
+criteria are met; keep rollback documentation during the transition. Writing
+`docs/phases/PHASE_7_*.md` waits on these, and nobody should write it first.
+
+| # | Question | Why only the owner can answer |
+|---|---|---|
+| 1 | Which source components are candidates for deprecation, and in what order | The inventory in `docs/ARCHITECTURE.md` names five repositories; Phases 2 to 6 migrated or declined pieces of each (`docs/PHASE_N_MIGRATION.md`), and which remaining pieces anyone still depends on is not visible from this repository |
+| 2 | What "parity" means for each, in terms the harness can check as a case | The evaluation harness can express a parity check, but somebody who uses the source tools has to say which behaviours matter |
+| 3 | Where production-like scenarios run, and with whose credentials | Every test here is inert by design and CI must stay so. A scenario against a real Ollama, the company gateway, a real vault or a real n8n needs a host and a credential source outside CI. The one live request against each model adapter (the paragraph above) waits on this too |
+| 4 | Rollback and retention for the source repositories | Archived, frozen or deleted, and who owns them during the transition |

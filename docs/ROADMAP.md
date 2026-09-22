@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 complete; Phase 7 — End-to-end migration and deprecation not started (its specification needs owner decisions, see `HANDOFF.md`)
+Status: Phases 1–6 complete; Phase 7 — End-to-end migration and deprecation not started (its specification waits on the pending owner decisions listed in `docs/TASKS.md`)
 
 ## Objective
 

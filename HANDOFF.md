@@ -28,10 +28,10 @@ code and the platform never starts a provider process (2026-09-21).
   the "Met" note in `docs/phases/PHASE_6_EVALUATION.md`, and the Phase 6
   section of `docs/TASKS.md` marked complete with the open items carried
   forward.
-- `CLAUDE.md` and `AGENTS.md` still name `docs/phases/PHASE_6_EVALUATION.md`
-  as the active specification, as they named Phase 5's until Phase 6 began.
-  That specification now says the phase is met, so a reader is not misled;
-  the pointer moves when a Phase 7 specification exists.
+- `CLAUDE.md` says no phase specification is active and that
+  `docs/phases/PHASE_7_*.md` is not to be written until the pending owner
+  decisions in `docs/TASKS.md` are answered. Those decisions live in
+  `docs/TASKS.md`, not here, because this file is rewritten on every handoff.
 
 ## In Progress
 
@@ -39,30 +39,16 @@ code and the platform never starts a provider process (2026-09-21).
 
 ## Remaining
 
-Phase 7, "End-to-end migration and deprecation", has no specification yet.
-The Roadmap says: run representative production-like scenarios against old
-and new paths; deprecate source components only after parity and acceptance
-criteria are met; keep rollback documentation during the transition. Writing
-that specification needs decisions only the owner can make:
+Phase 7, "End-to-end migration and deprecation", has no specification yet,
+and writing it waits on the four questions under "Pending owner decisions" in
+`docs/TASKS.md`: which source components are deprecated and in what order,
+what parity means for each, where production-like scenarios may run and with
+whose credentials, and rollback and retention for the source repositories.
 
-1. **Which source components are candidates for deprecation**, and in what
-   order. The source inventory in `docs/ARCHITECTURE.md` names five
-   repositories; Phases 2 to 6 migrated or deliberately declined pieces of
-   each, and `docs/PHASE_N_MIGRATION.md` records what was declined and why.
-2. **What "parity" means for each**, in terms this platform can measure. The
-   evaluation harness can express a parity check as a case, but somebody who
-   uses the source tools has to say which behaviours matter.
-3. **What production-like means here.** Every test in the repository is
-   inert by design. A Phase 7 scenario that talks to a real Ollama, the real
-   company gateway, a real vault or a real n8n needs a host, credentials and
-   a place to run that is not CI, and the owner decides where that is.
-4. **Rollback and retention** for source repositories: archived, frozen or
-   deleted, and who owns them during the transition.
-
-A smaller piece of work that needs no decision: neither model adapter has
-been run against a live endpoint (`docs/TASKS.md`, "Never exercised against a
-live endpoint"). One real request against each would confirm the field names
-before Phase 7 relies on them.
+The one live request against each model adapter that would confirm the
+provider field names (`docs/TASKS.md`, "Never exercised against a live
+endpoint") waits on the third of those: nothing in this repository may talk
+to a real endpoint until the owner says where that is allowed to happen.
 
 ## Architecture decisions made
 
@@ -100,5 +86,5 @@ across namespaces.
 ## Next Recommended Action
 
 Merge PR #46 on green CI and flip its row in `docs/TASKS.md` to `done`. Then
-put the four Phase 7 questions above to the owner; do not write
-`docs/phases/PHASE_7_*.md` until they are answered.
+put the four pending owner decisions in `docs/TASKS.md` to the owner; do not
+write `docs/phases/PHASE_7_*.md` until they are answered.
