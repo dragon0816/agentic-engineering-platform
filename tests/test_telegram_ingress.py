@@ -140,11 +140,14 @@ def device(kind: str = "company_workstation") -> BridgeDevice:
 
 
 def membership(kind: str = "company_workstation") -> BridgeMembership:
+    """A company workstation runs as the employee who registered it; a shared
+    test machine runs as `shared-bot`, a virtual member of its own."""
     dev = device(kind)
-    bindings = [BridgeBinding(bridge_id=dev.bridge_id, actor="engineer", role="operator")]
-    if kind == "shared_test_workstation":
-        bindings.append(BridgeBinding(bridge_id=dev.bridge_id, actor="tester", role="operator"))
-    return BridgeMembership(device=dev, bindings=tuple(bindings))
+    member = "engineer" if kind == "company_workstation" else "shared-bot"
+    return BridgeMembership(
+        device=dev,
+        bindings=(BridgeBinding(bridge_id=dev.bridge_id, actor=member, role="operator"),),
+    )
 
 
 def config(kind: str = "company_workstation", **changes: Any) -> TelegramIngressConfig:
@@ -229,29 +232,52 @@ def test_an_unmapped_sender_is_neither_routed_nor_answered(tmp_path: Path) -> No
     assert result.next_offset == 2
 
 
-def test_a_mapped_sender_whose_actor_is_not_bound_is_refused_by_the_agent(tmp_path: Path) -> None:
-    # On the company device only the owner is bound; the tester is mapped but not a member.
+def test_a_company_device_will_not_have_work_done_on_anybody_elses_behalf(
+    tmp_path: Path,
+) -> None:
+    # The company machine is the engineer's alone. A colleague who is mapped
+    # in its sender list still cannot have work done there under that name.
     transport = FakeTransport([[update(1, TESTER, "shipment.run")]])
     item, agent, runner = ingress(tmp_path, transport)
     result = poll(item)
     delivery = result.deliveries[0]
     assert delivery.disposition == "refused"
     assert delivery.outcome is not None
-    assert delivery.outcome.refusal == "company_owner_required"
-    assert "company_owner_required" in (delivery.reply or "")
+    assert delivery.outcome.refusal == "delegation_not_allowed"
+    assert "delegation_not_allowed" in (delivery.reply or "")
     assert runner.bridge.events == () and agent.runs() == ()
-    # And on a shared device, an actor mapped but not bound at all.
-    transport = FakeTransport([[update(1, STRANGER, "shipment.run")]])
+
+
+def test_a_shared_device_runs_an_employees_request_as_its_virtual_member(
+    tmp_path: Path,
+) -> None:
+    """A shared test machine is laid out around the instruments wired to it.
+    An employee drives it through Telegram without ever being bound to it, and
+    the record says both who ran the work and who wanted it."""
+    transport = FakeTransport([[update(1, TESTER, "shipment.run")]])
     item, agent, runner = ingress(
         tmp_path / "shared",
         transport,
         "shared_test_workstation",
-        senders=[{"sender_id": STRANGER, "actor": "nobody"}],
+        senders=[{"sender_id": TESTER, "actor": "tester"}],
     )
     result = poll(item)
-    assert result.deliveries[0].outcome is not None
-    assert result.deliveries[0].outcome.refusal == "actor_not_bound"
-    assert runner.bridge.events == ()
+    delivery = result.deliveries[0]
+    assert delivery.disposition == "routed"
+    assert delivery.outcome is not None and delivery.outcome.refusal is None
+    assert [(item.actor, item.on_behalf_of) for item in agent.runs()] == [("shared-bot", "tester")]
+    assert runner.bridge.events != ()
+    # A sender the machine does not know is still ignored: being able to reach
+    # the bot is not the same as being on its sender list.
+    transport = FakeTransport([[update(2, STRANGER, "shipment.run")]])
+    item, agent, runner = ingress(
+        tmp_path / "shared-again",
+        transport,
+        "shared_test_workstation",
+        senders=[{"sender_id": TESTER, "actor": "tester"}],
+    )
+    assert poll(item).deliveries[0].disposition == "unmapped_sender"
+    assert runner.bridge.events == () and agent.runs() == ()
 
 
 def test_a_bound_sender_reaches_the_real_workflow_and_is_recorded_under_the_actor(
@@ -267,6 +293,8 @@ def test_a_bound_sender_reaches_the_real_workflow_and_is_recorded_under_the_acto
     assert outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
     assert outcome.trace.trace_id == "telegram-7"
     assert outcome.run is not None and outcome.run.actor == "engineer"
+    # The member asked for their own machine's work, so nobody else is named.
+    assert outcome.on_behalf_of is None and outcome.run.on_behalf_of is None
     assert len(runner.bridge.events) == 2
     assert delivery.reply is not None
     assert "release-package" in delivery.reply and "succeeded" in delivery.reply

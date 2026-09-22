@@ -298,12 +298,16 @@ Its two primary deployment purposes are deliberately narrow:
 
 The authoritative installed-asset inventory, detailed run state and execution
 credentials remain on each Bridge. A Team Platform status view is a timestamped
-projection and becomes `stale` when the Bridge stops reporting. A company workstation
-accepts remote requests only from its one bound owner; a shared test workstation may
-accept them from any currently bound platform actor. Telegram may be an ingress to
-the resident local Agent after its sender is mapped to that actor. Every ingress uses
-the same typed job, device-membership, Workflow authorization and side-effect policy
-checks. Remote control initially means typed job submission, status, cancellation
+projection and becomes `stale` when the Bridge stops reporting. Every machine is
+bound to exactly one platform member. A company workstation's member is the employee
+who registered it, and it accepts remote requests only from them. A shared test
+workstation's member is a virtual one of its own — the machine belongs to the
+instruments and test environment laid out on it rather than to a desk — and the
+employees who need it drive it through an ingress without being bound to it; work
+done that way runs as the virtual member and records which employee asked. Telegram
+may be an ingress to the resident local Agent after its sender is mapped to a
+platform actor. Every ingress uses the same typed job, device-membership, Workflow
+authorization and side-effect policy checks. Remote control initially means typed job submission, status, cancellation
 request and result references; it does not mean arbitrary shell or remote-desktop
 access.
 

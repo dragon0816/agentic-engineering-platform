@@ -86,9 +86,11 @@ def company() -> BridgeMembership:
 
 
 def shared() -> BridgeMembership:
+    """A shared test machine runs as `shared-bot`, a virtual member of its own;
+    the employees who need its instruments reach it through an ingress."""
     return BridgeMembership(
         device=device("shared_test_workstation"),
-        bindings=(binding("engineer", "bridge-shared"), binding("tester", "bridge-shared")),
+        bindings=(binding("shared-bot", "bridge-shared"),),
     )
 
 
@@ -196,7 +198,7 @@ def package(name: str, payload: bytes) -> PublishedAssetPackage:
     )
 
 
-def test_membership_is_this_device_only_and_a_company_device_has_one_owner() -> None:
+def test_membership_is_this_device_only_and_every_device_has_one_member() -> None:
     with pytest.raises(ValidationError, match="names the device"):
         BridgeMembership(device=device(), bindings=(binding("engineer", "bridge-other"),))
     with pytest.raises(ValidationError, match="bound to a device once"):
@@ -205,14 +207,23 @@ def test_membership_is_this_device_only_and_a_company_device_has_one_owner() -> 
         BridgeMembership(device=device(), bindings=(binding("engineer"), binding("tester")))
     with pytest.raises(ValidationError, match="registered owner"):
         BridgeMembership(device=device(), bindings=(binding("tester"),))
-    # A revoked binding for somebody else beside the owner's active one is
-    # history, not membership; a shared test device holds several members.
+    # A shared test machine is held to the same one-member rule; it is the
+    # virtual member, not the registered owner, that the machine runs as.
+    with pytest.raises(ValidationError, match="one active member"):
+        BridgeMembership(
+            device=device("shared_test_workstation"),
+            bindings=(binding("shared-bot", "bridge-shared"), binding("tester", "bridge-shared")),
+        )
+    # A revoked binding for somebody else beside the active one is history,
+    # not membership.
     kept = BridgeMembership(
         device=device(), bindings=(binding("engineer"), binding("tester", status="revoked"))
     )
-    assert kept.binding_for("tester") is None
-    assert shared().binding_for("tester") is not None
-    assert shared().binding_for("stranger") is None
+    assert kept.binding_for("tester") is None and kept.member() == "engineer"
+    assert shared().member() == "shared-bot"
+    assert shared().binding_for("shared-bot") is not None
+    assert shared().binding_for("tester") is None
+    assert BridgeMembership(device=device()).member() is None
 
 
 def test_a_request_is_closed_and_refuses_credential_material() -> None:
@@ -243,24 +254,50 @@ def test_a_company_device_admits_only_its_owner_and_records_nothing_on_refusal(
     assert runner.bridge.events == ()
 
 
-def test_a_shared_test_device_admits_its_bound_actors_and_refuses_the_rest(
+def test_a_shared_test_device_runs_as_its_virtual_member_and_records_who_asked(
     tmp_path: Path,
 ) -> None:
     resident, runner = agent(shared(), tmp_path)
-    for actor in ("engineer", "tester"):
-        outcome = asyncio.run(
-            resident.handle(request(actor=actor, bridge_id="bridge-shared", ingress="telegram"))
+    # Work an employee asked for runs as the machine's own member, and the
+    # record names both: who ran it and who wanted it.
+    asked = asyncio.run(
+        resident.handle(
+            request(
+                actor="shared-bot",
+                on_behalf_of="tester",
+                bridge_id="bridge-shared",
+                ingress="telegram",
+            )
         )
-        assert outcome.refusal is None
-        assert outcome.decision is not None and outcome.decision.kind == "workflow"
-    stranger = asyncio.run(resident.handle(request(actor="stranger", bridge_id="bridge-shared")))
+    )
+    assert asked.refusal is None
+    assert asked.decision is not None and asked.decision.kind == "workflow"
+    assert asked.run is not None
+    assert asked.run.actor == "shared-bot" and asked.run.on_behalf_of == "tester"
+    # Admission reads only the acting member, so naming somebody else neither
+    # widens nor narrows what may run.
+    alone = asyncio.run(
+        resident.handle(request(actor="shared-bot", bridge_id="bridge-shared", trace=trace("2")))
+    )
+    assert alone.refusal is None and alone.run is not None and alone.run.on_behalf_of is None
+    # An employee who reaches this machine through an ingress is not bound to
+    # it, so a request that claims to act as them is refused.
+    stranger = asyncio.run(resident.handle(request(actor="tester", bridge_id="bridge-shared")))
     assert stranger.refusal == "actor_not_bound"
+    # A company workstation is one person's, so work on anybody's behalf is
+    # refused there rather than attributed.
+    owned, _ = agent(company(), tmp_path / "company")
+    delegated = asyncio.run(
+        owned.handle(request(actor="engineer", on_behalf_of="tester", trace=trace("3")))
+    )
+    assert delegated.refusal == "delegation_not_allowed"
+    assert delegated.run is None
     disabled = BridgeMembership(
         device=device("shared_test_workstation", status="disabled"),
-        bindings=(binding("engineer", "bridge-shared"),),
+        bindings=(binding("shared-bot", "bridge-shared"),),
     )
     resident, runner = agent(disabled, tmp_path / "disabled")
-    outcome = asyncio.run(resident.handle(request(bridge_id="bridge-shared")))
+    outcome = asyncio.run(resident.handle(request(actor="shared-bot", bridge_id="bridge-shared")))
     assert outcome.refusal == "device_disabled"
     assert runner.bridge.events == ()
 

@@ -123,34 +123,42 @@ def test_invitation_is_issued_by_admin_and_accepted_once_for_named_actor() -> No
         registry.accept(issued.invitation_id, "engineer-a")
 
 
-def test_company_bridge_has_exactly_one_active_member() -> None:
+def test_a_device_has_exactly_one_active_member() -> None:
+    """Whatever its kind. A shared test machine is bound to a virtual member
+    of its own, so no colleague's credential ever sits on it."""
     registry = registry_with("engineer-a", "engineer-b")
     registry.register_device(company_device(), registration(company_device()))
-    first = BridgeBinding(bridge_id="bridge-company-a", actor="engineer-a", role="device_admin")
-    registry.bind("engineer-a", first)
+    registry.bind(
+        "engineer-a",
+        BridgeBinding(bridge_id="bridge-company-a", actor="engineer-a", role="device_admin"),
+    )
     assert registry.admit(BridgeExecutionSubject(actor="engineer-a", bridge_id="bridge-company-a"))
-    with pytest.raises(EnrollmentError, match="company_device_single_user"):
+    with pytest.raises(EnrollmentError, match="device_single_user"):
         registry.bind(
             "engineer-a",
             BridgeBinding(bridge_id="bridge-company-a", actor="engineer-b", role="operator"),
         )
 
 
-def test_shared_bridge_accepts_multiple_platform_users_with_distinct_subjects() -> None:
-    registry = registry_with("engineer-a", "engineer-b")
+def test_a_shared_bridge_is_bound_to_its_virtual_member_and_nobody_else() -> None:
+    registry = registry_with("engineer-a", "shared-bot")
     device = shared_device()
     registry.register_device(device, registration(device))
-    for actor, role in (("engineer-a", "device_admin"), ("engineer-b", "operator")):
-        registry.bind(
-            "engineer-a", BridgeBinding(bridge_id=device.bridge_id, actor=actor, role=role)
-        )
-        assert registry.admit(BridgeExecutionSubject(actor=actor, bridge_id=device.bridge_id))
-    assert registry.members(device.bridge_id) == (
-        BridgeBinding(bridge_id=device.bridge_id, actor="engineer-a", role="device_admin"),
-        BridgeBinding(bridge_id=device.bridge_id, actor="engineer-b", role="operator"),
+    registry.bind(
+        "engineer-a", BridgeBinding(bridge_id=device.bridge_id, actor="shared-bot", role="operator")
     )
+    assert registry.admit(BridgeExecutionSubject(actor="shared-bot", bridge_id=device.bridge_id))
+    assert registry.members(device.bridge_id) == (
+        BridgeBinding(bridge_id=device.bridge_id, actor="shared-bot", role="operator"),
+    )
+    # A real employee is not bound to it and reaches it through an ingress.
+    with pytest.raises(EnrollmentError, match="device_single_user"):
+        registry.bind(
+            "engineer-a",
+            BridgeBinding(bridge_id=device.bridge_id, actor="engineer-a", role="operator"),
+        )
     assert not registry.admit(
-        BridgeExecutionSubject(actor="engineer-c", bridge_id=device.bridge_id)
+        BridgeExecutionSubject(actor="engineer-a", bridge_id=device.bridge_id)
     )
 
 

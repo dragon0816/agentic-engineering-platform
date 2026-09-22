@@ -15,9 +15,11 @@ active/disabled lifecycle. `BridgeBinding` grants use of one Bridge only, while
 
 `company_workstation` requires a dedicated Windows user, corporate resource scope,
 single-user local boundary and one active platform member. `shared_test_workstation`
-requires a shared Windows user, external-only scope and cooperative workspace; it
-may have several platform members but one interactive slot. Cooperative workspace
-is organizational separation, not confidentiality from users of the same OS account.
+requires a shared Windows user, external-only scope, cooperative workspace and one
+interactive slot. Since slice 2j it too has exactly one active platform member: a
+virtual member of its own, which the employees who need its instruments reach
+through an ingress. Cooperative workspace is organizational separation, not
+confidentiality from users of the same OS account.
 
 `InMemoryEnrollmentRegistry` demonstrates invitation acceptance, device enrollment,
 membership and use-time checks. It is not an authentication server, RBAC server,
@@ -1206,7 +1208,7 @@ Workflow identity, actor, Bridge, arguments, trace and matching allowed
 `ExecutionAuthorization`. It has no arbitrary command/shell field and refuses secret
 fields or values. `InMemoryRemoteControl` also requires device admission: a company
 workstation admits only its registered owner, while a shared test workstation admits
-its bound actors. Telegram identity mapping occurs before this contract and cannot
+the virtual member it runs as. Telegram identity mapping occurs before this contract and cannot
 bypass the same membership and policy path. Polling returns bounded queued records;
 cancellation is a request state and does not claim a running side effect stopped.
 
@@ -1214,13 +1216,17 @@ cancellation is a request state and does not claim a running side effect stopped
 
 `common.local_agent.BridgeMembership` is the Bridge computer's own copy of who
 may use it: its `BridgeDevice` and the `BridgeBinding`s for that device. It
-refuses a binding for another device, a repeated actor, and on a company
-workstation more than one active binding or an active binding that is not the
-registering owner, so the local rule cannot drift from the control plane's. It
+refuses a binding for another device, a repeated actor, more than one active
+binding whatever the device's kind, and on a company workstation an active
+binding that is not the registering owner, so the local rule cannot drift from
+the control plane's. `member()` answers which member this machine runs as. It
 grants use of the device and nothing else. `LocalAgentRequest` is one request
 from any ingress (`local`, `shared_platform`, `telegram`): actor, Bridge,
 namespace, message, trace and optional session, closed and refusing credential
-material. A remote job is the existing `RemoteWorkflowJob`.
+material. Its `on_behalf_of` records the member who asked when that is not the
+member who runs; it is recorded and never consulted, because admission, grants
+and entitlement all read the acting member. A remote job is the existing
+`RemoteWorkflowJob`.
 
 `common.enrollment.admit_device(device, actor=, bridge_id=)` is the device
 half of admission, written once: the request names this device, the device is
@@ -1414,15 +1420,18 @@ packages)` records decisions and refuses the ones a member may not make:
 and `kind_mismatch` against the Registry, `tool_not_advertised` for a
 capability the device does not say it has, `approval_required` for a tool
 whose own `CapabilitySpec` requires one, `approver_not_member` when the
-approver is not a member of that device, `tool_not_grantable` for a
+approver is not an active platform member, `tool_not_grantable` for a
 capability that declares no policy reference and so cannot be granted to
 anybody, `decision_in_future` for a decision no bundle could carry,
 `duplicate_selection`, and `selection_missing` on revocation. `grants(bridge_id)` derives the device's
 `CapabilityGrant`s through `grant_from(spec, selection)`: the permissions and
 policy references are the capability's own declaration and the approval is the
 member's, so a decision about which tools never becomes a decision about what
-they may do. Grants are per actor, so on a shared test workstation one
-member's decision authorizes that member's runs and nobody else's.
+they may do. Grants are per actor, and a machine has one member, so a device's
+grants are that member's; on a shared test workstation they are the virtual
+member's. The approver is checked against the platform's members rather than
+the device's, because one member per machine would otherwise leave
+`approved_by` able to name only the member giving the approval.
 
 A company host reads `authorization.json` from its workspace when it is there.
 `build_gateway` then installs only the Workflows and Skills the members chose,
@@ -1490,8 +1499,8 @@ a new one.
 token: `token_id`, the `actor` and `bridge_id` it was issued for, a
 `fingerprint` of the secret, `issued_at`, an optional `expires_at` that must
 be after it, and `status`. Binding a member to a device is what justifies one,
-so a grant always names both, and several members on one machine hold several
-tokens. The secret is not in it.
+so a grant always names both; since slice 2j a machine has one member, so a
+machine holds one token. The secret is not in it.
 
 `common.identity.IssuedAccessToken` is the one moment the secret exists
 outside the Bridge: the grant and the value, returned once by issuing.

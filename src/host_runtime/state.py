@@ -249,7 +249,10 @@ class SqliteLocalState:
             ).fetchone()
             if row is not None:
                 stored = LocalRunSummary.model_validate_json(row[0])
-                if stored.actor != item.actor:
+                if (stored.actor, stored.on_behalf_of) != (item.actor, item.on_behalf_of):
+                    # Who ran it and who asked are both fixed for the life of
+                    # the record: a later update may change how it ended and
+                    # nothing about whose work it was.
                     raise LocalStateError("run_owner_fixed")
                 if item.updated_at < stored.updated_at:
                     raise LocalStateError("run_update_stale")

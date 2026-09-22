@@ -13,7 +13,7 @@ Shared-platform computer (control plane)
         +-- invitation-only platform account and Bridge enrollment
         |
 Company Windows computer (one employee)          Shared test Windows computer
-Agent + Bridge + corporate resource access       Agent + Bridge, many platform users
+Agent + Bridge + corporate resource access       Agent + Bridge, one virtual member
 old Host Bridge remains available for parity     one shared Windows account
 ```
 
@@ -26,9 +26,12 @@ and then enrolls a Bridge. Platform identity, Bridge device identity, runtime
 authorization, and credentials for Jira/GitLab/SAP-C4C remain separate.
 
 The company computer has one employee user and may access corporate resources.
-The shared test computer cannot access corporate resources; several invited
-platform users may bind to one Bridge while sharing one Windows account. Every
-run retains its platform actor and Bridge identity. Workspaces are separated for
+The shared test computer cannot access corporate resources. Owner decision
+(2026-09-23): **every machine is bound to exactly one platform member.** A
+shared test computer is bound to a virtual member of its own, a virtual
+employee, and no real employee binds to it; employees who need it drive it
+through the Telegram ingress, and the request records which of them asked.
+Every run retains its platform actor and Bridge identity. Workspaces are separated for
 organization and cleanup, but this is not an OS security boundary: users of the
 same Windows account can read one another's local files and processes. Interactive
 work is serialized to one user/run at a time.
@@ -38,9 +41,10 @@ run state are local. It uses the shared platform to publish, discover and obtain
 assets, but already-installed local behavior does not require that connection unless
 its manifest declares `central_required`. The shared platform additionally controls
 Bridge computers through governed remote jobs. A company workstation accepts only
-its one bound owner; a shared test workstation accepts its bound platform users. A
-Telegram adapter may deliver commands to the resident local Agent only after mapping
-the sender to that platform actor. The shared platform never becomes the authority
+its one bound owner; a shared test workstation accepts the virtual member it runs
+as, and work an employee asked for through an ingress runs as that member and
+records who asked. A Telegram adapter may deliver commands to the resident local
+Agent only after mapping the sender to a platform actor. The shared platform never becomes the authority
 for local run state.
 
 CI remains inert. Production-like evidence is produced only by an explicitly
@@ -49,8 +53,9 @@ never copied into Registry assets, invitations, evaluation cases, traces or Git.
 
 ## Migration order
 
-1. Enrollment foundation: invitation-only users, independent Bridge identity,
-   one-user company workstation and multi-user shared test workstation contracts.
+1. Enrollment foundation: invitation-only users, independent Bridge identity, and
+   device-profile contracts for the company workstation and the shared test
+   workstation (one member each, since slice 2j).
 2. Deployment: package and install Agent + Bridge on a company workstation;
    verify registration, binding, capability advertisement and a read-only probe.
 3. Local-first control contracts: Registry package acquisition and verified local
@@ -632,3 +637,64 @@ of that device; a session ending no later than its token; a supplied secret
 refused when it is too short; a spent token no longer listed and no longer in
 the way of a new one; and unbinding revoking the tokens it justified while
 leaving the member able to be bound again.
+
+## Slice 2j — one member per machine, and who asked
+
+Owner decision (2026-09-23): every machine is bound to exactly one platform
+member; a shared test machine gets a virtual member of its own and no real
+employee binds to it; employees reach it through Telegram, and the record says
+which employee asked. The owner also decided what not to build: being an
+invited, authenticated member is the gate for using the platform's resources,
+so a request is not narrowed further by who asked for it, and the list of
+people who may drive a machine stays host configuration rather than something
+the control plane delivers.
+
+A shared test workstation is not a desk that several people take turns at. It
+is wired to particular instruments and laid out as a test environment, and the
+employees who use it want that environment, not that computer. Giving it a
+virtual member of its own says that in the model: the machine belongs to its
+rig, and people reach the rig through an ingress.
+
+This removes the shared-workstation credential problem rather than mitigating
+it. One member on a machine means one token on that machine, so there is no
+colleague's credential there to take.
+
+1. A device holds one active binding, whatever its kind. The enrollment
+   registry refuses a second (`device_single_user`, which replaces the
+   company-only code), and a Bridge's own `BridgeMembership` refuses one too,
+   so the rule holds on both sides of a delivery.
+2. `LocalAgentRequest.on_behalf_of` and `LocalRunSummary.on_behalf_of` record
+   the member who asked, when that is not the member who runs. They are
+   recorded and never consulted: admission, grants and entitlement all read
+   the acting member, so nothing about this field can widen what may happen.
+   A field that looks like authorization and is not would be worse than no
+   field at all, so both contracts say so where they are declared.
+3. A company workstation refuses delegation outright
+   (`delegation_not_allowed`). The architecture says it accepts only its one
+   bound owner, and a request performed on somebody else's behalf is not that.
+   Only a shared test workstation runs work for a member who is not bound to
+   it.
+4. The Telegram ingress maps a sender to a platform actor as before. When that
+   actor is the machine's bound member, the request runs as them and records
+   nobody else. When it is not, and the machine is a shared test workstation,
+   the request runs as the bound member on behalf of the mapped actor.
+5. Attribution is as good as the ingress and no better. A Telegram request
+   carries evidence of which account asked; a person at that machine's own
+   keyboard is the bound member and there is nobody else to record. The sender
+   map stays trusted host configuration, so the operator decides who may drive
+   a machine, and the platform does not.
+6. An approver on a tool selection is checked against the platform's active
+   members rather than the device's. One member per machine would otherwise
+   leave `approved_by` able to name only the member giving the approval, which
+   is no approval at all; a colleague the platform knows may approve work on a
+   machine they are not bound to.
+
+Tests precede implementation and cover: a second binding refused on both kinds
+of device, and a Bridge membership refusing one too; a request and a run
+recording who asked while admission reads only the acting member; a company
+workstation refusing delegation; a mapped Telegram sender who is the bound
+member running as themselves with nothing recorded; a mapped sender who is not
+running as the virtual member on their behalf, with the run naming both; an
+unmapped sender still ignored; a shared machine with one virtual member holding
+exactly one token; and an approver who is an active platform member accepted
+while a stranger is refused.

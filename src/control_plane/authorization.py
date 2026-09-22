@@ -80,6 +80,17 @@ class InMemoryAuthorizationRegistry:
     def _member(self, actor: str, bridge_id: str) -> bool:
         return self.enrollment.admit(BridgeExecutionSubject(actor=actor, bridge_id=bridge_id))
 
+    def _active(self, actor: str) -> bool:
+        """Somebody the platform invited and has not disabled. An approver is
+        checked against this rather than against the device's own members: a
+        machine has one member, and a shared test machine's member is the
+        virtual one it runs as, so requiring the approver to be bound there
+        would leave every approval self-given."""
+        try:
+            return self.enrollment.user(actor).status == "active"
+        except EnrollmentError:
+            return False
+
     def _advertised(self, bridge_id: str, asset: AssetIdentity) -> CapabilitySpec | None:
         try:
             advertisement = self.enrollment.advertisement(bridge_id)
@@ -164,7 +175,7 @@ class InMemoryAuthorizationRegistry:
                 raise AuthorizationError("tool_not_grantable")
             if spec.policy.approval_required and item.approval_ref is None:
                 raise AuthorizationError("approval_required")
-            if item.approved_by is not None and not self._member(item.approved_by, item.bridge_id):
+            if item.approved_by is not None and not self._active(item.approved_by):
                 raise AuthorizationError("approver_not_member")
         else:
             package = self.packages.get(item.asset)

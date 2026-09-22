@@ -1,131 +1,77 @@
-# Handoff — Phase 7 slice 2b, Bridge access tokens
+# Handoff — Phase 7 slice 2j, one member per machine, and who asked
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #62 (slice 2b) merged with its review applied.
+Branch: `phase-7/virtual-member`, ahead of `main` by this slice's commit.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Goal
 
-Implement the owner's rule of 2026-09-23: binding a user to a machine issues
-an access token for that pair, kept on the Bridge, and a Bridge presents one
-to authenticate with the shared platform. Requirements: the "Slice 2b"
-section of `docs/phases/PHASE_7_MIGRATION.md`; contracts: `docs/CONTRACTS.md`
-("Bridge access tokens"); source characterization and decisions:
-`docs/PHASE_7_MIGRATION.md` (same heading).
+Implement the owner's rule of 2026-09-23: every machine is bound to exactly one
+platform member. A shared test workstation gets a virtual member of its own —
+it is wired to particular instruments and laid out as a test environment, so it
+belongs to that rig rather than to a desk — and no real employee binds to it.
+The employees who need it drive it through the Telegram ingress, and the record
+says which of them asked.
 
-## Owner decisions in force
+Requirements: the "Slice 2j" section of `docs/phases/PHASE_7_MIGRATION.md`.
+Contracts: `docs/CONTRACTS.md`, under "Resident local Agent and durable local
+state", "Member-decided asset authorization" and "Bridge access tokens".
+Owner decisions with their dates: `docs/TASKS.md`.
 
-Listed with their dates in `docs/TASKS.md`. The four that settle who may do
-what: a member decides what their own devices may run; a Bridge is bound to a
-user and that user's authentication decides what they may use; group
-membership comes from the invitation; and binding issues a per-member,
-per-machine access token. With this one, nothing about identity or
-authorization is still open.
+## What this slice changed
 
-## Completed
+- `common.local_agent.BridgeMembership` refuses a second active binding on any
+  device kind, not only a company workstation, and answers `member()` — who
+  this machine runs as.
+- `control_plane.enrollment.InMemoryEnrollmentRegistry.bind` refuses a second
+  active binding with `device_single_user`, which replaces the company-only
+  code.
+- `LocalAgentRequest.on_behalf_of` and `LocalRunSummary.on_behalf_of` record
+  who asked when that is not who runs. They are recorded and never consulted:
+  admission, grants and entitlement all read the acting member. `state.py`
+  fixes both for the life of a run record (`run_owner_fixed`).
+- `host_runtime.agent.LocalAgent.admit` refuses delegation outright on a
+  company workstation (`delegation_not_allowed`).
+- `channels.telegram` runs a mapped sender's request as the machine's member,
+  naming the sender in `on_behalf_of` when they are not that member.
+- `control_plane.authorization` checks an approver against the platform's
+  active members rather than the device's. One member per machine would
+  otherwise leave `approved_by` able to name only the member giving the
+  approval, which is no approval at all.
 
-- Source inspected read-only at `896046e8` (`.scratch/rs-source`, ignored by
-  Git). The behaviour table and the PRESERVE/ADAPT/REFUSE decisions are in
-  `docs/PHASE_7_MIGRATION.md`.
-- `common.identity.BridgeAccessGrant` (the platform's record: member, device,
-  fingerprint, issue and expiry, status) and `IssuedAccessToken` (the one
-  moment the secret exists outside the Bridge, deliberately not a `Contract`,
-  with a redacting `repr` and no attribute to put a secret in).
-- `control_plane.identity.InMemoryAccessTokens`: `issue` for an admitted
-  member only, one active token per pair, a generated secret and a minimum
-  length for a supplied one; `authenticate` verifying the secret before the
-  state, with an unknown token and a wrong secret giving one answer;
-  `grants_for`, `revoke`, `revoke_for`.
-- `InMemoryEnrollmentRegistry.unbind`, so a binding can be withdrawn and the
-  tokens it justified revoked with it.
-- PR #62 review (6 findings) applied: a withdrawn binding barred rebinding;
-  an expired token blocked reissue and was listed as live; issuing and
-  revoking took no requester; a malformed token id raised instead of being
-  refused like any unknown one; and an authentication now names the machine
-  its token was issued for, which the specification had claimed a test for.
-- `tests/test_access_tokens.py`, 13 tests, as listed at the end of the slice
-  2b requirements section, including the whole chain: a secret becomes an
-  identity, an identity decides entitlement, entitlement allows a decision.
+## Verification
 
-## In Progress
+Run on Windows in `.venv` (Python 3.12) at the head of this branch:
 
-- Nothing. `main` is the state to resume from.
+- `python -m pytest -q -p no:cacheprovider` — **788 passed, 3 skipped**. The
+  skips need symbolic-link privileges and run on Linux CI.
+- `ruff check .` — clean. `ruff format --check .` — 160 files formatted.
+- `mypy` — no issues in 125 source files.
+- `pip check` — no broken requirements. `python -m build` — both artifacts
+  built. `git diff --check` — clean.
 
-## Remaining
+## Where this stopped
 
-- Slice 2i, the transports, is now unblocked and is the next thing to build:
-  Registry package synchronization, delivering an authorization to a device,
-  capability advertisement, a read-only connectivity probe, Bridge job polling
-  and snapshot reporting, over a transport that presents an access token. Two
-  invariants come from the source: unreachable is never treated as revoked,
-  and re-binding needs a person at that keyboard.
-- Wiring the token into the host: the Bridge holds the secret through a
-  `SecretRef` and the host's `CredentialResolver`, as the Telegram token does,
-  and `host.json` carries the non-secret `token_id`. That belongs with the
-  transport, since nothing presents a token until there is somewhere to
-  present it.
-- Then migration steps 3 to 6 in `docs/TASKS.md` (workflow 7, workflow 13,
-  knowledge, controlled cutover).
+The work is complete and verified locally. Not yet done:
 
-## Architecture decisions made
+1. Open the pull request from `phase-7/virtual-member` into `main`.
+2. Run `/code-review` on it and apply the findings, as every earlier slice did.
+3. Watch CI, then merge, and set the `2j` row in `docs/TASKS.md` to `done`
+   with its pull request number.
 
-- The platform keeps a fingerprint and never a secret, so its own store is
-  not worth stealing.
-- The secret is verified before anything is said about the token's state: an
-  unknown token and a wrong secret are one answer.
-- A plain SHA-256 is used because the secret is 32 random bytes rather than a
-  password, which is also why a short supplied secret is refused.
-- One token per member and machine, not one per machine: that is what makes
-  several members on one machine distinguishable and separately revocable.
+## Next after this slice
 
-## Exact verification commands and results
+Slice 2i, authenticated shared-platform transports, which this slice unblocks:
+Registry package synchronization, authorization delivery, capability
+advertisement, a read-only connectivity probe, Bridge job polling and snapshot
+reporting, over a transport that presents a Bridge access token. The invariant
+carried from the source: unreachable is never treated as revoked. After that,
+migration steps 3 to 6 in `docs/TASKS.md`.
 
-Windows, Python 3.12.14, repository root, with the `office` extra installed:
+## Open item for the owner
 
-```powershell
-.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
-# PASS: 787 passed, 3 skipped (link privileges)
-.venv/Scripts/python.exe -m ruff check .
-# PASS
-.venv/Scripts/python.exe -m ruff format --check .
-# PASS
-.venv/Scripts/python.exe -m mypy
-# PASS
-.venv/Scripts/python.exe -m pip check
-# PASS
-.venv/Scripts/python.exe -m build
-# PASS: sdist and wheel
-git diff --check
-# PASS
-```
-
-No socket, model, gateway, network, real vault, job or n8n instance was
-invoked, and no token was written to any file.
-
-## Known issues / limitations
-
-- **The shared workstation.** Tokens live on the Bridge, and a shared test
-  workstation's members share one Windows account with no OS-level isolation,
-  so one member can read another's token and act as them. One token per
-  member and machine makes their requests distinguishable and separately
-  revocable, which a single shared token never could, but not unforgeable
-  between people who already share that account. Narrowing it needs
-  per-member Windows accounts or a proof that cannot be replayed from a file.
-  This is the owner's to decide before a shared device gets a transport.
-- Nothing presents a token yet: there is no transport, and the host does not
-  hold one.
-- The registries are in memory. They are the reference model for the shared
-  platform's rules, not a database.
-- Issuing is a trusted host call. What a person types to prove who they are
-  before the platform issues them a token, the source's ops username and
-  password, is the entry point's business and is not modelled here.
-
-## Next Recommended Action
-
-Write the slice 2i requirements: the transport that presents these tokens,
-starting with the read-only connectivity probe and the authorization delivery,
-since those are the two a company host needs before anything else. Put the
-shared-workstation question under "Known issues" to the owner first, because
-it decides whether a shared device gets a transport at all.
+The pinned `telegram-local-agent` source's `config.yaml` commits a Telegram bot
+token and a GitLab personal access token. Neither was copied into this
+repository. Revoking them is an action in that repository, not this one.
