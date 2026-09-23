@@ -1003,9 +1003,11 @@ a `WorkbookWriter` protocol and knows nothing about COM.
    has just turned it black.
 3. The digest is the guard the source did not have: a plan carries the scratch
    sheet's digest as it stood, and applying it to a sheet that has since
-   changed is refused (`sheet_changed`) rather than written. A plan for a
-   scratch sheet that did not exist creates it from the seed and has nothing
-   to compare.
+   changed is refused (`sheet_changed`) rather than written. Presence counts
+   as much as content, so a plan made without a scratch sheet is not written
+   into one somebody has made since; a plan for a sheet that is still absent
+   creates it from the seed. The guard runs before anything is copied or
+   backed up, so a refused run leaves nothing behind.
 4. Staging, as measured in the source: the workbook is copied somewhere no
    sync client is watching, driven there, and written back once. A workbook
    somebody has open is refused before anything is copied, and a run that does

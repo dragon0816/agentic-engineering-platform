@@ -66,6 +66,7 @@ class RecordingWriter:
         cells: dict[str, str] | None = None,
         prepends: bool = True,
         fail_on: str | None = None,
+        on_close: Any = None,
     ) -> None:
         self.calls: list[tuple[str, Any]] = []
         self.existing_rows = dict(existing_rows or {})
@@ -73,6 +74,7 @@ class RecordingWriter:
         self._cells = dict(cells or {})
         self._prepends = prepends
         self._fail_on = fail_on
+        self._on_close = on_close
         self.closed_saving: bool | None = None
 
     def _record(self, name: str, payload: Any = None) -> None:
@@ -142,6 +144,8 @@ class RecordingWriter:
     def close(self, path: Path, *, save: bool) -> None:
         self.closed_saving = save
         self._record("close", save)
+        if self._on_close is not None:
+            self._on_close()
 
 
 def build_workbook(path: Path, *, scratch: bool = True, extra: list[str] | None = None) -> None:
@@ -186,7 +190,9 @@ def sheet_state(workbook: Path, *, temp: str = "weekly report temp") -> SheetSta
         return temp if temp in names else "2026_30W"
 
     names, source, headers, rows = excel.read_chosen_sheet(workbook, choose)
-    existing = {row[0]: row[6] for row in rows if row and row[0]}
+    lowered = [header.strip().lower() for header in headers]
+    key_at, comments_at = lowered.index("key"), lowered.index("comments")
+    existing = {row[key_at]: row[comments_at] for row in rows if row and row[key_at]}
     present = temp in names
     return SheetState(
         headers=tuple(headers),
@@ -400,7 +406,8 @@ def test_a_sheet_that_changed_since_planning_is_refused(tmp_path: Path) -> None:
     with pytest.raises(ApplyRefused) as refused:
         apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
     assert refused.value.code == "sheet_changed"
-    assert "upsert" not in writer.names, "nothing was written"
+    assert writer.calls == [], "nothing was written, and nothing backed up"
+    assert not (tmp_path / "state").exists(), "nothing was copied"
     # The plan still fits the sheet it was made against.
     restored = tmp_path / "restored.xlsx"
     restored.write_bytes(before)
@@ -463,14 +470,91 @@ def test_staging_can_be_turned_off(tmp_path: Path) -> None:
     assert writer.calls[1][1]["rows"][0]["Key"] == "GTM-1"
 
 
-def test_only_the_managed_columns_are_ever_written(tmp_path: Path) -> None:
-    """Rule 2: that is how the hand-kept Comments column survives a run."""
+def test_the_comments_column_is_never_a_managed_header(tmp_path: Path) -> None:
+    """Rule 2, and the whole reason the hand-kept log survives a run.
+
+    A writer sets every managed header from the record it is given. The
+    record has no `Comments`, so naming that column as managed would set it
+    to the empty string on every planned row -- the exact loss the rule
+    exists to prevent. It is prevented by never naming the column."""
     workbook = tmp_path / "SDE_Weekly_Report.xlsx"
     build_workbook(workbook)
     plan = plan_for(workbook, [issue("GTM-1", "completed:\n- tx cal")])
     writer = RecordingWriter(existing_rows={"GTM-688": 2})
     apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
     written = writer.calls[1][1]
-    assert written["headers"] == HEADERS
-    assert set(written["rows"][0]) == {"Key", "Summary", "Company", "Status", "Assignee", "Sales"}
-    assert "Comments" not in written["rows"][0]
+    assert written["headers"] == ["Key", "Summary", "Company", "Status", "Assignee", "Sales"]
+    assert "Comments" not in written["headers"]
+    for row in written["rows"]:
+        assert set(row) == set(written["headers"])
+    # Every managed header has a value; nothing is written as a blank by
+    # default, which is how the loss happened.
+    assert all(name in written["rows"][0] for name in written["headers"])
+
+
+def test_the_columns_are_the_sheets_own_not_the_contracts(tmp_path: Path) -> None:
+    """A member's sheet with an extra column is still written in the right
+    places, and in the same places the preview named."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    layout = ["Key", "Summary", "Company", "Status", "Assignee", "Salse", "Notes", "Comments"]
+    book = openpyxl.Workbook()
+    week = book.active
+    week.title = "2026_30W"
+    week.append(layout)
+    temp = book.create_sheet("weekly report temp")
+    temp.append(layout)
+    temp.append(["GTM-688", "edit", "Acme", "In Progress", "Ming", "Wendy", "mine", OLD_BLOCK])
+    book.save(workbook)
+
+    plan = plan_for(workbook, [issue("GTM-1", "completed:\n- tx cal")])
+    assert plan.sheet_headers == tuple(layout)
+    assert plan.sales_header == "Salse", "the sheet's own spelling"
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    # Comments is H here, not G, and the row's border reaches it.
+    reset = writer.calls[3][1]
+    assert FontColour(range="H2:H3", colour="#000000") in reset
+    assert Fill(range="A2:A3") in reset
+    marks = writer.calls[5][1]
+    assert Border(range="A3:H3", style="thin") in marks
+    prepend = [payload for name, payload in writer.calls if name == "rich_prepend"]
+    assert prepend[0]["cell"] == "H3"
+    # The member's own spelling of the Sales column is what gets written.
+    assert "Salse" in writer.calls[1][1]["headers"]
+    assert "Notes" not in writer.calls[1][1]["headers"], "an unmanaged column is left alone"
+
+
+def test_a_plan_made_without_a_scratch_sheet_is_not_written_into_a_new_one(
+    tmp_path: Path,
+) -> None:
+    """Presence counts as much as content: a sheet somebody made in between
+    is not the sheet this plan was made against."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook, scratch=False)
+    plan = plan_for(workbook, [issue("GTM-1", "completed:\n- tx cal")])
+    assert not plan.scratch_present
+    build_workbook(workbook, scratch=True)
+    writer = RecordingWriter()
+    with pytest.raises(ApplyRefused) as refused:
+        apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    assert refused.value.code == "sheet_changed"
+    assert writer.calls == [], "not even a backup"
+
+
+def test_a_write_back_that_fails_is_not_reported_as_nothing_happened(tmp_path: Path) -> None:
+    """The report was written and saved; only the copy back failed, and the
+    finished workbook is the staged one. Saying `workbook_open` here would
+    read as "nothing happened" and the next run would stage over it."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook)
+    plan = plan_for(workbook, [issue("GTM-1", "completed:\n- tx cal")])
+    writer = RecordingWriter(
+        existing_rows={"GTM-688": 2},
+        on_close=lambda: owner_file(workbook).write_bytes(b""),
+    )
+    with pytest.raises(ApplyRefused) as refused:
+        apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    assert refused.value.code == "write_back_failed"
+    assert writer.closed_saving is True, "the report was saved"
+    staged = tmp_path / "state" / "weekly-report-staging" / workbook.name
+    assert staged.is_file()

@@ -169,6 +169,7 @@ def build_plan(
         sheet_digest=sheet.digest,
         scratch_present=sheet.scratch_present,
         seed_sheet=sheet.seed_sheet,
+        sheet_headers=sheet.headers,
         browse_base=_browse_base(issues),
         preview="pending",
     )

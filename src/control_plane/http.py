@@ -61,7 +61,7 @@ class _Handler(BaseHTTPRequestHandler):
     def version_string(self) -> str:
         return "control-plane"
 
-    def _send(self, status: int, body: bytes) -> None:
+    def _send(self, status: int, body: bytes, *, unread_body: bool = False) -> None:
         # One request per connection. A refusal sent before the body was
         # read would otherwise leave that body on the wire to be parsed as
         # the next request, and every operation here is one round trip.
@@ -73,10 +73,32 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_header("Connection", "close")
         self.end_headers()
         self.wfile.write(body)
+        if unread_body:
+            self._linger()
 
-    def _refuse(self, code: Any) -> None:
+    def _linger(self, *, seconds: float = 0.25, limit: int = 65536) -> None:
+        """Swallow what the client already sent before closing on it.
+
+        A socket closed with data still unread is reset rather than finished,
+        and a reset discards whatever the client has not yet picked up --
+        including the refusal just written. Only the paths that refuse
+        *before* reading a declared body need this, and it is bounded by
+        time as well as by size, because the declared length is exactly what
+        those paths refused to believe."""
+        try:
+            self.wfile.flush()
+            self.connection.settimeout(seconds)
+            while limit > 0:
+                chunk = self.connection.recv(min(limit, 8192))
+                if not chunk:
+                    return
+                limit -= len(chunk)
+        except OSError:
+            return
+
+    def _refuse(self, code: Any, *, unread_body: bool = False) -> None:
         status, body = _failure(code)
-        self._send(status, body)
+        self._send(status, body, unread_body=unread_body)
 
     def do_GET(self) -> None:  # noqa: N802 - the base class names it
         if self.path == f"{API_PREFIX}health":
@@ -91,7 +113,7 @@ class _Handler(BaseHTTPRequestHandler):
         operation = self.path[len(API_PREFIX) :]
         if self.headers.get("Transfer-Encoding"):
             # A body of unstated length is not read; this wire states it.
-            self._refuse("invalid_request")
+            self._refuse("invalid_request", unread_body=True)
             return
         try:
             length = int(self.headers.get("Content-Length") or 0)
@@ -100,7 +122,7 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if length < 0 or length > MAX_BODY_BYTES:
             # Refused before it is read: a body that large is not read at all.
-            self._refuse("request_too_large")
+            self._refuse("request_too_large", unread_body=True)
             return
         raw = self.rfile.read(length) if length else b""
         credential = _credential(self.headers.get("Authorization"))

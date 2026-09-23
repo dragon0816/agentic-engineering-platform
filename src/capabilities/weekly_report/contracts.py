@@ -245,6 +245,9 @@ class WeeklyReportPlan(Contract):
     sheet_digest: Sha256
     scratch_present: StrictBool = False
     seed_sheet: Text | None = None
+    # The sheet's own header row, so a writer addresses the columns the
+    # member actually has rather than the ones the contract names.
+    sheet_headers: tuple[str, ...] = ()
     # The Jira site the key cells link to, taken from the issues themselves.
     browse_base: Text | None = None
     preview: str

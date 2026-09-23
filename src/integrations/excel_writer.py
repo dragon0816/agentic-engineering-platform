@@ -53,6 +53,9 @@ WorkbookWriteErrorCode = Literal[
 #: client holds a brief lock of its own while it uploads, and losing a run's
 #: work to a lock that clears in two seconds would be absurd.
 UNSTAGE_RETRY_SECONDS = 30.0
+#: xlEdgeLeft, xlEdgeTop, xlEdgeBottom, xlEdgeRight and xlInsideVertical.
+_EDGE_BORDERS = (7, 8, 9, 10)
+_INSIDE_VERTICAL = 11
 STAGING_DIR = "weekly-report-staging"
 
 
@@ -457,10 +460,19 @@ class ExcelComWriter:
                 elif isinstance(operation, FontColour):
                     worksheet.Range(operation.range).Font.Color = self._bgr(operation.colour)
                 elif isinstance(operation, Border):
-                    borders = worksheet.Range(operation.range).Borders
-                    borders.LineStyle = -4142 if operation.style == "none" else 1
-                    if operation.style != "none":
-                        borders.Weight = 2 if operation.style == "thin" else -4138
+                    target = worksheet.Range(operation.range)
+                    # Edge by edge, never the whole collection: setting
+                    # `Borders.LineStyle` also draws Excel's two diagonals,
+                    # which is not what a table row looks like. xlInside* is
+                    # only meaningful for a range spanning more than one cell.
+                    edges = [*_EDGE_BORDERS]
+                    if ":" in operation.range:
+                        edges.append(_INSIDE_VERTICAL)
+                    for edge in edges:
+                        border = target.Borders(edge)
+                        border.LineStyle = -4142 if operation.style == "none" else 1
+                        if operation.style != "none":
+                            border.Weight = 2 if operation.style == "thin" else -4138
                 else:
                     worksheet.Range(operation.cell).Formula = operation.formula
         except Exception:  # noqa: BLE001

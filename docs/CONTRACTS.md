@@ -1593,7 +1593,10 @@ that service on a standard-library `ThreadingHTTPServer`: `POST
 /v1/<operation>` with `Authorization: Bearer <token_id>:<secret>`, a 4 MiB
 body limit refused before reading, a chunked body refused, one request per
 connection (`Connection: close`, so a refused body is never parsed as the next
-request), an unauthenticated `GET /v1/health`, no request logging, no software
+request; a refusal sent *before* the body was read then swallows what the
+client already sent, briefly and boundedly, because a socket closed with
+unread data is reset rather than finished and a reset discards the refusal
+itself), an unauthenticated `GET /v1/health`, no request logging, no software
 name, and an optional `ssl.SSLContext` that wraps the socket. It serves the
 in-memory references; a durable platform store is a later slice.
 
@@ -1803,17 +1806,28 @@ report goes on, as the source did.
 
 `ApplyRefused` is a `CapabilityRefused` whose code the member sees on the
 failed step: `sheet_changed` (the plan carries the scratch sheet's digest as
-it stood, and a sheet somebody has changed since is refused, not written),
-`header_missing`, `workbook_missing`, `workbook_open`. A run that does not
+it stood, and a sheet somebody has changed since — or one somebody has since
+*made*, when the plan was made without one — is refused, not written),
+`header_missing`, `workbook_missing`, `workbook_open`, and
+`write_back_failed`, which says the report was written and saved and only the
+copy back failed, so the finished workbook is the staged one. The guard runs
+before anything is copied or backed up, so a refused run leaves nothing
+behind. A run that does not
 finish closes without saving, leaves the real workbook exactly as it was and
 names the staged copy. `WeeklyReportApplied` is the evidence: the digests
 before and after, the backup's path, the staged path, every count the source
 reported and each `FailedComment`; `evidence_lines(applied, plan)` is what
 the parity gate reads.
 
-`WeeklyReportPlan` gains `scratch_present`, `seed_sheet` and `browse_base`
-(taken from the issues themselves) so a writer needs nothing but the plan,
-and `WeeklyReportSettings` gains `local_staging`.
+`WeeklyReportPlan` gains `scratch_present`, `seed_sheet`, `browse_base`
+(taken from the issues themselves) and `sheet_headers` so a writer needs
+nothing but the plan, and `WeeklyReportSettings` gains `local_staging`. The
+column letters come from `sheet_headers`, the member's own header row, so the
+write lands where the preview said it would even on a sheet whose layout
+differs from the column contract. The managed headers are the columns the
+job writes and **never `Comments`**: a writer sets every managed header from
+the record it is given, the record has no comments, and naming the column
+would blank the hand-kept log on every planned row.
 `capabilities.weekly_report.handlers.APPLY_SPEC` is the first capability in
 this repository with a side effect: `write`, `approval_required`, so the
 Bridge policy refuses it unless the member's decision carries an

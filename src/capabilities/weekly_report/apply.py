@@ -54,6 +54,9 @@ ApplyRefusalCode = Literal[
     "header_missing",
     "workbook_missing",
     "workbook_open",
+    # The report was written and saved, and only the copy back onto the real
+    # workbook failed. The finished workbook is the staged one.
+    "write_back_failed",
 ]
 
 #: How much of a block has to still sit at the top of a cell for a recolour
@@ -101,17 +104,20 @@ def apply_plan(
     if workbook_is_open(real) is not None:
         raise ApplyRefused("workbook_open")
 
+    # The sheet this plan was made against, read before anything is copied,
+    # backed up or opened, so a refusal really does leave nothing behind.
+    # Presence counts as much as content: a plan made when the scratch sheet
+    # was absent must not be written blind into one somebody has since made.
+    digest_before, present = scratch_digest(real, settings.temp_sheet)
+    if present != plan.scratch_present or (present and digest_before != plan.sheet_digest):
+        raise ApplyRefused("sheet_changed")
+
     backup = writer.backup(real)
     staged: Path | None = None
     working = real
     if settings.local_staging:
         staged = stage_workbook(real, staging_root)
         working = staged
-
-    # The sheet this plan was made against, before anything is opened.
-    digest_before, present = scratch_digest(working, settings.temp_sheet)
-    if plan.scratch_present and digest_before != plan.sheet_digest:
-        raise ApplyRefused("sheet_changed")
 
     finished = False
     try:
@@ -127,7 +133,13 @@ def apply_plan(
             # worse outcome than the failure that caused it.
             pass
     if staged is not None:
-        unstage_workbook(staged, real)
+        try:
+            unstage_workbook(staged, real)
+        except WorkbookWriteError:
+            # The report was written and saved; only the copy back failed.
+            # Saying `workbook_open` here would read as "nothing happened",
+            # and the next run would stage over the finished workbook.
+            raise ApplyRefused("write_back_failed") from None
     digest_after, _ = scratch_digest(real, settings.temp_sheet)
     return applied.model_copy(
         update={
@@ -149,25 +161,28 @@ def _write(
     workbook: Path,
 ) -> WeeklyReportApplied:
     """Everything between opening the workbook and saving it."""
-    headers = _headers(plan)
+    # The sheet's own header row, which is what the member has and what the
+    # preview was rendered against; the column contract only stands in for a
+    # sheet that has none.
+    layout = list(plan.sheet_headers) or list(rules.WEEKLY_COLUMNS)
     sheet = settings.temp_sheet
     try:
-        key_column = rules.column_for_header(headers, "Key")
-        comments_column = rules.column_for_header(headers, "Comments")
+        key_column = rules.column_for_header(layout, "Key")
+        comments_column = rules.column_for_header(layout, "Comments")
     except KeyError:
         raise ApplyRefused("header_missing") from None
     try:
-        status_column: str | None = rules.column_for_header(headers, "Status")
+        status_column: str | None = rules.column_for_header(layout, "Status")
     except KeyError:
         # A sheet without a Status column is not an error: the run still has
         # a report to write, and only the pink has nowhere to go.
         status_column = None
-    last_column = column_letter(len(headers))
+    last_column = column_letter(len(layout))
 
     upsert = writer.upsert(
         workbook,
         sheet,
-        headers=headers,
+        headers=_managed(plan),
         key_header="Key",
         rows=[_record(row, plan.sales_header) for row in plan.rows],
     )
@@ -293,12 +308,18 @@ def _write(
     )
 
 
-def _headers(plan: WeeklyReportPlan) -> list[str]:
-    """The managed headers, in the workbook's own order, with whichever
-    spelling of the Sales column the sheet uses."""
+def _managed(plan: WeeklyReportPlan) -> list[str]:
+    """The columns this job writes, and only those.
+
+    `Comments` is deliberately absent. It is a hand-maintained log that is
+    only ever prepended to, and a writer given it as a managed header would
+    set it to whatever the record carries for it -- which is nothing. That is
+    the loss rule 2 of `integrations.excel_writer` exists to prevent, and it
+    is prevented here, by never naming the column."""
     return [
         plan.sales_header if header in rules.SALES_COLUMN_ALIASES else header
         for header in rules.WEEKLY_COLUMNS
+        if header != "Comments"
     ]
 
 
