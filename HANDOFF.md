@@ -41,7 +41,7 @@ plan". Source characterization and decisions: `docs/PHASE_7_MIGRATION.md`,
 
 Run on Windows in `.venv` (Python 3.12) at the head of this branch:
 
-- `python -m pytest -q -p no:cacheprovider` — **896 passed, 4 skipped**. Three
+- `python -m pytest -q -p no:cacheprovider` — **897 passed, 4 skipped**. Three
   skips need symbolic-link privileges and one needs an IPv6 loopback; all
   four run on Linux CI.
 - `ruff check .` — clean. `ruff format --check .` — clean.

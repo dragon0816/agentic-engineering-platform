@@ -114,6 +114,10 @@ class CompanyHostConfiguration(Contract):
     # fails as `timeout`, and the thread it was running on finishes on its
     # own, so the cap is a report, not a stop.
     capability_timeout_seconds: int = Field(default=600, ge=1, le=3600, strict=True)
+    # How long a caller waits for a workflow before the Agent reports it
+    # still running; no shorter than a step's cap, or the caller would be
+    # told `workflow_timeout` while the step was still allowed to finish.
+    workflow_wait_seconds: int = Field(default=900, ge=1, le=7200, strict=True)
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:
@@ -132,6 +136,8 @@ class CompanyHostConfiguration(Contract):
         names = [item.secret for item in self.credentials]
         if len(names) != len(set(names)):
             raise ValueError("a secret is mapped to one environment variable")
+        if self.workflow_wait_seconds < self.capability_timeout_seconds:
+            raise ValueError("a caller waits at least as long as one step may run")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

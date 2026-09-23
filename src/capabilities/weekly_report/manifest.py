@@ -1,16 +1,12 @@
 """The Skill and the Workflow that run the weekly report's preview.
 
 Shipped as contracts so a host, a test and the Registry all take the same
-manifests; `aep-host export-assets` writes them as the JSON files a workspace
-or a publisher takes.
+manifests; `host_runtime.assets.export_assets` writes them as the JSON files
+a workspace or a publisher takes. Pure data: nothing here touches a file.
 """
-
-import json
-from pathlib import Path
 
 from agent.skills import SkillManifest
 from common.assets import AssetIdentity, WorkflowManifest
-from host_runtime.workspace import write_atomically
 
 PREVIEW_WORKFLOW = AssetIdentity(
     namespace="engineering", name="jira-weekly-report-preview", version="1.0.0"
@@ -36,7 +32,17 @@ def preview_workflow() -> WorkflowManifest:
                 "workbook's scratch sheet, with nothing written"
             ),
             "execution": {"mode": "local"},
-            "dependencies": {"central_required": False},
+            # Named so the engine refuses the run before its first step on a
+            # host that lacks any of them, rather than failing at step 1.
+            "dependencies": {
+                "central_required": False,
+                "local_capabilities": [
+                    "weekly_report.resolve_window",
+                    "jira.search",
+                    "excel.read_scratch_sheet",
+                    "weekly_report.plan",
+                ],
+            },
             "input_contract": "engineering.jira-weekly-report.request.v1",
             "output_contract": "weekly-report.plan.output.v1",
             "steps": [
@@ -98,21 +104,3 @@ def weekly_skill() -> SkillManifest:
             "default_command": "preview",
         }
     )
-
-
-def export_assets(directory: Path) -> tuple[Path, ...]:
-    """Write the shipped manifests where a workspace or a publisher reads
-    them: `skills/` and `workflows/` under `directory`."""
-    written: list[Path] = []
-    for folder, manifest in (
-        ("skills", weekly_skill()),
-        ("workflows", preview_workflow()),
-    ):
-        identity = manifest.metadata.identity
-        path = (
-            directory / folder / f"{identity.namespace}__{identity.name}__{identity.version}.json"
-        )
-        payload = json.dumps(manifest.model_dump(mode="json"), indent=2, ensure_ascii=False)
-        write_atomically(path, payload.encode("utf-8") + b"\n")
-        written.append(path)
-    return tuple(written)

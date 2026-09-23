@@ -901,7 +901,7 @@ here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
    when a site answers the probe 404 or 410, offset-paged `POST search`
    otherwise, both under the safety cap and both reading every page while
    the site's `total` says more remain; comment threads re-fetched when the
-   search truncated them; bounded retries on 429 and 5xx honouring `Retry-After`, with an
+   search truncated them; bounded retries on 429 and 5xx honouring `Retry-After` up to a minute, with an
    injectable sleeper; 401 and 403 a typed `jira_auth` refusal; every failure
    a code with a redacted message. `UrllibTransport` gains `request` for a
    method other than POST; `Transport` itself is unchanged.
@@ -927,7 +927,9 @@ here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
    Phase 6 harness like any other run.
 5. `capabilities.weekly_report.manifest` ships the Skill (`weekly`, with
    `preview`) and the Workflow `engineering/jira-weekly-report-preview` that
-   runs the four steps in order, and `aep-host export-assets` writes them as
+   runs the four steps in order and names them as the capabilities it needs,
+   so a host lacking one refuses the run before its first step; `aep-host
+   export-assets` writes them as
    the JSON files a workspace or the Registry takes. The host gains
    `integrations.jira` (the connection, its secret a `SecretRef` mapped like
    every other) and `integrations.weekly_report` (the workbook, the scratch
@@ -936,7 +938,12 @@ here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
    capabilities, and one without them still runs everything it did. The
    host's step timeout becomes configuration (`capability_timeout_seconds`,
    default ten minutes): the platform's thirty seconds suits a file read,
-   not a Jira search with a throttle waited out.
+   not a Jira search with a throttle waited out; a caller's wait
+   (`workflow_wait_seconds`, default fifteen minutes) is never shorter, so
+   the caller is not told `workflow_timeout` while the step may still finish.
+   A step's handler that raises `ValueError` fails the step as
+   `invalid_input`: a window that ends before it starts, a week the calendar
+   has not got, a sheet without `Key` and `Comments` columns.
 6. `openpyxl` (MIT, 3.1.x, maintained) joins the `office` extra for reading a
    workbook without Excel; `types-openpyxl` joins the dev tools. On a host
    without the extra `doctor` says so, and a run that reaches the sheet step

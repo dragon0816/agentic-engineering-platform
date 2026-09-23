@@ -30,7 +30,6 @@ class WeeklyReportSettings(Contract):
     # A base JQL overrides project and statuses when given; the window is
     # AND-ed onto it and its ORDER BY stays last.
     jql: Text | None = None
-    page_size: int = Field(default=100, ge=1, le=100, strict=True)
     max_issues: int | None = Field(default=None, ge=1, strict=True)
     # Canonical marker -> synonyms; None means the observed defaults.
     markers: dict[Text, tuple[Text, ...]] | None = None
@@ -89,17 +88,28 @@ class WeeklyReportRequest(Contract):
         if not isinstance(text, str) or not text.strip():
             return data
         filled = dict(data)
+        named: set[str] = set()
+
+        def take(field: str, value: object) -> None:
+            if field in named:
+                raise ValueError(f"a request names {field} once")
+            named.add(field)
+            # A field given directly wins; None is absent, not a choice.
+            if filled.get(field) is None:
+                filled[field] = value
+
         for word in text.split():
             name, has_value, value = word.partition("=")
             if not has_value and rules.parse_week_name(word) is not None:
-                filled.setdefault("week", word)
+                take("week", word)
             elif has_value and name in ("since", "until"):
-                filled.setdefault(name, value)
+                take(name, value)
             elif has_value and name in ("max", "max_issues"):
                 try:
-                    filled.setdefault("max_issues", int(value))
+                    count = int(value)
                 except ValueError:
                     raise ValueError(f"{name} takes a whole number") from None
+                take("max_issues", count)
             else:
                 raise ValueError(
                     "a request is a week such as 2026_31W, since=YYYY-MM-DD, "

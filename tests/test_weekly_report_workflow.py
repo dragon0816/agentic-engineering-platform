@@ -30,9 +30,10 @@ from capabilities.weekly_report.handlers import (
     ReadScratchSheetInput,
     digest_rows,
 )
-from capabilities.weekly_report.manifest import export_assets, preview_workflow, weekly_skill
+from capabilities.weekly_report.manifest import preview_workflow, weekly_skill
 from common.execution import RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
+from host_runtime.assets import export_assets
 from host_runtime.cli import main
 from host_runtime.host import build_runtime, host_report
 from integrations import excel
@@ -252,8 +253,11 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
     assert plan.highlight_keys == ("GTM-1", "GTM-9")
     assert plan.rows[0].company == "Acme" and plan.rows[0].sales == "Wendy/Teresa"
     assert not plan.capped and "CAPPED" not in plan.preview
-    # The host's executor gives a step the time a Jira search needs.
-    assert config.capability_timeout_seconds == 600
+    # The host's executor gives a step the time a Jira search needs, and a
+    # caller waits at least that long.
+    assert config.capability_timeout_seconds == 600 and config.workflow_wait_seconds == 900
+    with pytest.raises(Exception, match="at least as long"):
+        config.model_validate({**config.model_dump(), "workflow_wait_seconds": 10})
     # The evidence: the sheet as it was, and nothing changed.
     assert plan.sheet_digest != "0" * 64
     assert workbook.read_bytes() == before
@@ -272,6 +276,42 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
     assert repeat.model_copy(update={"window": plan.window}) == plan
 
 
+def test_a_cap_is_reported_only_when_it_cut_the_week_short(tmp_path: Path) -> None:
+    config, layout, _ = host(tmp_path)
+    for words, expected_capped, expected_rows in (
+        ("max=4", False, 3),  # exactly the cap: the whole week
+        ("max=3", True, 2),  # one short of it: the fourth, worked on, is cut
+        ("max=2", True, 2),  # the silent ticket and the cut one are both gone
+    ):
+        transport = ScriptedTransport(jira_replies())
+        with build_runtime(
+            config,
+            layout=layout,
+            resolver=StaticCredentials({"jira_token": TOKEN}),
+            jira_transport=transport,
+        ) as runtime:
+            outcome = ask(runtime, f"weekly.preview 2026_31W {words}")
+            assert outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
+            plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[-1].data)
+        assert plan.capped is expected_capped, words
+        assert len(plan.rows) == expected_rows, words
+        assert ("CAPPED" in plan.preview) is expected_capped
+        assert transport.calls[0]["json"]["maxResults"] == 100
+    # A host with the report but no Jira site is told so before anything
+    # runs, by the doctor and by the engine.
+    without = config.model_copy(
+        update={"integrations": config.integrations.model_copy(update={"jira": None})}
+    )
+    checks = {c.name: c for c in host_report(without, layout).checks}
+    assert checks["integrations"].status == "failed"
+    assert "needs a Jira site" in checks["integrations"].detail
+    with build_runtime(without, layout=layout) as runtime:
+        outcome = ask(runtime, "weekly.preview 2026_31W")
+        assert outcome.workflow is not None
+        assert outcome.workflow.run.status == "unavailable"
+        assert outcome.workflow.run.completed_steps == 0
+
+
 def test_a_jira_refusal_fails_the_run_and_claims_nothing(tmp_path: Path) -> None:
     config, layout, _ = host(tmp_path)
     transport = ScriptedTransport([Reply(401, {"message": "nope"})])
@@ -286,10 +326,15 @@ def test_a_jira_refusal_fails_the_run_and_claims_nothing(tmp_path: Path) -> None
         assert outcome.workflow.run.completed_steps == 1
         failure = outcome.workflow.run.failure
         assert failure is not None and TOKEN not in failure.message
-        # A request that is not one is refused before anything is fetched.
+        # A request that is not one is refused before anything is fetched,
+        # and so is a window that cannot be, with the input named as the fault.
         refused = ask(runtime, "weekly.preview whenever")
         assert refused.workflow is not None and refused.workflow.run.status == "failed"
         assert refused.workflow.run.completed_steps == 0
+        impossible = ask(runtime, "weekly.preview 2026_31W since=2026-09-01")
+        assert impossible.workflow is not None and impossible.workflow.run.status == "failed"
+        first = impossible.workflow.step_results[0]
+        assert first.failure is not None and first.failure.code == "invalid_input"
     assert len(transport.calls) == 1
 
 
@@ -350,6 +395,16 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
     )
     assert headless.headers == rules.WEEKLY_COLUMNS
     assert headless.digest == digest_rows(("",) * 7, (("GTM-1", "x", "", "", "", "", ""),))
+    # A sheet whose header row names no Key and Comments is refused, not
+    # planned as empty.
+    odd = tmp_path / "odd.xlsx"
+    book = openpyxl.Workbook()
+    book.active.title = "weekly report temp"
+    book.active.append(["Ticket", "Summary", "Notes"])
+    book.active.append(["GTM-1", "x", "y"])
+    book.save(odd)
+    with pytest.raises(ValueError, match="no Key and Comments columns"):
+        read(ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(odd))), "2026_31W")
     with pytest.raises(excel.WorkbookError, match="workbook_missing"):
         excel.sheet_names(tmp_path / "nowhere.xlsx")
     (tmp_path / "junk.xlsx").write_bytes(b"not a workbook")

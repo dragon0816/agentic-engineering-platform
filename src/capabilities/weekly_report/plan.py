@@ -44,13 +44,18 @@ def resolve_window(
     if since is not None and until is not None:
         start, end = since, until
     elif week is not None:
-        start, end = rules.week_range_for_name(week, settings.week_style)
+        try:
+            start, end = rules.week_range_for_name(week, settings.week_style)
+        except ValueError:
+            raise ValueError(f"{week} is not a week the calendar has") from None
         start = since if since is not None else start
         end = until if until is not None else end
     else:
         start, end = rules.week_range(today)
         start = since if since is not None else start
         end = until if until is not None else end
+    if start > end:
+        raise ValueError(f"the window {start}..{end} ends before it starts")
     stamp = min(today, end) if today >= start else end
     lookback = settings.lookback_days
     comment_since = start - _dt.timedelta(days=lookback) if lookback else start

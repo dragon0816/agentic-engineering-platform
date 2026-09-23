@@ -120,6 +120,11 @@ class BridgeExecutor:
                 retryable=binding.spec.side_effect == "read",
                 invoked=True,
             )
+        except ValueError:
+            # A handler that raises ValueError is refusing what it was given:
+            # the input, or the thing the input pointed it at. Its text may
+            # quote either, so only the code travels.
+            return self._failure(call, "invalid_input", invoked=True)
         except Exception:
             # Exception text may contain credentials or input data; never trace it.
             return self._failure(call, "handler_error", invoked=True)

@@ -251,6 +251,29 @@ def test_a_request_is_parsed_from_the_words_after_the_command() -> None:
         WeeklyReportRequest(args="max=lots")
     with pytest.raises(ValidationError, match="no earlier"):
         WeeklyReportRequest(since=_dt.date(2026, 8, 2), until=_dt.date(2026, 7, 27))
+    # A serialized request carries its defaults as None; the words still count.
+    assert WeeklyReportRequest.model_validate({"args": "2026_31W", "week": None}).week == (
+        "2026_31W"
+    )
+    with pytest.raises(ValidationError, match="names week once"):
+        WeeklyReportRequest(args="2026_30W 2026_31W")
+    with pytest.raises(ValidationError, match="names max_issues once"):
+        WeeklyReportRequest(args="max=1 max_issues=2")
+    # A window that cannot be, and a week the calendar has not got, are
+    # refused by the resolver with a reason.
+    with pytest.raises(ValueError, match="ends before it starts"):
+        resolve_window(
+            settings(),
+            week="2026_31W",
+            since=_dt.date(2026, 9, 1),
+            until=None,
+            max_issues=None,
+            today=RUN_DATE,
+        )
+    with pytest.raises(ValueError, match="not a week the calendar has"):
+        resolve_window(
+            settings(), week="2025_53W", since=None, until=None, max_issues=None, today=RUN_DATE
+        )
 
 
 def test_the_settings_and_the_plan_are_closed_and_consistent() -> None:
@@ -264,6 +287,8 @@ def test_the_settings_and_the_plan_are_closed_and_consistent() -> None:
         settings(markers={})
     with pytest.raises(ValidationError):
         settings(week_suffix="wk")
+    with pytest.raises(ValidationError):
+        settings(page_size=50)  # the connection pages; the report has no page size
     assert settings(week_suffix="").week_suffix == ""
     assert settings(jql="project = X").base_jql() == "project = X"
     base = plan_for([WORKED_ON])

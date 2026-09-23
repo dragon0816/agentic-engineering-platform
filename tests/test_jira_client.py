@@ -239,6 +239,11 @@ def test_throttles_and_transient_errors_are_waited_out_and_the_rest_are_not() ->
     client, _, slept = cloud([Reply(429, {}, {"Retry-After": "2"}), page(["GTM-1"], is_last=True)])
     assert len(client.search_issues("project = GTM")) == 1
     assert slept == [2.0]
+    # A throttle is waited out, not obeyed without limit.
+    client, _, slept = cloud(
+        [Reply(429, {}, {"Retry-After": "3600"}), page(["GTM-1"], is_last=True)]
+    )
+    assert len(client.search_issues("project = GTM")) == 1 and slept == [60.0]
     for status in (500, 502, 503, 504):
         client, _, slept = cloud([Reply(status, {}), page(["GTM-1"], is_last=True)])
         assert len(client.search_issues("project = GTM")) == 1 and slept == [1.0]

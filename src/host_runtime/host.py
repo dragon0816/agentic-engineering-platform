@@ -418,6 +418,8 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
         problems.append("the Jira token's secret is not mapped to an environment variable")
     settings = integrations.weekly_report
     if settings is not None:
+        if integrations.jira is None:
+            problems.append("the weekly report needs a Jira site; none is configured")
         try:
             excel.require_library()
         except excel.WorkbookError:
@@ -607,7 +609,9 @@ def build_runtime(
     except (LocalStateError, OSError, ValueError) as error:
         raise HostError("state_unavailable", place.state) from error
     try:
-        agent = LocalAgent(membership, gateway, state)
+        agent = LocalAgent(
+            membership, gateway, state, workflow_wait_seconds=checked.workflow_wait_seconds
+        )
         telegram = build_telegram(checked, place, agent, resolver)
         platform = build_platform(checked, resolver)
     except BaseException:

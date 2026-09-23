@@ -1676,8 +1676,10 @@ non-secret configuration with the source's defaults (workbook, scratch sheet,
 week style and suffix, project and statuses or a base `jql`, page size and
 cap, marker synonyms, bullet, look-back, the five colours and the border);
 `WeeklyReportRequest` is what a run asks for, as fields or as the words after
-a command (`2026_31W since=… until=… max=N`), and refuses a week that is not
-a sheet name where the source fell back to today's; `ReportingWindow` is the
+a command (`2026_31W since=… until=… max=N`; a field given directly wins, a
+word naming a field twice is refused), and refuses a week that is not a
+sheet name where the source fell back to today's; `resolve_window` refuses a
+window that ends before it starts and a week the calendar has not got; `ReportingWindow` is the
 week resolved (window, comment window, stamp date, composed JQL, cap);
 `JiraIssue`/`JiraComment` are an issue reduced to the report's fields with
 its comments flattened to text; `SheetState` is the scratch sheet as it
@@ -1702,7 +1704,7 @@ already hold this week's content, or arrived this week.
 `server`, the token a `SecretRef`, timeout, retries, page size) and
 `JiraClient(connection, resolver, transport=, sleep=)`: Basic `email:token`
 or Bearer built per call and held nowhere; `request` with bounded retries on
-429/5xx honouring `Retry-After` and no body ever echoed; `search_issues`/
+429/5xx honouring `Retry-After` up to sixty seconds and no body ever echoed; `search_issues`/
 `iter_issues` token-paged on Cloud with a remembered fall-back to offset
 paging when a site answers the probe 404 or 410 (an empty body is
 `jira_bad_reply`, never a fall-back), offset-paged on Server, under the
@@ -1723,16 +1725,20 @@ rows from a single open), `require_library`; failures are
 `capabilities.weekly_report.handlers` are the four read capabilities:
 `weekly-report/resolve-window` (`ResolveWindowInput.request`),
 `jira/search` (`JiraSearchInput.jql`, `max_issues`; `JiraSearchOutput.issues`
-normalized, threads the search truncated re-fetched, `capped`),
-`excel/read-scratch-sheet` (`ReadScratchSheetInput.week` → `SheetState`) and
+normalized through `rules.issue_to_row`, threads the search truncated
+re-fetched, `capped` only when a result past the cap existed),
+`excel/read-scratch-sheet` (`ReadScratchSheetInput.week` → `SheetState`; a
+sheet whose header row names no `Key` and `Comments` is refused, not planned
+as empty) and
 `weekly-report/plan` (`PlanInput.window`, `issues`, `sheet` →
 `WeeklyReportPlan`). A Jira outage is raised as `TransientCapabilityError`;
 every other failure is raised and fails the step, so a run never claims
 success it did not earn. `capabilities.weekly_report.manifest` ships the
 Skill `weekly` (`preview`) and the Workflow
-`engineering/jira-weekly-report-preview` over those four steps, and
-`export_assets(directory)` writes them as JSON under `skills/` and
-`workflows/`.
+`engineering/jira-weekly-report-preview` over those four steps, which the
+Workflow names in `dependencies.local_capabilities` so a host lacking one
+refuses the run before its first step; `host_runtime.assets.export_assets`
+writes them as JSON under `skills/` and `workflows/`.
 
 The host: `HostIntegrations` (`jira`, `weekly_report`) on
 `CompanyHostConfiguration.integrations`; `build_integrations` installs the
@@ -1745,10 +1751,16 @@ the library and the workbook's presence without contacting anything;
 long one step may run on this host: the platform's thirty seconds suits a
 file read and not a Jira search with a throttle waited out. A step that
 outlives it fails as `timeout`; the thread it ran on finishes on its own, so
-the cap is a report, not a stop.
+the cap is a report, not a stop. `workflow_wait_seconds` (default 900, never
+shorter) is how long a caller waits before the Agent reports a run still
+running; `LocalAgent(workflow_wait_seconds=)` applies it on every ingress.
+The `integrations` check fails when the weekly report is configured without
+a Jira site.
 
 `workflow.dispatch.BridgeExecutor` now validates a step's inputs strictly
 against JSON (`model_validate_json(json.dumps(arguments), strict=True)`)
 rather than strictly in Python: a step's arguments are what an earlier
 step's output serialized to, so a list is a tuple and an ISO string is a
-date, while `"1"` is still not an integer.
+date, while `"1"` is still not an integer. A handler that raises
+`ValueError` is refusing what it was given, and the step fails as
+`invalid_input` rather than `handler_error`; its text still never travels.

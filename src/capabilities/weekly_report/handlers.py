@@ -138,17 +138,21 @@ class JiraSearchHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         item = JiraSearchInput.model_validate(inputs)
         try:
-            raw = await asyncio.to_thread(self._fetch, item.jql, item.max_issues)
+            raw, capped = await asyncio.to_thread(self._fetch, item.jql, item.max_issues)
         except JiraError as error:
             if error.code == "jira_unavailable":
                 raise TransientCapabilityError(error.code) from None
             raise
         issues = tuple(_normalize(issue, self.client) for issue in raw)
-        capped = item.max_issues is not None and len(issues) >= item.max_issues
         return JiraSearchOutput(jql=item.jql, issues=issues, capped=capped)
 
-    def _fetch(self, jql: str, max_issues: int | None) -> list[dict[str, Any]]:
-        issues = self.client.search_issues(jql, rules.REPORT_FIELDS, max_issues=max_issues)
+    def _fetch(self, jql: str, max_issues: int | None) -> tuple[list[dict[str, Any]], bool]:
+        # One past the cap, so a week of exactly the cap's size is not
+        # reported as cut short.
+        asked = max_issues + 1 if max_issues is not None else None
+        fetched = self.client.search_issues(jql, rules.REPORT_FIELDS, max_issues=asked)
+        capped = max_issues is not None and len(fetched) > max_issues
+        issues = fetched[:max_issues] if max_issues is not None else fetched
         for issue in issues:
             fields = issue.setdefault("fields", {})
             block = fields.get("comment") or {}
@@ -161,7 +165,7 @@ class JiraSearchHandler:
             # returns one), so the thread is fetched on its own.
             full = self.client.comments(str(issue.get("key")))
             fields["comment"] = {"comments": full, "total": len(full)}
-        return issues
+        return issues, capped
 
 
 def _normalize(issue: dict[str, Any], client: JiraClient) -> JiraIssue:
@@ -175,14 +179,16 @@ def _normalize(issue: dict[str, Any], client: JiraClient) -> JiraIssue:
         for item in thread
         if isinstance(item, dict)
     )
-    key = str(issue.get("key") or "")
+    # The one mapping of Jira fields to the sheet's columns, the rules' own.
+    row = rules.issue_to_row(issue)
+    key = row["Key"]
     return JiraIssue(
         key=key,
-        summary=rules.display(fields.get("summary")),
-        status=rules.display(fields.get("status")),
-        assignee=rules.display(fields.get("assignee")),
-        company=rules.display(fields.get(rules.FIELD_COMPANY)),
-        sales=rules.display(fields.get(rules.FIELD_SALES)),
+        summary=row["Summary"],
+        status=row["Status"],
+        assignee=row["Assignee"],
+        company=row["Company"],
+        sales=row["Sales"],
         updated=str(fields.get("updated")) if fields.get("updated") else None,
         comments=comments,
         browse_url=client.browse_url(key),
@@ -231,14 +237,17 @@ class ReadScratchSheetHandler:
             headers = rules.WEEKLY_COLUMNS
         existing: dict[str, str] = {}
         lowered = [header.strip().lower() for header in headers]
-        if "key" in lowered and "comments" in lowered:
-            key_index, comments_index = lowered.index("key"), lowered.index("comments")
-            for row in rows:
-                if key_index >= len(row):
-                    continue
-                key = row[key_index].strip()
-                if key:
-                    existing[key] = row[comments_index] if comments_index < len(row) else ""
+        if "key" not in lowered or "comments" not in lowered:
+            # A sheet the plan cannot read is refused, not planned as empty:
+            # every tracked ticket would otherwise be proposed as new.
+            raise ValueError(f"sheet {source!r} has no Key and Comments columns in its header row")
+        key_index, comments_index = lowered.index("key"), lowered.index("comments")
+        for row in rows:
+            if key_index >= len(row):
+                continue
+            key = row[key_index].strip()
+            if key:
+                existing[key] = row[comments_index] if comments_index < len(row) else ""
         return SheetState(
             headers=tuple(header.strip() for header in headers),
             existing=existing,

@@ -38,6 +38,9 @@ JiraErrorCode = Literal[
 
 DEFAULT_PAGE_SIZE = 100
 RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
+# A throttle is waited out, not obeyed without limit: one header must not
+# park the worker for an hour past every timeout above it.
+MAX_RETRY_AFTER_SECONDS = 60.0
 # A site without `search/jql` answers one of these to the probe.
 FALLBACK_STATUSES = frozenset({404, 410})
 
@@ -225,7 +228,7 @@ class JiraClient:
 
     def _delay(self, attempt: int, retry_after: float | None) -> float:
         if retry_after is not None:
-            return retry_after
+            return min(max(retry_after, 0.0), MAX_RETRY_AFTER_SECONDS)
         return float(self._backoff * (2**attempt))
 
     # -- search ---------------------------------------------------------

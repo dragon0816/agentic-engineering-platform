@@ -19,11 +19,11 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from capabilities.weekly_report.manifest import export_assets
 from channels.telegram import TelegramIngress
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.agent import LocalAgentOutcome
+from host_runtime.assets import export_assets
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
