@@ -22,8 +22,8 @@ from capabilities.weekly_report.apply import (
     scratch_digest,
 )
 from capabilities.weekly_report.contracts import (
-    JiraComment,
-    JiraIssue,
+    ReportComment,
+    ReportItem,
     SheetState,
     WeeklyReportPlan,
     WeeklyReportSettings,
@@ -172,9 +172,9 @@ def settings(workbook: Path, **changes: Any) -> WeeklyReportSettings:
     return WeeklyReportSettings.model_validate({"workbook_path": str(workbook), **changes})
 
 
-def issue(key: str, body: str | None = None, *, summary: str = "[WNC] work") -> JiraIssue:
-    comments = (JiraComment(created="2026-07-29T09:00:00.000+0800", body=body),) if body else ()
-    return JiraIssue(
+def issue(key: str, body: str | None = None, *, summary: str = "[WNC] work") -> ReportItem:
+    comments = (ReportComment(created="2026-07-29T09:00:00.000+0800", body=body),) if body else ()
+    return ReportItem(
         key=key,
         summary=summary,
         status="In Progress",
@@ -208,7 +208,7 @@ def sheet_state(workbook: Path, *, temp: str = "weekly report temp") -> SheetSta
     )
 
 
-def plan_for(workbook: Path, issues: list[JiraIssue], **changes: Any) -> WeeklyReportPlan:
+def plan_for(workbook: Path, issues: list[ReportItem], **changes: Any) -> WeeklyReportPlan:
     config = settings(workbook, **changes)
     window = resolve_window(
         config, week="2026_31W", since=None, until=None, max_issues=None, today=RUN_DATE

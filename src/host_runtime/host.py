@@ -32,17 +32,17 @@ from capabilities.weekly_report.contracts import (
 )
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
-    JIRA_SEARCH_SPEC,
     PLAN_SPEC,
+    PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
     ApplyHandler,
     ApplyInput,
-    JiraSearchHandler,
-    JiraSearchInput,
-    JiraSearchOutput,
     PlanHandler,
     PlanInput,
+    ProjectSearchHandler,
+    ProjectSearchInput,
+    ProjectSearchOutput,
     ReadScratchSheetHandler,
     ReadScratchSheetInput,
     ResolveWindowHandler,
@@ -71,7 +71,7 @@ from integrations.excel_writer import (
     WorkbookWriter,
     require_com,
 )
-from integrations.jira import JiraClient
+from integrations.github_project import GitHubProjectClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from models.wire import MethodTransport
 from workflow.dispatch import BridgeExecutor
@@ -252,27 +252,29 @@ def build_integrations(
     """The capabilities the migrated workflows need, from what this host was
     given. Jira's token is resolved through the host's credential mapping at
     every call and never held; a name nothing is mapped to is refused now,
-    not at the first fetch. The weekly report's steps that need no Jira are
+    not at the first fetch. The weekly report's steps that need no board are
     installed whenever its settings are, so a preview against the workbook
     alone still runs."""
     integrations = config.integrations
     if integrations is None:
         return
-    if integrations.jira is not None:
+    settings = integrations.weekly_report
+    if integrations.github_project is not None and settings is not None:
         if resolver is None:
             mapped = config.credential_environment()
-            if integrations.jira.credential.name not in mapped:
+            if integrations.github_project.credential.name not in mapped:
                 raise HostError("credential_unmapped")
             resolver = EnvironmentCredentials(mapped)
-        client = JiraClient(integrations.jira, resolver, transport=jira_transport)
+        client = GitHubProjectClient(
+            integrations.github_project, resolver, transport=jira_transport
+        )
         installed.register(
-            JIRA_SEARCH_SPEC,
-            JiraSearchHandler(client),
-            JiraSearchInput,
-            JiraSearchOutput,
+            PROJECT_SEARCH_SPEC,
+            ProjectSearchHandler(client, settings),
+            ProjectSearchInput,
+            ProjectSearchOutput,
             ExecutionDependencies(central_required=False),
         )
-    settings = integrations.weekly_report
     if settings is not None:
         installed.register(
             RESOLVE_WINDOW_SPEC,
@@ -438,22 +440,24 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
     configuration and the installed libraries alone: no site is contacted
     and no workbook is opened."""
     integrations = config.integrations
-    if integrations is None or (integrations.jira is None and integrations.weekly_report is None):
+    if integrations is None or (
+        integrations.github_project is None and integrations.weekly_report is None
+    ):
         return DoctorCheck(
             name="integrations",
             status="pending",
-            detail="no Jira site or weekly report is configured; only the file capability runs",
+            detail="no project board or weekly report is configured; only the file capability runs",
         )
     problems: list[str] = []
     if (
-        integrations.jira is not None
-        and integrations.jira.credential.name not in config.credential_environment()
+        integrations.github_project is not None
+        and integrations.github_project.credential.name not in config.credential_environment()
     ):
-        problems.append("the Jira token's secret is not mapped to an environment variable")
+        problems.append("the board token's secret is not mapped to an environment variable")
     settings = integrations.weekly_report
     if settings is not None:
-        if integrations.jira is None:
-            problems.append("the weekly report needs a Jira site; none is configured")
+        if integrations.github_project is None:
+            problems.append("the weekly report needs a project board; none is configured")
         try:
             excel.require_library()
         except excel.WorkbookError:
@@ -466,8 +470,9 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
     if problems:
         return DoctorCheck(name="integrations", status="failed", detail="; ".join(problems))
     parts = []
-    if integrations.jira is not None:
-        parts.append(f"Jira at {integrations.jira.base_url}")
+    board = integrations.github_project
+    if board is not None:
+        parts.append(f"project {board.owner}/{board.project_number}")
     if settings is not None:
         try:
             require_com()

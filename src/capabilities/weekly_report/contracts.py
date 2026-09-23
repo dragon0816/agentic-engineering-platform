@@ -25,10 +25,18 @@ class WeeklyReportSettings(Contract):
     week_suffix: Literal["W", ""] = "W"
     project: Symbol = rules.DEFAULT_PROJECT
     statuses: tuple[Text, ...] = rules.DEFAULT_STATUSES
-    # A base JQL overrides project and statuses when given; the window is
-    # AND-ed onto it and its ORDER BY stays last.
-    jql: Text | None = None
     max_issues: int | None = Field(default=None, ge=1, strict=True)
+    # Which board column feeds which of the report's, first non-empty
+    # winning. Configuration because the people who use a board rename its
+    # columns, and that is not a code change. The defaults are the columns
+    # the board carried when it was read on 2026-09-23.
+    status_fields: tuple[Text, ...] = ("Status", "GTM Status")
+    assignee_fields: tuple[Text, ...] = ("SDE Assignee", "Assignees")
+    company_fields: tuple[Text, ...] = ("Company",)
+    sales_fields: tuple[Text, ...] = ("Sales",)
+    # The key given to work that started on the board and never carried one
+    # of the workbook's own, as `GH-63`.
+    board_key_prefix: Symbol = "GH"
     # Canonical marker -> synonyms; None means the observed defaults.
     markers: dict[Text, tuple[Text, ...]] | None = None
     bullet: Annotated[str, StringConstraints(min_length=1, max_length=4)] = "- "
@@ -59,9 +67,6 @@ class WeeklyReportSettings(Contract):
             raise ValueError("a marker vocabulary names at least one marker")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
-
-    def base_jql(self) -> str:
-        return self.jql if self.jql else rules.default_jql(self.project, self.statuses)
 
 
 class WeeklyReportRequest(Contract):
@@ -130,14 +135,14 @@ class WeeklyReportRequest(Contract):
 class ReportingWindow(Contract):
     """The week resolved: its name, its window, the comment window (wider
     when a look-back is configured), the date to stamp dateless blocks with,
-    the composed JQL and the cap."""
+    and the cap. What is searched is the host's own board, so there is no
+    query here for anybody to have to read."""
 
     week: Text
     since: _dt.date
     until: _dt.date
     comment_since: _dt.date
     stamp_date: _dt.date
-    jql: Text
     max_issues: int | None = Field(default=None, ge=1, strict=True)
 
     @model_validator(mode="after")
@@ -147,16 +152,19 @@ class ReportingWindow(Contract):
         return self
 
 
-class JiraComment(Contract):
-    """One comment as the rules read it: when it was created, as Jira wrote
-    the timestamp, and its body flattened to text."""
+class ReportComment(Contract):
+    """One comment as the rules read it: when it was written, as the source
+    wrote the timestamp, and its body flattened to text."""
 
     created: str | None = None
     body: str = ""
 
 
-class JiraIssue(Contract):
-    """An issue reduced to the report's fields, its comments flattened."""
+class ReportItem(Contract):
+    """One tracked item reduced to the report's fields, its comments
+    flattened. Named for what it is and not for where it came from: the
+    source moved from Jira to a GitHub Projects board in 2026-09, and
+    nothing downstream of this contract had to know."""
 
     key: Symbol
     summary: str = ""
@@ -165,7 +173,7 @@ class JiraIssue(Contract):
     company: str = ""
     sales: str = ""
     updated: str | None = None
-    comments: tuple[JiraComment, ...] = ()
+    comments: tuple[ReportComment, ...] = ()
     browse_url: str | None = None
 
 
@@ -199,6 +207,11 @@ class WeeklyRow(Contract):
     status: str = ""
     assignee: str = ""
     sales: str = ""
+    #: Where this row's key cell links to. Carried per row rather than
+    #: composed from a site and a key: Jira's addresses were
+    #: `<site>/browse/<key>` and a board's are not, and the plan has to be
+    #: the whole instruction whatever the source was.
+    url: str = ""
 
 
 class CommentOperation(Contract):
@@ -240,6 +253,10 @@ class WeeklyReportPlan(Contract):
     issue_keys: tuple[str, ...] = ()
     # Whether the cap cut the search short: a partial week is said to be one.
     capped: bool = False
+    #: Items whose comment thread was longer than one page of the source's
+    #: answer. Named on the plan, because a thread read short is a week
+    #: reported wrong and the plan is what a reader checks.
+    truncated_threads: tuple[Symbol, ...] = ()
     # The scratch sheet as it stood when this was planned. A writer that finds
     # a different digest is looking at a sheet somebody has changed since.
     sheet_digest: Sha256
@@ -249,6 +266,7 @@ class WeeklyReportPlan(Contract):
     # member actually has rather than the ones the contract names.
     sheet_headers: tuple[str, ...] = ()
     # The Jira site the key cells link to, taken from the issues themselves.
+    #: Kept for a plan made before rows carried their own link.
     browse_base: Text | None = None
     preview: str
 

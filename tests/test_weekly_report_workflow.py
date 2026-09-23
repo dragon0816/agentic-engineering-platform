@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from test_github_project_client import Reply, ScriptedTransport
 from test_host_wiring import device, membership_record, workspace
-from test_jira_client import Reply, ScriptedTransport
 
 from capabilities.weekly_report import rules
 from capabilities.weekly_report.contracts import (
@@ -24,8 +24,8 @@ from capabilities.weekly_report.contracts import (
 )
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
-    JIRA_SEARCH_SPEC,
     PLAN_SPEC,
+    PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
     ReadScratchSheetHandler,
@@ -48,7 +48,7 @@ from models.credentials import StaticCredentials
 
 openpyxl = pytest.importorskip("openpyxl")
 
-TOKEN = "a-jira-api-token-that-must-not-appear-anywhere"
+TOKEN = "a-board-token-that-must-not-appear-anywhere"
 HEADERS = list(rules.WEEKLY_COLUMNS)
 OLD_BLOCK = "7/17:\n[Completed]\n- BT Tx BR LE are ready\n"
 
@@ -77,80 +77,91 @@ def build_workbook(path: Path, *, scratch: bool) -> None:
     workbook.save(path)
 
 
-def jira_issue(key: str, summary: str, *comments: dict[str, Any]) -> dict[str, Any]:
+def board_item(
+    number: int,
+    title: str,
+    *comments: dict[str, Any],
+    total: int | None = None,
+    updated: str = "2026-07-30T10:00:00Z",
+) -> dict[str, Any]:
+    """One row of the board, shaped as the real one answered."""
     return {
-        "key": key,
-        "fields": {
-            "summary": summary,
-            "status": {"name": "In Progress"},
-            "assignee": {"displayName": "Ming-Kai Shih"},
-            "updated": "2026-07-30T10:00:00.000+0800",
-            rules.FIELD_COMPANY: "Acme",
-            rules.FIELD_SALES: "Wendy/Teresa",
-            "comment": {"comments": list(comments), "total": len(comments)},
+        "id": f"PVTI_{number}",
+        "type": "ISSUE",
+        "fieldValues": {
+            "nodes": [
+                {"text": title, "field": {"name": "Title"}},
+                {"name": "In Progress", "field": {"name": "Status"}},
+                {"text": "Acme", "field": {"name": "Company"}},
+                {"text": "Ming-Kai Shih", "field": {"name": "SDE Assignee"}},
+                {"text": "Wendy/Teresa", "field": {"name": "Sales"}},
+            ]
+        },
+        "content": {
+            "__typename": "Issue",
+            "number": number,
+            "title": title,
+            "url": f"https://github.com/an-owner/a-board/issues/{number}",
+            "state": "OPEN",
+            "updatedAt": updated,
+            "repository": {"nameWithOwner": "an-owner/a-board"},
+            "comments": {
+                "totalCount": total if total is not None else len(comments),
+                "nodes": list(comments),
+            },
         },
     }
 
 
-def jira_comment(created: str, body: Any) -> dict[str, Any]:
-    return {"created": created, "body": body}
+def board_comment(created: str, body: str) -> dict[str, Any]:
+    return {"createdAt": created, "author": {"login": "an-engineer"}, "body": body}
 
 
-ADF = {
-    "type": "doc",
-    "content": [
-        {"type": "paragraph", "content": [{"type": "text", "text": "completed:"}]},
-        {
-            "type": "bulletList",
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {"type": "paragraph", "content": [{"type": "text", "text": "tx cal done"}]}
-                    ],
-                }
-            ],
-        },
-    ],
-}
-
-
-def jira_replies() -> list[Reply]:
-    """One search page, then the comment thread of the issue whose thread the
-    search truncated."""
+def board_replies() -> list[Reply]:
+    """One page of the board: a row with a comment, a row with none, a row
+    that says nothing this week, and a row whose thread is longer than one
+    page."""
     return [
         Reply(
             200,
             {
-                "issues": [
-                    jira_issue(
-                        "GTM-1",
-                        "[WNC] worked on",
-                        jira_comment("2026-07-29T09:00:00.000+0800", ADF),
-                    ),
-                    jira_issue("GTM-688", "[Acme] field edit"),
-                    jira_issue("GTM-455", "[Silent] nothing this week"),
-                    {
-                        **jira_issue("GTM-9", "[Truncated] thread"),
-                        "fields": {
-                            **jira_issue("GTM-9", "[Truncated] thread")["fields"],
-                            "comment": {"comments": [], "total": 2},
-                        },
-                    },
-                ],
-                "isLast": True,
+                "data": {
+                    "user": {
+                        "projectV2": {
+                            "title": "a board",
+                            "items": {
+                                "pageInfo": {"hasNextPage": False, "endCursor": None},
+                                "nodes": [
+                                    board_item(
+                                        1,
+                                        "[GTM-1] [WNC] worked on",
+                                        board_comment(
+                                            "2026-07-29T09:00:00Z",
+                                            "completed:\n- tx cal done",
+                                        ),
+                                    ),
+                                    board_item(688, "[GTM-688] [Acme] field edit"),
+                                    board_item(455, "[GTM-455] [Silent] nothing this week"),
+                                    board_item(
+                                        9,
+                                        "[GTM-9] [Truncated] thread",
+                                        board_comment(
+                                            "2026-07-28T09:00:00Z",
+                                            "ongoing task:\n- fix rx power",
+                                        ),
+                                        board_comment(
+                                            "2026-07-30T09:00:00Z",
+                                            "completed:\n- rx power fixed",
+                                        ),
+                                        total=3,
+                                    ),
+                                ],
+                            },
+                        }
+                    }
+                }
             },
-        ),
-        Reply(
-            200,
-            {
-                "comments": [
-                    jira_comment("2026-07-28T09:00:00.000+0800", "ongoing task:\n- fix rx power"),
-                    jira_comment("2026-07-30T09:00:00.000+0800", "completed:\n- rx power fixed"),
-                ],
-                "total": 2,
-            },
-        ),
+        )
     ]
 
 
@@ -165,7 +176,7 @@ def grants() -> list[dict[str, Any]]:
         }
         for spec in (
             RESOLVE_WINDOW_SPEC,
-            JIRA_SEARCH_SPEC,
+            PROJECT_SEARCH_SPEC,
             READ_SCRATCH_SHEET_SPEC,
             PLAN_SPEC,
             APPLY_SPEC,
@@ -187,14 +198,14 @@ def host(tmp_path: Path, *, scratch: bool = True, **changes: Any) -> tuple[Any, 
         assets=False,
         config_changes={
             "integrations": {
-                "jira": {
-                    "base_url": "https://example-team.atlassian.net",
-                    "email": "a@example.com",
-                    "credential": {"name": "jira_token"},
+                "github_project": {
+                    "owner": "an-owner",
+                    "project_number": 1,
+                    "credential": {"name": "board_token"},
                 },
                 "weekly_report": settings(workbook, **changes),
             },
-            "credentials": [{"secret": "jira_token", "environment_variable": "AEP_JIRA_TOKEN"}],
+            "credentials": [{"secret": "board_token", "environment_variable": "AEP_GITHUB_TOKEN"}],
         },
     )
     export_assets(layout.workspace_root / "assets")
@@ -220,14 +231,14 @@ def test_the_shipped_manifests_validate_and_export() -> None:
     workflow = preview_workflow()
     assert [step.capability.name for step in workflow.steps if hasattr(step, "capability")] == [
         "resolve-window",
-        "search",
+        "search-project",
         "read-scratch-sheet",
         "plan",
     ]
     full = report_workflow()
     assert [step.capability.name for step in full.steps if hasattr(step, "capability")] == [
         "resolve-window",
-        "search",
+        "search-project",
         "read-scratch-sheet",
         "plan",
         "apply",
@@ -246,11 +257,11 @@ def test_the_shipped_manifests_validate_and_export() -> None:
 def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
     config, layout, workbook = host(tmp_path)
     before = workbook.read_bytes()
-    transport = ScriptedTransport(jira_replies())
+    transport = ScriptedTransport(board_replies())
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"jira_token": TOKEN}),
+        resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=transport,
     ) as runtime:
         outcome = ask(runtime, "weekly.preview 2026_31W")
@@ -261,11 +272,17 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
         plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[-1].data)
     # The window, the fetch and the sheet.
     assert plan.window.week == "2026_31W"
-    assert 'updated >= "2026-07-27" AND updated < "2026-08-03"' in plan.window.jql
-    search, thread = transport.calls
-    assert search["json"]["jql"] == plan.window.jql
-    assert search["json"]["fields"] == list(rules.REPORT_FIELDS)
-    assert "/issue/GTM-9/comment" in thread["url"]
+    assert (plan.window.since.isoformat(), plan.window.until.isoformat()) == (
+        "2026-07-27",
+        "2026-08-02",
+    )
+    (search,) = transport.calls
+    variables = search["body"]["variables"]
+    assert (variables["owner"], variables["number"]) == ("an-owner", 1)
+    assert search["headers"]["Authorization"] == f"Bearer {TOKEN}"
+    # The board answers the thread with the row, so there is no second
+    # call; a thread longer than one page is named instead of refetched.
+    assert search["url"].endswith("/graphql")
     assert plan.issue_keys == ("GTM-1", "GTM-455", "GTM-688", "GTM-9")
     # What reaches the sheet, and why the rest does not.
     assert [row.key for row in plan.rows] == ["GTM-1", "GTM-688", "GTM-9"]
@@ -295,8 +312,8 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"jira_token": TOKEN}),
-        jira_transport=ScriptedTransport(jira_replies()),
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
     ) as runtime:
         again = ask(runtime, "weekly.preview 2026_31W")
         assert again.workflow is not None
@@ -311,11 +328,11 @@ def test_a_cap_is_reported_only_when_it_cut_the_week_short(tmp_path: Path) -> No
         ("max=3", True, 2),  # one short of it: the fourth, worked on, is cut
         ("max=2", True, 2),  # the silent ticket and the cut one are both gone
     ):
-        transport = ScriptedTransport(jira_replies())
+        transport = ScriptedTransport(board_replies())
         with build_runtime(
             config,
             layout=layout,
-            resolver=StaticCredentials({"jira_token": TOKEN}),
+            resolver=StaticCredentials({"board_token": TOKEN}),
             jira_transport=transport,
         ) as runtime:
             outcome = ask(runtime, f"weekly.preview 2026_31W {words}")
@@ -324,15 +341,17 @@ def test_a_cap_is_reported_only_when_it_cut_the_week_short(tmp_path: Path) -> No
         assert plan.capped is expected_capped, words
         assert len(plan.rows) == expected_rows, words
         assert ("CAPPED" in plan.preview) is expected_capped
-        assert transport.calls[0]["json"]["maxResults"] == 100
-    # A host with the report but no Jira site is told so before anything
+        # The board has no query language to push a cap into, so the cap is
+        # applied here and the board is still read whole.
+        assert len(transport.calls) == 1
+    # A host with the report but no board is told so before anything
     # runs, by the doctor and by the engine.
     without = config.model_copy(
-        update={"integrations": config.integrations.model_copy(update={"jira": None})}
+        update={"integrations": config.integrations.model_copy(update={"github_project": None})}
     )
     checks = {c.name: c for c in host_report(without, layout).checks}
     assert checks["integrations"].status == "failed"
-    assert "needs a Jira site" in checks["integrations"].detail
+    assert "needs a project board" in checks["integrations"].detail
     with build_runtime(without, layout=layout) as runtime:
         outcome = ask(runtime, "weekly.preview 2026_31W")
         assert outcome.workflow is not None
@@ -346,7 +365,7 @@ def test_a_jira_refusal_fails_the_run_and_claims_nothing(tmp_path: Path) -> None
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"jira_token": TOKEN}),
+        resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=transport,
     ) as runtime:
         outcome = ask(runtime, "weekly.preview 2026_31W")
@@ -452,7 +471,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     config, layout, workbook = host(tmp_path)
     checks = {c.name: c for c in host_report(config, layout).checks}
     assert checks["integrations"].status == "passed"
-    assert "Jira at https://example-team.atlassian.net" in checks["integrations"].detail
+    assert "project an-owner/1" in checks["integrations"].detail
     assert "SDE_Weekly_Report.xlsx" in checks["integrations"].detail
     workbook.unlink()
     checks = {c.name: c for c in host_report(config, layout).checks}
@@ -499,8 +518,8 @@ def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Pat
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"jira_token": TOKEN}),
-        jira_transport=ScriptedTransport(jira_replies()),
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
         writer=lambda: writer,
     ) as runtime:
         outcome = ask(runtime, "weekly.apply 2026_31W")
@@ -539,8 +558,8 @@ def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"jira_token": TOKEN}),
-        jira_transport=ScriptedTransport(jira_replies()),
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
         writer=lambda: writer,
     ) as runtime:
         outcome = ask(runtime, "weekly.apply 2026_31W")
@@ -563,8 +582,8 @@ def test_a_workbook_that_cannot_be_written_names_its_own_refusal(tmp_path: Path)
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"jira_token": TOKEN}),
-        jira_transport=ScriptedTransport(jira_replies()),
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
         writer=lambda: writer,
     ) as runtime:
         outcome = ask(runtime, "weekly.apply 2026_31W")

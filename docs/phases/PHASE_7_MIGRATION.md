@@ -1388,3 +1388,37 @@ but not the issues, which is a refusal and not an empty week.
 private repository's issues. The two are separate permissions, and a token
 with only one of them reads half the report: the fields without the
 narrative, or the narrative without the fields.
+
+
+### Slice 5 as built
+
+The board's client, then everything that pointed at Jira.
+
+`ReportItem` and `ReportComment` replace `JiraIssue` and `JiraComment`,
+unchanged in shape: a contract named after a vendor was the leak the
+architecture guard warns about, and it would now name the wrong one. The
+resolved window no longer carries a query, because a board has none to carry.
+`github.search-project` replaces `jira.search` and hands the planning step the
+same items it already consumed, so nothing after that step knows where a row
+came from.
+
+Two things the new source forced, both recorded rather than guessed:
+
+- **A row carries its own link.** Jira's addresses were a site and a key, so
+  the plan carried the site; a board's are neither, so each row carries its
+  own address and the plan stays the whole instruction. A plan made before
+  rows did still composes one from the site it has.
+- **A key the workbook already uses wins.** The rebuild kept `[GTM-833]` in
+  each title, and that is what matches a row this report wrote in an earlier
+  week. Work that started on the board and never had such a key is keyed by
+  its issue number instead, `GH-63`, so it can still be written.
+
+Which board column feeds which of the report's columns is configuration, with
+the columns the board carried on 2026-09-23 as defaults: the people who use a
+board rename its columns, and that is not a code change.
+
+The board is read whole and the week is selected here, because a project
+board has no query language to push a window into. That is cheap at this size
+and honest at any: the alternative is a filter the board cannot apply and
+this code pretending it did. A comment thread longer than one page is named
+on the plan, since a thread read short is a week reported wrong.

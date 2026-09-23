@@ -255,19 +255,14 @@ def _write(
     # 5. Every key cell links to its ticket, not only the new ones, so rows
     #    added by earlier runs heal instead of staying inconsistent.
     linked = 0
-    if plan.browse_base:
-        links: list[FormatOperation] = [
-            Hyperlink(
-                cell=f"{key_column}{placed[row.key]}",
-                url=f"{plan.browse_base}/browse/{row.key}",
-                text=row.key,
-            )
-            for row in plan.rows
-            if row.key in placed
-        ]
-        if links:
-            writer.format(workbook, sheet, links)
-            linked = len(links)
+    links: list[FormatOperation] = [
+        Hyperlink(cell=f"{key_column}{placed[row.key]}", url=_link(plan, row), text=row.key)
+        for row in plan.rows
+        if row.key in placed and _link(plan, row)
+    ]
+    if links:
+        writer.format(workbook, sheet, links)
+        linked = len(links)
 
     # 6. Prepend this week's block in red, with a black tail.
     prepended = 0
@@ -407,3 +402,13 @@ def evidence_lines(applied: WeeklyReportApplied, plan: WeeklyReportPlan) -> Sequ
         f"after     : {applied.digest_after}",
         f"backup    : {applied.backup_path}",
     )
+
+
+def _link(plan: WeeklyReportPlan, row: WeeklyRow) -> str:
+    """Where a key cell points. A row carries its own address; a plan made
+    before rows did still has a site to compose one from."""
+    if row.url:
+        return row.url
+    if plan.browse_base:
+        return f"{plan.browse_base}/browse/{row.key}"
+    return ""

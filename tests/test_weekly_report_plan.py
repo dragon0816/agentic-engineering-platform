@@ -16,9 +16,9 @@ import pytest
 from pydantic import ValidationError
 
 from capabilities.weekly_report.contracts import (
-    JiraComment,
-    JiraIssue,
+    ReportComment,
     ReportingWindow,
+    ReportItem,
     SheetState,
     WeeklyReportPlan,
     WeeklyReportRequest,
@@ -57,12 +57,12 @@ def sheet(existing: dict[str, str] | None = None, **changes: Any) -> SheetState:
     )
 
 
-def comment(created: str, body: str) -> JiraComment:
-    return JiraComment(created=created, body=body)
+def comment(created: str, body: str) -> ReportComment:
+    return ReportComment(created=created, body=body)
 
 
-def issue(key: str, *comments: JiraComment, summary: str = "[WNC] work") -> JiraIssue:
-    return JiraIssue(
+def issue(key: str, *comments: ReportComment, summary: str = "[WNC] work") -> ReportItem:
+    return ReportItem(
         key=key,
         summary=summary,
         status="In Progress",
@@ -77,7 +77,7 @@ SILENT = issue("GTM-455")
 
 
 def plan_for(
-    issues: list[JiraIssue], existing: dict[str, str] | None = None, **changes: Any
+    issues: list[ReportItem], existing: dict[str, str] | None = None, **changes: Any
 ) -> WeeklyReportPlan:
     return build_plan(settings(**changes), window(), issues, sheet(existing))
 
@@ -183,11 +183,8 @@ def test_the_window_is_resolved_as_the_source_resolved_it() -> None:
     )
     assert (named.since, named.until, named.stamp_date) == (START, END, RUN_DATE)
     assert named.comment_since == START and named.max_issues is None
-    assert named.jql == (
-        'project = GTM AND status in ("In Progress", "Ready for Launch", "To Do", "Pending") '
-        'AND (updated >= "2026-07-27" AND updated < "2026-08-03") '
-        "ORDER BY updated DESC, cf[10019] ASC"
-    )
+    # The window no longer carries a query: what is searched is a board, and
+    # the week is chosen from the dates the window already states.
     # Run after the week ended: the stamp is the week's end, not today.
     later = resolve_window(
         base, week="2026_31W", since=None, until=None, max_issues=None, today=_dt.date(2026, 8, 20)
@@ -220,9 +217,7 @@ def test_the_window_is_resolved_as_the_source_resolved_it() -> None:
     )
     assert (shifted.since, shifted.until) == (_dt.date(2026, 7, 29), END)
     tuned = resolve_window(
-        settings(
-            lookback_days=3, max_issues=40, jql="project = X ORDER BY rank", week_style="iso-1"
-        ),
+        settings(lookback_days=3, max_issues=40, week_style="iso-1"),
         week="2026_30W",
         since=None,
         until=None,
@@ -231,9 +226,6 @@ def test_the_window_is_resolved_as_the_source_resolved_it() -> None:
     )
     assert tuned.comment_since == START - _dt.timedelta(days=3)
     assert tuned.max_issues == 40 and tuned.since == START
-    assert tuned.jql.startswith("project = X AND (updated >=") and tuned.jql.endswith(
-        "ORDER BY rank"
-    )
 
 
 def test_a_request_is_parsed_from_the_words_after_the_command() -> None:
@@ -290,7 +282,9 @@ def test_the_settings_and_the_plan_are_closed_and_consistent() -> None:
     with pytest.raises(ValidationError):
         settings(page_size=50)  # the connection pages; the report has no page size
     assert settings(week_suffix="").week_suffix == ""
-    assert settings(jql="project = X").base_jql() == "project = X"
+    assert settings(status_fields=("GTM Status",)).status_fields == ("GTM Status",)
+    with pytest.raises(ValidationError):
+        settings(jql="project = X")  # the source moved; a query is not a setting
     base = plan_for([WORKED_ON])
 
     def changed(**update: Any) -> WeeklyReportPlan:

@@ -20,8 +20,8 @@ from capabilities.files import READ_FILE_SPEC
 from capabilities.runtime import CapabilityGrant, LocalPolicy
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
-    JIRA_SEARCH_SPEC,
     PLAN_SPEC,
+    PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
 )
@@ -35,7 +35,7 @@ README = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "R
 SPECS = (
     READ_FILE_SPEC,
     RESOLVE_WINDOW_SPEC,
-    JIRA_SEARCH_SPEC,
+    PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     PLAN_SPEC,
     APPLY_SPEC,
