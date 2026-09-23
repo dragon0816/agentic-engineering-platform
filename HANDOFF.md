@@ -1,84 +1,87 @@
-# Handoff — Phase 7 slice 2i, authenticated shared-platform transports
+# Handoff — Phase 7, next is migration step 5, workflow 7 parity
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `phase-7/platform-transport`, ahead of `main` by this slice's commit.
+Branch: `main`, after PR #66 (slice 2i) merged with two review rounds applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
-## Goal
-
-The wire between a Bridge and the shared platform, which migration step 4
-named and slices 2d and 2e left for last: Registry package synchronization,
-authorization delivery, capability advertisement, a read-only connectivity
-probe, Bridge job polling and snapshot reporting, over a transport that
-presents the Bridge access token of slice 2b. The invariant carried from the
-pinned Host Bridge: unreachable is never treated as revoked.
-
-Requirements: the "Slice 2i" section of `docs/phases/PHASE_7_MIGRATION.md`.
-Contracts: `docs/CONTRACTS.md`, "Shared-platform transport". Source
-characterization and decisions: `docs/PHASE_7_MIGRATION.md`, same heading.
-
-## What this slice added
-
-- `src/common/sync.py` — the six-operation wire, closed contracts only.
-- `src/control_plane/service.py` — `ControlPlaneService`, the platform's side,
-  transport-agnostic, over the in-memory references.
-- `src/control_plane/http.py` — `ControlPlaneServer`, that service on the
-  standard library's `ThreadingHTTPServer`; `POST /v1/<op>` with
-  `Authorization: Bearer <token_id>:<secret>`, `GET /v1/health` open.
-- `src/host_runtime/sync.py` — `PlatformClient`, the Bridge's side, with the
-  five-way classification of every answer and a sync that verifies everything
-  before writing anything.
-- `CompanyHostConfiguration.platform` (`PlatformBinding`), `aep-host
-  probe|sync|jobs`, and a `platform` doctor check. `HostLayout` moved to
-  `host_runtime.contracts` and is re-exported from `host_runtime.host`.
-- `RemoteJobRecord` final states and `settle`; `RemoteWorkflowJob.on_behalf_of`;
-  `InMemoryEnrollmentRegistry.advertise`.
-
-## Verification
-
-Run on Windows in `.venv` (Python 3.12) at the head of this branch:
-
-- `python -m pytest -q -p no:cacheprovider` — **806 passed, 4 skipped**. Three
-  skips need symbolic-link privileges and one needs an IPv6 loopback; all
-  four run on Linux CI.
-- `ruff check .` — clean. `ruff format --check .` — 165 files formatted.
-- `mypy` — no issues in 131 source files.
-- `pip check` — no broken requirements. `git diff --check` — clean.
-
 ## Where this stopped
 
-The work is complete and verified locally. Not yet done:
+Slice 2i is merged and nothing is in flight. Every slice of migration step 4
+is done: the resident Agent (2d), the Telegram ingress (2e) and the
+authenticated shared-platform wire (2i). A company host can now be probed,
+synchronized and driven by polled jobs from a control plane that serves the
+in-memory references over HTTP.
 
-1. Open the pull request from `phase-7/platform-transport` into `main`.
-2. Run `/code-review` on it and apply the findings, as every earlier slice did.
-3. Watch CI, then merge, and set the `2i` row in `docs/TASKS.md` to `done`
-   with its pull request number.
+## What 2i settled, because the next steps build on it
 
-## What is deliberately not here
+- A Bridge talks to the platform through six operations, each presented with
+  its access token, and classifies every answer: only `answered` changes
+  anything; `unreachable` is never treated as revoked.
+- `synchronize` is how Skills and Workflows reach a company host: the member
+  decides on the platform, the host installs the verified bytes and the
+  bundle. A workflow migrated in the next steps is published as a package,
+  chosen by the member, and synced — not hand-placed.
+- Jobs reach a Bridge through `poll`/`settle`. Nothing runs twice within one
+  process; across a restart of `aep-host jobs` a job whose settle was lost
+  runs again (known limitation, `docs/TASKS.md`).
+- The platform has no durable store and no member sign-in yet. Both are
+  later slices; the server is run from a script that builds the references.
 
-- A durable platform store. The server serves the in-memory references and
-  loses them on restart; an operator can run it from a Python script that
-  builds the references, and a platform host with durable state is a later
-  slice.
-- A member sign-in. Invitation, registration, binding and token issue are
-  trusted-host calls on the platform; nothing member-facing is on this wire.
-- TLS termination as tested code. `ControlPlaneServer` takes an
-  `ssl.SSLContext` and wraps its socket; that path is not exercised by the
-  suite, because generating a certificate needs a tool the repository does
-  not carry. The client refuses plain http beyond loopback.
-- Job leases and concurrent job runs (the pinned source's heartbeat and pool).
-  Deferred until the first workflow that needs them; the settle-or-re-offer
-  rule with the job id as idempotency key is correct without them.
+## Next: migration step 5, workflow 7 parity
 
-## Next
+`docs/TASKS.md` row 3; parity gate in `docs/phases/PHASE_7_MIGRATION.md`,
+"Workflow 7 — Jira team tickets to Excel"; source characterization to write
+into `docs/PHASE_7_MIGRATION.md` from the pinned
+`host-bridge/jobs/jira_weekly_report.py`, `_weekly_rules.py`,
+`_excel_upsert.py` and `_jira_client.py`, and
+`workflows/07_jira_team_tickets_to_excel.json`, all in `.scratch/rs-source`.
 
-Migration step 5, workflow 7 parity (`docs/TASKS.md` row 3): the Jira team
-tickets report against a test workbook, compared with the working old Host
-Bridge. This needs capabilities the package does not yet ship (Jira, Excel)
-and evidence from a real company Bridge; CI stays inert and never claims live
-parity. Then workflow 13, knowledge parity, and controlled cutover.
+What can be built inertly, and should be, before any live run:
+
+1. The job's rules as typed capability and Workflow contracts: a Jira search
+   capability over the platform's `Transport` (issue keys for a week, base
+   JQL and updated window, with the safety cap), and an Excel capability
+   that touches only `weekly report temp`, upserts by Jira key, prepends
+   marker-tagged comments once in red, and retires stale weekly marks. Both
+   fail closed and report typed failures; neither is retried by the engine.
+   The old Host Bridge writes Excel through COM; how the platform writes a
+   workbook (COM on the company Bridge, or a library) is a decision to
+   record before the capability is written.
+2. A dry run that produces the preview and performs no Excel or Outlook
+   write.
+3. Evidence the Phase 6 harness can grade: the normalized key set, the plan
+   summary, sheet hashes before and after, normalized scratch-sheet rows,
+   formatting assertions and a repeat-run comparison — all redacted, with
+   the workbook itself never uploaded.
+4. Tests against a fake Jira transport and a workbook on disk.
+
+What cannot be built here: the parity evidence itself. It comes from a real
+company Bridge with Jira credentials in its execution environment, compared
+with the working old Host Bridge, and CI never claims it. When the code is
+ready, the owner runs it; the handoff then records the evidence references.
+
+Then workflow 13 (step 6), knowledge parity (step 7) and controlled cutover.
+
+## How to verify
+
+On Windows in `.venv` (Python 3.12), from the repository root:
+
+```text
+.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider
+.venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m ruff format --check .
+.venv\Scripts\python.exe -m mypy
+.venv\Scripts\python.exe -m pip check
+.venv\Scripts\python.exe -m build
+git diff --check
+```
+
+At this commit: 806 passed, 4 skipped, everything else clean. Three skips
+need symbolic-link privileges and one an IPv6 loopback; all four run on
+Linux CI, which runs the same chain on Windows and Ubuntu against Python 3.11
+and 3.12.
 
 ## Open item for the owner
 
