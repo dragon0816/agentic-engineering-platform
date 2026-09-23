@@ -1,7 +1,8 @@
 # Handoff — Phase 7, workflow 10 is the active work
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `phase-7/workflow-10-characterization`, in review.
+Branch: `main`, after PR #80 merged with its review applied. Slice 4a has
+not started.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
