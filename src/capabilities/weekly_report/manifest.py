@@ -29,7 +29,7 @@ def preview_workflow() -> WorkflowManifest:
             "metadata": {"identity": PREVIEW_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
             "description": (
-                "Preview the GTM weekly report: the week's Jira issues planned against the "
+                "Preview the GTM weekly report: the week's tracked items planned against the "
                 "workbook's scratch sheet, with nothing written"
             ),
             "execution": {"mode": "local"},
@@ -100,7 +100,7 @@ def report_workflow() -> WorkflowManifest:
             "metadata": {"identity": REPORT_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
             "description": (
-                "The GTM weekly report: the week's Jira issues planned against the workbook's "
+                "The GTM weekly report: the week's tracked items planned against the workbook's "
                 "scratch sheet and written into it"
             ),
             "execution": {"mode": "local"},
