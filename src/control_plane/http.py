@@ -153,6 +153,8 @@ class ControlPlaneServer(ThreadingHTTPServer):
     def base_url(self) -> str:
         host, port = self.server_address[0], self.server_address[1]
         name = host.decode("ascii") if isinstance(host, bytes) else str(host)
+        if ":" in name:  # an IPv6 address is bracketed in a URL
+            name = f"[{name}]"
         scheme = "https" if isinstance(self.socket, ssl.SSLSocket) else "http"
         return f"{scheme}://{name}:{port}"
 

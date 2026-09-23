@@ -12,8 +12,6 @@ pieces together and adds no authority. The policy decides every dispatch,
 the engine decides every workflow, and the Agent decides who may ask.
 """
 
-import json
-from collections.abc import Iterator
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, TypeVar
@@ -40,6 +38,7 @@ from host_runtime.contracts import HostLayout as HostLayout
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
+from host_runtime.workspace import documents
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
@@ -58,7 +57,6 @@ HostErrorCode = Literal[
     "telegram_invalid",
     "credential_unmapped",
     "state_unavailable",
-    "platform_missing",
 ]
 
 ContractT = TypeVar("ContractT", bound=Contract)
@@ -72,12 +70,6 @@ class HostError(Exception):
         self.code: HostErrorCode = code
         self.path = path
         super().__init__(f"{code}: {path}" if path is not None else code)
-
-
-def _documents(path: Path) -> Iterator[object]:
-    """Every JSON document in a file, which may hold one or a list of them."""
-    payload = json.loads(path.read_text(encoding="utf-8-sig"))
-    yield from payload if isinstance(payload, list) else [payload]
 
 
 def _load_one(path: Path, model: type[ContractT], code: HostErrorCode) -> ContractT:
@@ -96,7 +88,7 @@ def _load_all(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]:
     items: list[ContractT] = []
     for path in sorted(directory.glob("*.json")):
         try:
-            items.extend(model.model_validate(item) for item in _documents(path))
+            items.extend(model.model_validate(item) for item in documents(path))
         except (OSError, ValidationError, ValueError) as error:
             raise HostError("asset_invalid", path) from error
     return tuple(items)
@@ -179,7 +171,7 @@ def _configured_grants(layout: HostLayout) -> tuple[CapabilityGrant, ...]:
     if not layout.grants.is_file():
         return ()
     try:
-        return tuple(CapabilityGrant.model_validate(item) for item in _documents(layout.grants))
+        return tuple(CapabilityGrant.model_validate(item) for item in documents(layout.grants))
     except (OSError, ValidationError, ValueError) as error:
         raise HostError("grants_invalid", layout.grants) from error
 

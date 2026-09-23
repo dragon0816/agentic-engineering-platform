@@ -1565,7 +1565,8 @@ told only to a Bridge that proved its secret.
 `run` present exactly when it ran, naming the job's actor, `on_behalf_of` and
 workflow; `open` is whether the Bridge has yet to settle it.
 `RemoteWorkflowJob` gains `on_behalf_of` with the meaning it has everywhere
-since slice 2j, and `LocalAgent.execute` records it. `InMemoryRemoteControl`
+since slice 2j, and `LocalAgent.execute` records it; its `job_id` is held to
+the shape of an `IdempotencyKey`, because that is what the Bridge runs it under. `InMemoryRemoteControl`
 gains `job(job_id)` and `settle(bridge_id, job_id, disposition=, run=)`, which
 only the job's own device may call, once (`job_bridge_mismatch`, `job_settled`,
 `job_run_mismatch`); `poll` no longer offers a settled job and `cancel` refuses
@@ -1576,7 +1577,10 @@ what a device says it can run, under the same identity rule as enrolling.
 transport-agnostic and locked for concurrent callers. Every operation takes a
 token id and secret, decides who is asking through
 `InMemoryAccessTokens.authenticate`, and acts only on the device the token was
-issued for; a payload naming another device is `device_mismatch`. `handle`
+issued for; a payload naming another device is `device_mismatch`. A report
+is received no earlier than it was observed: a Bridge clock up to
+`CLOCK_SKEW` (five minutes) ahead of the platform's is still reporting now,
+and one further ahead is `invalid_request`. `handle`
 dispatches by operation name for a transport and answers `unknown_operation`
 and `invalid_request` for anything that is not one. `synchronize` plans each wanted
 asset once however many selections name it, so a decision left behind by a
@@ -1594,8 +1598,8 @@ name, and an optional `ssl.SSLContext` that wraps the socket. It serves the
 in-memory references; a durable platform store is a later slice.
 
 `host_runtime.contracts.PlatformBinding` is how a host names its platform:
-`base_url` (an origin: https, or http on loopback only, with no path, query
-or fragment), `token_id`, the `SecretRef` of the token's secret and a timeout; `CompanyHostConfiguration.platform` is
+`base_url` (an origin: https, or http on loopback only, with no path, query,
+fragment or credential), `token_id`, the `SecretRef` of the token's secret and a timeout; `CompanyHostConfiguration.platform` is
 optional and a host without it works locally. `HostLayout` moved to the
 contracts module and is still importable from `host_runtime.host`.
 
@@ -1606,7 +1610,8 @@ that is not a `WireFailure` — an intermediary's bare 401 included), always
 retryable; `withdrawn`; `rejected` (`authentication_failed`: this host's
 configuration is wrong); `refused` (anything else declined). Only `answered`
 changes anything on the Bridge. `probe`, `advertise` and `report` change
-nothing locally. `synchronize(layout, state)` refuses before calling when
+nothing locally; the credential is resolved per call through
+`models.wire.authorized`, under the rule every HTTP adapter shares. `synchronize(layout, state)` refuses before calling when
 `grants.json` exists (`sync_grants_conflict`), then applies a reply in this
 order: `verify_installation` over the whole plan against the SQLite
 inventory; each artifact parsed as the manifest its kind names and carrying

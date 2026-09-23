@@ -64,6 +64,9 @@ class PlatformBinding(Contract):
             or parts.fragment
         ):
             raise ValueError("base_url is the origin of the shared platform")
+        if parts.username is not None or parts.password is not None:
+            # A credential in a URL is a credential in a file.
+            raise ValueError("base_url carries no credential; the token is a SecretRef")
         if parts.scheme == "http" and not _loopback(self.base_url):
             raise ValueError("a platform beyond loopback is reached over https")
         reject_embedded_secrets(self.model_dump(mode="json"))

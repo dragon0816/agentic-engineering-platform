@@ -13,7 +13,7 @@ secret learns nothing but that; and nothing in an answer echoes a request.
 
 import threading
 from collections.abc import Callable, Mapping
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from pydantic import ValidationError
 
@@ -40,6 +40,10 @@ from control_plane.authorization import InMemoryAuthorizationRegistry
 from control_plane.distribution import ControlError, InMemoryPackageRegistry, InMemoryRemoteControl
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity import AccessError, InMemoryAccessTokens
+
+# How far ahead of the platform's clock a Bridge's observation may be and
+# still be a report of now rather than of the future.
+CLOCK_SKEW = timedelta(minutes=5)
 
 # The HTTP status each refusal deserves, kept beside the codes so the server
 # and a reader of the wire agree without a second table.
@@ -182,12 +186,15 @@ class ControlPlaneService:
             _, device = self._who(token_id, secret, now)
             if item.snapshot.device.bridge_id != device:
                 raise ServiceError("device_mismatch")
-            try:
-                projection = self.control.report(item.snapshot, received_at=now)
-            except ValidationError:
-                # A snapshot observed after the platform's own clock says
-                # now; the projection contract refuses it.
-                raise ServiceError("invalid_request") from None
+            observed = item.snapshot.observed_at
+            if observed > now + CLOCK_SKEW:
+                # A Bridge whose clock is far ahead would be projected as
+                # online for as long as it is ahead; that is not a report.
+                raise ServiceError("invalid_request")
+            # Two machines, two clocks. Received no earlier than observed is
+            # what the projection promises, and a Bridge a little ahead of
+            # the platform is still reporting now.
+            projection = self.control.report(item.snapshot, received_at=max(now, observed))
         return ReportReply(received_at=projection.received_at)
 
     def poll(self, token_id: str, secret: str, request: PollRequest) -> PollReply:
@@ -221,25 +228,29 @@ class ControlPlaneService:
         # The body is validated here and only here, so a contract the
         # service fails to build while answering is its own fault
         # (`internal_error`, from the transport) and never the Bridge's.
+        # Each method validates what it is handed, and a contract instance
+        # validated once is handed on as it is.
         try:
-            request: Contract = _REQUESTS[named].model_validate(body)
-        except ValidationError:
-            raise ServiceError("invalid_request") from None
-        if named == "advertise":
-            return self.advertise(token_id, secret, AdvertiseRequest.model_validate(request))
-        if named == "sync":
-            return self.synchronize(token_id, secret, SyncRequest.model_validate(request))
-        if named == "report":
-            return self.report(token_id, secret, ReportRequest.model_validate(request))
-        if named == "poll":
-            return self.poll(token_id, secret, PollRequest.model_validate(request))
-        return self.settle(token_id, secret, SettleRequest.model_validate(request))
+            if named == "advertise":
+                return self.advertise(token_id, secret, AdvertiseRequest.model_validate(body))
+            if named == "sync":
+                return self.synchronize(token_id, secret, SyncRequest.model_validate(body))
+            if named == "report":
+                return self.report(token_id, secret, ReportRequest.model_validate(body))
+            if named == "poll":
+                return self.poll(token_id, secret, PollRequest.model_validate(body))
+            return self.settle(token_id, secret, SettleRequest.model_validate(body))
+        except ValidationError as error:
+            # Only the body's own validation reaches here: every method
+            # validates its request first and raises nothing else of this
+            # kind, except `synchronize` building its reply, which is what
+            # the check below tells apart.
+            if error.title in _REQUEST_TITLES:
+                raise ServiceError("invalid_request") from None
+            raise
 
 
-_REQUESTS: dict[str, type[Contract]] = {
-    "advertise": AdvertiseRequest,
-    "sync": SyncRequest,
-    "report": ReportRequest,
-    "poll": PollRequest,
-    "settle": SettleRequest,
-}
+_REQUEST_TITLES = frozenset(
+    model.__name__
+    for model in (AdvertiseRequest, SyncRequest, ReportRequest, PollRequest, SettleRequest)
+)

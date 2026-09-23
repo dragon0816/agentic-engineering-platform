@@ -409,6 +409,11 @@ def test_the_wire_contracts_are_closed_and_consistent(platform: Platform) -> Non
         PlatformBinding.model_validate(binding("https://platform.internal?env=prod"))
     with pytest.raises(ValidationError, match="origin"):
         PlatformBinding.model_validate(binding("https://platform.internal#prod"))
+    with pytest.raises(ValidationError, match="no credential"):
+        PlatformBinding.model_validate(binding("https://token-1:secret@platform.internal"))
+    # A job id is what the Bridge runs the job under, so it has to be a key.
+    with pytest.raises(ValidationError, match="idempotency key"):
+        platform.submit("j" * 129)
     with pytest.raises(ValidationError):
         PlatformBinding.model_validate(binding("https://platform.internal?access_token=abc"))
     with pytest.raises(ValidationError):
@@ -739,6 +744,8 @@ def test_jobs_are_polled_run_settled_and_reported(
         ran = platform.control.job("job-ran")
         assert ran.status == "ran" and ran.run is not None
         assert ran.run.status == "succeeded" and ran.run.actor == "engineer"
+        # The platform holds the very record the Bridge stored.
+        assert ran.run == runtime.agent.runs()[0]
         assert platform.control.job("job-cancelled").status == "cancelled"
         assert platform.control.job("job-rejected").status == "rejected"
         # The queue is drained, the cancelled job never ran, and the
@@ -847,7 +854,7 @@ def test_the_cli_probes_syncs_and_runs_jobs(
     # says what to fix.
     monkeypatch.delenv("AEP_PLATFORM_TOKEN")
     assert main(["probe", "--config", str(path)]) == 1
-    assert "platform_credential_unavailable" in capsys.readouterr().out
+    assert "credential_unavailable" in capsys.readouterr().out
     unmapped = config.model_copy(update={"credentials": ()})
     assert {c.name: c.status for c in host_report(unmapped, layout).checks}["platform"] == "failed"
     (tmp_path / "unmapped").mkdir()
@@ -1081,3 +1088,40 @@ def test_a_bundle_that_cannot_be_written_is_reported_with_what_was_installed(
         assert outcome.failure.code == "sync_workspace_unwritable"
         assert {item.name for item in outcome.installed} == {"read-local-file", "file-skill"}
         assert len(runtime.state.installed()) == 2
+
+
+def test_a_bridge_clock_a_little_ahead_still_reports_now(platform: Platform) -> None:
+    """Two machines, two clocks. Received no earlier than observed is what
+    the projection promises; a Bridge a little ahead is reporting now, and
+    one far ahead is not reporting at all."""
+    behind = datetime.now(UTC) - timedelta(seconds=30)
+    service = ControlPlaneService(
+        enrollment=platform.enrollment,
+        tokens=platform.tokens,
+        packages=platform.packages,
+        authorization=platform.authorization,
+        control=platform.control,
+        artifacts=platform.artifacts,
+        clock=lambda: behind,
+    )
+    token = platform.company_token.grant.token_id
+    observed = datetime.now(UTC)
+    snapshot = {"device": platform.enrollment.device(BRIDGE), "observed_at": observed}
+    reply = service.report(token, SECRET, ReportRequest.model_validate({"snapshot": snapshot}))
+    assert reply.received_at == observed
+    assert platform.control.view(BRIDGE, now=datetime.now(UTC)).connectivity == "online"
+    far = {**snapshot, "observed_at": datetime.now(UTC) + timedelta(minutes=10)}
+    with pytest.raises(ServiceError, match="invalid_request"):
+        service.report(token, SECRET, ReportRequest.model_validate({"snapshot": far}))
+
+
+def test_the_server_names_its_address_as_a_url(platform: Platform) -> None:
+    with ControlPlaneServer(platform.service) as server:
+        assert PlatformBinding.model_validate(binding(server.base_url)).base_url == server.base_url
+    try:
+        six = ControlPlaneServer(platform.service, host="::1")
+    except OSError:
+        pytest.skip("no IPv6 loopback on this machine")
+    with six:
+        assert six.base_url.startswith("http://[::1]:")
+        assert PlatformBinding.model_validate(binding(six.base_url)).base_url == six.base_url

@@ -23,8 +23,7 @@ it would touch. A refusal at any step leaves the workspace untouched.
 
 import asyncio
 import json
-import os
-from collections.abc import Iterator, Mapping
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from time import monotonic
@@ -38,6 +37,7 @@ from common.base import Contract, Symbol
 from common.distribution import (
     BridgeStateSnapshot,
     InstallationPlan,
+    InstalledAsset,
     LocalRunSummary,
     LocalStateError,
     LocalStateErrorCode,
@@ -64,13 +64,14 @@ from common.sync import (
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.contracts import HostLayout, PlatformBinding
 from host_runtime.state import SqliteLocalState
-from models.credentials import CredentialMisconfigured, CredentialResolver
+from host_runtime.workspace import documents, write_atomically
+from models.credentials import CredentialResolver
 from models.wire import (
     RETRYABLE_STATUS,
     Transport,
     UrllibTransport,
+    authorized,
     close_quietly,
-    describe,
     status_failure,
     transport_failure,
 )
@@ -167,11 +168,6 @@ class _Answer:
         self.data = data
 
 
-def _documents(path: Path) -> Iterator[object]:
-    payload = json.loads(path.read_text(encoding="utf-8-sig"))
-    yield from payload if isinstance(payload, list) else [payload]
-
-
 def _identities_on_disk(directory: Path) -> dict[tuple[str, str, str], tuple[Path, bytes]]:
     """Every asset identity a directory already holds, with where and as
     what, so a sync never writes a second answer to an identity an operator
@@ -182,22 +178,13 @@ def _identities_on_disk(directory: Path) -> dict[tuple[str, str, str], tuple[Pat
     for path in sorted(directory.glob("*.json")):
         try:
             content = path.read_bytes()
-            for item in _documents(path):
+            for item in documents(path):
                 metadata = item.get("metadata") if isinstance(item, dict) else None
                 identity = metadata.get("identity") if isinstance(metadata, dict) else None
                 found[AssetIdentity.model_validate(identity).key] = (path, content)
         except (OSError, ValueError, ValidationError):
             raise SyncRefused("asset_invalid") from None
     return found
-
-
-def _write_atomically(path: Path, content: bytes) -> None:
-    """A file appears whole or not at all, so a host that is rebuilt halfway
-    through a sync never reads half a manifest."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".part")
-    temporary.write_bytes(content)
-    os.replace(temporary, path)
 
 
 class PlatformClient:
@@ -224,28 +211,14 @@ class PlatformClient:
     def _call(self, operation: str, payload: Contract | None) -> _Answer:
         """One operation over the wire, classified. Blocking; the async
         methods run it on a thread so the Agent's runs are never held up."""
-        try:
-            secret = self._resolver.resolve(self.binding.credential)
-        except CredentialMisconfigured as error:
-            return _Answer(
-                "refused",
-                Failure(code="platform_credential_unavailable", message=describe(error)),
-                None,
-            )
-        except Exception as error:  # noqa: BLE001 - a store caught mid-rotation
-            return _Answer(
-                "unreachable",
-                Failure(
-                    code="platform_credential_unavailable",
-                    message=describe(error),
-                    retryable=True,
-                ),
-                None,
-            )
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.binding.token_id}:{secret}",
-        }
+        # The same rule every HTTP adapter applies to its credential: a
+        # secret nothing is mapped to is a refusal, a store caught
+        # mid-rotation is a moment to wait out.
+        headers = authorized(
+            lambda: f"{self.binding.token_id}:{self._resolver.resolve(self.binding.credential)}"
+        )
+        if isinstance(headers, Failure):
+            return _Answer("unreachable" if headers.retryable else "refused", headers, None)
         body = payload.model_dump_json().encode("utf-8") if payload is not None else b"{}"
         try:
             reply = self._transport.send(
@@ -332,7 +305,7 @@ class PlatformClient:
         if reply.authorization.bridge_id != state.bridge_id:
             return SyncOutcome(status="refused", failure=_refusal("installation_bridge_mismatch"))
         try:
-            added = await asyncio.to_thread(self._apply, reply, layout, state)
+            added = await asyncio.to_thread(self._apply, reply, layout, state, installed)
         except SyncRefused as error:
             return SyncOutcome(
                 status="refused", failure=_refusal(error.code), installed=error.installed
@@ -342,7 +315,11 @@ class PlatformClient:
         )
 
     def _apply(
-        self, reply: SyncReply, layout: HostLayout, state: SqliteLocalState
+        self,
+        reply: SyncReply,
+        layout: HostLayout,
+        state: SqliteLocalState,
+        installed: tuple[InstalledAsset, ...],
     ) -> tuple[AssetIdentity, ...]:
         """Verify everything, then write everything. The order is: the plan
         against the inventory, every manifest against its package, every file
@@ -351,10 +328,11 @@ class PlatformClient:
         added: tuple[AssetIdentity, ...] = ()
         if reply.plan is not None:
             artifacts = {item.artifact_ref: item.raw for item in reply.artifacts}
-            files = self._verified(reply.plan, artifacts, layout, state)
+            present = {item.identity.key for item in installed}
+            files = self._verified(reply.plan, artifacts, layout, state.bridge_id, present)
             try:
                 for path, content in files:
-                    _write_atomically(path, content)
+                    write_atomically(path, content)
             except OSError:
                 raise SyncRefused("workspace_unwritable") from None
             try:
@@ -363,7 +341,7 @@ class PlatformClient:
                 raise SyncRefused(error.code) from None
             added = tuple(item.identity for item in rows)
         try:
-            _write_atomically(
+            write_atomically(
                 layout.authorization,
                 reply.authorization.model_dump_json(indent=2).encode("utf-8") + b"\n",
             )
@@ -378,11 +356,11 @@ class PlatformClient:
         plan: InstallationPlan,
         artifacts: Mapping[str, bytes],
         layout: HostLayout,
-        state: SqliteLocalState,
+        bridge_id: str,
+        present: set[tuple[str, str, str]],
     ) -> list[tuple[Path, bytes]]:
         try:
-            present = {item.identity.key for item in state.installed()}
-            verify_installation(plan, artifacts, bridge_id=state.bridge_id, installed=present)
+            verify_installation(plan, artifacts, bridge_id=bridge_id, installed=present)
         except LocalStateError as error:
             raise SyncRefused(error.code) from None
         on_disk = {
@@ -503,16 +481,24 @@ class PlatformClient:
             else:
                 snapshot = outcome.workflow
                 failure = snapshot.run.failure
+                recorded = outcome.run
                 if failure is not None and failure.code == "workflow_timeout":
                     # The run outlived the wait and is still going. A settle
-                    # is final, so it waits for the run to actually end.
+                    # is final, so it waits for the run to actually end, and
+                    # for the Agent to have recorded that end.
                     ended = await engine.wait(snapshot.run.run_id)
                     await agent.settled()
                     snapshot = ended if ended is not None else snapshot
+                    recorded = await asyncio.to_thread(_recorded, agent, snapshot.run.run_id)
                 disposition = "ran"
-                # The local record when it exists and is final; otherwise the
-                # engine's own result, which is the truth either way.
-                run = _summary(request, snapshot)
+                # The local record when it exists and agrees with the engine,
+                # so the platform's job carries the very record the next
+                # snapshot will; otherwise the engine's own result.
+                run = (
+                    recorded
+                    if recorded is not None and recorded.status == snapshot.run.status
+                    else _summary(request, snapshot)
+                )
         settle = SettleRequest(job_id=request.job_id, disposition=disposition, run=run)
         answer = await asyncio.to_thread(self._call, "settle", settle)
         delivery = JobDelivery(
@@ -544,6 +530,14 @@ class PlatformClient:
                 pass
             if result.status != "answered":
                 delay = min(delay * 2, MAX_BACKOFF_SECONDS)
+        return None
+
+
+def _recorded(agent: LocalAgent, run_id: str) -> LocalRunSummary | None:
+    """The Agent's own record of a run, read under the store's lock."""
+    try:
+        return next((item for item in agent.runs() if item.run_id == run_id), None)
+    except LocalStateError:
         return None
 
 

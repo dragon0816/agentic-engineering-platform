@@ -803,7 +803,13 @@ authorization and the installed assets exactly where they are.
    settled `ran`, because the idempotency key knows. A job whose settle could
    not be delivered stays open at the platform and is offered again; the
    Bridge joins the run it already started and settles it again, so nothing
-   runs twice. A `RemoteJobRecord` gains those three final states and the run
+   runs twice within one process. That guarantee is the engine's in-memory
+   idempotency table: a company host runs its engine without a journal, so a
+   job whose settle was lost and which is re-offered after `aep-host jobs`
+   restarts runs again. Durable idempotency for polled jobs is a known
+   limitation, recorded in `docs/TASKS.md`. A job id is therefore held to
+   the shape of an idempotency key at the contract. A `RemoteJobRecord`
+   gains those three final states and the run
    that settled it; `poll` no longer returns a settled job, `cancel` refuses
    one, and a settle for another device's job or with a run that names a
    different actor or workflow is refused. `RemoteWorkflowJob` gains

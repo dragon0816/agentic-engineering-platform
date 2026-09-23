@@ -4,7 +4,7 @@ import hashlib
 from collections.abc import Collection, Mapping
 from typing import Literal, Self
 
-from pydantic import AwareDatetime, JsonValue, model_validator
+from pydantic import AwareDatetime, JsonValue, TypeAdapter, ValidationError, model_validator
 
 from common.assets import (
     AssetIdentity,
@@ -14,7 +14,12 @@ from common.assets import (
 )
 from common.base import Contract, Sha256, Symbol
 from common.enrollment import BridgeDevice
-from common.execution import ExecutionAuthorization, RunStatus, TraceIdentifiers
+from common.execution import (
+    ExecutionAuthorization,
+    IdempotencyKey,
+    RunStatus,
+    TraceIdentifiers,
+)
 
 AssetKind = Literal["task", "workflow", "skill", "knowledge", "agent"]
 
@@ -134,6 +139,13 @@ class RemoteWorkflowJob(RegistryContract):
             raise ValueError("remote job authorization must match actor, workflow and trace")
         if self.on_behalf_of == self.actor:
             raise ValueError("a job on your own behalf names nobody else")
+        # The job id is the idempotency key the Bridge runs it under, so it
+        # has to be one; a job the Bridge could not key would be re-offered
+        # on every poll and never settled.
+        try:
+            TypeAdapter(IdempotencyKey).validate_python(self.job_id)
+        except ValidationError:
+            raise ValueError("a job id serves as the run's idempotency key") from None
         reject_embedded_secrets(self.arguments)
         return self
 
