@@ -48,6 +48,7 @@ WorkbookWriteErrorCode = Literal[
     "workbook_open",
     "workbook_unwritable",
     "sheet_missing",
+    "sheets_lost",
     "header_missing",
     "write_failed",
 ]
@@ -139,6 +140,8 @@ class WorkbookWriter(Protocol):
     """Everything the weekly report's executor needs of a workbook. A reader
     is not enough: an upsert has to know where each key already is, and the
     marks have to be read before they can be retired."""
+
+    def sheet_names(self, path: Path) -> tuple[str, ...]: ...
 
     def backup(self, path: Path) -> Path | None: ...
 
@@ -408,6 +411,12 @@ class ExcelComWriter:
         return out
 
     # -- the protocol -------------------------------------------------
+
+    def sheet_names(self, path: Path) -> tuple[str, ...]:
+        """Every sheet in the workbook, in its own order."""
+        book = self._book(path)
+        count = int(book.Worksheets.Count)
+        return tuple(str(book.Worksheets(i).Name) for i in range(1, count + 1))
 
     def backup(self, path: Path) -> Path | None:
         if not path.is_file():
