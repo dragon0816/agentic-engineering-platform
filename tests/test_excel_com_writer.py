@@ -66,18 +66,21 @@ class FakeExcel:
 
 
 def install(monkeypatch: pytest.MonkeyPatch, book: FakeBook) -> FakeExcel:
-    """Stand in for the whole of `pywin32`, which this machine does not have
-    and a Linux runner cannot have."""
+    """Stand in for the bridge, which this machine does not have and a Linux
+    runner cannot have.
+
+    Only the bridge is faked. Whether Excel is *there* is asked of the real
+    registry, and a test that faked that question is what let a made-up API
+    through on 2026-09-24.
+    """
     excel = FakeExcel(book)
-    pythoncom = types.ModuleType("pythoncom")
-    pythoncom.CLSIDFromProgID = lambda prog_id: "{00024500-0000-0000-C000-000000000046}"  # type: ignore[attr-defined]
     client = types.ModuleType("win32com.client")
     client.DispatchEx = lambda prog_id: excel  # type: ignore[attr-defined]
     win32com = types.ModuleType("win32com")
     win32com.client = client  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "pythoncom", pythoncom)
     monkeypatch.setitem(sys.modules, "win32com", win32com)
     monkeypatch.setitem(sys.modules, "win32com.client", client)
+    monkeypatch.setattr(excel_writer, "progid_is_registered", lambda _prog_id: True)
     return excel
 
 
@@ -159,3 +162,40 @@ def test_a_lock_that_clears_does_not_cost_the_run(
     writer, workbook = opened_writer(tmp_path)
     writer.close(workbook, save=True)
     assert book.attempts == 3 and book.saved == 1
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="there is no registry to ask")
+def test_whether_a_program_is_registered_is_asked_of_this_machine() -> None:
+    """The real registry, on the machine the test runs on.
+
+    This is the test that was missing. The check used to go through the COM
+    bridge's own module and call a function that does not exist there, and a
+    fake carrying that function passed happily while every real host reported
+    that Excel was not installed.
+    """
+    assert excel_writer.progid_is_registered("Shell.Application") is True, (
+        "every Windows machine registers this one"
+    )
+    assert excel_writer.progid_is_registered("No.Such.Program.Ever") is False
+
+
+def test_a_machine_with_no_registry_at_all_registers_nothing() -> None:
+    """A host that is not Windows cannot run Excel either, so the answer is
+    the same and it is reached without an exception."""
+    assert excel_writer.progid_is_registered("No.Such.Program.Ever") is False
+    assert excel_writer.EXCEL_PROGID == "Excel.Application"
+
+
+def test_a_machine_with_the_bridge_and_no_excel_says_which(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The two absences stay apart: this one is the machine, not the
+    installation."""
+    client = types.ModuleType("win32com.client")
+    win32com = types.ModuleType("win32com")
+    win32com.client = client  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "win32com", win32com)
+    monkeypatch.setitem(sys.modules, "win32com.client", client)
+    with pytest.raises(WorkbookWriteError) as refused:
+        excel_writer.require_com()
+    assert refused.value.code == "excel_missing", "this machine has no Excel"

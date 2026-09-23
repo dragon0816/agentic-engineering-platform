@@ -1783,9 +1783,13 @@ client is watching and put it back once, retrying a lock for thirty seconds.
 travels. The first two
 are different absences: `library_missing` is this installation without the
 Excel bridge, `excel_missing` is a machine without Excel. `require_com`
-tells them apart by resolving the `Excel.Application` ProgID, which reads the
-registry and starts nothing, because the preview bundle always carries the
-bridge and an importable `win32com` therefore says nothing about Excel.
+tells them apart with `progid_is_registered`, which reads the registry and
+starts nothing, because the preview bundle always carries the bridge and an
+importable `win32com` therefore says nothing about Excel. It reads the
+registry directly rather than asking the bridge: the bridge's module is a
+shim over a DLL, and on a host where that shim is unhappy every question
+asked through it fails alike, which would make "Excel is not installed" the
+answer to a question about something else.
 
 `ExcelComWriter` is the one adapter and the only thing that knows about COM
 (`pywin32`, the `windows` extra, imported lazily). It opens a private Excel
