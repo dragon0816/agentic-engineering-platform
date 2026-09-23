@@ -1,7 +1,7 @@
 # Handoff — Phase 7, workflow 7 needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `phase-7/preview-weekly-report`, slice 3c committed and in review.
+Branch: `main`, after PR #72 (slice 3c) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -14,7 +14,7 @@ comment threads, read the scratch sheet without Excel, plan every row and cell
 operation, and write that plan into the workbook through Excel. `weekly
 preview` is the dry run and its own asset; `weekly apply` writes.
 
-Slice 3c (this branch) fixed the install, not the behaviour. **This platform
+Slice 3c fixed the install, not the behaviour. **This platform
 is published to no package index**, so every earlier instruction of the form
 `pip install agentic-engineering-platform[...]` was impossible; the owner hit
 exactly that on a company computer, against the corporate index. The offline
