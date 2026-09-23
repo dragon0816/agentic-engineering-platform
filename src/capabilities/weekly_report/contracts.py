@@ -34,6 +34,7 @@ class WeeklyReportSettings(Contract):
     assignee_fields: tuple[Text, ...] = ("SDE Assignee", "Assignees")
     company_fields: tuple[Text, ...] = ("Company",)
     sales_fields: tuple[Text, ...] = ("Sales",)
+    instrument_fields: tuple[Text, ...] = ("Production",)
     # The key given to work that started on the board and never carried one
     # of the workbook's own, as `GH-63`.
     board_key_prefix: Symbol = "GH"
@@ -172,6 +173,10 @@ class ReportItem(Contract):
     assignee: str = ""
     company: str = ""
     sales: str = ""
+    #: What the work is done on, as the team writes it, several on one
+    #: ticket included. The workbook does not carry it; the mail counts by
+    #: it.
+    instrument: str = ""
     updated: str | None = None
     comments: tuple[ReportComment, ...] = ()
     browse_url: str | None = None

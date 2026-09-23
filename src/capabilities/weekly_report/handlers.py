@@ -219,6 +219,7 @@ def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
         assignee=_field(fields, settings.assignee_fields),
         company=_field(fields, settings.company_fields),
         sales=_field(fields, settings.sales_fields),
+        instrument=_field(fields, settings.instrument_fields),
         updated=row.updated or None,
         comments=tuple(
             ReportComment(created=comment.created or None, body=comment.body)
