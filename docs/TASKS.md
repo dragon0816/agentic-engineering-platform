@@ -27,16 +27,17 @@ Phases 0 to 6 complete, closure records included. Phase 7 is active under
 `docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b, 2c to 2j
 slice 3a (workflow 7 up to its plan) and slice 3b (the workbook writer)
 have merged, slice 3c puts workflow 7 into the installable bundle and slice
-3d makes that bundle extractable on Windows; the live parity run on a company
-Bridge is next, and only the owner can produce it. 70 pull requests merged (#1 to #74; #5 was closed unmerged and superseded
+3d makes that bundle extractable on Windows and slice 3e documents the grants
+it needs to run; the live parity run on a company Bridge is next, and only the
+owner can produce it. 71 pull requests merged (#1 to #75; #5 was closed unmerged and superseded
 by #6, the numbers #24 and #25 were never pull requests, and #49 was closed
 unmerged when its base branch was deleted and landed through #51). The count
-stood at 64 while eight of those had merged, counted against GitHub on
+stood at 64 while nine of those had merged, counted against GitHub on
 2026-09-23. A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 923 passed, 4 skipped on Windows, with `ruff`, `mypy`,
+The suite is 931 passed, 4 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. Three skips need symbolic-link
 privileges and one needs an IPv6 loopback; all four run on Linux CI.
 
@@ -141,6 +142,7 @@ privileges and one needs an IPv6 loopback; all four run on Linux CI.
 | 3b workflow 7: writing the plan into the workbook | #70 | done | A typed `WorkbookWriter` and the source's order of operations behind it: back up, stage, verify the sheet is the one that was planned, upsert, retire last week's marks across the whole sheet, tint, border and pink what is new, recolour, link every key, prepend in red with a black tail. `ExcelComWriter` is the one adapter and the only thing that knows about COM; every test drives a recording writer. `weekly-report/apply` is the first side-effecting capability, approval required |
 | 3c the offline bundle carries workflow 7 | #72 | done | The preview bundle carried `pydantic` alone, so the artefact a member can install could not run the workflow slices 3a and 3b shipped, and the install instruction named a package index this platform is not published to. The `excel` and `windows` extras are bundled as wheels, the builder refuses a bundle missing one, the installer takes them from `wheels/` with `--no-index`, CI imports them from the installed bundle, and every instruction that named an index is corrected |
 | 3d a bundle nobody can extract is a bundle nobody can install | #74 | done | The owner's first download of the slice 3c bundle failed with a missing wheel. The zip was complete: two of its files needed more than Windows' 260-character path limit once downloaded as an artefact and extracted in a Downloads folder, and Explorer left them out silently. The bundle and artefact names shrink, the builder refuses names that would not survive the download, and the installer measures the path and names the cause before it reports a missing file |
+| 3e the grants the weekly report actually needs | #76 | in review | Following the preview's README produced `permission_denied` before Jira was reached: all five capabilities declare that they need an approval, the four reads included, and the page said only the write did. The README writes out every grant, and a test parses that JSON and puts it through the real policy, so the page and the capabilities cannot drift |
 | 3a workflow 7: rules, Jira fetch and plan | #68 | done | The source's weekly-report rules ported pure with its own tests as the oracle; a Jira client over the platform's transport with the secret resolved per call; four read capabilities (resolve the window, search Jira, read the scratch sheet without Excel, plan) and the preview Workflow over them; the plan is the dry run and the evidence; `aep-host export-assets`, `integrations` in `host.json` and a doctor check. Nothing writes a workbook; how the platform writes one is a decision for the owner |
 | 3 workflow 7 parity | — | planned | The Jira report against a test workbook on the company Bridge, compared with the working old Host Bridge. Needs a machine with Excel: the evidence is the owner's to produce and CI never claims it |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
