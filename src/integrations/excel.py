@@ -7,6 +7,8 @@ raising at import time. Nothing here writes a workbook; how the platform
 writes one is a decision recorded in the Phase 7 documents, not made here.
 """
 
+import hashlib
+import json
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any, Literal
@@ -95,6 +97,13 @@ def read_chosen_sheet(
     finally:
         workbook.close()
     return names, source, headers, rows
+
+
+def digest_rows(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> str:
+    """A stable digest of a sheet's text: the evidence's before and after,
+    and what tells a writer the sheet is still the one that was planned."""
+    payload = json.dumps([list(headers), [list(row) for row in rows]], ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _texts(row: Sequence[Any]) -> tuple[str, ...]:

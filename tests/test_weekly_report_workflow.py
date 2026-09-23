@@ -18,25 +18,32 @@ from test_jira_client import Reply, ScriptedTransport
 from capabilities.weekly_report import rules
 from capabilities.weekly_report.contracts import (
     SheetState,
+    WeeklyReportApplied,
     WeeklyReportPlan,
     WeeklyReportSettings,
 )
 from capabilities.weekly_report.handlers import (
+    APPLY_SPEC,
     JIRA_SEARCH_SPEC,
     PLAN_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
     ReadScratchSheetHandler,
     ReadScratchSheetInput,
-    digest_rows,
 )
-from capabilities.weekly_report.manifest import preview_workflow, weekly_skill
+from capabilities.weekly_report.manifest import (
+    preview_workflow,
+    report_workflow,
+    weekly_skill,
+)
 from common.execution import RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.assets import export_assets
 from host_runtime.cli import main
 from host_runtime.host import build_runtime, host_report
 from integrations import excel
+from integrations.excel import digest_rows
+from integrations.excel_writer import owner_file
 from models.credentials import StaticCredentials
 
 openpyxl = pytest.importorskip("openpyxl")
@@ -156,7 +163,13 @@ def grants() -> list[dict[str, Any]]:
             "policy_refs": list(spec.policy.policy_refs),
             "approval_ref": "weekly-report-approval",
         }
-        for spec in (RESOLVE_WINDOW_SPEC, JIRA_SEARCH_SPEC, READ_SCRATCH_SHEET_SPEC, PLAN_SPEC)
+        for spec in (
+            RESOLVE_WINDOW_SPEC,
+            JIRA_SEARCH_SPEC,
+            READ_SCRATCH_SHEET_SPEC,
+            PLAN_SPEC,
+            APPLY_SPEC,
+        )
     ]
 
 
@@ -211,8 +224,23 @@ def test_the_shipped_manifests_validate_and_export() -> None:
         "read-scratch-sheet",
         "plan",
     ]
+    full = report_workflow()
+    assert [step.capability.name for step in full.steps if hasattr(step, "capability")] == [
+        "resolve-window",
+        "search",
+        "read-scratch-sheet",
+        "plan",
+        "apply",
+    ]
+    # The preview stays its own asset, so a member can be given the dry run
+    # alone; the write names the capability it needs like the rest.
+    assert "weekly_report.apply" in full.dependencies.local_capabilities
+    assert "weekly_report.apply" not in workflow.dependencies.local_capabilities
     skill = weekly_skill()
     assert skill.alias == "weekly" and skill.commands[0].target == workflow.metadata.identity
+    assert skill.default_command == "preview"
+    assert [command.name for command in skill.commands] == ["preview", "apply"]
+    assert skill.commands[1].target == full.metadata.identity
 
 
 def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
@@ -450,6 +478,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     assert written == [
         "skills/engineering__weekly-report__1.0.0.json",
         "workflows/engineering__jira-weekly-report-preview__1.0.0.json",
+        "workflows/engineering__jira-weekly-report__1.0.0.json",
     ]
     assert "wrote" in capsys.readouterr().out
     exported = json.loads((out / written[1]).read_text(encoding="utf-8"))
@@ -457,3 +486,98 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     # A host without the secret mapped will not be built.
     with pytest.raises(Exception, match="credential_unmapped"):
         build_runtime(unmapped, layout=layout)
+
+
+def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Path) -> None:
+    """The five steps end to end on a real host: the workbook read, the plan
+    made, and the plan written through a recording writer."""
+    from test_weekly_report_apply import RecordingWriter
+
+    config, layout, workbook = host(tmp_path)
+    before = workbook.read_bytes()
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"jira_token": TOKEN}),
+        jira_transport=ScriptedTransport(jira_replies()),
+        writer=lambda: writer,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.apply 2026_31W")
+        assert outcome.refusal is None and outcome.workflow is not None
+        run = outcome.workflow.run
+        assert run.status == "succeeded", run.failure
+        assert run.completed_steps == 5
+        applied = WeeklyReportApplied.model_validate(outcome.workflow.step_results[-1].data)
+    # The plan reached the writer: a new row, a refreshed one, blocks in red.
+    assert (applied.inserted, applied.updated) == (2, 1)
+    assert applied.prepended == 2 and applied.failures == ()
+    assert applied.week == "2026_31W"
+    # The evidence the parity gate names, on both sides of the write.
+    assert applied.digest_before == applied.digest_after, "the recorder wrote nothing"
+    assert applied.backup_path is not None
+    assert workbook.read_bytes() == before
+    assert "upsert" in writer.names and writer.closed_saving is True
+
+
+def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:
+    """The first side-effecting capability in this repository: the Bridge
+    policy refuses it when the member's decision carries no approval."""
+    from test_weekly_report_apply import RecordingWriter
+
+    assert APPLY_SPEC.side_effect == "write"
+    assert APPLY_SPEC.policy.approval_required
+    config, layout, _ = host(tmp_path)
+    unapproved = [
+        {key: value for key, value in grant.items() if key != "approval_ref"}
+        if grant["asset"]["name"] == "apply"
+        else grant
+        for grant in grants()
+    ]
+    layout.grants.write_text(json.dumps(unapproved), encoding="utf-8")
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"jira_token": TOKEN}),
+        jira_transport=ScriptedTransport(jira_replies()),
+        writer=lambda: writer,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.apply 2026_31W")
+        assert outcome.workflow is not None
+        assert outcome.workflow.run.status == "failed"
+        assert outcome.workflow.run.completed_steps == 4, "the plan was made, the write was not"
+        failure = outcome.workflow.step_results[-1].failure
+        assert failure is not None and failure.code == "permission_denied"
+    assert "upsert" not in writer.names
+
+
+def test_a_workbook_that_cannot_be_written_names_its_own_refusal(tmp_path: Path) -> None:
+    """A handler's refusal keeps its code on the failed step, so the member
+    is told which of "somebody has it open" and "it is not there" happened."""
+    from test_weekly_report_apply import RecordingWriter
+
+    config, layout, workbook = host(tmp_path)
+    owner_file(workbook).write_bytes(b"")
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"jira_token": TOKEN}),
+        jira_transport=ScriptedTransport(jira_replies()),
+        writer=lambda: writer,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.apply 2026_31W")
+        assert outcome.workflow is not None and outcome.workflow.run.status == "failed"
+        failure = outcome.workflow.step_results[-1].failure
+        assert failure is not None and failure.code == "workbook_open"
+    assert writer.calls == []
+
+
+def test_a_host_without_excel_previews_but_says_it_cannot_write(tmp_path: Path) -> None:
+    config, layout, _ = host(tmp_path)
+    detail = {c.name: c for c in host_report(config, layout).checks}["integrations"].detail
+    # This machine has no pywin32, so the doctor says so without failing: a
+    # host may be given the dry run alone.
+    assert "weekly report on" in detail
+    assert ("can write it" in detail) or ("preview only" in detail)

@@ -3,12 +3,26 @@
 from dataclasses import dataclass
 from typing import Protocol
 
-from pydantic import Field, JsonValue
+from pydantic import Field, JsonValue, TypeAdapter
 
 from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, ExecutionDependencies, SecretRef
 from common.base import Contract, Symbol, Text
 from common.execution import ExecutionAuthorization, RequestContext
+
+
+class CapabilityRefused(Exception):
+    """A handler refusing what it was asked to do, with a code of its own.
+
+    The dispatcher puts that code on the failure, so a caller learns *why*
+    without the handler's message travelling: a message may quote the input
+    or the data it reached, and neither may leave the Bridge. Use it for a
+    refusal a person can act on; anything else is a `handler_error`.
+    """
+
+    def __init__(self, code: str) -> None:
+        self.code: str = TypeAdapter(Symbol).validate_python(code)
+        super().__init__(self.code)
 
 
 class TransientCapabilityError(Exception):

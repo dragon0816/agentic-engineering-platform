@@ -11,6 +11,7 @@ from common.assets import AssetIdentity, WorkflowManifest
 PREVIEW_WORKFLOW = AssetIdentity(
     namespace="engineering", name="jira-weekly-report-preview", version="1.0.0"
 )
+REPORT_WORKFLOW = AssetIdentity(namespace="engineering", name="jira-weekly-report", version="1.0.0")
 WEEKLY_SKILL = AssetIdentity(namespace="engineering", name="weekly-report", version="1.0.0")
 
 _METADATA = {
@@ -34,53 +35,84 @@ def preview_workflow() -> WorkflowManifest:
             "execution": {"mode": "local"},
             # Named so the engine refuses the run before its first step on a
             # host that lacks any of them, rather than failing at step 1.
-            "dependencies": {
-                "central_required": False,
-                "local_capabilities": [
-                    "weekly_report.resolve_window",
-                    "jira.search",
-                    "excel.read_scratch_sheet",
-                    "weekly_report.plan",
-                ],
-            },
+            "dependencies": {"central_required": False, "local_capabilities": _PLAN_CAPABILITIES},
             "input_contract": "engineering.jira-weekly-report.request.v1",
             "output_contract": "weekly-report.plan.output.v1",
+            "steps": _plan_steps(),
+        }
+    )
+
+
+#: The four steps a preview runs, which the full report runs before it
+#: writes. Named once so the two manifests cannot drift apart.
+def _plan_steps() -> list[dict[str, object]]:
+    return [
+        {
+            "capability": {
+                "namespace": "weekly-report",
+                "name": "resolve-window",
+                "version": "1.0.0",
+            },
+            "inputs": {"request": {"source": "run"}},
+        },
+        {
+            "capability": {"namespace": "jira", "name": "search", "version": "1.0.0"},
+            "inputs": {
+                "jql": {"source": "step", "step_index": 0, "path": ["jql"]},
+                "max_issues": {"source": "step", "step_index": 0, "path": ["max_issues"]},
+            },
+        },
+        {
+            "capability": {"namespace": "excel", "name": "read-scratch-sheet", "version": "1.0.0"},
+            "inputs": {"week": {"source": "step", "step_index": 0, "path": ["week"]}},
+        },
+        {
+            "capability": {"namespace": "weekly-report", "name": "plan", "version": "1.0.0"},
+            "inputs": {
+                "window": {"source": "step", "step_index": 0},
+                "issues": {"source": "step", "step_index": 1, "path": ["issues"]},
+                "capped": {"source": "step", "step_index": 1, "path": ["capped"]},
+                "sheet": {"source": "step", "step_index": 2},
+            },
+        },
+    ]
+
+
+_PLAN_CAPABILITIES = [
+    "weekly_report.resolve_window",
+    "jira.search",
+    "excel.read_scratch_sheet",
+    "weekly_report.plan",
+]
+
+
+def report_workflow() -> WorkflowManifest:
+    """The preview's four steps, then the write. Kept as its own asset so a
+    member can be given the dry run alone."""
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": REPORT_WORKFLOW.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "The GTM weekly report: the week's Jira issues planned against the workbook's "
+                "scratch sheet and written into it"
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {
+                "central_required": False,
+                "local_capabilities": [*_PLAN_CAPABILITIES, "weekly_report.apply"],
+            },
+            "input_contract": "engineering.jira-weekly-report.request.v1",
+            "output_contract": "weekly-report.apply.output.v1",
             "steps": [
+                *_plan_steps(),
                 {
                     "capability": {
                         "namespace": "weekly-report",
-                        "name": "resolve-window",
+                        "name": "apply",
                         "version": "1.0.0",
                     },
-                    "inputs": {"request": {"source": "run"}},
-                },
-                {
-                    "capability": {"namespace": "jira", "name": "search", "version": "1.0.0"},
-                    "inputs": {
-                        "jql": {"source": "step", "step_index": 0, "path": ["jql"]},
-                        "max_issues": {"source": "step", "step_index": 0, "path": ["max_issues"]},
-                    },
-                },
-                {
-                    "capability": {
-                        "namespace": "excel",
-                        "name": "read-scratch-sheet",
-                        "version": "1.0.0",
-                    },
-                    "inputs": {"week": {"source": "step", "step_index": 0, "path": ["week"]}},
-                },
-                {
-                    "capability": {
-                        "namespace": "weekly-report",
-                        "name": "plan",
-                        "version": "1.0.0",
-                    },
-                    "inputs": {
-                        "window": {"source": "step", "step_index": 0},
-                        "issues": {"source": "step", "step_index": 1, "path": ["issues"]},
-                        "capped": {"source": "step", "step_index": 1, "path": ["capped"]},
-                        "sheet": {"source": "step", "step_index": 2},
-                    },
+                    "inputs": {"plan": {"source": "step", "step_index": 3}},
                 },
             ],
         }
@@ -96,11 +128,13 @@ def weekly_skill() -> SkillManifest:
             "alias": "weekly",
             "instructions": (
                 "Preview the GTM weekly report for the current week, or for a named week "
-                "such as 2026_31W."
+                "such as 2026_31W; `weekly apply` writes the same plan into the workbook."
             ),
             "commands": [
-                {"name": "preview", "kind": "workflow", "target": PREVIEW_WORKFLOW.model_dump()}
+                {"name": "preview", "kind": "workflow", "target": PREVIEW_WORKFLOW.model_dump()},
+                {"name": "apply", "kind": "workflow", "target": REPORT_WORKFLOW.model_dump()},
             ],
+            # A preview by default: writing the workbook is asked for.
             "default_command": "preview",
         }
     )

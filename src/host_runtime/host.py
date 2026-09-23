@@ -12,6 +12,7 @@ pieces together and adds no authority. The policy decides every dispatch,
 the engine decides every workflow, and the Agent decides who may ask.
 """
 
+from collections.abc import Callable
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, TypeVar
@@ -23,12 +24,20 @@ from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
-from capabilities.weekly_report.contracts import ReportingWindow, SheetState, WeeklyReportPlan
+from capabilities.weekly_report.contracts import (
+    ReportingWindow,
+    SheetState,
+    WeeklyReportApplied,
+    WeeklyReportPlan,
+)
 from capabilities.weekly_report.handlers import (
+    APPLY_SPEC,
     JIRA_SEARCH_SPEC,
     PLAN_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
+    ApplyHandler,
+    ApplyInput,
     JiraSearchHandler,
     JiraSearchInput,
     JiraSearchOutput,
@@ -56,6 +65,12 @@ from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.workspace import documents
 from integrations import excel
+from integrations.excel_writer import (
+    ExcelComWriter,
+    WorkbookWriteError,
+    WorkbookWriter,
+    require_com,
+)
 from integrations.jira import JiraClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from models.wire import MethodTransport
@@ -230,7 +245,9 @@ def build_integrations(
     installed: InstalledCapabilities,
     resolver: CredentialResolver | None,
     *,
+    layout: HostLayout,
     jira_transport: MethodTransport | None = None,
+    writer: Callable[[], WorkbookWriter] | None = None,
 ) -> None:
     """The capabilities the migrated workflows need, from what this host was
     given. Jira's token is resolved through the host's credential mapping at
@@ -278,6 +295,20 @@ def build_integrations(
             WeeklyReportPlan,
             ExecutionDependencies(central_required=False),
         )
+        # The writer is built per run, so a host without Excel still installs
+        # the capability and refuses at the write with `library_missing`
+        # rather than failing to assemble at all.
+        installed.register(
+            APPLY_SPEC,
+            ApplyHandler(
+                settings,
+                writer if writer is not None else ExcelComWriter,
+                staging_root=layout.workspace_root,
+            ),
+            ApplyInput,
+            WeeklyReportApplied,
+            ExecutionDependencies(central_required=False),
+        )
 
 
 def build_gateway(
@@ -287,6 +318,7 @@ def build_gateway(
     *,
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
+    writer: Callable[[], WorkbookWriter] | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
@@ -324,7 +356,9 @@ def build_gateway(
         ReadFileOutput,
         ExecutionDependencies(central_required=False),
     )
-    build_integrations(config, installed, resolver, jira_transport=jira_transport)
+    build_integrations(
+        config, installed, resolver, layout=layout, jira_transport=jira_transport, writer=writer
+    )
     grants = (
         _decided_grants(authorization, installed)
         if authorization is not None
@@ -434,7 +468,14 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
     if integrations.jira is not None:
         parts.append(f"Jira at {integrations.jira.base_url}")
     if settings is not None:
-        parts.append(f"weekly report on {Path(settings.workbook_path).name}")
+        try:
+            require_com()
+            writes = "can write it"
+        except WorkbookWriteError:
+            # A preview needs no Excel; only the write does. Not a failure:
+            # a host may be given the dry run alone.
+            writes = "preview only, no Excel to write with"
+        parts.append(f"weekly report on {Path(settings.workbook_path).name} ({writes})")
     return DoctorCheck(name="integrations", status="passed", detail=", ".join(parts))
 
 
@@ -592,6 +633,7 @@ def build_runtime(
     layout: HostLayout | None = None,
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
+    writer: Callable[[], WorkbookWriter] | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
@@ -603,6 +645,7 @@ def build_runtime(
         load_authorization(checked, place),
         resolver=resolver,
         jira_transport=jira_transport,
+        writer=writer,
     )
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)

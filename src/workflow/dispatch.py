@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from capabilities.runtime import (
     CapabilityInvocation,
+    CapabilityRefused,
     InstalledCapabilities,
     LocalPolicy,
     TransientCapabilityError,
@@ -113,6 +114,9 @@ class BridgeExecutor:
             )
         except TimeoutError:
             return self._failure(call, "timeout", invoked=True)
+        except CapabilityRefused as refusal:
+            # The handler named why; only the code travels.
+            return self._failure(call, refusal.code, invoked=True)
         except TransientCapabilityError:
             return self._failure(
                 call,
