@@ -1656,7 +1656,7 @@ read from the configuration alone (`pending` without a platform, `failed`
 when the secret's name is unmapped, `passed` otherwise). Every unreachable
 answer is printed as exactly that, never as a revocation.
 
-## Workflow 7: the weekly report up to its plan (Phase 7, slice 3a)
+## Workflow 11: the weekly report up to its plan (Phase 7, slice 3a)
 
 `capabilities.weekly_report.rules` is the pinned Host Bridge's
 `_weekly_rules` ported pure: `parse_week_name`, `week_number`/`week_name` in
@@ -1760,7 +1760,7 @@ running; `LocalAgent(workflow_wait_seconds=)` applies it on every ingress.
 The `integrations` check fails when the weekly report is configured without
 a Jira site.
 
-## Workflow 7: writing the plan into the workbook (Phase 7, slice 3b)
+## Workflow 11: writing the plan into the workbook (Phase 7, slice 3b)
 
 `integrations.excel_writer` is the writing vocabulary, typed: `Fill` (a
 `colour` of None clears, which is not white — Excel reports an unfilled cell

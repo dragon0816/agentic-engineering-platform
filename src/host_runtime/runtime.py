@@ -17,8 +17,9 @@ from workflow.host_bridge import BridgeRegistration
 LIMITATIONS = (
     "Enrollment (invitation, device registration, binding, token issue) happens on the "
     "shared platform; this host presents a token it was given and cannot obtain one.",
-    "Workflow 7 needs a Jira site and a workbook configured under `integrations`, and "
-    "Excel installed to write; `doctor` reports whether this host has them.",
+    "The GTM weekly report (source workflow 11) needs a Jira site and a workbook "
+    "configured under `integrations`, and Excel installed to write; `doctor` reports "
+    "whether this host has them.",
     "No Git, browser, email, DUT or instrument capability is included, so this host "
     "cannot execute workflow 13.",
 )

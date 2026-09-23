@@ -135,7 +135,7 @@ Run representative production-like scenarios against old and new paths. Deprecat
 
 Owner scope set 2026-09-22: the shared-platform computer is the control plane;
 real validation runs on an enrolled company computer with Agent + Bridge. Start
-with workflow 7 (Jira report), then workflow 13 (release package), then a copy of
+with workflow 11 (the GTM weekly report), then workflow 13 (release package), then a copy of
 the knowledge vault. Accounts are invitation-only. A company workstation is bound
 to its one employee; a shared test workstation may bind several platform users
 who share one Windows account and therefore have no OS-level isolation from each

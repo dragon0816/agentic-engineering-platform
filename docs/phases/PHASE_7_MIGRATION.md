@@ -63,8 +63,9 @@ never copied into Registry assets, invitations, evaluation cases, traces or Git.
    jobs for enrolled Bridge computers.
 4. Local Agent interface and authenticated transports: operate company work locally,
    synchronize Registry packages, and let shared test Bridges poll approved jobs.
-5. Workflow 7: `07_jira_team_tickets_to_excel.json` /
-   `jira_weekly_report.py`, report generation against a test workbook.
+5. Workflow 11: `11_jira_weekly_report.json` / `jira_weekly_report.py`,
+   report generation against a test workbook. (Recorded as "workflow 7" until
+   2026-09-23; see the correction in `docs/PHASE_7_MIGRATION.md`.)
 6. Workflow 13: `13_release_package.json` / `release_package.py`, first in dry-run
    and an isolated test repository, then an explicitly approved non-production push.
 7. Knowledge platform: adopt and exercise a copy before any source vault changes.
@@ -80,7 +81,7 @@ byte-identical files when timestamps, workbook metadata or archive metadata diff
 Every production-like run exports redacted evidence that the Phase 6 harness can
 grade; credentials and sensitive payloads remain on the Bridge.
 
-### Workflow 7 — Jira team tickets to Excel
+### Workflow 11 — the GTM weekly report
 
 - The same reporting week, base JQL and updated window select the same Jira issue
   keys, subject to an explicit safety cap.
@@ -180,7 +181,7 @@ that can be carried to a company computer while the enrollment host is designed.
    name is device metadata and never authentication proof.
 3. `aep-host doctor` checks the OS, exact Python minor, company device profile and
    workspace without opening a socket or invoking a capability. It states that no
-   live transport and no workflow 7/13 capability exist in this preview.
+   live transport and no workflow 11/13 capability exist in this preview.
 4. `aep-host enrollment-request` exports a closed `BridgeDevice` plus an empty
    `BridgeRegistration`. The output is not invitation proof, authentication,
    authorization or a secret, and does not grant execution.
@@ -863,16 +864,16 @@ backing off on an unreachable platform; every failure message free of the
 secret; and the CLI commands with their exit codes and the doctor's platform
 check in each of its three states.
 
-## Slice 3a — workflow 7: the weekly report's rules, the Jira fetch and the plan
+## Slice 3a — workflow 11: the weekly report's rules, the Jira fetch and the plan
 
-Migration step 5 is workflow 7, `07_jira_team_tickets_to_excel.json` /
+Migration step 5 is workflow 11, `11_jira_weekly_report.json` /
 `jira_weekly_report.py`: the GTM tickets updated this week, upserted into the
 scratch sheet of the team's weekly workbook with the marker-tagged comments of
 the week prepended in red. Its parity gate is above. The source job is one
 module of orchestration over three of rules, a Jira client and an Excel
 executor; the rules are pure and were tested against the real workbook and the
 real project, so they are ported as they stand
-(`docs/PHASE_7_MIGRATION.md`, "Workflow 7").
+(`docs/PHASE_7_MIGRATION.md`, "Workflow 11").
 
 This slice is everything up to the point where the workbook is written: the
 week and its window, the Jira fetch, the reading of the scratch sheet, and the
@@ -968,7 +969,7 @@ content or arrived, markers and lines counted; and the preview workflow
 running end to end on a real host through the real Gateway with a fake Jira
 and a workbook on disk, writing nothing.
 
-## Slice 3b — workflow 7: writing the plan into the workbook
+## Slice 3b — workflow 11: writing the plan into the workbook
 
 Slice 3a stopped at the plan. This is the other half: executing it against the
 team's workbook, with the parity gate's evidence on both sides of the write.
@@ -1039,9 +1040,9 @@ without an approval; and the whole Workflow end to end on a real host with a
 recording writer, with the evidence carrying both digests.
 
 
-## Slice 3c — the offline bundle carries workflow 7
+## Slice 3c — the offline bundle carries workflow 11
 
-Slices 3a and 3b finished workflow 7 in the repository and told the owner to
+Slices 3a and 3b finished workflow 11 in the repository and told the owner to
 install it with `pip install "agentic-engineering-platform[office,windows]"`.
 That instruction could not work and never could: **this platform is published
 to no package index**, public or internal. The owner's first attempt on a
@@ -1074,8 +1075,8 @@ it does.
 5. Every install instruction that named a package index is corrected:
    `HANDOFF.md`, `deploy/windows-preview/README.md`, and the doctor's own
    message when the workbook reader is missing. The host runtime's
-   `LIMITATIONS` no longer says workflow 7 cannot run here; it says what
-   workflow 7 needs and that `doctor` reports whether this host has it.
+   `LIMITATIONS` no longer says the weekly report cannot run here; it says
+   what it needs and that `doctor` reports whether this host has it.
 
 Because the bundle now always carries the Excel bridge, an importable
 `win32com` stopped being evidence of anything: a doctor that answered "can
@@ -1174,3 +1175,39 @@ configuration, membership, grants, exported assets and a workbook — and
 running it: `doctor` reports `host status: ready` with every check passed,
 and `weekly.preview` routes to the installed Workflow and reaches the Jira
 step, which is as far as a machine with no Jira credential can go.
+
+
+## Slice 3f — the workflow this phase migrated is number 11
+
+Raised by the owner while configuring the first live run: the settings the
+platform asks for are the GTM weekly report's, which the source numbers 11,
+and every document here called it workflow 7.
+
+The source has both files. `workflows/11_jira_weekly_report.json`
+("11 · Jira GTM → Weekly Report + Email (W2)") calls the job
+`jira_weekly_report`; `workflows/07_jira_team_tickets_to_excel.json`
+("07 · Jira Team Tickets → Excel (Issue Tracking)") calls `jira_team_tickets`,
+a different job this repository has never read.
+
+What was built is unaffected and nothing is renamed in the platform's own
+contracts: every behaviour was characterized from `jira_weekly_report.py` and
+its rules module, and ported against that job's own tests. The mistake was
+made once, in the candidate table of `docs/PHASE_7_MIGRATION.md` on
+2026-09-22, where the right job was paired with the wrong workflow file, and
+it propagated into the migration order, the parity gate, the progress record,
+the roadmap, the handoff, four docstrings and a host limitation.
+
+1. Every reference is corrected to workflow 11, including the parity gate's
+   heading, which called the weekly report "Jira team tickets to Excel".
+2. `docs/PHASE_7_MIGRATION.md` gains a dated correction section saying what
+   the identifiers used to be, because that file is the decision record and a
+   silent fix would erase the mistake rather than record it. The owner
+   decision of 2026-09-22 in `docs/TASKS.md` keeps its original wording and
+   gains a correction row beside it.
+3. **Source workflow 7 (`jira_team_tickets`) remains unmigrated and
+   unassessed**, and is recorded as an open item. Whether it is migrated at
+   all, and where it would belong in the order, is an owner decision that has
+   not been asked for.
+
+Nothing executable changed, so the suite is unchanged; the only code touched
+is four docstrings and the wording of one host limitation.
