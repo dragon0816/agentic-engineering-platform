@@ -77,6 +77,40 @@ def _load(path: Path) -> CompanyHostConfiguration:
     return CompanyHostConfiguration.model_validate_json(path.read_text(encoding="utf-8-sig"))
 
 
+def _why_unusable(path: Path, invalid: Exception) -> list[str]:
+    """What is wrong with a host configuration, without saying what is in it.
+
+    The file names a board, a workbook, and which environment variable holds
+    which secret, so no value from it is ever printed. The field that is
+    wrong is not a value, though, and refusing to name it left an operator to
+    guess which of a hundred lines to look at.
+
+    The installed version is named with it, because a field this host has
+    never heard of reads exactly like a typo and is usually an installation
+    older than the configuration written for it.
+    """
+    lines = [
+        f"{path} cannot be used by this host ({_package_version()}), so nothing ran. "
+        "No value from it is shown."
+    ]
+    if isinstance(invalid, ValidationError):
+        for error in invalid.errors():
+            where = ".".join(str(part) for part in error.get("loc", ())) or "(the whole file)"
+            lines.append(f"  {where}: {error.get('msg', 'is not valid')}")
+    else:
+        # A file that is not JSON at all. The position is not a value.
+        lines.append(f"  it is not valid JSON: {_json_position(invalid)}")
+    return lines
+
+
+def _json_position(invalid: Exception) -> str:
+    line = getattr(invalid, "lineno", None)
+    column = getattr(invalid, "colno", None)
+    if line is None:
+        return "the text could not be parsed"
+    return f"line {line}, column {column}"
+
+
 def _trace() -> TraceIdentifiers:
     value = uuid.uuid4().hex
     return TraceIdentifiers(
@@ -299,11 +333,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     try:
         config = _load(args.config)
-    except (OSError, ValidationError, ValueError):
-        print(
-            "configuration is missing or invalid; no input values were displayed",
-            file=sys.stderr,
-        )
+    except OSError:
+        print(f"cannot read {args.config}", file=sys.stderr)
+        return 2
+    except (ValidationError, ValueError) as invalid:
+        for line in _why_unusable(args.config, invalid):
+            print(line, file=sys.stderr)
         return 2
     layout = HostLayout.under(config.workspace_root)
     if args.command == "doctor":
