@@ -612,7 +612,9 @@ all. So the rules carry over; it is the source that changes.
    rows and the retiring of last week's marks are all unchanged.
 2. **The week is chosen by time, as it was.** The default window is the one
    the week already implies, and an explicit range can be configured for the
-   occasions that need one. The board's `Week` field is not the selector.
+   occasions that need one. The board's `Week` field is not the selector,
+   and is not read at all: it is a note for people and the owner intends to
+   remove it.
 3. **The board's fields are authoritative** for Company, Status, Assignee and
    Sales. The block in the issue body is a snapshot of the rebuild and is not
    read.
@@ -625,5 +627,27 @@ all. So the rules carry over; it is the source that changes.
 | The report's own contracts, named `JiraIssue` and `JiraComment` | **RENAME.** A contract named after a vendor is the leak the architecture guard names, and it would now name the wrong vendor. The shape is unchanged |
 | `ReportingWindow.jql` | **REPLACE** with the query the new source needs, and with the explicit range the owner asked for |
 | The rules, the plan, the writer, the workbook | **UNCHANGED.** This is why the source was ported as pure rules over typed inputs |
-| The board's `Week` field | **NOT READ**, by decision 2. Recorded here because it exists and somebody will ask |
+| The board's `Week` field | **NOT READ**, and nothing in this platform ever reads it. The owner confirmed on 2026-09-23 that it is a note for people and is going to be deleted, so reading it would be building on something already scheduled to disappear |
 | Two unrecognised marker spellings | **ADD** `In complete` as a synonym of `In-Completed`. `Customer's feadback` is not a marker and gets none |
+
+
+### What the first real run showed (2026-09-23)
+
+The whole workflow ran against the real board, read-only, and succeeded: the
+window resolved, the board was read over the live API, and the plan came back
+with four rows to write, four comment blocks to prepend and sixty items
+skipped for having no marker content that week. Those four are exactly the
+four issues on the board that carry a comment, which is the source's own rule
+working on the source's own data. Every key was one carried from the workbook
+and every row carried its own link.
+
+One property of the data is worth writing down, because it looks like a
+defect and is not. The issues were all rebuilt from the workbook between
+2026-09-21 and 2026-09-23, so every one of them was last updated then,
+whatever week it describes. Selecting by time therefore finds them for the
+week of the rebuild and finds almost nothing for the weeks before it. That is
+correct for every week from here on, when people comment during the week they
+are reporting, and it means the weeks before the rebuild are not reachable by
+time. The owner accepted that on 2026-09-23: the report runs forward, the
+`Week` field is a note for people rather than a selector, and it is going to
+be deleted.
