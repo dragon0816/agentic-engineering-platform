@@ -16,10 +16,14 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
+from typing import TypeVar
 
 from pydantic import ValidationError
 
+from agent.skills import SkillManifest
 from channels.telegram import TelegramIngress
+from common.assets import WorkflowManifest
+from common.base import Contract
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.agent import LocalAgentOutcome
@@ -28,6 +32,7 @@ from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, H
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
 from host_runtime.sync import PlatformClient, advertisement
+from host_runtime.workspace import documents
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -154,13 +159,50 @@ def _print_outcome(outcome: LocalAgentOutcome) -> None:
         print(f"the run record could not be written: {outcome.unrecorded}")
 
 
+ContractT = TypeVar("ContractT", bound=Contract)
+
+
+def _installed_namespaces(runtime: HostRuntime) -> str:
+    """Which namespaces this host's installed Skills and Workflows are in."""
+    found: set[str] = set()
+    for skill in _manifests(runtime.layout.skills, SkillManifest):
+        found.add(skill.metadata.identity.namespace)
+    for workflow in _manifests(runtime.layout.workflows, WorkflowManifest):
+        found.add(workflow.metadata.identity.namespace)
+    names = sorted(found)
+    if not names:
+        return " Nothing is installed here yet; `export-assets` writes the shipped ones."
+    if len(names) == 1:
+        return f" Everything installed here is in `{names[0]}`."
+    return " The assets installed here are in " + ", ".join(f"`{n}`" for n in names) + "."
+
+
+def _manifests(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]:
+    """Whatever reads cleanly. This is a message, not a gate: a manifest that
+    does not parse is reported by `doctor`, and refusing to name the others
+    because of it would help nobody."""
+    if not directory.is_dir():
+        return ()
+    found: list[ContractT] = []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            found.extend(model.model_validate(item) for item in documents(path))
+        except (OSError, ValidationError, ValueError):
+            continue
+    return tuple(found)
+
+
 def _ask(
     runtime: HostRuntime, message: str, actor: str | None, namespace: str | None, as_json: bool
 ) -> int:
     chosen = namespace if namespace is not None else runtime.config.namespace
     if chosen is None:
+        # The host knows which namespaces its own installed assets are in, so
+        # it says them rather than leaving the reader to find out: a request
+        # addresses a namespace, and there is no sensible default to guess.
         print(
-            "no namespace is configured; pass --namespace or set it in host.json",
+            "no namespace is configured; pass --namespace or set `namespace` in host.json."
+            + _installed_namespaces(runtime),
             file=sys.stderr,
         )
         return 2
