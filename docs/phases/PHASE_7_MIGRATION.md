@@ -1310,3 +1310,26 @@ a failed run does not consume the diff.
 This is the last slice because it is the only one that keeps state between
 runs, and because the platform already has a place for that: the host's own
 state, not a directory of JSON files beside the repository.
+
+
+### Slice 4a as built
+
+The transformation is ported and the source's own tests pass against it, case
+for case: 149 of them, covering the chipset-cell parser, vendor and
+technology inference, match keys, the scalar columns, company splitting,
+aggregation across fiscal years, matching against the existing sheet,
+rendering, ordering and the watched columns.
+
+The ruleset is a closed contract rather than a dictionary, and the shipped
+default is the source's own example file, unchanged, read in its own
+spelling. It travels in the wheel, so a host has a ruleset without being
+given one, and can point at its own.
+
+The five fixes each have a test that names the defect it would catch coming
+back: technology order is the same in every process, two runs in one process
+do not share their dropped rows, an impossible month is text rather than a
+crash, the month name does not follow the machine's language, and a keyword
+written with a space matches only what it means.
+
+The protected-sheet guard is not here. It belongs with the write, in slice
+4c, where it can refuse rather than assert.

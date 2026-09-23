@@ -1866,3 +1866,46 @@ step's output serialized to, so a list is a tuple and an ISO string is a
 date, while `"1"` is still not an integer. A handler that raises
 `ValueError` is refusing what it was given, and the step fails as
 `invalid_input` rather than `handler_error`; its text still never travels.
+
+
+## Workflow 10: the chipset report's rules (Phase 7, slice 4a)
+
+`capabilities.chipset_report.ruleset` is everything the report knows that is
+not code, typed. The source kept it as an unvalidated dictionary read from
+`config/chipset-map.json`, with every lookup carrying its own inline default,
+so a misspelt key reverted to that default in silence. `ChipsetRuleset` is
+closed: `split` (the separators, the noise, filler and role words, the
+quantity suffix and the two switches that drop undecided chipsets), `vendors`
+(the output order, the literal vendor words and the model-number prefixes),
+`chipset_aliases`, `technology` (the canonical values, the keywords, the
+generation labels and the model rules), `brand` and `mfg`, `priority`,
+`status`, `dri` and `output` (the display choices, the colours and the
+watched columns).
+
+`load_ruleset` reads the file the team already has, in its own spelling. It
+forgives two kinds of key and nothing else: documentation, which that file
+uses for its reasoning, and the four keys the source read nowhere, which are
+named in `IGNORED`. `RulesetError` codes are `ruleset_missing`,
+`ruleset_unreadable`, `ruleset_not_an_object`, `section_not_an_object`,
+`rules_not_a_list`, `unknown_key`, `ruleset_invalid` and `pattern_invalid`.
+`compile_rules` turns a ruleset into `Rules`, which is what every rule takes,
+so no pattern is compiled per cell.
+
+`capabilities.chipset_report.rules` is the transformation, pure: nothing
+reads a file, a clock or the environment, and the date a run stamps arrives
+as an argument, because a plan has to be the same plan when it is applied.
+`SourceRow.from_record` reads a project row by column name through
+`header_key`, which folds case, spacing and punctuation but never spelling.
+`split_chipsets` turns a free-text cell into `ChipsetToken`s;
+`resolve_technologies` answers from one source and says which; `aggregate`
+merges by chipset and technology, counting an opportunity once across fiscal
+years, and returns what it dropped rather than leaving it on a function
+attribute; `match_against_existing` reports `tracked`, `tracked-other-tech`,
+`partial` or `new`; `render_row` writes one record keyed by the sheet's own
+headers plus ten audit columns; `transform` runs the whole of it and returns
+`TransformResult`, which carries the records, the dropped chipsets and the
+counts.
+
+The defects preserved from the source are marked **preserved** where they
+live, and the five fixed are listed in `docs/PHASE_7_MIGRATION.md`,
+"Workflow 10". Nothing here writes a workbook.
