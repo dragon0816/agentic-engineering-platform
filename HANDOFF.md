@@ -1,7 +1,7 @@
 # Handoff — Phase 7, workflow 7 needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `phase-7/bundle-path-limit`, slice 3d committed and in review.
+Branch: `main`, after PR #74 (slice 3d) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
