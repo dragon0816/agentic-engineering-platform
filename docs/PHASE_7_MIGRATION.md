@@ -539,3 +539,91 @@ crash, and record every preserved defect**.
 - The evidence is the plan and the applied record, as for workflow 11: the
   digests of the `temp` sheet before and after, the backup's path, every
   count, and every row that was dropped with the reason it was dropped.
+
+
+## Workflow 11, second source: GitHub in place of Jira
+
+Reported by the owner on 2026-09-23: Jira is switched off, and the project
+information now lives in a GitHub Projects board. Read on the same day with
+the owner's authorization, read-only.
+
+### What is there
+
+`dragon0816/rs-sde-projects`, a private user project (number 1) over the
+private repository of the same name. 64 items, 63 issues.
+
+Every issue was **rebuilt from the weekly report workbook**. Each body records
+where it came from, and the title keeps the original Jira key:
+
+```text
+[GTM-833] [Customer] WNC CMP180 SCPI integration
+
+## Source
+- Rebuilt from: `...\SDE_Weekly_Report.xlsx`
+- Week sheet: `2026_38W`
+- Original key: `GTM-833`
+
+## Fields
+- Company: WNC
+- Status: In Progress
+...
+## Weekly report comments
+9/18:
+[In-progress]
+- Add trace data of flatness in demo code
+```
+
+That the Jira key survives in the title matters more than it looks: the
+workbook's existing rows are keyed by it, so the report can still find the
+row it wrote last week.
+
+The board's fields carry the report's columns directly: `Company`,
+`GTM Status`, `SDE Assignee`, `Sales`, `Status` (Todo, In Progress, Ready for
+Launch, Pending, Done), `Week` (`2026_38W` on every item today), `Task type`,
+`Production`, `GTM Create date`, and the built-in `Assignees`, `Labels`,
+`Repository`, `Updated`.
+
+The week's narrative is in two places. What was migrated out of the workbook
+sits in each issue's body under "Weekly report comments", with its original
+`M/D:` day headers. What happens from now on arrives as an issue comment, in
+the same marker form. Four of the 63 issues had a comment when this was read.
+
+### What the port already handles
+
+A real comment, fed to the rules ported in slice 3a, reads correctly:
+
+```text
+[Completed]
+1. Add trace data of flatness in demo code
+2. Sub channel check method
+```
+
+becomes one `Completed` block of two lines, with the numbering stripped. Of
+the thirteen marker spellings the board actually uses, eleven are already
+recognised, including `Ongoing`, `Complete Task`, `In-completed Tasks` and
+`Next step`. Two are not: `In complete`, once, a misspelling of
+`In-Completed`; and `Customer's feadback`, once, which is not a marker at
+all. So the rules carry over; it is the source that changes.
+
+### Owner decisions, 2026-09-23
+
+1. **The workbook stays the deliverable.** GitHub replaces Jira as the source
+   and nothing else moves: the plan, the write, the matching against existing
+   rows and the retiring of last week's marks are all unchanged.
+2. **The week is chosen by time, as it was.** The default window is the one
+   the week already implies, and an explicit range can be configured for the
+   occasions that need one. The board's `Week` field is not the selector.
+3. **The board's fields are authoritative** for Company, Status, Assignee and
+   Sales. The block in the issue body is a snapshot of the rebuild and is not
+   read.
+
+### Disposition
+
+| Part | Decision |
+|---|---|
+| `integrations.jira`, the Jira client and `jira.search` | **REPLACE.** Jira is switched off, so there is nothing to keep working. The client and its capability go when the GitHub one can do what the plan needs |
+| The report's own contracts, named `JiraIssue` and `JiraComment` | **RENAME.** A contract named after a vendor is the leak the architecture guard names, and it would now name the wrong vendor. The shape is unchanged |
+| `ReportingWindow.jql` | **REPLACE** with the query the new source needs, and with the explicit range the owner asked for |
+| The rules, the plan, the writer, the workbook | **UNCHANGED.** This is why the source was ported as pure rules over typed inputs |
+| The board's `Week` field | **NOT READ**, by decision 2. Recorded here because it exists and somebody will ask |
+| Two unrecognised marker spellings | **ADD** `In complete` as a synonym of `In-Completed`. `Customer's feadback` is not a marker and gets none |

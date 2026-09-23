@@ -1352,3 +1352,39 @@ it kept, and refuses rather than overwrites a `host.json` it cannot read. The
 Windows job in CI installs over a configured host and checks that the
 integrations, the credential mapping and the device identity all come through
 the second install, because this is a path no unit test reaches.
+
+
+## Slice 5 — workflow 11 reads GitHub instead of Jira
+
+Jira is switched off (`docs/PHASE_7_MIGRATION.md`, "Workflow 11, second
+source"). The workbook stays the deliverable and the rules, the plan and the
+writer do not change; what changes is where the week's issues and comments
+come from.
+
+1. `integrations.github_project` reads a GitHub Projects board and the issues
+   behind it: the board's field values for each item, and each issue's
+   comments. It speaks the platform's own transport, as the Jira client did,
+   and resolves its token per call from a `SecretRef`.
+2. The report's contracts lose their vendor's name: `JiraIssue` and
+   `JiraComment` become `ReportItem` and `ReportComment`, unchanged in shape.
+   A contract named after a vendor is what the architecture guard warns
+   about, and it would now name the wrong one.
+3. `ReportingWindow` carries the window the week implies, as it does today,
+   and an explicit range that overrides it for the occasions that need one.
+   `jql` goes; what replaces it is the board and repository the items are
+   read from.
+4. The capability `jira.search` becomes `github.search-project`, returning
+   the same `ReportItem`s the planning step already consumes. Nothing after
+   that step knows where a row came from.
+5. `In complete` joins the synonyms of `In-Completed`.
+
+Tests precede implementation: the board's real shape as a recorded reply,
+including an item whose issue the token cannot see; the two places the
+narrative lives, body and comments; the marker spellings the board actually
+uses; the default window and an explicit one; a token that may read the board
+but not the issues, which is a refusal and not an empty week.
+
+**What the host needs.** One token that can read both the project and the
+private repository's issues. The two are separate permissions, and a token
+with only one of them reads half the report: the fields without the
+narrative, or the narrative without the fields.
