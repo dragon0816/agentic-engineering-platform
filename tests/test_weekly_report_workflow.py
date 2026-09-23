@@ -469,6 +469,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     config, layout, workbook = host(tmp_path)
+    monkeypatch.setenv("AEP_GITHUB_TOKEN", "a value nobody prints")
     checks = {c.name: c for c in host_report(config, layout).checks}
     assert checks["integrations"].status == "passed"
     assert "project an-owner/1" in checks["integrations"].detail
@@ -593,10 +594,32 @@ def test_a_workbook_that_cannot_be_written_names_its_own_refusal(tmp_path: Path)
     assert writer.calls == []
 
 
-def test_a_host_without_excel_previews_but_says_it_cannot_write(tmp_path: Path) -> None:
+def test_a_host_without_excel_previews_but_says_it_cannot_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     config, layout, _ = host(tmp_path)
+    monkeypatch.setenv("AEP_GITHUB_TOKEN", "a value nobody prints")
     detail = {c.name: c for c in host_report(config, layout).checks}["integrations"].detail
     # This machine has no pywin32, so the doctor says so without failing: a
     # host may be given the dry run alone.
     assert "weekly report on" in detail
     assert ("can write it" in detail) or ("preview only" in detail)
+
+
+def test_the_doctor_says_when_the_token_variable_is_not_set(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The one thing between a host that looks configured and a run that
+    fails at the first fetch. `setx` on Windows sets a variable for the next
+    process and not this one, so a host passes its own doctor and then
+    cannot fetch anything."""
+    config, layout, _ = host(tmp_path)
+    monkeypatch.delenv("AEP_GITHUB_TOKEN", raising=False)
+    check = {c.name: c for c in host_report(config, layout).checks}["integrations"]
+    assert check.status == "failed"
+    assert "AEP_GITHUB_TOKEN is not set" in check.detail, "which variable, by name"
+
+    monkeypatch.setenv("AEP_GITHUB_TOKEN", "a value nobody prints")
+    passed = {c.name: c for c in host_report(config, layout).checks}["integrations"]
+    assert passed.status == "passed"
+    assert "a value nobody prints" not in passed.detail, "knowing it is set is not reading it"
