@@ -269,16 +269,40 @@ def test_a_throttle_that_asks_for_an_hour_is_bounded() -> None:
     assert waited == [60.0], "one header must not park a run past every timeout above it"
 
 
-def test_a_query_github_refused_is_read_from_the_body_not_the_status() -> None:
-    """GitHub answers a query it partly refused with 200 and an errors block,
-    so a status code is not the whole answer."""
+@pytest.mark.parametrize(
+    "kind, expected",
+    [
+        ("INSUFFICIENT_SCOPES", "github_scope_missing"),
+        ("FORBIDDEN", "github_auth"),
+        ("NOT_FOUND", "github_not_found"),
+        ("RATE_LIMITED", "github_rate_limited"),
+        ("SOMETHING_NEW", "github_bad_reply"),
+    ],
+)
+def test_a_query_github_refused_is_named_from_the_body_not_the_status(
+    kind: str, expected: str
+) -> None:
+    """GitHub answers a query it would not run with 200 and a typed error, so
+    a status code says nothing. Only the code travels to whoever asked, so it
+    has to carry the meaning: "the reply was bad" and "this token has no
+    project access" are the same sentence otherwise, and only one of them
+    tells somebody what to do."""
     transport = ScriptedTransport(
-        [Reply(200, {"data": None, "errors": [{"message": "INSUFFICIENT_SCOPES"}]})]
+        [Reply(200, {"data": None, "errors": [{"type": kind, "message": "GitHub said why"}]})]
+    )
+    with pytest.raises(GitHubError) as refused:
+        client(transport).items()
+    assert refused.value.code == expected
+    assert "GitHub said why" in str(refused.value), "its own words stay in the message"
+
+
+def test_an_error_with_no_type_is_still_an_answer() -> None:
+    transport = ScriptedTransport(
+        [Reply(200, {"data": None, "errors": [{"message": "something went wrong"}]})]
     )
     with pytest.raises(GitHubError) as refused:
         client(transport).items()
     assert refused.value.code == "github_bad_reply"
-    assert "INSUFFICIENT_SCOPES" in str(refused.value)
 
 
 def test_a_board_that_is_not_there_says_which_number() -> None:
