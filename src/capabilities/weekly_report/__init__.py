@@ -1,4 +1,4 @@
-"""Workflow 11: the GTM weekly report, from Jira into the team's workbook.
+"""Workflow 11: the GTM weekly report, into the team's workbook.
 
 Ported from the pinned `rs_workflow_system` job `jira_weekly_report` and its
 pure rules module (`docs/PHASE_7_MIGRATION.md`, "Workflow 11"). The rules

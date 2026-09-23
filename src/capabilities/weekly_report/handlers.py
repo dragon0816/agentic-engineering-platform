@@ -1,10 +1,10 @@
 """The four read capabilities that take the weekly report up to its plan.
 
 Each has a spec, a closed input and output, and a handler the host builds
-from its configuration. None writes anything: the fetch reads Jira, the
+from its configuration. None writes anything: the fetch reads the board, the
 sheet step reads the workbook's bytes, and the other two compute. A failure
 is raised, which the Bridge executor turns into a failed step and the run
-into a failed run — there is no false success — and a Jira outage is a
+into a failed run — there is no false success — and a source outage is a
 `TransientCapabilityError`, which is the one kind a read step may retry.
 """
 
