@@ -667,3 +667,50 @@ def test_a_host_without_a_namespace_will_not_guess_one(
         main(["ask", "--config", str(path), "--namespace", "engineering", f"files.read {target}"])
         == 0
     )
+
+
+def test_a_configuration_that_cannot_be_used_says_which_field(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """An operator edits this file by hand. Refusing without naming the field
+    left them to guess which of a hundred lines to look at, which is what
+    happened on 2026-09-23."""
+    broken = tmp_path / "host.json"
+    broken.write_text(
+        json.dumps(
+            {
+                "schema_version": "1",
+                "device": device(),
+                "workspace_root": str(tmp_path / "workspace"),
+                "integrations": {
+                    "github_project": {"project_number": 1, "credential": {"name": "board"}},
+                    "weekly_report": {"workbook_path": "a-relative-path.xlsx"},
+                },
+                "credentials": [{"secret": "board", "environment_variable": "AEP_GITHUB_TOKEN"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert main(["doctor", "--config", str(broken)]) == 2
+    said = capsys.readouterr().err
+    assert "integrations.github_project.owner" in said, "the missing field is named"
+    assert "absolute path" in said, "and so is the rule the other one broke"
+    assert "a-relative-path.xlsx" not in said, "but never what the file says"
+    assert "No value from it is shown" in said
+
+
+def test_a_configuration_that_is_not_json_says_where(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    broken = tmp_path / "host.json"
+    broken.write_text('{"schema_version": "1",' + chr(10) + '  "device": }', encoding="utf-8")
+    assert main(["doctor", "--config", str(broken)]) == 2
+    said = capsys.readouterr().err
+    assert "line 2" in said, "a position is not a value"
+
+
+def test_a_configuration_that_is_not_there_says_so(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert main(["doctor", "--config", str(tmp_path / "nowhere.json")]) == 2
+    assert "cannot read" in capsys.readouterr().err
