@@ -10,9 +10,9 @@ into a failed run — there is no false success — and a Jira outage is a
 
 import asyncio
 import datetime as _dt
-from collections.abc import Callable
+import re
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any
 
 from pydantic import Field
 
@@ -21,9 +21,9 @@ from capabilities.runtime import CapabilityRefused, TransientCapabilityError
 from capabilities.weekly_report import rules
 from capabilities.weekly_report.apply import apply_plan
 from capabilities.weekly_report.contracts import (
-    JiraComment,
-    JiraIssue,
+    ReportComment,
     ReportingWindow,
+    ReportItem,
     SheetState,
     WeeklyReportApplied,
     WeeklyReportPlan,
@@ -31,12 +31,12 @@ from capabilities.weekly_report.contracts import (
     WeeklyReportSettings,
 )
 from capabilities.weekly_report.plan import build_plan, resolve_window
-from common.base import Contract, Text
+from common.base import Contract, Symbol, Text
 from common.execution import RequestContext
 from integrations import excel
 from integrations.excel import digest_rows
 from integrations.excel_writer import WorkbookWriteError, WorkbookWriter
-from integrations.jira import JiraClient, JiraError
+from integrations.github_project import GitHubError, GitHubProjectClient, ProjectItem
 
 RESOLVE_WINDOW_SPEC = CapabilitySpec.model_validate(
     {
@@ -53,15 +53,15 @@ RESOLVE_WINDOW_SPEC = CapabilitySpec.model_validate(
     }
 )
 
-JIRA_SEARCH_SPEC = CapabilitySpec.model_validate(
+PROJECT_SEARCH_SPEC = CapabilitySpec.model_validate(
     {
-        "identity": {"namespace": "jira", "name": "search", "version": "1.0.0"},
-        "name": "jira.search",
-        "description": "Search Jira issues by JQL with their comment threads, under a cap",
-        "input_contract": "jira.search.input.v1",
-        "output_contract": "jira.search.output.v1",
+        "identity": {"namespace": "github", "name": "search-project", "version": "1.0.0"},
+        "name": "github.search_project",
+        "description": "Read the week's items and their comment threads from a project board",
+        "input_contract": "github.search-project.input.v1",
+        "output_contract": "github.search-project.output.v1",
         "side_effect": "read",
-        "policy": {"required_permissions": ["jira.read"], "policy_refs": ["jira-read-policy"]},
+        "policy": {"required_permissions": ["github.read"], "policy_refs": ["github-read-policy"]},
     }
 )
 
@@ -116,85 +116,117 @@ class ResolveWindowHandler:
         )
 
 
-class JiraSearchInput(Contract):
-    jql: Text
+#: A key the workbook already uses, carried in the item's title by the
+#: rebuild: `[GTM-833] ...`. It is what matches a row this report wrote in an
+#: earlier week, so it wins over anything this platform could invent.
+CARRIED_KEY = re.compile(r"^\s*\[([A-Za-z][A-Za-z0-9_]*-\d+)\]\s*")
+
+
+class ProjectSearchInput(Contract):
+    """The window the week implies, or the one a run asked for."""
+
+    since: _dt.date
+    until: _dt.date
     max_issues: int | None = Field(default=None, ge=1, strict=True)
 
 
-class JiraSearchOutput(Contract):
-    jql: Text
-    issues: tuple[JiraIssue, ...] = ()
+class ProjectSearchOutput(Contract):
+    items: tuple[ReportItem, ...] = ()
     # Whether the cap cut the result short: the report then says so rather
     # than passing a partial week off as the whole one.
     capped: bool = False
+    # Items whose comment thread was longer than one page. Named rather than
+    # counted, because a truncated thread is a week reported wrong.
+    truncated: tuple[Symbol, ...] = ()
 
 
-class JiraSearchHandler:
-    """The source's `fetch_week_issues` and `hydrate_comments`: the search
-    with the report's fields, then a comment thread re-fetched for every
-    issue the search truncated."""
+class ProjectSearchHandler:
+    """The week's items, read from the board that replaced Jira.
 
-    def __init__(self, client: JiraClient) -> None:
+    The board is read whole and the week is selected here, because a project
+    board has no query language to push a window into. That is cheap at this
+    size and honest at any: the alternative is a filter the board cannot
+    apply and this code pretending it did.
+    """
+
+    def __init__(self, client: GitHubProjectClient, settings: WeeklyReportSettings) -> None:
         self.client = client
+        self.settings = WeeklyReportSettings.model_validate(settings)
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-        item = JiraSearchInput.model_validate(inputs)
+        item = ProjectSearchInput.model_validate(inputs)
         try:
-            raw, capped = await asyncio.to_thread(self._fetch, item.jql, item.max_issues)
-        except JiraError as error:
-            if error.code == "jira_unavailable":
+            rows = await asyncio.to_thread(self.client.items)
+        except GitHubError as error:
+            if error.code == "github_unavailable":
                 raise TransientCapabilityError(error.code) from None
-            raise
-        issues = tuple(_normalize(issue, self.client) for issue in raw)
-        return JiraSearchOutput(jql=item.jql, issues=issues, capped=capped)
-
-    def _fetch(self, jql: str, max_issues: int | None) -> tuple[list[dict[str, Any]], bool]:
-        # One past the cap, so a week of exactly the cap's size is not
-        # reported as cut short.
-        asked = max_issues + 1 if max_issues is not None else None
-        fetched = self.client.search_issues(jql, rules.REPORT_FIELDS, max_issues=asked)
-        capped = max_issues is not None and len(fetched) > max_issues
-        issues = fetched[:max_issues] if max_issues is not None else fetched
-        for issue in issues:
-            fields = issue.setdefault("fields", {})
-            block = fields.get("comment") or {}
-            got = list(block.get("comments") or [])
-            total = block.get("total")
-            if total is None or len(got) >= int(total):
-                fields["comment"] = {"comments": got, "total": total or len(got)}
-                continue
-            # The search endpoint truncates embedded comments (the live site
-            # returns one), so the thread is fetched on its own.
-            full = self.client.comments(str(issue.get("key")))
-            fields["comment"] = {"comments": full, "total": len(full)}
-        return issues, capped
-
-
-def _normalize(issue: dict[str, Any], client: JiraClient) -> JiraIssue:
-    fields = issue.get("fields") or {}
-    thread = (fields.get("comment") or {}).get("comments") or []
-    comments = tuple(
-        JiraComment(
-            created=str(item.get("created") or item.get("updated") or "") or None,
-            body=rules.comment_body_text(item.get("body")),
+            raise CapabilityRefused(error.code) from None
+        chosen = [row for row in rows if _within(row.updated, item.since, item.until)]
+        capped = item.max_issues is not None and len(chosen) > item.max_issues
+        if item.max_issues is not None:
+            chosen = chosen[: item.max_issues]
+        found = tuple(_as_item(row, self.settings) for row in chosen)
+        truncated = tuple(
+            reported.key
+            for reported, row in zip(found, chosen, strict=True)
+            if row.comments_truncated
         )
-        for item in thread
-        if isinstance(item, dict)
-    )
-    # The one mapping of Jira fields to the sheet's columns, the rules' own.
-    row = rules.issue_to_row(issue)
-    key = row["Key"]
-    return JiraIssue(
+        return ProjectSearchOutput(items=found, capped=capped, truncated=truncated)
+
+
+def _within(stamp: str, since: _dt.date, until: _dt.date) -> bool:
+    """Whether an item moved inside the week. An item with no timestamp is
+    included: the board answered without one, and dropping a row because a
+    field was empty is how a week goes quietly missing."""
+    moment = rules.parse_jira_datetime(stamp) if stamp else None
+    if moment is None:
+        return True
+    day = moment.date()
+    return since <= day <= until
+
+
+def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
+    """One board row as the report reads it.
+
+    The board's fields are authoritative for the columns people maintain
+    there, by the owner's decision of 2026-09-23; which field feeds which
+    column is configuration, because a board's columns are renamed by the
+    people who use it and that is not a code change.
+    """
+    fields = dict(row.fields)
+    title = fields.get("Title") or row.title
+    carried = CARRIED_KEY.match(title)
+    if carried:
+        key = carried.group(1)
+        summary = title[carried.end() :].strip()
+    else:
+        # Work that started on the board and never had a key of its own.
+        number = row.key.rsplit("#", 1)[-1] if "#" in row.key else ""
+        key = f"{settings.board_key_prefix}-{number}" if number else settings.board_key_prefix
+        summary = title.strip()
+    return ReportItem(
         key=key,
-        summary=row["Summary"],
-        status=row["Status"],
-        assignee=row["Assignee"],
-        company=row["Company"],
-        sales=row["Sales"],
-        updated=str(fields.get("updated")) if fields.get("updated") else None,
-        comments=comments,
-        browse_url=client.browse_url(key),
+        summary=summary,
+        status=_field(fields, settings.status_fields),
+        assignee=_field(fields, settings.assignee_fields),
+        company=_field(fields, settings.company_fields),
+        sales=_field(fields, settings.sales_fields),
+        updated=row.updated or None,
+        comments=tuple(
+            ReportComment(created=comment.created or None, body=comment.body)
+            for comment in row.comments
+        ),
+        browse_url=row.url or None,
     )
+
+
+def _field(fields: dict[str, str], names: Sequence[str]) -> str:
+    """The first of these columns the board actually has a value in."""
+    for name in names:
+        value = fields.get(name)
+        if value:
+            return value
+    return ""
 
 
 class ReadScratchSheetInput(Contract):
@@ -285,8 +317,9 @@ APPLY_SPEC = CapabilitySpec.model_validate(
 
 class PlanInput(Contract):
     window: ReportingWindow
-    issues: tuple[JiraIssue, ...] = ()
+    issues: tuple[ReportItem, ...] = ()
     capped: bool = False
+    truncated_threads: tuple[Symbol, ...] = ()
     sheet: SheetState
 
 
@@ -296,7 +329,14 @@ class PlanHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         item = PlanInput.model_validate(inputs)
-        return build_plan(self.settings, item.window, item.issues, item.sheet, capped=item.capped)
+        return build_plan(
+            self.settings,
+            item.window,
+            item.issues,
+            item.sheet,
+            capped=item.capped,
+            truncated_threads=item.truncated_threads,
+        )
 
 
 class ApplyInput(Contract):

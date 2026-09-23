@@ -1914,3 +1914,30 @@ counts.
 The defects preserved from the source are marked **preserved** where they
 live, and the five fixed are listed in `docs/PHASE_7_MIGRATION.md`,
 "Workflow 10". Nothing here writes a workbook.
+
+
+## Workflow 11's second source: the GitHub Projects client (Phase 7, slice 5)
+
+`integrations.github_project` reads the board that replaced Jira.
+`GitHubProjectConnection` says which board and which secret opens it, never
+the secret itself: the owner, whether it is a user's board or an
+organization's, the project number, the API address, the page sizes and the
+timeout. `GitHubProjectClient` resolves the secret through the host's
+`CredentialResolver` on every call, holds it nowhere, follows the board's
+pages, and honours a throttle up to a minute before giving up on it.
+
+`ProjectItem` is one row of the board: the board's own identifier, the issue
+key as `owner/repo#number`, the title, the URL, the state, when it was last
+updated, the field values by name, the comment thread, and whether that
+thread was longer than the client asked for. `ProjectComment` is when a
+comment was written, by whom, and its body.
+
+`GitHubError` codes are `github_credential`, `github_auth`, `github_http`,
+`github_unavailable`, `github_bad_reply`, `github_project_missing` and
+`github_issue_unreadable`. The last is this source's own trap: reading the
+board and reading the issues on it are two different permissions, and GitHub
+answers a token that holds only the first by omitting the content rather than
+refusing. Every row would then arrive with no title and no comments, which
+reads exactly like a week in which nobody wrote anything, so it is a refusal
+here. A query GitHub partly refused comes back as `200` with an `errors`
+block, so the body decides and not the status.

@@ -5,9 +5,9 @@ configuration before the shared-platform enrollment transport exists. It install
 a resident Agent that runs the Skills and Workflows you place in its workspace.
 
 It ships the capabilities the GTM weekly report needs — a bounded read of a file
-inside the workspace, a Jira search, a workbook reader and the workbook writer —
+inside the workspace, a project board reader, a workbook reader and the workbook writer —
 and the Skill and Workflow that run them. None of that does anything until you
-configure a Jira site and a workbook under `integrations`; `aep-host doctor`
+configure a project board and a workbook under `integrations`; `aep-host doctor`
 says whether you have. It contains no Git, browser, email, DUT or instrument
 adapter, so it cannot run workflow 13.
 
@@ -192,19 +192,23 @@ platform.
 
 ## Weekly report preview (optional)
 
-The GTM weekly report's first half runs here: the week's Jira issues planned
+The GTM weekly report's first half runs here: the week's tracked items planned
 against the workbook's scratch sheet, with nothing written. The workbook is
 read without Excel, by a library the bundle already carries, so there is
-nothing to install. Add the Jira site and the report's settings to
-`host.json` and map the Jira API token like every other secret:
+nothing to install. Add the project board and the report's settings to
+`host.json` and map the board's token like every other secret. The token
+needs **both** project access and access to the repository the board's issues
+live in: with only the first it reads the board and none of the notes on it,
+which looks exactly like a week in which nobody wrote anything, and the run
+refuses rather than report that.
 
 ```json
 "integrations": {
-  "jira": { "base_url": "https://your-site.atlassian.net", "email": "you@company.com",
-            "credential": { "name": "jira_token" } },
+  "github_project": { "owner": "your-account", "project_number": 1,
+                      "credential": { "name": "board_token" } },
   "weekly_report": { "workbook_path": "C:/Users/you/OneDrive/Report/SDE_Weekly_Report.xlsx" }
 },
-"credentials": [{ "secret": "jira_token", "environment_variable": "AEP_JIRA_TOKEN" }]
+"credentials": [{ "secret": "board_token", "environment_variable": "AEP_GITHUB_TOKEN" }]
 ```
 
 `weekly_report` takes the source job's other settings with the same defaults
@@ -232,8 +236,8 @@ records the approval under.
     "permissions": ["weekly-report.plan"], "policy_refs": ["weekly-report-policy"],
     "approval_ref": "CHANGE-1234" },
   { "actor": "employee.id",
-    "asset": { "namespace": "jira", "name": "search", "version": "1.0.0" },
-    "permissions": ["jira.read"], "policy_refs": ["jira-read-policy"],
+    "asset": { "namespace": "github", "name": "search-project", "version": "1.0.0" },
+    "permissions": ["github.read"], "policy_refs": ["github-read-policy"],
     "approval_ref": "CHANGE-1234" },
   { "actor": "employee.id",
     "asset": { "namespace": "excel", "name": "read-scratch-sheet", "version": "1.0.0" },
@@ -255,7 +259,7 @@ aep-host ask --config host.json "weekly.preview 2026_31W"
 ```
 
 A run that fails says how many steps finished, which is where it stopped:
-none means the grants, one means Jira, two means the workbook.
+none means the grants, one means the board, two means the workbook.
 
 The answer is the plan: which rows would be upserted, which comment blocks
 would be prepended in red, what was skipped and why, and a digest of the

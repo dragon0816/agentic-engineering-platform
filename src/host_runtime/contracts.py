@@ -10,7 +10,7 @@ from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
-from integrations.jira import JiraConnection
+from integrations.github_project import GitHubProjectConnection
 from workflow.host_bridge import BridgeRegistration
 
 # The name of an environment variable, which is not a credential and cannot
@@ -80,7 +80,7 @@ class HostIntegrations(Contract):
     none of it secret: a Jira site whose token is a `SecretRef`, and the
     weekly report's workbook and rules."""
 
-    jira: JiraConnection | None = None
+    github_project: GitHubProjectConnection | None = None
     weekly_report: WeeklyReportSettings | None = None
 
 

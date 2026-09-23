@@ -11,9 +11,9 @@ from collections.abc import Sequence
 from capabilities.weekly_report import rules
 from capabilities.weekly_report.contracts import (
     CommentOperation,
-    JiraIssue,
     Remark,
     ReportingWindow,
+    ReportItem,
     SheetState,
     SkippedComment,
     WeeklyReportPlan,
@@ -66,7 +66,6 @@ def resolve_window(
         until=end,
         comment_since=comment_since,
         stamp_date=stamp,
-        jql=rules.compose_jql(settings.base_jql(), rules.jql_updated_clause(start, end)),
         max_issues=cap,
     )
 
@@ -74,10 +73,11 @@ def resolve_window(
 def build_plan(
     settings: WeeklyReportSettings,
     window: ReportingWindow,
-    issues: Sequence[JiraIssue],
+    issues: Sequence[ReportItem],
     sheet: SheetState,
     *,
     capped: bool = False,
+    truncated_threads: Sequence[str] = (),
 ) -> WeeklyReportPlan:
     """Every row and cell operation, decided from the issues and the sheet.
 
@@ -115,6 +115,7 @@ def build_plan(
                 status=issue.status,
                 assignee=issue.assignee or rules.UNASSIGNED,
                 sales=issue.sales,
+                url=issue.browse_url or "",
             )
         )
         if not text:
@@ -166,6 +167,7 @@ def build_plan(
         highlight_keys=tuple(tinted),
         issue_keys=tuple(sorted({issue.key for issue in issues})),
         capped=capped,
+        truncated_threads=tuple(truncated_threads),
         sheet_digest=sheet.digest,
         scratch_present=sheet.scratch_present,
         seed_sheet=sheet.seed_sheet,
@@ -176,7 +178,7 @@ def build_plan(
     return plan.model_copy(update={"preview": render_preview(settings, plan, sheet)})
 
 
-def _browse_base(issues: Sequence[JiraIssue]) -> str | None:
+def _browse_base(issues: Sequence[ReportItem]) -> str | None:
     """The Jira site the key cells will link to, taken from the issues
     themselves so the plan is the whole instruction and a writer needs no
     Jira configuration of its own."""

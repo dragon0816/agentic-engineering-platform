@@ -56,9 +56,10 @@ def _plan_steps() -> list[dict[str, object]]:
             "inputs": {"request": {"source": "run"}},
         },
         {
-            "capability": {"namespace": "jira", "name": "search", "version": "1.0.0"},
+            "capability": {"namespace": "github", "name": "search-project", "version": "1.0.0"},
             "inputs": {
-                "jql": {"source": "step", "step_index": 0, "path": ["jql"]},
+                "since": {"source": "step", "step_index": 0, "path": ["since"]},
+                "until": {"source": "step", "step_index": 0, "path": ["until"]},
                 "max_issues": {"source": "step", "step_index": 0, "path": ["max_issues"]},
             },
         },
@@ -70,8 +71,13 @@ def _plan_steps() -> list[dict[str, object]]:
             "capability": {"namespace": "weekly-report", "name": "plan", "version": "1.0.0"},
             "inputs": {
                 "window": {"source": "step", "step_index": 0},
-                "issues": {"source": "step", "step_index": 1, "path": ["issues"]},
+                "issues": {"source": "step", "step_index": 1, "path": ["items"]},
                 "capped": {"source": "step", "step_index": 1, "path": ["capped"]},
+                "truncated_threads": {
+                    "source": "step",
+                    "step_index": 1,
+                    "path": ["truncated"],
+                },
                 "sheet": {"source": "step", "step_index": 2},
             },
         },
@@ -80,7 +86,7 @@ def _plan_steps() -> list[dict[str, object]]:
 
 _PLAN_CAPABILITIES = [
     "weekly_report.resolve_window",
-    "jira.search",
+    "github.search_project",
     "excel.read_scratch_sheet",
     "weekly_report.plan",
 ]
