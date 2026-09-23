@@ -1,7 +1,7 @@
 # Handoff — Phase 7, workflow 7 needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #74 (slice 3d) merged with its review applied.
+Branch: `phase-7/weekly-report-grants`, slice 3e committed and in review.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -54,12 +54,20 @@ only through a recording writer — the same caveat the model adapters carry
    `host.json` (`deploy/windows-preview/README.md` has the shape), with
    `workbook_path` pointing at **a copy** of `SDE_Weekly_Report.xlsx`, and
    map the Jira token to an environment variable.
-3. `aep-host doctor --config host.json` — the `integrations` check should say
-   the site, the secret, the library and the workbook are all in place, and
-   whether it can write.
-4. `aep-host ask --config host.json "weekly.preview 2026_31W"`, read the
-   plan, then `weekly.apply 2026_31W` against the copy.
-5. Run the old Host Bridge's `jobs.jira_weekly_report` for the same week
+3. Write `workspace\membership.json` naming you as this device's bound
+   member, and `workspace\grants.json` with all five grants exactly as
+   `deploy/windows-preview/README.md` shows them. **Every grant needs an
+   `approval_ref`, the four reads included**, or the run stops at the first
+   step with `permission_denied`. Then `aep-host export-assets --out
+   workspace\assets`.
+4. `aep-host doctor --config host.json` — `host status` should be `ready` and
+   the `integrations` check should say the site, the secret, the library and
+   the workbook are all in place, and whether it can write.
+5. `aep-host ask --config host.json "weekly.preview 2026_31W"`, read the
+   plan, then `weekly.apply 2026_31W` against the copy. A failed run reports
+   how many steps finished, which is where it stopped: none is the grants,
+   one is Jira, two is the workbook.
+6. Run the old Host Bridge's `jobs.jira_weekly_report` for the same week
    against a second copy and compare against the parity gate in
    `docs/phases/PHASE_7_MIGRATION.md`, "Workflow 7": the same Jira key set,
    only `weekly report temp` created or changed, rows upserted by key, a new
@@ -110,7 +118,7 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 923 passed, 4 skipped, everything else clean. Three skips
+At this commit: 930 passed, 4 skipped, everything else clean. Three skips
 need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
 CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
 3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`

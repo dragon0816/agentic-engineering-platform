@@ -195,14 +195,52 @@ nothing to install. Add the Jira site and the report's settings to
 `weekly_report` takes the source job's other settings with the same defaults
 (`temp_sheet`, `week_style`, `jql`, `max_issues`, `markers`, the colours);
 `aep-host doctor` reports whether the site, the secret, the library and the
-workbook are all in place without contacting anything. Then write the shipped
-manifests into the workspace and grant the four read capabilities in
-`grants.json` (or choose them on the shared platform and `sync`):
+workbook are all in place without contacting anything.
+
+Then write the shipped manifests into the workspace:
 
 ```powershell
 aep-host export-assets --out workspace\assets
+```
+
+and grant the capabilities in `workspace\grants.json` (or choose them on the
+shared platform and `sync`). **Every one of them declares that it needs an
+approval, the reads included, so every grant carries an `approval_ref`.** A
+grant without one is not a weaker grant; it is no grant, and the run stops
+with `permission_denied` at the first step. Use whatever reference your team
+records the approval under.
+
+```json
+[
+  { "actor": "employee.id",
+    "asset": { "namespace": "weekly-report", "name": "resolve-window", "version": "1.0.0" },
+    "permissions": ["weekly-report.plan"], "policy_refs": ["weekly-report-policy"],
+    "approval_ref": "CHANGE-1234" },
+  { "actor": "employee.id",
+    "asset": { "namespace": "jira", "name": "search", "version": "1.0.0" },
+    "permissions": ["jira.read"], "policy_refs": ["jira-read-policy"],
+    "approval_ref": "CHANGE-1234" },
+  { "actor": "employee.id",
+    "asset": { "namespace": "excel", "name": "read-scratch-sheet", "version": "1.0.0" },
+    "permissions": ["excel.read"], "policy_refs": ["excel-read-policy"],
+    "approval_ref": "CHANGE-1234" },
+  { "actor": "employee.id",
+    "asset": { "namespace": "weekly-report", "name": "plan", "version": "1.0.0" },
+    "permissions": ["weekly-report.plan"], "policy_refs": ["weekly-report-policy"],
+    "approval_ref": "CHANGE-1234" }
+]
+```
+
+The four above are the preview. Writing needs a fifth, in the next section.
+`membership.json` has to name you as well, or this Bridge admits nobody and
+`doctor` says the resident Agent is pending. Then:
+
+```powershell
 aep-host ask --config host.json "weekly.preview 2026_31W"
 ```
+
+A run that fails says how many steps finished, which is where it stopped:
+none means the grants, one means Jira, two means the workbook.
 
 The answer is the plan: which rows would be upserted, which comment blocks
 would be prepended in red, what was skipped and why, and a digest of the
@@ -220,10 +258,19 @@ to install:
 aep-host ask --config host.json "weekly.apply 2026_31W"
 ```
 
-Writing is a side effect, so the capability requires an approval: the grant
-for `weekly-report/apply` must carry an `approval_ref` (or the member's
-decision on the shared platform must). Without one the plan is still made and
-the write is refused.
+Writing is the one side effect here, so `weekly-report/apply` is granted
+separately from the four reads. It needs `excel.write` and its own policy
+reference, and an `approval_ref` like every other grant:
+
+```json
+{ "actor": "employee.id",
+  "asset": { "namespace": "weekly-report", "name": "apply", "version": "1.0.0" },
+  "permissions": ["excel.write"], "policy_refs": ["weekly-report-write-policy"],
+  "approval_ref": "CHANGE-1234" }
+```
+
+Without it the plan is still made and only the write is refused, so
+`weekly preview` keeps working on a host that may not write.
 
 Before it writes, it backs the workbook up, copies it somewhere your sync
 client is not watching, and **checks the scratch sheet is still the one the

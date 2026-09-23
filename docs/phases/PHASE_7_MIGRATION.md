@@ -1136,3 +1136,38 @@ Verified by building the bundle with the new names, extracting it, installing
 it end to end (doctor reports the same nine checks) and running the installer
 from a deliberately deep folder, where it refuses with the path length and
 the remedy instead of a missing file.
+
+
+## Slice 3e — the grants the weekly report actually needs
+
+The owner installed the bundle and asked what to do next. Following the
+preview's own README produced
+
+```text
+run run-...: failed, 0 step(s) completed
+failure: permission_denied
+```
+
+before Jira was ever reached. The page said that the grant for
+`weekly-report/apply` must carry an `approval_ref`, which read as "only the
+write needs one". Every one of the five capabilities declares
+`approval_required`, the four reads included, so a grant without a reference
+is not a weaker grant: it is no grant, and `LocalPolicy` returns an empty
+authorization that names nothing. An operator sees a refusal with no cause.
+
+1. The README writes out `grants.json` in full, all five, each with its own
+   permissions, policy reference and an approval reference, and says plainly
+   that the reads need one too. It also says that `membership.json` must name
+   the operator, and that the number of completed steps in a failed run is
+   where it stopped.
+2. `test_weekly_report_documented_grants` parses the README's own JSON and
+   puts it through the real `LocalPolicy` against the five shipped
+   specifications: every capability has a documented grant, every documented
+   grant is accepted, and dropping the approval reference refuses all five.
+   The page and the policy now fail together or not at all.
+
+Verified by building the whole workspace an operator would write — host
+configuration, membership, grants, exported assets and a workbook — and
+running it: `doctor` reports `host status: ready` with every check passed,
+and `weekly.preview` routes to the installed Workflow and reaches the Jira
+step, which is as far as a machine with no Jira credential can go.
