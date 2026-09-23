@@ -27,6 +27,7 @@ write. Staging removes the watcher, not the saves.
 
 import os
 import shutil
+import sys
 import time
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -287,10 +288,13 @@ def progid_is_registered(prog_id: str) -> bool:
     answer to a question about something else entirely. That is what happened
     on 2026-09-24.
     """
-    try:
-        import winreg
-    except ImportError:  # pragma: no cover - not Windows
+    if sys.platform != "win32":
+        # No registry, and no Excel either, so the answer is the same. The
+        # platform test is also what lets a type checker read the import
+        # below, which is Windows-only in the standard library.
         return False
+    import winreg
+
     try:
         with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, prog_id + r"\CLSID"):
             return True
