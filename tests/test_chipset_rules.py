@@ -17,12 +17,21 @@ it is said out loud.
 from __future__ import annotations
 
 import datetime as _dt
+from pathlib import Path
 from typing import Any
 
 import pytest
 
 from capabilities.chipset_report import rules as R
-from capabilities.chipset_report.ruleset import ChipsetRuleset, Rules, compile_rules, load_ruleset
+from capabilities.chipset_report.ruleset import (
+    DEFAULT_WATCH_FIELDS,
+    ChipsetRuleset,
+    Rules,
+    RulesetError,
+    compile_rules,
+    load_ruleset,
+    ruleset_from_mapping,
+)
 
 WHEN = _dt.date(2026, 7, 28)
 HEADERS = list(R.FALLBACK_TARGET_HEADERS)
@@ -919,6 +928,7 @@ def test_the_month_name_does_not_follow_the_machines_language(rules: Rules) -> N
     would change language and stop matching what is already in the sheet."""
     import locale
 
+    previous = locale.setlocale(locale.LC_TIME)
     try:
         locale.setlocale(locale.LC_TIME, "German_Germany.1252")
     except locale.Error:  # pragma: no cover - the locale is not installed here
@@ -926,7 +936,7 @@ def test_the_month_name_does_not_follow_the_machines_language(rules: Rules) -> N
     try:
         assert R.format_schedule(_dt.date(2026, 3, 1), rules) == "Mar. 2026"
     finally:
-        locale.setlocale(locale.LC_TIME, "C")
+        locale.setlocale(locale.LC_TIME, previous)
 
 
 def test_a_keyword_written_with_a_space_matches_only_what_it_means(rules: Rules) -> None:
@@ -938,3 +948,82 @@ def test_a_keyword_written_with_a_space_matches_only_what_it_means(rules: Rules)
     assert R.find_technologies("wifi module", rules) == ["wifi"]
     assert R.find_technologies("wi[fi module", rules) == []
     assert R.find_technologies("wi]fi module", rules) == []
+
+
+# ---------------------------------------------------------------------------
+# 13. Reading the ruleset the team already has
+# ---------------------------------------------------------------------------
+
+
+def test_a_key_nobody_reads_is_a_refusal_that_names_it() -> None:
+    """The source reverted a misspelt key to a code default in silence, so a
+    rule somebody believed was in force simply was not."""
+    with pytest.raises(RulesetError) as refused:
+        ruleset_from_mapping({"split": {"noiseTokens": ["tbc"], "noiseTokns": ["tbd"]}})
+    assert refused.value.code == "unknown_key"
+    assert refused.value.where == "split.noiseTokns", "the reader must not have to bisect the file"
+
+
+def test_the_keys_that_file_carries_and_nothing_reads_are_forgiven() -> None:
+    """Its own comments, and the four the source read nowhere."""
+    parsed = ruleset_from_mapping(
+        {
+            "_comment": ["why this file exists"],
+            "version": 3,
+            "split": {"_c": "note", "lineSeparator": chr(10), "noiseTokens": ["tbc"]},
+        }
+    )
+    assert parsed.split.noise_tokens == ("tbc",)
+
+
+def test_an_alias_that_is_not_a_rule_is_refused() -> None:
+    """A stray null among the aliases would stop `MTK7925` becoming
+    `MT7925`, and every row that used to match would arrive as new with
+    nothing anywhere saying why."""
+    with pytest.raises(RulesetError) as refused:
+        ruleset_from_mapping({"chipsetAliases": [{"pattern": "^MTK", "replace": "MT"}, None]})
+    assert refused.value.code == "rule_not_an_object"
+
+
+def test_an_empty_watch_list_still_watches_the_usual_two() -> None:
+    """Saying it with an empty list is not the same as saying nobody edits
+    anything by hand, and a watch that covers nothing is the silence
+    `watched_but_missing` exists to break."""
+    parsed = ruleset_from_mapping({"output": {"watchFields": []}})
+    assert parsed.output.watch_fields == DEFAULT_WATCH_FIELDS
+
+
+def test_a_ruleset_that_will_not_load_says_where(tmp_path: Path) -> None:
+    missing = tmp_path / "nowhere.json"
+    with pytest.raises(RulesetError) as absent:
+        load_ruleset(missing)
+    assert absent.value.code == "ruleset_missing"
+
+    not_json = tmp_path / "broken.json"
+    not_json.write_text("{", encoding="utf-8")
+    with pytest.raises(RulesetError) as unreadable:
+        load_ruleset(not_json)
+    assert unreadable.value.code == "ruleset_unreadable"
+
+    wrong_type = tmp_path / "wrong.json"
+    wrong_type.write_text('{"split": {"dropPlaceholders": "yes please"}}', encoding="utf-8")
+    with pytest.raises(RulesetError) as invalid:
+        load_ruleset(wrong_type)
+    assert invalid.value.code == "ruleset_invalid"
+    assert "drop_placeholders" in invalid.value.where
+
+
+def test_a_ruleset_saved_by_a_windows_editor_still_loads(tmp_path: Path) -> None:
+    """Notepad and Excel write a byte order mark. Refusing it as unreadable
+    would be a puzzle rather than a message."""
+    marked = tmp_path / "bom.json"
+    marked.write_text('{"split": {"noiseTokens": ["tbc"]}}', encoding="utf-8-sig")
+    assert load_ruleset(marked).split.noise_tokens == ("tbc",)
+
+
+def test_a_ruleset_that_is_not_text_this_platform_reads(tmp_path: Path) -> None:
+    other = tmp_path / "cp950.json"
+    other.write_bytes('{"output": {"tracePrefix": "[週報"}}'.encode("cp950"))
+    with pytest.raises(RulesetError) as unreadable:
+        load_ruleset(other)
+    assert unreadable.value.code == "ruleset_unreadable"

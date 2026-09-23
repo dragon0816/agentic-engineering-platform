@@ -1887,7 +1887,12 @@ forgives two kinds of key and nothing else: documentation, which that file
 uses for its reasoning, and the four keys the source read nowhere, which are
 named in `IGNORED`. `RulesetError` codes are `ruleset_missing`,
 `ruleset_unreadable`, `ruleset_not_an_object`, `section_not_an_object`,
-`rules_not_a_list`, `unknown_key`, `ruleset_invalid` and `pattern_invalid`.
+`rules_not_a_list`, `rule_not_an_object`, `unknown_key`, `ruleset_invalid`
+and `pattern_invalid`, and each carries `where`: the key that was not
+understood, never what was in it. A ruleset is hundreds of lines long, and
+bisecting one by hand is the failure that detail exists to prevent. An empty
+watch list means the usual two columns rather than none of them, as the
+source read it.
 `compile_rules` turns a ruleset into `Rules`, which is what every rule takes,
 so no pattern is compiled per cell.
 

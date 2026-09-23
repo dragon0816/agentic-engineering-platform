@@ -25,6 +25,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError, field_validator
+
 from common.base import Contract
 
 #: Keys the source file carries that its own code read nowhere. Ignored by
@@ -41,12 +43,18 @@ DEFAULT_RULESET = Path(__file__).with_name("chipset_map.json")
 
 
 class RulesetError(Exception):
-    """The ruleset could not be read. The code is the whole message: a path
-    or a value could name the team's own data."""
+    """The ruleset could not be read.
 
-    def __init__(self, code: str) -> None:
+    The code says what went wrong and `where` says which key, because the
+    file is hundreds of lines long and bisecting it by hand is the failure
+    this class exists to prevent. No value is ever carried: the names are
+    the team's own vendors, brands and chipsets.
+    """
+
+    def __init__(self, code: str, where: str = "") -> None:
         self.code = code
-        super().__init__(code)
+        self.where = where
+        super().__init__(f"{code} at {where}" if where else code)
 
 
 class SplitRules(Contract):
@@ -138,6 +146,11 @@ class Colours(Contract):
     changed: str = "#FFC7CE"
 
 
+#: What is watched when a ruleset says nothing, or says it with an empty
+#: list. The two columns sales edit by hand.
+DEFAULT_WATCH_FIELDS: tuple[str, ...] = ("Purchased Schedule", "Protential Biz")
+
+
 class OutputRules(Contract):
     vendor_display: str = "every"
     unknown_biz_marker: str = "?"
@@ -147,7 +160,15 @@ class OutputRules(Contract):
     colors: Colours = Colours()
     #: The columns whose change is worth pointing at on a row already
     #: tracked. A statement about how the team works, not about the code.
-    watch_fields: tuple[str, ...] = ("Purchased Schedule", "Protential Biz")
+    #: An empty list means the usual two rather than none of them: the
+    #: source read it that way, and a watch list that silently covers
+    #: nothing is the failure `watched_but_missing` exists to make audible.
+    watch_fields: tuple[str, ...] = DEFAULT_WATCH_FIELDS
+
+    @field_validator("watch_fields")
+    @classmethod
+    def _at_least_the_usual_two(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        return value or DEFAULT_WATCH_FIELDS
 
 
 class ChipsetRuleset(Contract):
@@ -231,13 +252,13 @@ def _documentation(key: str) -> bool:
 
 def _section(name: str, value: Any, keys: Mapping[str, str]) -> dict[str, Any]:
     if not isinstance(value, dict):
-        raise RulesetError("section_not_an_object")
+        raise RulesetError("section_not_an_object", name)
     out: dict[str, Any] = {}
     for key, item in value.items():
         if _documentation(key) or key in IGNORED:
             continue
         if key not in keys:
-            raise RulesetError("unknown_key")
+            raise RulesetError("unknown_key", f"{name}.{key}")
         out[keys[key]] = item
     return out
 
@@ -249,11 +270,15 @@ def _entries(value: Any) -> list[dict[str, Any]]:
     believes is in force."""
     if not isinstance(value, list):
         raise RulesetError("rules_not_a_list")
-    return [
-        {k: v for k, v in item.items() if not _documentation(k)}
-        for item in value
-        if isinstance(item, dict)
-    ]
+    entries: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            # The source skipped these. A stray `null` among the aliases
+            # would stop `MTK7925` becoming `MT7925`, and every row that used
+            # to match would arrive as new, with nothing anywhere saying why.
+            raise RulesetError("rule_not_an_object")
+        entries.append({k: v for k, v in item.items() if not _documentation(k)})
+    return entries
 
 
 def ruleset_from_mapping(data: Mapping[str, Any]) -> ChipsetRuleset:
@@ -268,7 +293,7 @@ def ruleset_from_mapping(data: Mapping[str, Any]) -> ChipsetRuleset:
             fields["chipset_aliases"] = _entries(value)
             continue
         if key not in _TOP_KEYS:
-            raise RulesetError("unknown_key")
+            raise RulesetError("unknown_key", key)
         name, keys = _TOP_KEYS[key]
         section = _section(key, value, keys)
         if key == "vendors" and "prefix_rules" in section:
@@ -282,17 +307,26 @@ def ruleset_from_mapping(data: Mapping[str, Any]) -> ChipsetRuleset:
         fields[name] = section
     try:
         return ChipsetRuleset.model_validate(fields)
-    except Exception:  # noqa: BLE001 - pydantic's own kinds
-        raise RulesetError("ruleset_invalid") from None
+    except ValidationError as invalid:
+        # The field path, never the value: the contract already hides inputs
+        # and these are the team's own vendors and brands.
+        first = invalid.errors()[0]
+        where = ".".join(str(part) for part in first.get("loc", ()))
+        raise RulesetError("ruleset_invalid", where) from None
 
 
 def load_ruleset(path: str | Path | None = None) -> ChipsetRuleset:
     """The ruleset at `path`, or the one this package ships."""
     target = Path(path) if path else DEFAULT_RULESET
     try:
-        text = target.read_text(encoding="utf-8")
+        # `utf-8-sig` because a ruleset edited in Excel or Notepad on a
+        # Windows machine arrives with a byte order mark, and refusing it as
+        # unreadable would be a puzzle rather than a message.
+        text = target.read_text(encoding="utf-8-sig")
     except OSError:
         raise RulesetError("ruleset_missing") from None
+    except UnicodeDecodeError:
+        raise RulesetError("ruleset_unreadable") from None
     try:
         data = json.loads(text)
     except ValueError:
