@@ -364,7 +364,28 @@ def _jobs(runtime: HostRuntime, once: bool, interval: float) -> int:
         return 0
 
 
+def _write_in_utf8() -> None:
+    """Say what happened in UTF-8, whatever code page this console has.
+
+    A Windows console outside the English-speaking world is not UTF-8, and
+    what this prints is the team's own data: a project board's titles and
+    comments. Printing them through a legacy code page raises
+    `UnicodeEncodeError` part way through, which is a crash in place of an
+    answer, and it happens on the machines this platform is for and on none
+    of the machines it is written on.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8")
+        except (OSError, ValueError):  # pragma: no cover - a stream that will not
+            continue
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    _write_in_utf8()
     args = _parser().parse_args(argv)
     if args.command == "version":
         print(_package_version())

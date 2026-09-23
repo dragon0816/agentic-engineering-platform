@@ -731,3 +731,23 @@ def test_a_configuration_that_is_not_there_says_so(
 ) -> None:
     assert main(["doctor", "--config", str(tmp_path / "nowhere.json")]) == 2
     assert "cannot read" in capsys.readouterr().err
+
+
+def test_output_survives_a_console_that_is_not_utf8(
+    tmp_path: Path, capsysbinary: pytest.CaptureFixture[bytes]
+) -> None:
+    """The company machines this platform is for run a legacy code page, and
+    what it prints is the team's own data: a board's titles and comments. A
+    character outside that code page used to raise part way through the
+    answer, which is a crash in place of a result, on exactly the machines
+    none of the development ones resemble.
+    """
+    config, layout = ready(tmp_path)
+    note = layout.workspace_root / "notes.txt"
+    # A narrow no-break space: what a real board's answer carried, and what
+    # cp950 cannot encode.
+    note.write_text("a b", encoding="utf-8")
+    path = host_json(tmp_path, config)
+    assert main(["ask", "--config", str(path), "--json", f"files.read {note}"]) == 0
+    written = capsysbinary.readouterr().out
+    assert " ".encode() in written, "the character reaches the reader as itself"
