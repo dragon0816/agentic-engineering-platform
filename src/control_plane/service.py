@@ -151,11 +151,15 @@ class ControlPlaneService:
             who, device = self._who(token_id, secret, now)
             bundle = self.authorization.authorization(device, issued_at=now)
             present = {asset.key for asset in item.installed}
-            wanted = tuple(
-                selection.asset
+            # One asset once, however many selections name it: a decision
+            # left behind by a member since unbound and a new member's
+            # decision about the same asset install the same bytes.
+            wanted_by_key = {
+                selection.asset.key: selection.asset
                 for selection in bundle.installable()
                 if selection.asset.key not in present
-            )
+            }
+            wanted = tuple(wanted_by_key[key] for key in sorted(wanted_by_key))
             if not wanted:
                 return SyncReply(authorization=bundle)
             try:
@@ -212,17 +216,30 @@ class ControlPlaneService:
         if operation not in OPERATIONS:
             raise ServiceError("unknown_operation")
         named: Operation = operation
+        if named == "probe":
+            return self.probe(token_id, secret)
+        # The body is validated here and only here, so a contract the
+        # service fails to build while answering is its own fault
+        # (`internal_error`, from the transport) and never the Bridge's.
         try:
-            if named == "probe":
-                return self.probe(token_id, secret)
-            if named == "advertise":
-                return self.advertise(token_id, secret, AdvertiseRequest.model_validate(body))
-            if named == "sync":
-                return self.synchronize(token_id, secret, SyncRequest.model_validate(body))
-            if named == "report":
-                return self.report(token_id, secret, ReportRequest.model_validate(body))
-            if named == "poll":
-                return self.poll(token_id, secret, PollRequest.model_validate(body))
-            return self.settle(token_id, secret, SettleRequest.model_validate(body))
+            request: Contract = _REQUESTS[named].model_validate(body)
         except ValidationError:
             raise ServiceError("invalid_request") from None
+        if named == "advertise":
+            return self.advertise(token_id, secret, AdvertiseRequest.model_validate(request))
+        if named == "sync":
+            return self.synchronize(token_id, secret, SyncRequest.model_validate(request))
+        if named == "report":
+            return self.report(token_id, secret, ReportRequest.model_validate(request))
+        if named == "poll":
+            return self.poll(token_id, secret, PollRequest.model_validate(request))
+        return self.settle(token_id, secret, SettleRequest.model_validate(request))
+
+
+_REQUESTS: dict[str, type[Contract]] = {
+    "advertise": AdvertiseRequest,
+    "sync": SyncRequest,
+    "report": ReportRequest,
+    "poll": PollRequest,
+    "settle": SettleRequest,
+}

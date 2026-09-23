@@ -27,6 +27,7 @@ import os
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
+from time import monotonic
 from typing import Literal
 
 from pydantic import Field, StrictBool, ValidationError
@@ -41,6 +42,7 @@ from common.distribution import (
     LocalStateError,
     LocalStateErrorCode,
     RemoteJobRecord,
+    RemoteWorkflowJob,
     verify_installation,
 )
 from common.execution import Failure, TraceIdentifiers
@@ -72,13 +74,20 @@ from models.wire import (
     status_failure,
     transport_failure,
 )
+from workflow.engine import WorkflowRunSnapshot
 from workflow.host_bridge import BridgeRegistration
 
 Reachability = Literal["answered", "unreachable", "withdrawn", "rejected", "refused"]
-# What will not fix itself by asking again, and so ends a loop.
+# What will not fix itself by asking again, and so ends a loop when a poll
+# answers it.
 FINAL: frozenset[str] = frozenset({"withdrawn", "rejected", "refused"})
+# What ends a loop when a settle answers it: the platform no longer knows
+# this Bridge. A settle it declined for one job is that job's business.
+ENDS_LOOP: frozenset[str] = frozenset({"withdrawn", "rejected"})
 # How long `run_jobs` waits after a retryable failure before polling again, at most.
 MAX_BACKOFF_SECONDS = 300.0
+# How often an idle job loop still reports the Bridge's state.
+REPORT_EVERY_SECONDS = 60.0
 
 SyncRefusalCode = (
     LocalStateErrorCode
@@ -87,11 +96,14 @@ SyncRefusalCode = (
 
 
 class SyncRefused(Exception):
-    """This Bridge would not apply what the platform sent. The code is the
-    whole message; nothing was written."""
+    """This Bridge would not apply what the platform sent, or could not
+    finish applying it. `installed` is what had already been recorded when
+    that happened: empty for every refusal before the first write, and the
+    recorded rows when the one write after them, the bundle, failed."""
 
-    def __init__(self, code: SyncRefusalCode) -> None:
+    def __init__(self, code: SyncRefusalCode, installed: tuple[AssetIdentity, ...] = ()) -> None:
         self.code: SyncRefusalCode = code
+        self.installed = installed
         super().__init__(code)
 
 
@@ -108,8 +120,9 @@ class AdvertiseOutcome(Contract):
 
 
 class SyncOutcome(Contract):
-    """What a synchronization did. `installed` is what this call added;
-    `selections` is how many decisions the bundle now carries."""
+    """What a synchronization did. `installed` is what this call recorded,
+    which on a refusal is empty unless the bundle was the one write that
+    failed; `selections` is how many decisions the bundle now carries."""
 
     status: Reachability
     failure: Failure | None = None
@@ -197,10 +210,16 @@ class PlatformClient:
         resolver: CredentialResolver,
         *,
         transport: Transport | None = None,
+        workflow_timeout_seconds: float | None = None,
     ) -> None:
         self.binding = PlatformBinding.model_validate(binding)
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
+        # How long a polled job's workflow is waited on before the Agent
+        # reports it still running; the engine's default when None. A run
+        # that outlives it is still waited for before it is settled.
+        self._workflow_timeout_seconds = workflow_timeout_seconds
+        self._reported_at: float | None = None
 
     def _call(self, operation: str, payload: Contract | None) -> _Answer:
         """One operation over the wire, classified. Blocking; the async
@@ -315,7 +334,9 @@ class PlatformClient:
         try:
             added = await asyncio.to_thread(self._apply, reply, layout, state)
         except SyncRefused as error:
-            return SyncOutcome(status="refused", failure=_refusal(error.code))
+            return SyncOutcome(
+                status="refused", failure=_refusal(error.code), installed=error.installed
+            )
         return SyncOutcome(
             status="answered", installed=added, selections=len(reply.authorization.selections)
         )
@@ -347,7 +368,9 @@ class PlatformClient:
                 reply.authorization.model_dump_json(indent=2).encode("utf-8") + b"\n",
             )
         except OSError:
-            raise SyncRefused("workspace_unwritable") from None
+            # The inventory is recorded and the files are there; only the
+            # bundle is not. The outcome says both, so nothing is hidden.
+            raise SyncRefused("workspace_unwritable", added) from None
         return added
 
     @staticmethod
@@ -422,61 +445,84 @@ class PlatformClient:
         except ValidationError:
             return JobsOutcome(status="unreachable", failure=_bad_reply())
         deliveries: list[JobDelivery] = []
-        status: Reachability = "answered"
-        failure: Failure | None = None
         for record in reply.jobs:
             delivery, ended = await self._one(agent, record)
             deliveries.append(delivery)
-            if ended is not None and status == "answered":
-                status, failure = ended.status, ended.failure
-        if status == "answered":
-            reported = await self.report(agent.snapshot(observed_at=datetime.now(UTC)))
-            return JobsOutcome(
-                status="answered",
-                deliveries=tuple(deliveries),
-                reported=reported.status == "answered",
-            )
-        return JobsOutcome(status=status, failure=failure, deliveries=tuple(deliveries))
+            if ended is not None:
+                # The platform has just said this Bridge is no longer its
+                # member, or does not know its token: the rest of the batch
+                # is not run on its behalf.
+                return JobsOutcome(
+                    status=ended.status, failure=ended.failure, deliveries=tuple(deliveries)
+                )
+        reported = False
+        if deliveries or self._report_due():
+            snapshot = await asyncio.to_thread(agent.snapshot, observed_at=datetime.now(UTC))
+            reported = (await self.report(snapshot)).status == "answered"
+            if reported:
+                self._reported_at = monotonic()
+        return JobsOutcome(status="answered", deliveries=tuple(deliveries), reported=reported)
+
+    def _report_due(self) -> bool:
+        """An idle Bridge still lets the platform see it is alive, but not
+        on every poll: the snapshot carries every run ever recorded."""
+        return self._reported_at is None or monotonic() - self._reported_at >= REPORT_EVERY_SECONDS
 
     async def _one(
         self, agent: LocalAgent, record: RemoteJobRecord
     ) -> tuple[JobDelivery, _Answer | None]:
+        """Run one job and settle it. What ends a loop is the platform
+        saying this Bridge is no longer its member; a settle it declined for
+        that one job is recorded on the delivery, and the next poll simply
+        does not offer that job again."""
         outcome: LocalAgentOutcome | None = None
         run: LocalRunSummary | None = None
+        request = record.request
+        engine = agent.gateway.engine
+        started = engine.submitted(request.actor, request.workflow.namespace, request.job_id)
+        disposition: JobDisposition
         if record.status == "cancel_requested":
-            disposition: JobDisposition = "cancelled"
+            if started is None:
+                disposition = "cancelled"
+            else:
+                # A settle that was lost, then a cancel: this Bridge already
+                # ran it, and the idempotency key knows. The truth is what
+                # happened, not what was asked for afterwards.
+                final = await engine.wait(started.run.run_id)
+                disposition = "ran"
+                run = _summary(request, final if final is not None else started)
         else:
-            outcome = await agent.execute(record.request)
+            outcome = await agent.execute(
+                request, workflow_timeout_seconds=self._workflow_timeout_seconds
+            )
             if outcome.refusal is not None or outcome.workflow is None:
                 disposition = "rejected"
-            elif outcome.run is not None:
-                disposition, run = "ran", outcome.run
-            elif outcome.unrecorded is not None:
-                # It ran; only the local record failed. The platform still
-                # gets the truth, from the engine's own result.
-                snapshot = outcome.workflow.run
-                disposition = "ran"
-                run = LocalRunSummary(
-                    run_id=snapshot.run_id,
-                    actor=record.request.actor,
-                    on_behalf_of=record.request.on_behalf_of,
-                    workflow=snapshot.workflow,
-                    status=snapshot.status,
-                    updated_at=datetime.now(UTC),
-                )
-            else:
+            elif outcome.run is None and outcome.unrecorded is None:
                 # The engine answered before starting anything.
                 disposition = "rejected"
-        request = SettleRequest(job_id=record.request.job_id, disposition=disposition, run=run)
-        answer = await asyncio.to_thread(self._call, "settle", request)
+            else:
+                snapshot = outcome.workflow
+                failure = snapshot.run.failure
+                if failure is not None and failure.code == "workflow_timeout":
+                    # The run outlived the wait and is still going. A settle
+                    # is final, so it waits for the run to actually end.
+                    ended = await engine.wait(snapshot.run.run_id)
+                    await agent.settled()
+                    snapshot = ended if ended is not None else snapshot
+                disposition = "ran"
+                # The local record when it exists and is final; otherwise the
+                # engine's own result, which is the truth either way.
+                run = _summary(request, snapshot)
+        settle = SettleRequest(job_id=request.job_id, disposition=disposition, run=run)
+        answer = await asyncio.to_thread(self._call, "settle", settle)
         delivery = JobDelivery(
-            job_id=record.request.job_id,
+            job_id=request.job_id,
             disposition=disposition,
             settled=answer.status == "answered",
             outcome=outcome,
             failure=answer.failure,
         )
-        return delivery, (answer if answer.status in FINAL else None)
+        return delivery, (answer if answer.status in ENDS_LOOP else None)
 
     async def run_jobs(
         self, agent: LocalAgent, stop: asyncio.Event, *, interval_s: float = 5.0
@@ -499,6 +545,17 @@ class PlatformClient:
             if result.status != "answered":
                 delay = min(delay * 2, MAX_BACKOFF_SECONDS)
         return None
+
+
+def _summary(request: RemoteWorkflowJob, snapshot: WorkflowRunSnapshot) -> LocalRunSummary:
+    return LocalRunSummary(
+        run_id=snapshot.run.run_id,
+        actor=request.actor,
+        on_behalf_of=request.on_behalf_of,
+        workflow=snapshot.run.workflow,
+        status=snapshot.run.status,
+        updated_at=datetime.now(UTC),
+    )
 
 
 def _bad_reply() -> Failure:

@@ -1578,17 +1578,24 @@ token id and secret, decides who is asking through
 `InMemoryAccessTokens.authenticate`, and acts only on the device the token was
 issued for; a payload naming another device is `device_mismatch`. `handle`
 dispatches by operation name for a transport and answers `unknown_operation`
-and `invalid_request` for anything that is not one. `STATUS_FOR` is the HTTP
-status each code deserves. `control_plane.http.ControlPlaneServer` is that
-service on a standard-library `ThreadingHTTPServer`: `POST /v1/<operation>`
-with `Authorization: Bearer <token_id>:<secret>`, a 4 MiB body limit refused
-before reading, an unauthenticated `GET /v1/health`, no request logging, no
-software name, and an optional `ssl.SSLContext` that wraps the socket. It
-serves the in-memory references; a durable platform store is a later slice.
+and `invalid_request` for anything that is not one. `synchronize` plans each wanted
+asset once however many selections name it, so a decision left behind by a
+member since unbound never breaks the device's sync. The body is validated in
+`handle` and only there: a contract the service fails to build while
+answering is the platform's own inconsistency and reaches the Bridge as
+`internal_error` (retryable), never as `invalid_request`. `STATUS_FOR` is the
+HTTP status each code deserves. `control_plane.http.ControlPlaneServer` is
+that service on a standard-library `ThreadingHTTPServer`: `POST
+/v1/<operation>` with `Authorization: Bearer <token_id>:<secret>`, a 4 MiB
+body limit refused before reading, a chunked body refused, one request per
+connection (`Connection: close`, so a refused body is never parsed as the next
+request), an unauthenticated `GET /v1/health`, no request logging, no software
+name, and an optional `ssl.SSLContext` that wraps the socket. It serves the
+in-memory references; a durable platform store is a later slice.
 
 `host_runtime.contracts.PlatformBinding` is how a host names its platform:
-`base_url` (https, or http on loopback only), `token_id`, the `SecretRef` of
-the token's secret and a timeout; `CompanyHostConfiguration.platform` is
+`base_url` (an origin: https, or http on loopback only, with no path, query
+or fragment), `token_id`, the `SecretRef` of the token's secret and a timeout; `CompanyHostConfiguration.platform` is
 optional and a host without it works locally. `HostLayout` moved to the
 contracts module and is still importable from `host_runtime.host`.
 
@@ -1608,17 +1615,32 @@ write compared with any hand-placed asset of the same identity, a conflict
 unless the bytes are identical (`sync_asset_conflict`); then the manifests
 written atomically as `<namespace>__<name>__<version>.json`, the inventory
 recorded in one transaction, and `authorization.json` replaced atomically. A
-refusal at any step leaves the workspace untouched. `poll_jobs(agent)` runs
-each open job through `LocalAgent.execute` and settles it — `ran` with the run
-(built from the engine's result when the local record failed), `rejected` for
-a refusal or a pre-flight rejection, `cancelled` for a job the platform had
-asked to stop — then reports the snapshot; a settle that could not be
-delivered leaves the job open at the platform, and the idempotency key keeps
-it from running twice. `run_jobs(agent, stop, interval_s=)` loops with the
-Telegram ingress's rule: `withdrawn`, `rejected` and `refused` end it and are
-returned; `unreachable` is waited out with a doubling delay up to five
-minutes. `advertisement(agent, trace_id)` is the `BridgeRegistration` a host
-sends: the capabilities its policy could ever dispatch.
+refusal before the first write leaves the workspace untouched; when the
+bundle, the one write after the inventory is recorded, fails, the outcome is
+`refused` with `installed` naming what was recorded (`SyncRefused.installed`).
+`poll_jobs(agent)` runs each open job through `LocalAgent.execute` and settles
+it — `ran` with the run (built from the engine's result when the local record
+failed; a run that outlives the wait is waited for until it ends first),
+`rejected` for a refusal or a pre-flight rejection, `cancelled` for a job the
+platform had asked to stop unless `WorkflowEngine.submitted` says this Bridge
+already ran it, in which case `ran` — then reports the snapshot after a batch
+that did something and otherwise once a minute (`REPORT_EVERY_SECONDS`), read
+off the event loop. A settle the platform declined for one job is recorded on
+the delivery and the batch goes on; a settle answered `withdrawn` or
+`rejected` stops the rest of the batch. A settle that could not be delivered
+leaves the job open at the platform, and the idempotency key keeps it from
+running twice. `run_jobs(agent, stop, interval_s=)` loops with the Telegram
+ingress's rule: a poll answered `withdrawn`, `rejected` or `refused`, or a
+settle answered `withdrawn` or `rejected`, ends it and is returned;
+`unreachable` is waited out with a doubling delay up to five minutes. The
+client takes `workflow_timeout_seconds` for how long a polled job is waited on
+before the Agent reports it still running. `advertisement(agent, trace_id)`
+is the `BridgeRegistration` a host sends: the capabilities its policy could
+ever dispatch.
+
+`workflow.engine.WorkflowEngine.submitted(actor, namespace, idempotency_key)`
+is the run an idempotency key already names, or None: what a caller asks
+before saying a job it may have started never ran.
 
 `aep-host` gains `probe`, `sync` (which then advertises and reports, best
 effort) and `jobs [--once] [--interval]`; `doctor` gains a `platform` check

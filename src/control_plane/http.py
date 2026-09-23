@@ -19,8 +19,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import TracebackType
 from typing import Any, Self
 
-from pydantic import ValidationError
-
 from common.base import Contract
 from common.sync import WireFailure
 from control_plane.service import STATUS_FOR, ControlPlaneService, ServiceError
@@ -64,10 +62,15 @@ class _Handler(BaseHTTPRequestHandler):
         return "control-plane"
 
     def _send(self, status: int, body: bytes) -> None:
+        # One request per connection. A refusal sent before the body was
+        # read would otherwise leave that body on the wire to be parsed as
+        # the next request, and every operation here is one round trip.
+        self.close_connection = True
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "close")
         self.end_headers()
         self.wfile.write(body)
 
@@ -86,6 +89,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._refuse("unknown_operation")
             return
         operation = self.path[len(API_PREFIX) :]
+        if self.headers.get("Transfer-Encoding"):
+            # A body of unstated length is not read; this wire states it.
+            self._refuse("invalid_request")
+            return
         try:
             length = int(self.headers.get("Content-Length") or 0)
         except ValueError:
@@ -110,10 +117,10 @@ class _Handler(BaseHTTPRequestHandler):
         except ServiceError as error:
             self._refuse(error.code)
             return
-        except (ValidationError, ValueError):
-            self._refuse("invalid_request")
-            return
         except Exception:  # noqa: BLE001 - never a traceback over the wire
+            # Including a contract the service could not build while
+            # answering: that is the platform's own inconsistency, reported
+            # as such and retryable, never as the Bridge's request.
             self._refuse("internal_error")
             return
         self._send(200, reply.model_dump_json().encode("utf-8"))

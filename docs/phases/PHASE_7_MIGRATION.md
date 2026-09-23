@@ -753,10 +753,12 @@ authorization and the installed assets exactly where they are.
    spec says so rather than pretending otherwise.
 3. `control_plane.http` is that service over HTTP from the standard library
    alone: `POST /v1/<operation>` with `Authorization: Bearer <token_id>:<secret>`,
-   JSON in and out, a body limit, no redirect, no request logging, and one
-   unauthenticated `GET /v1/health` that says nothing but that the process is
-   up. Failures come back as `WireFailure` codes with the status they deserve;
-   nothing in a reply echoes a request.
+   JSON in and out, a body limit, one request per connection, no redirect, no
+   request logging, and one unauthenticated `GET /v1/health` that says
+   nothing but that the process is up. Failures come back as `WireFailure`
+   codes with the status they deserve, and a contract the platform could not
+   build while answering is its own `internal_error`, never the Bridge's
+   `invalid_request`; nothing in a reply echoes a request.
 4. `host_runtime.sync.PlatformClient` is the Bridge's side. It resolves the
    token's secret through a `SecretRef` on every call and holds it nowhere,
    refuses a plain-HTTP platform anywhere but loopback, and classifies every
@@ -775,8 +777,11 @@ authorization and the installed assets exactly where they are.
    write checked against a hand-placed asset of the same identity, which is a
    conflict unless the bytes are identical; then the manifests written, the
    inventory recorded in one transaction, and `authorization.json` replaced
-   atomically. A refusal at any step leaves the workspace untouched. A second
-   sync with nothing new installs nothing and rewrites only the bundle.
+   atomically. A refusal before the first write leaves the workspace
+   untouched; the one write that can fail after the inventory is recorded,
+   the bundle, is reported as a refusal that also says what was installed,
+   so nothing is hidden. A second sync with nothing new installs nothing and
+   rewrites only the bundle.
 6. `advertise` sends what this host can run — the capabilities its Bridge
    policy could ever dispatch — as a `BridgeRegistration`, and the platform
    replaces the device's advertisement with it
@@ -791,20 +796,32 @@ authorization and the installed assets exactly where they are.
    same engine, the job id still the idempotency key — and settles it: `ran`
    with the run record, `rejected` when the Agent refused it or the engine
    answered before starting anything, `cancelled` when the platform had asked
-   for that before the Bridge got to it. A job whose settle could not be
-   delivered stays open at the platform and is offered again; the Bridge joins
-   the run it already started and settles it again, so nothing runs twice. A
-   `RemoteJobRecord` gains those three final states and the run that settled
-   it; `poll` no longer returns a settled job, `cancel` refuses one, and a
-   settle for another device's job or with a run that names a different actor
-   or workflow is refused. `RemoteWorkflowJob` gains `on_behalf_of` with the
-   same meaning as everywhere else since slice 2j, and `execute` records it.
+   for that before the Bridge got to it. A settle is final, so it says what
+   actually happened: a run that outlives the wait is waited for until it
+   ends before it is settled, and a job the platform asks to cancel after
+   this Bridge already ran it (a settle that was lost, then a cancel) is
+   settled `ran`, because the idempotency key knows. A job whose settle could
+   not be delivered stays open at the platform and is offered again; the
+   Bridge joins the run it already started and settles it again, so nothing
+   runs twice. A `RemoteJobRecord` gains those three final states and the run
+   that settled it; `poll` no longer returns a settled job, `cancel` refuses
+   one, and a settle for another device's job or with a run that names a
+   different actor or workflow is refused. `RemoteWorkflowJob` gains
+   `on_behalf_of` with the same meaning as everywhere else since slice 2j,
+   and `execute` records it.
 8. `run_jobs` loops poll, execute, settle and report until asked to stop, with
    the Telegram ingress's rule: a retryable failure is waited out with a
-   doubling delay, and one that will not fix itself — `withdrawn`, `rejected`,
-   `refused` — ends the loop and is returned. The loop never deletes or
-   rewrites anything on a failure: a Bridge that has been thrown out keeps
-   doing local work with what it has, which is the local-first rule.
+   doubling delay, and one that will not fix itself — a poll answered
+   `withdrawn`, `rejected` or `refused`, or a settle answered `withdrawn` or
+   `rejected`, which also stops the rest of that batch — ends the loop and is
+   returned. A settle the platform declined for one job (`job_settled`,
+   `job_missing`, `job_mismatch`) is that job's business: it is recorded on
+   the delivery and the loop goes on, because the next poll simply does not
+   offer that job again. The snapshot is reported after a batch that did
+   something and otherwise once a minute, not on every idle poll. The loop
+   never deletes or rewrites anything on a failure: a Bridge that has been
+   thrown out keeps doing local work with what it has, which is the
+   local-first rule.
 9. The host. `CompanyHostConfiguration.platform` is optional: `base_url`,
    `token_id` and the `SecretRef` naming the token's secret, which the host
    maps to an environment variable as it does the Telegram token; the value is

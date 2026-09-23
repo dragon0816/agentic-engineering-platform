@@ -56,7 +56,13 @@ class PlatformBinding(Contract):
     @model_validator(mode="after")
     def https_beyond_loopback(self) -> Self:
         parts = urlsplit(self.base_url)
-        if parts.scheme not in ("https", "http") or not parts.hostname or parts.path:
+        if (
+            parts.scheme not in ("https", "http")
+            or not parts.hostname
+            or parts.path
+            or parts.query
+            or parts.fragment
+        ):
             raise ValueError("base_url is the origin of the shared platform")
         if parts.scheme == "http" and not _loopback(self.base_url):
             raise ValueError("a platform beyond loopback is reached over https")

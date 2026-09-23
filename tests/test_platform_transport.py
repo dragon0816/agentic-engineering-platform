@@ -15,6 +15,7 @@ import urllib.error
 import urllib.request
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime, timedelta
+from http.client import HTTPConnection
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,8 @@ from test_host_wiring import (
     workflow_manifest,
     workspace,
 )
+from test_local_agent import VALIDATION, slow_gateway, state_for
+from test_local_agent import company as company_membership
 
 from capabilities.files import READ_FILE_SPEC
 from common.assets import AssetIdentity, AssetMetadata, Owner, PackageMetadata
@@ -58,6 +61,7 @@ from control_plane.enrollment import InMemoryEnrollmentRegistry
 from control_plane.http import ControlPlaneServer
 from control_plane.identity import InMemoryAccessTokens
 from control_plane.service import ControlPlaneService, ServiceError
+from host_runtime.agent import LocalAgent
 from host_runtime.cli import main
 from host_runtime.contracts import CompanyHostConfiguration, HostLayout, PlatformBinding
 from host_runtime.host import HostRuntime, build_runtime, host_report
@@ -70,6 +74,7 @@ from workflow.host_bridge import BridgeRegistration
 NOW = datetime(2026, 1, 1, 9, 0, tzinfo=UTC)
 WORKFLOW = AssetIdentity(namespace="engineering", name="read-local-file", version="1.0.0")
 SKILL = AssetIdentity(namespace="engineering", name="file-skill", version="1.0.0")
+SHADOW = AssetIdentity(namespace="engineering", name="shadow", version="1.0.0")
 READ = READ_FILE_SPEC.identity
 SECRET = "a-platform-token-secret-that-is-long-enough-to-pass"
 SHARED_SECRET = "another-platform-token-secret-long-enough-to-pass"
@@ -110,7 +115,7 @@ class Platform:
     """The whole shared platform in one object: every reference, the
     service over them, and the two tokens the tests present."""
 
-    def __init__(self, *, workflow_bytes: bytes | None = None) -> None:
+    def __init__(self, *, workflow_bytes: bytes | None = None, shadow: bool = False) -> None:
         self.enrollment = InMemoryEnrollmentRegistry(administrators=("platform-admin",))
         for actor in ("engineer", "shared-bot"):
             self.enrollment.issue(
@@ -169,12 +174,24 @@ class Platform:
             published = self.packages.publish(package(identity, kind, content))
             assert published.metadata.package is not None
             self.artifacts[published.metadata.package.artifact_ref] = content
-        self.authorization = InMemoryAuthorizationRegistry(self.enrollment, self.packages)
-        for kind, asset, approval in (
+        chosen: list[tuple[str, AssetIdentity, str | None]] = [
             ("workflow", WORKFLOW, None),
             ("skill", SKILL, None),
             ("capability", READ, "workspace-read-approval"),
-        ):
+        ]
+        if shadow:
+            # A second published package pointing at the first one's bytes:
+            # the platform's own inconsistency, not any Bridge's.
+            first = self.packages.get(WORKFLOW)
+            assert first is not None and first.metadata.package is not None
+            self.packages.publish(
+                first.model_copy(
+                    update={"metadata": first.metadata.model_copy(update={"identity": SHADOW})}
+                )
+            )
+            chosen.append(("workflow", SHADOW, None))
+        self.authorization = InMemoryAuthorizationRegistry(self.enrollment, self.packages)
+        for kind, asset, approval in chosen:
             self.authorization.select(
                 signed_in(),
                 DeviceAssetSelection(
@@ -388,6 +405,10 @@ def test_the_wire_contracts_are_closed_and_consistent(platform: Platform) -> Non
         PlatformBinding.model_validate(binding("http://platform.internal"))
     with pytest.raises(ValidationError, match="origin"):
         PlatformBinding.model_validate(binding("https://platform.internal/v1"))
+    with pytest.raises(ValidationError, match="origin"):
+        PlatformBinding.model_validate(binding("https://platform.internal?env=prod"))
+    with pytest.raises(ValidationError, match="origin"):
+        PlatformBinding.model_validate(binding("https://platform.internal#prod"))
     with pytest.raises(ValidationError):
         PlatformBinding.model_validate(binding("https://platform.internal?access_token=abc"))
     with pytest.raises(ValidationError):
@@ -729,6 +750,8 @@ def test_jobs_are_polled_run_settled_and_reported(
         # A second poll with nothing waiting is an answered poll.
         idle = run(runtime.platform.poll_jobs(runtime.agent))
         assert idle.status == "answered" and idle.deliveries == ()
+        # An idle poll right after a report does not ship the snapshot again.
+        assert not idle.reported
     # A settle is refused for a settled job, for another device, and for a
     # run that names another actor.
     token = platform.company_token.grant.token_id
@@ -846,3 +869,215 @@ def test_the_cli_probes_syncs_and_runs_jobs(
     server.stop()
     assert main(["probe", "--config", str(path)]) == 1
     assert "could not be reached; nothing on this host changed" in capsys.readouterr().out
+
+
+class InterceptingTransport:
+    """The real transport, except that settle calls are answered from a
+    queue of canned replies while it lasts."""
+
+    def __init__(self, canned: list[tuple[int, bytes]]) -> None:
+        self.inner = UrllibTransport()
+        self.canned = canned
+
+    def send(self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float) -> Any:
+        if url.endswith("/v1/settle") and self.canned:
+            status, reply = self.canned.pop(0)
+            return CannedReply(status, reply)
+        return self.inner.send(url, body, headers, timeout_s)
+
+
+def slow_agent(tmp_path: Path) -> tuple[LocalAgent, Any]:
+    """An Agent whose one workflow outlives a short wait, over the
+    repository's real engine."""
+    gateway, bridge = slow_gateway()
+    membership = company_membership()
+    return LocalAgent(membership, gateway, state_for(membership, tmp_path)), bridge
+
+
+def test_a_job_that_outlives_the_wait_is_settled_when_it_ends(
+    tmp_path: Path, server: ControlPlaneServer, platform: Platform
+) -> None:
+    agent, bridge = slow_agent(tmp_path)
+    impatient = PlatformClient(
+        PlatformBinding.model_validate(
+            binding(server.base_url, token_id=platform.company_token.grant.token_id)
+        ),
+        StaticCredentials({"platform_token": SECRET}),
+        workflow_timeout_seconds=0.02,
+    )
+    platform.submit("job-slow", workflow=VALIDATION, arguments={})
+    outcome = run(impatient.poll_jobs(agent))
+    delivery = outcome.deliveries[0]
+    # The wait saw a timeout; the settle waited for the run to actually end.
+    assert delivery.outcome is not None and delivery.outcome.workflow is not None
+    failure = delivery.outcome.workflow.run.failure
+    assert failure is not None and failure.code == "workflow_timeout"
+    assert delivery.disposition == "ran" and delivery.settled
+    record = platform.control.job("job-slow")
+    assert record.status == "ran" and record.run is not None
+    assert record.run.status == "succeeded"
+    assert [item.status for item in agent.runs()] == ["succeeded"]
+    # A settle that was lost, then a cancel: the Bridge already ran it, and
+    # says so rather than calling it cancelled.
+    platform.submit("job-lost", workflow=VALIDATION, arguments={})
+    lost = platform.control.job("job-lost")
+    run(agent.execute(lost.request))
+    platform.control.cancel("job-lost", actor="engineer")
+    outcome = run(impatient.poll_jobs(agent))
+    delivery = outcome.deliveries[0]
+    assert delivery.disposition == "ran" and delivery.settled and delivery.outcome is None
+    assert platform.control.job("job-lost").status == "ran"
+    assert len(agent.runs()) == 2 and len(bridge.events) == 2
+
+
+def test_a_settle_declined_for_one_job_does_not_end_the_loop(
+    tmp_path: Path, server: ControlPlaneServer, platform: Platform
+) -> None:
+    config, layout, runtime = host(tmp_path, platform, server.base_url)
+    with runtime:
+        assert runtime.platform is not None
+        assert run(runtime.platform.synchronize(layout, runtime.state)).status == "answered"
+    with build_runtime(
+        config, layout=layout, resolver=StaticCredentials({"platform_token": SECRET})
+    ) as runtime:
+        # Another process settled it first, or the platform restarted: the
+        # platform declines this settle, the delivery says so, the loop goes
+        # on, and the next poll simply does not offer that job again.
+        platform.submit("job-a")
+        declined = PlatformClient(
+            config.platform,  # type: ignore[arg-type]
+            StaticCredentials({"platform_token": SECRET}),
+            transport=InterceptingTransport([(409, b'{"code":"job_settled","retryable":false}')]),
+        )
+        outcome = run(declined.poll_jobs(runtime.agent))
+        assert outcome.status == "answered"
+        delivery = outcome.deliveries[0]
+        assert delivery.disposition == "ran" and not delivery.settled
+        assert delivery.failure is not None and delivery.failure.code == "job_settled"
+        # Here the platform never actually heard the settle, so it offers
+        # the job again; the Bridge joins the run it already started.
+        again = run(declined.poll_jobs(runtime.agent))
+        assert [(d.job_id, d.settled) for d in again.deliveries] == [("job-a", True)]
+        assert len(runtime.agent.runs()) == 1
+        # The platform saying this Bridge is no longer its member, in the
+        # middle of a batch, stops the batch.
+        platform.submit("job-b")
+        platform.submit("job-c")
+        thrown_out = PlatformClient(
+            config.platform,  # type: ignore[arg-type]
+            StaticCredentials({"platform_token": SECRET}),
+            transport=InterceptingTransport([(401, b'{"code":"token_revoked","retryable":false}')]),
+        )
+        outcome = run(thrown_out.poll_jobs(runtime.agent))
+        assert outcome.status == "withdrawn" and len(outcome.deliveries) == 1
+        assert outcome.deliveries[0].job_id == "job-b"
+        assert platform.control.job("job-c").status == "queued"
+        assert len(runtime.agent.runs()) == 2
+        assert layout.authorization.exists()
+
+
+def test_one_asset_is_planned_once_however_many_selections_name_it(platform: Platform) -> None:
+    """A decision left behind by a member since unbound and a new member's
+    decision about the same asset are one installation."""
+    platform.enrollment.issue(
+        Invitation(
+            invitation_id="invite-tester",
+            actor="tester",
+            issued_by="platform-admin",
+            groups=("engineering",),
+        )
+    )
+    platform.enrollment.accept("invite-tester", "tester")
+    platform.authorization.select(
+        signed_in("shared-bot"),
+        DeviceAssetSelection(
+            bridge_id="bridge-shared",
+            actor="shared-bot",
+            kind="workflow",
+            asset=WORKFLOW,
+            decided_at=NOW,
+        ),
+        now=NOW,
+    )
+    platform.enrollment.unbind("engineer", "bridge-shared", "shared-bot")
+    platform.enrollment.bind(
+        "engineer", BridgeBinding(bridge_id="bridge-shared", actor="tester", role="operator")
+    )
+    platform.authorization.select(
+        signed_in("tester"),
+        DeviceAssetSelection(
+            bridge_id="bridge-shared",
+            actor="tester",
+            kind="workflow",
+            asset=WORKFLOW,
+            decided_at=NOW,
+        ),
+        now=NOW,
+    )
+    token = platform.tokens.issue(
+        "engineer", "tester", "bridge-shared", issued_at=NOW, secret=SECRET + "-tester"
+    )
+    reply = platform.service.synchronize(token.grant.token_id, token.secret, SyncRequest())
+    assert len(reply.authorization.selections) == 2
+    assert reply.plan is not None
+    assert [item.metadata.identity for item in reply.plan.packages] == [WORKFLOW]
+
+
+def test_the_platforms_own_inconsistency_is_reported_as_such(tmp_path: Path) -> None:
+    shadow = Platform(shadow=True)
+    with ControlPlaneServer(shadow.service) as server:
+        credential = f"Bearer {shadow.company_token.grant.token_id}:{SECRET}"
+        status, body = http(server.base_url, "POST", "/v1/sync", b"{}", Authorization=credential)
+        assert (status, body) == (500, {"code": "internal_error", "retryable": True})
+        config, layout, runtime = host(tmp_path, shadow, server.base_url)
+        with runtime:
+            assert runtime.platform is not None
+            outcome = run(runtime.platform.synchronize(layout, runtime.state))
+            assert outcome.status == "unreachable" and outcome.failure is not None
+            assert outcome.failure.retryable and outcome.failure.code == "platform_http_error"
+            _untouched(layout)
+
+
+def test_one_request_per_connection(server: ControlPlaneServer, platform: Platform) -> None:
+    """A refusal sent before the body was read closes the connection, so the
+    unread body is never parsed as the next request."""
+    host_name, port = server.server_address[0], server.server_address[1]
+    credential = f"Bearer {platform.company_token.grant.token_id}:{SECRET}"
+    connection = HTTPConnection(str(host_name), int(port), timeout=5)
+    connection.request(
+        "POST",
+        "/v1/poll",
+        body=b"{}",
+        headers={"Authorization": credential, "Content-Length": str(64 * 1024 * 1024)},
+    )
+    reply = connection.getresponse()
+    assert reply.status == 413 and reply.getheader("Connection") == "close"
+    reply.read()
+    connection.request("GET", "/v1/health")
+    reply = connection.getresponse()
+    assert reply.status == 200 and json.loads(reply.read()) == {"ok": True}
+    connection.request(
+        "POST",
+        "/v1/poll",
+        body=b"2\r\n{}\r\n0\r\n\r\n",
+        headers={"Authorization": credential, "Transfer-Encoding": "chunked"},
+    )
+    reply = connection.getresponse()
+    assert reply.status == 400 and json.loads(reply.read())["code"] == "invalid_request"
+    connection.close()
+
+
+def test_a_bundle_that_cannot_be_written_is_reported_with_what_was_installed(
+    tmp_path: Path, server: ControlPlaneServer, platform: Platform
+) -> None:
+    config, layout, runtime = host(tmp_path, platform, server.base_url)
+    # A directory where the bundle would go: the one write after the
+    # inventory is recorded fails, and the outcome hides neither fact.
+    layout.authorization.mkdir()
+    with runtime:
+        assert runtime.platform is not None
+        outcome = run(runtime.platform.synchronize(layout, runtime.state))
+        assert outcome.status == "refused" and outcome.failure is not None
+        assert outcome.failure.code == "sync_workspace_unwritable"
+        assert {item.name for item in outcome.installed} == {"read-local-file", "file-skill"}
+        assert len(runtime.state.installed()) == 2

@@ -40,7 +40,7 @@ characterization and decisions: `docs/PHASE_7_MIGRATION.md`, same heading.
 
 Run on Windows in `.venv` (Python 3.12) at the head of this branch:
 
-- `python -m pytest -q -p no:cacheprovider` — **799 passed, 3 skipped**. The
+- `python -m pytest -q -p no:cacheprovider` — **805 passed, 3 skipped**. The
   skips need symbolic-link privileges and run on Linux CI.
 - `ruff check .` — clean. `ruff format --check .` — 165 files formatted.
 - `mypy` — no issues in 130 source files.
