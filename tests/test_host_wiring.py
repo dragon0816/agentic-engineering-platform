@@ -697,6 +697,7 @@ def test_a_configuration_that_cannot_be_used_says_which_field(
     assert "absolute path" in said, "and so is the rule the other one broke"
     assert "a-relative-path.xlsx" not in said, "but never what the file says"
     assert "No value from it is shown" in said
+    assert "0.1.0" in said, "which build refused it, because an old host reads as a typo"
 
 
 def test_a_configuration_that_is_not_json_says_where(

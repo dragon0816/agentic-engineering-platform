@@ -80,12 +80,19 @@ def _load(path: Path) -> CompanyHostConfiguration:
 def _why_unusable(path: Path, invalid: Exception) -> list[str]:
     """What is wrong with a host configuration, without saying what is in it.
 
-    The file names a Jira site or a board, a workbook, and which environment
-    variable holds which secret, so no value from it is ever printed. The
-    field that is wrong is not a value, though, and refusing to name it left
-    an operator to guess which of a hundred lines to look at.
+    The file names a board, a workbook, and which environment variable holds
+    which secret, so no value from it is ever printed. The field that is
+    wrong is not a value, though, and refusing to name it left an operator to
+    guess which of a hundred lines to look at.
+
+    The installed version is named with it, because a field this host has
+    never heard of reads exactly like a typo and is usually an installation
+    older than the configuration written for it.
     """
-    lines = [f"{path} cannot be used, so nothing ran. No value from it is shown."]
+    lines = [
+        f"{path} cannot be used by this host ({_package_version()}), so nothing ran. "
+        "No value from it is shown."
+    ]
     if isinstance(invalid, ValidationError):
         for error in invalid.errors():
             where = ".".join(str(part) for part in error.get("loc", ())) or "(the whole file)"
