@@ -37,9 +37,24 @@ GitHubErrorCode = Literal[
     "github_http",
     "github_unavailable",
     "github_bad_reply",
+    "github_scope_missing",
+    "github_not_found",
+    "github_rate_limited",
     "github_project_missing",
     "github_issue_unreadable",
 ]
+
+#: What GitHub calls a refusal, and what this platform calls it. GraphQL
+#: answers a query it would not run with `200` and a typed error, so the
+#: kind is in the body and a status code says nothing. Naming each one is
+#: the difference between "the reply was bad" and "this token has no project
+#: access", which is the only form of it an operator can act on.
+REFUSAL_CODES: Mapping[str, GitHubErrorCode] = {
+    "INSUFFICIENT_SCOPES": "github_scope_missing",
+    "FORBIDDEN": "github_auth",
+    "NOT_FOUND": "github_not_found",
+    "RATE_LIMITED": "github_rate_limited",
+}
 
 DEFAULT_API_URL = "https://api.github.com/graphql"
 #: GitHub's own maximum for a connection page.
@@ -241,7 +256,8 @@ class GitHubProjectClient:
                 raise GitHubError("github_bad_reply", "GitHub's answer was not an object")
             errors = payload.get("errors")
             if errors:
-                raise GitHubError("github_bad_reply", _first_error(errors))
+                code, message = _refusal(errors)
+                raise GitHubError(code, message)
             data = payload.get("data")
             if not isinstance(data, dict):
                 raise GitHubError("github_bad_reply", "GitHub's answer carried no data")
@@ -345,11 +361,23 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
     )
 
 
-def _first_error(errors: Sequence[Any]) -> str:
+def _refusal(errors: Sequence[Any]) -> tuple[GitHubErrorCode, str]:
+    """The first error GitHub named, as a code this platform uses.
+
+    GitHub's own words are kept in the message, which the host logs and
+    never sends onward; the code is what travels, so it has to carry the
+    meaning by itself.
+    """
     for error in errors:
-        if isinstance(error, Mapping) and error.get("message"):
-            return str(error["message"])
-    return "GitHub refused the query"
+        if not isinstance(error, Mapping):
+            continue
+        kind = str(error.get("type") or "")
+        message = str(error.get("message") or "") or "GitHub refused the query"
+        if kind in REFUSAL_CODES:
+            return REFUSAL_CODES[kind], message
+        if message:
+            return "github_bad_reply", message
+    return "github_bad_reply", "GitHub refused the query"
 
 
 def _retry_after(reply: Any) -> float | None:

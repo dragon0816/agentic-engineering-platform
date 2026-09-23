@@ -1937,8 +1937,15 @@ thread was longer than the client asked for. `ProjectComment` is when a
 comment was written, by whom, and its body.
 
 `GitHubError` codes are `github_credential`, `github_auth`, `github_http`,
-`github_unavailable`, `github_bad_reply`, `github_project_missing` and
-`github_issue_unreadable`. The last is this source's own trap: reading the
+`github_unavailable`, `github_bad_reply`, `github_scope_missing`,
+`github_not_found`, `github_rate_limited`, `github_project_missing` and
+`github_issue_unreadable`. GitHub answers a query it would not run with
+`200` and a typed error, so the kind is in the body and the status says
+nothing; `REFUSAL_CODES` maps the kinds it names. Only the code travels to
+whoever asked, so it carries the meaning: "the reply was bad" and "this token
+has no project access" are otherwise the same sentence, and only one of them
+tells somebody what to do. A throttle is `github_rate_limited`, which the
+capability raises as transient beside an outage. The last is this source's own trap: reading the
 board and reading the issues on it are two different permissions, and GitHub
 answers a token that holds only the first by omitting the content rather than
 refusing. Every row would then arrive with no title and no comments, which

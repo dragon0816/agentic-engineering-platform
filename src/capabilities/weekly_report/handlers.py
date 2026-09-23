@@ -158,7 +158,9 @@ class ProjectSearchHandler:
         try:
             rows = await asyncio.to_thread(self.client.items)
         except GitHubError as error:
-            if error.code == "github_unavailable":
+            # A throttle and an outage are the same answer to a caller: try
+            # later. Everything else is a refusal this run cannot fix.
+            if error.code in ("github_unavailable", "github_rate_limited"):
                 raise TransientCapabilityError(error.code) from None
             raise CapabilityRefused(error.code) from None
         chosen = [row for row in rows if _within(row.updated, item.since, item.until)]
