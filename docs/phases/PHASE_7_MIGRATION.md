@@ -63,9 +63,15 @@ never copied into Registry assets, invitations, evaluation cases, traces or Git.
    jobs for enrolled Bridge computers.
 4. Local Agent interface and authenticated transports: operate company work locally,
    synchronize Registry packages, and let shared test Bridges poll approved jobs.
-5. Workflow 11: `11_jira_weekly_report.json` / `jira_weekly_report.py`,
-   report generation against a test workbook. (Recorded as "workflow 7" until
-   2026-09-23; see the correction in `docs/PHASE_7_MIGRATION.md`.)
+5a. Workflow 10: `10_sales_opportunity_to_chipset.json` /
+   `sales_to_chipset.py`, the sales opportunity list projected into the
+   chipset requirement workbook's `temp` sheet. Moved ahead of workflow 11 by
+   the owner decision of 2026-09-23.
+5b. Workflow 11: `11_jira_weekly_report.json` / `jira_weekly_report.py`,
+   report generation against a test workbook. Complete in code since slice
+   3b; its live parity run is deferred behind workflow 10 by the same
+   decision. (Recorded as "workflow 7" until 2026-09-23; see the correction
+   in `docs/PHASE_7_MIGRATION.md`.)
 6. Workflow 13: `13_release_package.json` / `release_package.py`, first in dry-run
    and an isolated test repository, then an explicitly approved non-production push.
 7. Knowledge platform: adopt and exercise a copy before any source vault changes.
