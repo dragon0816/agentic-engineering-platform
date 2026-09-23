@@ -164,17 +164,24 @@ def test_a_lock_that_clears_does_not_cost_the_run(
     assert book.attempts == 3 and book.saved == 1
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="there is no registry to ask")
 def test_whether_a_program_is_registered_is_asked_of_this_machine() -> None:
     """The real registry, on the machine the test runs on.
 
     This is the test that was missing. The check used to go through the COM
     bridge's own module and call a function that does not exist there, and a
-    fake with that function on it passed happily while every real host
-    reported that Excel was not installed.
+    fake carrying that function passed happily while every real host reported
+    that Excel was not installed.
     """
     assert excel_writer.progid_is_registered("Shell.Application") is True, (
         "every Windows machine registers this one"
     )
+    assert excel_writer.progid_is_registered("No.Such.Program.Ever") is False
+
+
+def test_a_machine_with_no_registry_at_all_registers_nothing() -> None:
+    """A host that is not Windows cannot run Excel either, so the answer is
+    the same and it is reached without an exception."""
     assert excel_writer.progid_is_registered("No.Such.Program.Ever") is False
     assert excel_writer.EXCEL_PROGID == "Excel.Application"
 
