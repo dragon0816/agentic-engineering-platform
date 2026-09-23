@@ -34,7 +34,7 @@ jobs:
         run: |
           python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "openpyxl>=3.1,<4" "pywin32>=306"
           python scripts/build_windows_preview.py --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/windows-preview-wheels
-          $archive = Get-ChildItem dist/agentic-engineering-platform-windows-preview-*.zip | Select-Object -First 1
+          $archive = Get-ChildItem dist/aep-windows-preview-*.zip | Select-Object -First 1
           Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/preview-expanded
           $bundle = Get-ChildItem dist/preview-expanded -Directory | Select-Object -First 1
           $installRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\ci-preview"
@@ -70,7 +70,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.python == '3.12'
         uses: actions/upload-artifact@v4
         with:
-          name: windows-company-host-preview-${{ github.sha }}
-          path: dist/agentic-engineering-platform-windows-preview-*.zip
+          name: aep-windows-preview-${{ github.sha }}
+          path: dist/aep-windows-preview-*.zip
           if-no-files-found: error
           retention-days: 14

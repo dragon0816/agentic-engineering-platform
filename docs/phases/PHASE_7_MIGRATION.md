@@ -1092,3 +1092,45 @@ wrote all three manifests. `require_com()` reports `excel_missing` on this
 machine, which is the correct answer: there is no Excel here. That is an
 install check, not the parity run; the parity run still needs Excel and Jira
 credentials on a company workstation.
+
+
+## Slice 3d — a bundle nobody can extract is a bundle nobody can install
+
+Reported by the owner on 2026-09-23, on the first download of the bundle
+slice 3c fixed: `install.cmd` stopped at
+
+```text
+Bundle file is missing: wheels\agentic_engineering_platform-0.1.0-py3-none-any.whl
+```
+
+The zip was complete and its hashes were right. Windows refuses a path of 260
+characters or more unless long paths are enabled, and Explorer extracts what
+fits and leaves out the rest without saying so. The bundle is downloaded as a
+CI artefact and extracted twice before it is run — the artefact folder, whose
+name carries a 40-character commit, then the folder made from the zip's own
+name — and inside an ordinary `Downloads` folder the two longest wheel names
+needed 268 and 263 characters. Those two were missing; the other fourteen
+files were there. The installer could only report the first absence, which
+reads as a broken download and sends the reader to the wrong place.
+
+1. The bundle's own names are the only part of that path we control, so they
+   shrink: `aep-windows-preview-0.1.0` in place of
+   `agentic-engineering-platform-windows-preview-0.1.0`, and the same for the
+   CI artefact. At the location that failed the longest path falls from 268
+   to 209, leaving fifty characters for a longer user name or a deeper folder.
+2. `worst_case_path` states the arithmetic — Downloads, the artefact folder,
+   the extracted folder, the bundle root, the file — and the builder refuses
+   to produce a bundle any of whose files would exceed it. The failure now
+   happens where the names are chosen instead of on a company computer. The
+   test asserts the refusal against the exact names that broke, so the
+   arithmetic is checked against the incident it comes from.
+3. `install.ps1` measures the longest path in its manifest before verifying
+   anything and names the cause and the fix: extract somewhere shorter, such
+   as `C:\aep`, and nothing is wrong with the download. The missing-file
+   message says to extract the whole zip again rather than implying the
+   bundle is corrupt.
+
+Verified by building the bundle with the new names, extracting it, installing
+it end to end (doctor reports the same nine checks) and running the installer
+from a deliberately deep folder, where it refuses with the path length and
+the remedy instead of a missing file.

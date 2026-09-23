@@ -22,11 +22,27 @@ if ($BridgeId -notmatch '^[a-zA-Z_][a-zA-Z0-9_.-]*$') {
     throw "BridgeId must contain only letters, numbers, underscore, dot or hyphen."
 }
 
+# Windows refuses a path of 260 characters or more unless long paths have
+# been enabled, and Explorer extracts what fits and silently leaves out the
+# rest. That arrives here as a missing bundle file, which reads as a broken
+# download and sends the reader looking in the wrong place. Measure first, so
+# the installer names the real cause and the fix.
+$Longest = ($Manifest.files | ForEach-Object {
+        (Join-Path $BundleRoot $_.path.Replace('/', [IO.Path]::DirectorySeparatorChar)).Length
+    } | Measure-Object -Maximum).Maximum
+if ($Longest -ge 260) {
+    throw ("This bundle sits too deep for Windows: one of its files needs a path of " +
+        "$Longest characters and Windows allows 259. Move or re-extract the bundle " +
+        "somewhere shorter, such as C:\aep, and run install.cmd again. Nothing is wrong " +
+        "with the download.")
+}
+
 foreach ($File in $Manifest.files) {
     $Relative = $File.path.Replace('/', [IO.Path]::DirectorySeparatorChar)
     $Path = Join-Path $BundleRoot $Relative
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw "Bundle file is missing: $Relative"
+        throw ("Bundle file is missing: $Relative. Extract the whole zip again, keeping " +
+            "every file; an extraction that skipped one leaves the bundle unusable.")
     }
     $Actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($Actual -ne $File.sha256) {

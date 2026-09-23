@@ -12,7 +12,19 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-BUNDLE_NAME = "agentic-engineering-platform-windows-preview-0.1.0"
+#: Short on purpose. Windows refuses a path of 260 characters or more, and
+#: this bundle is downloaded as a CI artefact and extracted twice before it is
+#: run: once for the artefact folder, once for the bundle's own. The former
+#: name cost 51 characters of that budget and pushed the two longest wheel
+#: names over the limit in an ordinary Downloads folder, where Explorer left
+#: them out silently and the installer reported a missing file.
+BUNDLE_NAME = "aep-windows-preview-0.1.0"
+#: The longest path any file in the bundle may need once it is extracted the
+#: way people actually get it. Windows allows 259.
+MAX_EXTRACTED_PATH = 259
+#: The artefact name in `.github/workflows/verify.yml`, which GitHub turns
+#: into a folder around the zip when the artefact is downloaded.
+ARTEFACT_PREFIX = "aep-windows-preview-"
 TEXT_SUFFIXES = {".cmd", ".json", ".md", ".ps1", ".txt"}
 SECRET_ASSIGNMENT = re.compile(
     r"(?:password|api[_-]?key|access[_-]?token|secret[_-]?value)\s*[=:]\s*(?:\"[^\"]+\"|'[^']+'|\S+)",
@@ -35,6 +47,24 @@ REQUIRED_DEPENDENCIES = (
 )
 #: What `install.ps1` installs the platform wheel with.
 BUNDLED_EXTRAS = ("excel", "windows")
+
+
+def worst_case_path(relative: str) -> int:
+    """How long a file's path becomes once the bundle has been downloaded and
+    extracted the way people actually get it.
+
+    Measured from the install that failed on 2026-09-23: a Windows Downloads
+    folder, the artefact folder GitHub wraps the zip in (its name and a
+    40-character commit), the folder an extraction makes from the zip's own
+    name, and the bundle's own root inside it. Two of the wheels needed more
+    than 259 characters there, Explorer left them out without saying so, and
+    the installer could only report a missing file.
+    """
+    downloads = len(r"C:\Users\employee.name\Downloads") + 1
+    artefact = len(ARTEFACT_PREFIX) + 40 + 1
+    zip_folder = len(BUNDLE_NAME) + 1 + 12 + 1
+    bundle_root = len(BUNDLE_NAME) + 1
+    return downloads + artefact + zip_folder + bundle_root + len(relative)
 
 
 def digest(path: Path) -> str:
@@ -83,13 +113,18 @@ def build(
                 text = path.read_text(encoding="utf-8")
                 if SECRET_ASSIGNMENT.search(text):
                     raise ValueError(f"credential-like assignment found in {path.name}")
+        relatives = [path.relative_to(root).as_posix() for path in payload]
+        # A name nobody can extract is a bundle nobody can install, and the
+        # failure surfaces on the company computer rather than here.
+        if any(worst_case_path(relative) > MAX_EXTRACTED_PATH for relative in relatives):
+            raise ValueError("a bundled file would exceed the Windows path limit")
         files = [
             {
-                "path": path.relative_to(root).as_posix(),
+                "path": relative,
                 "sha256": digest(path),
                 "size": path.stat().st_size,
             }
-            for path in payload
+            for path, relative in zip(payload, relatives, strict=True)
         ]
         manifest = {
             "schema_version": "1",
