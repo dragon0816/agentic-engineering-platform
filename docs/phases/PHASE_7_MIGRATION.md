@@ -1333,3 +1333,22 @@ written with a space matches only what it means.
 
 The protected-sheet guard is not here. It belongs with the write, in slice
 4c, where it can refuse rather than assert.
+
+
+## Slice 3h — installing over a configured host keeps its configuration
+
+Raised by the owner asking whether an update means reinstalling. It did, and
+reinstalling threw away everything they had typed.
+
+`install.ps1` built `host.json` from its parameters and wrote it, so a second
+run replaced the file. The device identity and the workspace path are the
+installer's to write, but everything else in that file is an operator's work:
+the report's source, the workbook, which environment variable holds which
+secret, the shared platform. Losing it is silent, and the next run then fails
+for a reason that looks nothing like the cause.
+
+The installer now keeps every key it does not write itself, says which ones
+it kept, and refuses rather than overwrites a `host.json` it cannot read. The
+Windows job in CI installs over a configured host and checks that the
+integrations, the credential mapping and the device identity all come through
+the second install, because this is a path no unit test reaches.

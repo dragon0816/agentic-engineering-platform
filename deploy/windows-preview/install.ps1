@@ -102,7 +102,34 @@ $Config = [ordered]@{
 if (-not [string]::IsNullOrWhiteSpace($Namespace)) {
     $Config.namespace = $Namespace
 }
-$Config | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $InstallRoot "host.json") -Encoding UTF8
+# Keep what the operator added. The installer owns the device identity and
+# the workspace path and writes those afresh, but everything else in this
+# file was typed by hand: the Jira or project source, the workbook, which
+# environment variable holds which secret, the shared platform. Overwriting
+# it on an update loses all of that silently, and the run afterwards fails
+# for a reason that looks nothing like the cause.
+$ConfigPath = Join-Path $InstallRoot "host.json"
+if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
+    try {
+        $Existing = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+    }
+    catch {
+        throw ("There is a host.json at $ConfigPath that cannot be read: $($_.Exception.Message). " +
+            "Move it aside and run install.cmd again; everything in it was typed by hand, so it " +
+            "is not overwritten.")
+    }
+    $Kept = @()
+    foreach ($Property in $Existing.PSObject.Properties) {
+        if (-not $Config.Contains($Property.Name)) {
+            $Config[$Property.Name] = $Property.Value
+            $Kept += $Property.Name
+        }
+    }
+    if ($Kept.Count -gt 0) {
+        Write-Host ("Kept from the existing host.json: " + ($Kept -join ", "))
+    }
+}
+$Config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ConfigPath -Encoding UTF8
 & (Join-Path $Venv "Scripts\aep-host.exe") doctor --config (Join-Path $InstallRoot "host.json")
 if ($LASTEXITCODE -ne 0) { throw "Host doctor failed." }
 Write-Host "Installed the local-only preview at $InstallRoot"
