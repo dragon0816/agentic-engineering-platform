@@ -1,0 +1,246 @@
+{
+  "_comment": [
+    "W1 chipset parsing / mapping rules. Copy to config/chipset-map.json and edit.",
+    "Everything here is data: jobs/_chipset_rules.py contains no hardcoded chipset,",
+    "vendor, brand or technology knowledge. See docs/W1_MAPPING.md for the spec."
+  ],
+  "version": 1,
+
+  "split": {
+    "_comment": [
+      "The intended shape of a 'Chipset models' cell is a list of technology groups:",
+      "    <technology>: <chipset id>, <technology>: <chipset id>, ...",
+      "",
+      "  groupSeparators ','  -> a DIFFERENT TECHNOLOGY; each group becomes its own row.",
+      "     'WiFi: mtk7921+mtk7922, BT: IW416' therefore yields exactly TWO rows:",
+      "     'mtk7921+mtk7922' (wifi) and 'IW416' (bt). A newline does the same thing,",
+      "     because the sheet is not always filled in on a single line.",
+      "  compositionSeparators '+' -> ONE solution built from several dies; kept together",
+      "     in a single chipset string, matching how Chipset_requirement already records",
+      "     e.g. 'MT7977+MT7996+MT7988'.",
+      "  alternativeSeparators -> competing options for the SAME technology (the sheet",
+      "     sometimes writes 'A or B' while the decision is still open).",
+      "",
+      "Commas inside brackets ('Cellular(LTE, NR)') are NOT group separators."
+    ],
+    "groupSeparators": [","],
+    "alternativeSeparators": ["/", ";", "&", " or ", " OR ", " Or "],
+    "compositionSeparators": ["+"],
+    "keepCompositionTogether": true,
+    "composeSameVendorLines": true,
+    "lineSeparator": "\n",
+    "sharedPrefixExpansion": true,
+    "noiseTokens": [
+      "tbc", "tbd", "n/a", "na", "none", "null", "?", "-", "--", "x", "xx",
+      "ug", "or", "and", "under discussion", "under discussion either all", "either all",
+      "solution", "chipset", "chipsets", "chip", "family", "series", "project"
+    ],
+    "fillerWords": ["dual", "tri", "single", "quad", "band", "solution", "and", "the", "only"],
+    "roleWords": [
+      "soc", "bbic", "rfic", "radio", "switch", "mimo", "codename", "code-name",
+      "front", "end", "fem", "lna", "pa", "ic", "module", "mcu", "ancor", "anchor"
+    ],
+    "multiplicitySuffix": "(?:\\s+[*x]|\\s*\\*)\\s*\\d+\\s*$"
+  },
+
+  "vendors": {
+    "_comment": [
+      "nameTokens: literal vendor words that may appear inside the 'Chipset models'",
+      "cell. They set the vendor and are removed when building the match key, but are",
+      "kept in the displayed chipset string (Chipset_requirement does the same,",
+      "e.g. 'Qualcomm SDX35').",
+      "prefixRules are evaluated in order; first match wins."
+    ],
+    "canonicalOrder": [
+      "Qualcomm", "MediaTek", "Broadcom", "Realtek", "NXP", "Infineon",
+      "Nordic", "Qorvo", "STMicroelectronics", "Intel", "Quectel"
+    ],
+    "nameTokens": {
+      "qualcomm": "Qualcomm",
+      "qcom": "Qualcomm",
+      "qca": "Qualcomm",
+      "mediatek": "MediaTek",
+      "mediateck": "MediaTek",
+      "mtk": "MediaTek",
+      "broadcom": "Broadcom",
+      "boradcom": "Broadcom",
+      "brcm": "Broadcom",
+      "realtek": "Realtek",
+      "rtk": "Realtek",
+      "nxp": "NXP",
+      "infineon": "Infineon",
+      "infenion": "Infineon",
+      "cypress": "Infineon",
+      "nordic": "Nordic",
+      "nordique": "Nordic",
+      "qorvo": "Qorvo",
+      "stmicroelectronics": "STMicroelectronics",
+      "stmicroelectronic": "STMicroelectronics",
+      "stmicro": "STMicroelectronics",
+      "intel": "Intel",
+      "quectel": "Quectel"
+    },
+    "prefixRules": [
+      { "pattern": "^(QCA|QCN|QCM|QCC|QFW|IPQ|WCN|WSA|SDX|SDM|SDA|PSDX|QM3|FSM|SM8)", "vendor": "Qualcomm" },
+      { "pattern": "^CYW",                                                             "vendor": "Infineon" },
+      { "pattern": "^(BCM|BRCM)",                                                      "vendor": "Broadcom" },
+      { "pattern": "^MT[0-9]",                                                         "vendor": "MediaTek" },
+      { "pattern": "^(RTL|88[0-9]{2})",                                                "vendor": "Realtek" },
+      { "pattern": "^(IW[0-9]|RW[0-9]|K32W|MCX|SE05)",                                 "vendor": "NXP" },
+      { "pattern": "^(DW[0-9]|QM33)",                                                  "vendor": "Qorvo" },
+      { "pattern": "^(STLIV|STM32|ST[0-9])",                                           "vendor": "STMicroelectronics" },
+      { "pattern": "^(NRF|NORDIC)",                                                    "vendor": "Nordic" },
+      { "pattern": "^(BE[0-9]{3}|AX[0-9]{3})",                                         "vendor": "Intel" },
+      { "pattern": "^(EC2|RM5|RG5|BG9|EG9)",                                           "vendor": "Quectel" }
+    ]
+  },
+
+  "chipsetAliases": [
+    { "_c": "MTK7925 and MT7925 are the same part; Chipset_requirement uses MT####.",
+      "pattern": "^MTK[\\s\\-]*([0-9])", "replace": "MT\\1" },
+    { "_c": "BRCM 47722 -> BCM47722 (target convention).",
+      "pattern": "^BRCM[\\s\\-]*([0-9])", "replace": "BCM\\1" },
+    { "pattern": "^Nordique[\\s\\-]*([0-9])", "replace": "Nordic\\1" },
+    { "pattern": "^QCN[\\s\\-]+([0-9])", "replace": "QCN\\1" },
+    { "pattern": "^QCA[\\s\\-]+([0-9])", "replace": "QCA\\1" }
+  ],
+
+  "technology": {
+    "_comment": [
+      "canonical = the only values allowed in the target 'Technology' column",
+      "(plus 'TBD'). keywords are matched case-insensitively on word boundaries.",
+      "detailKeywords only feed the auditing column _TechDetail; they never change",
+      "the canonical Technology value."
+    ],
+    "canonical": ["wifi", "bt", "uwb", "cellular", "zigbee", "thread", "gnss", "lora"],
+    "unresolved": "TBD",
+    "keywords": {
+      "wifi": ["wifi", "wi-fi", "wi fi", "wlan", "802.11", "wifi6", "wifi7", "wifi8", "wifi6e"],
+      "bt": ["bt", "bluetooth", "ble", "bt5", "bt6"],
+      "uwb": ["uwb", "fira", "ccc"],
+      "cellular": ["cellular", "5gnr", "5g", "4g", "lte", "nr", "fr1", "fr2", "gsm", "wcdma", "redcap", "ntn", "fwa", "cbrs"],
+      "zigbee": ["zigbee", "802.15.4"],
+      "thread": ["thread", "matter"],
+      "gnss": ["gnss", "gps", "glonass", "beidou"],
+      "lora": ["lora", "lorawan"]
+    },
+    "detailKeywords": {
+      "wifi8": ["wifi 8", "wi-fi 8", "wifi8", "802.11bn"],
+      "wifi7": ["wifi 7", "wi-fi 7", "wifi7", "802.11be"],
+      "wifi6e": ["wifi 6e", "wi-fi 6e", "wifi6e"],
+      "wifi6": ["wifi 6", "wi-fi 6", "wifi6", "802.11ax"],
+      "bt6": ["bt 6", "bt6"],
+      "5g": ["5g", "5gnr", "nr"],
+      "lte": ["lte", "4g"]
+    },
+    "chipsetRules": [
+      { "pattern": "QCA6688",            "technologies": ["wifi", "bt"] },
+      { "pattern": "^QM3[0-9]",          "technologies": ["uwb"] },
+      { "pattern": "^DW1000",            "technologies": ["uwb"] },
+      { "pattern": "^(SDX|SDM|SDA|PSDX)","technologies": ["cellular"] },
+      { "pattern": "^(QFW|IPQ|QCN|WSA)", "technologies": ["wifi"] },
+      { "pattern": "^WCN[0-9]",          "technologies": ["wifi", "bt"] },
+      { "pattern": "^QCC[0-9]",          "technologies": ["bt"] },
+      { "pattern": "^QCA[0-9]",          "technologies": ["wifi"] },
+      { "pattern": "^CYW[0-9]",          "technologies": ["wifi", "bt"] },
+      { "pattern": "^BCM[0-9]",          "technologies": ["wifi"] },
+      { "pattern": "^MT(79|76|75|73)",   "technologies": ["wifi"] },
+      { "pattern": "^MT(83|66|63)",      "technologies": ["wifi"] },
+      { "pattern": "^RTL89[0-9]{2}",     "technologies": ["wifi", "bt"] },
+      { "pattern": "^RTL8[0-9]{3}",      "technologies": ["wifi"] },
+      { "pattern": "^IW4[0-9]{2}",       "technologies": ["wifi", "bt"] },
+      { "pattern": "^RW6[0-9]{2}",       "technologies": ["wifi", "bt"] },
+      { "pattern": "^STLIV",             "technologies": ["gnss"] },
+      { "pattern": "^Nordic5[0-9]",      "technologies": ["bt"] },
+      { "pattern": "^NRF5[0-9]",         "technologies": ["bt"] },
+      { "pattern": "^(BE|AX)[0-9]{3}",   "technologies": ["wifi", "bt"] },
+      { "_c": "Vendor code-names seen in the project lists; taken from the technology already recorded in Chipset_requirement.",
+        "pattern": "\\b(JUHU|Hermosa|Wakiki|Miami|Pebble|Trestle)\\b", "technologies": ["wifi"] }
+    ]
+  },
+
+  "brand": {
+    "_comment": [
+      "lineJoins: source cells where a newline is part of ONE company name rather",
+      "than a separator (e.g. 'American\\nBrand'). Key is the raw cell content with",
+      "newlines written as \\n; value is the resulting company list."
+    ],
+    "lineJoins": {
+      "American\nBrand": ["American Brand"],
+      "SpaceX\nand\nAmazon": ["SpaceX", "Amazon"],
+      "N/A\nprimarily target Charter": ["Charter"],
+      "Jio Reliance": ["Jio Reliance"]
+    },
+    "aliases": {
+      "orcale": "Oracle",
+      "cisco": "CISCO",
+      "sagemcom": "Sagemcom",
+      "sagemcomm": "Sagemcom",
+      "mircosoft": "Microsoft",
+      "r&d use": "R&D Use",
+      "softband": "SoftBank"
+    },
+    "dropTokens": ["n/a", "na", "and", "x", "tbd", "tbc", "-", "/"]
+  },
+
+  "mfg": {
+    "lineJoins": {},
+    "aliases": {
+      "foxconn-fih": "Foxconn",
+      "foxconn fih": "Foxconn",
+      "alpha": "ALPHA"
+    },
+    "dropTokens": ["n/a", "na", "x", "tbd", "tbc", "-", "/"]
+  },
+
+  "priority": {
+    "map": { "h": "High", "high": "High", "m": "Moderate", "med": "Moderate", "medium": "Moderate", "moderate": "Moderate", "l": "Low", "low": "Low" },
+    "rank": { "High": 3, "Moderate": 2, "Low": 1 },
+    "unknown": ""
+  },
+
+  "status": {
+    "_comment": "Source Status values that are excluded by default (case-insensitive).",
+    "excludeByDefault": ["lost"],
+    "newRowStatus": "Not Start"
+  },
+
+  "dri": {
+    "_comment": [
+      "Suggested owner for NEW rows only. Rows that match an existing",
+      "Chipset_requirement row always keep the DRI already recorded there.",
+      "byTechnology is checked before byVendor."
+    ],
+    "byTechnology": { "uwb": "Jundong" },
+    "byVendor": {
+      "Qualcomm": "Kevin Fang",
+      "MediaTek": "Jenny Chen",
+      "Realtek": "Jenny Teng",
+      "Broadcom": "Klaus Peng",
+      "NXP": "Klaus Peng",
+      "Infineon": "Klaus Peng",
+      "Intel": "Klaus Peng"
+    },
+    "fallback": "TBD"
+  },
+
+  "output": {
+    "_comment": [
+      "vendorDisplay 'every' writes the vendor on every row (best for reviewing the",
+      "temp sheet). 'groupFirst' reproduces the sparse group-header look of the",
+      "existing Chipset_requirement sheet."
+    ],
+    "vendorDisplay": "every",
+    "unknownBizMarker": "?",
+    "scheduleFormat": "%b. %Y",
+    "companyJoin": "\n",
+    "tracePrefix": "[W1-TRACE",
+    "colors": {
+      "header": "#D9D9D9",
+      "new": "#FFF2CC",
+      "tracked": "#E2EFDA",
+      "partial": "#DDEBF7",
+      "unresolved": "#FCE4D6"
+    }
+  }
+}

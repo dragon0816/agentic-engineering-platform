@@ -1,8 +1,7 @@
 # Handoff — Phase 7, workflow 10 is the active work
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #80 merged with its review applied. Slice 4a has
-not started.
+Branch: `phase-7/chipset-rules`, slice 4a committed and in review.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -11,8 +10,9 @@ the current work stopped and how to resume it, and is rewritten each time.
 
 The owner asked for **workflow 10**, `sales_to_chipset`: the CMP180 sales
 opportunity lists projected into the `temp` sheet of the chipset readiness
-workbook. It had never been inspected. It is now characterized in full and
-planned as four slices; no implementation has started.
+workbook. It had never been inspected. It is now characterized in full, planned as
+four slices, and slice 4a is built: the transformation is ported and the
+source's own 149 test cases pass against it.
 
 Read before continuing, in this order:
 
@@ -33,11 +33,16 @@ that run are in `docs/phases/PHASE_7_MIGRATION.md` and
 
 ## The next action
 
-Slice 4a: port `_chipset_rules.py` pure into
-`capabilities.chipset_report.rules`, with the source's 43 rule tests as the
-oracle and the ruleset as a typed contract. It is the largest slice and the
-only one with a safety net; everything after it has none, because the
-source's tests cover the job almost not at all.
+Slice 4b: reading, and the plan. `integrations.excel` reads row 1 as the
+headers and turns every cell into text; this workflow needs the target's
+headers from row 2, and needs real numbers and real dates to reach the rules,
+which tell them apart from their text spellings. Then the capabilities that
+read a project list and the target sheet, the planning capability, and the
+preview Workflow over them.
+
+From here on there is no safety net: the source's tests cover the rules and
+almost nothing else, so every test for the reads, the plan, the write and the
+change tracking is written here.
 
 Before writing code, apply `.agents/skills/architecture-guard/SKILL.md` and
 `.agents/skills/contract-development/SKILL.md`. The migration rule this phase
@@ -57,6 +62,9 @@ preserved defect rather than fixing it in passing.
   copied the staged workbook back and called it a success. Both are checked
   against a stand-in for Excel.
 - Workflow 10 is characterized and planned.
+- Slice 4a is built: the rules, the typed ruleset and the shipped default,
+  with the source's tests passing case for case and five source defects
+  fixed, each with a test naming it.
 
 ## Open items for the owner
 
@@ -96,7 +104,7 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 938 passed, 4 skipped, everything else clean. Three skips
+At this commit: 1094 passed, 4 skipped, everything else clean. Three skips
 need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
 CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
 3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`

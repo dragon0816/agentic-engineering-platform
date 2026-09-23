@@ -38,7 +38,10 @@ windows = ["pywin32>=306"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["py.typed"]
+# The chipset report's ruleset is data the package ships, not configuration a
+# host has to supply: a host may point at its own file, and without one the
+# shipped default is what runs.
+"*" = ["py.typed", "*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
