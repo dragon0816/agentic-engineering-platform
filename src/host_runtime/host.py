@@ -12,6 +12,7 @@ pieces together and adds no authority. The policy decides every dispatch,
 the engine decides every workflow, and the Agent decides who may ask.
 """
 
+import os
 from collections.abc import Callable
 from pathlib import Path
 from types import TracebackType
@@ -449,11 +450,20 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
             detail="no project board or weekly report is configured; only the file capability runs",
         )
     problems: list[str] = []
-    if (
-        integrations.github_project is not None
-        and integrations.github_project.credential.name not in config.credential_environment()
-    ):
-        problems.append("the board token's secret is not mapped to an environment variable")
+    if integrations.github_project is not None:
+        mapped = config.credential_environment()
+        variable = mapped.get(integrations.github_project.credential.name)
+        if variable is None:
+            problems.append("the board token's secret is not mapped to an environment variable")
+        elif not os.environ.get(variable):
+            # Reading whether a variable is set is not reading its value, and
+            # this is the one thing between a host that looks configured and
+            # a run that fails at the first fetch. `setx` on Windows sets it
+            # for the next process, not this one, which is how a host passes
+            # its own doctor and then cannot fetch anything.
+            problems.append(
+                f"the board token's environment variable {variable} is not set in this session"
+            )
     settings = integrations.weekly_report
     if settings is not None:
         if integrations.github_project is None:
