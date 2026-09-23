@@ -69,8 +69,12 @@ def test_doctor_is_side_effect_free_and_reports_every_local_requirement(tmp_path
     limitations = " ".join(report.limitations)
     # What the preview cannot do is stated, and what it now can do is not
     # claimed as a limitation: the weekly report runs here once configured.
+    # Matching the phrasing rather than a number, because the number was
+    # wrong until slice 3f and a negative assertion carrying it said nothing.
     assert "workflow 13" in limitations and "Enrollment" in limitations
-    assert "cannot execute workflow 11" not in limitations
+    unable = [line for line in report.limitations if "cannot execute" in line]
+    assert unable == [line for line in unable if "workflow 13" in line], unable
+    assert any("weekly report" in line and "needs" in line for line in report.limitations)
     assert tuple(tmp_path.iterdir()) == before
 
 
