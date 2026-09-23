@@ -51,6 +51,11 @@ def _parser() -> argparse.ArgumentParser:
     ask.add_argument("--actor", help="the platform actor to act as; the device owner by default")
     ask.add_argument("--namespace", help="the namespace to address; this host's by default")
     ask.add_argument("--json", action="store_true")
+    ask.add_argument(
+        "--output",
+        type=Path,
+        help="write the answer to this file as UTF-8, rather than to the screen",
+    )
     ask.add_argument("message", help="a skill command such as release.package, or a description")
     status = commands.add_parser("status", help="what this Bridge has installed and has run")
     status.add_argument("--config", required=True, type=Path)
@@ -139,24 +144,27 @@ def _print_report(report: HostDoctorReport) -> None:
         print(f"LIMITATION: {limitation}")
 
 
-def _print_outcome(outcome: LocalAgentOutcome) -> None:
+def _outcome_text(outcome: LocalAgentOutcome) -> str:
+    """What happened, in the words a person reads. Rendered rather than
+    printed, so the screen and a file say the same thing."""
     if outcome.refusal is not None:
-        print(f"refused: {outcome.refusal}")
-        return
+        return f"refused: {outcome.refusal}"
+    lines: list[str] = []
     decision = outcome.decision
     if decision is not None:
         target = decision.target
         named = f" {target.namespace}/{target.name}@{target.version}" if target else ""
-        print(f"route: {decision.kind}{named} ({decision.reason})")
+        lines.append(f"route: {decision.kind}{named} ({decision.reason})")
     if outcome.capability is not None:
-        print(f"capability: {outcome.capability.status}")
+        lines.append(f"capability: {outcome.capability.status}")
     if outcome.workflow is not None:
         run = outcome.workflow.run
-        print(f"run {run.run_id}: {run.status}, {run.completed_steps} step(s) completed")
+        lines.append(f"run {run.run_id}: {run.status}, {run.completed_steps} step(s) completed")
         if run.failure is not None:
-            print(f"failure: {run.failure.code}")
+            lines.append(f"failure: {run.failure.code}")
     if outcome.unrecorded is not None:
-        print(f"the run record could not be written: {outcome.unrecorded}")
+        lines.append(f"the run record could not be written: {outcome.unrecorded}")
+    return chr(10).join(lines)
 
 
 ContractT = TypeVar("ContractT", bound=Contract)
@@ -193,7 +201,12 @@ def _manifests(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]
 
 
 def _ask(
-    runtime: HostRuntime, message: str, actor: str | None, namespace: str | None, as_json: bool
+    runtime: HostRuntime,
+    message: str,
+    actor: str | None,
+    namespace: str | None,
+    as_json: bool,
+    output: Path | None,
 ) -> int:
     chosen = namespace if namespace is not None else runtime.config.namespace
     if chosen is None:
@@ -219,10 +232,16 @@ def _ask(
         print("that request was refused before it was routed", file=sys.stderr)
         return 2
     outcome = asyncio.run(runtime.agent.handle(request))
-    if as_json:
-        print(outcome.model_dump_json(indent=2))
+    rendered = outcome.model_dump_json(indent=2) if as_json else _outcome_text(outcome)
+    if output is not None:
+        # Written here, in UTF-8, rather than redirected by the shell.
+        # Windows PowerShell's `>` writes UTF-16, so what lands in the file
+        # is then not the JSON anybody asked for, and the answer carries the
+        # team's own data: it has to arrive as itself.
+        output.write_text(rendered + "\n", encoding="utf-8")
+        print(f"wrote {output}")
     else:
-        _print_outcome(outcome)
+        print(rendered)
     return 0 if outcome.refusal is None else 1
 
 
@@ -364,7 +383,28 @@ def _jobs(runtime: HostRuntime, once: bool, interval: float) -> int:
         return 0
 
 
+def _write_in_utf8() -> None:
+    """Say what happened in UTF-8, whatever code page this console has.
+
+    A Windows console outside the English-speaking world is not UTF-8, and
+    what this prints is the team's own data: a project board's titles and
+    comments. Printing them through a legacy code page raises
+    `UnicodeEncodeError` part way through, which is a crash in place of an
+    answer, and it happens on the machines this platform is for and on none
+    of the machines it is written on.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8")
+        except (OSError, ValueError):  # pragma: no cover - a stream that will not
+            continue
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    _write_in_utf8()
     args = _parser().parse_args(argv)
     if args.command == "version":
         print(_package_version())
@@ -406,7 +446,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     with runtime:
         if args.command == "ask":
-            return _ask(runtime, args.message, args.actor, args.namespace, args.json)
+            return _ask(runtime, args.message, args.actor, args.namespace, args.json, args.output)
         if args.command == "status":
             return _status(runtime, args.json)
         if args.command == "probe":
