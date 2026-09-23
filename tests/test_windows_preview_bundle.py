@@ -138,7 +138,8 @@ def test_a_name_too_long_to_extract_is_refused_where_it_is_built(
     repo = Path(__file__).resolve().parents[1]
     platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
     platform_wheel.write_bytes(b"platform-wheel")
-    with pytest.raises(ValueError, match="Windows path limit"):
+    refusal = r"agentic_engineering_platform.*would need a 276 character path"
+    with pytest.raises(ValueError, match=refusal):
         build(
             repo=repo,
             platform_wheel=platform_wheel,
@@ -146,3 +147,14 @@ def test_a_name_too_long_to_extract_is_refused_where_it_is_built(
             output_dir=tmp_path / "output",
             revision="c" * 40,
         )
+
+
+def test_the_builders_artefact_name_is_the_one_the_workflow_uses() -> None:
+    """The build-time guard counts the folder GitHub wraps the zip in, so it
+    is only right while the workflow agrees. Renaming the artefact alone would
+    make the guard under-count and re-open the incident it prevents."""
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "verify.yml"
+    ).read_text(encoding="utf-8")
+    assert f"name: {build_windows_preview.ARTEFACT_PREFIX}${{{{ github.sha }}}}" in workflow
+    assert f"path: dist/{BUNDLE_NAME.rsplit('-', 1)[0]}-*.zip" in workflow

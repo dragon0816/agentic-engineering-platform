@@ -1116,8 +1116,10 @@ reads as a broken download and sends the reader to the wrong place.
 1. The bundle's own names are the only part of that path we control, so they
    shrink: `aep-windows-preview-0.1.0` in place of
    `agentic-engineering-platform-windows-preview-0.1.0`, and the same for the
-   CI artefact. At the location that failed the longest path falls from 268
-   to 209, leaving fifty characters for a longer user name or a deeper folder.
+   CI artefact. At the exact location that failed the longest path falls
+   from 268 to 209 characters, and the budget the builder enforces, which
+   assumes a longer Windows user name, falls from 276 to 217. Either way
+   there are more than forty characters left for a deeper folder.
 2. `worst_case_path` states the arithmetic — Downloads, the artefact folder,
    the extracted folder, the bundle root, the file — and the builder refuses
    to produce a bundle any of whose files would exceed it. The failure now

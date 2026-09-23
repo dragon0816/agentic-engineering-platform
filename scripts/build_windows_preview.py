@@ -23,7 +23,10 @@ BUNDLE_NAME = "aep-windows-preview-0.1.0"
 #: way people actually get it. Windows allows 259.
 MAX_EXTRACTED_PATH = 259
 #: The artefact name in `.github/workflows/verify.yml`, which GitHub turns
-#: into a folder around the zip when the artefact is downloaded.
+#: into a folder around the zip when the artefact is downloaded. Renaming the
+#: artefact there without changing this would make the guard below under-count
+#: and re-open the incident it exists to prevent, so a test reads the workflow
+#: and holds the two together.
 ARTEFACT_PREFIX = "aep-windows-preview-"
 TEXT_SUFFIXES = {".cmd", ".json", ".md", ".ps1", ".txt"}
 SECRET_ASSIGNMENT = re.compile(
@@ -115,9 +118,20 @@ def build(
                     raise ValueError(f"credential-like assignment found in {path.name}")
         relatives = [path.relative_to(root).as_posix() for path in payload]
         # A name nobody can extract is a bundle nobody can install, and the
-        # failure surfaces on the company computer rather than here.
-        if any(worst_case_path(relative) > MAX_EXTRACTED_PATH for relative in relatives):
-            raise ValueError("a bundled file would exceed the Windows path limit")
+        # failure surfaces on the company computer rather than here. Name the
+        # file and its length: whoever sees this has to know which name to
+        # shorten and by how much.
+        too_long = [
+            (relative, worst_case_path(relative))
+            for relative in relatives
+            if worst_case_path(relative) > MAX_EXTRACTED_PATH
+        ]
+        if too_long:
+            worst, length = max(too_long, key=lambda item: item[1])
+            raise ValueError(
+                f"{worst} would need a {length} character path once the bundle is "
+                f"downloaded and extracted, and Windows allows {MAX_EXTRACTED_PATH}"
+            )
         files = [
             {
                 "path": relative,
