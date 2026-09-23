@@ -1,18 +1,26 @@
 # Handoff — Phase 7, workflow 7 needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #70 (slice 3b) merged with its review applied.
+Branch: `phase-7/preview-weekly-report`, slice 3c committed and in review.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Where this stopped
 
-Workflow 7 is complete in code and nothing is in flight. A company host can
-resolve the week, fetch the week's Jira issues with their comment threads,
-read the scratch sheet without Excel, plan every row and cell operation, and
-write that plan into the workbook through Excel. `weekly preview` is the dry
-run and its own asset; `weekly apply` writes.
+Workflow 7 is complete in code and the Windows preview bundle now carries it.
+A company host can resolve the week, fetch the week's Jira issues with their
+comment threads, read the scratch sheet without Excel, plan every row and cell
+operation, and write that plan into the workbook through Excel. `weekly
+preview` is the dry run and its own asset; `weekly apply` writes.
+
+Slice 3c (this branch) fixed the install, not the behaviour. **This platform
+is published to no package index**, so every earlier instruction of the form
+`pip install agentic-engineering-platform[...]` was impossible; the owner hit
+exactly that on a company computer, against the corporate index. The offline
+bundle is the supported install, it now carries the `excel` and `windows`
+extras as wheels, the builder refuses a bundle missing one, and CI imports
+them out of the installed bundle.
 
 **What is left cannot be done from here.** Migration step 5 is a parity gate,
 and its evidence comes from a real company workstation with Excel and Jira
@@ -26,8 +34,14 @@ machine, so it is written to the documented COM object model and exercised
 only through a recording writer — the same caveat the model adapters carry
 (`docs/TASKS.md`, open items). To close step 5:
 
-1. `pip install "agentic-engineering-platform[office,windows]"` on the
-   company workstation.
+1. Install the offline bundle on the company workstation: take the
+   `agentic-engineering-platform-windows-preview-*.zip` from the run's
+   artefacts (or build it with `scripts/build_windows_preview.py`), extract
+   it, and run `install.cmd -Actor <your.id>`. It installs with `--no-index`
+   from its own `wheels/`, so a company pip index is neither needed nor
+   consulted, and no pip setting has to change. **The platform is not
+   published to any package index**, so `pip install
+   agentic-engineering-platform` cannot work and never could.
 2. Configure `integrations.jira` and `integrations.weekly_report` in
    `host.json` (`deploy/windows-preview/README.md` has the shape), with
    `workbook_path` pointing at **a copy** of `SDE_Weekly_Report.xlsx`, and
@@ -88,11 +102,11 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 916 passed, 4 skipped, everything else clean. Three skips
+At this commit: 917 passed, 4 skipped, everything else clean. Three skips
 need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
 CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
-3.12. The weekly-report tests need the `office` extra (`openpyxl`); none of
-them needs Excel.
+3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`
+extra, which `office` also contains); none of them needs Excel or `pywin32`.
 
 ## Open items for the owner
 
@@ -100,9 +114,11 @@ them needs Excel.
   checked on 2026-09-23 and the finding is in `docs/TASKS.md`: the Telegram
   bot token is already dead and the GitLab one is for a local WSL2 Docker
   instance that is not running, so neither is live. This repository never
-  carried either (`.scratch/` is gitignored). Both remain in that
-  repository's history; scrubbing it would move the commit the Phase 7
-  rollback baseline is pinned to, so it belongs with the cutover.
+  carried either (`.scratch/` is gitignored). Revoking them is still the
+  owner's to do: the Telegram token through @BotFather, the GitLab token in
+  that instance once WSL2 is running. Both remain in that repository's
+  history; scrubbing it would move the commit the Phase 7 rollback baseline
+  is pinned to, so it belongs with the cutover.
 - Whether a tool approval must come from a second person is an owner policy
   decision nobody has asked for.
 - Taking somebody off a shared machine is still a host action, not a platform

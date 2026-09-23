@@ -21,6 +21,10 @@ dev = [
     # Stubs for openpyxl (Apache-2.0), so the workbook reader type-checks.
     "types-openpyxl>=3.1,<4",
 ]
+# Reading a workbook without Excel (Phase 7 slice 3a). Named on its own so a
+# company Bridge running the weekly report installs a spreadsheet reader and
+# not the whole PDF/PPTX/DOCX stack; `office` includes it.
+excel = ["openpyxl>=3.1,<4"]
 # Office extraction (Phase 4 slice 3); licenses recorded in docs/PHASE_4_MIGRATION.md.
 # openpyxl (MIT) reads the weekly workbook without Excel (Phase 7 slice 3a);
 # recorded in docs/PHASE_7_MIGRATION.md.

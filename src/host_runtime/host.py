@@ -458,7 +458,8 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
             excel.require_library()
         except excel.WorkbookError:
             problems.append(
-                "openpyxl is not installed; install the office extra to read the workbook"
+                "openpyxl is not installed; the Windows preview bundle carries it, "
+                "and a source checkout installs it with the `excel` extra"
             )
         if not Path(settings.workbook_path).is_file():
             problems.append("the weekly workbook is not at the configured path")
