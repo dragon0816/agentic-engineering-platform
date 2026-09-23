@@ -1593,7 +1593,10 @@ that service on a standard-library `ThreadingHTTPServer`: `POST
 /v1/<operation>` with `Authorization: Bearer <token_id>:<secret>`, a 4 MiB
 body limit refused before reading, a chunked body refused, one request per
 connection (`Connection: close`, so a refused body is never parsed as the next
-request), an unauthenticated `GET /v1/health`, no request logging, no software
+request; a refusal sent *before* the body was read then swallows what the
+client already sent, briefly and boundedly, because a socket closed with
+unread data is reset rather than finished and a reset discards the refusal
+itself), an unauthenticated `GET /v1/health`, no request logging, no software
 name, and an optional `ssl.SSLContext` that wraps the socket. It serves the
 in-memory references; a durable platform store is a later slice.
 
@@ -1756,6 +1759,88 @@ shorter) is how long a caller waits before the Agent reports a run still
 running; `LocalAgent(workflow_wait_seconds=)` applies it on every ingress.
 The `integrations` check fails when the weekly report is configured without
 a Jira site.
+
+## Workflow 7: writing the plan into the workbook (Phase 7, slice 3b)
+
+`integrations.excel_writer` is the writing vocabulary, typed: `Fill` (a
+`colour` of None clears, which is not white — Excel reports an unfilled cell
+as white and only `ColorIndex = xlNone` means no fill), `FontColour`,
+`Border`, `Hyperlink` (whose `formula` is an `=HYPERLINK()`, never a COM
+Hyperlink object, because those leak references and keep Excel alive),
+`TextRun` for a rich cell and `UpsertResult` (what was inserted and updated,
+and where each key landed). `WorkbookWriter` is the protocol the executor
+speaks: `backup`, `ensure_sheet`, `upsert`, `fills`, `format`, `cell_text`,
+`rich_prepend`, `set_rich`, `close`. `hyperlink_formula`, `column_letter`,
+`header_index` (case-insensitive, `header_missing` when absent) and
+`plain_key` (a key cell already holding our formula reads back as the bare
+key) are its pure helpers. `workbook_is_open` is a filesystem check, not a
+COM one, because it has to be answerable without opening the file;
+`stage_workbook` and `unstage_workbook` copy the workbook somewhere no sync
+client is watching and put it back once, retrying a lock for thirty seconds.
+`WorkbookWriteError` codes are `library_missing`, `workbook_missing`,
+`workbook_open`, `workbook_unwritable`, `sheet_missing`, `header_missing` and
+`write_failed`, and nothing else travels.
+
+`ExcelComWriter` is the one adapter and the only thing that knows about COM
+(`pywin32`, the `windows` extra, imported lazily). It carries the source's
+`_excel_upsert` rules: the last data row comes from the used range because
+hidden rows count, only managed headers are ever written so the hand-kept
+`Comments` column survives, and header matching is case-insensitive.
+**The suite never exercises it**: there is no Excel in CI, so every test
+drives a recording writer as the source's own tests did, and the adapter is
+unproven until the owner runs it — recorded in `docs/TASKS.md` beside the
+model adapters, which carry the same caveat.
+
+`capabilities.weekly_report.apply.apply_plan(plan, settings, writer,
+staging_root=)` executes a plan in the source's order, which is the order
+that makes the marks mean what they say: back up, stage, verify, ensure the
+scratch sheet, upsert, **retire last week's marks across the whole sheet**
+(the `Comments` column to the tail colour, the `Key` column's fill cleared,
+and only the `Status` cells holding exactly this job's pink — the member's
+own colours are read and left alone), tint what gained content, border and
+pink what is new, recolour the blocks already present, link every key, then
+prepend each block in red with a black tail. A block the writer reports as
+already at the top is recoloured instead, because the reset has just turned
+it black. A comment cell that cannot be written is recorded and the week's
+report goes on, as the source did.
+
+`ApplyRefused` is a `CapabilityRefused` whose code the member sees on the
+failed step: `sheet_changed` (the plan carries the scratch sheet's digest as
+it stood, and a sheet somebody has changed since — or one somebody has since
+*made*, when the plan was made without one — is refused, not written),
+`header_missing`, `workbook_missing`, `workbook_open`, and
+`write_back_failed`, which says the report was written and saved and only the
+copy back failed, so the finished workbook is the staged one. The guard runs
+before anything is copied or backed up, so a refused run leaves nothing
+behind. A run that does not
+finish closes without saving, leaves the real workbook exactly as it was and
+names the staged copy. `WeeklyReportApplied` is the evidence: the digests
+before and after, the backup's path, the staged path, every count the source
+reported and each `FailedComment`; `evidence_lines(applied, plan)` is what
+the parity gate reads.
+
+`WeeklyReportPlan` gains `scratch_present`, `seed_sheet`, `browse_base`
+(taken from the issues themselves) and `sheet_headers` so a writer needs
+nothing but the plan, and `WeeklyReportSettings` gains `local_staging`. The
+column letters come from `sheet_headers`, the member's own header row, so the
+write lands where the preview said it would even on a sheet whose layout
+differs from the column contract. The managed headers are the columns the
+job writes and **never `Comments`**: a writer sets every managed header from
+the record it is given, the record has no comments, and naming the column
+would blank the hand-kept log on every planned row.
+`capabilities.weekly_report.handlers.APPLY_SPEC` is the first capability in
+this repository with a side effect: `write`, `approval_required`, so the
+Bridge policy refuses it unless the member's decision carries an
+`approval_ref`. The Workflow `engineering/jira-weekly-report` is the
+preview's four steps plus apply; `jira-weekly-report-preview` is unchanged,
+so a member can still be given the dry run alone, and the `weekly` Skill
+gains `apply` beside `preview`, which stays the default.
+
+`capabilities.runtime.CapabilityRefused(code)` is new and general: a handler
+refusing what it was asked to do with a code of its own, which
+`BridgeExecutor` puts on the failure. The handler's *message* still never
+travels — it may quote the input or the data it reached — but the reason now
+does.
 
 `workflow.dispatch.BridgeExecutor` now validates a step's inputs strictly
 against JSON (`model_validate_json(json.dumps(arguments), strict=True)`)

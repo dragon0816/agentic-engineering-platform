@@ -1,63 +1,93 @@
-# Handoff — Phase 7, the workbook writer waits on an owner decision
+# Handoff — Phase 7 slice 3b, writing the weekly report
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #68 (slice 3a) merged with two review rounds applied.
+Branch: `phase-7/weekly-report-writer`, ahead of `main` by this slice's work.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
+## Goal
+
+Slice 3a stopped at the plan. This is the other half: executing it against
+the team's workbook, with the parity gate's evidence on both sides of the
+write.
+
+Requirements: the "Slice 3b" section of `docs/phases/PHASE_7_MIGRATION.md`.
+Contracts: `docs/CONTRACTS.md`, "Workflow 7: writing the plan into the
+workbook". Source characterization and decisions: `docs/PHASE_7_MIGRATION.md`,
+"Workflow 7".
+
+## The decision that was taken, and by whom
+
+The owner was given both options and a recommendation, and asked for the
+slice to be finished. **Excel through COM on the company workstation** is
+what the writer does, recorded as a delegated owner decision in
+`docs/TASKS.md`. It is reversible: the executor writes through a
+`WorkbookWriter` protocol and knows nothing about COM, so another adapter
+replaces it and nothing else changes.
+
+## What this slice added
+
+- `src/integrations/excel_writer.py` — the typed operations, the
+  `WorkbookWriter` protocol, the staging helpers, and `ExcelComWriter`.
+- `src/capabilities/weekly_report/apply.py` — the ordered executor and
+  `evidence_lines`.
+- `WeeklyReportApplied` and `FailedComment`; `WeeklyReportPlan` gained
+  `scratch_present`, `seed_sheet`, `browse_base`; settings gained
+  `local_staging`.
+- `APPLY_SPEC` / `ApplyHandler`, the `engineering/jira-weekly-report`
+  Workflow, and `weekly apply` on the Skill.
+- `capabilities.runtime.CapabilityRefused` — a handler may now name its own
+  refusal, and `BridgeExecutor` puts that code on the failed step.
+- `pywin32` in a new `windows` extra.
+
+## Verification
+
+Run on Windows in `.venv` (Python 3.12) at the head of this branch:
+
+- `python -m pytest -q -p no:cacheprovider` — **916 passed, 4 skipped**. Three
+  skips need symbolic-link privileges and one needs an IPv6 loopback; all
+  four run on Linux CI.
+- `ruff check .` — clean. `ruff format --check .` — clean.
+- `mypy` — no issues in 147 source files.
+- `pip check` — no broken requirements. `python -m build` — both artifacts
+  built. `git diff --check` — clean.
+
 ## Where this stopped
 
-Slice 3a is merged and nothing is in flight. Workflow 7, the GTM weekly
-report, runs on a company host up to its plan: the week resolved, the Jira
-issues fetched with their comment threads, the scratch sheet read without
-Excel, and every row and cell operation decided and previewed. Nothing yet
-writes the workbook. The next slice, 3b, is the writer, and it cannot start
-until the owner has chosen how the workbook is written.
+The work is complete and verified locally. Not yet done:
 
-## The decision the owner has to make
+1. Open the pull request from `phase-7/weekly-report-writer` into `main`.
+2. Run `/code-review` on it and apply the findings, as every earlier slice did.
+3. Watch CI, then merge, and set the `3b` row in `docs/TASKS.md` to `done`
+   with its pull request number.
 
-**How the platform writes the workbook.** The pinned Host Bridge drives Excel
-through COM on the Windows machine: it upserts rows, resets and applies fills
-and borders, prepends a red rich-text block with a black tail, and writes
-`=HYPERLINK()` formulas, staging the workbook to a local copy and writing it
-back once. Two ways to carry that here:
+## The one thing only the owner can do next
 
-- **COM on the company Bridge** (`pywin32`, Windows only, Excel installed).
-  Faithful to the source, including per-character colour runs and every
-  workbook feature Excel preserves. Cannot run in CI; tested through a fake
-  the way the source tested it.
-- **A library (`openpyxl`)**, portable and testable in CI, already reading
-  the workbook. Rewriting a 75-sheet, hand-formatted, 1.1 MB workbook with it
-  risks dropping what `openpyxl` does not model (charts, images, some
-  formatting); rich-text runs survive only when loaded with `rich_text=True`.
+**`ExcelComWriter` has never been run.** There is no Excel in CI and none on
+this machine, so it is written to the documented COM object model and
+exercised only through a recording writer — exactly as the pinned source's
+own tests exercised its Bridge, and the same caveat the model adapters carry
+(`docs/TASKS.md`, open items). Migration step 5's parity evidence needs a
+company workstation with Excel and Jira credentials:
 
-The parity gate says only `weekly report temp` changes and the other sheets
-remain unchanged; that is easy to claim with COM and has to be measured with
-a library. Recommendation: COM for the writer, behind the same typed plan,
-with `openpyxl` kept for reading and for the sheet digests before and after.
+1. Install with `pip install "agentic-engineering-platform[office,windows]"`.
+2. Configure `integrations.jira` and `integrations.weekly_report` in
+   `host.json` (`deploy/windows-preview/README.md` has the shape), pointing
+   `workbook_path` at **a copy** of `SDE_Weekly_Report.xlsx`.
+3. `aep-host ask --config host.json "weekly.preview 2026_31W"` and read the
+   plan; then `weekly.apply` against the copy.
+4. Run the old Host Bridge's `jobs.jira_weekly_report` for the same week
+   against another copy, and compare against the parity gate in
+   `docs/phases/PHASE_7_MIGRATION.md`: the same Jira key set, only
+   `weekly report temp` changed, rows upserted by key, blocks prepended once
+   in red with the older text black, a repeat run duplicating nothing, and
+   the marks retired.
+5. The evidence is in the run's own output: `WeeklyReportApplied` carries the
+   digests before and after, the backup's path and every count;
+   `evidence_lines(applied, plan)` renders what the gate reads.
 
-## What 3a settled, because 3b builds on it
-
-- `WeeklyReportPlan` is the contract a writer executes: rows to upsert by
-  key, new and updated keys, the blocks to prepend with their markers, the
-  blocks already present that only need their colour back, the keys to
-  tint, and the digest of the scratch sheet as it stood when the plan was
-  made. A writer that finds a different digest is looking at a sheet that
-  changed since planning.
-- The source's `_excel_upsert` rules are carried forward for the writer, not
-  ported yet: the last data row from the used range (hidden rows count),
-  only managed headers written, case-insensitive header matching, the key
-  as a `=HYPERLINK()` formula; and the job's own order of operations: reset
-  last week's marks across the whole sheet, tint, border and pink the new
-  rows, recolour the blocks already present, link every key, rich-prepend
-  with `tailColor` black.
-- A step's handler that raises `ValueError` fails the step as
-  `invalid_input`; a Jira outage is `TransientCapabilityError`; every other
-  failure fails the step and so the run, with no false success.
-- The host's step cap is `capability_timeout_seconds` (600) and a caller's
-  wait `workflow_wait_seconds` (900); a step that outlives the cap keeps its
-  thread until it ends.
+Whatever that run finds comes back here as the next slice's requirements.
 
 ## How to verify
 
@@ -73,24 +103,17 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 897 passed, 4 skipped, everything else clean. Three skips
-need symbolic-link privileges and one an IPv6 loopback; all four run on
-Linux CI, which runs the same chain on Windows and Ubuntu against Python 3.11
-and 3.12. The weekly-report tests need the `office` extra (`openpyxl`).
+The weekly-report tests need the `office` extra (`openpyxl`); none of them
+needs Excel.
 
-## Next, once the owner has chosen
+## Open items for the owner
 
-Slice 3b, the writer: a `weekly-report/apply` capability with a side effect
-and an approval, executing the plan through the chosen writer behind a typed
-executor the way the source's `sync_sheet` did, staging and write-back, the
-`after` digest beside the `before`, the Workflow `jira-weekly-report` with the
-apply step after the plan, and the parity evidence exported for the Phase 6
-harness. Then the live comparison against the working old Host Bridge on
-the company Bridge, which CI never claims. Then workflow 13, knowledge
-parity, and controlled cutover.
-
-## Open item for the owner
-
-The pinned `telegram-local-agent` source's `config.yaml` commits a Telegram bot
-token and a GitLab personal access token. Neither was copied into this
-repository. Revoking them is an action in that repository, not this one.
+- The leaked credentials in the pinned `telegram-local-agent` source were
+  checked on 2026-09-23 and the finding is recorded in `docs/TASKS.md`: the
+  Telegram bot token is already dead, and the GitLab one is for a local WSL2
+  Docker instance that is not running. Neither is live, and this repository
+  never carried either. What remains is that both sit in that repository's
+  history; scrubbing it would move the commit the Phase 7 rollback baseline
+  is pinned to, so it belongs with the cutover.
+- Whether a tool approval must come from a second person is still an owner
+  policy decision nobody has asked for (`docs/TASKS.md`, open items).

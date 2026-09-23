@@ -11,9 +11,7 @@ from pydantic import Field, StrictBool, StringConstraints, model_validator
 from capabilities.weekly_report import rules
 from common.assets import reject_embedded_secrets
 from common.base import Contract, Sha256, Symbol, Text
-
-Colour = Annotated[str, StringConstraints(pattern=r"^#[0-9A-Fa-f]{6}$")]
-BorderStyle = Literal["thin", "medium", "none"]
+from integrations.excel_writer import BorderStyle, Colour
 
 
 class WeeklyReportSettings(Contract):
@@ -44,6 +42,9 @@ class WeeklyReportSettings(Contract):
     comment_tail_color: Colour = "#000000"
     new_row_fill: Colour = "#FFC7CE"
     new_row_border: BorderStyle = "thin"
+    # Drive a local copy and write it back once, which the source measured at
+    # 137s against 1001s in a synced folder. Off drives the real file in place.
+    local_staging: StrictBool = True
 
     @model_validator(mode="after")
     def absolute_and_secret_free(self) -> Self:
@@ -239,7 +240,16 @@ class WeeklyReportPlan(Contract):
     issue_keys: tuple[str, ...] = ()
     # Whether the cap cut the search short: a partial week is said to be one.
     capped: bool = False
+    # The scratch sheet as it stood when this was planned. A writer that finds
+    # a different digest is looking at a sheet somebody has changed since.
     sheet_digest: Sha256
+    scratch_present: StrictBool = False
+    seed_sheet: Text | None = None
+    # The sheet's own header row, so a writer addresses the columns the
+    # member actually has rather than the ones the contract names.
+    sheet_headers: tuple[str, ...] = ()
+    # The Jira site the key cells link to, taken from the issues themselves.
+    browse_base: Text | None = None
     preview: str
 
     @model_validator(mode="after")
@@ -263,4 +273,43 @@ class WeeklyReportPlan(Contract):
             f"{len(self.updated_keys)} updated); "
             f"{len(self.comment_operations)} comment block(s) to prepend, "
             f"{len(self.remarks)} to recolour, {len(self.skipped)} skipped"
+        )
+
+
+class FailedComment(Contract):
+    """A comment cell the writer could not write. The source kept going and
+    reported these rather than failing the week's report over one cell, and
+    so does this; they are in the evidence either way."""
+
+    key: Symbol
+    reason: Text
+
+
+class WeeklyReportApplied(Contract):
+    """What writing the plan did, and the evidence the parity gate names:
+    the scratch sheet's digest on both sides of the write, the backup that
+    was taken, and every count the source reported."""
+
+    week: Text
+    workbook: Text
+    sheet: Text
+    digest_before: Sha256
+    digest_after: Sha256
+    backup_path: Text | None = None
+    staged_path: Text | None = None
+    inserted: int = Field(ge=0, strict=True)
+    updated: int = Field(ge=0, strict=True)
+    highlighted: int = Field(ge=0, strict=True)
+    new_rows_marked: int = Field(ge=0, strict=True)
+    recoloured: int = Field(ge=0, strict=True)
+    prepended: int = Field(ge=0, strict=True)
+    linked: int = Field(ge=0, strict=True)
+    retired_fills: int = Field(ge=0, strict=True)
+    failures: tuple[FailedComment, ...] = ()
+
+    def summary(self) -> str:
+        return (
+            f"{self.inserted} inserted, {self.updated} updated, "
+            f"{self.prepended} block(s) prepended, {self.recoloured} recoloured, "
+            f"{len(self.failures)} failed"
         )

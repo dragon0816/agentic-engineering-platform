@@ -8,14 +8,18 @@ import json
 from pathlib import Path
 
 from agent.skills import SkillManifest
-from capabilities.weekly_report.manifest import preview_workflow, weekly_skill
+from capabilities.weekly_report.manifest import (
+    preview_workflow,
+    report_workflow,
+    weekly_skill,
+)
 from common.assets import WorkflowManifest
 from host_runtime.workspace import write_atomically
 
 
 def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
     """Every manifest this package ships, Skills and Workflows alike."""
-    return (weekly_skill(), preview_workflow())
+    return (weekly_skill(), preview_workflow(), report_workflow())
 
 
 def export_assets(directory: Path) -> tuple[Path, ...]:

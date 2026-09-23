@@ -1060,6 +1060,11 @@ def test_one_request_per_connection(server: ControlPlaneServer, platform: Platfo
     reply = connection.getresponse()
     assert reply.status == 413 and reply.getheader("Connection") == "close"
     reply.read()
+    # The server refused before reading the body and said it was closing, so
+    # the rest of that body never reaches the next request. Reconnect rather
+    # than write into a socket the peer has already closed on us: Windows
+    # answers that with a reset, which is the test racing, not the server.
+    connection.close()
     connection.request("GET", "/v1/health")
     reply = connection.getresponse()
     assert reply.status == 200 and json.loads(reply.read()) == {"ok": True}

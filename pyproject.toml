@@ -25,6 +25,10 @@ dev = [
 # openpyxl (MIT) reads the weekly workbook without Excel (Phase 7 slice 3a);
 # recorded in docs/PHASE_7_MIGRATION.md.
 office = ["pypdf[image]>=6,<7", "python-pptx>=1,<2", "python-docx>=1,<2", "openpyxl>=3.1,<4"]
+# The Excel writer on a company workstation (Phase 7 slice 3b). pywin32 is
+# permissively licensed (PSF-style) and Windows-only; the adapter imports it
+# lazily, so every other host installs and runs without it.
+windows = ["pywin32>=306"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -52,4 +56,10 @@ plugins = ["pydantic.mypy"]
 # lxml ships no stubs; it is reached only through the typed office libraries.
 [[tool.mypy.overrides]]
 module = ["lxml", "lxml.*"]
+ignore_missing_imports = true
+
+# pywin32 ships no stubs and is imported lazily by the one Excel adapter,
+# which the suite never exercises (docs/TASKS.md records that).
+[[tool.mypy.overrides]]
+module = ["win32com", "win32com.*"]
 ignore_missing_imports = true

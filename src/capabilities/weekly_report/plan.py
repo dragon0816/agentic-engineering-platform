@@ -167,9 +167,24 @@ def build_plan(
         issue_keys=tuple(sorted({issue.key for issue in issues})),
         capped=capped,
         sheet_digest=sheet.digest,
+        scratch_present=sheet.scratch_present,
+        seed_sheet=sheet.seed_sheet,
+        sheet_headers=sheet.headers,
+        browse_base=_browse_base(issues),
         preview="pending",
     )
     return plan.model_copy(update={"preview": render_preview(settings, plan, sheet)})
+
+
+def _browse_base(issues: Sequence[JiraIssue]) -> str | None:
+    """The Jira site the key cells will link to, taken from the issues
+    themselves so the plan is the whole instruction and a writer needs no
+    Jira configuration of its own."""
+    for issue in issues:
+        url = issue.browse_url
+        if url and "/browse/" in url:
+            return url.rsplit("/browse/", 1)[0]
+    return None
 
 
 def render_preview(

@@ -192,7 +192,38 @@ aep-host ask --config host.json "weekly.preview 2026_31W"
 The answer is the plan: which rows would be upserted, which comment blocks
 would be prepended in red, what was skipped and why, and a digest of the
 scratch sheet as it stands. It is the same plan the source's `--dry-run`
-printed, and writing it into the workbook is the next slice.
+printed.
+
+### Writing it into the workbook
+
+`weekly apply` runs the same four steps and then writes the plan through
+Excel itself, so it needs Excel installed and the `windows` extra:
+
+```powershell
+pip install "agentic-engineering-platform[office,windows]"
+aep-host ask --config host.json "weekly.apply 2026_31W"
+```
+
+Writing is a side effect, so the capability requires an approval: the grant
+for `weekly-report/apply` must carry an `approval_ref` (or the member's
+decision on the shared platform must). Without one the plan is still made and
+the write is refused.
+
+Before it writes, it backs the workbook up, copies it somewhere your sync
+client is not watching, and **checks the scratch sheet is still the one the
+plan was made against** — if somebody edited it in between, the run is
+refused rather than written. A run that does not finish leaves the real
+workbook exactly as it was and tells you where the staged copy is. Close the
+workbook first: a file Excel has open is refused before anything is copied.
+
+Two things to expect the first time. Every run retires last week's marks
+across the whole scratch sheet before making this week's, so a red `Comments`
+cell or a tinted `Key` cell you applied *by hand* loses its colour — never its
+text. And your own `Status` colours are left alone; only cells holding exactly
+the job's own pink are cleared.
+
+**This writer has not yet been run against a real workbook by anyone.** Try it
+on a copy first and compare the result with the old Host Bridge's.
 
 ## Remove
 

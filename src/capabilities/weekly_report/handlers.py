@@ -10,8 +10,6 @@ into a failed run — there is no false success — and a Jira outage is a
 
 import asyncio
 import datetime as _dt
-import hashlib
-import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -19,13 +17,15 @@ from typing import Any
 from pydantic import Field
 
 from capabilities.contracts import CapabilitySpec
-from capabilities.runtime import TransientCapabilityError
+from capabilities.runtime import CapabilityRefused, TransientCapabilityError
 from capabilities.weekly_report import rules
+from capabilities.weekly_report.apply import apply_plan
 from capabilities.weekly_report.contracts import (
     JiraComment,
     JiraIssue,
     ReportingWindow,
     SheetState,
+    WeeklyReportApplied,
     WeeklyReportPlan,
     WeeklyReportRequest,
     WeeklyReportSettings,
@@ -34,6 +34,8 @@ from capabilities.weekly_report.plan import build_plan, resolve_window
 from common.base import Contract, Text
 from common.execution import RequestContext
 from integrations import excel
+from integrations.excel import digest_rows
+from integrations.excel_writer import WorkbookWriteError, WorkbookWriter
 from integrations.jira import JiraClient, JiraError
 
 RESOLVE_WINDOW_SPEC = CapabilitySpec.model_validate(
@@ -261,10 +263,24 @@ class ReadScratchSheetHandler:
         )
 
 
-def digest_rows(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> str:
-    """A stable digest of a sheet's text: the evidence's before and after."""
-    payload = json.dumps([list(headers), [list(row) for row in rows]], ensure_ascii=False)
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+APPLY_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "weekly-report", "name": "apply", "version": "1.0.0"},
+        "name": "weekly_report.apply",
+        "description": "Write a weekly report plan into the team's workbook",
+        "input_contract": "weekly-report.apply.input.v1",
+        "output_contract": "weekly-report.apply.output.v1",
+        # The first side effect in this repository: it changes a file the
+        # team reads, so the Bridge policy refuses it without an approval.
+        "side_effect": "write",
+        "policy": {
+            "risk": "medium",
+            "approval_required": True,
+            "required_permissions": ["excel.write"],
+            "policy_refs": ["weekly-report-write-policy"],
+        },
+    }
+)
 
 
 class PlanInput(Contract):
@@ -281,6 +297,50 @@ class PlanHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         item = PlanInput.model_validate(inputs)
         return build_plan(self.settings, item.window, item.issues, item.sheet, capped=item.capped)
+
+
+class ApplyInput(Contract):
+    """The plan is the whole instruction: it carries the sheet it was made
+    against, the seed to create one from, and the site the keys link to."""
+
+    plan: WeeklyReportPlan
+
+
+class ApplyHandler:
+    """Write the plan through whichever `WorkbookWriter` the host built.
+
+    The writer is made per run and closed by the executor, so a failed run
+    never leaves Excel holding the file. A refusal the member can act on
+    keeps its own code on the failed step.
+    """
+
+    def __init__(
+        self,
+        settings: WeeklyReportSettings,
+        writer: Callable[[], WorkbookWriter],
+        *,
+        staging_root: Path,
+    ) -> None:
+        self.settings = WeeklyReportSettings.model_validate(settings)
+        self._writer = writer
+        self._staging_root = staging_root
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        item = ApplyInput.model_validate(inputs)
+        return await asyncio.to_thread(self._apply, item.plan)
+
+    def _apply(self, plan: WeeklyReportPlan) -> WeeklyReportApplied:
+        try:
+            writer = self._writer()
+        except WorkbookWriteError as error:
+            raise CapabilityRefused(error.code) from None
+        try:
+            return apply_plan(plan, self.settings, writer, staging_root=self._staging_root)
+        except WorkbookWriteError as error:
+            # Everything a workbook can refuse keeps its own code, so the
+            # member is told which of "somebody has it open", "it is not
+            # there" and "the write failed" happened.
+            raise CapabilityRefused(error.code) from None
 
 
 PLAN_OUTPUT = WeeklyReportPlan

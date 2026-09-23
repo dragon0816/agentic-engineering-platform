@@ -967,3 +967,73 @@ block prepended once and skipped on the repeat, tinting only what gained
 content or arrived, markers and lines counted; and the preview workflow
 running end to end on a real host through the real Gateway with a fake Jira
 and a workbook on disk, writing nothing.
+
+## Slice 3b — workflow 7: writing the plan into the workbook
+
+Slice 3a stopped at the plan. This is the other half: executing it against the
+team's workbook, with the parity gate's evidence on both sides of the write.
+
+Owner decision, delegated (2026-09-23): the owner asked for the slice to be
+finished and for problems to be raised, having been given the choice between
+Excel through COM and a library with a recommendation for COM. **COM on the
+company Bridge** is therefore what the writer does, for the reason recorded in
+`docs/PHASE_7_MIGRATION.md`: the parity gate requires that every sheet but
+`weekly report temp` is unchanged, which Excel gives for nothing and a library
+has to be measured for. The choice is reversible: the executor writes through
+a `WorkbookWriter` protocol and knows nothing about COM.
+
+1. `integrations.excel_writer` is the protocol and its operations as
+   contracts: `Upsert` (managed headers only, by key), `Fill`, `ClearFill`,
+   `FontColour`, `Border`, `Hyperlink` (an `=HYPERLINK()` formula, never a COM
+   Hyperlink object, which leaks references and keeps Excel alive), `TextRun`
+   for a rich cell, and the reads a write needs (`fills`, `cell_text`,
+   `last_row`). `ExcelComWriter` is the one adapter, `pywin32` imported
+   lazily so every other host still loads; a host without it says so rather
+   than raising. It carries the source's `_excel_upsert` rules: the last data
+   row comes from the used range because hidden rows count, only managed
+   headers are ever written so the hand-kept `Comments` column survives, and
+   header matching is case-insensitive.
+2. `capabilities.weekly_report.apply` executes a plan in the source's order,
+   which is the order the marks mean what they say: back up, stage, ensure the
+   scratch sheet, **verify the sheet is the one that was planned**, upsert,
+   retire last week's marks across the whole sheet, tint what gained content,
+   border and pink what is new, recolour the blocks already present, link
+   every key, then prepend each block in red with a black tail. A block the
+   writer reports as already present is recoloured instead, because the reset
+   has just turned it black.
+3. The digest is the guard the source did not have: a plan carries the scratch
+   sheet's digest as it stood, and applying it to a sheet that has since
+   changed is refused (`sheet_changed`) rather than written. Presence counts
+   as much as content, so a plan made without a scratch sheet is not written
+   into one somebody has made since; a plan for a sheet that is still absent
+   creates it from the seed. The guard runs before anything is copied or
+   backed up, so a refused run leaves nothing behind.
+4. Staging, as measured in the source: the workbook is copied somewhere no
+   sync client is watching, driven there, and written back once. A workbook
+   somebody has open is refused before anything is copied, and a run that does
+   not finish leaves the real workbook untouched and says where the staged one
+   is. Staging is configuration and can be turned off.
+5. `weekly-report/apply` is the first capability in this repository with a
+   side effect: `write`, approval required, so the Bridge policy refuses it
+   without an `approval_ref` and the member's decision must carry one. The
+   Workflow `engineering/jira-weekly-report` is the preview's four steps plus
+   apply; `jira-weekly-report-preview` stays exactly as it was, so a dry run
+   remains a separate asset a member can be given on its own.
+6. `WeeklyReportApplied` is the evidence: the digests before and after, the
+   backup's path, what was inserted, updated, tinted, marked new, recoloured
+   and prepended, and every comment cell that could not be written. A failed
+   prepend does not fail the run — the source kept going and reported them —
+   but it is in the evidence and in the outcome.
+
+Tests precede implementation and cover: every operation the executor issues,
+in order, against a recording writer, for a plan with a new row, a refreshed
+row, a block to prepend and a block to recolour; the reset covering the whole
+sheet and not only the rows touched; only this job's pink retired and the
+member's own status colours left alone; a second apply in the same week
+prepending nothing and recolouring instead; a sheet that changed since
+planning refused with nothing written; a workbook somebody has open refused
+before it is copied; a run that fails part way leaving the real workbook
+untouched with the staged copy named; a failed prepend reported without
+failing the run; the hyperlink written as a formula; the capability refused
+without an approval; and the whole Workflow end to end on a real host with a
+recording writer, with the evidence carrying both digests.

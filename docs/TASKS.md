@@ -25,14 +25,15 @@ the history is complete; this table is the index into them.
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
 `docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b, 2c to 2j
-and slice 3a (workflow 7 up to its plan) have merged; the workbook writer
-is next and waits on an owner decision. 62 pull requests merged (#1 to #68; #5 was closed unmerged and superseded by #6, the
+and slice 3a (workflow 7 up to its plan) have merged and slice 3b (the
+workbook writer) is in review; the live parity run on a company Bridge is
+next. 63 pull requests merged (#1 to #69; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
 when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 897 passed, 4 skipped on Windows, with `ruff`, `mypy`,
+The suite is 916 passed, 4 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. Three skips need symbolic-link
 privileges and one needs an IPv6 loopback; all four run on Linux CI.
 
@@ -134,8 +135,9 @@ privileges and one needs an IPv6 loopback; all four run on Linux CI.
 | 2h identity-derived entitlement | #60 | done | An invitation records which groups accepting it grants; an authenticated actor says who and until when and carries no group; what a member may use follows from the platform's record, and a decision needs a valid session and the member's own name |
 | 2j one member per machine, and who asked | #64 | done | Every machine holds one active binding, whatever its kind: a shared test workstation runs as a virtual member of its own, so no colleague's credential sits on a machine other people can read. A request and a run record who asked when that is not who runs; the field is recorded and never consulted. A company workstation refuses delegation outright, and a Telegram sender who is not the machine's member drives a shared machine as the virtual member on their behalf |
 | 2i authenticated shared-platform transports | #66 | done | `common.sync` is the six-operation wire; `ControlPlaneService` answers it over the in-memory references and `ControlPlaneServer` serves it from the standard library; `PlatformClient` presents the Bridge access token, classifies every answer (answered, unreachable, withdrawn, rejected, refused) and applies a sync only after the whole reply is verified; jobs are polled, run through the resident Agent, settled and reported; `aep-host probe|sync|jobs`. Unreachable is never treated as revoked |
+| 3b workflow 7: writing the plan into the workbook | — | in review | A typed `WorkbookWriter` and the source's order of operations behind it: back up, stage, verify the sheet is the one that was planned, upsert, retire last week's marks across the whole sheet, tint, border and pink what is new, recolour, link every key, prepend in red with a black tail. `ExcelComWriter` is the one adapter and the only thing that knows about COM; every test drives a recording writer. `weekly-report/apply` is the first side-effecting capability, approval required |
 | 3a workflow 7: rules, Jira fetch and plan | #68 | done | The source's weekly-report rules ported pure with its own tests as the oracle; a Jira client over the platform's transport with the secret resolved per call; four read capabilities (resolve the window, search Jira, read the scratch sheet without Excel, plan) and the preview Workflow over them; the plan is the dry run and the evidence; `aep-host export-assets`, `integrations` in `host.json` and a doctor check. Nothing writes a workbook; how the platform writes one is a decision for the owner |
-| 3 workflow 7 parity | — | planned | The workbook writer (COM or library, owner decision), then the Jira report against a test workbook on the company Bridge, compared with the working old Host Bridge |
+| 3 workflow 7 parity | — | planned | The Jira report against a test workbook on the company Bridge, compared with the working old Host Bridge. Needs a machine with Excel: the evidence is the owner's to produce and CI never claims it |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
 | 5 knowledge parity | — | planned | Adopt, query, update and restore a full copy of the source vault |
 | 6 controlled cutover | — | planned | Per-entry-point evidence, rollback rehearsal, owner approval and observation before freezing old entry points |
@@ -154,8 +156,22 @@ knows about them.
 | Phase 5 | Tool calling in either adapter (it needs a registry that can render a contract as a provider schema), reading `tool_calls` back, retry behaviour, a pooled or async transport, a production credential backend |
 | Phase 6 | Nothing persists an `ExecutionTrace` yet (a host writes them beside its checkpoints); `SECRET_PATTERN` is deliberately narrow and a provider-specific token shape it does not name is not redacted; `stayed_in_namespace` has no allowance for a capability legitimately shared across namespaces |
 | Phase 7, slice 2j | Taking somebody off a shared machine is a host action: their `telegram.json` entry keeps working after `disable_user` or `unbind`, because the request runs as the virtual member and `on_behalf_of` is never consulted. Offboarding has to include editing that file. Moving the sender list into the authorization bundle is the change that would make it a platform action, and the owner decided against it |
+| Phase 7, slice 3b | `ExcelComWriter` has never been run. There is no Excel in CI and none on this machine, so the adapter is written to the documented COM object model and exercised only through a recording writer, exactly as the pinned source's own tests exercised its Bridge. One run on a company workstation against a copy of the workbook should confirm it before any run against the real one — the same caveat the model adapters carry |
 | Phase 7, slice 2i | A polled job whose settle was lost is re-offered by the platform and, after `aep-host jobs` restarts, runs again: the idempotency key lives in the engine's in-memory table, because the company host runs its engine without a journal. Durable idempotency for polled jobs (a journal for the host's engine, or the platform's own lease) is deferred to the first workflow whose side effects make it necessary |
 | Phase 7, slice 2j | An approval on a tool selection may still name the acting member (`approved_by == actor`), as it could on a company workstation before the slice. Whether an approval must come from a second person is an owner policy decision that has not been asked for |
+
+**Leaked credentials in the pinned `telegram-local-agent` source, checked
+2026-09-23.** Its `config.yaml` is tracked and carries two values. The
+Telegram bot token is **already dead** (`getMe` answers 401, and the config
+itself says so). The GitLab personal access token is for a **local Docker
+GitLab in WSL2** (`http://172.26.111.166:8929`), whose distribution is not
+running, so there is nothing live to revoke; `docker/setup_template.py`
+reissues it by design. The repository is private on GitHub, and this
+repository never carried either value: `.scratch/` is gitignored and nothing
+under it is tracked. What remains is that both sit in that repository's
+history. Scrubbing it would change the commit the Phase 7 rollback baseline
+is pinned to, so it is deliberately **not** done while that pin stands; it
+belongs with the cutover, when the pin is retired.
 
 **Never exercised against a live endpoint.** Neither the Ollama adapter nor
 the company gateway has been run against a real server. Both are written to
@@ -183,6 +199,7 @@ streaming `done` flag.
 | 2026-09-23 | Binding a user to a machine issues an access token for that pair, kept on the Bridge; several members on one machine hold several tokens, and a Bridge presents one to authenticate with the shared platform, as the pinned Host Bridge exchanged a user sign-in for a machine token |
 | 2026-09-23 | Every machine is bound to exactly one platform member. A shared test workstation gets a virtual member of its own and no real employee binds to it; employees who need it drive it through Telegram, and the record says which employee asked. This supersedes the 2026-09-22 row above that gave a shared test workstation multiple platform users, and with it the "several tokens on one machine" part of the row above: one member per machine means one token per machine |
 | 2026-09-23 | A shared test workstation is wired to particular instruments and laid out as a test environment for automated testing; it belongs to that rig rather than to a desk, which is why a virtual member rather than a rota of employees fits it |
+| 2026-09-23 | The workbook is written through Excel itself (COM) on the company workstation rather than through a library. Delegated: the owner asked for the slice to be finished after being given both options and a recommendation. Reversible — the executor writes through a `WorkbookWriter` protocol and knows nothing about COM |
 | 2026-09-23 | Being an invited, authenticated member is the gate for using the platform's resources. A request is not narrowed further by who asked for it, and the list of people who may drive a machine stays host configuration rather than something the control plane delivers |
 
 ## Resolved owner decisions (Phase 7)
