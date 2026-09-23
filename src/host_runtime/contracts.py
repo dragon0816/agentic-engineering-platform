@@ -77,8 +77,14 @@ class PlatformBinding(Contract):
 
 class HostIntegrations(Contract):
     """The external systems this host reaches and the workflows' settings,
-    none of it secret: a Jira site whose token is a `SecretRef`, and the
-    weekly report's workbook and rules."""
+    none of it secret: the project board whose token is a `SecretRef`, and
+    the weekly report's workbook and rules.
+
+    A host installed before the report's source moved will refuse a
+    configuration naming `github_project`, because the field did not exist
+    yet. That refusal reads as a typo and is not one: it is an old
+    installation, and the answer is to install the current bundle.
+    """
 
     github_project: GitHubProjectConnection | None = None
     weekly_report: WeeklyReportSettings | None = None
