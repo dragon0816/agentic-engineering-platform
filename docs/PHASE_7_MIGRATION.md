@@ -432,3 +432,110 @@ original row rather than editing it.
 **Workflow 7 (`jira_team_tickets`) remains unmigrated and unassessed.** Where
 it belongs in the order is the owner's decision, not this correction's; it is
 recorded as an open item.
+
+
+## Workflow 10
+
+Source: `dragon0816/rs_workflow_system` at
+`896046e8fe2170d21f9213e56e5ce2f93c05ba43`, `host-bridge/jobs/sales_to_chipset.py`,
+`_chipset_rules.py`, `_source_snapshot.py`, the tests beside them,
+`config/chipset-map.example.json`, `config/workflow-w1.example.json`,
+`workflows/10_sales_opportunity_to_chipset.json` and the mapping specification
+`docs/W1_MAPPING.md`, read in `.scratch/rs-source` on 2026-09-23. The job is
+called W1 throughout the source. The n8n graph is a manual or Monday 08:00
+trigger that posts `{"job": "sales_to_chipset", "params": {...}}` to the Host
+Bridge and reports success or failure, nothing more.
+
+What it does: reads the CMP180 project lists, explodes every project row into
+chipset x technology rows, aggregates them across projects and fiscal years,
+compares them with the `Chipset_requirement` sheet of the chipset readiness
+workbook, and writes the result to that workbook's `temp` sheet. It never
+writes `Chipset_requirement`.
+
+`docs/W1_MAPPING.md` declares itself the single specification of the
+transformation and says that where the code and the document disagree, the
+document wins and the code is corrected. This migration treats it that way:
+it is the acceptance specification, and `_chipset_rules.py` is the reference
+implementation.
+
+### What the parity baseline actually is
+
+**The production rules data is not in the pinned source.** The tree contains
+`config/chipset-map.example.json` and no `config/chipset-map.json`, so every
+run in the pinned tree falls back to the example. The real file, which holds
+the team's own chipset, vendor and brand knowledge, exists only on the
+company machine. Two consequences:
+
+1. Parity cannot be judged from this repository alone. The owner's own
+   `chipset-map.json` and `workflow-w1.json` are needed for the parity run,
+   and they are configuration for the host, not content for this repository.
+2. The source's own tests assert the *example* file's contents in places
+   (the suggested owner for Qualcomm, the four fill colours, the vendor
+   order, the `SoftBand` and `Infenion` corrections). The example therefore
+   travels into this repository as test data, and the tests are honest about
+   testing rules against a known ruleset rather than testing the ruleset.
+
+### Source inspection and disposition
+
+| Source behaviour | Observed | Decision |
+|---|---|---|
+| `_chipset_rules`: cell cleaning, the chipset-cell parser, vendor inference, technology inference, match keys, unit and schedule parsing, company splitting, aggregation, matching against the existing sheet, row rendering, ordering and row colours | 1253 lines, one function does I/O (`load_rules`) and one reads the clock (`build_trace`); everything else is pure. 43 of the source's 45 tests cover this module and nothing else | **MIGRATE** ported pure into `capabilities.chipset_report.rules`, with the source's tests as the oracle, exactly as workflow 11's rules were. The two impure seams become parameters: the ruleset is passed in, and the date is passed in |
+| `config/chipset-map.json`: separators, noise, filler and role words, vendor tokens and prefix rules, chipset aliases, technology keywords and model rules, brand and MFG alias tables, priority map and rank, suggested owners, output colours and formats | 246 lines of data in the example; no schema, no validation, and a misspelt key silently reverts to a code default | **ADAPT**. The ruleset becomes a typed contract, so a misspelt key is a refusal at load rather than a rule that quietly stopped applying. The example file ships as the default ruleset and as test data; a host may point at its own |
+| `sales_to_chipset.run`: the order of operations, the guards, the parameter defaults, the statistics it returns | 683 lines, and the source's tests cover **two** of them (the protected-sheet guard). The orchestration, the reads, the writes, the dry run, the backup and the snapshot feature have no regression coverage at all | **ADAPT** into the platform's own shape: pure planning first, writing second, with the plan as the evidence. Tests are written here, because there are none to port |
+| `assert_not_protected`: `Chipset_requirement` is never written, checked case-insensitively and whitespace-stripped, before the dry run and again before the write | The only part of the job with tests, and the reason the job is safe to run at all | **PRESERVE exactly**, as a refusal in the contract layer rather than an assertion inside a writer, so it cannot be bypassed by a different writer |
+| Writing: `mode="replace"`, headers always rewritten at `A1`, then a formatting pass (header fill, bold, thin border, wrap text over the block, one fill per row by match level, per-cell fill and bold for changed watched fields, autofit) | A full clear-and-rewrite of one sheet, not an upsert. The formatting order is load-bearing and commented as such: the row colour says how the row matched, the cell colour says what changed on it | **PRESERVE** the operations and their order. The protocol gains a sheet-replace operation and the formatting operations it does not have yet |
+| The target workbook is a macro workbook (`.xlsm`) whose headers are on **row 2**, because row 1 carries a sort button | Reading the wrong header row does not fail; it produces a sheet whose columns are named after a row of data. The job's own docstring still says `.xlsx`, and the job contains no macro handling: event suppression lives in the Bridge's Excel service | **PRESERVE** the configurable header row, as a required setting with no guessed default. Macro safety is this platform's writer's responsibility and was added for it |
+| Source snapshots: each run stores the source rows it read, compares them with the previous run's, and reports what changed, with chipset, end-product and purpose changes called out as critical. The baseline advances only after a successful run | Nobody annotates the project list when they correct a chipset, so the diff is the only way a reader learns that last week's figures moved | **MIGRATE** as its own slice. It is the feature most likely to be wanted and least likely to be understood from the output alone |
+| The `offline` mode that writes with `openpyxl` instead of Excel | Loses formatting elsewhere in the workbook, takes no backup, and would strip the macros from an `.xlsm` because it does not pass `keep_vba`. The source calls it development-only | **DROP.** This platform reads without Excel and writes with Excel; a second writer that silently damages the workbook is not worth carrying. A host without Excel gets the plan, which is what `weekly preview` already established |
+| `dryRun` writing a CSV and a JSON preview into `state/w1-preview/` | The dry run is how the job is actually used before a write | **ADAPT.** The plan is the dry run and is the evidence, as it is for workflow 11. No preview files are written; the plan is the answer |
+| n8n orchestration, Bridge HTTP transport, `PARAMS_SCHEMA`, the `x-ui` form hints | Transport and front-end concerns of the old system | **DROP.** The platform has its own transport, its own contracts and its own authorization |
+
+### Defects found in the source, and what this migration does with each
+
+The parity gate compares behaviour, so a defect that changes output cannot be
+fixed quietly on the way through: the comparison would then fail and nobody
+would know whether the port or the fix caused it. The rule adopted here is
+**preserve what the gate measures, fix what is nondeterministic, unsafe or a
+crash, and record every preserved defect**.
+
+| Defect | Effect | Decision |
+|---|---|---|
+| Technologies that are not in the canonical list are appended in `set` iteration order | Output varies between processes | **FIX.** First-seen order. Nothing in the shipped ruleset reaches this path |
+| `aggregate` returns its dropped rows by mutating an attribute on the function object, which `transform` reads back | Not re-entrant; two runs in one process leak each other's dropped lists | **FIX.** Returned properly. No output change |
+| `format_schedule` renders the month with `%b`, which is locale-dependent | On a non-English Windows the whole column silently changes language and stops round-tripping | **FIX.** An explicit English month table. On an English host the output is identical |
+| `parse_schedule` accepts a month of `0` or `13` to `99` from a `YYYY/M` cell and hands it to `date()` | Uncaught `ValueError`, which on this platform would be an unexplained failed step | **FIX.** Treated as unparseable text, which is what every other unparseable schedule does |
+| `_kw_regex` builds a corrupted character class for any keyword containing a space | `wi fi` also matches `wi[fi` and `wi]fi` | **FIX.** The intended pattern. It only removes matches that should never have happened |
+| `parse_units` replaces a comma with a space, so a text cell `1,200` parses as nothing and silently moves from the total to the notes | Under-counts the business figure | **PRESERVE**, recorded. It changes a number the gate compares, and the owner should decide after seeing one real run |
+| `render_row` prepends a new trace block without removing the previous one | The `Comments` cell grows on every run, without bound | **PRESERVE**, recorded. Workflow 11 solved the same problem by retiring last week's marks; doing that here is a change the owner should ask for, not one made in passing |
+| A genuine unit total of exactly `0` renders as the unknown marker `?` | Zero and unknown are not the same thing | **PRESERVE**, recorded |
+| `_paren_is_tech` tests role words as substrings, so a parenthesis containing `pa`, `ic`, `end`, `lna` or `fem` anywhere is treated as a role note | `(Japan)` is a role note because it contains `pa` | **PRESERVE**, recorded. It changes which text lands in the chipset name |
+| The partial-match rule is an unanchored substring test in both directions | A synthetic placeholder key can match a real row | **PRESERVE**, recorded. Placeholders are dropped before matching by default, so the path is unreachable with the shipped ruleset |
+| `match_key` concatenates tokens with no separator and is order-sensitive | `MT79 77` and `MT7977` collide; `A+B` never matches `B+A` | **PRESERVE.** This is the identity the whole match evidence in `W1_MAPPING.md` was validated against. Changing it would change which rows are reported as already tracked |
+| Dead code and dead configuration: `_looks_like_model`, `version`, `split.keepCompositionTogether`, `split.lineSeparator`, `split.sharedPrefixExpansion`, `output.colors.header` | Read by nothing | **DROP.** A typed ruleset cannot carry a key nothing reads without saying so |
+
+### Parity gate — workflow 10
+
+- The same project rows are included: the status filter, the all-empty row
+  skip and the per-source `enabled` flag select the same rows.
+- Every project row explodes into the same chipset x technology rows, with
+  the same display spellings, the same vendors and the same technologies.
+- Aggregation matches: the same business totals with the same
+  once-per-opportunity counting across fiscal years, the same earliest
+  schedule, the same highest priority, the same brand and MFG lists in the
+  same order.
+- The same rows are reported as `tracked`, `tracked-other-tech`, `partial`
+  and `new`, against the same existing sheet.
+- Only the `temp` sheet is created or changed. `Chipset_requirement` is
+  byte-identical afterwards, and so is every other sheet. The workbook still
+  has its macros.
+- The written sheet has the target's own headers in the target's own order
+  and spelling, including the trailing space in one of them, followed by the
+  trace columns when they are asked for.
+- The formatting is the same: header fill, bold and border; wrap text over
+  the block; one fill per row by match level; changed watched fields filled
+  and bolded per cell; columns autofitted.
+- A run that writes nothing produces the same plan as the old job's dry run,
+  row for row.
+- The evidence is the plan and the applied record, as for workflow 11: the
+  digests of the `temp` sheet before and after, the backup's path, every
+  count, and every row that was dropped with the reason it was dropped.

@@ -29,8 +29,9 @@ slice 3a (workflow 11 up to its plan) and slice 3b (the workbook writer)
 have merged, slice 3c puts workflow 11 into the installable bundle and slice
 3d makes that bundle extractable on Windows, slice 3e documents the grants it
 needs to run and slice 3f corrects the source workflow number it was migrated
-under; the live parity run on a company Bridge is next, and only the owner can
-produce it. 74 pull requests merged (#1 to #78; #5 was closed unmerged and superseded
+under. Workflow 10 is now the active work: slice 4 characterizes the source
+and plans four slices. Workflow 11's live parity run is deferred behind it by
+the owner decision of 2026-09-23, and only the owner can produce it. 74 pull requests merged (#1 to #78; #5 was closed unmerged and superseded
 by #6, the numbers #24 and #25 were never pull requests, and #49 was closed
 unmerged when its base branch was deleted and landed through #51). The count
 stood at 64 while twelve of those had merged, counted against GitHub on
@@ -38,7 +39,7 @@ stood at 64 while twelve of those had merged, counted against GitHub on
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 931 passed, 4 skipped on Windows, with `ruff`, `mypy`,
+The suite is 936 passed, 4 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. Three skips need symbolic-link
 privileges and one needs an IPv6 loopback; all four run on Linux CI.
 
@@ -145,6 +146,8 @@ privileges and one needs an IPv6 loopback; all four run on Linux CI.
 | 3d a bundle nobody can extract is a bundle nobody can install | #74 | done | The owner's first download of the slice 3c bundle failed with a missing wheel. The zip was complete: two of its files needed more than Windows' 260-character path limit once downloaded as an artefact and extracted in a Downloads folder, and Explorer left them out silently. The bundle and artefact names shrink, the builder refuses names that would not survive the download, and the installer measures the path and names the cause before it reports a missing file |
 | 3e the grants the weekly report actually needs | #76 | done | Following the preview's README produced `permission_denied` before Jira was reached: all five capabilities declare that they need an approval, the four reads included, and the page said only the write did. The README writes out every grant, and a test parses that JSON and puts it through the real policy, so the page and the capabilities cannot drift |
 | 3f the workflow this phase migrated is number 11 | #78 | done | The owner asked why the settings were the weekly report's while the documents said workflow 7. The source numbers the weekly report 11; workflow 7 is `jira_team_tickets`, a different job this repository has never read. The wrong workflow file was paired with the right job in the candidate table on 2026-09-22 and propagated everywhere. Every reference is corrected, the decision record gains a dated correction rather than a silent edit, and source workflow 7 is recorded as unmigrated |
+| 3g Excel macros and a failed save | #80 | in review | The adapter opened Excel without suppressing events, so a team workbook's `Workbook_Open` would run inside an unattended job, and it folded saving into closing, which the executor treats as best effort: a failed save left the report out of the file and the run then copied the staged workbook back and reported success. Saving is now its own refusal, `save_failed`, and the executor lets that one through its cleanup |
+| 4 workflow 10 characterization and plan | #80 | in review | The source read in full: 1253 lines of rules, a 683-line job, its 706 lines of tests and the 511-line mapping specification that declares itself authoritative over the code. Disposition recorded per part, a parity gate, twelve source defects each decided as preserved or fixed with the reason, and four slices. The team's real ruleset is not in the pinned source, so the parity run needs the owner's own file |
 | 3a workflow 11: rules, Jira fetch and plan | #68 | done | The source's weekly-report rules ported pure with its own tests as the oracle; a Jira client over the platform's transport with the secret resolved per call; four read capabilities (resolve the window, search Jira, read the scratch sheet without Excel, plan) and the preview Workflow over them; the plan is the dry run and the evidence; `aep-host export-assets`, `integrations` in `host.json` and a doctor check. Nothing writes a workbook; how the platform writes one is a decision for the owner |
 | 3 workflow 11 parity | — | planned | The Jira report against a test workbook on the company Bridge, compared with the working old Host Bridge. Needs a machine with Excel: the evidence is the owner's to produce and CI never claims it |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
@@ -167,6 +170,7 @@ knows about them.
 | Phase 7, slice 2j | Taking somebody off a shared machine is a host action: their `telegram.json` entry keeps working after `disable_user` or `unbind`, because the request runs as the virtual member and `on_behalf_of` is never consulted. Offboarding has to include editing that file. Moving the sender list into the authorization bundle is the change that would make it a platform action, and the owner decided against it |
 | Phase 7, slice 3b | `ExcelComWriter` has never been run. There is no Excel in CI and none on this machine, so the adapter is written to the documented COM object model and exercised only through a recording writer, exactly as the pinned source's own tests exercised its Bridge. One run on a company workstation against a copy of the workbook should confirm it before any run against the real one — the same caveat the model adapters carry |
 | Phase 7, slice 2i | A polled job whose settle was lost is re-offered by the platform and, after `aep-host jobs` restarts, runs again: the idempotency key lives in the engine's in-memory table, because the company host runs its engine without a journal. Durable idempotency for polled jobs (a journal for the host's engine, or the platform's own lease) is deferred to the first workflow whose side effects make it necessary |
+| Phase 7, slice 4 | The team's real `chipset-map.json`, the ruleset workflow 10 transforms with, is not in the pinned source: it carries only `chipset-map.example.json`, so every run in that tree falls back to the example. The real file exists on the company machine and is needed for the parity run. It is host configuration, not content for this repository |
 | Phase 7, slice 3f | Source workflow 7, `jira_team_tickets` / `workflows/07_jira_team_tickets_to_excel.json`, has never been inspected, characterized or migrated. It was named in the Phase 7 candidate table by mistake, in place of the weekly report that was actually built. Whether it is migrated at all, and where it belongs in the order, is an owner decision that has not been asked for |
 | Phase 7, slice 2j | An approval on a tool selection may still name the acting member (`approved_by == actor`), as it could on a company workstation before the slice. Whether an approval must come from a second person is an owner policy decision that has not been asked for |
 
