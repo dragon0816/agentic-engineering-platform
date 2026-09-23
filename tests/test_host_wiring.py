@@ -662,11 +662,27 @@ def test_a_host_without_a_namespace_will_not_guess_one(
     path = host_json(tmp_path, config)
     target = layout.workspace_root / "notes.txt"
     assert main(["ask", "--config", str(path), f"files.read {target}"]) == 2
-    assert "no namespace is configured" in capsys.readouterr().err
+    said = capsys.readouterr().err
+    assert "no namespace is configured" in said
+    # It will not guess, but it does say what is installed here: the host
+    # knows, and leaving the reader to find out is the whole cost of this
+    # refusal.
+    assert "`engineering`" in said, "the namespace its own installed assets are in"
     assert (
         main(["ask", "--config", str(path), "--namespace", "engineering", f"files.read {target}"])
         == 0
     )
+
+
+def test_a_host_with_nothing_installed_says_that_instead(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Naming no namespace and naming an empty list are different problems."""
+    config, layout = ready(tmp_path, assets=False, config_changes={"namespace": None})
+    path = host_json(tmp_path, config)
+    target = layout.workspace_root / "notes.txt"
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 2
+    assert "Nothing is installed here yet" in capsys.readouterr().err
 
 
 def test_a_configuration_that_cannot_be_used_says_which_field(
