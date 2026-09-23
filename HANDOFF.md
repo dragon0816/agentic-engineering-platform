@@ -1,7 +1,7 @@
 # Handoff — Phase 7, the weekly report needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `phase-7/workflow-number`, slice 3f committed and in review.
+Branch: `main`, after PR #78 (slice 3f) merged with its review applied.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
