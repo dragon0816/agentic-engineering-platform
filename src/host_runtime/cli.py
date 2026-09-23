@@ -1,10 +1,11 @@
 """Command line interface for the company-workstation host.
 
-Four things an operator does: inspect the machine, export an enrollment
-request, ask the resident Agent to do something, and leave the Telegram
-ingress running. Every command reads one `host.json` and the files beside it
-in the workspace; none of them contacts the shared platform, which does not
-have an authenticated transport yet.
+What an operator does: inspect the machine, export an enrollment request, ask
+the resident Agent to do something, leave the Telegram ingress running, and,
+once this host holds a platform token, probe the shared platform, synchronize
+what its member decided, and leave the job loop running. Every command reads
+one `host.json` and the files beside it in the workspace; only the last three
+open a socket, and only to the platform named there.
 """
 
 import argparse
@@ -19,12 +20,13 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from channels.telegram import TelegramIngress
-from common.execution import TraceIdentifiers
+from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.agent import LocalAgentOutcome
-from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport
-from host_runtime.host import HostError, HostLayout, HostRuntime, build_runtime, host_report
+from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
+from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
+from host_runtime.sync import PlatformClient, advertisement
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -50,6 +52,16 @@ def _parser() -> argparse.ArgumentParser:
     telegram = commands.add_parser("telegram", help="poll Telegram until interrupted")
     telegram.add_argument("--config", required=True, type=Path)
     telegram.add_argument("--once", action="store_true", help="poll a single time and stop")
+    probe = commands.add_parser("probe", help="ask the shared platform whether it knows this host")
+    probe.add_argument("--config", required=True, type=Path)
+    probe.add_argument("--json", action="store_true")
+    sync = commands.add_parser("sync", help="install what this host's member decided it may run")
+    sync.add_argument("--config", required=True, type=Path)
+    sync.add_argument("--json", action="store_true")
+    jobs = commands.add_parser("jobs", help="run the shared platform's jobs until interrupted")
+    jobs.add_argument("--config", required=True, type=Path)
+    jobs.add_argument("--once", action="store_true", help="poll a single time and stop")
+    jobs.add_argument("--interval", type=float, default=5.0, help="seconds between polls")
     commands.add_parser("version", help="show the installed package version")
     return parser
 
@@ -179,6 +191,96 @@ def _telegram(runtime: HostRuntime, once: bool) -> int:
         return 0
 
 
+def _platform(runtime: HostRuntime) -> PlatformClient | None:
+    if runtime.platform is None:
+        print("no shared platform is configured on this host", file=sys.stderr)
+    return runtime.platform
+
+
+def _explain(status: str, failure: Failure | None) -> str:
+    """One line an operator can act on. Unreachable is said to be exactly
+    that, never dressed up as a revocation."""
+    if status == "answered":
+        return "answered"
+    if status == "unreachable":
+        return "the platform could not be reached; nothing on this host changed"
+    if status == "withdrawn":
+        return "the platform no longer admits this host's token; nothing on this host changed"
+    if status == "rejected":
+        return "the platform does not recognise this host's token; check the configuration"
+    code = failure.code if failure is not None else "refused"
+    return f"declined: {code}"
+
+
+def _probe(runtime: HostRuntime, as_json: bool) -> int:
+    client = _platform(runtime)
+    if client is None:
+        return 2
+    outcome = asyncio.run(client.probe())
+    if as_json:
+        print(outcome.model_dump_json(indent=2))
+    elif outcome.reply is not None:
+        who = outcome.reply.identity
+        print(f"the platform knows this host as {who.actor} on {who.bridge_id}")
+        print(f"session until {who.expires_at.isoformat()}")
+    else:
+        print(_explain(outcome.status, outcome.failure))
+    return 0 if outcome.status == "answered" else 1
+
+
+def _sync(runtime: HostRuntime, as_json: bool) -> int:
+    client = _platform(runtime)
+    if client is None:
+        return 2
+    outcome = asyncio.run(client.synchronize(runtime.layout, runtime.state))
+    if as_json:
+        print(outcome.model_dump_json(indent=2))
+    elif outcome.status == "answered":
+        print(f"{len(outcome.installed)} asset(s) installed, {outcome.selections} decision(s)")
+        for item in outcome.installed:
+            print(f"  {item.namespace}/{item.name}@{item.version}")
+    else:
+        print(_explain(outcome.status, outcome.failure))
+    if outcome.status != "answered":
+        return 1
+    # What this host can run and what it holds, so the platform's view is
+    # current. Best effort: the sync itself is done.
+    advertised = asyncio.run(client.advertise(advertisement(runtime.agent, _trace().trace_id)))
+    reported = asyncio.run(client.report(runtime.agent.snapshot(observed_at=datetime.now(UTC))))
+    if not as_json:
+        print(f"advertised: {advertised.status}; reported: {reported.status}")
+    return 0
+
+
+def _jobs(runtime: HostRuntime, once: bool, interval: float) -> int:
+    client = _platform(runtime)
+    if client is None:
+        return 2
+    if once:
+        outcome = asyncio.run(client.poll_jobs(runtime.agent))
+        for delivery in outcome.deliveries:
+            settled = "settled" if delivery.settled else "not settled"
+            print(f"{delivery.job_id}: {delivery.disposition}, {settled}")
+        if outcome.status != "answered":
+            print(_explain(outcome.status, outcome.failure), file=sys.stderr)
+            return 1
+        return 0
+
+    async def loop() -> int:
+        stop = asyncio.Event()
+        failure = await client.run_jobs(runtime.agent, stop, interval_s=interval)
+        if failure is not None:
+            print(f"the job loop stopped: {failure.code}", file=sys.stderr)
+            return 1
+        return 0
+
+    try:
+        return asyncio.run(loop())
+    except KeyboardInterrupt:  # pragma: no cover - interactive only
+        print("stopped")
+        return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "version":
@@ -219,6 +321,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _ask(runtime, args.message, args.actor, args.namespace, args.json)
         if args.command == "status":
             return _status(runtime, args.json)
+        if args.command == "probe":
+            return _probe(runtime, args.json)
+        if args.command == "sync":
+            return _sync(runtime, args.json)
+        if args.command == "jobs":
+            return _jobs(runtime, args.once, args.interval)
         return _telegram(runtime, args.once)
 
 

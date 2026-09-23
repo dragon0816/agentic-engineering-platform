@@ -338,10 +338,23 @@ def test_a_remote_job_executes_its_exact_workflow_once_however_often_delivered(
     assert again.workflow.run.run_id == outcome.workflow.run.run_id
     assert len(runner.bridge.events) == 2
     assert len(resident.runs()) == 1
-    # The membership rule applies to jobs as it does to messages.
+    # The membership rule applies to jobs as it does to messages, and so
+    # does the rule about work on somebody else's behalf.
     refused = asyncio.run(resident.execute(job(actor="tester", job_id="job-2")))
     assert refused.refusal == "company_owner_required"
+    delegated = asyncio.run(resident.execute(job(on_behalf_of="tester", job_id="job-3")))
+    assert delegated.refusal == "delegation_not_allowed"
     assert len(runner.bridge.events) == 2
+    # On a shared machine a job an employee asked for runs as the virtual
+    # member and the run names both.
+    shared_resident, _ = agent(shared(), tmp_path / "shared")
+    asked = asyncio.run(
+        shared_resident.execute(
+            job(actor="shared-bot", on_behalf_of="tester", bridge_id="bridge-shared")
+        )
+    )
+    assert asked.refusal is None and asked.run is not None
+    assert (asked.run.actor, asked.run.on_behalf_of) == ("shared-bot", "tester")
 
 
 def test_a_pre_flight_rejection_starts_nothing_and_records_no_ghost_run(tmp_path: Path) -> None:

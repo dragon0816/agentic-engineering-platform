@@ -271,6 +271,16 @@ class WorkflowEngine:
         record = self._runs.get(run_id)
         return record.snapshot() if record is not None else None
 
+    def submitted(
+        self, actor: str, namespace: str, idempotency_key: str
+    ) -> WorkflowRunSnapshot | None:
+        """The run an idempotency key already names for this actor and
+        namespace, or None. A caller that is told to stop a job it may have
+        started asks this before saying it never ran."""
+        key = (actor, namespace, TypeAdapter(IdempotencyKey).validate_python(idempotency_key))
+        previous = self._submissions.get(key)
+        return previous[1].snapshot() if previous is not None else None
+
     async def wait(self, run_id: str) -> WorkflowRunSnapshot | None:
         """Join a run that outlived its caller-wait timeout and return its final state."""
         task = self._tasks.get(run_id)

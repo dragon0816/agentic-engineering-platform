@@ -157,10 +157,14 @@ class LocalAgent:
         workflow result that started nothing. The job's authorization is the
         control plane's decision; the Bridge policy still decides each step."""
         item = RemoteWorkflowJob.model_validate(job)
-        refusal = self.admit(item.actor, item.bridge_id)
+        refusal = self.admit(item.actor, item.bridge_id, item.on_behalf_of)
         if refusal is not None:
             return LocalAgentOutcome(
-                trace=item.trace, ingress=item.ingress, actor=item.actor, refusal=refusal
+                trace=item.trace,
+                ingress=item.ingress,
+                actor=item.actor,
+                on_behalf_of=item.on_behalf_of,
+                refusal=refusal,
             )
         context = RequestContext(
             trace=item.trace,
@@ -176,11 +180,12 @@ class LocalAgent:
             workflow_timeout_seconds=workflow_timeout_seconds,
             workflow_idempotency_key=item.job_id,
         )
-        run, unrecorded = await self._record(item.actor, None, snapshot)
+        run, unrecorded = await self._record(item.actor, item.on_behalf_of, snapshot)
         return LocalAgentOutcome(
             trace=item.trace,
             ingress=item.ingress,
             actor=item.actor,
+            on_behalf_of=item.on_behalf_of,
             workflow=snapshot,
             run=run,
             unrecorded=unrecorded,

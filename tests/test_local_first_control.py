@@ -252,6 +252,48 @@ def test_remote_control_enforces_company_owner_and_shared_membership_across_ingr
         control.cancel("job-shared", actor="engineer-a")
 
 
+def test_a_job_is_settled_once_by_the_device_it_was_for() -> None:
+    control = InMemoryRemoteControl(admission=lambda subject: True)
+    control.submit(remote_job(), device("shared_test_workstation"))
+    control.submit(remote_job(job_id="job-2"), device("shared_test_workstation"))
+    # Only the job's own device, and only with the job's own actor and workflow.
+    with pytest.raises(ControlError, match="job_bridge_mismatch"):
+        control.settle("bridge-company", "job-1", disposition="cancelled")
+    run = LocalRunSummary(
+        run_id="run-1", actor="engineer-a", workflow=identity(), status="succeeded", updated_at=NOW
+    )
+    with pytest.raises(ControlError, match="job_run_mismatch"):
+        control.settle(
+            "bridge-shared",
+            "job-1",
+            disposition="ran",
+            run=run.model_copy(update={"actor": "engineer-b"}),
+        )
+    with pytest.raises(ControlError, match="job_run_mismatch"):
+        control.settle("bridge-shared", "job-1", disposition="rejected", run=run)
+    settled = control.settle("bridge-shared", "job-1", disposition="ran", run=run)
+    assert settled.status == "ran" and settled.run == run and not settled.open
+    # Settled is final: not offered again, not cancellable, not settled twice.
+    assert [item.request.job_id for item in control.poll("bridge-shared", limit=10)] == ["job-2"]
+    with pytest.raises(ControlError, match="job_settled"):
+        control.settle("bridge-shared", "job-1", disposition="cancelled")
+    with pytest.raises(ControlError, match="job_settled"):
+        control.cancel("job-1", actor="engineer-a")
+    assert control.job("job-1") == settled
+    with pytest.raises(ControlError, match="job_missing"):
+        control.settle("bridge-shared", "job-nobody", disposition="cancelled")
+    # A job on somebody's behalf is recorded as such, and its run must agree.
+    asked = control.submit(
+        remote_job(job_id="job-3", actor="engineer-a", on_behalf_of="engineer-c"),
+        device("shared_test_workstation"),
+    )
+    assert asked.request.on_behalf_of == "engineer-c"
+    with pytest.raises(ControlError, match="job_run_mismatch"):
+        control.settle("bridge-shared", "job-3", disposition="ran", run=run)
+    with pytest.raises(ValidationError, match="names nobody else"):
+        remote_job(job_id="job-4", on_behalf_of="engineer-a")
+
+
 def test_installation_plan_and_snapshots_reject_ambiguous_duplicates() -> None:
     item = package()
     with pytest.raises(ValidationError):

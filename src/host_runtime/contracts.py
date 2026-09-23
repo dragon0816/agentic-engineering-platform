@@ -2,10 +2,11 @@
 
 from pathlib import Path, PureWindowsPath
 from typing import Annotated, Literal, Self
+from urllib.parse import urlsplit
 
-from pydantic import StringConstraints, model_validator
+from pydantic import Field, StringConstraints, field_validator, model_validator
 
-from common.assets import reject_embedded_secrets
+from common.assets import SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
 from workflow.host_bridge import BridgeRegistration
@@ -27,6 +28,51 @@ class CredentialBinding(Contract):
     environment_variable: EnvironmentVariable
 
 
+def _loopback(base_url: str) -> bool:
+    host = urlsplit(base_url).hostname
+    return host in ("127.0.0.1", "::1", "localhost")
+
+
+class PlatformBinding(Contract):
+    """How this host reaches the shared platform and as which token.
+
+    The token's secret is a `SecretRef` like the Telegram bot token: the host
+    maps its name to an environment variable, and the value is never in a
+    file. A plain-HTTP platform is accepted on loopback only, so the wire can
+    be exercised without a certificate and a token never crosses a network in
+    the clear.
+    """
+
+    base_url: Text
+    token_id: Symbol
+    credential: SecretRef
+    timeout_seconds: int = Field(default=30, ge=1, le=300, strict=True)
+
+    @field_validator("base_url")
+    @classmethod
+    def without_trailing_slash(cls, value: str) -> str:
+        return value.rstrip("/")
+
+    @model_validator(mode="after")
+    def https_beyond_loopback(self) -> Self:
+        parts = urlsplit(self.base_url)
+        if (
+            parts.scheme not in ("https", "http")
+            or not parts.hostname
+            or parts.path
+            or parts.query
+            or parts.fragment
+        ):
+            raise ValueError("base_url is the origin of the shared platform")
+        if parts.username is not None or parts.password is not None:
+            # A credential in a URL is a credential in a file.
+            raise ValueError("base_url carries no credential; the token is a SecretRef")
+        if parts.scheme == "http" and not _loopback(self.base_url):
+            raise ValueError("a platform beyond loopback is reached over https")
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -45,6 +91,9 @@ class CompanyHostConfiguration(Contract):
     # secrets and names no namespace, which is why the schema version is
     # unchanged: an older file stays valid and means exactly that.
     credentials: tuple[CredentialBinding, ...] = ()
+    # The shared platform, when this host has been given a token for one. A
+    # host without it works locally, which every earlier command still does.
+    platform: PlatformBinding | None = None
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:
@@ -70,6 +119,34 @@ class CompanyHostConfiguration(Contract):
         return {item.secret: item.environment_variable for item in self.credentials}
 
 
+class HostLayout(Contract):
+    """Where a company host keeps what it needs, all under one workspace, so
+    an operator and the installer agree without a second configuration file."""
+
+    workspace_root: Path
+    membership: Path
+    grants: Path
+    authorization: Path
+    skills: Path
+    workflows: Path
+    telegram: Path
+    state: Path
+
+    @classmethod
+    def under(cls, workspace_root: Path | str) -> Self:
+        root = Path(workspace_root)
+        return cls(
+            workspace_root=root,
+            membership=root / "membership.json",
+            grants=root / "grants.json",
+            authorization=root / "authorization.json",
+            skills=root / "assets" / "skills",
+            workflows=root / "assets" / "workflows",
+            telegram=root / "telegram.json",
+            state=root / "state.sqlite",
+        )
+
+
 class DoctorCheck(Contract):
     """One thing an operator needs to know. `pending` is for what this host
     has not been given yet, which is not the same as something being wrong:
@@ -84,6 +161,7 @@ class DoctorCheck(Contract):
         "authorization",
         "assets",
         "state",
+        "platform",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text

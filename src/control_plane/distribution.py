@@ -4,7 +4,7 @@ from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
 from typing import Literal, TypeVar
 
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from common.assets import AssetIdentity
 from common.base import Symbol
@@ -13,6 +13,7 @@ from common.distribution import (
     BridgeStatusProjection,
     InstallationPlan,
     InstalledAsset,
+    LocalRunSummary,
     LocalStateError,
     LocalStateErrorCode,
     PublishedAssetPackage,
@@ -38,6 +39,9 @@ ControlErrorCode = Literal[
     "duplicate_job",
     "job_missing",
     "job_actor_mismatch",
+    "job_bridge_mismatch",
+    "job_settled",
+    "job_run_mismatch",
 ]
 
 
@@ -206,10 +210,19 @@ class InMemoryRemoteControl:
         return _copy(record)
 
     def poll(self, bridge_id: Symbol, *, limit: int) -> tuple[RemoteJobRecord, ...]:
+        """The jobs still waiting for this device, oldest first. A settled job
+        is done and is not offered again."""
         key = TypeAdapter(Symbol).validate_python(bridge_id)
         if isinstance(limit, bool) or not 1 <= limit <= 50:
             raise ValueError("poll limit must be between 1 and 50")
         return tuple(_copy(self._jobs[job_id]) for job_id in self._queues.get(key, [])[:limit])
+
+    def job(self, job_id: Symbol) -> RemoteJobRecord:
+        key = TypeAdapter(Symbol).validate_python(job_id)
+        record = self._jobs.get(key)
+        if record is None:
+            raise ControlError("job_missing")
+        return _copy(record)
 
     def cancel(self, job_id: Symbol, *, actor: Symbol) -> RemoteJobRecord:
         key = TypeAdapter(Symbol).validate_python(job_id)
@@ -219,6 +232,39 @@ class InMemoryRemoteControl:
             raise ControlError("job_missing")
         if record.request.actor != checked_actor:
             raise ControlError("job_actor_mismatch")
+        if not record.open:
+            # It has already ended one way or another; asking it to stop now
+            # would claim something about a run that is over.
+            raise ControlError("job_settled")
         updated = RemoteJobRecord(request=record.request, status="cancel_requested")
         self._jobs[key] = updated
+        return _copy(updated)
+
+    def settle(
+        self,
+        bridge_id: Symbol,
+        job_id: Symbol,
+        *,
+        disposition: Literal["ran", "rejected", "cancelled"],
+        run: LocalRunSummary | None = None,
+    ) -> RemoteJobRecord:
+        """How the Bridge says a job ended. Only the device the job was for
+        may settle it, once; a run that names another actor or workflow is
+        not this job's run and is refused rather than attached."""
+        device = TypeAdapter(Symbol).validate_python(bridge_id)
+        key = TypeAdapter(Symbol).validate_python(job_id)
+        record = self._jobs.get(key)
+        if record is None:
+            raise ControlError("job_missing")
+        if record.request.bridge_id != device:
+            raise ControlError("job_bridge_mismatch")
+        if not record.open:
+            raise ControlError("job_settled")
+        try:
+            updated = RemoteJobRecord(request=record.request, status=disposition, run=run)
+        except ValidationError:
+            raise ControlError("job_run_mismatch") from None
+        self._jobs[key] = updated
+        queue = self._queues.get(device, [])
+        self._queues[device] = [item for item in queue if item != key]
         return _copy(updated)

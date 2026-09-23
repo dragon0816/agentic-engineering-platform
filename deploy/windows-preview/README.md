@@ -125,6 +125,41 @@ as that member and records who asked. **This file is therefore the access list f
 a shared machine.** Disabling somebody on the shared platform does not close this
 door — removing their entry here does — so offboarding has to include editing it.
 
+## Shared platform (optional)
+
+Once somebody who administers this device has bound it on the shared platform
+and issued its access token, add the platform to `host.json` and map the
+token's secret to an environment variable, exactly as for the Telegram token.
+The value is never in a file.
+
+```json
+"platform": { "base_url": "https://platform.internal:8443",
+              "token_id": "token-0123456789abcdef", "credential": { "name": "platform_token" } },
+"credentials": [{ "secret": "platform_token", "environment_variable": "AEP_PLATFORM_TOKEN" }]
+```
+
+A platform beyond this computer is reached over `https`; plain `http` is
+accepted on loopback only. Then:
+
+```powershell
+aep-host probe --config host.json   # does the platform still know this host as its member?
+aep-host sync  --config host.json   # install what the member decided this device may run
+aep-host jobs  --config host.json   # run the platform's jobs until Ctrl+C (--once to poll once)
+```
+
+`sync` writes `authorization.json` and the chosen Skill and Workflow manifests
+under `workspace\assets\`, and refuses to run while a hand-written
+`grants.json` is present: the two are different answers to one question, so
+remove `grants.json` before the first sync. Everything is verified before
+anything is written; a refusal leaves the workspace untouched.
+
+When the platform cannot be reached, every command says so and changes
+nothing: the token, the authorization and the installed assets stay where
+they are, and `ask` keeps working with them. Only the platform itself telling
+this host that its token is revoked or its binding withdrawn is a revocation,
+and even then nothing local is deleted; being bound again is an action on the
+platform.
+
 ## Remove
 
 `uninstall.cmd` shows what it would remove. `uninstall.cmd -Apply` removes only the
