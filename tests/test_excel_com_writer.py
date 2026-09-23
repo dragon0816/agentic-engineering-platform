@@ -199,3 +199,97 @@ def test_a_machine_with_the_bridge_and_no_excel_says_which(
     with pytest.raises(WorkbookWriteError) as refused:
         excel_writer.require_com()
     assert refused.value.code == "excel_missing", "this machine has no Excel"
+
+
+class FakeSheet:
+    def __init__(self, book: FakeBookWithSheets, name: str) -> None:
+        self._book = book
+        self._name = name
+
+    @property
+    def Name(self) -> str:  # noqa: N802 - Excel's own spelling
+        return self._name
+
+    @Name.setter
+    def Name(self, value: str) -> None:  # noqa: N802
+        self._book.names[self._book.names.index(self._name)] = value
+        self._name = value
+
+    def Copy(self, before: Any, after: Any) -> None:  # noqa: N802
+        """Excel's own behaviour when it is told where to put the copy."""
+        if self._book.copy_goes_elsewhere:
+            # What happened on the owner's machine: the copy went somewhere
+            # this workbook cannot see, and the sheet count did not change.
+            return
+        self._book.names.append(f"{self._name} (2)")
+
+
+class FakeWorksheets:
+    def __init__(self, book: FakeBookWithSheets) -> None:
+        self._book = book
+
+    def __call__(self, index: int) -> FakeSheet:
+        return FakeSheet(self._book, self._book.names[index - 1])
+
+    @property
+    def Count(self) -> int:  # noqa: N802
+        return len(self._book.names)
+
+    def Add(self, before: Any, after: Any) -> None:  # noqa: N802
+        self._book.names.append("Sheet1")
+
+
+class FakeBookWithSheets:
+    def __init__(self, names: list[str], *, copy_goes_elsewhere: bool = False) -> None:
+        self.names = list(names)
+        self.copy_goes_elsewhere = copy_goes_elsewhere
+        self.Worksheets = FakeWorksheets(self)
+
+    def Save(self) -> None:  # noqa: N802
+        return None
+
+    def Close(self, SaveChanges: bool) -> None:  # noqa: N802, N803
+        return None
+
+
+def writer_over(
+    book: FakeBookWithSheets, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[ExcelComWriter, Path]:
+    workbook = tmp_path / "book.xlsx"
+    workbook.write_bytes(b"not really a workbook")
+    client = types.ModuleType("win32com.client")
+    client.DispatchEx = lambda prog_id: None  # type: ignore[attr-defined]
+    win32com = types.ModuleType("win32com")
+    win32com.client = client  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "win32com", win32com)
+    monkeypatch.setitem(sys.modules, "win32com.client", client)
+    monkeypatch.setattr(excel_writer, "progid_is_registered", lambda _p: True)
+    made = ExcelComWriter()
+    made._books[str(workbook.resolve())] = book
+    return made, workbook
+
+
+def test_the_sheet_that_gets_the_name_is_the_one_that_appeared(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The copy, never the seed."""
+    book = FakeBookWithSheets(["2026_37W", "2026_38W"])
+    made, workbook = writer_over(book, tmp_path, monkeypatch)
+    made.ensure_sheet(workbook, "weekly report temp", seed="2026_38W")
+    assert book.names == ["2026_37W", "2026_38W", "weekly report temp"]
+
+
+def test_a_copy_that_went_elsewhere_is_refused_not_guessed_at(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """What destroyed a week of somebody's work on 2026-09-24. `Copy` put the
+    new sheet where this code could not see it, the position it then renamed
+    still held the seed, and `2026_38W` became the scratch sheet. The
+    workbook had the same number of sheets afterwards, so nothing looked
+    wrong until a person read the tabs."""
+    book = FakeBookWithSheets(["2026_37W", "2026_38W"], copy_goes_elsewhere=True)
+    made, workbook = writer_over(book, tmp_path, monkeypatch)
+    with pytest.raises(WorkbookWriteError) as refused:
+        made.ensure_sheet(workbook, "weekly report temp", seed="2026_38W")
+    assert refused.value.code == "sheet_not_created"
+    assert book.names == ["2026_37W", "2026_38W"], "the seed keeps its name"
