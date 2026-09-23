@@ -29,15 +29,15 @@ slice 3a (workflow 7 up to its plan) and slice 3b (the workbook writer)
 have merged, slice 3c puts workflow 7 into the installable bundle and slice
 3d makes that bundle extractable on Windows and slice 3e documents the grants
 it needs to run; the live parity run on a company Bridge is next, and only the
-owner can produce it. 70 pull requests merged (#1 to #74; #5 was closed unmerged and superseded
+owner can produce it. 71 pull requests merged (#1 to #75; #5 was closed unmerged and superseded
 by #6, the numbers #24 and #25 were never pull requests, and #49 was closed
 unmerged when its base branch was deleted and landed through #51). The count
-stood at 64 while eight of those had merged, counted against GitHub on
+stood at 64 while nine of those had merged, counted against GitHub on
 2026-09-23. A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 930 passed, 4 skipped on Windows, with `ruff`, `mypy`,
+The suite is 931 passed, 4 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. Three skips need symbolic-link
 privileges and one needs an IPv6 loopback; all four run on Linux CI.
 

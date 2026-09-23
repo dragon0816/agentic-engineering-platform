@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from capabilities.contracts import CapabilitySpec
+from capabilities.files import READ_FILE_SPEC
 from capabilities.runtime import CapabilityGrant, LocalPolicy
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
@@ -26,8 +28,12 @@ from capabilities.weekly_report.handlers import (
 from common.execution import RequestContext, TraceIdentifiers
 
 README = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "README.md"
-#: The five the weekly report runs: four reads and the one write.
+#: Every capability a host built from this package installs: the bounded file
+#: read this package ships on its own, then the weekly report's four reads and
+#: its one write. The page has to cover all of them, because a reader who
+#: follows it and is refused cannot tell which grant is missing.
 SPECS = (
+    READ_FILE_SPEC,
     RESOLVE_WINDOW_SPEC,
     JIRA_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
@@ -87,11 +93,11 @@ def test_every_documented_grant_is_one_the_policy_accepts() -> None:
         assert authorization.allowed, spec.identity.key
 
 
-@pytest.mark.parametrize("spec", SPECS, ids=lambda spec: spec.identity.key[1])
-def test_a_documented_grant_without_its_approval_is_refused(spec: object) -> None:
+@pytest.mark.parametrize("spec", SPECS, ids=lambda spec: spec.identity.name)
+def test_a_documented_grant_without_its_approval_is_refused(spec: CapabilitySpec) -> None:
     """Why the page has to say so: dropping the reference is not a weaker
-    grant, it is no grant at all."""
+    grant, it is no grant at all. Checked one capability at a time, so a
+    failure names the one that changed."""
     grants = tuple(grant.model_copy(update={"approval_ref": None}) for grant in documented_grants())
     policy = LocalPolicy(grants)
-    for candidate in SPECS:
-        assert not policy.authorize(context(grants[0].actor), candidate).allowed
+    assert not policy.authorize(context(grants[0].actor), spec).allowed

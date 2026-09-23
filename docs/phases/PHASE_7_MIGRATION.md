@@ -1160,11 +1160,14 @@ authorization that names nothing. An operator sees a refusal with no cause.
    that the reads need one too. It also says that `membership.json` must name
    the operator, and that the number of completed steps in a failed run is
    where it stopped.
-2. `test_weekly_report_documented_grants` parses the README's own JSON and
-   puts it through the real `LocalPolicy` against the five shipped
-   specifications: every capability has a documented grant, every documented
-   grant is accepted, and dropping the approval reference refuses all five.
-   The page and the policy now fail together or not at all.
+2. The first walkthrough had the same defect: it told an operator to run
+   `files.read` and never showed the grant that needs, so the page's very
+   first command always failed. It is written out too.
+3. `test_weekly_report_documented_grants` parses the README's own JSON and
+   puts it through the real `LocalPolicy` against every capability a host
+   installs: each one has a documented grant, each documented grant is
+   accepted, and dropping the approval reference refuses each in turn. The
+   page and the policy now fail together or not at all.
 
 Verified by building the whole workspace an operator would write — host
 configuration, membership, grants, exported assets and a workbook — and

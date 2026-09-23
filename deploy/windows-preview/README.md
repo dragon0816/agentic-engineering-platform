@@ -94,6 +94,21 @@ values as `host.json`:
 }
 ```
 
+Nothing runs until `grants.json` says who may run what. Every capability
+this package ships declares that it needs an approval, the reads included, so
+**every grant carries an `approval_ref`**; a grant without one is no grant,
+and the dispatch is refused without naming a cause. For the one capability
+this package ships on its own, `workspace\grants.json` reads:
+
+```json
+[
+  { "actor": "employee.id",
+    "asset": { "namespace": "filesystem", "name": "read-file", "version": "1.0.0" },
+    "permissions": ["filesystem.read"], "policy_refs": ["filesystem-read-policy"],
+    "approval_ref": "CHANGE-1234" }
+]
+```
+
 Then ask the Agent to do something, and see what this Bridge has run:
 
 ```bat
