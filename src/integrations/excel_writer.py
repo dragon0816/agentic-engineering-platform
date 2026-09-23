@@ -48,6 +48,8 @@ WorkbookWriteErrorCode = Literal[
     "workbook_open",
     "workbook_unwritable",
     "sheet_missing",
+    "sheet_not_created",
+    "sheets_lost",
     "header_missing",
     "write_failed",
 ]
@@ -139,6 +141,8 @@ class WorkbookWriter(Protocol):
     """Everything the weekly report's executor needs of a workbook. A reader
     is not enough: an upsert has to know where each key already is, and the
     marks have to be read before they can be retired."""
+
+    def sheet_names(self, path: Path) -> tuple[str, ...]: ...
 
     def backup(self, path: Path) -> Path | None: ...
 
@@ -409,6 +413,12 @@ class ExcelComWriter:
 
     # -- the protocol -------------------------------------------------
 
+    def sheet_names(self, path: Path) -> tuple[str, ...]:
+        """Every sheet in the workbook, in its own order."""
+        book = self._book(path)
+        count = int(book.Worksheets.Count)
+        return tuple(str(book.Worksheets(i).Name) for i in range(1, count + 1))
+
     def backup(self, path: Path) -> Path | None:
         if not path.is_file():
             raise WorkbookWriteError("workbook_missing")
@@ -421,19 +431,42 @@ class ExcelComWriter:
         return target
 
     def ensure_sheet(self, path: Path, sheet: str, *, seed: str | None) -> None:
+        """Make the scratch sheet, from last week's if there is one.
+
+        The sheet that gets the name is the one that **appeared**, found by
+        comparing the workbook's sheets before and after. Naming by position
+        instead is what destroyed a week of somebody's work: `Copy` put the
+        new sheet somewhere this code did not expect, the position it then
+        renamed still held the seed, and a week's own sheet became the
+        scratch sheet. The workbook had the same number of sheets afterwards,
+        so nothing looked wrong until a person read the tabs.
+
+        `Copy` is called with both of its arguments in order, because a COM
+        method reached dynamically does not always honour a named one, and
+        `Copy` with neither puts the sheet in a new workbook entirely.
+        """
         book = self._book(path)
-        names = {str(book.Worksheets(i).Name) for i in range(1, int(book.Worksheets.Count) + 1)}
-        if sheet in names:
+        before = self.sheet_names(path)
+        if sheet in before:
             return
         try:
-            if seed and seed in names:
+            last = book.Worksheets(int(book.Worksheets.Count))
+            if seed and seed in before:
                 # A copy, so the member opens the scratch sheet and sees last
                 # week's report to edit rather than a blank grid.
-                source = self._sheet(path, seed)
-                source.Copy(After=book.Worksheets(int(book.Worksheets.Count)))
-                book.Worksheets(int(book.Worksheets.Count)).Name = sheet
+                self._sheet(path, seed).Copy(None, last)
             else:
-                book.Worksheets.Add(After=book.Worksheets(int(book.Worksheets.Count))).Name = sheet
+                book.Worksheets.Add(None, last)
+        except Exception:  # noqa: BLE001
+            raise WorkbookWriteError("write_failed") from None
+        appeared = [name for name in self.sheet_names(path) if name not in before]
+        if len(appeared) != 1:
+            # Nothing appeared, or more than one thing did. Either way this
+            # code does not know which sheet is the new one, and guessing is
+            # how the week was lost.
+            raise WorkbookWriteError("sheet_not_created")
+        try:
+            self._sheet(path, appeared[0]).Name = sheet
         except Exception:  # noqa: BLE001
             raise WorkbookWriteError("write_failed") from None
 

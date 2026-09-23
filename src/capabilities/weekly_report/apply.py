@@ -51,6 +51,8 @@ from integrations.excel_writer import (
 
 ApplyRefusalCode = Literal[
     "sheet_changed",
+    # A sheet the workbook had is not there any more, which no run may do.
+    "sheets_lost",
     "header_missing",
     "workbook_missing",
     "workbook_open",
@@ -121,9 +123,16 @@ def apply_plan(
 
     finished = False
     try:
+        # Every sheet but the scratch one has to come through untouched, and
+        # that is the parity gate's first line. It is checked rather than
+        # trusted: on the first real run of this writer a week's own sheet
+        # disappeared from the team's workbook, and nothing noticed until a
+        # person looked at the tabs.
+        before_sheets = writer.sheet_names(working)
         if not present:
             writer.ensure_sheet(working, settings.temp_sheet, seed=plan.seed_sheet)
         applied = _write(plan, settings, writer, working)
+        _no_sheet_was_lost(before_sheets, writer.sheet_names(working), settings.temp_sheet)
         finished = True
     finally:
         try:
@@ -412,3 +421,20 @@ def _link(plan: WeeklyReportPlan, row: WeeklyRow) -> str:
     if plan.browse_base:
         return f"{plan.browse_base}/browse/{row.key}"
     return ""
+
+
+def _no_sheet_was_lost(before: Sequence[str], after: Sequence[str], scratch: str) -> None:
+    """Refuse a run that would save a workbook missing a sheet it had.
+
+    The scratch sheet may appear, because this run may create it. Nothing
+    else may appear and nothing at all may go: every other sheet is a week
+    somebody wrote by hand, and losing one is the kind of damage a backup
+    exists for and nobody should need.
+
+    Raised before the save, so the refusal leaves the real workbook as it
+    was and the staged copy is what carries the evidence.
+    """
+    gone = [name for name in before if name not in after]
+    arrived = [name for name in after if name not in before and name != scratch]
+    if gone or arrived:
+        raise ApplyRefused("sheets_lost")

@@ -70,6 +70,8 @@ class RecordingWriter:
         prepends: bool = True,
         fail_on: str | None = None,
         on_close: Any = None,
+        sheets: tuple[str, ...] = ("2026_30W", "weekly report temp"),
+        sheets_after: tuple[str, ...] | None = None,
     ) -> None:
         self.calls: list[tuple[str, Any]] = []
         self.existing_rows = dict(existing_rows or {})
@@ -78,7 +80,18 @@ class RecordingWriter:
         self._prepends = prepends
         self._fail_on = fail_on
         self._on_close = on_close
+        self._sheets = sheets
+        self._sheets_after = sheets_after
+        self._asked_sheets = 0
         self.closed_saving: bool | None = None
+
+    def sheet_names(self, path: Path) -> tuple[str, ...]:
+        # The second answer may differ, so a test can stand for a run that
+        # lost a sheet on the way through.
+        self._asked_sheets += 1
+        if self._asked_sheets > 1 and self._sheets_after is not None:
+            return self._sheets_after
+        return self._sheets
 
     def _record(self, name: str, payload: Any = None) -> None:
         if self._fail_on == name:
@@ -645,3 +658,42 @@ def test_a_handle_that_would_not_release_does_not_fail_a_finished_report(
     writer = RecordingWriter(existing_rows={"GTM-688": 2}, on_close=stuck_handle)
     applied = apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
     assert applied.digest_after, "the run finished and its evidence is complete"
+
+
+def test_a_run_that_would_lose_a_sheet_is_refused(tmp_path: Path) -> None:
+    """The first real run of this writer lost a week's own sheet from the
+    team's workbook, and nothing noticed until somebody looked at the tabs.
+    Every sheet but the scratch one has to come through untouched, and that
+    is now checked rather than trusted."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook)
+    plan = plan_for(workbook, [issue("GTM-1", "completed:" + chr(10) + "- tx cal")])
+    writer = RecordingWriter(
+        existing_rows={"GTM-688": 2},
+        sheets=("2026_30W", "weekly report temp"),
+        sheets_after=("weekly report temp",),
+    )
+    before = workbook.read_bytes()
+    with pytest.raises(ApplyRefused) as refused:
+        apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    assert refused.value.code == "sheets_lost"
+    assert writer.closed_saving is False, "a workbook missing a sheet is not saved"
+    assert workbook.read_bytes() == before, "and the real one is untouched"
+
+
+def test_the_scratch_sheet_may_appear_and_nothing_else_may(tmp_path: Path) -> None:
+    """A run that creates the scratch sheet is the ordinary case."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook, scratch=False)
+    plan = plan_for(workbook, [issue("GTM-1", "completed:" + chr(10) + "- tx cal")])
+    writer = RecordingWriter(sheets=("2026_30W",), sheets_after=("2026_30W", "weekly report temp"))
+    applied = apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    assert applied.digest_after
+
+    # A sheet nobody asked for is as wrong as a sheet that went.
+    stranger = RecordingWriter(
+        sheets=("2026_30W",), sheets_after=("2026_30W", "weekly report temp", "Sheet1")
+    )
+    with pytest.raises(ApplyRefused) as refused:
+        apply_plan(plan, settings(workbook), stranger, staging_root=tmp_path / "state")
+    assert refused.value.code == "sheets_lost"
