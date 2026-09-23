@@ -641,7 +641,8 @@ def test_a_card_nobody_filed_as_an_issue_is_not_a_row(tmp_path: Path) -> None:
     replies = board_replies()
     page = replies[0]
     payload = json.loads(b"".join(page.chunks()).decode("utf-8"))
-    payload["data"]["user"]["projectV2"]["items"]["nodes"].extend([drafts, dict(drafts, id="PVTI_2")])
+    nodes = payload["data"]["user"]["projectV2"]["items"]["nodes"]
+    nodes.extend([drafts, dict(drafts, id="PVTI_2")])
     transport = ScriptedTransport([Reply(200, payload)])
     with build_runtime(
         config,
