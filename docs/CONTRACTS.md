@@ -1794,7 +1794,10 @@ and `Workbook_Open` would otherwise run inside a job nobody is watching; the
 pinned source Bridge does the same and is the parity baseline. It saves and
 releases separately: `Save` then `Close(SaveChanges=False)`, so a failed save
 is `save_failed` rather than something swallowed with the release, which is
-best effort. The executor lets that one refusal through its own cleanup,
+best effort. The save retries a lock for as long as the copy back does,
+because everything past it discards the run's work: the workbook is released
+either way, since an invisible Excel holding a file the member cannot see is
+worse than the failure. The executor lets that one refusal through its own cleanup,
 because a report that was not saved must not be copied back as though it
 were. It carries the source's
 `_excel_upsert` rules: the last data row comes from the used range because

@@ -10,24 +10,29 @@ until it runs on a company workstation, which `docs/TASKS.md` records.
 from __future__ import annotations
 
 import sys
+import time
 import types
 from pathlib import Path
 from typing import Any
 
 import pytest
 
+from integrations import excel_writer
 from integrations.excel_writer import ExcelComWriter, WorkbookWriteError
 
 
 class FakeBook:
-    def __init__(self, *, save_raises: bool = False) -> None:
+    def __init__(self, *, save_raises: bool = False, failures: int = 0) -> None:
         self.save_raises = save_raises
+        self.failures = failures
+        self.attempts = 0
         self.saved = 0
         self.closed_with: list[bool] = []
 
     def Save(self) -> None:  # noqa: N802 - Excel's own spelling
-        if self.save_raises:
-            raise OSError("the network share went away")
+        self.attempts += 1
+        if self.save_raises or self.attempts <= self.failures:
+            raise OSError("the file is locked")
         self.saved += 1
 
     def Close(self, SaveChanges: bool) -> None:  # noqa: N802, N803 - Excel's own spelling
@@ -76,7 +81,7 @@ def install(monkeypatch: pytest.MonkeyPatch, book: FakeBook) -> FakeExcel:
     return excel
 
 
-def opened_writer(tmp_path: Path, excel_book: FakeBook) -> tuple[ExcelComWriter, Path]:
+def opened_writer(tmp_path: Path) -> tuple[ExcelComWriter, Path]:
     workbook = tmp_path / "book.xlsm"
     workbook.write_bytes(b"not really a workbook")
     writer = ExcelComWriter()
@@ -91,7 +96,7 @@ def test_a_workbooks_macros_do_not_run_because_this_opened_it(
     run inside a job nobody is watching. The pinned source Bridge suppresses
     events for the same reason, and it is the parity baseline."""
     excel = install(monkeypatch, FakeBook())
-    opened_writer(tmp_path, FakeBook())
+    opened_writer(tmp_path)
     assert excel.settings["EnableEvents"] is False
     assert excel.settings["ScreenUpdating"] is False
     assert excel.settings["DisplayAlerts"] is False
@@ -105,7 +110,7 @@ def test_saving_and_releasing_are_asked_separately(
     best effort. Saving is not."""
     book = FakeBook()
     install(monkeypatch, book)
-    writer, workbook = opened_writer(tmp_path, book)
+    writer, workbook = opened_writer(tmp_path)
     writer.close(workbook, save=True)
     assert book.saved == 1
     assert book.closed_with == [False], "the save already happened; the close must not redo it"
@@ -119,7 +124,8 @@ def test_a_workbook_that_was_not_saved_says_so(
     workbook back and reported a report it had never written."""
     book = FakeBook(save_raises=True)
     excel = install(monkeypatch, book)
-    writer, workbook = opened_writer(tmp_path, book)
+    monkeypatch.setattr(excel_writer, "SAVE_RETRY_SECONDS", 0.0)
+    writer, workbook = opened_writer(tmp_path)
     with pytest.raises(WorkbookWriteError) as refused:
         writer.close(workbook, save=True)
     assert refused.value.code == "save_failed"
@@ -134,7 +140,22 @@ def test_a_release_without_a_save_asks_for_neither(
     changes out of the file."""
     book = FakeBook(save_raises=True)
     install(monkeypatch, book)
-    writer, workbook = opened_writer(tmp_path, book)
+    writer, workbook = opened_writer(tmp_path)
     writer.close(workbook, save=False)
     assert book.saved == 0
     assert book.closed_with == [False]
+
+
+def test_a_lock_that_clears_does_not_cost_the_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Everything past a failed save discards the run's work, so a lock that
+    clears in a moment must not decide the run. The copy back retries for the
+    same reason and for the same length of time."""
+    book = FakeBook(failures=2)
+    install(monkeypatch, book)
+    monkeypatch.setattr(excel_writer, "SAVE_RETRY_SECONDS", 5.0)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+    writer, workbook = opened_writer(tmp_path)
+    writer.close(workbook, save=True)
+    assert book.attempts == 3 and book.saved == 1

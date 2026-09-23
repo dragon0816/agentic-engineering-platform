@@ -128,14 +128,18 @@ def apply_plan(
     finally:
         try:
             writer.close(working, save=finished)
-        except WorkbookWriteError:
+        except WorkbookWriteError as error:
             # Releasing is best effort: a file the member cannot edit is a
             # worse outcome than the failure that caused it. A failed *save*
             # is not a release failure, though: the report is not in the
             # file, and going on would copy an unchanged workbook back and
-            # report a report that was never written. It is raised only when
-            # the write itself succeeded, so it never masks the real cause.
-            if finished:
+            # report a report that was never written. Only that one is
+            # raised, and only when the write itself succeeded, so it neither
+            # masks the real cause nor turns a stuck handle into a failed
+            # run after the report was already saved -- `write_back_failed`
+            # is the outcome for a finished report that could not be
+            # returned, and it is decided below.
+            if finished and error.code == "save_failed":
                 raise
     if staged is not None:
         try:

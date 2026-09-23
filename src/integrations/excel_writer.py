@@ -55,6 +55,9 @@ WorkbookWriteErrorCode = Literal[
 #: client holds a brief lock of its own while it uploads, and losing a run's
 #: work to a lock that clears in two seconds would be absurd.
 UNSTAGE_RETRY_SECONDS = 30.0
+#: The same, for the save itself. Past this the run's work is gone, because
+#: the workbook is released either way, so it is worth waiting the same.
+SAVE_RETRY_SECONDS = 30.0
 #: xlEdgeLeft, xlEdgeTop, xlEdgeBottom, xlEdgeRight and xlInsideVertical.
 _EDGE_BORDERS = (7, 8, 9, 10)
 _INSIDE_VERTICAL = 11
@@ -571,16 +574,18 @@ class ExcelComWriter:
         does, and it is what keeps a macro workbook's format: `Save` writes
         the file it opened, where `SaveAs` would have to be told which format
         that was.
+
+        A save that cannot be done after retrying loses the run's work: the
+        workbook is released regardless, because an invisible Excel holding a
+        file the member cannot see is a worse outcome than the failure. The
+        staged copy that remains is the one from before the run.
         """
         key = str(path.resolve())
         book = self._books.pop(key, None)
         failure: WorkbookWriteError | None = None
         if book is not None:
             if save:
-                try:
-                    book.Save()
-                except Exception:  # noqa: BLE001 - COM raises its own kinds
-                    failure = WorkbookWriteError("save_failed")
+                failure = self._save(book)
             try:
                 book.Close(SaveChanges=False)
             except Exception:  # noqa: BLE001 - releasing is best effort
@@ -593,6 +598,27 @@ class ExcelComWriter:
             self._excel = None
         if failure is not None:
             raise failure
+
+    def _save(self, book: Any) -> WorkbookWriteError | None:
+        """Save, retrying a lock the way the copy back does.
+
+        Everything after this point discards the run's work: the workbook is
+        released either way, because leaving an invisible Excel holding a
+        file the member cannot see is worse than the failure. So a lock that
+        clears in two seconds must not cost the whole run, exactly as for
+        `unstage_workbook`, and for the same reason: something else on the
+        machine holds the file for a moment at a time.
+        """
+        deadline = time.monotonic() + SAVE_RETRY_SECONDS
+        while True:
+            try:
+                book.Save()
+            except Exception:  # noqa: BLE001 - COM raises its own kinds
+                if time.monotonic() >= deadline:
+                    return WorkbookWriteError("save_failed")
+                time.sleep(0.5)
+            else:
+                return None
 
 
 def _has(headers: Sequence[str], name: str) -> bool:

@@ -632,4 +632,22 @@ def test_a_report_that_could_not_be_saved_is_not_reported_as_written(tmp_path: P
     assert refused.value.code == "save_failed"
     assert workbook.read_bytes() == before, "the real workbook was not touched"
     staged = tmp_path / "state" / "weekly-report-staging" / workbook.name
-    assert staged.is_file(), "the staged copy is left where the member can look at it"
+    assert staged.is_file(), "the staged copy remains, but it is the one from before the run"
+
+
+def test_a_handle_that_would_not_release_does_not_fail_a_finished_report(
+    tmp_path: Path,
+) -> None:
+    """The report is saved and the only thing that failed is letting go of
+    the file. Failing the run here would strand a finished report in staging
+    and tell the member nothing was written."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook)
+    plan = plan_for(workbook, [issue("GTM-1", "completed:" + chr(10) + "- tx cal")])
+
+    def stuck_handle() -> None:
+        raise WorkbookWriteError("write_failed")
+
+    writer = RecordingWriter(existing_rows={"GTM-688": 2}, on_close=stuck_handle)
+    applied = apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    assert applied.digest_after, "the run finished and its evidence is complete"
