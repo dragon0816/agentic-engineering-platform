@@ -63,9 +63,15 @@ never copied into Registry assets, invitations, evaluation cases, traces or Git.
    jobs for enrolled Bridge computers.
 4. Local Agent interface and authenticated transports: operate company work locally,
    synchronize Registry packages, and let shared test Bridges poll approved jobs.
-5. Workflow 11: `11_jira_weekly_report.json` / `jira_weekly_report.py`,
-   report generation against a test workbook. (Recorded as "workflow 7" until
-   2026-09-23; see the correction in `docs/PHASE_7_MIGRATION.md`.)
+5a. Workflow 10: `10_sales_opportunity_to_chipset.json` /
+   `sales_to_chipset.py`, the sales opportunity list projected into the
+   chipset requirement workbook's `temp` sheet. Moved ahead of workflow 11 by
+   the owner decision of 2026-09-23.
+5b. Workflow 11: `11_jira_weekly_report.json` / `jira_weekly_report.py`,
+   report generation against a test workbook. Complete in code since slice
+   3b; its live parity run is deferred behind workflow 10 by the same
+   decision. (Recorded as "workflow 7" until 2026-09-23; see the correction
+   in `docs/PHASE_7_MIGRATION.md`.)
 6. Workflow 13: `13_release_package.json` / `release_package.py`, first in dry-run
    and an isolated test repository, then an explicitly approved non-production push.
 7. Knowledge platform: adopt and exercise a copy before any source vault changes.
@@ -1211,3 +1217,96 @@ the roadmap, the handoff, four docstrings and a host limitation.
 
 Nothing executable changed, so the suite is unchanged; the only code touched
 is four docstrings and the wording of one host limitation.
+
+
+## Slice 4 — workflow 10: the sales opportunity list into the chipset sheet
+
+Migration step 5a. The source, its disposition and the parity gate are in
+`docs/PHASE_7_MIGRATION.md`, "Workflow 10"; that file also records which
+source defects are preserved deliberately and which are fixed. The
+transformation's acceptance specification is the source's own
+`docs/W1_MAPPING.md`, which declares itself authoritative over the code.
+
+The shape follows workflow 11, because the same shape answered the same
+questions: pure rules with the source's tests as the oracle, then reads, then
+a plan that is the dry run and the evidence, then a write that is the only
+thing with a side effect and the only thing that needs an approval.
+
+**What only the owner can supply.** The team's real ruleset
+(`config/chipset-map.json`) is not in the pinned source, which carries only
+the example. The example ships here as the default and as test data; the
+parity run needs the owner's own file, and it is host configuration rather
+than content for this repository.
+
+### Slice 4a — the rules, ported pure
+
+1. `capabilities.chipset_report.rules` carries the source's transformation
+   with no I/O and no clock: cell cleaning, the chipset-cell parser with its
+   composition, alternative and group separators, shared-prefix expansion,
+   line composition and label handling; vendor inference; technology
+   inference and its audit detail; match keys; unit, schedule and priority
+   parsing; company splitting and joining; aggregation with once-per-
+   opportunity counting; matching against the existing sheet; row rendering,
+   ordering and row colours.
+2. `ChipsetRuleset` is the typed ruleset the source kept as an unvalidated
+   dictionary. Every key it declares is read by something, and a key it does
+   not declare is a refusal rather than a rule that silently stopped
+   applying. The example ruleset ships as the default.
+3. The date the trace block stamps is a parameter, and the dropped rows are
+   returned rather than left on a function attribute.
+
+Tests precede implementation and are the source's own 43 rule tests, ported
+case for case against the shipped ruleset, plus: the fixed ordering is
+deterministic across processes; an out-of-range month in a schedule cell is
+unparseable text rather than a crash; the month name does not depend on the
+host's locale; and the preserved defects are pinned as they stand, each named
+as preserved so nobody fixes one by accident.
+
+### Slice 4b — reading, and the plan
+
+1. `integrations.excel` gains a header row and typed values. Today it reads
+   row 1 as the headers and coerces every cell to text; this workflow needs
+   the target's headers from row 2, and needs real numbers and real dates to
+   reach the rules, which distinguish them from their text spellings.
+2. Capabilities: read a project list (a source workbook, its sheet resolved
+   by name or by the two known defaults, bounded), read the target sheet (its
+   headers and existing rows at the configured header row), and plan.
+3. `ChipsetReportPlan` is the evidence: every row that would be written with
+   the header spellings of the target sheet, the match level and matched row
+   for each, the fill each row would get, the rows that were dropped and why,
+   the statistics the source reported, the digest of the `temp` sheet as it
+   stands, and whether the target could be read at all.
+4. Refusals the plan makes before anything is written: the destination sheet
+   is the protected one; the target sheet cannot be read and the caller did
+   not ask for an unmatched preview; a source names a sheet that is not
+   there.
+5. The preview Workflow over those capabilities, its own asset, as
+   `jira-weekly-report-preview` is.
+
+### Slice 4c — writing the plan into the workbook
+
+1. The writer protocol gains what a replace needs: clearing and rewriting one
+   sheet's contents with its headers, wrap text over a range, and a bold
+   font, alongside the fills and borders it already has.
+2. `capabilities.chipset_report.apply` executes a plan in the source's order:
+   verify the destination is not the protected sheet, verify the `temp` sheet
+   is the one the plan was made against, back up, stage, replace the sheet,
+   then format in the source's order, where the row fill says how the row
+   matched and the cell fill says what changed on it.
+3. `chipset-report/apply` is a write capability with an approval, as
+   `weekly-report/apply` is, and the full Workflow is the preview's steps
+   plus it.
+4. `ChipsetReportApplied` is the evidence: the digests before and after, the
+   backup, the counts, and every refusal that did not stop the run.
+
+### Slice 4d — what changed in the source since last time
+
+The source snapshots the rows it read, compares them with the previous run's
+and reports what changed, calling out chipset, end-product and purpose
+changes as critical, because nobody annotates the project list when they
+correct a chipset. The baseline advances only after a run that succeeded, so
+a failed run does not consume the diff.
+
+This is the last slice because it is the only one that keeps state between
+runs, and because the platform already has a place for that: the host's own
+state, not a directory of JSON files beside the repository.

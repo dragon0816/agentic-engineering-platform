@@ -42,6 +42,7 @@ BorderStyle = Literal["thin", "medium", "none"]
 WorkbookWriteErrorCode = Literal[
     "library_missing",
     "excel_missing",
+    "save_failed",
     "workbook_missing",
     "workbook_open",
     "workbook_unwritable",
@@ -54,6 +55,9 @@ WorkbookWriteErrorCode = Literal[
 #: client holds a brief lock of its own while it uploads, and losing a run's
 #: work to a lock that clears in two seconds would be absurd.
 UNSTAGE_RETRY_SECONDS = 30.0
+#: The same, for the save itself. Past this the run's work is gone, because
+#: the workbook is released either way, so it is worth waiting the same.
+SAVE_RETRY_SECONDS = 30.0
 #: xlEdgeLeft, xlEdgeTop, xlEdgeBottom, xlEdgeRight and xlInsideVertical.
 _EDGE_BORDERS = (7, 8, 9, 10)
 _INSIDE_VERTICAL = 11
@@ -329,6 +333,15 @@ class ExcelComWriter:
             # A workbook that asks about links or recovery would hang a run
             # nobody is watching.
             self._excel.AskToUpdateLinks = False
+            # The team's workbooks may carry macros, and opening one would
+            # otherwise run its `Workbook_Open` inside a job the member is
+            # not watching. The pinned source Bridge suppresses events for
+            # exactly this reason and this is the parity baseline
+            # (`host-bridge/app/services/excel_com.py`). Screen updating is
+            # off for the same run's sake: it is the slow part of driving
+            # Excel cell by cell.
+            self._excel.EnableEvents = False
+            self._excel.ScreenUpdating = False
         return self._excel
 
     def _book(self, path: Path) -> Any:
@@ -552,11 +565,29 @@ class ExcelComWriter:
             raise WorkbookWriteError("write_failed") from None
 
     def close(self, path: Path, *, save: bool) -> None:
+        """Save, then release. Saving may fail the run; releasing may not.
+
+        `Close(SaveChanges=True)` would fold the two together, and a failed
+        save would then be swallowed with the release it is bundled with: the
+        caller would copy an unchanged workbook back and report a report it
+        never wrote. Saving explicitly is also what the pinned source Bridge
+        does, and it is what keeps a macro workbook's format: `Save` writes
+        the file it opened, where `SaveAs` would have to be told which format
+        that was.
+
+        A save that cannot be done after retrying loses the run's work: the
+        workbook is released regardless, because an invisible Excel holding a
+        file the member cannot see is a worse outcome than the failure. The
+        staged copy that remains is the one from before the run.
+        """
         key = str(path.resolve())
         book = self._books.pop(key, None)
+        failure: WorkbookWriteError | None = None
         if book is not None:
+            if save:
+                failure = self._save(book)
             try:
-                book.Close(SaveChanges=save)
+                book.Close(SaveChanges=False)
             except Exception:  # noqa: BLE001 - releasing is best effort
                 pass
         if not self._books and self._excel is not None:
@@ -565,6 +596,29 @@ class ExcelComWriter:
             except Exception:  # noqa: BLE001
                 pass
             self._excel = None
+        if failure is not None:
+            raise failure
+
+    def _save(self, book: Any) -> WorkbookWriteError | None:
+        """Save, retrying a lock the way the copy back does.
+
+        Everything after this point discards the run's work: the workbook is
+        released either way, because leaving an invisible Excel holding a
+        file the member cannot see is worse than the failure. So a lock that
+        clears in two seconds must not cost the whole run, exactly as for
+        `unstage_workbook`, and for the same reason: something else on the
+        machine holds the file for a moment at a time.
+        """
+        deadline = time.monotonic() + SAVE_RETRY_SECONDS
+        while True:
+            try:
+                book.Save()
+            except Exception:  # noqa: BLE001 - COM raises its own kinds
+                if time.monotonic() >= deadline:
+                    return WorkbookWriteError("save_failed")
+                time.sleep(0.5)
+            else:
+                return None
 
 
 def _has(headers: Sequence[str], name: str) -> bool:

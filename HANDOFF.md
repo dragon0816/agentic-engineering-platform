@@ -1,109 +1,85 @@
-# Handoff — Phase 7, the weekly report needs its run on a company workstation
+# Handoff — Phase 7, workflow 10 is the active work
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #78 (slice 3f) merged with its review applied.
+Branch: `phase-7/workflow-10-characterization`, in review.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Where this stopped
 
-The GTM weekly report, which the source numbers **workflow 11**, is complete
-in code and the Windows preview bundle now carries it.
-A company host can resolve the week, fetch the week's Jira issues with their
-comment threads, read the scratch sheet without Excel, plan every row and cell
-operation, and write that plan into the workbook through Excel. `weekly
-preview` is the dry run and its own asset; `weekly apply` writes.
+The owner asked for **workflow 10**, `sales_to_chipset`: the CMP180 sales
+opportunity lists projected into the `temp` sheet of the chipset readiness
+workbook. It had never been inspected. It is now characterized in full and
+planned as four slices; no implementation has started.
 
-Slices 3c and 3d fixed the install, not the behaviour. **This platform is
-published to no package index**, so every earlier instruction of the form
-`pip install agentic-engineering-platform[...]` was impossible; the owner hit
-exactly that on a company computer, against the corporate index. The offline
-bundle is the supported install, it now carries the `excel` and `windows`
-extras as wheels, the builder refuses a bundle missing one, and CI imports
-them out of the installed bundle.
+Read before continuing, in this order:
 
-The owner's first download of that bundle then failed with a missing wheel,
-because two of its files exceeded Windows' 260-character path limit where it
-had been extracted and Explorer left them out in silence. Slice 3d shortens
-the bundle and artefact names, refuses at build time any name that would not
-survive the download, and makes the installer name the path limit instead of
-reporting a missing file.
+1. `docs/PHASE_7_MIGRATION.md`, "Workflow 10" — what the source does, what
+   this migration does with each part, the parity gate, and twelve source
+   defects each decided as preserved or fixed with the reason.
+2. `docs/phases/PHASE_7_MIGRATION.md`, "Slice 4" — the four slices.
+3. The source's own `docs/W1_MAPPING.md` in `.scratch/rs-source`, 511 lines,
+   which declares itself authoritative over the code. It is the acceptance
+   specification for the transformation.
 
-**What is left cannot be done from here.** Migration step 5 is a parity gate,
-and its evidence comes from a real company workstation with Excel and Jira
-credentials, compared against the working old Host Bridge. CI never claims
-it, and this machine cannot produce it.
+**Workflow 11, the GTM weekly report, is complete in code and deferred.** Its
+live parity run on a company workstation is still the thing only the owner
+can produce, and it now comes after workflow 10 by the owner's decision of
+2026-09-23. Nothing about it is unfinished in this repository; the steps for
+that run are in `docs/phases/PHASE_7_MIGRATION.md` and
+`deploy/windows-preview/README.md`.
 
-## The one thing only the owner can do next
+## The next action
 
-`ExcelComWriter` has never been run: there is no Excel in CI and none on this
-machine, so it is written to the documented COM object model and exercised
-only through a recording writer — the same caveat the model adapters carry
-(`docs/TASKS.md`, open items). To close step 5:
+Slice 4a: port `_chipset_rules.py` pure into
+`capabilities.chipset_report.rules`, with the source's 43 rule tests as the
+oracle and the ruleset as a typed contract. It is the largest slice and the
+only one with a safety net; everything after it has none, because the
+source's tests cover the job almost not at all.
 
-1. Install the offline bundle on the company workstation: take the
-   `aep-windows-preview-*.zip` from the run's artefacts (or build it with
-   `scripts/build_windows_preview.py`), extract it **somewhere short such as
-   `C:\aep`** (Windows refuses a path of 260 characters or more and Explorer
-   leaves out what will not fit), and run `install.cmd -Actor <your.id>`. It installs with `--no-index`
-   from its own `wheels/`, so a company pip index is neither needed nor
-   consulted, and no pip setting has to change. **The platform is not
-   published to any package index**, so `pip install
-   agentic-engineering-platform` cannot work and never could.
-2. Configure `integrations.jira` and `integrations.weekly_report` in
-   `host.json` (`deploy/windows-preview/README.md` has the shape), with
-   `workbook_path` pointing at **a copy** of `SDE_Weekly_Report.xlsx`, and
-   map the Jira token to an environment variable.
-3. Write `workspace\membership.json` naming you as this device's bound
-   member, and `workspace\grants.json` with all five grants exactly as
-   `deploy/windows-preview/README.md` shows them. **Every grant needs an
-   `approval_ref`, the four reads included**, or the run stops at the first
-   step with `permission_denied`. Then `aep-host export-assets --out
-   workspace\assets`.
-4. `aep-host doctor --config host.json` — `host status` should be `ready` and
-   the `integrations` check should say the site, the secret, the library and
-   the workbook are all in place, and whether it can write.
-5. `aep-host ask --config host.json "weekly.preview 2026_31W"`, read the
-   plan, then `weekly.apply 2026_31W` against the copy. A failed run reports
-   how many steps finished, which is where it stopped: none is the grants,
-   one is Jira, two is the workbook.
-6. Run the old Host Bridge's `jobs.jira_weekly_report` for the same week
-   against a second copy and compare against the parity gate in
-   `docs/phases/PHASE_7_MIGRATION.md`, "Workflow 11": the same Jira key set,
-   only `weekly report temp` created or changed, rows upserted by key, a new
-   ticket without marker content not added, blocks prepended once in red with
-   the older text black, a repeat run duplicating nothing, and last week's
-   marks retired.
+Before writing code, apply `.agents/skills/architecture-guard/SKILL.md` and
+`.agents/skills/contract-development/SKILL.md`. The migration rule this phase
+adopted is in the characterization: preserve what the parity gate measures,
+fix only what is nondeterministic, unsafe or a crash, and record every
+preserved defect rather than fixing it in passing.
 
-The evidence is the run's own output: `WeeklyReportApplied` carries the
-scratch sheet's digest before and after, the backup's path and every count,
-and `evidence_lines(applied, plan)` renders what the gate reads. Whatever
-that run finds comes back here as the next slice's requirements — expect the
-COM adapter to need corrections, since nobody has run it.
+## What is already done on this branch
 
-## What to be ready for on that first run
+- The owner's decision to migrate workflow 10 next is recorded.
+- Two defects in the Excel adapter are fixed, found by reading the pinned
+  source Bridge's Excel service, which is the parity baseline. It opens Excel
+  with events suppressed and this adapter did not, so opening a team workbook
+  would run its macros inside an unattended job. It also saves explicitly,
+  where this adapter folded saving into closing, which the executor treats as
+  best effort: a failed save left the report out of the file and the run then
+  copied the staged workbook back and called it a success. Both are checked
+  against a stand-in for Excel.
+- Workflow 10 is characterized and planned.
 
-- Every run retires last week's marks across the whole scratch sheet before
-  making this week's, so a red `Comments` cell or a tinted `Key` cell applied
-  by hand loses its colour — never its text. The member's own `Status`
-  colours are left alone; only the job's own pink is cleared.
-- Close the workbook first. A file Excel has open is refused before anything
-  is copied.
-- A plan is written only into the sheet it was made against: if somebody
-  edits the scratch sheet between the preview and the apply, the run is
-  refused (`sheet_changed`) rather than written.
-- A run that does not finish leaves the real workbook exactly as it was and
-  names the staged copy; `write_back_failed` means the report *was* written
-  and only the copy back failed, so the staged file is the finished one.
+## Open items for the owner
 
-## After step 5
-
-Migration step 6, workflow 13 (`13_release_package.json` /
-`release_package.py`): dry run first, then an isolated test repository, then
-an explicitly approved non-production push. Then knowledge parity on a copy
-(step 7), and the controlled cutover (step 9), which is also when the pinned
-source repositories stop being the rollback baseline.
+- **The team's real ruleset is needed for the parity run.** The pinned source
+  carries only `config/chipset-map.example.json`; the real
+  `config/chipset-map.json`, which holds the team's chipset, vendor and brand
+  knowledge, exists on the company machine. The example ships here as the
+  default and as test data. The real file is host configuration and does not
+  belong in this repository.
+- Source workflow 7, `jira_team_tickets`, has never been inspected or
+  migrated. It was named in the Phase 7 candidate table by mistake, in place
+  of the weekly report that was actually built. Whether it is migrated at
+  all is an owner decision nobody has asked for.
+- The leaked credentials in the pinned `telegram-local-agent` source were
+  checked on 2026-09-23 and the finding is in `docs/TASKS.md`: the Telegram
+  bot token is already dead and the GitLab one is for a local WSL2 Docker
+  instance that is not running, so neither is live. This repository never
+  carried either (`.scratch/` is gitignored). Revoking them is still the
+  owner's to do: the Telegram token through @BotFather, the GitLab token in
+  that instance once WSL2 is running.
+- Whether a tool approval must come from a second person is an owner policy
+  decision nobody has asked for.
+- Taking somebody off a shared machine is still a host action, not a platform
+  one (slice 2j).
 
 ## How to verify
 
@@ -119,24 +95,8 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 931 passed, 4 skipped, everything else clean. Three skips
+At this commit: 938 passed, 4 skipped, everything else clean. Three skips
 need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
 CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
 3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`
 extra, which `office` also contains); none of them needs Excel or `pywin32`.
-
-## Open items for the owner
-
-- The leaked credentials in the pinned `telegram-local-agent` source were
-  checked on 2026-09-23 and the finding is in `docs/TASKS.md`: the Telegram
-  bot token is already dead and the GitLab one is for a local WSL2 Docker
-  instance that is not running, so neither is live. This repository never
-  carried either (`.scratch/` is gitignored). Revoking them is still the
-  owner's to do: the Telegram token through @BotFather, the GitLab token in
-  that instance once WSL2 is running. Both remain in that repository's
-  history; scrubbing it would move the commit the Phase 7 rollback baseline
-  is pinned to, so it belongs with the cutover.
-- Whether a tool approval must come from a second person is an owner policy
-  decision nobody has asked for.
-- Taking somebody off a shared machine is still a host action, not a platform
-  one (slice 2j).
