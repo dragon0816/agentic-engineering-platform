@@ -64,6 +64,32 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'The resident agent did not answer a local request.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" status --config "$installRoot\host.json"
           if ($LASTEXITCODE -ne 0) { throw 'The resident agent could not report its status.' }
+          # Installing over a configured host must keep what was typed by
+          # hand. Everything below the device identity -- the report's
+          # source, the workbook, which environment variable holds which
+          # secret -- is an operator's work, and losing it on an update
+          # fails the next run for a reason that looks nothing like the
+          # cause.
+          $configured = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
+          $configured | Add-Member -NotePropertyName integrations -NotePropertyValue ([ordered]@{
+              weekly_report = [ordered]@{ workbook_path = "C:/nowhere/Report.xlsx" }
+          })
+          $configured | Add-Member -NotePropertyName credentials -NotePropertyValue @(
+              [ordered]@{ secret = "jira_token"; environment_variable = "AEP_JIRA_TOKEN" }
+          )
+          $configured | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\host.json" -Encoding UTF8
+          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Installing over an existing host failed.' }
+          $kept = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
+          if ($kept.integrations.weekly_report.workbook_path -ne "C:/nowhere/Report.xlsx") {
+            throw 'Reinstalling discarded the integrations an operator had configured.'
+          }
+          if ($kept.credentials[0].environment_variable -ne "AEP_JIRA_TOKEN") {
+            throw 'Reinstalling discarded the credential mapping an operator had configured.'
+          }
+          if ($kept.device.bridge_id -ne $device.bridge_id) {
+            throw 'Reinstalling changed the device identity it should have rewritten unchanged.'
+          }
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
       - name: Upload Windows technical preview
