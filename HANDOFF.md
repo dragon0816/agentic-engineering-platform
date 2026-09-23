@@ -102,7 +102,7 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 917 passed, 4 skipped, everything else clean. Three skips
+At this commit: 920 passed, 4 skipped, everything else clean. Three skips
 need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
 CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
 3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`

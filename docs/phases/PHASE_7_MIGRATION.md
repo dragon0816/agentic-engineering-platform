@@ -1077,8 +1077,18 @@ it does.
    `LIMITATIONS` no longer says workflow 7 cannot run here; it says what
    workflow 7 needs and that `doctor` reports whether this host has it.
 
+Because the bundle now always carries the Excel bridge, an importable
+`win32com` stopped being evidence of anything: a doctor that answered "can
+write it" on the strength of it would promise a write that fails at the first
+`DispatchEx` on a workstation without Excel. `require_com` therefore resolves
+the `Excel.Application` ProgID, which reads the registry and starts nothing,
+and `excel_missing` (no Excel on this machine) is told apart from
+`library_missing` (no bridge in this installation), because different people
+fix them.
+
 Verified by installing the built bundle into a clean directory: the doctor
-ran, `openpyxl` and `pywin32` were importable, `aep-host export-assets` wrote
-all three manifests and `require_com()` passed. That is an install check, not
-the parity run; the parity run still needs Excel and Jira credentials on a
-company workstation.
+ran, `openpyxl` and `pywin32` were importable and `aep-host export-assets`
+wrote all three manifests. `require_com()` reports `excel_missing` on this
+machine, which is the correct answer: there is no Excel here. That is an
+install check, not the parity run; the parity run still needs Excel and Jira
+credentials on a company workstation.

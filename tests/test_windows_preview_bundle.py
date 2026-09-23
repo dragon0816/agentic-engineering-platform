@@ -72,9 +72,10 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         for wheel in BUNDLED_WHEELS:
             assert prefix + "wheels/" + wheel in names
         installer = bundle.read(prefix + "install.ps1").decode("utf-8")
-        assert "--no-index" in installer
-        for extra in BUNDLED_EXTRAS:
-            assert extra in installer
+        install_line = next(line for line in installer.splitlines() if "-m pip install" in line)
+        assert "--no-index" in install_line
+        extras = ",".join(BUNDLED_EXTRAS)
+        assert f'"agentic-engineering-platform[{extras}]"' in install_line
         for item in manifest["files"]:
             content = bundle.read(prefix + item["path"])
             assert hashlib.sha256(content).hexdigest() == item["sha256"]

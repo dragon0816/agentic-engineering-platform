@@ -472,10 +472,15 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
         try:
             require_com()
             writes = "can write it"
-        except WorkbookWriteError:
+        except WorkbookWriteError as missing:
             # A preview needs no Excel; only the write does. Not a failure:
-            # a host may be given the dry run alone.
-            writes = "preview only, no Excel to write with"
+            # a host may be given the dry run alone. Which absence it is
+            # decides who fixes it, so the two are never merged.
+            writes = (
+                "preview only, Excel is not installed"
+                if missing.code == "excel_missing"
+                else "preview only, the Excel bridge is not installed"
+            )
         parts.append(f"weekly report on {Path(settings.workbook_path).name} ({writes})")
     return DoctorCheck(name="integrations", status="passed", detail=", ".join(parts))
 

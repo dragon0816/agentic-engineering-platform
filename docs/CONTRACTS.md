@@ -1777,9 +1777,14 @@ key) are its pure helpers. `workbook_is_open` is a filesystem check, not a
 COM one, because it has to be answerable without opening the file;
 `stage_workbook` and `unstage_workbook` copy the workbook somewhere no sync
 client is watching and put it back once, retrying a lock for thirty seconds.
-`WorkbookWriteError` codes are `library_missing`, `workbook_missing`,
-`workbook_open`, `workbook_unwritable`, `sheet_missing`, `header_missing` and
-`write_failed`, and nothing else travels.
+`WorkbookWriteError` codes are `library_missing`, `excel_missing`,
+`workbook_missing`, `workbook_open`, `workbook_unwritable`, `sheet_missing`,
+`header_missing` and `write_failed`, and nothing else travels. The first two
+are different absences: `library_missing` is this installation without the
+Excel bridge, `excel_missing` is a machine without Excel. `require_com`
+tells them apart by resolving the `Excel.Application` ProgID, which reads the
+registry and starts nothing, because the preview bundle always carries the
+bridge and an importable `win32com` therefore says nothing about Excel.
 
 `ExcelComWriter` is the one adapter and the only thing that knows about COM
 (`pywin32`, the `windows` extra, imported lazily). It carries the source's
