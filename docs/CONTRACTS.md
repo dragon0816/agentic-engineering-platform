@@ -1652,3 +1652,92 @@ effort) and `jobs [--once] [--interval]`; `doctor` gains a `platform` check
 read from the configuration alone (`pending` without a platform, `failed`
 when the secret's name is unmapped, `passed` otherwise). Every unreachable
 answer is printed as exactly that, never as a revocation.
+
+## Workflow 7: the weekly report up to its plan (Phase 7, slice 3a)
+
+`capabilities.weekly_report.rules` is the pinned Host Bridge's
+`_weekly_rules` ported pure: `parse_week_name`, `week_number`/`week_name` in
+the `iso`, `us` and `iso-1` styles, `week_range`, `week_range_for_name`,
+`jql_updated_clause` (exclusive upper bound), `compose_jql` (the `ORDER BY`
+stays last), `column_letter`, `column_for_header` (case-insensitive, `Sales`
+and `Salse` alike), `latest_weekly_sheet` (by `(year, week)`, strictly
+`before` the week reported), `adf_to_text`/`comment_body_text`,
+`extract_marker_blocks` with `DEFAULT_MARKER_SYNONYMS` and
+`build_marker_pattern` (a header is a short line, not prose),
+`merge_marker_blocks` (per day, canonical order, newest day first),
+`select_comments_in_window`/`extract_week_blocks` (inclusive, in the
+timestamp's own offset, undated comments kept), `format_comment_block` (one
+`M/D:` header per comment date, newest first), `should_prepend` (the dedupe
+guard) and `issue_to_row` (never the `Comments` column). The source's own
+tests are the port's oracle.
+
+`capabilities.weekly_report.contracts`: `WeeklyReportSettings` is the host's
+non-secret configuration with the source's defaults (workbook, scratch sheet,
+week style and suffix, project and statuses or a base `jql`, page size and
+cap, marker synonyms, bullet, look-back, the five colours and the border);
+`WeeklyReportRequest` is what a run asks for, as fields or as the words after
+a command (`2026_31W since=… until=… max=N`), and refuses a week that is not
+a sheet name where the source fell back to today's; `ReportingWindow` is the
+week resolved (window, comment window, stamp date, composed JQL, cap);
+`JiraIssue`/`JiraComment` are an issue reduced to the report's fields with
+its comments flattened to text; `SheetState` is the scratch sheet as it
+stands (or the seed sheet when absent) with `Key -> Comments`, the seed and a
+`digest` of the scratch sheet's rows; `WeeklyReportPlan` is every row and
+cell operation decided before anything is touched — `rows`, `new_keys`,
+`updated_keys`, `comment_operations` (text, markers, line count), `remarks`
+(blocks already present that only need their colour back), `skipped` with
+reasons, `highlight_keys`, the sorted `issue_keys`, `sheet_digest` and the
+rendered `preview` — with its consistency enforced by the contract.
+
+`capabilities.weekly_report.plan.resolve_window` and `build_plan` are the
+source's window resolution and `build_plan`: a ticket the sheet has never
+seen earns a row only with marker content this week, a row already there is
+always refreshed, and the tint names exactly the rows that gained content,
+already hold this week's content, or arrived this week.
+
+`integrations.jira.JiraConnection` (https site root, `cloud` with an email or
+`server`, the token a `SecretRef`, timeout, retries, page size) and
+`JiraClient(connection, resolver, transport=, sleep=)`: Basic `email:token`
+or Bearer built per call and held nowhere; `request` with bounded retries on
+429/5xx honouring `Retry-After` and no body ever echoed; `search_issues`/
+`iter_issues` token-paged on Cloud with a remembered fall-back to offset
+paging when a site lacks `search/jql`, offset-paged on Server, under the
+cap; `comments` page by page; `myself`; `browse_url`. Every failure is a
+`JiraError` with `jira_credential`, `jira_auth`, `jira_http`,
+`jira_unavailable` or `jira_bad_reply`. `models.wire.MethodTransport` is the
+transport it takes (`request(method, url, body, headers, timeout)`), which
+`UrllibTransport` now implements beside `send`.
+
+`integrations.excel` reads a workbook's bytes with `openpyxl` (`office`
+extra), never Excel and never a write: `sheet_names`, `read_rows` (row 1 the
+headers, every cell as text), `require_library`; failures are
+`WorkbookError` codes (`library_missing`, `workbook_missing`,
+`workbook_unreadable`, `sheet_missing`) with nothing echoed.
+
+`capabilities.weekly_report.handlers` are the four read capabilities:
+`weekly-report/resolve-window` (`ResolveWindowInput.request`),
+`jira/search` (`JiraSearchInput.jql`, `max_issues`; `JiraSearchOutput.issues`
+normalized, threads the search truncated re-fetched, `capped`),
+`excel/read-scratch-sheet` (`ReadScratchSheetInput.week` → `SheetState`) and
+`weekly-report/plan` (`PlanInput.window`, `issues`, `sheet` →
+`WeeklyReportPlan`). A Jira outage is raised as `TransientCapabilityError`;
+every other failure is raised and fails the step, so a run never claims
+success it did not earn. `capabilities.weekly_report.manifest` ships the
+Skill `weekly` (`preview`) and the Workflow
+`engineering/jira-weekly-report-preview` over those four steps, and
+`export_assets(directory)` writes them as JSON under `skills/` and
+`workflows/`.
+
+The host: `HostIntegrations` (`jira`, `weekly_report`) on
+`CompanyHostConfiguration.integrations`; `build_integrations` installs the
+four capabilities from it (the Jira token's name must be mapped, like every
+other secret); `build_runtime(..., jira_transport=)` lets a test inject the
+wire; `doctor` gains an `integrations` check that reads the configuration,
+the library and the workbook's presence without contacting anything;
+`aep-host export-assets --out <dir>` writes the shipped manifests.
+
+`workflow.dispatch.BridgeExecutor` now validates a step's inputs strictly
+against JSON (`model_validate_json(json.dumps(arguments), strict=True)`)
+rather than strictly in Python: a step's arguments are what an earlier
+step's output serialized to, so a list is a tuple and an ISO string is a
+date, while `"1"` is still not an integer.

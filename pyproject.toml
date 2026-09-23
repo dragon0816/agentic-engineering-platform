@@ -13,9 +13,18 @@ dependencies = ["pydantic>=2.10,<3"]
 aep-host = "host_runtime.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "build>=1.2,<2"]
+dev = [
+    "pytest>=8,<10",
+    "ruff>=0.9,<1",
+    "mypy>=1.14,<2",
+    "build>=1.2,<2",
+    # Stubs for openpyxl (Apache-2.0), so the workbook reader type-checks.
+    "types-openpyxl>=3.1,<4",
+]
 # Office extraction (Phase 4 slice 3); licenses recorded in docs/PHASE_4_MIGRATION.md.
-office = ["pypdf[image]>=6,<7", "python-pptx>=1,<2", "python-docx>=1,<2"]
+# openpyxl (MIT) reads the weekly workbook without Excel (Phase 7 slice 3a);
+# recorded in docs/PHASE_7_MIGRATION.md.
+office = ["pypdf[image]>=6,<7", "python-pptx>=1,<2", "python-docx>=1,<2", "openpyxl>=3.1,<4"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -25,14 +25,14 @@ the history is complete; this table is the index into them.
 
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
 `docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b, 2c to 2j
-have merged, and migration step 5 (workflow 7 parity) is next. 60 pull
-requests merged (#1 to #66; #5 was closed unmerged and superseded by #6, the
+have merged, slice 3a (workflow 7 up to its plan) is in review, and the
+workbook writer is next. 61 pull requests merged (#1 to #67; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
 when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 806 passed, 4 skipped on Windows, with `ruff`, `mypy`,
+The suite is 896 passed, 4 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. Three skips need symbolic-link
 privileges and one needs an IPv6 loopback; all four run on Linux CI.
 
@@ -134,7 +134,8 @@ privileges and one needs an IPv6 loopback; all four run on Linux CI.
 | 2h identity-derived entitlement | #60 | done | An invitation records which groups accepting it grants; an authenticated actor says who and until when and carries no group; what a member may use follows from the platform's record, and a decision needs a valid session and the member's own name |
 | 2j one member per machine, and who asked | #64 | done | Every machine holds one active binding, whatever its kind: a shared test workstation runs as a virtual member of its own, so no colleague's credential sits on a machine other people can read. A request and a run record who asked when that is not who runs; the field is recorded and never consulted. A company workstation refuses delegation outright, and a Telegram sender who is not the machine's member drives a shared machine as the virtual member on their behalf |
 | 2i authenticated shared-platform transports | #66 | done | `common.sync` is the six-operation wire; `ControlPlaneService` answers it over the in-memory references and `ControlPlaneServer` serves it from the standard library; `PlatformClient` presents the Bridge access token, classifies every answer (answered, unreachable, withdrawn, rejected, refused) and applies a sync only after the whole reply is verified; jobs are polled, run through the resident Agent, settled and reported; `aep-host probe|sync|jobs`. Unreachable is never treated as revoked |
-| 3 workflow 7 parity | — | planned | Jira report behavior against a test workbook, compared with the working old Host Bridge |
+| 3a workflow 7: rules, Jira fetch and plan | — | in review | The source's weekly-report rules ported pure with its own tests as the oracle; a Jira client over the platform's transport with the secret resolved per call; four read capabilities (resolve the window, search Jira, read the scratch sheet without Excel, plan) and the preview Workflow over them; the plan is the dry run and the evidence; `aep-host export-assets`, `integrations` in `host.json` and a doctor check. Nothing writes a workbook; how the platform writes one is a decision for the owner |
+| 3 workflow 7 parity | — | planned | The workbook writer (COM or library, owner decision), then the Jira report against a test workbook on the company Bridge, compared with the working old Host Bridge |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
 | 5 knowledge parity | — | planned | Adopt, query, update and restore a full copy of the source vault |
 | 6 controlled cutover | — | planned | Per-entry-point evidence, rollback rehearsal, owner approval and observation before freezing old entry points |

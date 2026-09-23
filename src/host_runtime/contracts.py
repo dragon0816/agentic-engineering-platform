@@ -6,9 +6,11 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, StringConstraints, field_validator, model_validator
 
+from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
+from integrations.jira import JiraConnection
 from workflow.host_bridge import BridgeRegistration
 
 # The name of an environment variable, which is not a credential and cannot
@@ -73,6 +75,15 @@ class PlatformBinding(Contract):
         return self
 
 
+class HostIntegrations(Contract):
+    """The external systems this host reaches and the workflows' settings,
+    none of it secret: a Jira site whose token is a `SecretRef`, and the
+    weekly report's workbook and rules."""
+
+    jira: JiraConnection | None = None
+    weekly_report: WeeklyReportSettings | None = None
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -94,6 +105,8 @@ class CompanyHostConfiguration(Contract):
     # The shared platform, when this host has been given a token for one. A
     # host without it works locally, which every earlier command still does.
     platform: PlatformBinding | None = None
+    # The external systems the migrated workflows reach, when configured.
+    integrations: HostIntegrations | None = None
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:
@@ -162,6 +175,7 @@ class DoctorCheck(Contract):
         "assets",
         "state",
         "platform",
+        "integrations",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text
