@@ -271,6 +271,33 @@ def unstage_workbook(
 # ---------------------------------------------------------------------------
 
 
+#: What Excel registers itself as. A ProgID is a name in the registry, and
+#: the entry beneath it is the class Windows would start for it.
+EXCEL_PROGID = "Excel.Application"
+
+
+def progid_is_registered(prog_id: str) -> bool:
+    """Whether a ProgID names something this machine could start.
+
+    Reads the registry and starts nothing, which is what a doctor is allowed
+    to do, and reads exactly what resolving the ProgID would read. It does
+    not go through the COM bridge to ask: that bridge's module is a shim over
+    a DLL, and on a host where the shim is unhappy every question asked
+    through it fails alike, which would make "Excel is not installed" the
+    answer to a question about something else entirely. That is what happened
+    on 2026-09-24.
+    """
+    try:
+        import winreg
+    except ImportError:  # pragma: no cover - not Windows
+        return False
+    try:
+        with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, prog_id + r"\CLSID"):
+            return True
+    except OSError:
+        return False
+
+
 def require_com() -> None:
     """Raise where this host cannot drive Excel, so a doctor can ask without
     opening anything.
@@ -282,21 +309,13 @@ def require_com() -> None:
     bridge, so an importable `win32com` says nothing at all about Excel, and
     answering "can write it" on the strength of it would promise a write that
     fails at the first `DispatchEx`.
-
-    Resolving the ProgID reads the registry and starts nothing, which is what
-    a doctor is allowed to do. Anything other than a clean resolution is read
-    as "no Excel here": understating is the safe direction, because the
-    preview still runs and only the write is withheld.
     """
     try:
-        import pythoncom
         import win32com.client  # noqa: F401 - the adapter's own import
     except ImportError:
         raise WorkbookWriteError("library_missing") from None
-    try:
-        pythoncom.CLSIDFromProgID("Excel.Application")
-    except Exception:
-        raise WorkbookWriteError("excel_missing") from None
+    if not progid_is_registered(EXCEL_PROGID):
+        raise WorkbookWriteError("excel_missing")
 
 
 class ExcelComWriter:

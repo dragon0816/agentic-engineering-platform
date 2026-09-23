@@ -29,7 +29,7 @@ from capabilities.weekly_report.contracts import (
     WeeklyReportSettings,
 )
 from capabilities.weekly_report.plan import build_plan, resolve_window
-from integrations import excel
+from integrations import excel, excel_writer
 from integrations.excel_writer import (
     Border,
     Fill,
@@ -563,24 +563,20 @@ def test_a_write_back_that_fails_is_not_reported_as_nothing_happened(tmp_path: P
     assert staged.is_file()
 
 
-def fake_pywin32(monkeypatch: pytest.MonkeyPatch, *, excel_registered: bool) -> None:
-    """Stand in for the bridge this machine does not have. The bundle always
-    carries it, so what the doctor answers on a machine *with* the bridge is
-    exactly what these tests cannot otherwise reach."""
-    pythoncom = types.ModuleType("pythoncom")
+def fake_bridge(monkeypatch: pytest.MonkeyPatch, *, excel_registered: bool) -> None:
+    """Stand in for the bridge this machine does not have.
 
-    def resolve(prog_id: str) -> str:
-        if not excel_registered:
-            raise OSError("class not registered")
-        return "{00024500-0000-0000-C000-000000000046}"
-
-    pythoncom.CLSIDFromProgID = resolve  # type: ignore[attr-defined]
+    Only the bridge. Whether Excel is registered is a question about the
+    machine, and it is answered by `progid_is_registered`, which reads the
+    real registry and has its own test against it: faking that question is
+    what let a made-up API through on 2026-09-24.
+    """
     client = types.ModuleType("win32com.client")
     win32com = types.ModuleType("win32com")
     win32com.client = client  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "pythoncom", pythoncom)
     monkeypatch.setitem(sys.modules, "win32com", win32com)
     monkeypatch.setitem(sys.modules, "win32com.client", client)
+    monkeypatch.setattr(excel_writer, "progid_is_registered", lambda _p: excel_registered)
 
 
 def test_a_machine_without_excel_is_not_a_machine_that_can_write(
@@ -590,16 +586,14 @@ def test_a_machine_without_excel_is_not_a_machine_that_can_write(
     `win32com` says nothing about Excel. Answering `can write it` on the
     strength of the import would promise a write that fails at the first
     `DispatchEx`."""
-    fake_pywin32(monkeypatch, excel_registered=False)
+    fake_bridge(monkeypatch, excel_registered=False)
     with pytest.raises(WorkbookWriteError) as refused:
         require_com()
     assert refused.value.code == "excel_missing"
 
 
 def test_a_machine_with_excel_can_write(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Resolving the ProgID reads the registry and starts nothing, which is
-    all a doctor is allowed to do."""
-    fake_pywin32(monkeypatch, excel_registered=True)
+    fake_bridge(monkeypatch, excel_registered=True)
     require_com()
 
 
@@ -608,7 +602,7 @@ def test_a_missing_bridge_is_a_different_absence_from_a_missing_excel(
 ) -> None:
     """Different people fix them: one is this installation, the other is the
     machine. This test machine has no bridge at all."""
-    monkeypatch.setitem(sys.modules, "pythoncom", None)
+    monkeypatch.setitem(sys.modules, "win32com.client", None)
     with pytest.raises(WorkbookWriteError) as refused:
         require_com()
     assert refused.value.code == "library_missing"
