@@ -897,9 +897,11 @@ here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
 2. `integrations.jira.JiraClient` is the source's client over the platform's
    transport: Basic `email:token` for Cloud and Bearer for Server, the secret
    resolved per call through a `SecretRef` and held nowhere; token-paged
-   `POST search/jql` for Cloud and offset-paged `POST search` otherwise, both
-   under the safety cap; comment threads re-fetched when the search truncated
-   them; bounded retries on 429 and 5xx honouring `Retry-After`, with an
+   `POST search/jql` for Cloud with a remembered fall-back to offset paging
+   when a site answers the probe 404 or 410, offset-paged `POST search`
+   otherwise, both under the safety cap and both reading every page while
+   the site's `total` says more remain; comment threads re-fetched when the
+   search truncated them; bounded retries on 429 and 5xx honouring `Retry-After`, with an
    injectable sleeper; 401 and 403 a typed `jira_auth` refusal; every failure
    a code with a redacted message. `UrllibTransport` gains `request` for a
    method other than POST; `Transport` itself is unchanged.
@@ -915,9 +917,9 @@ here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
    typed `WeeklyReportPlan`: rows to upsert by key, new and updated keys, the
    blocks to prepend with their markers, the blocks already present that
    only need their colour back, what was skipped and why, the keys to tint,
-   and the rendered preview. A ticket the sheet has never seen earns a row
-   only with marker content this week; a row already there is always
-   refreshed.
+   and the rendered preview, which says in capitals when the cap cut the
+   search short. A ticket the sheet has never seen earns a row only with
+   marker content this week; a row already there is always refreshed.
 4. The plan is the evidence the parity gate names: the normalized key set,
    the plan summary, the scratch sheet's digest before, the normalized rows
    and the repeat-run comparison (a second plan against a sheet that already
@@ -931,7 +933,10 @@ here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
    every other) and `integrations.weekly_report` (the workbook, the scratch
    sheet, the week style, the base JQL, the markers, the colours and the cap,
    with the source's defaults); a host so configured installs the four
-   capabilities, and one without them still runs everything it did.
+   capabilities, and one without them still runs everything it did. The
+   host's step timeout becomes configuration (`capability_timeout_seconds`,
+   default ten minutes): the platform's thirty seconds suits a file read,
+   not a Jira search with a throttle waited out.
 6. `openpyxl` (MIT, 3.1.x, maintained) joins the `office` extra for reading a
    workbook without Excel; `types-openpyxl` joins the dev tools. On a host
    without the extra `doctor` says so, and a run that reaches the sheet step

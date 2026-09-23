@@ -334,7 +334,7 @@ def build_gateway(
         policy = LocalPolicy(grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
-    bridge = BridgeExecutor(installed, policy)
+    bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     return Gateway(RequestRouter(CommandRouter(skills)), bridge, WorkflowEngine(workflows, bridge))
 
 

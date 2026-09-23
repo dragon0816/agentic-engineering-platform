@@ -1686,8 +1686,11 @@ stands (or the seed sheet when absent) with `Key -> Comments`, the seed and a
 cell operation decided before anything is touched — `rows`, `new_keys`,
 `updated_keys`, `comment_operations` (text, markers, line count), `remarks`
 (blocks already present that only need their colour back), `skipped` with
-reasons, `highlight_keys`, the sorted `issue_keys`, `sheet_digest` and the
-rendered `preview` — with its consistency enforced by the contract.
+reasons, `highlight_keys`, the sorted `issue_keys`, `capped` (the search
+stopped at the cap, which the preview says in capitals), `sheet_digest` and
+the rendered `preview` — with its consistency enforced by the contract.
+`week_suffix` is `W` or empty, the two spellings the parser reads; a marker
+vocabulary names at least one marker.
 
 `capabilities.weekly_report.plan.resolve_window` and `build_plan` are the
 source's window resolution and `build_plan`: a ticket the sheet has never
@@ -1701,8 +1704,10 @@ already hold this week's content, or arrived this week.
 or Bearer built per call and held nowhere; `request` with bounded retries on
 429/5xx honouring `Retry-After` and no body ever echoed; `search_issues`/
 `iter_issues` token-paged on Cloud with a remembered fall-back to offset
-paging when a site lacks `search/jql`, offset-paged on Server, under the
-cap; `comments` page by page; `myself`; `browse_url`. Every failure is a
+paging when a site answers the probe 404 or 410 (an empty body is
+`jira_bad_reply`, never a fall-back), offset-paged on Server, under the
+cap and reading every page while the site's `total` says more remain;
+`comments` page by page; `myself`; `browse_url`. Every failure is a
 `JiraError` with `jira_credential`, `jira_auth`, `jira_http`,
 `jira_unavailable` or `jira_bad_reply`. `models.wire.MethodTransport` is the
 transport it takes (`request(method, url, body, headers, timeout)`), which
@@ -1710,7 +1715,8 @@ transport it takes (`request(method, url, body, headers, timeout)`), which
 
 `integrations.excel` reads a workbook's bytes with `openpyxl` (`office`
 extra), never Excel and never a write: `sheet_names`, `read_rows` (row 1 the
-headers, every cell as text), `require_library`; failures are
+headers, every cell as text), `read_chosen_sheet` (the names and one sheet's
+rows from a single open), `require_library`; failures are
 `WorkbookError` codes (`library_missing`, `workbook_missing`,
 `workbook_unreadable`, `sheet_missing`) with nothing echoed.
 
@@ -1735,6 +1741,11 @@ other secret); `build_runtime(..., jira_transport=)` lets a test inject the
 wire; `doctor` gains an `integrations` check that reads the configuration,
 the library and the workbook's presence without contacting anything;
 `aep-host export-assets --out <dir>` writes the shipped manifests.
+`CompanyHostConfiguration.capability_timeout_seconds` (default 600) is how
+long one step may run on this host: the platform's thirty seconds suits a
+file read and not a Jira search with a throttle waited out. A step that
+outlives it fails as `timeout`; the thread it ran on finishes on its own, so
+the cap is a report, not a stop.
 
 `workflow.dispatch.BridgeExecutor` now validates a step's inputs strictly
 against JSON (`model_validate_json(json.dumps(arguments), strict=True)`)

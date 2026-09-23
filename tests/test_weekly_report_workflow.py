@@ -28,6 +28,7 @@ from capabilities.weekly_report.handlers import (
     RESOLVE_WINDOW_SPEC,
     ReadScratchSheetHandler,
     ReadScratchSheetInput,
+    digest_rows,
 )
 from capabilities.weekly_report.manifest import export_assets, preview_workflow, weekly_skill
 from common.execution import RequestContext, TraceIdentifiers
@@ -250,6 +251,9 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
     )
     assert plan.highlight_keys == ("GTM-1", "GTM-9")
     assert plan.rows[0].company == "Acme" and plan.rows[0].sales == "Wendy/Teresa"
+    assert not plan.capped and "CAPPED" not in plan.preview
+    # The host's executor gives a step the time a Jira search needs.
+    assert config.capability_timeout_seconds == 600
     # The evidence: the sheet as it was, and nothing changed.
     assert plan.sheet_digest != "0" * 64
     assert workbook.read_bytes() == before
@@ -331,6 +335,21 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
     empty = read(ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(bare))), "2026_31W")
     assert empty.headers == rules.WEEKLY_COLUMNS and empty.existing == {}
     assert empty.seed_sheet is None and empty.source_sheet is None
+    # A scratch sheet with a blank header row is digested as it stands; the
+    # column contract stands in only for the plan's own lookups.
+    blank = tmp_path / "blank.xlsx"
+    book = openpyxl.Workbook()
+    book.active.title = "2026_30W"
+    book.active.append(HEADERS)
+    scratch = book.create_sheet("weekly report temp")
+    scratch.append([None] * 7)
+    scratch.append(["GTM-1", "x", "", "", "", "", ""])
+    book.save(blank)
+    headless = read(
+        ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(blank))), "2026_31W"
+    )
+    assert headless.headers == rules.WEEKLY_COLUMNS
+    assert headless.digest == digest_rows(("",) * 7, (("GTM-1", "x", "", "", "", "", ""),))
     with pytest.raises(excel.WorkbookError, match="workbook_missing"):
         excel.sheet_names(tmp_path / "nowhere.xlsx")
     (tmp_path / "junk.xlsx").write_bytes(b"not a workbook")
@@ -341,8 +360,6 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
 
 
 def handler_digest_of_nothing() -> str:
-    from capabilities.weekly_report.handlers import digest_rows
-
     return digest_rows((), ())
 
 

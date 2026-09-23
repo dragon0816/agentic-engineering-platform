@@ -107,6 +107,13 @@ class CompanyHostConfiguration(Contract):
     platform: PlatformBinding | None = None
     # The external systems the migrated workflows reach, when configured.
     integrations: HostIntegrations | None = None
+    # How long one capability step may run. The platform's default of thirty
+    # seconds is right for a file read and wrong for a Jira search over a
+    # week's tickets with their comment threads and a throttle waited out;
+    # the source's job ran under no such cap. A step that outlives this
+    # fails as `timeout`, and the thread it was running on finishes on its
+    # own, so the cap is a report, not a stop.
+    capability_timeout_seconds: int = Field(default=600, ge=1, le=3600, strict=True)
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:

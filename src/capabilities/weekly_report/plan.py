@@ -71,6 +71,8 @@ def build_plan(
     window: ReportingWindow,
     issues: Sequence[JiraIssue],
     sheet: SheetState,
+    *,
+    capped: bool = False,
 ) -> WeeklyReportPlan:
     """Every row and cell operation, decided from the issues and the sheet.
 
@@ -158,6 +160,7 @@ def build_plan(
         skipped=tuple(skipped),
         highlight_keys=tuple(tinted),
         issue_keys=tuple(sorted({issue.key for issue in issues})),
+        capped=capped,
         sheet_digest=sheet.digest,
         preview="pending",
     )
@@ -188,6 +191,14 @@ def render_preview(
         f"# week     : {window.week}  ({window.since} .. {window.until})",
         f"# seed     : {sheet.seed_sheet}",
         f"# before   : {plan.sheet_digest}",
+        *(
+            [
+                f"# CAPPED   : the search stopped at {window.max_issues} issue(s); "
+                "this is not the whole week"
+            ]
+            if plan.capped
+            else []
+        ),
         "",
         f"1) copy '{sheet.seed_sheet}' -> '{settings.temp_sheet}' (only if the sheet is missing)",
         f"2) upsert by Key  rows={len(plan.rows)}"

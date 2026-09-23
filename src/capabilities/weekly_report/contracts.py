@@ -23,7 +23,8 @@ class WeeklyReportSettings(Contract):
     workbook_path: Text
     temp_sheet: Text = "weekly report temp"
     week_style: rules.WeekStyle = "iso"
-    week_suffix: Annotated[str, StringConstraints(max_length=3)] = "W"
+    # The two spellings the workbook has used and `parse_week_name` reads.
+    week_suffix: Literal["W", ""] = "W"
     project: Symbol = rules.DEFAULT_PROJECT
     statuses: tuple[Text, ...] = rules.DEFAULT_STATUSES
     # A base JQL overrides project and statuses when given; the window is
@@ -54,6 +55,8 @@ class WeeklyReportSettings(Contract):
             raise ValueError("workbook_path must be an absolute path")
         if not self.statuses:
             raise ValueError("at least one status selects the board")
+        if self.markers is not None and not self.markers:
+            raise ValueError("a marker vocabulary names at least one marker")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -224,6 +227,8 @@ class WeeklyReportPlan(Contract):
     highlight_keys: tuple[str, ...] = ()
     # Every key the search returned, sorted: the normalized key set.
     issue_keys: tuple[str, ...] = ()
+    # Whether the cap cut the search short: a partial week is said to be one.
+    capped: bool = False
     sheet_digest: Sha256
     preview: str
 

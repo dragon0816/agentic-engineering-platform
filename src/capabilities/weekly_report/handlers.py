@@ -207,11 +207,15 @@ class ReadScratchSheetHandler:
 
     def _read(self, week: str) -> SheetState:
         path = Path(self.settings.workbook_path)
-        names = excel.sheet_names(path)
-        seed = rules.latest_weekly_sheet(names, before=rules.parse_week_name(week))
         scratch = self.settings.temp_sheet
+        before = rules.parse_week_name(week)
+
+        def choose(names: tuple[str, ...]) -> str | None:
+            return scratch if scratch in names else rules.latest_weekly_sheet(names, before=before)
+
+        names, source, read_headers, rows = excel.read_chosen_sheet(path, choose)
+        seed = rules.latest_weekly_sheet(names, before=before)
         present = scratch in names
-        source = scratch if present else seed
         if source is None:
             return SheetState(
                 headers=rules.WEEKLY_COLUMNS,
@@ -220,7 +224,9 @@ class ReadScratchSheetHandler:
                 scratch_present=False,
                 digest=digest_rows((), ()),
             )
-        headers, rows = excel.read_rows(path, source)
+        # The digest is of the sheet as it stands, headers as read; the
+        # column contract stands in only for the plan's own lookups.
+        headers = read_headers
         if not any(header.strip() for header in headers):
             headers = rules.WEEKLY_COLUMNS
         existing: dict[str, str] = {}
@@ -242,7 +248,7 @@ class ReadScratchSheetHandler:
             source_sheet=source,
             # The digest is of the scratch sheet as it stands: when it is
             # absent there is nothing to have changed.
-            digest=digest_rows(headers, rows) if present else digest_rows((), ()),
+            digest=digest_rows(read_headers, rows) if present else digest_rows((), ()),
         )
 
 
@@ -255,6 +261,7 @@ def digest_rows(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> 
 class PlanInput(Contract):
     window: ReportingWindow
     issues: tuple[JiraIssue, ...] = ()
+    capped: bool = False
     sheet: SheetState
 
 
@@ -264,7 +271,7 @@ class PlanHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         item = PlanInput.model_validate(inputs)
-        return build_plan(self.settings, item.window, item.issues, item.sheet)
+        return build_plan(self.settings, item.window, item.issues, item.sheet, capped=item.capped)
 
 
 PLAN_OUTPUT = WeeklyReportPlan

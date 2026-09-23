@@ -72,6 +72,7 @@ def preview_workflow() -> WorkflowManifest:
                     "inputs": {
                         "window": {"source": "step", "step_index": 0},
                         "issues": {"source": "step", "step_index": 1, "path": ["issues"]},
+                        "capped": {"source": "step", "step_index": 1, "path": ["capped"]},
                         "sheet": {"source": "step", "step_index": 2},
                     },
                 },

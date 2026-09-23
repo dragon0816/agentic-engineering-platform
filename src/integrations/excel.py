@@ -7,7 +7,7 @@ raising at import time. Nothing here writes a workbook; how the platform
 writes one is a decision recorded in the Phase 7 documents, not made here.
 """
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any, Literal
 
@@ -73,6 +73,28 @@ def read_rows(path: Path, sheet: str) -> tuple[tuple[str, ...], tuple[tuple[str,
     finally:
         workbook.close()
     return headers, rows
+
+
+def read_chosen_sheet(
+    path: Path, choose: Callable[[tuple[str, ...]], str | None]
+) -> tuple[tuple[str, ...], str | None, tuple[str, ...], tuple[tuple[str, ...], ...]]:
+    """The sheet names, the sheet `choose` picks from them, and that
+    sheet's headers and rows, from one open of the file: a 75-sheet workbook
+    is parsed once, not once per question."""
+    workbook = _open(path)
+    try:
+        names = tuple(str(name) for name in workbook.sheetnames)
+        source = choose(names)
+        if source is None:
+            return names, None, (), ()
+        if source not in names:
+            raise WorkbookError("sheet_missing")
+        iterator = workbook[source].iter_rows(values_only=True)
+        headers = _texts(next(iterator, ()))
+        rows = tuple(_texts(row) for row in iterator)
+    finally:
+        workbook.close()
+    return names, source, headers, rows
 
 
 def _texts(row: Sequence[Any]) -> tuple[str, ...]:

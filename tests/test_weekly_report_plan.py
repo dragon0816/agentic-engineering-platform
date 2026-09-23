@@ -170,6 +170,10 @@ def test_the_preview_says_what_would_be_written_and_that_nothing_was() -> None:
     assert plan.summary() == (
         "2 row(s) (1 new, 1 updated); 1 comment block(s) to prepend, 0 to recolour, 1 skipped"
     )
+    assert "CAPPED" not in preview and not plan.capped
+    # A search the cap cut short is said to be one.
+    short = build_plan(settings(), window(max_issues=1), [WORKED_ON], sheet(), capped=True)
+    assert short.capped and "# CAPPED   : the search stopped at 1 issue(s)" in short.preview
 
 
 def test_the_window_is_resolved_as_the_source_resolved_it() -> None:
@@ -256,6 +260,11 @@ def test_the_settings_and_the_plan_are_closed_and_consistent() -> None:
         settings(key_highlight="yellow")
     with pytest.raises(ValidationError):
         settings(api_token="pasted")
+    with pytest.raises(ValidationError, match="at least one marker"):
+        settings(markers={})
+    with pytest.raises(ValidationError):
+        settings(week_suffix="wk")
+    assert settings(week_suffix="").week_suffix == ""
     assert settings(jql="project = X").base_jql() == "project = X"
     base = plan_for([WORKED_ON])
 

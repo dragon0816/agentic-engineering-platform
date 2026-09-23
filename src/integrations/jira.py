@@ -177,7 +177,6 @@ class JiraClient:
                 raw = b"".join(reply.chunks())
             except Exception as error:  # noqa: BLE001 - a body cut short
                 last = describe(error)
-                close_quietly(reply)
                 if attempt + 1 >= attempts:
                     raise JiraError("jira_unavailable", last) from None
                 self._sleep(self._delay(attempt, None))
@@ -210,8 +209,12 @@ class JiraClient:
                 raise JiraError(
                     "jira_http", f"Jira {method} {path} returned {status}", status=status
                 )
-            if status == 204 or not raw:
+            if status == 204:
                 return None
+            if not raw:
+                # An answer with nothing in it is not an answer: a proxy or
+                # a hiccup, never a site saying it lacks an endpoint.
+                raise JiraError("jira_bad_reply", f"Jira {method} {path} returned an empty body")
             try:
                 return json.loads(raw)
             except ValueError:
@@ -329,9 +332,12 @@ class JiraClient:
                         return
             start_at += len(issues)
             total = page.get("total")
-            if total is not None and start_at >= int(total):
-                return
-            if len(issues) < page_size:
+            if total is not None:
+                # The site says how many there are; a page shorter than asked
+                # for is the site's own cap, not the end.
+                if start_at >= int(total):
+                    return
+            elif len(issues) < page_size:
                 return
 
     # -- single issue ---------------------------------------------------
@@ -356,9 +362,10 @@ class JiraClient:
                 break
             start_at += len(batch)
             total = page.get("total")
-            if total is not None and start_at >= int(total):
-                break
-            if len(batch) < size:
+            if total is not None:
+                if start_at >= int(total):
+                    break
+            elif len(batch) < size:
                 break
         return out
 

@@ -186,6 +186,26 @@ def test_server_pages_by_offset_and_a_cloud_site_without_search_jql_falls_back()
     assert transport.calls[0]["url"].endswith("/rest/api/2/search")
     client, transport = server([Reply(200, {"issues": [{"key": "M-1"}]})])
     assert len(client.search_issues("project = M", page_size=2)) == 1
+    # A site that caps maxResults below the page asked for still says how
+    # many there are, and every page is read until then.
+    client, transport = server(
+        [
+            Reply(200, {"issues": [{"key": "M-1"}, {"key": "M-2"}], "total": 3, "maxResults": 2}),
+            Reply(200, {"issues": [{"key": "M-3"}], "total": 3, "maxResults": 2}),
+        ]
+    )
+    assert [i["key"] for i in client.search_issues("project = M", page_size=100)] == [
+        "M-1",
+        "M-2",
+        "M-3",
+    ]
+    client, transport, _ = cloud(
+        [
+            Reply(200, {"comments": [{"id": "1"}], "total": 2}),
+            Reply(200, {"comments": [{"id": "2"}], "total": 2}),
+        ]
+    )
+    assert [c["id"] for c in client.comments("GTM-1", page_size=100)] == ["1", "2"]
     # A Cloud site that has not got `search/jql` still works, and the
     # fall-back is remembered.
     client, transport, _ = cloud(
@@ -236,8 +256,14 @@ def test_throttles_and_transient_errors_are_waited_out_and_the_rest_are_not() ->
     with pytest.raises(JiraError, match="400") as bad:
         client.request("GET", "myself")
     assert bad.value.code == "jira_http" and len(transport.calls) == 1
-    client, _, _ = cloud([Reply(200, None)])
+    client, _, _ = cloud([Reply(204, None)])
     assert client.request("GET", "myself") is None
+    # An answer with nothing in it is not an answer, and never a probe's
+    # "this site lacks the endpoint".
+    client, transport, _ = cloud([Reply(200, None)])
+    with pytest.raises(JiraError, match="empty body") as empty:
+        client.search_issues("project = GTM")
+    assert empty.value.code == "jira_bad_reply" and len(transport.calls) == 1
 
 
 def test_a_rejected_credential_is_a_refusal_of_its_own_kind() -> None:

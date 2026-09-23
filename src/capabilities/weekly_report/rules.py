@@ -141,7 +141,10 @@ def week_range_for_name(name: str, style: WeekStyle = "iso") -> tuple[_dt.date, 
     if style == "iso":
         monday = _dt.date.fromisocalendar(year, number, 1)
     elif style == "iso-1":
-        monday = _dt.date.fromisocalendar(year, min(number + 1, 53), 1)
+        # Week N under iso-1 is ISO week N+1, which for the last week of a
+        # 52-week year is the first week of the next: a week later, not
+        # a week number the calendar refuses.
+        monday = _dt.date.fromisocalendar(year, number, 1) + _dt.timedelta(weeks=1)
     elif style == "us":
         first = _dt.date(year, 1, 1)
         first_monday = first + _dt.timedelta(days=(7 - first.weekday()) % 7)
@@ -392,7 +395,11 @@ def build_marker_pattern(lookup: Mapping[str, str]) -> re.Pattern[str]:
     bracketed, hashed or bulleted) or followed immediately by a colon. That
     keeps `Complete the rest of test item OBUE` from being a header while
     `Complete tasks: got the request` still is. Longest synonyms win."""
-    alternatives = sorted((re.escape(key) for key in lookup), key=len, reverse=True)
+    alternatives = sorted((re.escape(key) for key in lookup if key), key=len, reverse=True)
+    if not alternatives:
+        # No vocabulary matches nothing; an empty alternation would match
+        # every blank line.
+        return re.compile(r"(?!x)x(?P<marker>)(?P<inline>)")
     body = "|".join(alternatives)
     return re.compile(
         r"(?im)^[ \t]*[-*#>•]*[ \t]*"

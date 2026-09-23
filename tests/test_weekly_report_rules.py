@@ -81,6 +81,9 @@ def test_week_range_for_name_round_trips_and_rejects_junk() -> None:
         assert rules.week_name(start, "iso") == name
     with pytest.raises(ValueError, match="not a weekly sheet name"):
         rules.week_range_for_name("Tasks Summary-12-23")
+    # Under iso-1 the last week of a 52-week year is the first of the next.
+    assert rules.week_range_for_name("2025_52W", "iso-1")[0] == _dt.date(2025, 12, 29)
+    assert rules.week_range_for_name("2026_52W", "iso-1")[0] == _dt.date(2026, 12, 28)
 
 
 #: The real sheet list, trimmed: gaps (no 2025_39W, 2026_7W, 2026_8W,
@@ -407,6 +410,8 @@ def test_block_structure() -> None:
     only_completed = {"Completed": ("completed",)}
     assert one("ongoing task:\n- x", only_completed) == []
     assert one("completed:\n- x", only_completed) == [("Completed", ["x"])]
+    # No vocabulary matches nothing, blank lines included.
+    assert one("para one\n\npara two\ncompleted:\n- x", {}) == []
     assert rules.MarkerBlock("Completed", "ongoing task", ("a", "b")).as_text() == (
         "[Completed]\n- a\n- b"
     )
