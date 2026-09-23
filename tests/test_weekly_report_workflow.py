@@ -623,3 +623,35 @@ def test_the_doctor_says_when_the_token_variable_is_not_set(
     passed = {c.name: c for c in host_report(config, layout).checks}["integrations"]
     assert passed.status == "passed"
     assert "a value nobody prints" not in passed.detail, "knowing it is set is not reading it"
+
+
+def test_a_card_nobody_filed_as_an_issue_is_not_a_row(tmp_path: Path) -> None:
+    """A board carries cards that were never filed. They have no key, no
+    history and no comments, so they can never carry a week's work, and
+    reading them gave every one of them the same key: two such cards merged
+    into a single row. Seen on the owner's own board on 2026-09-24, as a row
+    called `GH`."""
+    config, layout, _ = host(tmp_path)
+    drafts = {
+        "id": "PVTI_draft",
+        "type": "DRAFT_ISSUE",
+        "fieldValues": {"nodes": [{"text": "a card nobody filed", "field": {"name": "Title"}}]},
+        "content": {"__typename": "DraftIssue", "title": "a card nobody filed"},
+    }
+    replies = board_replies()
+    page = replies[0]
+    payload = json.loads(b"".join(page.chunks()).decode("utf-8"))
+    nodes = payload["data"]["user"]["projectV2"]["items"]["nodes"]
+    nodes.extend([drafts, dict(drafts, id="PVTI_2")])
+    transport = ScriptedTransport([Reply(200, payload)])
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=transport,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.preview 2026_31W")
+        assert outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
+        plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[-1].data)
+    assert all(not row.key.endswith("GH") for row in plan.rows), "no row is the bare prefix"
+    assert len(plan.rows) == len({row.key for row in plan.rows}), "no two cards share a row"

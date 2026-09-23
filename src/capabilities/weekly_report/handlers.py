@@ -163,7 +163,11 @@ class ProjectSearchHandler:
             if error.code in ("github_unavailable", "github_rate_limited"):
                 raise TransientCapabilityError(error.code) from None
             raise CapabilityRefused(error.code) from None
-        chosen = [row for row in rows if _within(row.updated, item.since, item.until)]
+        # A card nobody has filed as an issue has no key, no history and no
+        # comments, so it can never carry a week's work. Including it gave
+        # every such card the same key and merged them into one row.
+        tracked = [row for row in rows if row.key]
+        chosen = [row for row in tracked if _within(row.updated, item.since, item.until)]
         capped = item.max_issues is not None and len(chosen) > item.max_issues
         if item.max_issues is not None:
             chosen = chosen[: item.max_issues]
@@ -202,9 +206,11 @@ def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
         key = carried.group(1)
         summary = title[carried.end() :].strip()
     else:
-        # Work that started on the board and never had a key of its own.
-        number = row.key.rsplit("#", 1)[-1] if "#" in row.key else ""
-        key = f"{settings.board_key_prefix}-{number}" if number else settings.board_key_prefix
+        # Work that started on the board and never had a key of its own. The
+        # issue number is what makes it one row rather than all of them:
+        # a row with no number at all is not read (see `tracked` above).
+        number = row.key.rsplit("#", 1)[-1]
+        key = f"{settings.board_key_prefix}-{number}"
         summary = title.strip()
     return ReportItem(
         key=key,
