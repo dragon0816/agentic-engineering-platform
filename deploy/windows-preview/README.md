@@ -26,6 +26,12 @@ Do not add a password, token, cookie or API key to `host.json`.
 
 ## Install and inspect
 
+Extract the zip somewhere short, such as `C:\aep`. Windows refuses a path of
+260 characters or more, and Explorer silently leaves out the files that would
+need one, so a bundle extracted inside a downloaded artefact folder can arrive
+incomplete. The installer measures this before it verifies anything and says
+so, but extracting shallowly avoids it.
+
 Open Command Prompt in the extracted bundle and enter the platform actor/user:
 
 ```bat

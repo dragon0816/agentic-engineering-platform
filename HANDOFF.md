@@ -1,7 +1,7 @@
 # Handoff — Phase 7, workflow 7 needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #72 (slice 3c) merged with its review applied.
+Branch: `phase-7/bundle-path-limit`, slice 3d committed and in review.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
@@ -14,13 +14,20 @@ comment threads, read the scratch sheet without Excel, plan every row and cell
 operation, and write that plan into the workbook through Excel. `weekly
 preview` is the dry run and its own asset; `weekly apply` writes.
 
-Slice 3c fixed the install, not the behaviour. **This platform
-is published to no package index**, so every earlier instruction of the form
+Slices 3c and 3d fixed the install, not the behaviour. **This platform is
+published to no package index**, so every earlier instruction of the form
 `pip install agentic-engineering-platform[...]` was impossible; the owner hit
 exactly that on a company computer, against the corporate index. The offline
 bundle is the supported install, it now carries the `excel` and `windows`
 extras as wheels, the builder refuses a bundle missing one, and CI imports
 them out of the installed bundle.
+
+The owner's first download of that bundle then failed with a missing wheel,
+because two of its files exceeded Windows' 260-character path limit where it
+had been extracted and Explorer left them out in silence. Slice 3d shortens
+the bundle and artefact names, refuses at build time any name that would not
+survive the download, and makes the installer name the path limit instead of
+reporting a missing file.
 
 **What is left cannot be done from here.** Migration step 5 is a parity gate,
 and its evidence comes from a real company workstation with Excel and Jira
@@ -35,9 +42,10 @@ only through a recording writer — the same caveat the model adapters carry
 (`docs/TASKS.md`, open items). To close step 5:
 
 1. Install the offline bundle on the company workstation: take the
-   `agentic-engineering-platform-windows-preview-*.zip` from the run's
-   artefacts (or build it with `scripts/build_windows_preview.py`), extract
-   it, and run `install.cmd -Actor <your.id>`. It installs with `--no-index`
+   `aep-windows-preview-*.zip` from the run's artefacts (or build it with
+   `scripts/build_windows_preview.py`), extract it **somewhere short such as
+   `C:\aep`** (Windows refuses a path of 260 characters or more and Explorer
+   leaves out what will not fit), and run `install.cmd -Actor <your.id>`. It installs with `--no-index`
    from its own `wheels/`, so a company pip index is neither needed nor
    consulted, and no pip setting has to change. **The platform is not
    published to any package index**, so `pip install
@@ -102,7 +110,7 @@ On Windows in `.venv` (Python 3.12), from the repository root:
 git diff --check
 ```
 
-At this commit: 920 passed, 4 skipped, everything else clean. Three skips
+At this commit: 923 passed, 4 skipped, everything else clean. Three skips
 need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
 CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
 3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`
