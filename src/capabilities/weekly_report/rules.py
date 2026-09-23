@@ -1,7 +1,7 @@
 """Pure rules for the weekly report. No I/O, no network, no workbook.
 
 Ported as they stand from the pinned Host Bridge's `_weekly_rules`
-(`docs/PHASE_7_MIGRATION.md`, "Workflow 7"). Every rule here was derived
+(`docs/PHASE_7_MIGRATION.md`, "Workflow 11"). Every rule here was derived
 from the real workbook and the real project, not invented, and the source's
 own tests are the oracle for this port:
 

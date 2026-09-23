@@ -4,7 +4,7 @@ Unified engineering automation platform for agentic reasoning, deterministic wor
 
 Phase 7 is active with invitation-only platform enrollment and separate Bridge
 device identity as its first slice. Production-like validation will run on an
-enrolled company Agent + Bridge, beginning with Jira report workflow 7 and release
+enrolled company Agent + Bridge, beginning with the GTM weekly report (source workflow 11) and release
 package workflow 13; CI and this shared-platform host remain side-effect-free.
 
 Phase 1 provides validated contracts and an in-memory Task discovery / Bridge
@@ -117,7 +117,7 @@ The Phase 7 Windows company-host technical preview is built with
 `scripts/build_windows_preview.py`. It installs a local `aep-host` CLI from bundled
 Python 3.12 wheels, validates the host with `aep-host doctor`, and exports an empty,
 credential-free Bridge enrollment request. See `deploy/windows-preview/README.md`.
-It has no shared-platform transport and cannot execute workflow 7 or 13 yet.
+It has no shared-platform transport and cannot execute workflow 13 yet.
 
 Phase 7 keeps the Personal Agent, installed assets and authoritative run state on
 each Bridge computer. The shared platform distributes published packages and holds

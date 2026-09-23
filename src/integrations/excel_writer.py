@@ -1,7 +1,7 @@
 """Writing a workbook, and the one adapter that does it through Excel.
 
 The protocol is the vocabulary the pinned Host Bridge's Excel service
-exposed, typed (`docs/PHASE_7_MIGRATION.md`, "Workflow 7"). The executor in
+exposed, typed (`docs/PHASE_7_MIGRATION.md`, "Workflow 11"). The executor in
 `capabilities.weekly_report.apply` speaks only this; `ExcelComWriter` is the
 one thing that knows about Excel, so the owner's choice of COM is reversible
 by writing another adapter and nothing else.

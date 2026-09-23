@@ -68,9 +68,9 @@ def test_doctor_is_side_effect_free_and_reports_every_local_requirement(tmp_path
     assert all(check.status == "passed" for check in report.checks)
     limitations = " ".join(report.limitations)
     # What the preview cannot do is stated, and what it now can do is not
-    # claimed as a limitation: workflow 7 runs here once it is configured.
+    # claimed as a limitation: the weekly report runs here once configured.
     assert "workflow 13" in limitations and "Enrollment" in limitations
-    assert "cannot execute workflow 7" not in limitations
+    assert "cannot execute workflow 11" not in limitations
     assert tuple(tmp_path.iterdir()) == before
 
 

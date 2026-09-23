@@ -1,7 +1,7 @@
 """A Jira REST client over the platform's transport.
 
 Ported from the pinned Host Bridge's `_jira_client` (`docs/PHASE_7_MIGRATION.md`,
-"Workflow 7"): Basic `email:token` for Cloud and Bearer for Server, token-paged
+"Workflow 11"): Basic `email:token` for Cloud and Bearer for Server, token-paged
 `POST search/jql` on Cloud with a remembered fall-back to offset paging where
 a site lacks it, offset-paged `POST search` otherwise, comment threads read
 page by page, bounded retries on throttles and transient 5xx honouring

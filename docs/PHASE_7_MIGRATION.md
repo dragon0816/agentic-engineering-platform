@@ -9,8 +9,8 @@ therefore supplies the comparison baseline. No source repository is modified.
 
 | Candidate | Proven behavior that must survive | Decision |
 |---|---|---|
-| `workflows/07_jira_team_tickets_to_excel.json`, `host-bridge/jobs/jira_weekly_report.py` | Manual/daily trigger; no HTTP retry; fixed week/JQL window; scratch-sheet-only writes; upsert by Jira key; marker-filtered comment prepend with local and remote dedupe; formatting retirement; dry-run preview | **PRESERVE + ADAPT** after company-Bridge enrollment. Characterize the job's rules and project them into typed capability/workflow contracts. Keep Jira and Excel execution on the company Bridge. Do not copy credentials, file paths or n8n transport configuration. |
-| `workflows/13_release_package.json`, `host-bridge/jobs/release_package.py` | One blocked run per working copy; no automatic HTTP retry; required values; version/branch/requirements/release.yaml rules; safe inbox names; dry-run without commit/push; explicit commit/push | **PRESERVE + ADAPT** after workflow 7. First run only against an isolated test repository with dry-run. Keep Git/file execution on the company Bridge and retain explicit approval for push. Do not interpret publication or device binding as release authority. |
+| `workflows/11_jira_weekly_report.json`, `host-bridge/jobs/jira_weekly_report.py` | Manual/daily trigger; no HTTP retry; fixed week/JQL window; scratch-sheet-only writes; upsert by Jira key; marker-filtered comment prepend with local and remote dedupe; formatting retirement; dry-run preview | **PRESERVE + ADAPT** after company-Bridge enrollment. Characterize the job's rules and project them into typed capability/workflow contracts. Keep Jira and Excel execution on the company Bridge. Do not copy credentials, file paths or n8n transport configuration. |
+| `workflows/13_release_package.json`, `host-bridge/jobs/release_package.py` | One blocked run per working copy; no automatic HTTP retry; required values; version/branch/requirements/release.yaml rules; safe inbox names; dry-run without commit/push; explicit commit/push | **PRESERVE + ADAPT** after workflow 11. First run only against an isolated test repository with dry-run. Keep Git/file execution on the company Bridge and retain explicit approval for push. Do not interpret publication or device binding as release authority. |
 | Phase 4 knowledge source | Immutable Raw, provenance, whole-plan refusal, backups/restore and query citations | **ADAPT** after both workflows, using a full copy before the source vault. Existing Phase 4 characterization remains the baseline. |
 
 The n8n graph is optional scheduling/coarse orchestration. Parity belongs to the
@@ -354,12 +354,12 @@ and `host-bridge/run-bridge.ps1`, read in `.scratch/rs-source` on 2026-09-23.
 | The relay enrolls a worker with `POST /api/relay/enroll` during install and the token is useless "until an administrator" acts | Enrollment is a member's action at the dashboard | **PRESERVE the boundary.** Nothing member-facing is on this wire: invitation, registration, binding and token issue stay trusted-host calls on the platform, and a Bridge presents a token it was given |
 | The dashboard is the durable store of workers, runs and events | | **DEFER.** The service serves the in-memory references and says so; a durable platform store is a later slice |
 
-## Workflow 7
+## Workflow 11
 
 Source: `dragon0816/rs_workflow_system` at
 `896046e8fe2170d21f9213e56e5ce2f93c05ba43`, `host-bridge/jobs/jira_weekly_report.py`,
 `_weekly_rules.py`, `_jira_client.py`, `_excel_upsert.py`, the tests beside
-them and `workflows/07_jira_team_tickets_to_excel.json`, read in
+them and `workflows/11_jira_weekly_report.json`, read in
 `.scratch/rs-source` on 2026-09-23. The job is one module of orchestration
 over pure rules, a Jira client and an Excel executor; the n8n graph is a
 manual or daily trigger that posts to the Host Bridge's job runner and reports
@@ -399,3 +399,36 @@ slice needs anyway.
 Rollback removes `src/control_plane/identity.py`, the token contracts in
 `common.identity`, `InMemoryEnrollmentRegistry.unbind` and their tests;
 enrollment, entitlement and the member decisions keep working.
+
+
+## Correction (2026-09-23): this workflow is number 11, not 7
+
+Raised by the owner while configuring the first live run: the settings this
+platform asks for are the GTM weekly report's, which the source numbers 11,
+while every document here called it workflow 7.
+
+The source has both, and they are different workflows:
+
+| Source workflow | Its job | Migrated |
+|---|---|---|
+| `workflows/11_jira_weekly_report.json`, "11 · Jira GTM → Weekly Report + Email (W2)" | `jira_weekly_report` | Yes, in Phase 7 slices 3a and 3b |
+| `workflows/07_jira_team_tickets_to_excel.json`, "07 · Jira Team Tickets → Excel (Issue Tracking)" | `jira_team_tickets` | No. Never inspected, characterized or ported |
+
+What was built is unaffected. Every behaviour in the candidate row above and
+in "Workflow 11" below was read from `host-bridge/jobs/jira_weekly_report.py`
+and its rules module, which is workflow 11's job, and the port was tested
+against that job's own tests. Only the number and the workflow file cited
+beside it were wrong, in the candidate table, the migration order, the parity
+gate, and from there in every later document and docstring. Those are
+corrected in place so nobody follows the wrong file; this section is what
+they used to say.
+
+The wrong number entered at the first inspection on 2026-09-22 and was never
+checked against the source directory, which lists both files. The owner's
+decision of 2026-09-22 therefore also names `jira_team_tickets` where it
+meant the weekly report; `docs/TASKS.md` carries that correction beside the
+original row rather than editing it.
+
+**Workflow 7 (`jira_team_tickets`) remains unmigrated and unassessed.** Where
+it belongs in the order is the owner's decision, not this correction's; it is
+recorded as an open item.

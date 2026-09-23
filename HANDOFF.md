@@ -1,14 +1,15 @@
-# Handoff — Phase 7, workflow 7 needs its run on a company workstation
+# Handoff — Phase 7, the weekly report needs its run on a company workstation
 
 Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #76 (slice 3e) merged with its review applied.
+Branch: `phase-7/workflow-number`, slice 3f committed and in review.
 
 Progress across every phase is in `docs/TASKS.md`. This file is only where
 the current work stopped and how to resume it, and is rewritten each time.
 
 ## Where this stopped
 
-Workflow 7 is complete in code and the Windows preview bundle now carries it.
+The GTM weekly report, which the source numbers **workflow 11**, is complete
+in code and the Windows preview bundle now carries it.
 A company host can resolve the week, fetch the week's Jira issues with their
 comment threads, read the scratch sheet without Excel, plan every row and cell
 operation, and write that plan into the workbook through Excel. `weekly
@@ -69,7 +70,7 @@ only through a recording writer — the same caveat the model adapters carry
    one is Jira, two is the workbook.
 6. Run the old Host Bridge's `jobs.jira_weekly_report` for the same week
    against a second copy and compare against the parity gate in
-   `docs/phases/PHASE_7_MIGRATION.md`, "Workflow 7": the same Jira key set,
+   `docs/phases/PHASE_7_MIGRATION.md`, "Workflow 11": the same Jira key set,
    only `weekly report temp` created or changed, rows upserted by key, a new
    ticket without marker content not added, blocks prepended once in red with
    the older text black, a repeat run duplicating nothing, and last week's
