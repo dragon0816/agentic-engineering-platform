@@ -2,10 +2,19 @@
 
 This preview proves a credential-free, per-user installation and company-device
 configuration before the shared-platform enrollment transport exists. It installs
-a resident Agent that runs the Skills and Workflows you place in its workspace,
-using the one capability this package ships (a bounded read of a file inside the
-workspace). It does not run workflow 7 or 13 and contains no Jira, Excel, Git,
-browser, email, DUT or instrument adapter.
+a resident Agent that runs the Skills and Workflows you place in its workspace.
+
+It ships the capabilities the GTM weekly report needs — a bounded read of a file
+inside the workspace, a Jira search, a workbook reader and the workbook writer —
+and the Skill and Workflow that run them. None of that does anything until you
+configure a Jira site and a workbook under `integrations`; `aep-host doctor`
+says whether you have. It contains no Git, browser, email, DUT or instrument
+adapter, so it cannot run workflow 13.
+
+**Nothing here is installed from a package index.** The bundle carries every
+wheel it needs and installs with `--no-index`, so it works on a machine whose
+pip points at a company index, or at nothing at all. The platform itself is not
+published to any index, public or internal.
 
 ## Prerequisite
 
@@ -163,10 +172,10 @@ platform.
 ## Weekly report preview (optional)
 
 The GTM weekly report's first half runs here: the week's Jira issues planned
-against the workbook's scratch sheet, with nothing written. Add the Jira site
-and the report's settings to `host.json`, map the Jira API token like every
-other secret, and install the `office` extra (`openpyxl`) so the workbook can
-be read without Excel:
+against the workbook's scratch sheet, with nothing written. The workbook is
+read without Excel, by a library the bundle already carries, so there is
+nothing to install. Add the Jira site and the report's settings to
+`host.json` and map the Jira API token like every other secret:
 
 ```json
 "integrations": {
@@ -197,10 +206,11 @@ printed.
 ### Writing it into the workbook
 
 `weekly apply` runs the same four steps and then writes the plan through
-Excel itself, so it needs Excel installed and the `windows` extra:
+Excel itself, so the machine needs Excel installed. The bundle already carries
+the reader (`openpyxl`) and the Excel bridge (`pywin32`), so there is nothing
+to install:
 
 ```powershell
-pip install "agentic-engineering-platform[office,windows]"
 aep-host ask --config host.json "weekly.apply 2026_31W"
 ```
 

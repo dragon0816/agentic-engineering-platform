@@ -1037,3 +1037,58 @@ untouched with the staged copy named; a failed prepend reported without
 failing the run; the hyperlink written as a formula; the capability refused
 without an approval; and the whole Workflow end to end on a real host with a
 recording writer, with the evidence carrying both digests.
+
+
+## Slice 3c — the offline bundle carries workflow 7
+
+Slices 3a and 3b finished workflow 7 in the repository and told the owner to
+install it with `pip install "agentic-engineering-platform[office,windows]"`.
+That instruction could not work and never could: **this platform is published
+to no package index**, public or internal. The owner's first attempt on a
+company computer failed against the corporate index, as it had to.
+
+The supported install is the offline Windows preview bundle, which carries
+every wheel it needs and installs with `--no-index`. It carried `pydantic`
+only, so the bundle a member can actually install could not have run the
+workflow the two previous slices shipped. No new behavior is added here; what
+changes is that the shipped artefact contains what its own documentation says
+it does.
+
+1. The `excel` extra (`openpyxl`) is named on its own rather than reached
+   through `office`, so a company Bridge installs a spreadsheet reader and not
+   the whole PDF/PPTX/DOCX stack. `windows` (`pywin32`) is the Excel bridge.
+   Both are imported lazily, so every other host is unaffected.
+2. `scripts/build_windows_preview.py` requires the wheels those extras need
+   (`openpyxl`, `et_xmlfile`, `pywin32`) in the dependency directory and
+   refuses to build a bundle without them. A bundle missing a wheel is a
+   failed install on a machine with no index to fall back on, so it is
+   refused where it is built rather than where it is used.
+3. `install.ps1` installs the requirement `agentic-engineering-platform`
+   with its `excel` and `windows` extras from `wheels/` alone. The corporate
+   pip index on a company computer is neither needed nor consulted.
+4. CI downloads the three packages into the bundle it builds, and the Windows
+   install job then imports `openpyxl` and `win32com.client` from the
+   installed environment and checks that `export-assets` wrote the
+   weekly-report manifests. An offline bundle that cannot import what it
+   claims to carry fails the build.
+5. Every install instruction that named a package index is corrected:
+   `HANDOFF.md`, `deploy/windows-preview/README.md`, and the doctor's own
+   message when the workbook reader is missing. The host runtime's
+   `LIMITATIONS` no longer says workflow 7 cannot run here; it says what
+   workflow 7 needs and that `doctor` reports whether this host has it.
+
+Because the bundle now always carries the Excel bridge, an importable
+`win32com` stopped being evidence of anything: a doctor that answered "can
+write it" on the strength of it would promise a write that fails at the first
+`DispatchEx` on a workstation without Excel. `require_com` therefore resolves
+the `Excel.Application` ProgID, which reads the registry and starts nothing,
+and `excel_missing` (no Excel on this machine) is told apart from
+`library_missing` (no bridge in this installation), because different people
+fix them.
+
+Verified by installing the built bundle into a clean directory: the doctor
+ran, `openpyxl` and `pywin32` were importable and `aep-host export-assets`
+wrote all three manifests. `require_com()` reports `excel_missing` on this
+machine, which is the correct answer: there is no Excel here. That is an
+install check, not the parity run; the parity run still needs Excel and Jira
+credentials on a company workstation.

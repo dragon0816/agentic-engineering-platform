@@ -41,6 +41,7 @@ BorderStyle = Literal["thin", "medium", "none"]
 
 WorkbookWriteErrorCode = Literal[
     "library_missing",
+    "excel_missing",
     "workbook_missing",
     "workbook_open",
     "workbook_unwritable",
@@ -267,12 +268,31 @@ def unstage_workbook(
 
 
 def require_com() -> None:
-    """Raise `library_missing` where `pywin32` is absent, so a doctor can ask
-    without opening anything."""
+    """Raise where this host cannot drive Excel, so a doctor can ask without
+    opening anything.
+
+    Two different absences, kept apart because they are fixed differently.
+    `library_missing` is this installation: the bridge is not installed, which
+    on a source checkout means the `windows` extra. `excel_missing` is the
+    machine: Excel itself is not there. The preview bundle always carries the
+    bridge, so an importable `win32com` says nothing at all about Excel, and
+    answering "can write it" on the strength of it would promise a write that
+    fails at the first `DispatchEx`.
+
+    Resolving the ProgID reads the registry and starts nothing, which is what
+    a doctor is allowed to do. Anything other than a clean resolution is read
+    as "no Excel here": understating is the safe direction, because the
+    preview still runs and only the write is withheld.
+    """
     try:
-        import win32com.client  # noqa: F401 - presence is the check
+        import pythoncom
+        import win32com.client  # noqa: F401 - the adapter's own import
     except ImportError:
         raise WorkbookWriteError("library_missing") from None
+    try:
+        pythoncom.CLSIDFromProgID("Excel.Application")
+    except Exception:
+        raise WorkbookWriteError("excel_missing") from None
 
 
 class ExcelComWriter:

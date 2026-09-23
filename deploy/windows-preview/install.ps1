@@ -59,7 +59,14 @@ $VenvPython = Join-Path $Venv "Scripts\python.exe"
 $PlatformWheels = @(Get-ChildItem -LiteralPath (Join-Path $BundleRoot "wheels") -Filter "agentic_engineering_platform-*.whl")
 if ($PlatformWheels.Count -ne 1) { throw "Bundle must contain exactly one platform wheel." }
 $PlatformWheel = $PlatformWheels[0]
-& $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall $PlatformWheel.FullName
+# By name with its extras, resolved entirely from the bundle's own wheels:
+# the extras the bundle carries are reading the weekly workbook (openpyxl)
+# and writing it through Excel (pywin32). Extras appended to a wheel *path*
+# read to pip as part of the filename, so the requirement form is used and
+# the check above is what guarantees the directory holds exactly one build.
+# Still --no-index, so a missing wheel fails here rather than reaching for a
+# package index.
+& $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows]"
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
 
 $Config = [ordered]@{

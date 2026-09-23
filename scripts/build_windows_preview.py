@@ -18,13 +18,23 @@ SECRET_ASSIGNMENT = re.compile(
     r"(?:password|api[_-]?key|access[_-]?token|secret[_-]?value)\s*[=:]\s*(?:\"[^\"]+\"|'[^']+'|\S+)",
     re.IGNORECASE,
 )
+#: Every wheel the installed extras need. The bundle is offline, so a
+#: missing one is a failed install on a company computer rather than a
+#: download, and the builder refuses to produce a bundle that would do that.
 REQUIRED_DEPENDENCIES = (
     "annotated_types-",
     "pydantic-",
     "pydantic_core-",
     "typing_extensions-",
     "typing_inspection-",
+    # The `excel` extra: reading the weekly workbook without Excel.
+    "openpyxl-",
+    "et_xmlfile-",
+    # The `windows` extra: writing it through Excel.
+    "pywin32-",
 )
+#: What `install.ps1` installs the platform wheel with.
+BUNDLED_EXTRAS = ("excel", "windows")
 
 
 def digest(path: Path) -> str:

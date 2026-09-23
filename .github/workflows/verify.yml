@@ -32,7 +32,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.python == '3.12'
         shell: pwsh
         run: |
-          python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3"
+          python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "openpyxl>=3.1,<4" "pywin32>=306"
           python scripts/build_windows_preview.py --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/windows-preview-wheels
           $archive = Get-ChildItem dist/agentic-engineering-platform-windows-preview-*.zip | Select-Object -First 1
           Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/preview-expanded
@@ -44,6 +44,14 @@ jobs:
           & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
           $pending = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
           if ($pending -notcontains 'resident agent: pending') { throw 'A freshly installed host should report a pending resident agent.' }
+          # The bundle is offline, so the extras it claims to carry have to be
+          # importable from it alone -- no index was available to fill a gap.
+          & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client"
+          if ($LASTEXITCODE -ne 0) { throw 'The bundle did not install the excel and windows extras.' }
+          & "$installRoot\.venv\Scripts\aep-host.exe" export-assets --out "$installRoot\workspace\assets"
+          if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__jira-weekly-report__1.0.0.json")) {
+            throw 'The shipped weekly-report manifests were not written.'
+          }
           $device = $installedConfig.device
           $membership = [ordered]@{
               device = $device

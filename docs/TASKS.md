@@ -26,14 +26,15 @@ the history is complete; this table is the index into them.
 Phases 0 to 6 complete, closure records included. Phase 7 is active under
 `docs/phases/PHASE_7_MIGRATION.md`; slices 1, 2a, 2b, 2c to 2j
 slice 3a (workflow 7 up to its plan) and slice 3b (the workbook writer)
-have merged; the live parity run on a company Bridge is next, and only the
-owner can produce it. 64 pull requests merged (#1 to #70; #5 was closed unmerged and superseded by #6, the
+have merged, and slice 3c puts workflow 7 into the installable bundle; the
+live parity run on a company Bridge is next, and only the owner can produce
+it. 64 pull requests merged (#1 to #70; #5 was closed unmerged and superseded by #6, the
 numbers #24 and #25 were never pull requests, and #49 was closed unmerged
 when its base branch was deleted and landed through #51). A row says `done`
 only once its pull request has merged; until then it says `in review`, so the
 committed record never asserts a merge that has not happened.
 
-The suite is 916 passed, 4 skipped on Windows, with `ruff`, `mypy`,
+The suite is 920 passed, 4 skipped on Windows, with `ruff`, `mypy`,
 `pip check` and `python -m build` clean. Three skips need symbolic-link
 privileges and one needs an IPv6 loopback; all four run on Linux CI.
 
@@ -136,6 +137,7 @@ privileges and one needs an IPv6 loopback; all four run on Linux CI.
 | 2j one member per machine, and who asked | #64 | done | Every machine holds one active binding, whatever its kind: a shared test workstation runs as a virtual member of its own, so no colleague's credential sits on a machine other people can read. A request and a run record who asked when that is not who runs; the field is recorded and never consulted. A company workstation refuses delegation outright, and a Telegram sender who is not the machine's member drives a shared machine as the virtual member on their behalf |
 | 2i authenticated shared-platform transports | #66 | done | `common.sync` is the six-operation wire; `ControlPlaneService` answers it over the in-memory references and `ControlPlaneServer` serves it from the standard library; `PlatformClient` presents the Bridge access token, classifies every answer (answered, unreachable, withdrawn, rejected, refused) and applies a sync only after the whole reply is verified; jobs are polled, run through the resident Agent, settled and reported; `aep-host probe|sync|jobs`. Unreachable is never treated as revoked |
 | 3b workflow 7: writing the plan into the workbook | #70 | done | A typed `WorkbookWriter` and the source's order of operations behind it: back up, stage, verify the sheet is the one that was planned, upsert, retire last week's marks across the whole sheet, tint, border and pink what is new, recolour, link every key, prepend in red with a black tail. `ExcelComWriter` is the one adapter and the only thing that knows about COM; every test drives a recording writer. `weekly-report/apply` is the first side-effecting capability, approval required |
+| 3c the offline bundle carries workflow 7 | #72 | in review | The preview bundle carried `pydantic` alone, so the artefact a member can install could not run the workflow slices 3a and 3b shipped, and the install instruction named a package index this platform is not published to. The `excel` and `windows` extras are bundled as wheels, the builder refuses a bundle missing one, the installer takes them from `wheels/` with `--no-index`, CI imports them from the installed bundle, and every instruction that named an index is corrected |
 | 3a workflow 7: rules, Jira fetch and plan | #68 | done | The source's weekly-report rules ported pure with its own tests as the oracle; a Jira client over the platform's transport with the secret resolved per call; four read capabilities (resolve the window, search Jira, read the scratch sheet without Excel, plan) and the preview Workflow over them; the plan is the dry run and the evidence; `aep-host export-assets`, `integrations` in `host.json` and a doctor check. Nothing writes a workbook; how the platform writes one is a decision for the owner |
 | 3 workflow 7 parity | — | planned | The Jira report against a test workbook on the company Bridge, compared with the working old Host Bridge. Needs a machine with Excel: the evidence is the owner's to produce and CI never claims it |
 | 4 workflow 13 parity | — | planned | Release package behavior in dry-run and an isolated test repository before any approved push |
