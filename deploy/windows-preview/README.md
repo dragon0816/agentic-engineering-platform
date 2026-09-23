@@ -160,6 +160,40 @@ this host that its token is revoked or its binding withdrawn is a revocation,
 and even then nothing local is deleted; being bound again is an action on the
 platform.
 
+## Weekly report preview (optional)
+
+The GTM weekly report's first half runs here: the week's Jira issues planned
+against the workbook's scratch sheet, with nothing written. Add the Jira site
+and the report's settings to `host.json`, map the Jira API token like every
+other secret, and install the `office` extra (`openpyxl`) so the workbook can
+be read without Excel:
+
+```json
+"integrations": {
+  "jira": { "base_url": "https://your-site.atlassian.net", "email": "you@company.com",
+            "credential": { "name": "jira_token" } },
+  "weekly_report": { "workbook_path": "C:/Users/you/OneDrive/Report/SDE_Weekly_Report.xlsx" }
+},
+"credentials": [{ "secret": "jira_token", "environment_variable": "AEP_JIRA_TOKEN" }]
+```
+
+`weekly_report` takes the source job's other settings with the same defaults
+(`temp_sheet`, `week_style`, `jql`, `max_issues`, `markers`, the colours);
+`aep-host doctor` reports whether the site, the secret, the library and the
+workbook are all in place without contacting anything. Then write the shipped
+manifests into the workspace and grant the four read capabilities in
+`grants.json` (or choose them on the shared platform and `sync`):
+
+```powershell
+aep-host export-assets --out workspace\assets
+aep-host ask --config host.json "weekly.preview 2026_31W"
+```
+
+The answer is the plan: which rows would be upserted, which comment blocks
+would be prepended in red, what was skipped and why, and a digest of the
+scratch sheet as it stands. It is the same plan the source's `--dry-run`
+printed, and writing it into the workbook is the next slice.
+
 ## Remove
 
 `uninstall.cmd` shows what it would remove. `uninstall.cmd -Apply` removes only the

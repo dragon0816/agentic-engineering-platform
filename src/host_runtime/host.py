@@ -23,6 +23,22 @@ from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+from capabilities.weekly_report.contracts import ReportingWindow, SheetState, WeeklyReportPlan
+from capabilities.weekly_report.handlers import (
+    JIRA_SEARCH_SPEC,
+    PLAN_SPEC,
+    READ_SCRATCH_SHEET_SPEC,
+    RESOLVE_WINDOW_SPEC,
+    JiraSearchHandler,
+    JiraSearchInput,
+    JiraSearchOutput,
+    PlanHandler,
+    PlanInput,
+    ReadScratchSheetHandler,
+    ReadScratchSheetInput,
+    ResolveWindowHandler,
+    ResolveWindowInput,
+)
 from channels.telegram import TelegramIngress, TelegramIngressConfig
 from common.assets import ExecutionDependencies, WorkflowManifest
 from common.authorization import DeviceAuthorization
@@ -39,7 +55,10 @@ from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.workspace import documents
+from integrations import excel
+from integrations.jira import JiraClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
+from models.wire import MethodTransport
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
@@ -206,10 +225,68 @@ def _decided_grants(
     return tuple(grants)
 
 
+def build_integrations(
+    config: CompanyHostConfiguration,
+    installed: InstalledCapabilities,
+    resolver: CredentialResolver | None,
+    *,
+    jira_transport: MethodTransport | None = None,
+) -> None:
+    """The capabilities the migrated workflows need, from what this host was
+    given. Jira's token is resolved through the host's credential mapping at
+    every call and never held; a name nothing is mapped to is refused now,
+    not at the first fetch. The weekly report's steps that need no Jira are
+    installed whenever its settings are, so a preview against the workbook
+    alone still runs."""
+    integrations = config.integrations
+    if integrations is None:
+        return
+    if integrations.jira is not None:
+        if resolver is None:
+            mapped = config.credential_environment()
+            if integrations.jira.credential.name not in mapped:
+                raise HostError("credential_unmapped")
+            resolver = EnvironmentCredentials(mapped)
+        client = JiraClient(integrations.jira, resolver, transport=jira_transport)
+        installed.register(
+            JIRA_SEARCH_SPEC,
+            JiraSearchHandler(client),
+            JiraSearchInput,
+            JiraSearchOutput,
+            ExecutionDependencies(central_required=False),
+        )
+    settings = integrations.weekly_report
+    if settings is not None:
+        installed.register(
+            RESOLVE_WINDOW_SPEC,
+            ResolveWindowHandler(settings),
+            ResolveWindowInput,
+            ReportingWindow,
+            ExecutionDependencies(central_required=False),
+        )
+        installed.register(
+            READ_SCRATCH_SHEET_SPEC,
+            ReadScratchSheetHandler(settings),
+            ReadScratchSheetInput,
+            SheetState,
+            ExecutionDependencies(central_required=False),
+        )
+        installed.register(
+            PLAN_SPEC,
+            PlanHandler(settings),
+            PlanInput,
+            WeeklyReportPlan,
+            ExecutionDependencies(central_required=False),
+        )
+
+
 def build_gateway(
     config: CompanyHostConfiguration,
     layout: HostLayout,
     authorization: DeviceAuthorization | None = None,
+    *,
+    resolver: CredentialResolver | None = None,
+    jira_transport: MethodTransport | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
@@ -247,6 +324,7 @@ def build_gateway(
         ReadFileOutput,
         ExecutionDependencies(central_required=False),
     )
+    build_integrations(config, installed, resolver, jira_transport=jira_transport)
     grants = (
         _decided_grants(authorization, installed)
         if authorization is not None
@@ -256,7 +334,7 @@ def build_gateway(
         policy = LocalPolicy(grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
-    bridge = BridgeExecutor(installed, policy)
+    bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     return Gateway(RequestRouter(CommandRouter(skills)), bridge, WorkflowEngine(workflows, bridge))
 
 
@@ -319,6 +397,45 @@ def inspect_platform(config: CompanyHostConfiguration) -> DoctorCheck:
         status="passed",
         detail=f"configured for {config.platform.base_url} as {config.platform.token_id}",
     )
+
+
+def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
+    """Whether the migrated workflows could run here, read from the
+    configuration and the installed libraries alone: no site is contacted
+    and no workbook is opened."""
+    integrations = config.integrations
+    if integrations is None or (integrations.jira is None and integrations.weekly_report is None):
+        return DoctorCheck(
+            name="integrations",
+            status="pending",
+            detail="no Jira site or weekly report is configured; only the file capability runs",
+        )
+    problems: list[str] = []
+    if (
+        integrations.jira is not None
+        and integrations.jira.credential.name not in config.credential_environment()
+    ):
+        problems.append("the Jira token's secret is not mapped to an environment variable")
+    settings = integrations.weekly_report
+    if settings is not None:
+        if integrations.jira is None:
+            problems.append("the weekly report needs a Jira site; none is configured")
+        try:
+            excel.require_library()
+        except excel.WorkbookError:
+            problems.append(
+                "openpyxl is not installed; install the office extra to read the workbook"
+            )
+        if not Path(settings.workbook_path).is_file():
+            problems.append("the weekly workbook is not at the configured path")
+    if problems:
+        return DoctorCheck(name="integrations", status="failed", detail="; ".join(problems))
+    parts = []
+    if integrations.jira is not None:
+        parts.append(f"Jira at {integrations.jira.base_url}")
+    if settings is not None:
+        parts.append(f"weekly report on {Path(settings.workbook_path).name}")
+    return DoctorCheck(name="integrations", status="passed", detail=", ".join(parts))
 
 
 def inspect_runtime(
@@ -419,7 +536,14 @@ def inspect_runtime(
                 status="failed",
                 detail=f"the local state file cannot be read: {type(error).__name__}",
             )
-    return (membership, authorization, assets, state, inspect_platform(config))
+    return (
+        membership,
+        authorization,
+        assets,
+        state,
+        inspect_platform(config),
+        inspect_integrations(config),
+    )
 
 
 def host_report(
@@ -467,18 +591,27 @@ def build_runtime(
     *,
     layout: HostLayout | None = None,
     resolver: CredentialResolver | None = None,
+    jira_transport: MethodTransport | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
     membership = load_membership(checked, place)
-    gateway = build_gateway(checked, place, load_authorization(checked, place))
+    gateway = build_gateway(
+        checked,
+        place,
+        load_authorization(checked, place),
+        resolver=resolver,
+        jira_transport=jira_transport,
+    )
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:
         raise HostError("state_unavailable", place.state) from error
     try:
-        agent = LocalAgent(membership, gateway, state)
+        agent = LocalAgent(
+            membership, gateway, state, workflow_wait_seconds=checked.workflow_wait_seconds
+        )
         telegram = build_telegram(checked, place, agent, resolver)
         platform = build_platform(checked, resolver)
     except BaseException:

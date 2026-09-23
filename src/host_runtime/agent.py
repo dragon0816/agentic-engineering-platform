@@ -81,11 +81,16 @@ class LocalAgent:
         state: SqliteLocalState,
         *,
         clock: Callable[[], datetime] | None = None,
+        workflow_wait_seconds: float | None = None,
     ) -> None:
         self.membership = BridgeMembership.model_validate(membership)
         self.gateway = gateway
         self.state = state
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
+        # How long a caller waits for a workflow when the request says
+        # nothing; the engine's default when None. A run that outlives it is
+        # still settled in the background.
+        self.workflow_wait_seconds = workflow_wait_seconds
         self._settling: set[asyncio.Task[None]] = set()
 
     def admit(
@@ -132,7 +137,7 @@ class LocalAgent:
             session_id=item.session_id,
         )
         result = await self.gateway.handle(
-            context, workflow_timeout_seconds=workflow_timeout_seconds
+            context, workflow_timeout_seconds=self._wait(workflow_timeout_seconds)
         )
         run, unrecorded = await self._record(item.actor, item.on_behalf_of, result.workflow)
         return LocalAgentOutcome(
@@ -177,7 +182,7 @@ class LocalAgent:
             context,
             item.workflow,
             dict(item.arguments),
-            workflow_timeout_seconds=workflow_timeout_seconds,
+            workflow_timeout_seconds=self._wait(workflow_timeout_seconds),
             workflow_idempotency_key=item.job_id,
         )
         run, unrecorded = await self._record(item.actor, item.on_behalf_of, snapshot)
@@ -190,6 +195,9 @@ class LocalAgent:
             run=run,
             unrecorded=unrecorded,
         )
+
+    def _wait(self, requested: float | None) -> float | None:
+        return requested if requested is not None else self.workflow_wait_seconds
 
     async def _record(
         self, actor: str, on_behalf_of: str | None, snapshot: WorkflowRunSnapshot | None

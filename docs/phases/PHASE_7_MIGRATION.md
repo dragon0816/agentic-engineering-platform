@@ -862,3 +862,108 @@ settled job and for another device; the loop ending on a rejected token and
 backing off on an unreachable platform; every failure message free of the
 secret; and the CLI commands with their exit codes and the doctor's platform
 check in each of its three states.
+
+## Slice 3a — workflow 7: the weekly report's rules, the Jira fetch and the plan
+
+Migration step 5 is workflow 7, `07_jira_team_tickets_to_excel.json` /
+`jira_weekly_report.py`: the GTM tickets updated this week, upserted into the
+scratch sheet of the team's weekly workbook with the marker-tagged comments of
+the week prepended in red. Its parity gate is above. The source job is one
+module of orchestration over three of rules, a Jira client and an Excel
+executor; the rules are pure and were tested against the real workbook and the
+real project, so they are ported as they stand
+(`docs/PHASE_7_MIGRATION.md`, "Workflow 7").
+
+This slice is everything up to the point where the workbook is written: the
+week and its window, the Jira fetch, the reading of the scratch sheet, and the
+plan — which is also the dry-run preview and the evidence. It stops there on
+purpose: how the platform writes a workbook (Excel through COM on the company
+Bridge, as the pinned Host Bridge does, or a library such as `openpyxl`, which
+this slice adds for reading only) changes what parity can claim about the rest
+of the workbook, and is recorded as a decision for the owner rather than made
+here. Nothing in this slice writes a workbook, opens Excel or touches Outlook.
+
+1. `capabilities.weekly_report.rules` is the source's `_weekly_rules` ported
+   pure: week naming in the three styles the workbook has used, the week's
+   range, the `updated` clause and its composition under the user's `ORDER
+   BY`, the column contract with the `Sales`/`Salse` alias, the newest weekly
+   sheet chosen by `(year, week)` strictly before the week reported, ADF and
+   plain comment bodies flattened alike, marker headers matched as short
+   lines with the observed synonyms, blocks cut at the next marker or date
+   header with a leading date kept as the block's own, blocks merged per day
+   and rendered newest first in the workbook's `M/D:` shape, and the two
+   dedupe rules that keep a second run in one week from stacking the block.
+   Every rule has the source's own test as its oracle.
+2. `integrations.jira.JiraClient` is the source's client over the platform's
+   transport: Basic `email:token` for Cloud and Bearer for Server, the secret
+   resolved per call through a `SecretRef` and held nowhere; token-paged
+   `POST search/jql` for Cloud with a remembered fall-back to offset paging
+   when a site answers the probe 404 or 410, offset-paged `POST search`
+   otherwise, both under the safety cap and both reading every page while
+   the site's `total` says more remain; comment threads re-fetched when the
+   search truncated them; bounded retries on 429 and 5xx honouring `Retry-After` up to a minute, with an
+   injectable sleeper; 401 and 403 a typed `jira_auth` refusal; every failure
+   a code with a redacted message. `UrllibTransport` gains `request` for a
+   method other than POST; `Transport` itself is unchanged.
+3. Four read capabilities, each with a spec, closed input and output
+   contracts, and a handler the host constructs from its configuration:
+   `weekly_report.resolve_window` (the request's week or today, the window,
+   the stamp date, the composed JQL and the cap), `jira.search` (issues
+   normalized to the report's fields with their comments flattened to text),
+   `excel.read_scratch_sheet` (headers, `Key -> Comments` of the scratch
+   sheet or of the seed sheet when the scratch sheet is absent, the seed
+   chosen strictly before the week, and a digest of the scratch sheet's rows
+   as it stands), and `weekly_report.plan`, the source's `build_plan` as a
+   typed `WeeklyReportPlan`: rows to upsert by key, new and updated keys, the
+   blocks to prepend with their markers, the blocks already present that
+   only need their colour back, what was skipped and why, the keys to tint,
+   and the rendered preview, which says in capitals when the cap cut the
+   search short. A ticket the sheet has never seen earns a row only with
+   marker content this week; a row already there is always refreshed.
+4. The plan is the evidence the parity gate names: the normalized key set,
+   the plan summary, the scratch sheet's digest before, the normalized rows
+   and the repeat-run comparison (a second plan against a sheet that already
+   holds the block skips it). It carries no credential and is graded by the
+   Phase 6 harness like any other run.
+5. `capabilities.weekly_report.manifest` ships the Skill (`weekly`, with
+   `preview`) and the Workflow `engineering/jira-weekly-report-preview` that
+   runs the four steps in order and names them as the capabilities it needs,
+   so a host lacking one refuses the run before its first step; `aep-host
+   export-assets` writes them as
+   the JSON files a workspace or the Registry takes. The host gains
+   `integrations.jira` (the connection, its secret a `SecretRef` mapped like
+   every other) and `integrations.weekly_report` (the workbook, the scratch
+   sheet, the week style, the base JQL, the markers, the colours and the cap,
+   with the source's defaults); a host so configured installs the four
+   capabilities, and one without them still runs everything it did. The
+   host's step timeout becomes configuration (`capability_timeout_seconds`,
+   default ten minutes): the platform's thirty seconds suits a file read,
+   not a Jira search with a throttle waited out; a caller's wait
+   (`workflow_wait_seconds`, default fifteen minutes) is never shorter, so
+   the caller is not told `workflow_timeout` while the step may still finish.
+   A step's handler that raises `ValueError` fails the step as
+   `invalid_input`: a window that ends before it starts, a week the calendar
+   has not got, a sheet without `Key` and `Comments` columns.
+6. `openpyxl` (MIT, 3.1.x, maintained) joins the `office` extra for reading a
+   workbook without Excel; `types-openpyxl` joins the dev tools. On a host
+   without the extra `doctor` says so, and a run that reaches the sheet step
+   fails closed rather than raising past the executor. Nothing here writes
+   with it.
+7. `BridgeExecutor` validates a step's inputs strictly against JSON rather
+   than strictly in Python: a step's arguments are what an earlier step's
+   output serialized to, so a list is a tuple and an ISO string is a date,
+   while `"1"` is still not an integer. Typed data between steps was not
+   possible before this; the existing workflows pass scalars and are
+   unaffected.
+
+Tests precede implementation and cover: the ported rules against the source's
+own cases; the Jira client over a fake transport for both auth modes, both
+paging styles, the cap, comment hydration, a 429 waited out and a 401 refused,
+with the secret in no failure; the scratch-sheet reader on a workbook built
+on disk with a scratch sheet present and absent, the seed chosen strictly
+before the week, and a stable digest; the plan for each rule of the parity
+gate — a new ticket without content not added, an existing row refreshed, a
+block prepended once and skipped on the repeat, tinting only what gained
+content or arrived, markers and lines counted; and the preview workflow
+running end to end on a real host through the real Gateway with a fake Jira
+and a workbook on disk, writing nothing.

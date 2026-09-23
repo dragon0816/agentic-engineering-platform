@@ -23,6 +23,7 @@ from channels.telegram import TelegramIngress
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.agent import LocalAgentOutcome
+from host_runtime.assets import export_assets
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
@@ -62,6 +63,12 @@ def _parser() -> argparse.ArgumentParser:
     jobs.add_argument("--config", required=True, type=Path)
     jobs.add_argument("--once", action="store_true", help="poll a single time and stop")
     jobs.add_argument("--interval", type=float, default=5.0, help="seconds between polls")
+    export = commands.add_parser(
+        "export-assets", help="write the shipped Skill and Workflow manifests as JSON files"
+    )
+    export.add_argument(
+        "--out", required=True, type=Path, help="a directory; assets/ of a workspace"
+    )
     commands.add_parser("version", help="show the installed package version")
     return parser
 
@@ -285,6 +292,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "version":
         print(_package_version())
+        return 0
+    if args.command == "export-assets":
+        for written in export_assets(args.out):
+            print(f"wrote {written}")
         return 0
     try:
         config = _load(args.config)

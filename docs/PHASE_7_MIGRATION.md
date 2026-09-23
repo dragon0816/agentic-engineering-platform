@@ -354,6 +354,34 @@ and `host-bridge/run-bridge.ps1`, read in `.scratch/rs-source` on 2026-09-23.
 | The relay enrolls a worker with `POST /api/relay/enroll` during install and the token is useless "until an administrator" acts | Enrollment is a member's action at the dashboard | **PRESERVE the boundary.** Nothing member-facing is on this wire: invitation, registration, binding and token issue stay trusted-host calls on the platform, and a Bridge presents a token it was given |
 | The dashboard is the durable store of workers, runs and events | | **DEFER.** The service serves the in-memory references and says so; a durable platform store is a later slice |
 
+## Workflow 7
+
+Source: `dragon0816/rs_workflow_system` at
+`896046e8fe2170d21f9213e56e5ce2f93c05ba43`, `host-bridge/jobs/jira_weekly_report.py`,
+`_weekly_rules.py`, `_jira_client.py`, `_excel_upsert.py`, the tests beside
+them and `workflows/07_jira_team_tickets_to_excel.json`, read in
+`.scratch/rs-source` on 2026-09-23. The job is one module of orchestration
+over pure rules, a Jira client and an Excel executor; the n8n graph is a
+manual or daily trigger that posts to the Host Bridge's job runner and reports
+success or failure, nothing more.
+
+| Source behaviour | Observed | Decision |
+|---|---|---|
+| `_weekly_rules`: week naming in three styles, the `updated` clause composed under the user's `ORDER BY`, the `Sales`/`Salse` column alias, the newest weekly sheet by `(year, week)` strictly before the week, ADF flattened, marker headers as short lines with the observed synonyms, blocks cut at the next marker or date header, merged per day and rendered `M/D:` newest first, two dedupe rules | Every rule derived from the real workbook and project and tested against it; no I/O in the module | **PRESERVE as it stands**, ported pure into `capabilities.weekly_report.rules` with the source's tests as the oracle. The email job's effort, instrument, chipset and account derivations belong to a different entry point and are not ported |
+| `build_plan`: a ticket the sheet has never seen earns a row only with marker content this week; a row already there is always refreshed; the tint names the rows that gained content, already hold it, or arrived; a block already at the top of a cell is recoloured rather than re-added; the plan is both what is executed and what the dry run prints | Written for the things that were quietly wrong (red on rows never touched, a tint on every JQL match, the run date on work written another day) | **PRESERVE**, as the typed `WeeklyReportPlan` in `capabilities.weekly_report.plan`, with the same skip reasons and the same preview shape |
+| `_jira_client`: Basic `email:token` on Cloud, Bearer on Server; `search/jql` token paging with a remembered fall-back to offset paging on 404/410; offset paging on Server; comment threads re-fetched when the search truncated them; retries on 429 and 5xx honouring `Retry-After`; 401/403 an auth error | A `requests` session with the credential in its headers for its whole life; the token read from a config file with a placeholder, falling back to the environment | **ADAPT.** The same paging, fall-back, hydration and retry rules over the platform's transport, with the secret a `SecretRef` resolved per call and held nowhere; no session, no `requests`, no config file. The error body is not echoed, because Jira quotes the request back and the request carried the credential |
+| Offset paging stops on a page shorter than asked for | A site that caps `maxResults` below the page size would end the week at its first page | **ADAPT.** A short page ends the search only when the site gives no `total`; with one, every page is read until it is reached |
+| A `week` that is not a sheet name silently falls back to today's week | | **REFUSE.** `WeeklyReportRequest` refuses it: the parity gate says the same week selects the same keys, and a silent substitution is how a report for the wrong week gets written |
+| The dry run reads the scratch sheet with `openpyxl` read-only and writes a preview JSON and an ops text under `state/` | "openpyxl only reads the file bytes; it never starts Excel and never writes" | **ADAPT.** The scratch sheet is read the same way, as a capability; the preview is the plan's own rendering and travels with the run rather than being written to a state directory |
+| Excel is driven through the Host Bridge's COM API: `excel_write` upsert by key, `excel_format` resets and fills, `rich-prepend` with `tailColor`, `set-rich`, hyperlink formulas; the workbook staged to a local copy and written back once | Chosen over openpyxl for writes; character-level colour runs measured at 10–45 ms per probe; OneDrive staging measured 1001 s versus 137 s | **DEFERRED to the owner.** Writing the workbook is the next slice, and how (COM on the company Bridge as the source, or a library) decides what parity can claim about the rest of the workbook. This slice stops at the plan and writes nothing |
+| `_excel_upsert`: the last data row from the used range (hidden rows count), only managed headers written, case-insensitive header matching, the key as a `=HYPERLINK()` formula | Each rule exists because of a real bug in the older PowerShell scripts | **CARRY FORWARD** into the writer slice; none of it is needed to plan |
+| Outlook draft (`jira_weekly_email`) | A second job on the same rules | **OUT OF SCOPE** for step 5; the parity gate names the workbook |
+
+`openpyxl` 3.1.5 (MIT; `et-xmlfile`, MIT) joins the `office` extra for
+reading, and `types-openpyxl` (Apache-2.0) the dev tools. It was chosen
+because the source already used it for exactly this, read-only. Nothing in
+this slice writes with it.
+
 Review of the first version found two lifecycle holes and two missing caller
 checks. A withdrawn binding was written as a tombstone that `bind` then read
 as a duplicate, so a member taken off a device could never be put back on it;

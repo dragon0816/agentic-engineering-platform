@@ -6,9 +6,11 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, StringConstraints, field_validator, model_validator
 
+from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
+from integrations.jira import JiraConnection
 from workflow.host_bridge import BridgeRegistration
 
 # The name of an environment variable, which is not a credential and cannot
@@ -73,6 +75,15 @@ class PlatformBinding(Contract):
         return self
 
 
+class HostIntegrations(Contract):
+    """The external systems this host reaches and the workflows' settings,
+    none of it secret: a Jira site whose token is a `SecretRef`, and the
+    weekly report's workbook and rules."""
+
+    jira: JiraConnection | None = None
+    weekly_report: WeeklyReportSettings | None = None
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -94,6 +105,19 @@ class CompanyHostConfiguration(Contract):
     # The shared platform, when this host has been given a token for one. A
     # host without it works locally, which every earlier command still does.
     platform: PlatformBinding | None = None
+    # The external systems the migrated workflows reach, when configured.
+    integrations: HostIntegrations | None = None
+    # How long one capability step may run. The platform's default of thirty
+    # seconds is right for a file read and wrong for a Jira search over a
+    # week's tickets with their comment threads and a throttle waited out;
+    # the source's job ran under no such cap. A step that outlives this
+    # fails as `timeout`, and the thread it was running on finishes on its
+    # own, so the cap is a report, not a stop.
+    capability_timeout_seconds: int = Field(default=600, ge=1, le=3600, strict=True)
+    # How long a caller waits for a workflow before the Agent reports it
+    # still running; no shorter than a step's cap, or the caller would be
+    # told `workflow_timeout` while the step was still allowed to finish.
+    workflow_wait_seconds: int = Field(default=900, ge=1, le=7200, strict=True)
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:
@@ -112,6 +136,8 @@ class CompanyHostConfiguration(Contract):
         names = [item.secret for item in self.credentials]
         if len(names) != len(set(names)):
             raise ValueError("a secret is mapped to one environment variable")
+        if self.workflow_wait_seconds < self.capability_timeout_seconds:
+            raise ValueError("a caller waits at least as long as one step may run")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -162,6 +188,7 @@ class DoctorCheck(Contract):
         "assets",
         "state",
         "platform",
+        "integrations",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text

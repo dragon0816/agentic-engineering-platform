@@ -46,21 +46,6 @@ class Transport(Protocol):
     ) -> Reply: ...
 
 
-class _UrllibReply:
-    def __init__(self, raw: Any, status: int) -> None:
-        self._raw = raw
-        self.status = status
-
-    def chunks(self) -> Iterator[bytes]:
-        yield from self._raw
-
-    def close(self) -> None:
-        try:
-            self._raw.close()
-        except Exception:  # noqa: BLE001 - closing is best effort
-            pass
-
-
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     """Refuses to follow a redirect. urllib copies every header it was given
     to the new location, `Authorization` included, and turns the POST into a
@@ -79,6 +64,37 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+class MethodTransport(Protocol):
+    """The same surface with the method named, for an API that reads with
+    GET. The model adapters and the platform wire only ever POST and keep
+    the narrower `Transport`."""
+
+    def request(
+        self,
+        method: str,
+        url: str,
+        body: bytes | None,
+        headers: Mapping[str, str],
+        timeout_s: float,
+    ) -> Reply: ...
+
+
+class _UrllibReply:
+    def __init__(self, raw: Any, status: int) -> None:
+        self._raw = raw
+        self.status = status
+        self.headers: Mapping[str, str] = dict(getattr(raw, "headers", None) or {})
+
+    def chunks(self) -> Iterator[bytes]:
+        yield from self._raw
+
+    def close(self) -> None:
+        try:
+            self._raw.close()
+        except Exception:  # noqa: BLE001 - closing is best effort
+            pass
+
+
 class UrllibTransport:
     """The standard library, so the platform's install stays `pydantic` alone."""
 
@@ -86,7 +102,17 @@ class UrllibTransport:
         self.opener = urllib.request.build_opener(NoRedirect())
 
     def send(self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float) -> Reply:
-        prepared = urllib.request.Request(url, data=body, headers=dict(headers), method="POST")
+        return self.request("POST", url, body, headers, timeout_s)
+
+    def request(
+        self,
+        method: str,
+        url: str,
+        body: bytes | None,
+        headers: Mapping[str, str],
+        timeout_s: float,
+    ) -> Reply:
+        prepared = urllib.request.Request(url, data=body, headers=dict(headers), method=method)
         try:
             raw = self.opener.open(prepared, timeout=timeout_s)
         except urllib.error.HTTPError as answered:

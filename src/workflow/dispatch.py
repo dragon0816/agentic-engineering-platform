@@ -1,6 +1,7 @@
 """Local Bridge dispatch: authorization and validation precede every handler call."""
 
 import asyncio
+import json
 import math
 from typing import Literal
 
@@ -98,8 +99,13 @@ class BridgeExecutor:
         if binding.secrets:
             return self._failure(call, "secret_resolution_unavailable", unavailable=True)
         try:
-            inputs = binding.input_model.model_validate(call.arguments, strict=True)
-        except ValidationError:
+            # Strict against JSON: a step's arguments are what an earlier
+            # step's output serialized to, so a list is a tuple and an ISO
+            # string is a date, while "1" is still not an integer.
+            inputs = binding.input_model.model_validate_json(
+                json.dumps(call.arguments), strict=True
+            )
+        except (ValidationError, TypeError, ValueError):
             return self._failure(call, "invalid_input")
         try:
             output = await asyncio.wait_for(
@@ -114,6 +120,11 @@ class BridgeExecutor:
                 retryable=binding.spec.side_effect == "read",
                 invoked=True,
             )
+        except ValueError:
+            # A handler that raises ValueError is refusing what it was given:
+            # the input, or the thing the input pointed it at. Its text may
+            # quote either, so only the code travels.
+            return self._failure(call, "invalid_input", invoked=True)
         except Exception:
             # Exception text may contain credentials or input data; never trace it.
             return self._failure(call, "handler_error", invoked=True)
