@@ -612,3 +612,24 @@ def test_a_missing_bridge_is_a_different_absence_from_a_missing_excel(
     with pytest.raises(WorkbookWriteError) as refused:
         require_com()
     assert refused.value.code == "library_missing"
+
+
+def test_a_report_that_could_not_be_saved_is_not_reported_as_written(tmp_path: Path) -> None:
+    """The write succeeded in Excel and the save did not, so the report is
+    not in the file. Copying the staged workbook back would put the old
+    content over the real one and call the run a success."""
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook)
+    plan = plan_for(workbook, [issue("GTM-1", "completed:" + chr(10) + "- tx cal")])
+
+    def refuse_to_save() -> None:
+        raise WorkbookWriteError("save_failed")
+
+    writer = RecordingWriter(existing_rows={"GTM-688": 2}, on_close=refuse_to_save)
+    before = workbook.read_bytes()
+    with pytest.raises(WorkbookWriteError) as refused:
+        apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    assert refused.value.code == "save_failed"
+    assert workbook.read_bytes() == before, "the real workbook was not touched"
+    staged = tmp_path / "state" / "weekly-report-staging" / workbook.name
+    assert staged.is_file(), "the staged copy is left where the member can look at it"

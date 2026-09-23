@@ -130,8 +130,13 @@ def apply_plan(
             writer.close(working, save=finished)
         except WorkbookWriteError:
             # Releasing is best effort: a file the member cannot edit is a
-            # worse outcome than the failure that caused it.
-            pass
+            # worse outcome than the failure that caused it. A failed *save*
+            # is not a release failure, though: the report is not in the
+            # file, and going on would copy an unchanged workbook back and
+            # report a report that was never written. It is raised only when
+            # the write itself succeeded, so it never masks the real cause.
+            if finished:
+                raise
     if staged is not None:
         try:
             unstage_workbook(staged, real)

@@ -42,6 +42,7 @@ BorderStyle = Literal["thin", "medium", "none"]
 WorkbookWriteErrorCode = Literal[
     "library_missing",
     "excel_missing",
+    "save_failed",
     "workbook_missing",
     "workbook_open",
     "workbook_unwritable",
@@ -329,6 +330,15 @@ class ExcelComWriter:
             # A workbook that asks about links or recovery would hang a run
             # nobody is watching.
             self._excel.AskToUpdateLinks = False
+            # The team's workbooks may carry macros, and opening one would
+            # otherwise run its `Workbook_Open` inside a job the member is
+            # not watching. The pinned source Bridge suppresses events for
+            # exactly this reason and this is the parity baseline
+            # (`host-bridge/app/services/excel_com.py`). Screen updating is
+            # off for the same run's sake: it is the slow part of driving
+            # Excel cell by cell.
+            self._excel.EnableEvents = False
+            self._excel.ScreenUpdating = False
         return self._excel
 
     def _book(self, path: Path) -> Any:
@@ -552,11 +562,27 @@ class ExcelComWriter:
             raise WorkbookWriteError("write_failed") from None
 
     def close(self, path: Path, *, save: bool) -> None:
+        """Save, then release. Saving may fail the run; releasing may not.
+
+        `Close(SaveChanges=True)` would fold the two together, and a failed
+        save would then be swallowed with the release it is bundled with: the
+        caller would copy an unchanged workbook back and report a report it
+        never wrote. Saving explicitly is also what the pinned source Bridge
+        does, and it is what keeps a macro workbook's format: `Save` writes
+        the file it opened, where `SaveAs` would have to be told which format
+        that was.
+        """
         key = str(path.resolve())
         book = self._books.pop(key, None)
+        failure: WorkbookWriteError | None = None
         if book is not None:
+            if save:
+                try:
+                    book.Save()
+                except Exception:  # noqa: BLE001 - COM raises its own kinds
+                    failure = WorkbookWriteError("save_failed")
             try:
-                book.Close(SaveChanges=save)
+                book.Close(SaveChanges=False)
             except Exception:  # noqa: BLE001 - releasing is best effort
                 pass
         if not self._books and self._excel is not None:
@@ -565,6 +591,8 @@ class ExcelComWriter:
             except Exception:  # noqa: BLE001
                 pass
             self._excel = None
+        if failure is not None:
+            raise failure
 
 
 def _has(headers: Sequence[str], name: str) -> bool:

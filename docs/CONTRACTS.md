@@ -1778,8 +1778,9 @@ COM one, because it has to be answerable without opening the file;
 `stage_workbook` and `unstage_workbook` copy the workbook somewhere no sync
 client is watching and put it back once, retrying a lock for thirty seconds.
 `WorkbookWriteError` codes are `library_missing`, `excel_missing`,
-`workbook_missing`, `workbook_open`, `workbook_unwritable`, `sheet_missing`,
-`header_missing` and `write_failed`, and nothing else travels. The first two
+`save_failed`, `workbook_missing`, `workbook_open`, `workbook_unwritable`,
+`sheet_missing`, `header_missing` and `write_failed`, and nothing else
+travels. The first two
 are different absences: `library_missing` is this installation without the
 Excel bridge, `excel_missing` is a machine without Excel. `require_com`
 tells them apart by resolving the `Excel.Application` ProgID, which reads the
@@ -1787,7 +1788,15 @@ registry and starts nothing, because the preview bundle always carries the
 bridge and an importable `win32com` therefore says nothing about Excel.
 
 `ExcelComWriter` is the one adapter and the only thing that knows about COM
-(`pywin32`, the `windows` extra, imported lazily). It carries the source's
+(`pywin32`, the `windows` extra, imported lazily). It opens a private Excel
+with events and screen updating off, because a team workbook may carry macros
+and `Workbook_Open` would otherwise run inside a job nobody is watching; the
+pinned source Bridge does the same and is the parity baseline. It saves and
+releases separately: `Save` then `Close(SaveChanges=False)`, so a failed save
+is `save_failed` rather than something swallowed with the release, which is
+best effort. The executor lets that one refusal through its own cleanup,
+because a report that was not saved must not be copied back as though it
+were. It carries the source's
 `_excel_upsert` rules: the last data row comes from the used range because
 hidden rows count, only managed headers are ever written so the hand-kept
 `Comments` column survives, and header matching is case-insensitive.
