@@ -1,0 +1,30 @@
+{
+  "requirement": "Convert source records to canonical records: trim and lowercase category, rename years to age, and emit age as an integer.",
+  "artifact_path": "transform.json",
+  "initial_candidate": {
+    "fields": [
+      {"target": "category", "source": "category", "operations": ["strip", "lower"]},
+      {"target": "age", "source": "years", "operations": []}
+    ]
+  },
+  "repaired_candidate": {
+    "fields": [
+      {"target": "category", "source": "category", "operations": ["strip", "lower"]},
+      {"target": "age", "source": "years", "operations": ["integer"]}
+    ]
+  },
+  "cases": [
+    {
+      "name": "new-age-conversion",
+      "kind": "new",
+      "input": [{"category": " Alpha ", "years": " 7 ", "age_new": 7}],
+      "expected": [{"category": "alpha", "age": 7}]
+    },
+    {
+      "name": "existing-normalization",
+      "kind": "regression",
+      "input": [{"category": " BETA", "years": 3}],
+      "expected": [{"category": "beta", "age": 3}]
+    }
+  ]
+}

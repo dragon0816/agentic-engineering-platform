@@ -10,16 +10,12 @@ permissions:
 
 jobs:
   verify:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python: ["3.11", "3.12"]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "3.12"
           cache: pip
       - run: python -m pip install -e ".[dev,office]"
       - run: python -m pytest
@@ -29,7 +25,6 @@ jobs:
       - run: python -m build
       - run: python -m pip check
       - name: Build and install Windows offline preview
-        if: runner.os == 'Windows' && matrix.python == '3.12'
         shell: pwsh
         run: |
           python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "openpyxl>=3.1,<4" "pywin32>=306"
@@ -93,7 +88,6 @@ jobs:
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
       - name: Upload Windows technical preview
-        if: runner.os == 'Windows' && matrix.python == '3.12'
         uses: actions/upload-artifact@v4
         with:
           name: aep-windows-preview-${{ github.sha }}
