@@ -23,10 +23,11 @@ from __future__ import annotations
 
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, JsonValue, StrictBool, model_validator
 
-from common.assets import WorkflowManifest
-from common.base import Contract, Slug, Symbol, Text
+from common.assets import AssetIdentity, WorkflowManifest, reject_embedded_secrets
+from common.base import Contract, Sha256, Slug, Symbol, Text
+from common.execution import TraceIdentifiers
 
 #: Why a draft did not happen, or did not survive being checked.
 DraftRefusalCode = Literal[
@@ -68,10 +69,21 @@ class DraftWorkflowRequest(Contract):
     sop: Text = Field(min_length=1)
     namespace: Slug
     name: Symbol | None = None
+    # The user's executable acceptance expectation. These are exact identities,
+    # not prose inferred a second time by the model. A plausible draft that
+    # silently omits one is unusable.
+    required_capabilities: tuple[AssetIdentity, ...] = ()
     # Bounded, because rule 15 says a loop is bounded and surfaces a
     # structured failure rather than spinning. Each attempt is one model call
     # and the failed one's problems are handed back for the next.
     max_attempts: int = Field(default=3, ge=1, le=5, strict=True)
+
+    @model_validator(mode="after")
+    def required_capability_identities_are_unique(self) -> Self:
+        keys = [identity.key for identity in self.required_capabilities]
+        if len(keys) != len(set(keys)):
+            raise ValueError("required capabilities must have unique scoped identities")
+        return self
 
 
 class WorkflowDraft(Contract):
@@ -89,6 +101,9 @@ class WorkflowDraft(Contract):
     # mystery.
     available: tuple[Symbol, ...] = ()
     preview: str = ""
+    # Echoed so an ingress can prove the SOP and acceptance expectations that
+    # reached the drafter are the ones the user supplied.
+    request: DraftWorkflowRequest | None = None
 
     @model_validator(mode="after")
     def a_draft_or_a_reason(self) -> Self:
@@ -96,4 +111,72 @@ class WorkflowDraft(Contract):
             raise ValueError("a draft carries a manifest or the reason there is none")
         if self.manifest is not None and self.manifest.metadata.lifecycle != "draft":
             raise ValueError("a drafted workflow is a draft, whatever it says of itself")
+        return self
+
+
+class WorkflowFixture(Contract):
+    """Representative run input and the externally expected final output."""
+
+    arguments: dict[Symbol, JsonValue]
+    expected_output: JsonValue
+
+    @model_validator(mode="after")
+    def contains_no_credentials(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class WorkflowAcceptanceRequest(Contract):
+    """The three inputs the product test keeps separate."""
+
+    draft: DraftWorkflowRequest
+    fixture: WorkflowFixture
+
+
+class WorkflowValidationEvidence(Contract):
+    """External evidence; the model cannot set or grade this result."""
+
+    trace: TraceIdentifiers
+    manifest_sha256: Sha256
+    status: Literal["passed", "failed"]
+    code: Symbol | None = None
+    run_id: Symbol | None = None
+    completed_steps: int = Field(default=0, ge=0, strict=True)
+    dispatched: tuple[AssetIdentity, ...] = ()
+    expected_output: JsonValue
+    observed_output: JsonValue = None
+    deterministic: StrictBool = True
+
+    @model_validator(mode="after")
+    def result_is_consistent(self) -> Self:
+        if (self.status == "passed") == (self.code is not None):
+            raise ValueError("a failed validation names its code; a pass has none")
+        if self.status == "passed" and self.run_id is None:
+            raise ValueError("a passed validation names the run that proved it")
+        if self.status == "passed" and self.expected_output != self.observed_output:
+            raise ValueError("a passed validation has matching expected and observed output")
+        if self.status == "passed" and not self.deterministic:
+            raise ValueError("a passed validation is deterministic")
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class WorkflowAcceptanceOutcome(Contract):
+    """What the Personal Agent returns for one SOP acceptance request."""
+
+    trace: TraceIdentifiers
+    draft: WorkflowDraft | None = None
+    validation: WorkflowValidationEvidence | None = None
+    refusal: Symbol | None = None
+
+    @model_validator(mode="after")
+    def one_outcome(self) -> Self:
+        if self.refusal is not None and self.validation is not None:
+            raise ValueError("a refused request has no validation")
+        if self.draft is None and self.refusal is None:
+            raise ValueError("an outcome carries a draft or a refusal")
+        if self.validation is not None and (self.draft is None or self.draft.manifest is None):
+            raise ValueError("only a manifest can have validation evidence")
+        if self.validation is not None and self.validation.trace != self.trace:
+            raise ValueError("validation evidence belongs to the outcome trace")
         return self

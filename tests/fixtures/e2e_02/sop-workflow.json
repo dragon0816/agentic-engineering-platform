@@ -1,0 +1,11 @@
+{
+  "sop": "Normalize every supplied category, then count the records in each normalized category.",
+  "namespace": "engineering",
+  "name": "category-summary",
+  "required_capabilities": [
+    {"namespace": "demo", "name": "normalize-categories", "version": "1.0.0"},
+    {"namespace": "demo", "name": "count-categories", "version": "1.0.0"}
+  ],
+  "arguments": {"records": [" Alpha ", "beta", "ALPHA"]},
+  "expected_output": {"counts": {"alpha": 2, "beta": 1}}
+}
