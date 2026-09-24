@@ -4,7 +4,7 @@ Updated: 2026-09-25 (Asia/Taipei).
 Branch: `codex/e2e-03-coding-harness`.
 Base: merged E2E-02 on `main` (`5428774`).
 Implementation commit: `273cde3`.
-Pull request: pending creation against `main`.
+Pull request: #99, open against `main`.
 
 Progress across all phases remains in `docs/TASKS.md`. This file records the
 current stopping point and the evidence needed to continue without chat history.
@@ -37,8 +37,7 @@ current stopping point and the evidence needed to continue without chat history.
 
 ## In progress
 
-- Create the E2E-03 documentation commit, open the pull request and obtain the
-  single Windows/Python 3.12 CI result.
+- Obtain the single Windows/Python 3.12 CI result for PR #99.
 
 ## Remaining
 
@@ -112,7 +111,6 @@ Ubuntu or Python 3.11 validation was run, per owner instruction.
 
 ## Next recommended action
 
-Commit this handoff and the E2E-03 documentation, push the branch, open the PR,
-wait for the Windows/Python 3.12 job, and merge only its verified head. Then
+Wait for PR #99's Windows/Python 3.12 job and merge only its verified head. Then
 branch from updated `main` and implement E2E-05 from
 `docs/PRODUCT_ACCEPTANCE_TESTS.md` without returning to Phase 7 backlog work.
