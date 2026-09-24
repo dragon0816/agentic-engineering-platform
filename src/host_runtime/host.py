@@ -28,17 +28,21 @@ from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPo
 from capabilities.weekly_report.contracts import (
     ReportingWindow,
     SheetState,
+    WeeklyMailDrafted,
     WeeklyReportApplied,
     WeeklyReportPlan,
 )
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
+    MAIL_SPEC,
     PLAN_SPEC,
     PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
     ApplyHandler,
     ApplyInput,
+    MailHandler,
+    MailInput,
     PlanHandler,
     PlanInput,
     ProjectSearchHandler,
@@ -73,6 +77,8 @@ from integrations.excel_writer import (
     require_com,
 )
 from integrations.github_project import GitHubProjectClient
+from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
+from integrations.outlook_draft import require_com as require_outlook
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from models.wire import MethodTransport
 from workflow.dispatch import BridgeExecutor
@@ -249,6 +255,7 @@ def build_integrations(
     layout: HostLayout,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    drafter: Callable[[], DraftWriter] | None = None,
 ) -> None:
     """The capabilities the migrated workflows need, from what this host was
     given. Jira's token is resolved through the host's credential mapping at
@@ -312,6 +319,21 @@ def build_integrations(
             WeeklyReportApplied,
             ExecutionDependencies(central_required=False),
         )
+        # The same arrangement for Outlook: built per run, so a host without
+        # it installs the capability and refuses at the draft rather than
+        # failing to assemble. The chart is written under the workspace,
+        # beside everything else this host produces.
+        installed.register(
+            MAIL_SPEC,
+            MailHandler(
+                settings,
+                drafter if drafter is not None else OutlookComDraft,
+                chart_root=layout.workspace_root / "weekly-mail",
+            ),
+            MailInput,
+            WeeklyMailDrafted,
+            ExecutionDependencies(central_required=False),
+        )
 
 
 def build_gateway(
@@ -322,6 +344,7 @@ def build_gateway(
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    drafter: Callable[[], DraftWriter] | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
@@ -360,7 +383,13 @@ def build_gateway(
         ExecutionDependencies(central_required=False),
     )
     build_integrations(
-        config, installed, resolver, layout=layout, jira_transport=jira_transport, writer=writer
+        config,
+        installed,
+        resolver,
+        layout=layout,
+        jira_transport=jira_transport,
+        writer=writer,
+        drafter=drafter,
     )
     grants = (
         _decided_grants(authorization, installed)
@@ -497,6 +526,20 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
                 else "preview only, the Excel bridge is not installed"
             )
         parts.append(f"weekly report on {Path(settings.workbook_path).name} ({writes})")
+        try:
+            require_outlook()
+            drafts = "can draft the mail"
+        except DraftError as missing:
+            # Told apart for the same reason as Excel's: whether the machine
+            # lacks Outlook or this installation lacks the bridge decides who
+            # fixes it. Neither is a failure -- a host may be given the report
+            # and not the mail.
+            drafts = (
+                "no mail, Outlook is not installed"
+                if missing.code == "outlook_missing"
+                else "no mail, the Outlook bridge is not installed"
+            )
+        parts.append(drafts)
     return DoctorCheck(name="integrations", status="passed", detail=", ".join(parts))
 
 
@@ -655,6 +698,7 @@ def build_runtime(
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    drafter: Callable[[], DraftWriter] | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
@@ -667,6 +711,7 @@ def build_runtime(
         resolver=resolver,
         jira_transport=jira_transport,
         writer=writer,
+        drafter=drafter,
     )
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)

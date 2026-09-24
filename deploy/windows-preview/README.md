@@ -304,6 +304,62 @@ cell or a tinted `Key` cell you applied *by hand* loses its colour — never its
 text. And your own `Status` colours are left alone; only cells holding exactly
 the job's own pink are cleared.
 
+### The weekly mail
+
+`weekly mail` reads the board, counts the week's effort and saves a draft in
+Outlook. **It never sends.** Nothing in this platform can send a mail: the
+adapter has no call that delivers one, and a test reads its source to keep it
+that way. A person opens the draft, reads it, and presses send, or does not.
+
+```powershell
+aep-host ask --config host.json "weekly.mail 2026_31W"
+```
+
+It does not read or write the workbook, so it is its own workflow and its own
+grant: somebody who may draft the mail need not be somebody who may write the
+team's file.
+
+```json
+{ "actor": "employee.id",
+  "asset": { "namespace": "weekly-report", "name": "mail", "version": "1.0.0" },
+  "permissions": ["outlook.draft"], "policy_refs": ["weekly-report-mail-policy"],
+  "approval_ref": "CHANGE-1234" }
+```
+
+What the mail says, and what it counts:
+
+- **Effort is tickets, not hours.** This project records no worklog and has no
+  points field, so there are no hours to weigh. The mail says that on its face.
+- **Only what somebody worked on.** An item whose timestamp moved because a
+  field was edited is not work, so it is left out — and the ones left out are
+  *named*, not just subtracted. A week that matched sixty-three items and
+  counted four is either right or badly wrong, and only a reader told both
+  numbers can tell which. Set `"mail_requires_activity": false` under
+  `weekly_report` to count everything the week matched instead; the mail then
+  says which question it answered.
+- **A ticket naming several instruments counts once under each**, so the
+  instrument totals add up to more than the number of tickets. That is
+  deliberate and the mail says so rather than hiding it.
+- The pie chart is drawn by this package itself, with no charting library, so
+  it needs nothing installed and adds nothing to this bundle. Its legend is the
+  table beneath it, with a colour per row: the labels stay selectable text and
+  every number survives if the reader's mail client blocks images.
+
+Who it is addressed to is configuration, and empty is the safer default — the
+draft then has no recipients and the person who opens it fills them in:
+
+```text
+"weekly_report": {
+  "mail_to": ["sde-team@example.com"],
+  "mail_cc": [],
+  "mail_subject_prefix": "GTM weekly report"
+}
+```
+
+**This drafter has not yet been run against a real Outlook by anyone.** Like
+the workbook writer before it, it is written to the documented object model
+and is unproven until you run it.
+
 This writer has now been run against a real team workbook once, on
 2026-09-24, and an earlier build of it renamed the previous week's sheet
 instead of adding this week's. That defect is fixed and pinned by a test, and

@@ -18,7 +18,7 @@ import datetime as _dt
 from collections.abc import Mapping, Sequence
 from html import escape
 
-from capabilities.weekly_report import effort
+from capabilities.weekly_report import chart, effort
 from capabilities.weekly_report.contracts import ReportingWindow, ReportItem
 
 #: Said on the mail's face, because a reader who assumes hours would read
@@ -111,12 +111,46 @@ def _cell_link(key: str, url: str) -> str:
     return f"<td style='border:1px solid #d0d0d0;padding:4px 8px'>{_linked(key, url)}</td>"
 
 
-def totals_section(title: str, totals: Mapping[str, int], *, note: str = "") -> str:
-    rows = [[name, str(count)] for name, count in totals.items()]
-    body = _table([title, "Tickets"], rows)
+def _swatch(colour: str) -> str:
+    """The chart's colour for this row, as a cell rather than a drawn legend.
+
+    A legend inside the picture would be text nobody can select, text that
+    does not wrap on a phone, and text that disappears entirely for a reader
+    whose mail client blocks images. Here it is a table, and the numbers
+    survive on their own.
+    """
+    return (
+        "<td style='border:1px solid #d0d0d0;padding:4px 8px;width:14px;"
+        f"background:{escape(colour, quote=True)}'></td>"
+    )
+
+
+def totals_section(
+    title: str,
+    totals: Mapping[str, int],
+    *,
+    note: str = "",
+    colours: Mapping[str, str] | None = None,
+) -> str:
+    """The totals as a table; with `colours`, the legend for the chart above
+    it, each row carrying the colour its slice is drawn in."""
+    if not totals:
+        return "<p><i>nothing this week</i></p>"
+    headers = ["", title, "Tickets"] if colours else [title, "Tickets"]
+    head = "".join(_head(name) for name in headers)
+    body = ""
+    for name, count in totals.items():
+        cells = _cell(name) + _cell(str(count))
+        if colours:
+            cells = _swatch(colours.get(name, "#ffffff")) + cells
+        body += f"<tr>{cells}</tr>"
+    table = (
+        "<table style='border-collapse:collapse;font-family:Segoe UI,Arial,sans-serif;"
+        f"font-size:13px'><tr>{head}</tr>{body}</table>"
+    )
     if note:
-        body += f"<p style='color:#666;font-size:12px;margin:4px 0 0'>{escape(note)}</p>"
-    return body
+        table += f"<p style='color:#666;font-size:12px;margin:4px 0 0'>{escape(note)}</p>"
+    return table
 
 
 def build_html(
@@ -130,8 +164,11 @@ def build_html(
     """The whole mail, as the HTML a draft carries.
 
     `chart_cid` is the identifier of an image the draft will attach. Empty
-    means no chart, and the mail then says why rather than leaving a gap
-    where a picture should be.
+    means there is no picture -- a week where nothing was worked on has
+    nothing to draw -- and then the legend's colour column goes too, since a
+    colour that keys to no picture is decoration. The numbers are the same
+    either way: the chart is a second reading of the table under it, never
+    the only place a figure appears.
     """
     parts: list[str] = [
         "<div style='font-family:Segoe UI,Arial,sans-serif;font-size:13px'>",
@@ -141,18 +178,17 @@ def build_html(
         member_section(items, instruments),
         "<h3 style='margin:16px 0 4px'>Effort by instrument</h3>",
     ]
+    totals = effort.instrument_totals(items, instruments)
     if chart_cid:
         parts.append(f"<img src='cid:{escape(chart_cid, quote=True)}' alt='effort by instrument'>")
-    else:
-        parts.append(
-            "<p style='color:#666;font-size:12px'><i>no chart: this host has no chart "
-            "library installed, so the numbers below are the whole answer</i></p>"
-        )
     parts.append(
         totals_section(
             "Instrument",
-            effort.instrument_totals(items, instruments),
+            totals,
             note=MULTI_INSTRUMENT_NOTE,
+            # The legend, keyed to the picture. Only when there is a picture:
+            # a colour column beside no chart is decoration that means nothing.
+            colours=chart.colours_for(tuple(totals)) if chart_cid else None,
         )
     )
     parts.append("<h3 style='margin:16px 0 4px'>Effort by account</h3>")

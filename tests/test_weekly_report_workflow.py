@@ -18,12 +18,14 @@ from test_host_wiring import device, membership_record, workspace
 from capabilities.weekly_report import rules
 from capabilities.weekly_report.contracts import (
     SheetState,
+    WeeklyMailDrafted,
     WeeklyReportApplied,
     WeeklyReportPlan,
     WeeklyReportSettings,
 )
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
+    MAIL_SPEC,
     PLAN_SPEC,
     PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
@@ -32,6 +34,7 @@ from capabilities.weekly_report.handlers import (
     ReadScratchSheetInput,
 )
 from capabilities.weekly_report.manifest import (
+    mail_workflow,
     preview_workflow,
     report_workflow,
     weekly_skill,
@@ -180,6 +183,7 @@ def grants() -> list[dict[str, Any]]:
             READ_SCRATCH_SHEET_SPEC,
             PLAN_SPEC,
             APPLY_SPEC,
+            MAIL_SPEC,
         )
     ]
 
@@ -250,8 +254,9 @@ def test_the_shipped_manifests_validate_and_export() -> None:
     skill = weekly_skill()
     assert skill.alias == "weekly" and skill.commands[0].target == workflow.metadata.identity
     assert skill.default_command == "preview"
-    assert [command.name for command in skill.commands] == ["preview", "apply"]
+    assert [command.name for command in skill.commands] == ["preview", "apply", "mail"]
     assert skill.commands[1].target == full.metadata.identity
+    assert skill.commands[2].target == mail_workflow().metadata.identity
 
 
 def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
@@ -497,12 +502,21 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     written = sorted(path.relative_to(out).as_posix() for path in out.rglob("*.json"))
     assert written == [
         "skills/engineering__weekly-report__1.0.0.json",
+        "workflows/engineering__jira-weekly-report-mail__1.0.0.json",
         "workflows/engineering__jira-weekly-report-preview__1.0.0.json",
         "workflows/engineering__jira-weekly-report__1.0.0.json",
     ]
     assert "wrote" in capsys.readouterr().out
-    exported = json.loads((out / written[1]).read_text(encoding="utf-8"))
+    exported = json.loads((out / written[2]).read_text(encoding="utf-8"))
     assert exported["metadata"]["identity"]["name"] == "jira-weekly-report-preview"
+    drafts = json.loads((out / written[1]).read_text(encoding="utf-8"))
+    assert drafts["metadata"]["identity"]["name"] == "jira-weekly-report-mail"
+    # The mail reads the board and drafts; it never touches the workbook.
+    assert [step["capability"]["name"] for step in drafts["steps"]] == [
+        "resolve-window",
+        "search-project",
+        "mail",
+    ]
     # A host without the secret mapped will not be built.
     with pytest.raises(Exception, match="credential_unmapped"):
         build_runtime(unmapped, layout=layout)
@@ -538,6 +552,100 @@ def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Pat
     assert applied.backup_path is not None
     assert workbook.read_bytes() == before
     assert "upsert" in writer.names and writer.closed_saving is True
+
+
+def test_the_mail_drafts_end_to_end_and_never_touches_the_workbook(tmp_path: Path) -> None:
+    """Three steps on a real host: the week resolved, the board read, a draft
+    saved. The workbook is not opened at all, which is why the mail is its
+    own asset rather than a fifth step on the report."""
+    from integrations.outlook_draft import RecordingDraftWriter
+
+    config, layout, workbook = host(tmp_path)
+    before = workbook.read_bytes()
+    drafter = RecordingDraftWriter()
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
+        drafter=lambda: drafter,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.mail 2026_31W")
+        assert outcome.refusal is None and outcome.workflow is not None
+        run = outcome.workflow.run
+        assert run.status == "succeeded", run.failure
+        assert run.completed_steps == 3
+        drafted = WeeklyMailDrafted.model_validate(outcome.workflow.step_results[-1].data)
+    assert workbook.read_bytes() == before, "the mail read no workbook and wrote none"
+    assert len(drafter.drafts) == 1, "one draft, saved, not sent"
+    saved = drafter.drafts[0]
+    assert saved.subject == "GTM weekly report 2026_31W (2026-07-27 .. 2026-08-02)"
+    assert drafted.week == "2026_31W"
+    # Two of the four board rows carry a comment inside the week; the other
+    # two moved without anybody working on them, and they are named.
+    assert drafted.counted == 2
+    assert drafted.counted + len(drafted.excluded) == drafted.matched
+    assert "GTM-688" in drafted.excluded and "GTM-455" in drafted.excluded
+    assert drafted.activity_required is True
+    # The picture is written where the draft refers to it.
+    assert drafted.chart_path and Path(drafted.chart_path).read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert f"cid:{saved.images[0].cid}" in saved.html_body
+    assert "GTM-1" in drafted.preview, "the plain text is what a person checks"
+
+
+def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
+    """A draft changes the member's own mailbox, so it is a write like the
+    workbook's and is refused the same way without an approval."""
+    from integrations.outlook_draft import RecordingDraftWriter
+
+    assert MAIL_SPEC.side_effect == "write"
+    assert MAIL_SPEC.policy.approval_required
+    config, layout, _ = host(tmp_path)
+    unapproved = [
+        {key: value for key, value in grant.items() if key != "approval_ref"}
+        if grant["asset"]["name"] == "mail"
+        else grant
+        for grant in grants()
+    ]
+    layout.grants.write_text(json.dumps(unapproved), encoding="utf-8")
+    drafter = RecordingDraftWriter()
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
+        drafter=lambda: drafter,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.mail 2026_31W")
+        assert outcome.workflow is not None
+        assert outcome.workflow.run.status == "failed"
+        assert outcome.workflow.run.completed_steps == 2, "the board was read, nothing was drafted"
+        failure = outcome.workflow.step_results[-1].failure
+        assert failure is not None and failure.code == "permission_denied"
+    assert drafter.drafts == []
+
+
+def test_a_host_without_outlook_says_so_rather_than_failing_to_assemble(tmp_path: Path) -> None:
+    """The drafter is built per run, so a machine without Outlook still
+    installs the capability and refuses at the draft with its own code."""
+    from integrations.outlook_draft import DraftError
+
+    def missing() -> Any:
+        raise DraftError("outlook_missing")
+
+    config, layout, _ = host(tmp_path)
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=ScriptedTransport(board_replies()),
+        drafter=missing,
+    ) as runtime:
+        outcome = ask(runtime, "weekly.mail 2026_31W")
+        assert outcome.workflow is not None
+        assert outcome.workflow.run.status == "failed"
+        failure = outcome.workflow.step_results[-1].failure
+        assert failure is not None and failure.code == "outlook_missing"
 
 
 def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:

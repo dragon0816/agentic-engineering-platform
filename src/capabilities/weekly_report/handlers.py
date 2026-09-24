@@ -18,13 +18,14 @@ from pydantic import Field
 
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused, TransientCapabilityError
-from capabilities.weekly_report import rules
+from capabilities.weekly_report import chart, effort, mail, rules
 from capabilities.weekly_report.apply import apply_plan
 from capabilities.weekly_report.contracts import (
     ReportComment,
     ReportingWindow,
     ReportItem,
     SheetState,
+    WeeklyMailDrafted,
     WeeklyReportApplied,
     WeeklyReportPlan,
     WeeklyReportRequest,
@@ -33,10 +34,11 @@ from capabilities.weekly_report.contracts import (
 from capabilities.weekly_report.plan import build_plan, resolve_window
 from common.base import Contract, Symbol, Text
 from common.execution import RequestContext
-from integrations import excel
+from integrations import excel, outlook_draft
 from integrations.excel import digest_rows
 from integrations.excel_writer import WorkbookWriteError, WorkbookWriter
 from integrations.github_project import GitHubError, GitHubProjectClient, ProjectItem
+from integrations.outlook_draft import DraftError, DraftWriter, MailDraft
 
 RESOLVE_WINDOW_SPEC = CapabilitySpec.model_validate(
     {
@@ -390,6 +392,97 @@ class ApplyHandler:
             # member is told which of "somebody has it open", "it is not
             # there" and "the write failed" happened.
             raise CapabilityRefused(error.code) from None
+
+
+MAIL_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "weekly-report", "name": "mail", "version": "1.0.0"},
+        "name": "weekly_report.mail",
+        "description": "Draft the weekly mail, with the week's effort counted and charted",
+        "input_contract": "weekly-report.mail.input.v1",
+        "output_contract": "weekly-report.mail.output.v1",
+        # A draft is a change to the member's own mailbox, so it is a write
+        # and needs an approval like every other. It is not a send: nothing
+        # in this repository can deliver a mail (`integrations.outlook_draft`).
+        "side_effect": "write",
+        "policy": {
+            "risk": "low",
+            "approval_required": True,
+            "required_permissions": ["outlook.draft"],
+            "policy_refs": ["weekly-report-mail-policy"],
+        },
+    }
+)
+
+
+class MailInput(Contract):
+    window: ReportingWindow
+    issues: tuple[ReportItem, ...] = ()
+
+
+class MailHandler:
+    """The week's mail, as a draft nobody has sent.
+
+    The counting narrows what the board matched to what somebody worked on,
+    and both numbers come back: a week that matched sixty-three items and
+    counted four is either right or badly wrong, and only a reader who is
+    told both can tell which.
+    """
+
+    def __init__(
+        self,
+        settings: WeeklyReportSettings,
+        writer: Callable[[], DraftWriter],
+        *,
+        chart_root: Path,
+    ) -> None:
+        self.settings = WeeklyReportSettings.model_validate(settings)
+        self._writer = writer
+        self._chart_root = chart_root
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        item = MailInput.model_validate(inputs)
+        return await asyncio.to_thread(self._draft, item.window, item.issues)
+
+    def _draft(self, window: ReportingWindow, issues: Sequence[ReportItem]) -> WeeklyMailDrafted:
+        activity = effort.active_items(
+            issues,
+            window.since,
+            window.until,
+            required=self.settings.mail_requires_activity,
+        )
+        counted = activity.counted
+        totals = effort.instrument_totals(counted)
+        # The picture is written beside the draft rather than into it: an
+        # attachment is a file on disk, and one this run wrote is one it can
+        # name in its evidence.
+        picture = chart.pie_for(totals)
+        images, cid = outlook_draft.images_for(picture, self._chart_root / window.week)
+        draft = MailDraft(
+            subject=mail.subject(window, prefix=self.settings.mail_subject_prefix),
+            html_body=mail.build_html(window, counted, chart_cid=cid),
+            to=outlook_draft.recipients(self.settings.mail_to),
+            cc=outlook_draft.recipients(self.settings.mail_cc),
+            images=images,
+        )
+        try:
+            receipt = self._writer().save(draft)
+        except DraftError as error:
+            raise CapabilityRefused(error.code) from None
+        return WeeklyMailDrafted(
+            week=window.week,
+            subject=draft.subject,
+            to=draft.to,
+            cc=draft.cc,
+            entry_id=receipt.entry_id,
+            folder=receipt.folder,
+            matched=len(issues),
+            counted=len(counted),
+            excluded=activity.excluded,
+            activity_required=activity.required,
+            chart_path=images[0].path if images else "",
+            preview=mail.build_text(window, counted),
+        )
 
 
 PLAN_OUTPUT = WeeklyReportPlan
