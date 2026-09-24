@@ -3,6 +3,7 @@
 Updated: 2026-09-24 (Asia/Taipei).
 Branch: `codex/product-vision-proposal`.
 Base: `main` at merge commit `d98f939` (PR #96).
+Pull request: #97, open against `main` for owner review.
 
 Progress across all phases remains in `docs/TASKS.md`. This file records the
 current stopping point and the evidence needed to continue without chat history.
