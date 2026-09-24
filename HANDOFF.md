@@ -20,20 +20,25 @@ current stopping point and the evidence needed to continue without chat history.
   architecture summary, reusable components, gaps, proposed boundary, benchmark
   paths, integration models, implementation slices, risks and recommended
   architecture amendments.
+- Added `docs/PRODUCT_ACCEPTANCE_TESTS.md` as the product-level acceptance source
+  of truth. It fixes the implementation order at E2E-02, E2E-03, E2E-05,
+  E2E-04, E2E-01 and defines each user scenario, automated and production-like
+  evidence, negative demonstrations and phase gate.
 - Updated README, Roadmap and Tasks so the Vision and proposal are discoverable
   and PR #96 is recorded as merged.
 
 ## In progress
 
-- Owner review of the proposed Agent/Harness boundary and implementation order.
+- Owner review of the proposed Agent/Harness boundary and acceptance tests.
   No runtime or shared contract has changed on this branch.
 
 ## Remaining
 
 - After owner approval, amend `docs/ARCHITECTURE.md`, `docs/ROADMAP.md` and an
   active phase specification in a small architecture-only PR.
-- Then implement benchmark contracts and inert fixtures, Harness contracts, and
-  the parser/transformation vertical.
+- Then implement only E2E-02: SOP semantic acceptance, inert fixture execution,
+  human review separation and deterministic no-model replay. Do not begin
+  E2E-03 until E2E-02 has a reproducible passing path.
 - Phase 7 production validation remains: company-workstation Outlook/model/
   browser checks, workflow 11 workbook recovery and parity, workflow 10 slices
   4b–4d, workflow 13 and Knowledge-copy parity.

@@ -12,6 +12,8 @@ development. `AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md` assesses the current
 implementation and proposes an incremental path. It is not yet an approved
 phase or architecture amendment; Phase 7 remains active until the owner reviews
 the proposal and chooses how to sequence its remaining parity work.
+The product E2E gate order and observable completion evidence are defined in
+`PRODUCT_ACCEPTANCE_TESTS.md`; this Roadmap does not override them.
 
 ## Objective
 

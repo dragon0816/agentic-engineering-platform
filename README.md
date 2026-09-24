@@ -3,6 +3,8 @@
 Unified engineering automation platform for agentic reasoning, deterministic workflows, enterprise knowledge, tools/MCP capabilities, and evaluation.
 
 The product direction is defined in [Product Vision](docs/PRODUCT_VISION.md).
+The required product gates and implementation order are defined in
+[Product Acceptance Tests](docs/PRODUCT_ACCEPTANCE_TESTS.md).
 The current [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
 compares that vision with the implemented architecture and is awaiting owner
 review; it does not yet change the architecture baseline.

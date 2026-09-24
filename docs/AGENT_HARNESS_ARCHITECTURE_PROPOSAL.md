@@ -155,9 +155,9 @@ The user supplies representative input, output expectations or golden files and
 a bounded workspace. The Harness generates or modifies the transformation,
 executes it only inside the workspace, compares schema/content and declared
 properties, feeds structured failures into a limited repair loop, and runs a
-regression corpus before returning a patch and evidence. This is the safest first
-complete Coding Harness vertical because it needs neither production credentials
-nor physical hardware.
+regression corpus before returning a patch and evidence. This is the first
+general Coding Harness vertical after E2E-02 because it needs neither production
+credentials nor physical hardware.
 
 ## Skill integration model
 
@@ -194,23 +194,27 @@ the Personal Agent and Harness pass all three V1 benchmarks.
 
 ## Incremental implementation plan
 
-1. **Benchmark contracts and fixtures.** Define pass/fail scenarios for all three
-   V1 categories, including simulated device cases. No side effects.
-2. **Harness contracts and inert runner.** Add workspace, plan, validation, run
-   and result contracts with budgets and externally determined completion.
-3. **Parser/transformation vertical.** Add minimal workspace-scoped file write,
-   command and Git-diff capabilities; prove generate, execute, validate and
-   repair against fixtures.
-4. **SOP-to-Workflow vertical.** Connect authoring to fixture execution,
-   regression evidence and a reviewable publish candidate.
-5. **Device/chipset vertical.** Prove simulation first, then run the explicit
-   production-like acceptance on an enrolled company or shared-test Bridge.
-6. **Personal Agent context.** Instantiate the engineering AgentProfile and wire
-   exact Skill versions and cited Knowledge into the bounded runtime.
-7. **Software and Improvement Request contracts.** Add external repository
-   references and the feedback-to-governed-work seam.
-8. **Evolution services.** Add triage, contribution and publishing automation
-   only after benchmark evidence shows the foundation is useful.
+The product gate order is fixed by `PRODUCT_ACCEPTANCE_TESTS.md`:
+
+1. **E2E-02 — SOP-to-Workflow.** Connect existing authoring to semantic
+   acceptance, fixture execution, regression evidence, human review and a
+   deterministic no-model replay.
+2. **E2E-03 — coding/transformation.** Add the minimum workspace, plan, change,
+   validation and bounded-repair contracts plus scoped file write, command and
+   Git-diff capabilities. Prove them with a parser/transformation fixture.
+3. **E2E-05 — Knowledge continuous evolution.** Turn a deficient cited answer
+   and user feedback into a governed improvement request, candidate, expanded
+   evaluation set and versioned republish without changing Raw evidence.
+4. **E2E-04 — Software continuous evolution.** Add external Software repository
+   metadata and use the proven Harness to reproduce, change, regress and prepare
+   a reviewable source-control candidate through an inert adapter.
+5. **E2E-01 — physical DUT/chipset capability.** Prove the same development path
+   with a simulator, then collect the required production-like evidence on an
+   enrolled company or shared-test Bridge.
+
+Only the minimum contracts needed by the current E2E are introduced. The next
+E2E runtime does not begin until the current one has its reproducible passing
+path.
 
 Each slice follows architecture -> requirements -> contracts -> tests ->
 implementation -> verification -> commit -> handoff and remains independently
