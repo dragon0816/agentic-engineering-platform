@@ -35,7 +35,8 @@ python -m build
 python -m pip check
 ```
 
-CI verifies on Windows and Linux with Python 3.11 and 3.12. The pure proof is in
+CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
+compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
 `workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
 loads the sample manifest and Bridge fixture and exercises the complete chain.
 
@@ -50,6 +51,19 @@ python -m pytest tests/test_product_e2e_02.py -q
 ```
 
 See [the E2E-02 implementation record](docs/phases/E2E_02_SOP_WORKFLOW.md).
+
+E2E-03 adds a bounded Coding Harness behind the same resident Agent, Gateway and
+Bridge path. Its first parser/transformation proof pins the workspace revision,
+records the plan and actual patch separately, runs only an injected declared
+validator, repairs one rejected candidate within budget, and requires both new
+and regression cases to pass. It never commits, pushes or publishes. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_03.py -q
+```
+
+See [the E2E-03 implementation record](docs/phases/E2E_03_CODING_HARNESS.md).
 
 Phase 2 entry points are `agent.routing.RequestRouter`, `agent.skills.SkillRegistry`,
 `capabilities.runtime.InstalledCapabilities`, `workflow.dispatch.BridgeExecutor`

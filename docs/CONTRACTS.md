@@ -1981,3 +1981,31 @@ digest. It does not install, register, distribute or authorize the result, and
 it does not change `TechnicalPolicy`. This preserves all three separations:
 validation from model confidence, business approval from technical policy, and
 publication from execution permission.
+
+## E2E-03 bounded Coding Harness
+
+`CodingHarnessRequest` is the trusted run envelope. `WorkspaceSnapshot` names
+an absolute root and its SHA-256 content revision. `allowed_paths` and
+`allowed_commands` are explicit allowlists; at least one `new` and one
+`regression` `ValidationCase` are required. `HarnessBudget` bounds repair
+attempts and validator calls. `skill_versions` records the exact procedures
+assembled for the run. All request, candidate, validator and result payloads
+reuse the platform credential-content rejection rule.
+
+`HarnessPlan` is created before mutation and names each intended path and each
+validator. It grants no access: runtime allowlists remain authoritative.
+`CandidateChange` carries one proposed file. `ChangeRecord` is the separate
+actual change set with before/after digests and a reviewable unified patch.
+
+`CommandOutcome` contains a pass or typed `ValidationFailure` values with the
+case, code, expected output and observed output. The Harness feeds that object
+to the provider-neutral `ChangeAuthor.repair` boundary and stops when its repair
+or command budget is exhausted. Only an installed `DeclaredCommands` handler
+can validate; a model statement and an undeclared command cannot complete a run.
+
+`CodingHarnessResult` echoes the immutable workspace snapshot and trace, keeps
+the plan separate from actual changes, records command outcomes and ordered
+events, identifies the final artifact by path and digest, and carries Skill
+versions. `validated` requires a final passing command and an artifact.
+Non-success requires a typed failure and no artifact. `committed` and
+`published` are fixed false because those transitions are outside the Harness.

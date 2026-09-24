@@ -315,8 +315,48 @@ validation is bound to the exact manifest digest and run. Business approval may
 then move that manifest to `published`; technical policy, installation and
 runtime authorization remain independent decisions. Replaying an explicitly
 installed and authorized result uses the normal deterministic Gateway and must
-not call a model. This is the complete E2E-02 boundary and is not yet the
-general Coding Harness required by E2E-03.
+not call a model. This is the complete E2E-02 boundary.
+
+### E2E-03 bounded Coding Harness
+
+The first Coding Harness vertical stays inside the Personal Engineering and
+Bridge execution planes. A model or another provider-neutral author may propose
+a plan and candidate change, but it receives no shell and cannot decide that the
+work passed. The host pins a workspace root and content revision, declares the
+only writable paths and validation commands, supplies new and regression cases,
+and sets repair and command budgets.
+
+```text
+resident Agent -> Gateway -> Bridge authorization -> coding-harness.run
+                                                   |
+                 pinned workspace + allowed paths |
+                 plan before mutation             |
+                 actual unified patch             |
+                                                   v
+                                  installed validator command
+                                           |
+                            fail -> structured evidence -> repair
+                                           |
+                               new case + regression pass
+                                           |
+                              validated artifact and trace
+```
+
+`CodingHarness` never invokes an arbitrary command. Its `DeclaredCommands`
+table contains trusted host handlers, and both the request and plan must name a
+registered allowed command. `BoundedWorkspace` resolves every access beneath
+the pinned root and refuses traversal and symlink escape. The capability is a
+workspace `write`, so normal Bridge permission, policy refs and explicit
+approval apply before the handler runs.
+
+The initial transformation is a typed JSON mapping program interpreted by a
+deterministic validator. This is the minimum parser/transformation benchmark,
+not a claim that arbitrary generated Python is safe to execute. A later adapter
+may add a sandboxed code runner behind the same command contract. The result
+records root and starting revision, plan, patches and hashes, exact command
+outcomes, ordered Harness events, Skill versions and trace. It always records
+`committed=false` and `published=false`; Git writes and publication are separate
+governed operations.
 
 ### Team Platform Plane
 
