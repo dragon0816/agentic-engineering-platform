@@ -31,9 +31,9 @@ still open. PR #96 merged the local interfaces, company-model wiring, bounded
 SOP-to-Workflow authoring, installed-browser automation and weekly mail draft.
 A product-direction review merged in PR #97 and is documented in
 `docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
-E2E order. E2E-02 merged in PR #98. E2E-03 has a reproducible local green path
-on `codex/e2e-03-coding-harness`; its pull request and CI are the remaining gate
-before E2E-05 may start.
+E2E order. E2E-02 merged in PR #98 and E2E-03 merged in PR #99 after its exact
+head passed Windows/Python 3.12 CI. E2E-05 now has a reproducible local green
+path on `codex/e2e-05-knowledge-evolution`; pull-request review and CI remain.
 A row says `done` only after its pull request merges.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
@@ -56,8 +56,8 @@ start until the preceding row has a reproducible passing path.
 | Gate | PR | Status | What it covers |
 |---|---|---|---|
 | E2E-02 SOP to deterministic Workflow | #98 | done | Natural-language SOP through resident Agent/Gateway, semantic capability requirements, inert fixture execution through Gateway/Workflow/Bridge, independent output grading, human publication decision and no-model deterministic replay |
-| E2E-03 parser/transformation development | #99 | implemented; local verification passed, CI pending | Pinned bounded workspace, pre-mutation plan, actual patches, injected declared validator, deliberately failing first candidate, one structured repair, new plus regression validation, trace and Skill versions; no commit/push/publish |
-| E2E-05 knowledge continuous evolution | — | blocked | Begins only after E2E-03 passes |
+| E2E-03 parser/transformation development | #99 | done | Pinned bounded workspace, pre-mutation plan, actual patches, injected declared validator, deliberately failing first candidate, one structured repair, new plus regression validation, trace and Skill versions; no commit/push/publish |
+| E2E-05 knowledge continuous evolution | #100 | implemented; local verification passed, CI pending | Exact version query with Raw citations, feedback evidence, approved Bridge candidate write, immutable Raw, persisted rejected claims, new plus regression evaluation, separate domain approval, versioned republish and rollback |
 | E2E-04 software continuous evolution | — | blocked | Begins only after E2E-05 passes |
 | E2E-01 DUT/chipset engineering | — | blocked | Begins only after E2E-04 passes and requires production-like company-host evidence |
 

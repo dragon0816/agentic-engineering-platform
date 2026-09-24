@@ -358,6 +358,44 @@ outcomes, ordered Harness events, Skill versions and trace. It always records
 `committed=false` and `published=false`; Git writes and publication are separate
 governed operations.
 
+### E2E-05 governed Knowledge evolution
+
+Knowledge improvement reuses the Phase 4 vault, query engine, immutable Raw
+evidence and persisted decisions. An exact published Knowledge version is
+resolved from a local catalog and queried through a Bridge-installed read
+capability. A grounded answer record binds the asset identity, trace, answer and
+the exact Raw passages cited by every sentence.
+
+```text
+question -> grounded answer -> feedback -> improvement request
+                                      |
+                              maintainer triage
+                                      |
+                                      v
+Personal Agent -> Gateway -> Bridge-approved candidate workspace write
+                                      |
+                         new case + existing regressions
+                                      |
+                              domain-owner review
+                                      |
+                          versioned Knowledge publish
+```
+
+Feedback cannot mutate published Knowledge. Candidate creation is a separate
+Bridge `write` capability and requires both its runtime approval and an approved
+improvement request. It copies the published vault to a new root, applies a
+typed `WritePlan`, and proves Raw stayed byte-identical. Persisted rejected
+claims are checked before the write so a later ingest cannot silently restore
+them.
+
+Validation binds the exact candidate content digest and ordered evaluation set.
+Both the feedback case and existing regressions must pass with Raw-cited
+answers. Domain approval is a later business decision and does not replace
+technical validation or Bridge authorization. Publishing creates a new semantic
+version; the prior exact version remains queryable for rollback. The first
+catalog is in memory and uses local vault paths, so it proves the lifecycle
+without claiming a production Registry or database.
+
 ### Team Platform Plane
 
 The shared Team Platform is primarily a **control plane**, not the default location where every engineer's reasoning executes. It owns shared capability/knowledge management such as:
