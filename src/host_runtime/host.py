@@ -53,6 +53,8 @@ from capabilities.weekly_report.handlers import (
     ResolveWindowHandler,
     ResolveWindowInput,
 )
+from capabilities.workflow_author.contracts import DraftWorkflowRequest, WorkflowDraft
+from capabilities.workflow_author.handlers import DRAFT_SPEC, DraftWorkflowHandler
 from channels.telegram import TelegramIngress, TelegramIngressConfig
 from common.assets import ExecutionDependencies, WorkflowManifest
 from common.authorization import DeviceAuthorization
@@ -81,6 +83,7 @@ from integrations.github_project import GitHubProjectClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
 from models.clients import ModelClients
+from models.contracts import ModelClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from models.wire import MethodTransport, Transport
 from workflow.dispatch import BridgeExecutor
@@ -404,6 +407,33 @@ def build_gateway(
         policy = LocalPolicy(grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
+    # Registered last, and holding the registry it is in: what a Workflow may
+    # be drafted from is whatever this machine ended up with, read per call.
+    # A host with no model still installs it, so that "why can I not draft"
+    # is answered by a sentence rather than by a missing capability.
+    binding = config.models
+    drafting_model: ModelClient | None = None
+    if binding is not None and binding.routing_alias is not None:
+        chosen = ModelClients(
+            binding.catalog, resolver=resolver, transport=model_transport, options=binding.options
+        ).for_alias(binding.routing_alias)
+        drafting_model = None if isinstance(chosen, Failure) else chosen
+    installed.register(
+        DRAFT_SPEC,
+        DraftWorkflowHandler(
+            installed,
+            model=drafting_model,
+            model_alias=(
+                binding.routing_alias
+                if binding is not None and binding.routing_alias is not None
+                else "routing"
+            ),
+            local_only=binding.require_local_model if binding is not None else False,
+        ),
+        DraftWorkflowRequest,
+        WorkflowDraft,
+        ExecutionDependencies(central_required=False),
+    )
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
