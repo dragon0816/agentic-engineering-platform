@@ -50,18 +50,58 @@ work inside the existing architecture, not a redesign.
 docstring: *"Routing is deterministic only: no model is configured on a
 company host in this slice, so an unrecognized message is `needs_input`
 rather than a guess."* `CompanyHostConfiguration` has no model, catalog,
-alias or provider field at all. `src/models/` has a catalog and clients, and
-`host_runtime` imports from it only credentials and HTTP transport.
+alias or provider field at all.
 
 So today the Agent matches commands and runs Workflows. It does not reason,
 because nothing gave it anything to reason with.
 
 Everything in (1) needs a model. So does the interesting half of (3) --
-answering a question, rather than retrieving a page. So does (4)'s
-per-agent LLM. **Putting a model on a company host is the first slice of all
-of it**, and it carries its own decisions nobody has made: which provider,
-where its credential lives on a company machine, what happens when the
-machine is offline, and what a model is allowed to do without an approval.
+answering a question rather than retrieving a page. So does (4)'s per-agent
+LLM. **Putting a model on a company host is the first slice of all of it.**
+
+### It is a smaller gate than it looks
+
+The owner said on 2026-09-24 that the team runs a LiteLLM gateway in front of
+the company's internal LLM. That is the gateway Phase 5 already migrated
+*from*, and the model layer built for it is complete and exercised in CI:
+
+- `models/openai_compatible.py` speaks exactly what a LiteLLM proxy serves.
+- `models/catalog.py` selects an endpoint by declared capability against a
+  declared requirement, and returns a typed `Failure` naming what was missing
+  rather than an exception from inside a request.
+- `models/clients.py` wires a catalog to the host's credential resolver and
+  transport, one client per alias.
+- `models/proof.py` runs the whole chain in CI, and its sample catalog already
+  carries a `company_reasoning` endpoint: `openai_compatible`, a company
+  gateway URL, a credential named rather than held.
+
+`docs/PHASE_5_MIGRATION.md` also already records how that gateway behaves,
+including the one that cost the source a patch to LiteLLM itself: **a
+streaming chunk with an empty `choices` list is normal and must be skipped,
+not treated as an error.**
+
+So what is actually missing is one slice of wiring:
+
+1. A `models` field on `CompanyHostConfiguration` -- a catalog, and which
+   alias routing uses. The credential needs nothing new: it resolves through
+   the same host mapping `AEP_GITHUB_TOKEN` already uses.
+2. `build_gateway` building `ModelClients` from it and passing a client to
+   `RequestRouter`.
+
+### The one thing for the owner to decide
+
+`RequestRouter` takes `local_only=True` by default, and an endpoint's `local`
+flag says where the model *runs*. A company-internal gateway runs inside the
+company but not on this machine, so it is `local: false`, and routing will
+refuse it until the host says `local_only: false`.
+
+That should stay a visible line in the configuration rather than become a
+default. It is the line that says an engineer's words leave this machine for
+the company's gateway, and whether that is acceptable is not a decision this
+repository should make silently.
+
+What a model may *do* once it is there -- as opposed to read -- remains open,
+and is the same question as the coding harness's, below.
 
 ## The order this implies
 

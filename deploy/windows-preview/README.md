@@ -366,6 +366,65 @@ instead of adding this week's. That defect is fixed and pinned by a test, and
 the run takes a backup before touching anything — but try it on a copy first
 and compare the result with the old Host Bridge's.
 
+## A model (optional)
+
+Without one, this Agent matches commands and runs Workflows. It does not
+reason about anything else: a request that matches no installed command is
+answered with `needs_input`, not a guess. That is the whole behaviour of every
+host before this section existed, and it is a reasonable one to keep.
+
+With one, a request that matches nothing is shown to a model along with the
+Skills installed *here*, and the model may pick one of them. It can pick only
+what is installed: a name it invents is refused, and the run never starts.
+
+A company's LiteLLM gateway serves an OpenAI-shaped API, which is what this
+speaks. In `host.json`:
+
+```json
+"models": {
+  "catalog": {
+    "endpoints": [
+      { "alias": "company",
+        "provider": "openai_compatible",
+        "model": "gpt-5.5",
+        "base_url": "https://your-gateway.example/api",
+        "credential": { "name": "llm_gateway_token" },
+        "capabilities": {
+          "reasoning": "high", "tool_calling": true, "structured_output": true,
+          "streaming": true, "max_context_tokens": 128000 } }
+    ]
+  },
+  "routing_alias": "company",
+  "allow_remote_models": true
+}
+```
+
+and, beside `credentials`, the variable that holds the key:
+
+```json
+{ "secret": "llm_gateway_token", "environment_variable": "AEP_LLM_TOKEN" }
+```
+
+**The key never goes in this file.** It goes in that environment variable,
+exactly like the board token. `doctor` reports the endpoint, and reports the
+variable by name when it is not set — never its value.
+
+### `allow_remote_models` is a line somebody has to write
+
+An endpoint's `local` flag says where the model *runs*. A company gateway runs
+inside the company but not on this computer, so it is not local, and this host
+refuses to route through it until the configuration says `allow_remote_models`.
+
+That line is the statement that **an engineer's words leave this computer** for
+that gateway. It is not something this platform should decide quietly on
+anybody's behalf, so there is no default that turns it on. A model running on
+this machine — an Ollama on `localhost` — needs no such line, because nothing
+leaves.
+
+`routing_alias` may also be left out. The catalog is then configured for
+capabilities to use and nothing chooses what to run, which is a reasonable
+thing to want.
+
 ## Without typing commands
 
 Everything above is one `aep-host` command, and nobody runs a weekly job that

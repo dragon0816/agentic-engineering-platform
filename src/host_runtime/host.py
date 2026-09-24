@@ -58,6 +58,7 @@ from common.assets import ExecutionDependencies, WorkflowManifest
 from common.authorization import DeviceAuthorization
 from common.base import Contract
 from common.distribution import LocalStateError
+from common.execution import Failure
 from common.local_agent import BridgeMembership
 from host_runtime.agent import LocalAgent
 from host_runtime.contracts import CompanyHostConfiguration, DoctorCheck, HostDoctorReport
@@ -79,8 +80,9 @@ from integrations.excel_writer import (
 from integrations.github_project import GitHubProjectClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
+from models.clients import ModelClients
 from models.credentials import CredentialResolver, EnvironmentCredentials
-from models.wire import MethodTransport
+from models.wire import MethodTransport, Transport
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
@@ -97,6 +99,7 @@ HostErrorCode = Literal[
     "telegram_missing",
     "telegram_invalid",
     "credential_unmapped",
+    "models_invalid",
     "state_unavailable",
 ]
 
@@ -345,6 +348,7 @@ def build_gateway(
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
+    model_transport: Transport | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
@@ -401,7 +405,61 @@ def build_gateway(
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
-    return Gateway(RequestRouter(CommandRouter(skills)), bridge, WorkflowEngine(workflows, bridge))
+    router = build_router(
+        config, CommandRouter(skills), resolver=resolver, transport=model_transport
+    )
+    return Gateway(router, bridge, WorkflowEngine(workflows, bridge))
+
+
+def build_router(
+    config: CompanyHostConfiguration,
+    commands: CommandRouter,
+    *,
+    resolver: CredentialResolver | None = None,
+    transport: Transport | None = None,
+) -> RequestRouter:
+    """The router, with a model behind it when this host was given one.
+
+    A host with no `models` gets exactly what every host got before the field
+    existed: deterministic command matching, and `needs_input` for anything
+    else. That is not a degraded mode. A machine that guesses which of the
+    team's workflows an ambiguous sentence meant, and runs it, is worse than
+    one that asks.
+
+    A misconfigured catalog is refused here, while the host is being
+    assembled, rather than at the first message somebody types. `doctor` then
+    reports it before anybody has waited for an answer that was never coming.
+    """
+    binding = config.models
+    if binding is None or binding.routing_alias is None:
+        return RequestRouter(commands)
+    if resolver is None:
+        mapped = config.credential_environment()
+        endpoint = binding.catalog.endpoint(binding.routing_alias)
+        if endpoint is not None and endpoint.credential is not None:
+            if endpoint.credential.name not in mapped:
+                raise HostError("credential_unmapped")
+        resolver = EnvironmentCredentials(mapped)
+    clients = ModelClients(
+        binding.catalog,
+        resolver=resolver,
+        transport=transport,
+        options=binding.options,
+    )
+    client = clients.for_alias(binding.routing_alias)
+    if isinstance(client, Failure):
+        # `unknown_alias` cannot happen -- the contract checked it -- so this
+        # is a provider this build has no adapter for, which is a
+        # configuration mistake and not something to discover at runtime.
+        raise HostError("models_invalid")
+    return RequestRouter(
+        commands,
+        client,
+        binding.routing_alias,
+        # Said in the configuration, where somebody had to write it: the
+        # flag means an engineer's words may leave this machine.
+        local_only=not binding.allow_remote_models,
+    )
 
 
 def build_telegram(
@@ -543,6 +601,56 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
     return DoctorCheck(name="integrations", status="passed", detail=", ".join(parts))
 
 
+def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
+    """What this host can reason with, and whether it can reason at all.
+
+    Nothing is contacted. A model endpoint is not asked whether it is up: a
+    doctor that made a chargeable request to answer a question about
+    configuration would be a doctor nobody runs.
+    """
+    binding = config.models
+    if binding is None:
+        return DoctorCheck(
+            name="models",
+            status="pending",
+            detail=(
+                "No model is configured, so this Agent matches commands and runs "
+                "Workflows and does not reason about anything else."
+            ),
+        )
+    mapped = config.credential_environment()
+    problems: list[str] = []
+    for endpoint in binding.catalog.endpoints:
+        if endpoint.credential is None:
+            continue
+        name = endpoint.credential.name
+        if name not in mapped:
+            problems.append(f"the model endpoint {endpoint.alias} needs the secret {name} mapped")
+        elif not os.environ.get(mapped[name]):
+            problems.append(
+                f"the endpoint {endpoint.alias} has its secret mapped to "
+                f"{mapped[name]}, which is not set in this session"
+            )
+    if problems:
+        return DoctorCheck(name="models", status="failed", detail="; ".join(problems))
+    aliases = ", ".join(endpoint.alias for endpoint in binding.catalog.endpoints)
+    if binding.routing_alias is None:
+        return DoctorCheck(
+            name="models",
+            status="passed",
+            detail=(
+                f"{aliases}; no routing alias, so an unrecognized message is still "
+                "answered with `needs_input` rather than a guess"
+            ),
+        )
+    leaves = "" if binding.allow_remote_models else " (this machine only)"
+    return DoctorCheck(
+        name="models",
+        status="passed",
+        detail=f"{aliases}; routing through {binding.routing_alias}{leaves}",
+    )
+
+
 def inspect_runtime(
     config: CompanyHostConfiguration, layout: HostLayout
 ) -> tuple[DoctorCheck, ...]:
@@ -648,6 +756,7 @@ def inspect_runtime(
         state,
         inspect_platform(config),
         inspect_integrations(config),
+        inspect_models(config),
     )
 
 
@@ -699,6 +808,7 @@ def build_runtime(
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
+    model_transport: Transport | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
@@ -712,6 +822,7 @@ def build_runtime(
         jira_transport=jira_transport,
         writer=writer,
         drafter=drafter,
+        model_transport=model_transport,
     )
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
