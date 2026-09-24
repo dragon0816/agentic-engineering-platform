@@ -57,6 +57,10 @@ def _parser() -> argparse.ArgumentParser:
         help="write the answer to this file as UTF-8, rather than to the screen",
     )
     ask.add_argument("message", help="a skill command such as release.package, or a description")
+    chat = commands.add_parser("chat", help="open a window and talk to the resident Agent")
+    chat.add_argument("--config", required=True, type=Path)
+    chat.add_argument("--actor", help="the platform actor to act as; the device owner by default")
+    chat.add_argument("--namespace", help="the namespace to address; this host's by default")
     status = commands.add_parser("status", help="what this Bridge has installed and has run")
     status.add_argument("--config", required=True, type=Path)
     status.add_argument("--json", action="store_true")
@@ -200,6 +204,22 @@ def _manifests(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]
     return tuple(found)
 
 
+def _namespace(runtime: HostRuntime, namespace: str | None) -> str | None:
+    """Which namespace a request addresses, or None having said why not.
+
+    The host knows which namespaces its own installed assets are in, so it
+    says them rather than leaving the reader to find out: a request addresses
+    a namespace, and there is no sensible default to guess."""
+    chosen = namespace if namespace is not None else runtime.config.namespace
+    if chosen is None:
+        print(
+            "no namespace is configured; pass --namespace or set `namespace` in host.json."
+            + _installed_namespaces(runtime),
+            file=sys.stderr,
+        )
+    return chosen
+
+
 def _ask(
     runtime: HostRuntime,
     message: str,
@@ -208,16 +228,8 @@ def _ask(
     as_json: bool,
     output: Path | None,
 ) -> int:
-    chosen = namespace if namespace is not None else runtime.config.namespace
+    chosen = _namespace(runtime, namespace)
     if chosen is None:
-        # The host knows which namespaces its own installed assets are in, so
-        # it says them rather than leaving the reader to find out: a request
-        # addresses a namespace, and there is no sensible default to guess.
-        print(
-            "no namespace is configured; pass --namespace or set `namespace` in host.json."
-            + _installed_namespaces(runtime),
-            file=sys.stderr,
-        )
         return 2
     try:
         request = LocalAgentRequest(
@@ -243,6 +255,30 @@ def _ask(
     else:
         print(rendered)
     return 0 if outcome.refusal is None else 1
+
+
+def _chat(runtime: HostRuntime, actor: str | None, namespace: str | None) -> int:
+    """Open the window, or say plainly why this machine cannot.
+
+    Tk is in the standard library but not in every build of it -- a Python
+    compiled without Tcl/Tk, or a server with no display, has none. That is
+    worth one sentence naming the command that does the same work without a
+    window, not a traceback."""
+    chosen = _namespace(runtime, namespace)
+    if chosen is None:
+        return 2
+    try:
+        import tkinter  # noqa: F401 - asked for its absence, not its contents
+    except ImportError:
+        print(
+            "this Python has no Tk, so no window can be opened here; "
+            "`aep-host ask` does the same work on the command line",
+            file=sys.stderr,
+        )
+        return 2
+    from host_runtime.window import AgentWindow
+
+    return AgentWindow(runtime, chosen, actor=actor).run()
 
 
 def _status(runtime: HostRuntime, as_json: bool) -> int:
@@ -447,6 +483,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     with runtime:
         if args.command == "ask":
             return _ask(runtime, args.message, args.actor, args.namespace, args.json, args.output)
+        if args.command == "chat":
+            return _chat(runtime, args.actor, args.namespace)
         if args.command == "status":
             return _status(runtime, args.json)
         if args.command == "probe":

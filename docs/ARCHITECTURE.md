@@ -306,7 +306,10 @@ instruments and test environment laid out on it rather than to a desk — and th
 employees who need it drive it through an ingress without being bound to it; work
 done that way runs as the virtual member and records which employee asked. Telegram
 may be an ingress to the resident local Agent after its sender is mapped to a
-platform actor. Every ingress uses the same typed job, device-membership, Workflow
+platform actor. A window on the machine itself is an ingress too, for an operator
+who has the machine in front of them and no Telegram: it is the `local` ingress the
+command line uses, so an operator gains nothing by opening it and loses nothing by
+closing it. Every ingress uses the same typed job, device-membership, Workflow
 authorization and side-effect policy checks. Remote control initially means typed job submission, status, cancellation
 request and result references; it does not mean arbitrary shell or remote-desktop
 access.

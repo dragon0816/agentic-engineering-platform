@@ -304,8 +304,47 @@ cell or a tinted `Key` cell you applied *by hand* loses its colour — never its
 text. And your own `Status` colours are left alone; only cells holding exactly
 the job's own pink are cleared.
 
-**This writer has not yet been run against a real workbook by anyone.** Try it
-on a copy first and compare the result with the old Host Bridge's.
+This writer has now been run against a real team workbook once, on
+2026-09-24, and an earlier build of it renamed the previous week's sheet
+instead of adding this week's. That defect is fixed and pinned by a test, and
+the run takes a backup before touching anything — but try it on a copy first
+and compare the result with the old Host Bridge's.
+
+## Without typing commands
+
+Everything above is one `aep-host` command, and nobody runs a weekly job that
+way for long. Four things in this folder do it for you. They find the
+installation themselves; if you installed somewhere else, edit the `ROOT` line
+at the top of each.
+
+| Double-click | What it does |
+| --- | --- |
+| `chat.cmd` | Opens a window and lets you talk to the Agent on this computer. |
+| `weekly-preview.cmd` | Runs the dry run and prints the plan. Writes nothing. |
+| `weekly-apply.cmd` | Asks, then writes the plan into the workbook. |
+
+`weekly-preview.cmd 2026_39W` names a week; with no argument it is this week.
+
+`chat.cmd` is the same Agent the command line and Telegram reach, with the
+same grants and the same refusals — a window is an ingress, not a shortcut
+past anything. Type a command such as `weekly.preview 2026_39W` and the plan
+comes back in the window. It takes one request at a time, because two runs at
+once would be two runs against the one workbook. A console window stays open
+behind it; that is where a configuration problem is reported.
+
+### On a schedule
+
+```powershell
+.\schedule-weekly.ps1                  # every Friday at 16:00
+.\schedule-weekly.ps1 -DayOfWeek Monday -At 09:00
+.\schedule-weekly.ps1 -Remove
+```
+
+This registers a Windows scheduled task that runs the **preview** and writes
+nothing. Writing stays something a person does, because it changes the team's
+workbook. The task runs as you, not as SYSTEM: the workbook, the board token
+and Excel all belong to your account, and a task running as SYSTEM would see
+none of them — so it runs when you are signed in.
 
 ## Remove
 

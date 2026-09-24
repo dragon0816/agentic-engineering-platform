@@ -71,6 +71,11 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         assert prefix + "install.ps1" in names
         assert prefix + "uninstall.ps1" in names
         assert prefix + "wheels/" + platform_wheel.name in names
+        # The things somebody double-clicks. An operator who has to type a
+        # command with four flags to see a week's plan does not run it, so
+        # these shipping is part of the bundle working, not a convenience.
+        for launcher in ("chat.cmd", "weekly-preview.cmd", "weekly-apply.cmd"):
+            assert prefix + launcher in names
         assert all("config" not in name.lower() for name in names)
         assert all("token" not in name.lower() for name in names)
         # The extras the installer asks for are carried, not fetched: the
