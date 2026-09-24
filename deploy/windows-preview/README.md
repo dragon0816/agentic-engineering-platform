@@ -378,6 +378,7 @@ at the top of each.
 | `chat.cmd` | Opens a window and lets you talk to the Agent on this computer. |
 | `weekly-preview.cmd` | Runs the dry run and prints the plan. Writes nothing. |
 | `weekly-apply.cmd` | Asks, then writes the plan into the workbook. |
+| `weekly-mail.cmd` | Saves this week's mail as a draft in Outlook. Sends nothing. |
 
 `weekly-preview.cmd 2026_39W` names a week; with no argument it is this week.
 
