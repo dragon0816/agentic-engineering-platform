@@ -2,6 +2,17 @@
 
 Status: Phases 1–6 complete; Phase 7 — End-to-end migration and controlled deprecation active
 
+## Proposed next product milestone (awaiting owner review)
+
+The product-level direction is recorded in `PRODUCT_VISION.md`. The proposed
+next milestone is one useful Personal Engineering Agent with a bounded Coding
+Harness that passes three executable benchmark categories: device/chipset
+development, SOP-to-deterministic-Workflow, and parser/transformation
+development. `AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md` assesses the current
+implementation and proposes an incremental path. It is not yet an approved
+phase or architecture amendment; Phase 7 remains active until the owner reviews
+the proposal and chooses how to sequence its remaining parity work.
+
 ## Objective
 
 Consolidate capabilities from the existing repositories into `agentic-engineering-platform` through contract-first, test-backed migration. This is not a source-tree merge.
