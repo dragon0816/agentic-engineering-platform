@@ -14,12 +14,14 @@ The product E2E gate order and observable completion evidence are defined in
 `PRODUCT_ACCEPTANCE_TESTS.md`; this Roadmap does not override them.
 
 The fixed order is **E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01**. E2E-02
-is the active product gate. Its implementation uses the resident Agent and
-existing Gateway/Workflow/Bridge contracts to draft an SOP-derived Workflow,
-run an inert fixture, bind validation to the manifest digest, preserve separate
-business and technical decisions, and replay the approved Workflow without a
-model. The reproducible gate and evidence are documented in
-`docs/phases/E2E_02_SOP_WORKFLOW.md`. E2E-03 remains blocked until this change
+merged to `main` in merge commit `5428774`. E2E-03 is the active product gate.
+It reuses the resident Agent, Gateway and Bridge and adds a bounded Coding
+Harness whose workspace revision, plan, actual patch, declared validation
+commands, repair budget, Skill versions and trace are explicit. The first proof
+edits a deterministic JSON transformation, rejects its deliberately wrong first
+candidate, repairs once from structured validator evidence, and passes the new
+case plus the committed regression case. Its boundary is documented in
+`docs/phases/E2E_03_CODING_HARNESS.md`. E2E-05 remains blocked until E2E-03
 passes pull-request CI and merges.
 
 ## Objective

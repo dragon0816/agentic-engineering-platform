@@ -1,159 +1,116 @@
-# Handoff — E2E-02 SOP to deterministic Workflow
+# Handoff — E2E-03 bounded Coding Harness
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `codex/e2e-02-sop-workflow`.
-Base: `main` at `d2bee6291345bb91b04bc9b772e3097e269a2e1d` (PR #97 merge).
-Pull request: #98, open against `main`.
-Implementation commit: `e4f15446b8fb49eb459a3c6aaad3265254aaed89`.
-Documentation commit: `831f03d`.
-Verified PR head: `f129aa4`.
+Branch: `codex/e2e-03-coding-harness`.
+Base: merged E2E-02 on `main` (`5428774`).
+Implementation commit: `273cde3`.
+Pull request: #99, open against `main`.
 
 Progress across all phases remains in `docs/TASKS.md`. This file records the
 current stopping point and the evidence needed to continue without chat history.
 
 ## Completed
 
-- Implemented product gate E2E-02 over the existing resident `LocalAgent`,
-  `Gateway`, `WorkflowEngine` and `BridgeExecutor`; no second agent/runtime path
-  was introduced.
-- Extended `DraftWorkflowRequest` with unique exact capability identities and
-  made every `WorkflowDraft` echo the request that reached the drafter.
-- Made deterministic review reject a structurally valid draft that silently
-  omits a capability required by the SOP acceptance criteria.
-- Added typed fixture, validation evidence and acceptance outcome contracts.
-  Secret values are rejected; a pass must identify its run, match expected and
-  observed output, be deterministic and belong to the same trace.
-- Added `PersonalWorkflowAuthor`: the user request enters through resident Agent
-  admission and normal Gateway routing; a candidate runs only in a throwaway
-  Workflow inventory through a Gateway, Workflow engine and the host's existing
-  Bridge policy. Validation does not install or publish the draft.
-- Added a pure human business-approval transition bound to the exact validated
-  manifest digest. It leaves technical policy, installation and execution
-  authorization separate.
-- Added the inert normalize-then-count fixture and E2E tests for the green path,
-  semantic omission, ambiguous/secret acceptance input, wrong output,
-  publication without permission and identical no-model replay.
-- Updated Architecture, Contracts, Roadmap, Tasks, README and the E2E-02 product
-  gate record only after the implementation had a reproducible local green path.
-- Updated `CLAUDE.md` so a fresh Claude Code session must read Product Vision,
-  Product Acceptance Tests and the active product-gate specification instead of
-  defaulting to the independent Phase 7 backlog.
-- Opened PR #98 and attached it to this task. GitHub Actions run `36023283160`
-  passed 4/4 on head `f129aa4`: Ubuntu and Windows with Python 3.11 and 3.12.
+- Merged E2E-02 to `main` after its exact head and 4/4 previous CI jobs were
+  verified.
+- Added provider-neutral Coding Harness contracts for pinned workspace state,
+  bounded plan, candidate and actual patches, validation cases, repair/command
+  budgets, exact command outcomes, ordered events, artifact digest, Skill
+  versions and trace.
+- Added `BoundedWorkspace`: every read/write is allowlisted and resolved beneath
+  the explicit root; traversal and resolved escapes are refused. The initial
+  content revision is verified before mutation.
+- Added `DeclaredCommands` and `CodingHarness`: no shell/subprocess path exists;
+  only injected installed validators may decide completion. A structured
+  failure feeds a bounded repair; budget exhaustion is a typed failure.
+- Added `coding-harness.run` as a Bridge-installed `write` capability with
+  required permission, policy ref and execution approval.
+- Added the deterministic JSON transformation proof and committed new/regression
+  fixtures. The wrong first candidate is rejected; one repair passes both.
+- Added negative tests for traversal/credential content, undeclared validation,
+  repair exhaustion and an old regression failing after the new case passes.
+- Kept commit/push/publication outside the Harness contract.
+- Narrowed GitHub Actions to the owner-requested Windows/Python 3.12 target. The
+  package compatibility declaration remains Python 3.11+.
+- Updated Architecture, Contracts, Roadmap, Tasks, README and the E2E-03 gate
+  record only after the implementation passed locally.
 
 ## In progress
 
-- PR #98 owner review and merge decision.
+- Obtain the single Windows/Python 3.12 CI result for PR #99.
 
 ## Remaining
 
-- Merge only when the owner explicitly asks. Do not begin E2E-03 before PR #98
-  has a reproducible passing path and merges.
-- Phase 7 production-like work remains independent: company-host workflow 11
-  parity, workflow 10 remaining slices, workflow 13 and Knowledge-copy parity.
+- Merge E2E-03 only after its exact PR head passes CI.
+- Start E2E-05 only after that merge. E2E-05 must demonstrate question with Raw
+  citations -> feedback -> standardized improvement request -> Knowledge
+  candidate -> new plus existing evaluation -> separate domain approval ->
+  versioned republish -> corrected cited answer, while Raw remains byte-identical.
+- E2E-04 and E2E-01 remain blocked by the approved order.
 
 ## Architecture decisions made
 
-- **REUSE** the current resident Agent, Gateway, Workflow engine, Bridge policy
-  and `WorkflowManifest`; E2E-02 is a bounded application service around them.
-- Required capabilities are explicit executable acceptance criteria. The model
-  may propose structure but cannot silently remove a required outcome.
-- Candidate validation uses an ephemeral Workflow inventory with the same Bridge
-  and grants as normal execution. The host inventory and Registry stay unchanged.
-- Expected output is supplied independently and graded outside the model.
-- Business approval may publish the validated manifest; technical policy,
-  installation, distribution and execution grants remain separate.
-- General workspace editing, code generation and repair remain E2E-03 scope.
-
-## Guardrails for the next worker
-
-- The current task is PR #98 review and, only after explicit owner approval,
-  merge. Do not add another feature to this PR.
-- Do not start E2E-03 on this branch or before PR #98 merges. The mandatory
-  order remains E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01.
-- Do not return to a Phase 7 backlog item merely because Phase 7 is also active;
-  the product-gate work named in this handoff has priority.
-- Do not replace the current Agent/Gateway/Workflow/Bridge path with a new agent
-  framework or redesign the approved architecture.
-- Do not treat a model-generated manifest as completion evidence. The external
-  fixture comparison is the validator.
-- Do not combine draft validation, business approval, technical policy,
-  publication, installation or execution authorization. They are separate
-  transitions and the tests deliberately prove that publication grants no
-  permission.
-- Do not require a live model or company workstation for E2E-02. This gate is
-  intentionally inert; live endpoint and physical-resource evidence belongs to
-  later gates.
-- Preserve the untracked user-owned `.claude/` directory.
-
-The implementation evidence map is:
-
-- acceptance source: `docs/PRODUCT_ACCEPTANCE_TESTS.md`, E2E-02;
-- approved boundary: `docs/ARCHITECTURE.md`, “E2E-02 bounded Workflow authoring
-  and validation”;
-- gate record: `docs/phases/E2E_02_SOP_WORKFLOW.md`;
-- contracts: `src/capabilities/workflow_author/contracts.py`;
-- semantic review: `src/capabilities/workflow_author/review.py`;
-- use-case orchestration: `src/host_runtime/workflow_author.py`;
-- committed input: `tests/fixtures/e2e_02/sop-workflow.json`; and
-- executable proof and negative cases: `tests/test_product_e2e_02.py`.
+- **REUSE** resident `LocalAgent`, `Gateway`, `BridgeExecutor`, installed Skills
+  and `LocalPolicy`; there is no second agent or execution path.
+- **ADD** the Harness at the Personal Engineering execution boundary and expose
+  it through one normally authorized Bridge capability.
+- **ADAPT** the source benchmark invariant that every grader must reject a known
+  wrong output.
+- **DO NOT MIGRATE** the source live-model/arbitrary-subprocess runner. It is not
+  a sandbox and conflicts with inert CI and the declared-command boundary.
+- Use a typed JSON transformation program for the first safe vertical. General
+  generated-code execution requires a later isolation adapter behind the same
+  command contract.
+- A plan grants no access. Runtime path/command allowlists and Bridge policy are
+  independently authoritative.
+- Validation creates a candidate only. Git writes, publishing, business review
+  and technical/execution authorization remain separate transitions.
 
 ## Exact verification commands and results
 
 ```text
-.venv\Scripts\python.exe -m pytest tests\test_workflow_author.py tests\test_product_e2e_02.py -q -p no:cacheprovider --basetemp=.scratch\pytest-e2e02-contract-3
-30 passed in 0.29s
+.venv\Scripts\python.exe -m pytest tests\test_product_e2e_03.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e03-final
+4 passed in 0.26s
 
-.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --ignore=tests\test_browser.py --basetemp=.scratch\pytest-e2e02-nobrowser
-1266 passed, 4 skipped in 32.31s
-
-.venv\Scripts\python.exe -m pytest tests\test_browser.py -q -p no:cacheprovider --basetemp=.scratch\pytest-e2e02-browser
-21 passed in 285.53s (run outside the command sandbox because installed Chromium closes its debugging socket inside it)
-
-Combined unique suite result: 1287 passed, 4 skipped
-
-GitHub Actions run 36023283160 on f129aa4
-4/4 passed: Ubuntu/Windows x Python 3.11/3.12
+.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .scratch\pytest-e2e03-full-final
+1291 passed, 4 skipped in 67.95s
 
 .venv\Scripts\python.exe -m ruff check .
 All checks passed
 
 .venv\Scripts\python.exe -m ruff format --check .
-222 files already formatted
+231 files already formatted
 
 .venv\Scripts\python.exe -m mypy
-Success: no issues found in 182 source files
+Success: no issues found in 190 source files
+
+.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e03
+Successfully built sdist and wheel
 
 .venv\Scripts\python.exe -m pip check
 No broken requirements found
-
-.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e02
-Successfully built agentic_engineering_platform-0.1.0.tar.gz and agentic_engineering_platform-0.1.0-py3-none-any.whl
-
-.scratch\wheel-env\Scripts\python.exe -m pip install --no-deps --force-reinstall .scratch\build-e2e02\agentic_engineering_platform-0.1.0-py3-none-any.whl
-.scratch\wheel-env\Scripts\python.exe -I -c "from capabilities.workflow_author.contracts import WorkflowAcceptanceRequest; from host_runtime.workflow_author import PersonalWorkflowAuthor; print(WorkflowAcceptanceRequest.__name__, PersonalWorkflowAuthor.__name__)"
-WorkflowAcceptanceRequest PersonalWorkflowAuthor
 
 git diff --check
 passed
 ```
 
-The first isolated build attempt could not download `setuptools>=75` because the
-sandbox blocks package-index access. After installing the declared build
-dependency with approved network access, the default `dist/` path was locked by
-an existing artifact. Building to `.scratch/build-e2e02` succeeded; this is an
-environment/path issue, not a source or package-content failure.
+The four skips are existing host-dependent cases: two Windows link privilege
+checks, IPv6 loopback availability and a directory-link privilege check. No
+Ubuntu or Python 3.11 validation was run, per owner instruction.
 
 ## Known issues
 
-- The scripted model makes the E2E path deterministic and inert. A live model is
-  intentionally not acceptance evidence for this gate.
-- This slice is not a general Coding Harness and does not edit a workspace or
-  repair generated code; those are E2E-03 concerns.
-- `.claude/` is untracked user-owned state and must not be committed, modified or
-  removed.
+- The author and routing model in the gate are scripted, so CI is deterministic
+  and inert. A real model/provider is not acceptance evidence for E2E-03.
+- The first transformation artifact is declarative JSON. Arbitrary Python or
+  shell execution is deliberately absent until an isolation boundary exists.
+- The Harness mutates its allowed temporary workspace during validation but
+  never commits, pushes or publishes it.
+- `.claude/` is untracked user-owned state and must not be committed, modified
+  or removed.
 
 ## Next recommended action
 
-Review PR #98. Once the owner approves a merge, merge it. Start E2E-03 only
-after that merge; do not expand this PR into the Coding Harness.
+Wait for PR #99's Windows/Python 3.12 job and merge only its verified head. Then
+branch from updated `main` and implement E2E-05 from
+`docs/PRODUCT_ACCEPTANCE_TESTS.md` without returning to Phase 7 backlog work.
