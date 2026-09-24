@@ -72,6 +72,17 @@ def _prompt(
         "The procedure:",
         request.sop,
     ]
+    if request.required_capabilities:
+        asked.extend(
+            [
+                "",
+                "Acceptance requires every one of these exact capabilities to appear:",
+                *(
+                    f"- {item.namespace}/{item.name}@{item.version}"
+                    for item in request.required_capabilities
+                ),
+            ]
+        )
     if problems:
         asked.extend(
             [
@@ -108,6 +119,7 @@ def draft_workflow(
         return WorkflowDraft(
             refusal="model_not_configured",
             available=available,
+            request=request,
             preview=(
                 "This machine has no model configured, so there is nothing to draft "
                 "with. `doctor` says the same, and host.json's `models` is where one "
@@ -118,6 +130,7 @@ def draft_workflow(
         return WorkflowDraft(
             refusal="nothing_to_draft",
             available=(),
+            request=request,
             preview=(
                 "Nothing is installed on this machine, so every Workflow drafted for it "
                 "would name a capability it does not have."
@@ -144,6 +157,7 @@ def draft_workflow(
                 refusal="model_unavailable",
                 attempts=tuple(attempts),
                 available=available,
+                request=request,
                 preview="The model could not be reached, so nothing was drafted.",
             )
         failure = getattr(response, "failure", None)
@@ -153,9 +167,15 @@ def draft_workflow(
                 refusal="model_unavailable",
                 attempts=tuple(attempts),
                 available=available,
+                request=request,
                 preview="The model did not return a document, so nothing was drafted.",
             )
-        manifest, problems = review.review(structured, installed, namespace=request.namespace)
+        manifest, problems = review.review(
+            structured,
+            installed,
+            namespace=request.namespace,
+            required_capabilities=request.required_capabilities,
+        )
         attempts.append(
             DraftAttempt(attempt=number, problems=problems, accepted=manifest is not None)
         )
@@ -165,12 +185,14 @@ def draft_workflow(
                 attempts=tuple(attempts),
                 available=available,
                 preview=review.rendered(manifest, installed),
+                request=request,
             )
     return WorkflowDraft(
         refusal="draft_unusable",
         attempts=tuple(attempts),
         available=available,
         preview=_why_not(attempts, available),
+        request=request,
     )
 
 

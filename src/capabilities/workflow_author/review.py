@@ -78,7 +78,11 @@ def _step_problems(index: int, step: WorkflowStep, installed: InstalledCapabilit
 
 
 def unusable(
-    manifest: WorkflowManifest, installed: InstalledCapabilities, *, namespace: str
+    manifest: WorkflowManifest,
+    installed: InstalledCapabilities,
+    *,
+    namespace: str,
+    required_capabilities: tuple[AssetIdentity, ...] = (),
 ) -> tuple[str, ...]:
     """Every reason this drafted Workflow would not run here, in order.
 
@@ -121,11 +125,23 @@ def unusable(
             "dependencies.local_capabilities must name every capability the steps use, "
             f"and leaves out: {', '.join(missing)}"
         )
+    used = {step.capability.key for step in manifest.steps if isinstance(step, WorkflowStep)}
+    omitted = [item for item in required_capabilities if item.key not in used]
+    if omitted:
+        named = ", ".join(f"{item.namespace}/{item.name}@{item.version}" for item in omitted)
+        problems.append(
+            "the SOP acceptance criteria require these capabilities, but the draft "
+            f"silently omits them: {named}"
+        )
     return tuple(problems)
 
 
 def review(
-    data: object, installed: InstalledCapabilities, *, namespace: str
+    data: object,
+    installed: InstalledCapabilities,
+    *,
+    namespace: str,
+    required_capabilities: tuple[AssetIdentity, ...] = (),
 ) -> tuple[WorkflowManifest | None, tuple[str, ...]]:
     """Parse and check one drafted Workflow.
 
@@ -136,7 +152,12 @@ def review(
         manifest = WorkflowManifest.model_validate(data)
     except ValidationError as invalid:
         return None, contract_problems(invalid)
-    problems = unusable(manifest, installed, namespace=namespace)
+    problems = unusable(
+        manifest,
+        installed,
+        namespace=namespace,
+        required_capabilities=required_capabilities,
+    )
     if problems:
         return None, problems
     return manifest, ()

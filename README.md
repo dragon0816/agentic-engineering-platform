@@ -5,9 +5,9 @@ Unified engineering automation platform for agentic reasoning, deterministic wor
 The product direction is defined in [Product Vision](docs/PRODUCT_VISION.md).
 The required product gates and implementation order are defined in
 [Product Acceptance Tests](docs/PRODUCT_ACCEPTANCE_TESTS.md).
-The current [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
-compares that vision with the implemented architecture and is awaiting owner
-review; it does not yet change the architecture baseline.
+The approved [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
+compares that vision with the implemented architecture and fixes the incremental
+product gate order.
 
 Phase 7 is active with invitation-only platform enrollment and separate Bridge
 device identity as its first slice. Production-like validation will run on an
@@ -38,6 +38,18 @@ python -m pip check
 CI verifies on Windows and Linux with Python 3.11 and 3.12. The pure proof is in
 `workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
 loads the sample manifest and Bridge fixture and exercises the complete chain.
+
+The first product gate, E2E-02, proves that a Personal Agent can turn a bounded
+SOP into a typed draft Workflow, validate it through the normal
+Gateway/Workflow/Bridge path against an independent fixture, and replay an
+approved installation deterministically with the model disabled. It has no
+production side effects. Reproduce the full positive and negative gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_02.py -q
+```
+
+See [the E2E-02 implementation record](docs/phases/E2E_02_SOP_WORKFLOW.md).
 
 Phase 2 entry points are `agent.routing.RequestRouter`, `agent.skills.SkillRegistry`,
 `capabilities.runtime.InstalledCapabilities`, `workflow.dispatch.BridgeExecutor`

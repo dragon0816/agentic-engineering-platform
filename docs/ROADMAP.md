@@ -2,18 +2,25 @@
 
 Status: Phases 1–6 complete; Phase 7 — End-to-end migration and controlled deprecation active
 
-## Proposed next product milestone (awaiting owner review)
+## Product E2E milestone (approved and active)
 
-The product-level direction is recorded in `PRODUCT_VISION.md`. The proposed
+The product-level direction is recorded in `PRODUCT_VISION.md`. The approved
 next milestone is one useful Personal Engineering Agent with a bounded Coding
 Harness that passes three executable benchmark categories: device/chipset
 development, SOP-to-deterministic-Workflow, and parser/transformation
 development. `AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md` assesses the current
-implementation and proposes an incremental path. It is not yet an approved
-phase or architecture amendment; Phase 7 remains active until the owner reviews
-the proposal and chooses how to sequence its remaining parity work.
+implementation and defines the incremental boundary approved by the owner.
 The product E2E gate order and observable completion evidence are defined in
 `PRODUCT_ACCEPTANCE_TESTS.md`; this Roadmap does not override them.
+
+The fixed order is **E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01**. E2E-02
+is the active product gate. Its implementation uses the resident Agent and
+existing Gateway/Workflow/Bridge contracts to draft an SOP-derived Workflow,
+run an inert fixture, bind validation to the manifest digest, preserve separate
+business and technical decisions, and replay the approved Workflow without a
+model. The reproducible gate and evidence are documented in
+`docs/phases/E2E_02_SOP_WORKFLOW.md`. E2E-03 remains blocked until this change
+passes pull-request CI and merges.
 
 ## Objective
 
