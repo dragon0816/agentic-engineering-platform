@@ -1,83 +1,81 @@
-# Handoff — E2E-05 governed Knowledge evolution
+# Handoff — E2E-05 complete; E2E-04 is next
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `codex/e2e-05-knowledge-evolution`.
-Base: E2E-03 merged to `main` by PR #99 (`15f88eb`).
-Implementation commit: `2444bb1`.
-Pull request: #100, open against `main`.
+Branch: `main`.
+E2E-05 pull request: #100, merged as `0f7437027af783f416d68b24bd7c6de746624f92`.
+Verified PR head: `31c48709cdf40454dfee6cf4a7d64ba3b91415e7`.
+CI run: `36038167378`, job `107763372657`, passed in 3m26s.
 
-Progress across all phases remains in `docs/TASKS.md`. This file records the
-current stopping point and the constraints another coding agent must preserve
-without relying on conversation history.
+Progress across all phases remains in `docs/TASKS.md`. This file contains the
+current stopping point and constraints needed to continue without chat history.
 
 ## Completed
 
-- Merged E2E-03 in PR #99 only after its exact head passed the single
-  Windows/Python 3.12 CI job.
-- Added exact-version `KnowledgeManifest` and an in-memory `KnowledgeCatalog`
-  that admit only published, digest-matching local vaults and retain prior
-  versions for rollback.
-- Added grounded query records that bind exact asset/version, trace, answer and
-  cited passages; every answer sentence must cite immutable Raw evidence.
-- Added structured improvement requests containing the original answer,
-  citations, user feedback, expected information, reproduction and acceptance
-  criteria. Feedback alone cannot mutate published Knowledge.
-- Added a separately approved maintainer-triage transition and a Bridge-installed
-  `knowledge_evolution.create_candidate` write capability. It copies the base
-  vault to a new root, applies a typed `WritePlan`, and removes partial output on
-  failure.
-- Bound candidates and validation evidence to complete content, Raw and decision
-  digests plus the ordered new/regression evaluation set.
-- Kept domain-owner approval separate from validation, Bridge execution
-  authorization and publication.
-- Added a committed miniature vault and deterministic E2E gate from question to
-  corrected version, including exact old-version rollback.
-- Added negative paths for Wiki-only unsupported claims, regression failure and
-  reintroduction of an exact claim persisted as rejected in `decisions.md`.
-- Confined candidate paths to a Bridge-configured workspace and proved that
-  content drift after validation invalidates the evidence.
-- Updated Architecture, Contracts, Roadmap, Tasks, README and the E2E-05 gate
-  record only after focused and full tests passed locally.
+- E2E-02, E2E-03 and E2E-05 are merged in the approved order through PRs #98,
+  #99 and #100.
+- E2E-05 adds exact-version `KnowledgeManifest` records and an in-memory
+  `KnowledgeCatalog` that admits only published, digest-matching local vaults and
+  retains previous versions for rollback.
+- `knowledge_query.ask` runs through the resident Personal Agent, Gateway and
+  Bridge. A grounded answer binds exact asset/version, trace, answer and Raw
+  passages, and every sentence must cite Raw evidence.
+- Feedback becomes a structured `KnowledgeImprovementRequest` with the original
+  answer/citations, expected information, reproduction and acceptance criteria.
+  It cannot mutate the published Knowledge version.
+- Maintainer triage approval is required before candidate development. Candidate
+  creation is a separately authorized Bridge `write` capability confined to a
+  host-configured workspace.
+- Candidate creation copies the base vault, applies a typed `WritePlan`, removes
+  partial output on failure, preserves Raw byte-for-byte and retains the settled
+  decision record.
+- Validation binds the exact candidate content and ordered new/regression cases.
+  A regression failure blocks approval, and any post-validation content drift
+  invalidates the evidence.
+- Domain-owner approval remains separate from technical validation, Bridge
+  authorization and publication. Publishing creates vNext while the old exact
+  version remains queryable.
+- Exact claims persisted as `- reject:` in `decisions.md` cannot be reintroduced
+  by a later candidate plan.
+- The product gate uses a committed miniature vault and a deterministic scripted
+  model; CI remains inert and performs no production side effects.
 
 ## In Progress
 
-- Wait for PR #100's exact-head Windows/Python 3.12 CI result and merge only if
-  it passes.
+- None. Stop here by owner instruction after Phase 3 / E2E-05.
 
 ## Remaining
 
-- Replace this section with exact commit, PR, CI and merge evidence after those
-  steps complete.
-- E2E-04 software continuous evolution remains blocked until E2E-05 merges.
+- E2E-04 software continuous evolution is the next gate in
+  `docs/PRODUCT_ACCEPTANCE_TESTS.md`. It has not started.
 - E2E-01 physical DUT/chipset engineering remains blocked behind E2E-04 and
-  requires later company-host evidence.
-- Do not resume the older Phase 7 workflow backlog as part of this product gate.
+  will require later validation on an enrolled company computer.
+- The older Phase 7 workflow backlog remains separate from this fixed product
+  E2E sequence; do not resume it by inference.
 
 ## Architecture decisions made
 
-- **REUSE** the resident `LocalAgent`, `Gateway`, `BridgeExecutor`, installed
-  Skills and `LocalPolicy`; no second agent/runtime was introduced.
+- **REUSE** resident `LocalAgent`, `Gateway`, `BridgeExecutor`, installed Skills
+  and `LocalPolicy`; there is no second agent/runtime or query path.
 - **REUSE** Phase 4 `Vault`, `QueryEngine`, Raw provenance, `WritePlan`, decision
   records and immutable-Raw behavior.
 - **WRAP** exact-version query as a Bridge `read` capability and candidate vault
   creation as a Bridge `write` capability requiring execution approval.
-- **ADD** only the missing improvement/version/evaluation contracts and the
-  in-memory exact-version catalog needed for the product gate.
-- **DO NOT MIGRATE** another source implementation; existing migrated Knowledge
-  components already supply the proven behavior needed here.
+- **ADD** only the missing version, feedback, candidate and evaluation contracts
+  plus an in-memory exact-version catalog for this gate.
+- **DO NOT MIGRATE** another source implementation. Existing migrated Knowledge
+  behavior already supplied the required base.
 - Feedback, maintainer triage, automated validation, domain approval,
   publication and execution authorization are independent transitions.
-- A candidate is created in a new vault root. Raw remains byte-identical and the
-  published base is never edited in place.
-- Published versions retain exact content/evidence digests. Validation evidence
-  cannot authorize content that changed after evaluation.
-- Persisted `- reject:` decisions block exact rejected claims before candidate
-  writes. Broader semantic contradiction detection is deferred and must not be
-  claimed by a later agent.
-- The catalog is an inert in-memory/local-vault proof, not a production Registry,
-  database or remote Knowledge service.
+- Published versions and validation evidence carry exact digests. Validation
+  evidence cannot authorize different or later-modified content.
+- Rejected-claim enforcement is exact phrase matching. Semantic-equivalence
+  detection is deferred and must not be claimed as implemented.
+- This is an inert local proof, not a production Registry/database, remote vault
+  service, live-model evaluation or automatic issue/repository integration.
 
 ## Exact verification commands and results
+
+Local Windows/Python 3.12:
 
 ```text
 .venv\Scripts\python.exe -m pytest tests\test_product_e2e_05.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e05-focused-final
@@ -105,29 +103,34 @@ git diff --check
 passed
 ```
 
-The four skips are existing host-dependent cases: two Windows link privilege
-checks, IPv6 loopback availability and a directory-link privilege check. No
-Ubuntu or Python 3.11 validation was run, per owner instruction.
+GitHub Actions on PR #100:
+
+```text
+Platform verification / verify
+run 36038167378, job 107763372657
+Windows, Python 3.12
+passed in 3m26s
+```
+
+The four local skips are existing host-dependent cases: two Windows link
+privilege checks, IPv6 loopback availability and a directory-link privilege
+check. No Ubuntu or Python 3.11 validation was run, per owner instruction.
 
 ## Known issues
 
-- Routing and answer synthesis in the gate use a scripted provider-neutral model
-  so CI stays deterministic and inert. A live model endpoint is not E2E-05
-  acceptance evidence.
-- Rejected-claim protection currently enforces exact persisted phrases. The
-  decision record is durable, but semantic-equivalence detection is deferred.
-- The catalog and vault paths are process-local. Production Registry/database,
+- A live model/provider has not been used as E2E-05 acceptance evidence.
+- Rejected-claim protection currently enforces exact persisted phrases.
+- The catalog and vault paths are process-local; production Registry/database,
   remote asset transport and distributed locking remain outside this gate.
-- The candidate write has a trusted configured target root; production workspace
-  allocation still belongs to a later host/control-plane adapter.
-- `.claude/` is untracked user-owned state and must not be committed, modified or
-  removed.
+- Production candidate workspace allocation still needs a host/control-plane
+  adapter behind the same confined Bridge capability.
+- `.claude/` is user-owned local state. Do not commit, modify or remove it.
 
 ## Next Recommended Action
 
-Finish Windows/Python 3.12 verification, open and merge the E2E-05 PR only after
-its exact head passes CI, then rewrite this handoff with final evidence. Only
-after that may the next owner begin E2E-04 from `PRODUCT_ACCEPTANCE_TESTS.md`.
-They must preserve exact Knowledge version rollback, immutable Raw, grounded
-citations, persisted decisions and the separation of validation, business
-approval, publication and execution authorization.
+Read `PRODUCT_VISION.md`, `PRODUCT_ACCEPTANCE_TESTS.md`, `docs/ARCHITECTURE.md`,
+`docs/TASKS.md` and this handoff. Prepare the E2E-04 software continuous
+evolution plan from its user-level acceptance scenario before changing code.
+Reuse the E2E-03 Harness and E2E-05 improvement/evidence/approval boundaries.
+Do not weaken exact versioning, external validation, rollback, or the separation
+of business approval, technical policy, publication and execution permission.

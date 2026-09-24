@@ -14,14 +14,14 @@ The product E2E gate order and observable completion evidence are defined in
 `PRODUCT_ACCEPTANCE_TESTS.md`; this Roadmap does not override them.
 
 The fixed order is **E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01**. E2E-02
-merged in PR #98 and E2E-03 merged in PR #99. E2E-05 is the active product
-gate. It reuses the resident Agent/Gateway/Bridge and Phase 4 Knowledge vault,
+merged in PR #98, E2E-03 in PR #99 and E2E-05 in PR #100. The E2E-05 proof
+reuses the resident Agent/Gateway/Bridge and Phase 4 Knowledge vault,
 query, Raw provenance and decision records. The proof captures feedback against
 an exact cited answer, creates an independently authorized candidate version,
 runs the new case plus existing regressions, records separate domain approval,
 publishes vNext and preserves the exact old version for rollback. Its boundary
-is documented in `docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md`. E2E-04 remains
-blocked until this gate has a reproducible passing path and merges.
+is documented in `docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md`. E2E-04 is the
+next approved product gate and has not started.
 
 ## Objective
 
