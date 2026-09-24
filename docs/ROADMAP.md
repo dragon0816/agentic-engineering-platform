@@ -160,6 +160,18 @@ repository skeleton
 
 Do **not** start by copying all source files. The first migrated behaviour should be a small, side-effect-free capability proving the contracts end to end.
 
+## What the owner has asked the Agent to do
+
+On 2026-09-24 the owner named five capabilities: a coding agent with a
+harness, running Workflows and driving the computer's own tools, answering
+questions from the Knowledge wiki, several agents on one machine each with
+its own skills/model/memory, and a web interface to all of it.
+
+`docs/AGENT_CAPABILITIES_REQUESTED.md` records the request, what already
+exists, and the one thing that gates most of it: **no model is configured on
+a company host at all today**. That file decides nothing; work appears in
+`docs/TASKS.md` and architecture changes in `docs/ARCHITECTURE.md`.
+
 ## Open decisions for later phases
 
 - exact agent runtime/SDK implementation;

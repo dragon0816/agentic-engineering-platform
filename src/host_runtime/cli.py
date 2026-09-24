@@ -61,6 +61,15 @@ def _parser() -> argparse.ArgumentParser:
     chat.add_argument("--config", required=True, type=Path)
     chat.add_argument("--actor", help="the platform actor to act as; the device owner by default")
     chat.add_argument("--namespace", help="the namespace to address; this host's by default")
+    web = commands.add_parser(
+        "web", help="serve this machine's Agent to a browser on this machine only"
+    )
+    web.add_argument("--config", required=True, type=Path)
+    web.add_argument("--namespace", help="the namespace to address; this host's by default")
+    web.add_argument(
+        "--port", type=int, default=0, help="a fixed port; by default the system picks a free one"
+    )
+    web.add_argument("--open", action="store_true", help="open the address in a browser")
     status = commands.add_parser("status", help="what this Bridge has installed and has run")
     status.add_argument("--config", required=True, type=Path)
     status.add_argument("--json", action="store_true")
@@ -281,6 +290,35 @@ def _chat(runtime: HostRuntime, actor: str | None, namespace: str | None) -> int
     return AgentWindow(runtime, chosen, actor=actor).run()
 
 
+def _web(runtime: HostRuntime, namespace: str | None, port: int, open_it: bool) -> int:
+    """Serve the page until interrupted.
+
+    The address carries the token, so it is printed and not logged, and the
+    token is new every run: one left behind would be a standing key to this
+    machine's Agent.
+    """
+    from host_runtime.web import AgentWeb, AgentWebServer
+
+    server = AgentWebServer(AgentWeb(runtime, namespace=namespace), port=port)
+    with server:
+        print("This machine's Agent is at:")
+        print(f"  {server.address}")
+        print(
+            "Only this computer can reach it, and only with that address. "
+            "The token changes every time this starts."
+        )
+        print("Ctrl+C stops it.")
+        if open_it:  # pragma: no cover - a browser needs a person
+            import webbrowser
+
+            webbrowser.open(server.address)
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:  # pragma: no cover - interactive only
+            print("stopped")
+    return 0
+
+
 def _status(runtime: HostRuntime, as_json: bool) -> int:
     snapshot = runtime.agent.snapshot(observed_at=datetime.now(UTC))
     if as_json:
@@ -485,6 +523,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _ask(runtime, args.message, args.actor, args.namespace, args.json, args.output)
         if args.command == "chat":
             return _chat(runtime, args.actor, args.namespace)
+        if args.command == "web":
+            return _web(runtime, args.namespace, args.port, args.open)
         if args.command == "status":
             return _status(runtime, args.json)
         if args.command == "probe":
