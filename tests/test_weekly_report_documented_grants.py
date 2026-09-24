@@ -20,6 +20,7 @@ from capabilities.files import READ_FILE_SPEC
 from capabilities.runtime import CapabilityGrant, LocalPolicy
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
+    MAIL_SPEC,
     PLAN_SPEC,
     PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
@@ -30,8 +31,9 @@ from common.execution import RequestContext, TraceIdentifiers
 README = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "README.md"
 #: Every capability a host built from this package installs: the bounded file
 #: read this package ships on its own, then the weekly report's four reads and
-#: its one write. The page has to cover all of them, because a reader who
-#: follows it and is refused cannot tell which grant is missing.
+#: its two writes -- the workbook and the mail draft. The page has to cover
+#: all of them, because a reader who follows it and is refused cannot tell
+#: which grant is missing.
 SPECS = (
     READ_FILE_SPEC,
     RESOLVE_WINDOW_SPEC,
@@ -39,6 +41,7 @@ SPECS = (
     READ_SCRATCH_SHEET_SPEC,
     PLAN_SPEC,
     APPLY_SPEC,
+    MAIL_SPEC,
 )
 
 

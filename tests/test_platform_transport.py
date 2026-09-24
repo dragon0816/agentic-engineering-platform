@@ -619,7 +619,11 @@ def test_sync_installs_what_the_member_chose_onto_a_real_host(
         # What this host can run, and what it holds, reach the platform.
         assert rebuilt.platform is not None
         advertised = run(rebuilt.platform.advertise(advertisement(rebuilt.agent, "adv-1")))
-        assert advertised.status == "answered" and advertised.capabilities == 1
+        # The bounded file read, and the Workflow drafter every host installs
+        # -- the latter whether or not a model is configured, so that "why can
+        # I not draft" is a sentence rather than a missing capability, exactly
+        # as the Excel writer installs on a machine without Excel.
+        assert advertised.status == "answered" and advertised.capabilities == 2
         assert platform.enrollment.advertisement(BRIDGE).trace.trace_id == "adv-1"
         reported = run(
             rebuilt.platform.report(rebuilt.agent.snapshot(observed_at=datetime.now(UTC)))

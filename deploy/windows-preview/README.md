@@ -304,8 +304,185 @@ cell or a tinted `Key` cell you applied *by hand* loses its colour — never its
 text. And your own `Status` colours are left alone; only cells holding exactly
 the job's own pink are cleared.
 
-**This writer has not yet been run against a real workbook by anyone.** Try it
-on a copy first and compare the result with the old Host Bridge's.
+### The weekly mail
+
+`weekly mail` reads the board, counts the week's effort and saves a draft in
+Outlook. **It never sends.** Nothing in this platform can send a mail: the
+adapter has no call that delivers one, and a test reads its source to keep it
+that way. A person opens the draft, reads it, and presses send, or does not.
+
+```powershell
+aep-host ask --config host.json "weekly.mail 2026_31W"
+```
+
+It does not read or write the workbook, so it is its own workflow and its own
+grant: somebody who may draft the mail need not be somebody who may write the
+team's file.
+
+```json
+{ "actor": "employee.id",
+  "asset": { "namespace": "weekly-report", "name": "mail", "version": "1.0.0" },
+  "permissions": ["outlook.draft"], "policy_refs": ["weekly-report-mail-policy"],
+  "approval_ref": "CHANGE-1234" }
+```
+
+What the mail says, and what it counts:
+
+- **Effort is tickets, not hours.** This project records no worklog and has no
+  points field, so there are no hours to weigh. The mail says that on its face.
+- **Only what somebody worked on.** An item whose timestamp moved because a
+  field was edited is not work, so it is left out — and the ones left out are
+  *named*, not just subtracted. A week that matched sixty-three items and
+  counted four is either right or badly wrong, and only a reader told both
+  numbers can tell which. Set `"mail_requires_activity": false` under
+  `weekly_report` to count everything the week matched instead; the mail then
+  says which question it answered.
+- **A ticket naming several instruments counts once under each**, so the
+  instrument totals add up to more than the number of tickets. That is
+  deliberate and the mail says so rather than hiding it.
+- The pie chart is drawn by this package itself, with no charting library, so
+  it needs nothing installed and adds nothing to this bundle. Its legend is the
+  table beneath it, with a colour per row: the labels stay selectable text and
+  every number survives if the reader's mail client blocks images.
+
+Who it is addressed to is configuration, and empty is the safer default — the
+draft then has no recipients and the person who opens it fills them in:
+
+```text
+"weekly_report": {
+  "mail_to": ["sde-team@example.com"],
+  "mail_cc": [],
+  "mail_subject_prefix": "GTM weekly report"
+}
+```
+
+**This drafter has not yet been run against a real Outlook by anyone.** Like
+the workbook writer before it, it is written to the documented object model
+and is unproven until you run it.
+
+This writer has now been run against a real team workbook once, on
+2026-09-24, and an earlier build of it renamed the previous week's sheet
+instead of adding this week's. That defect is fixed and pinned by a test, and
+the run takes a backup before touching anything — but try it on a copy first
+and compare the result with the old Host Bridge's.
+
+## A model (optional)
+
+Without one, this Agent matches commands and runs Workflows. It does not
+reason about anything else: a request that matches no installed command is
+answered with `needs_input`, not a guess. That is the whole behaviour of every
+host before this section existed, and it is a reasonable one to keep.
+
+With one, a request that matches nothing is shown to a model along with the
+Skills installed *here*, and the model may pick one of them. It can pick only
+what is installed: a name it invents is refused, and the run never starts.
+
+A company's LiteLLM gateway serves an OpenAI-shaped API, which is what this
+speaks. In `host.json`:
+
+```json
+"models": {
+  "catalog": {
+    "endpoints": [
+      { "alias": "company",
+        "provider": "openai_compatible",
+        "model": "gpt-5.5",
+        "base_url": "https://your-gateway.example/api",
+        "credential": { "name": "llm_gateway_token" },
+        "capabilities": {
+          "reasoning": "high", "tool_calling": true, "structured_output": true,
+          "streaming": true, "max_context_tokens": 128000 } }
+    ]
+  },
+  "routing_alias": "company"
+}
+```
+
+and, beside `credentials`, the variable that holds the key:
+
+```json
+{ "secret": "llm_gateway_token", "environment_variable": "AEP_LLM_TOKEN" }
+```
+
+**The key never goes in this file.** It goes in that environment variable,
+exactly like the board token. `doctor` reports the endpoint, and reports the
+variable by name when it is not set — never its value.
+
+There is no second line to write. Somebody put that URL in this file and
+mapped a credential to go with it; that is the decision, and this platform
+cannot tell one gateway from another anyway — both are a URL a person wrote.
+
+`routing_alias` may be left out. The catalog is then configured for
+capabilities to use and nothing chooses what to run, which is a reasonable
+thing to want.
+
+### Running the model on this machine instead
+
+An endpoint's `local` flag is about where the model *runs*: an Ollama loading
+a model into this computer's own memory is local, and a gateway is not,
+however close it is. It is a statement about this machine's memory and
+compute, not about the network.
+
+Most workstations cannot run a useful model and will simply name the gateway.
+A machine that can — or one that has to keep working with nothing reachable —
+runs Ollama and says so:
+
+```json
+"models": {
+  "catalog": { "endpoints": [
+    { "alias": "here",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "base_url": "http://localhost:11434",
+      "capabilities": { "tool_calling": true, "local": true,
+        "max_context_tokens": 32000 } }
+  ]},
+  "routing_alias": "here",
+  "require_local_model": true
+}
+```
+
+`require_local_model` narrows routing to an endpoint that runs here. Setting it
+while `routing_alias` names a gateway is two things that cannot both be true,
+and is refused where it is written rather than at the first message — where it
+would read as the model declining to answer.
+
+## Without typing commands
+
+Everything above is one `aep-host` command, and nobody runs a weekly job that
+way for long. Four things in this folder do it for you. They find the
+installation themselves; if you installed somewhere else, edit the `ROOT` line
+at the top of each.
+
+| Double-click | What it does |
+| --- | --- |
+| `chat.cmd` | Opens a window and lets you talk to the Agent on this computer. |
+| `weekly-preview.cmd` | Runs the dry run and prints the plan. Writes nothing. |
+| `weekly-apply.cmd` | Asks, then writes the plan into the workbook. |
+| `weekly-mail.cmd` | Saves this week's mail as a draft in Outlook. Sends nothing. |
+
+`weekly-preview.cmd 2026_39W` names a week; with no argument it is this week.
+
+`chat.cmd` is the same Agent the command line and Telegram reach, with the
+same grants and the same refusals — a window is an ingress, not a shortcut
+past anything. Type a command such as `weekly.preview 2026_39W` and the plan
+comes back in the window. It takes one request at a time, because two runs at
+once would be two runs against the one workbook. A console window stays open
+behind it; that is where a configuration problem is reported.
+
+### On a schedule
+
+```powershell
+.\schedule-weekly.ps1                  # every Friday at 16:00
+.\schedule-weekly.ps1 -DayOfWeek Monday -At 09:00
+.\schedule-weekly.ps1 -Remove
+```
+
+This registers a Windows scheduled task that runs the **preview** and writes
+nothing. Writing stays something a person does, because it changes the team's
+workbook. The task runs as you, not as SYSTEM: the workbook, the board token
+and Excel all belong to your account, and a task running as SYSTEM would see
+none of them — so it runs when you are signed in.
 
 ## Remove
 

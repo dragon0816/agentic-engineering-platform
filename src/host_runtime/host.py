@@ -28,17 +28,21 @@ from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPo
 from capabilities.weekly_report.contracts import (
     ReportingWindow,
     SheetState,
+    WeeklyMailDrafted,
     WeeklyReportApplied,
     WeeklyReportPlan,
 )
 from capabilities.weekly_report.handlers import (
     APPLY_SPEC,
+    MAIL_SPEC,
     PLAN_SPEC,
     PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     RESOLVE_WINDOW_SPEC,
     ApplyHandler,
     ApplyInput,
+    MailHandler,
+    MailInput,
     PlanHandler,
     PlanInput,
     ProjectSearchHandler,
@@ -49,11 +53,14 @@ from capabilities.weekly_report.handlers import (
     ResolveWindowHandler,
     ResolveWindowInput,
 )
+from capabilities.workflow_author.contracts import DraftWorkflowRequest, WorkflowDraft
+from capabilities.workflow_author.handlers import DRAFT_SPEC, DraftWorkflowHandler
 from channels.telegram import TelegramIngress, TelegramIngressConfig
 from common.assets import ExecutionDependencies, WorkflowManifest
 from common.authorization import DeviceAuthorization
 from common.base import Contract
 from common.distribution import LocalStateError
+from common.execution import Failure
 from common.local_agent import BridgeMembership
 from host_runtime.agent import LocalAgent
 from host_runtime.contracts import CompanyHostConfiguration, DoctorCheck, HostDoctorReport
@@ -73,8 +80,12 @@ from integrations.excel_writer import (
     require_com,
 )
 from integrations.github_project import GitHubProjectClient
+from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
+from integrations.outlook_draft import require_com as require_outlook
+from models.clients import ModelClients
+from models.contracts import ModelClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
-from models.wire import MethodTransport
+from models.wire import MethodTransport, Transport
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
@@ -91,6 +102,7 @@ HostErrorCode = Literal[
     "telegram_missing",
     "telegram_invalid",
     "credential_unmapped",
+    "models_invalid",
     "state_unavailable",
 ]
 
@@ -249,6 +261,7 @@ def build_integrations(
     layout: HostLayout,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    drafter: Callable[[], DraftWriter] | None = None,
 ) -> None:
     """The capabilities the migrated workflows need, from what this host was
     given. Jira's token is resolved through the host's credential mapping at
@@ -312,6 +325,21 @@ def build_integrations(
             WeeklyReportApplied,
             ExecutionDependencies(central_required=False),
         )
+        # The same arrangement for Outlook: built per run, so a host without
+        # it installs the capability and refuses at the draft rather than
+        # failing to assemble. The chart is written under the workspace,
+        # beside everything else this host produces.
+        installed.register(
+            MAIL_SPEC,
+            MailHandler(
+                settings,
+                drafter if drafter is not None else OutlookComDraft,
+                chart_root=layout.workspace_root / "weekly-mail",
+            ),
+            MailInput,
+            WeeklyMailDrafted,
+            ExecutionDependencies(central_required=False),
+        )
 
 
 def build_gateway(
@@ -322,6 +350,8 @@ def build_gateway(
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    drafter: Callable[[], DraftWriter] | None = None,
+    model_transport: Transport | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
@@ -360,7 +390,13 @@ def build_gateway(
         ExecutionDependencies(central_required=False),
     )
     build_integrations(
-        config, installed, resolver, layout=layout, jira_transport=jira_transport, writer=writer
+        config,
+        installed,
+        resolver,
+        layout=layout,
+        jira_transport=jira_transport,
+        writer=writer,
+        drafter=drafter,
     )
     grants = (
         _decided_grants(authorization, installed)
@@ -371,8 +407,89 @@ def build_gateway(
         policy = LocalPolicy(grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
+    # Registered last, and holding the registry it is in: what a Workflow may
+    # be drafted from is whatever this machine ended up with, read per call.
+    # A host with no model still installs it, so that "why can I not draft"
+    # is answered by a sentence rather than by a missing capability.
+    binding = config.models
+    drafting_model: ModelClient | None = None
+    if binding is not None and binding.routing_alias is not None:
+        chosen = ModelClients(
+            binding.catalog, resolver=resolver, transport=model_transport, options=binding.options
+        ).for_alias(binding.routing_alias)
+        drafting_model = None if isinstance(chosen, Failure) else chosen
+    installed.register(
+        DRAFT_SPEC,
+        DraftWorkflowHandler(
+            installed,
+            model=drafting_model,
+            model_alias=(
+                binding.routing_alias
+                if binding is not None and binding.routing_alias is not None
+                else "routing"
+            ),
+            local_only=binding.require_local_model if binding is not None else False,
+        ),
+        DraftWorkflowRequest,
+        WorkflowDraft,
+        ExecutionDependencies(central_required=False),
+    )
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
-    return Gateway(RequestRouter(CommandRouter(skills)), bridge, WorkflowEngine(workflows, bridge))
+    router = build_router(
+        config, CommandRouter(skills), resolver=resolver, transport=model_transport
+    )
+    return Gateway(router, bridge, WorkflowEngine(workflows, bridge))
+
+
+def build_router(
+    config: CompanyHostConfiguration,
+    commands: CommandRouter,
+    *,
+    resolver: CredentialResolver | None = None,
+    transport: Transport | None = None,
+) -> RequestRouter:
+    """The router, with a model behind it when this host was given one.
+
+    A host with no `models` gets exactly what every host got before the field
+    existed: deterministic command matching, and `needs_input` for anything
+    else. That is not a degraded mode. A machine that guesses which of the
+    team's workflows an ambiguous sentence meant, and runs it, is worse than
+    one that asks.
+
+    A misconfigured catalog is refused here, while the host is being
+    assembled, rather than at the first message somebody types. `doctor` then
+    reports it before anybody has waited for an answer that was never coming.
+    """
+    binding = config.models
+    if binding is None or binding.routing_alias is None:
+        return RequestRouter(commands)
+    if resolver is None:
+        mapped = config.credential_environment()
+        endpoint = binding.catalog.endpoint(binding.routing_alias)
+        if endpoint is not None and endpoint.credential is not None:
+            if endpoint.credential.name not in mapped:
+                raise HostError("credential_unmapped")
+        resolver = EnvironmentCredentials(mapped)
+    clients = ModelClients(
+        binding.catalog,
+        resolver=resolver,
+        transport=transport,
+        options=binding.options,
+    )
+    client = clients.for_alias(binding.routing_alias)
+    if isinstance(client, Failure):
+        # `unknown_alias` cannot happen -- the contract checked it -- so this
+        # is a provider this build has no adapter for, which is a
+        # configuration mistake and not something to discover at runtime.
+        raise HostError("models_invalid")
+    return RequestRouter(
+        commands,
+        client,
+        binding.routing_alias,
+        # Off unless this host asked for a model running on its own hardware.
+        # The contract already refused the pair that cannot both be true.
+        local_only=binding.require_local_model,
+    )
 
 
 def build_telegram(
@@ -497,7 +614,71 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
                 else "preview only, the Excel bridge is not installed"
             )
         parts.append(f"weekly report on {Path(settings.workbook_path).name} ({writes})")
+        try:
+            require_outlook()
+            drafts = "can draft the mail"
+        except DraftError as missing:
+            # Told apart for the same reason as Excel's: whether the machine
+            # lacks Outlook or this installation lacks the bridge decides who
+            # fixes it. Neither is a failure -- a host may be given the report
+            # and not the mail.
+            drafts = (
+                "no mail, Outlook is not installed"
+                if missing.code == "outlook_missing"
+                else "no mail, the Outlook bridge is not installed"
+            )
+        parts.append(drafts)
     return DoctorCheck(name="integrations", status="passed", detail=", ".join(parts))
+
+
+def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
+    """What this host can reason with, and whether it can reason at all.
+
+    Nothing is contacted. A model endpoint is not asked whether it is up: a
+    doctor that made a chargeable request to answer a question about
+    configuration would be a doctor nobody runs.
+    """
+    binding = config.models
+    if binding is None:
+        return DoctorCheck(
+            name="models",
+            status="pending",
+            detail=(
+                "No model is configured, so this Agent matches commands and runs "
+                "Workflows and does not reason about anything else."
+            ),
+        )
+    mapped = config.credential_environment()
+    problems: list[str] = []
+    for endpoint in binding.catalog.endpoints:
+        if endpoint.credential is None:
+            continue
+        name = endpoint.credential.name
+        if name not in mapped:
+            problems.append(f"the model endpoint {endpoint.alias} needs the secret {name} mapped")
+        elif not os.environ.get(mapped[name]):
+            problems.append(
+                f"the endpoint {endpoint.alias} has its secret mapped to "
+                f"{mapped[name]}, which is not set in this session"
+            )
+    if problems:
+        return DoctorCheck(name="models", status="failed", detail="; ".join(problems))
+    aliases = ", ".join(endpoint.alias for endpoint in binding.catalog.endpoints)
+    if binding.routing_alias is None:
+        return DoctorCheck(
+            name="models",
+            status="passed",
+            detail=(
+                f"{aliases}; no routing alias, so an unrecognized message is still "
+                "answered with `needs_input` rather than a guess"
+            ),
+        )
+    here = " (a model on this machine only)" if binding.require_local_model else ""
+    return DoctorCheck(
+        name="models",
+        status="passed",
+        detail=f"{aliases}; routing through {binding.routing_alias}{here}",
+    )
 
 
 def inspect_runtime(
@@ -605,6 +786,7 @@ def inspect_runtime(
         state,
         inspect_platform(config),
         inspect_integrations(config),
+        inspect_models(config),
     )
 
 
@@ -655,6 +837,8 @@ def build_runtime(
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    drafter: Callable[[], DraftWriter] | None = None,
+    model_transport: Transport | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
@@ -667,6 +851,8 @@ def build_runtime(
         resolver=resolver,
         jira_transport=jira_transport,
         writer=writer,
+        drafter=drafter,
+        model_transport=model_transport,
     )
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)

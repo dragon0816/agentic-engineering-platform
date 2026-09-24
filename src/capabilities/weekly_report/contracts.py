@@ -34,6 +34,7 @@ class WeeklyReportSettings(Contract):
     assignee_fields: tuple[Text, ...] = ("SDE Assignee", "Assignees")
     company_fields: tuple[Text, ...] = ("Company",)
     sales_fields: tuple[Text, ...] = ("Sales",)
+    instrument_fields: tuple[Text, ...] = ("Production",)
     # The key given to work that started on the board and never carried one
     # of the workbook's own, as `GH-63`.
     board_key_prefix: Symbol = "GH"
@@ -53,6 +54,17 @@ class WeeklyReportSettings(Contract):
     # Drive a local copy and write it back once, which the source measured at
     # 137s against 1001s in a synced folder. Off drives the real file in place.
     local_staging: StrictBool = True
+    # Who the weekly mail's draft is addressed to. Empty is allowed and is
+    # the safer default: the draft is then written with no recipients and the
+    # person who opens it fills them in, which is one more place a mail about
+    # the whole team's work cannot leave by itself.
+    mail_to: tuple[Text, ...] = ()
+    mail_cc: tuple[Text, ...] = ()
+    mail_subject_prefix: Text = "GTM weekly report"
+    # Count only items somebody actually worked on in the week -- an item
+    # whose timestamp moved because a field was edited is not work. Off
+    # counts everything the week matched, and the mail says which it did.
+    mail_requires_activity: StrictBool = True
 
     @model_validator(mode="after")
     def absolute_and_secret_free(self) -> Self:
@@ -172,6 +184,10 @@ class ReportItem(Contract):
     assignee: str = ""
     company: str = ""
     sales: str = ""
+    #: What the work is done on, as the team writes it, several on one
+    #: ticket included. The workbook does not carry it; the mail counts by
+    #: it.
+    instrument: str = ""
     updated: str | None = None
     comments: tuple[ReportComment, ...] = ()
     browse_url: str | None = None
@@ -331,3 +347,39 @@ class WeeklyReportApplied(Contract):
             f"{self.prepended} block(s) prepended, {self.recoloured} recoloured, "
             f"{len(self.failures)} failed"
         )
+
+
+class WeeklyMailDrafted(Contract):
+    """What the weekly mail's draft is, and what it counted.
+
+    The body is not here. It is in the draft, which is where a person reads
+    it; carrying the whole mail back through a run record would put the
+    team's own titles and comments into a log that is kept for months.
+    `preview` is the plain-text rendering, which is the thing worth reading
+    before opening Outlook.
+    """
+
+    week: Text
+    subject: Text
+    to: tuple[Text, ...] = ()
+    cc: tuple[Text, ...] = ()
+    # Outlook's own identifier for the saved item, and the folder it landed
+    # in. Neither is a secret and neither carries content.
+    entry_id: str = ""
+    folder: str = ""
+    matched: int = Field(ge=0, strict=True)
+    counted: int = Field(ge=0, strict=True)
+    # Named rather than counted: fifty-nine items vanishing from a week with
+    # only a number to show for it is how a wrong week goes unnoticed.
+    excluded: tuple[Symbol, ...] = ()
+    # Whether the count was narrowed to items somebody worked on, so a reader
+    # of the record knows which of two questions these numbers answer.
+    activity_required: StrictBool = True
+    chart_path: str = ""
+    preview: str = ""
+
+    @model_validator(mode="after")
+    def counted_is_what_is_left(self) -> Self:
+        if self.counted + len(self.excluded) != self.matched:
+            raise ValueError("every matched item is either counted or named as excluded")
+        return self

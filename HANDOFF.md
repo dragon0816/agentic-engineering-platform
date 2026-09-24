@@ -1,111 +1,93 @@
-# Handoff — Phase 7, workflow 10 is the active work
+# Handoff — Phase 7 local interfaces and bounded automation
 
-Updated: 2026-09-23 (Asia/Taipei).
-Branch: `main`, after PR #82 (slice 4a) merged with its review applied.
+Updated: 2026-09-24 (Asia/Taipei).
+Branch: `phase-7/weekly-mail-effort`.
+Pull request: #96, open against `main`.
 
-Progress across every phase is in `docs/TASKS.md`. This file is only where
-the current work stopped and how to resume it, and is rewritten each time.
+Progress across all phases remains in `docs/TASKS.md`. This file records only
+the current stopping point and the evidence needed to continue without chat
+history.
 
-## Where this stopped
+## Completed on this branch
 
-The owner asked for **workflow 10**, `sales_to_chipset`: the CMP180 sales
-opportunity lists projected into the `temp` sheet of the chipset readiness
-workbook. It had never been inspected. It is now characterized in full, planned as
-four slices, and slice 4a is built: the transformation is ported and the
-source's own 149 test cases pass against it.
+- Weekly report mail is deterministic end to end: board effort aggregation,
+  pure HTML content, dependency-free PNG chart, Outlook draft creation and the
+  `weekly.mail` Workflow. The Outlook adapter has no send operation.
+- The Windows preview carries double-click launchers for local chat, weekly
+  preview, weekly apply and weekly mail, plus a scheduled preview task.
+- `aep-host web` serves the resident Agent and installed asset catalogue on
+  loopback only. A fresh per-run token, Host validation and same-origin request
+  checks protect the API. It adds no external web dependency.
+- The Tk chat remains as a fallback and reaches the same Local Agent, policy
+  and Gateway as CLI, Telegram and the web page.
+- A company host may configure the existing provider-neutral model catalog and
+  OpenAI-compatible company gateway. Deterministic routes still run before the
+  model, and model-selected assets must still be installed and authorized.
+- A written SOP can be drafted into a typed Workflow candidate and checked for
+  contract, dependency, permission and dry-run viability before publication.
+- The installed browser can be driven through typed navigation, inspection,
+  form and screenshot operations over a dedicated profile. No arbitrary
+  JavaScript or shell execution is exposed.
 
-Read before continuing, in this order:
+## Architecture and safety boundaries
 
-1. `docs/PHASE_7_MIGRATION.md`, "Workflow 10" — what the source does, what
-   this migration does with each part, the parity gate, and twelve source
-   defects each decided as preserved or fixed with the reason.
-2. `docs/phases/PHASE_7_MIGRATION.md`, "Slice 4" — the four slices.
-3. The source's own `docs/W1_MAPPING.md` in `.scratch/rs-source`, 511 lines,
-   which declares itself authoritative over the code. It is the acceptance
-   specification for the transformation.
+- Registry/distribution remains the control plane; execution stays on the
+  member's Bridge.
+- Publication does not grant execution. Every run still uses actor/device
+  admission, installed assets, declared capability grants and approval policy.
+- The web interface is an ingress only. It contains no workflow-specific page,
+  routing rule or capability implementation.
+- The Outlook integration creates a draft and cannot send it.
+- Model credentials remain `SecretRef` mappings resolved by the host. No secret
+  value is stored in an asset or committed configuration.
+- SOP authoring produces a reviewable candidate; it does not publish or execute
+  the candidate automatically.
+- Browser automation drives a browser already installed on the Bridge and does
+  not add a downloaded browser/runtime to the offline bundle.
 
-**Workflow 11, the GTM weekly report, is complete in code and deferred.** Its
-live parity run on a company workstation is still the thing only the owner
-can produce, and it now comes after workflow 10 by the owner's decision of
-2026-09-23. Nothing about it is unfinished in this repository; the steps for
-that run are in `docs/phases/PHASE_7_MIGRATION.md` and
-`deploy/windows-preview/README.md`.
+## Verification at PR #96 head
 
-## The next action
-
-Slice 4b: reading, and the plan. `integrations.excel` reads row 1 as the
-headers and turns every cell into text; this workflow needs the target's
-headers from row 2, and needs real numbers and real dates to reach the rules,
-which tell them apart from their text spellings. Then the capabilities that
-read a project list and the target sheet, the planning capability, and the
-preview Workflow over them.
-
-From here on there is no safety net: the source's tests cover the rules and
-almost nothing else, so every test for the reads, the plan, the write and the
-change tracking is written here.
-
-Before writing code, apply `.agents/skills/architecture-guard/SKILL.md` and
-`.agents/skills/contract-development/SKILL.md`. The migration rule this phase
-adopted is in the characterization: preserve what the parity gate measures,
-fix only what is nondeterministic, unsafe or a crash, and record every
-preserved defect rather than fixing it in passing.
-
-## What is already done on this branch
-
-- The owner's decision to migrate workflow 10 next is recorded.
-- Two defects in the Excel adapter are fixed, found by reading the pinned
-  source Bridge's Excel service, which is the parity baseline. It opens Excel
-  with events suppressed and this adapter did not, so opening a team workbook
-  would run its macros inside an unattended job. It also saves explicitly,
-  where this adapter folded saving into closing, which the executor treats as
-  best effort: a failed save left the report out of the file and the run then
-  copied the staged workbook back and called it a success. Both are checked
-  against a stand-in for Excel.
-- Workflow 10 is characterized and planned.
-- Slice 4a is built: the rules, the typed ruleset and the shipped default,
-  with the source's tests passing case for case and five source defects
-  fixed, each with a test naming it.
-
-## Open items for the owner
-
-- **The team's real ruleset is needed for the parity run.** The pinned source
-  carries only `config/chipset-map.example.json`; the real
-  `config/chipset-map.json`, which holds the team's chipset, vendor and brand
-  knowledge, exists on the company machine. The example ships here as the
-  default and as test data. The real file is host configuration and does not
-  belong in this repository.
-- Source workflow 7, `jira_team_tickets`, has never been inspected or
-  migrated. It was named in the Phase 7 candidate table by mistake, in place
-  of the weekly report that was actually built. Whether it is migrated at
-  all is an owner decision nobody has asked for.
-- The leaked credentials in the pinned `telegram-local-agent` source were
-  checked on 2026-09-23 and the finding is in `docs/TASKS.md`: the Telegram
-  bot token is already dead and the GitLab one is for a local WSL2 Docker
-  instance that is not running, so neither is live. This repository never
-  carried either (`.scratch/` is gitignored). Revoking them is still the
-  owner's to do: the Telegram token through @BotFather, the GitLab token in
-  that instance once WSL2 is running.
-- Whether a tool approval must come from a second person is an owner policy
-  decision nobody has asked for.
-- Taking somebody off a shared machine is still a host action, not a platform
-  one (slice 2j).
-
-## How to verify
-
-On Windows in `.venv` (Python 3.12), from the repository root:
+Commands were run from the repository root with Python 3.12:
 
 ```text
-.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider
+.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp=.scratch\pytest-codex-20260924
+.venv\Scripts\python.exe -m pytest tests\test_browser.py -q -p no:cacheprovider --basetemp=.scratch\pytest-browser-escalated
 .venv\Scripts\python.exe -m ruff check .
 .venv\Scripts\python.exe -m ruff format --check .
 .venv\Scripts\python.exe -m mypy
 .venv\Scripts\python.exe -m pip check
 .venv\Scripts\python.exe -m build
-git diff --check
+git diff --check origin/main...HEAD
 ```
 
-At this commit: 1094 passed, 4 skipped, everything else clean. Three skips
-need symbolic-link privileges and one an IPv6 loopback; all four run on Linux
-CI, which runs the same chain on Windows and Ubuntu against Python 3.11 and
-3.12. The weekly-report tests need a workbook reader (`openpyxl`, the `excel`
-extra, which `office` also contains); none of them needs Excel or `pywin32`.
+Results:
+
+- Full suite inside the command sandbox: 1272 passed, 4 skipped, 9 failed only
+  because the sandbox closed the installed browser's debugging WebSocket.
+- Installed-browser suite outside the sandbox: 20 passed. These include the 9
+  cases above, so the combined result is 1282 passed, 4 skipped.
+- Ruff lint and format, mypy, pip check and diff check passed.
+- Source distribution and wheel built successfully.
+- GitHub Actions run 35997347136 passed on Ubuntu and Windows with Python 3.11
+  and 3.12 at the same commit.
+
+## Production validation still required
+
+- Run Outlook draft creation on the enrolled company workstation. No live
+  Outlook exists on this development machine or in CI.
+- Send one request through the configured internal model gateway and confirm
+  its real response shape and credential mapping.
+- Run the browser adapter against the real target site using a user-created
+  browser profile and confirm the site's authentication/session behavior.
+- Workflow 11's real workbook must have the lost `2026_38W` sheet restored
+  from the pre-run backup before another live write.
+- Workflow 10 slices 4b–4d and its real ruleset parity run remain deferred.
+
+## Next recommended action
+
+Merge PR #96 after its pull-request checks pass. Then commit the owner's
+product vision as the product-level source of truth and define the next
+contract slice before adding more runtime code: Personal Agent profiles and
+memory, the Coding Harness acceptance boundary, standardized Improvement
+Requests, and Software as a shared capability type. Keep these as small
+architecture/contract PRs rather than extending Phase 7 migration code.

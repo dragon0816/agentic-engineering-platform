@@ -27,7 +27,6 @@ write. Staging removes the watcher, not the saves.
 
 import os
 import shutil
-import sys
 import time
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -36,6 +35,10 @@ from typing import Annotated, Any, Literal, Protocol
 from pydantic import Field, StringConstraints
 
 from common.base import Contract, Text
+
+# Shared with the Outlook adapter; kept importable from here, which is where
+# every caller and every test has always found it.
+from integrations.com import progid_is_registered as progid_is_registered
 
 Colour = Annotated[str, StringConstraints(pattern=r"^#[0-9A-Fa-f]{6}$")]
 BorderStyle = Literal["thin", "medium", "none"]
@@ -279,31 +282,6 @@ def unstage_workbook(
 #: What Excel registers itself as. A ProgID is a name in the registry, and
 #: the entry beneath it is the class Windows would start for it.
 EXCEL_PROGID = "Excel.Application"
-
-
-def progid_is_registered(prog_id: str) -> bool:
-    """Whether a ProgID names something this machine could start.
-
-    Reads the registry and starts nothing, which is what a doctor is allowed
-    to do, and reads exactly what resolving the ProgID would read. It does
-    not go through the COM bridge to ask: that bridge's module is a shim over
-    a DLL, and on a host where the shim is unhappy every question asked
-    through it fails alike, which would make "Excel is not installed" the
-    answer to a question about something else entirely. That is what happened
-    on 2026-09-24.
-    """
-    if sys.platform != "win32":
-        # No registry, and no Excel either, so the answer is the same. The
-        # platform test is also what lets a type checker read the import
-        # below, which is Windows-only in the standard library.
-        return False
-    import winreg
-
-    try:
-        with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, prog_id + r"\CLSID"):
-            return True
-    except OSError:
-        return False
 
 
 def require_com() -> None:

@@ -4,13 +4,14 @@ from pathlib import Path, PureWindowsPath
 from typing import Annotated, Literal, Self
 from urllib.parse import urlsplit
 
-from pydantic import Field, StringConstraints, field_validator, model_validator
+from pydantic import Field, StrictBool, StringConstraints, field_validator, model_validator
 
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
 from integrations.github_project import GitHubProjectConnection
+from models.catalog import ModelCatalog
 from workflow.host_bridge import BridgeRegistration
 
 # The name of an environment variable, which is not a credential and cannot
@@ -90,6 +91,62 @@ class HostIntegrations(Contract):
     weekly_report: WeeklyReportSettings | None = None
 
 
+class ModelBinding(Contract):
+    """The models this host may use, and how it is allowed to use them.
+
+    The catalog is the platform's own `ModelCatalog`: endpoints declaring what
+    they can do, and routes naming them. Nothing here holds a secret; an
+    endpoint names its credential and this host's `credentials` say which
+    environment variable holds the value, exactly as the board token does.
+
+    `routing_alias` is the endpoint the Agent asks when a request matches no
+    installed command. A host that configures a catalog but no routing alias
+    has models for capabilities to use and still answers `needs_input` to an
+    unrecognized message, which is a reasonable thing to want.
+
+    `require_local_model` narrows routing to an endpoint that runs on this
+    machine. An endpoint's `local` flag is about where the model *runs*: an
+    Ollama loading a model into this computer's own memory is local, and a
+    gateway is not, however close it is. Most machines cannot run a useful
+    model and will leave this off; the setting exists so that a workstation
+    with the memory to do it can say so, and so that a machine which must
+    keep working with nothing reachable can insist on it.
+
+    It is not a data boundary and does not pretend to be one. This platform
+    cannot tell a company's own gateway from anybody else's -- both are a URL
+    somebody wrote here -- so writing that URL, and mapping a credential to
+    go with it, is the decision. Asking for it twice would add a line to
+    every host and no information to any of them.
+    """
+
+    catalog: ModelCatalog
+    routing_alias: Symbol | None = None
+    require_local_model: StrictBool = False
+    # Per-alias wire details an adapter takes but the catalog does not
+    # describe, such as a model that rejects the newer `max_completion_tokens`
+    # name. Host wiring, which is why it is here and not in the catalog.
+    options: dict[Symbol, dict[str, str]] = {}
+
+    @model_validator(mode="after")
+    def the_routing_alias_is_one_of_the_endpoints(self) -> Self:
+        if self.routing_alias is not None and self.catalog.endpoint(self.routing_alias) is None:
+            raise ValueError("routing_alias names an endpoint this catalog does not have")
+        unknown = sorted(alias for alias in self.options if self.catalog.endpoint(alias) is None)
+        if unknown:
+            raise ValueError(f"options name no endpoint: {', '.join(unknown)}")
+        if self.require_local_model and self.routing_alias is not None:
+            endpoint = self.catalog.endpoint(self.routing_alias)
+            if endpoint is not None and not endpoint.capabilities.local:
+                # Refused here rather than at the first message, where it
+                # would read as "the model would not answer" instead of "this
+                # host was told two things it cannot both do".
+                raise ValueError(
+                    "require_local_model is set and the routing endpoint does not "
+                    "run on this machine"
+                )
+        return self
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -113,6 +170,10 @@ class CompanyHostConfiguration(Contract):
     platform: PlatformBinding | None = None
     # The external systems the migrated workflows reach, when configured.
     integrations: HostIntegrations | None = None
+    # The models this host may use. Absent means none, and the Agent then
+    # matches commands and runs Workflows without reasoning about anything,
+    # which is what every host did before this field existed.
+    models: ModelBinding | None = None
     # How long one capability step may run. The platform's default of thirty
     # seconds is right for a file read and wrong for a Jira search over a
     # week's tickets with their comment threads and a throttle waited out;
@@ -195,6 +256,7 @@ class DoctorCheck(Contract):
         "state",
         "platform",
         "integrations",
+        "models",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text

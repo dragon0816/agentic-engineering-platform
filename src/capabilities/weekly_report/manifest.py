@@ -12,6 +12,9 @@ PREVIEW_WORKFLOW = AssetIdentity(
     namespace="engineering", name="jira-weekly-report-preview", version="1.0.0"
 )
 REPORT_WORKFLOW = AssetIdentity(namespace="engineering", name="jira-weekly-report", version="1.0.0")
+MAIL_WORKFLOW = AssetIdentity(
+    namespace="engineering", name="jira-weekly-report-mail", version="1.0.0"
+)
 WEEKLY_SKILL = AssetIdentity(namespace="engineering", name="weekly-report", version="1.0.0")
 
 _METADATA = {
@@ -125,6 +128,51 @@ def report_workflow() -> WorkflowManifest:
     )
 
 
+def mail_workflow() -> WorkflowManifest:
+    """Resolve the week, read the board, draft the mail.
+
+    It does not read the workbook and does not plan: the mail reports what
+    the team worked on, which is the board's answer, and a member who may
+    draft the mail need not be one who may touch the workbook. That is why
+    this is its own asset rather than a fifth step on the report.
+    """
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": MAIL_WORKFLOW.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "Draft the GTM weekly mail: the week's effort counted per member, instrument "
+                "and account, charted, and saved as a draft nobody has sent"
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {
+                "central_required": False,
+                "local_capabilities": [
+                    "weekly_report.resolve_window",
+                    "github.search_project",
+                    "weekly_report.mail",
+                ],
+            },
+            "input_contract": "engineering.jira-weekly-report.request.v1",
+            "output_contract": "weekly-report.mail.output.v1",
+            "steps": [
+                *_plan_steps()[:2],
+                {
+                    "capability": {
+                        "namespace": "weekly-report",
+                        "name": "mail",
+                        "version": "1.0.0",
+                    },
+                    "inputs": {
+                        "window": {"source": "step", "step_index": 0},
+                        "issues": {"source": "step", "step_index": 1, "path": ["items"]},
+                    },
+                },
+            ],
+        }
+    )
+
+
 def weekly_skill() -> SkillManifest:
     """`weekly.preview` from a local operator or `/weekly preview` from
     Telegram; the request is whatever follows the command."""
@@ -134,11 +182,13 @@ def weekly_skill() -> SkillManifest:
             "alias": "weekly",
             "instructions": (
                 "Preview the GTM weekly report for the current week, or for a named week "
-                "such as 2026_31W; `weekly apply` writes the same plan into the workbook."
+                "such as 2026_31W; `weekly apply` writes the same plan into the workbook, "
+                "and `weekly mail` drafts the week's mail without sending it."
             ),
             "commands": [
                 {"name": "preview", "kind": "workflow", "target": PREVIEW_WORKFLOW.model_dump()},
                 {"name": "apply", "kind": "workflow", "target": REPORT_WORKFLOW.model_dump()},
+                {"name": "mail", "kind": "workflow", "target": MAIL_WORKFLOW.model_dump()},
             ],
             # A preview by default: writing the workbook is asked for.
             "default_command": "preview",
