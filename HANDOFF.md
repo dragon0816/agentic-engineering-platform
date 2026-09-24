@@ -65,7 +65,7 @@ Results:
 - Full suite inside the command sandbox: 1272 passed, 4 skipped, 9 failed only
   because the sandbox closed the installed browser's debugging WebSocket.
 - Installed-browser suite outside the sandbox: 20 passed. These include the 9
-  cases above, so the combined result is 1281 passed, 4 skipped.
+  cases above, so the combined result is 1282 passed, 4 skipped.
 - Ruff lint and format, mypy, pip check and diff check passed.
 - Source distribution and wheel built successfully.
 - GitHub Actions run 35997347136 passed on Ubuntu and Windows with Python 3.11

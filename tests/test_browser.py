@@ -107,6 +107,30 @@ def test_a_machine_with_no_browser_says_so_rather_than_failing_oddly(
     assert refused.value.code == "browser_missing"
 
 
+def test_a_port_file_locked_while_chromium_replaces_it_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    marker = profile / "DevToolsActivePort"
+    marker.write_text("43127\n/devtools/browser/session\n", encoding="utf-8")
+    original = Path.read_text
+    attempts = 0
+
+    def briefly_locked(path: Path, *args: object, **kwargs: object) -> str:
+        nonlocal attempts
+        if path == marker and attempts == 0:
+            attempts += 1
+            raise PermissionError("Chromium is replacing the marker")
+        return original(path, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(Path, "read_text", briefly_locked)
+    waiting = Browser(profile, executable="unused", timeout_s=1)
+
+    assert waiting._published_port() == 43127
+    assert attempts == 1
+
+
 def test_an_element_reads_as_something_a_model_can_choose_from() -> None:
     element = Element(
         index=3, tag="BUTTON", kind="button", element_id="go", label="Sign in", visible=True

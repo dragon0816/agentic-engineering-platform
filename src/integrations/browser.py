@@ -301,7 +301,15 @@ class Browser:
         handed_off_at: float | None = None
         while time.time() < end:
             if marker.is_file():
-                first = marker.read_text(encoding="utf-8").splitlines()
+                try:
+                    first = marker.read_text(encoding="utf-8").splitlines()
+                except OSError:
+                    # Chromium replaces this file while it starts. Windows
+                    # may briefly deny a reader during that replacement,
+                    # especially when the same profile has just been closed.
+                    # The file is the readiness signal, so treat a temporary
+                    # lock exactly like a file that is not ready yet.
+                    first = []
                 if first and first[0].strip().isdigit():
                     return int(first[0].strip())
             if self._process is not None and self._process.poll() is not None:

@@ -31,7 +31,7 @@ still open. PR #96 is the active review for local interfaces, company-model
 wiring, bounded SOP-to-Workflow authoring, installed-browser automation and
 the weekly mail draft. A row says `done` only after its pull request merges.
 
-At PR #96's head the combined Windows result is 1281 passed, 4 skipped, with
+At PR #96's head the combined Windows result is 1282 passed, 4 skipped, with
 `ruff`, `mypy`, `pip check` and `python -m build` clean. Nine browser
 cases blocked by the command sandbox passed when rerun outside it. The same
 commit passed GitHub Actions on Windows and Ubuntu with Python 3.11 and 3.12.
