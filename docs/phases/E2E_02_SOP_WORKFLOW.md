@@ -1,6 +1,6 @@
 # Product gate E2E-02 — SOP to deterministic Workflow
 
-Status: implemented and locally verified in PR #98; CI and merge pending
+Status: implemented; local and PR #98 CI verification passed; merge pending
 
 ## User scenario
 

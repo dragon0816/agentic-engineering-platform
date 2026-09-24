@@ -54,7 +54,7 @@ start until the preceding row has a reproducible passing path.
 
 | Gate | PR | Status | What it covers |
 |---|---|---|---|
-| E2E-02 SOP to deterministic Workflow | #98 | in review; local verification passed | Natural-language SOP through resident Agent/Gateway, semantic capability requirements, inert fixture execution through Gateway/Workflow/Bridge, independent output grading, human publication decision and no-model deterministic replay |
+| E2E-02 SOP to deterministic Workflow | #98 | in review; local and CI verification passed | Natural-language SOP through resident Agent/Gateway, semantic capability requirements, inert fixture execution through Gateway/Workflow/Bridge, independent output grading, human publication decision and no-model deterministic replay |
 | E2E-03 parser/transformation development | — | blocked | Begins only after E2E-02 CI and merge |
 | E2E-05 knowledge continuous evolution | — | blocked | Begins only after E2E-03 passes |
 | E2E-04 software continuous evolution | — | blocked | Begins only after E2E-05 passes |
