@@ -1,12 +1,12 @@
 # Handoff — E2E-02 SOP to deterministic Workflow
 
-Updated: 2026-09-24 (Asia/Taipei).
+Updated: 2026-09-25 (Asia/Taipei).
 Branch: `codex/e2e-02-sop-workflow`.
 Base: `main` at `d2bee6291345bb91b04bc9b772e3097e269a2e1d` (PR #97 merge).
 Pull request: #98, open against `main`.
 Implementation commit: `e4f15446b8fb49eb459a3c6aaad3265254aaed89`.
 Documentation commit: `831f03d`.
-Verified PR head: `b41aece`.
+Verified PR head: `f129aa4`.
 
 Progress across all phases remains in `docs/TASKS.md`. This file records the
 current stopping point and the evidence needed to continue without chat history.
@@ -35,8 +35,11 @@ current stopping point and the evidence needed to continue without chat history.
   publication without permission and identical no-model replay.
 - Updated Architecture, Contracts, Roadmap, Tasks, README and the E2E-02 product
   gate record only after the implementation had a reproducible local green path.
-- Opened PR #98 and attached it to this task. GitHub Actions run `36022268850`
-  passed 4/4 on head `b41aece`: Ubuntu and Windows with Python 3.11 and 3.12.
+- Updated `CLAUDE.md` so a fresh Claude Code session must read Product Vision,
+  Product Acceptance Tests and the active product-gate specification instead of
+  defaulting to the independent Phase 7 backlog.
+- Opened PR #98 and attached it to this task. GitHub Actions run `36023283160`
+  passed 4/4 on head `f129aa4`: Ubuntu and Windows with Python 3.11 and 3.12.
 
 ## In progress
 
@@ -62,6 +65,39 @@ current stopping point and the evidence needed to continue without chat history.
   installation, distribution and execution grants remain separate.
 - General workspace editing, code generation and repair remain E2E-03 scope.
 
+## Guardrails for the next worker
+
+- The current task is PR #98 review and, only after explicit owner approval,
+  merge. Do not add another feature to this PR.
+- Do not start E2E-03 on this branch or before PR #98 merges. The mandatory
+  order remains E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01.
+- Do not return to a Phase 7 backlog item merely because Phase 7 is also active;
+  the product-gate work named in this handoff has priority.
+- Do not replace the current Agent/Gateway/Workflow/Bridge path with a new agent
+  framework or redesign the approved architecture.
+- Do not treat a model-generated manifest as completion evidence. The external
+  fixture comparison is the validator.
+- Do not combine draft validation, business approval, technical policy,
+  publication, installation or execution authorization. They are separate
+  transitions and the tests deliberately prove that publication grants no
+  permission.
+- Do not require a live model or company workstation for E2E-02. This gate is
+  intentionally inert; live endpoint and physical-resource evidence belongs to
+  later gates.
+- Preserve the untracked user-owned `.claude/` directory.
+
+The implementation evidence map is:
+
+- acceptance source: `docs/PRODUCT_ACCEPTANCE_TESTS.md`, E2E-02;
+- approved boundary: `docs/ARCHITECTURE.md`, “E2E-02 bounded Workflow authoring
+  and validation”;
+- gate record: `docs/phases/E2E_02_SOP_WORKFLOW.md`;
+- contracts: `src/capabilities/workflow_author/contracts.py`;
+- semantic review: `src/capabilities/workflow_author/review.py`;
+- use-case orchestration: `src/host_runtime/workflow_author.py`;
+- committed input: `tests/fixtures/e2e_02/sop-workflow.json`; and
+- executable proof and negative cases: `tests/test_product_e2e_02.py`.
+
 ## Exact verification commands and results
 
 ```text
@@ -76,7 +112,7 @@ current stopping point and the evidence needed to continue without chat history.
 
 Combined unique suite result: 1287 passed, 4 skipped
 
-GitHub Actions run 36022268850 on b41aece
+GitHub Actions run 36023283160 on f129aa4
 4/4 passed: Ubuntu/Windows x Python 3.11/3.12
 
 .venv\Scripts\python.exe -m ruff check .
