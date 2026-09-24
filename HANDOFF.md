@@ -4,7 +4,7 @@ Updated: 2026-09-25 (Asia/Taipei).
 Branch: `codex/e2e-05-knowledge-evolution`.
 Base: E2E-03 merged to `main` by PR #99 (`15f88eb`).
 Implementation commit: `2444bb1`.
-Pull request: not opened yet.
+Pull request: #100, open against `main`.
 
 Progress across all phases remains in `docs/TASKS.md`. This file records the
 current stopping point and the constraints another coding agent must preserve
@@ -41,10 +41,8 @@ without relying on conversation history.
 
 ## In Progress
 
-- Run the final lint, type, package and focused/full verification after the
-  documentation update.
-- Commit the implementation and documentation in small coherent commits, open a
-  PR, wait for exact-head CI, and merge it.
+- Wait for PR #100's exact-head Windows/Python 3.12 CI result and merge only if
+  it passes.
 
 ## Remaining
 

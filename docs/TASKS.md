@@ -57,7 +57,7 @@ start until the preceding row has a reproducible passing path.
 |---|---|---|---|
 | E2E-02 SOP to deterministic Workflow | #98 | done | Natural-language SOP through resident Agent/Gateway, semantic capability requirements, inert fixture execution through Gateway/Workflow/Bridge, independent output grading, human publication decision and no-model deterministic replay |
 | E2E-03 parser/transformation development | #99 | done | Pinned bounded workspace, pre-mutation plan, actual patches, injected declared validator, deliberately failing first candidate, one structured repair, new plus regression validation, trace and Skill versions; no commit/push/publish |
-| E2E-05 knowledge continuous evolution | pending | implemented; local verification passed, CI pending | Exact version query with Raw citations, feedback evidence, approved Bridge candidate write, immutable Raw, persisted rejected claims, new plus regression evaluation, separate domain approval, versioned republish and rollback |
+| E2E-05 knowledge continuous evolution | #100 | implemented; local verification passed, CI pending | Exact version query with Raw citations, feedback evidence, approved Bridge candidate write, immutable Raw, persisted rejected claims, new plus regression evaluation, separate domain approval, versioned republish and rollback |
 | E2E-04 software continuous evolution | — | blocked | Begins only after E2E-05 passes |
 | E2E-01 DUT/chipset engineering | — | blocked | Begins only after E2E-04 passes and requires production-like company-host evidence |
 
