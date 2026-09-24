@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import sys
 import threading
-import time
 from collections.abc import Iterator
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -303,7 +302,6 @@ def test_a_signed_in_profile_is_what_carries_the_session(tmp_path: Path, site: S
         first._evaluate("localStorage.setItem('signed-in-as', 'engineer')")
     finally:
         first.close()
-    time.sleep(1.0)
 
     second = Browser(profile, timeout_s=60)
     second.start()

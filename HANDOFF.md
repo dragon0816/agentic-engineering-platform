@@ -45,7 +45,7 @@ history.
 - Browser automation drives a browser already installed on the Bridge and does
   not add a downloaded browser/runtime to the offline bundle.
 
-## Verification at `4d7f6d4`
+## Verification at PR #96 head
 
 Commands were run from the repository root with Python 3.12:
 

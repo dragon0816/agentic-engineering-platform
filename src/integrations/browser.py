@@ -57,6 +57,9 @@ APP_PATHS = (
 )
 #: Chromium writes the port it chose into the profile it was given.
 PORT_FILE = "DevToolsActivePort"
+#: Chromium names the profile lock differently by platform and distribution.
+#: Edge on Windows uses `lockfile`; Chrome on POSIX uses `SingletonLock`.
+PROFILE_LOCK_FILES = ("lockfile", "SingletonLock")
 #: A browser releases its profile directory a moment after it exits, so a
 #: cleanup straight afterwards fails on Windows. The same shape as the
 #: workbook's unstaging retry, and for the same reason.
@@ -254,10 +257,17 @@ class Browser:
     def start(self) -> None:
         if self.executable is None:
             raise BrowserError("browser_missing")
-        if (self.profile / "SingletonLock").exists() and self._running_elsewhere():
-            # A profile a person has open cannot also be driven: Chromium
-            # holds it, and the second process quietly joins the first.
-            raise BrowserError("profile_in_use")
+        if self._profile_locked():
+            if self._running_elsewhere():
+                # A profile a person has open cannot also be driven: Chromium
+                # holds it, and the second process quietly joins the first.
+                raise BrowserError("profile_in_use")
+            # Browser.close stops answering before Chromium has finished
+            # flushing the profile. Starting during that short interval may
+            # appear to work and then close its DevTools socket underneath the
+            # first command. Wait on Chromium's own lock, not a fixed sleep.
+            if not self._await_profile_release():
+                raise BrowserError("profile_in_use")
         self.profile.mkdir(parents=True, exist_ok=True)
         # A stale port file from a previous run would be read as this run's.
         (self.profile / PORT_FILE).unlink(missing_ok=True)
@@ -270,6 +280,17 @@ class Browser:
         except OSError as failure:
             raise BrowserError("browser_would_not_start", type(failure).__name__) from None
         self._port = self._published_port()
+
+    def _profile_locked(self) -> bool:
+        return any((self.profile / name).exists() for name in PROFILE_LOCK_FILES)
+
+    def _await_profile_release(self) -> bool:
+        end = time.time() + PROFILE_RELEASE_SECONDS
+        while time.time() < end:
+            if not self._profile_locked():
+                return True
+            time.sleep(0.1)
+        return not self._profile_locked()
 
     def _running_elsewhere(self) -> bool:
         """Whether something is already answering on this profile's port."""
@@ -428,6 +449,7 @@ class Browser:
                     stderr=subprocess.DEVNULL,
                     check=False,
                 )
+        self._await_profile_release()
 
     def discard_profile(self) -> None:
         """Remove a throwaway profile, waiting for the browser to let go.
