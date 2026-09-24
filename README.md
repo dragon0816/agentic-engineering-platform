@@ -65,6 +65,19 @@ python -m pytest tests/test_product_e2e_03.py -q
 
 See [the E2E-03 implementation record](docs/phases/E2E_03_CODING_HARNESS.md).
 
+E2E-05 proves the first governed Knowledge improvement loop. A Personal Agent
+queries an exact published version with Raw citations, captures incomplete-answer
+feedback, and creates a separately approved candidate workspace through the
+Bridge. The candidate must keep Raw byte-identical and pass the new question plus
+existing regressions before a domain owner can approve a new version. The prior
+version remains queryable for rollback. Reproduce the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_05.py -q
+```
+
+See [the E2E-05 implementation record](docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md).
+
 Phase 2 entry points are `agent.routing.RequestRouter`, `agent.skills.SkillRegistry`,
 `capabilities.runtime.InstalledCapabilities`, `workflow.dispatch.BridgeExecutor`
 and `capabilities.mcp.MCPAdapter`. See

@@ -14,15 +14,14 @@ The product E2E gate order and observable completion evidence are defined in
 `PRODUCT_ACCEPTANCE_TESTS.md`; this Roadmap does not override them.
 
 The fixed order is **E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01**. E2E-02
-merged to `main` in merge commit `5428774`. E2E-03 is the active product gate.
-It reuses the resident Agent, Gateway and Bridge and adds a bounded Coding
-Harness whose workspace revision, plan, actual patch, declared validation
-commands, repair budget, Skill versions and trace are explicit. The first proof
-edits a deterministic JSON transformation, rejects its deliberately wrong first
-candidate, repairs once from structured validator evidence, and passes the new
-case plus the committed regression case. Its boundary is documented in
-`docs/phases/E2E_03_CODING_HARNESS.md`. E2E-05 remains blocked until E2E-03
-passes pull-request CI and merges.
+merged in PR #98 and E2E-03 merged in PR #99. E2E-05 is the active product
+gate. It reuses the resident Agent/Gateway/Bridge and Phase 4 Knowledge vault,
+query, Raw provenance and decision records. The proof captures feedback against
+an exact cited answer, creates an independently authorized candidate version,
+runs the new case plus existing regressions, records separate domain approval,
+publishes vNext and preserves the exact old version for rollback. Its boundary
+is documented in `docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md`. E2E-04 remains
+blocked until this gate has a reproducible passing path and merges.
 
 ## Objective
 

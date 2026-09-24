@@ -1,7 +1,6 @@
 # Product gate E2E-03 — bounded parser/transformation development
 
-Status: implemented with a reproducible local Windows/Python 3.12 green path;
-pull-request CI and merge pending
+Status: complete; merged in PR #99 after Windows/Python 3.12 CI passed
 
 ## User scenario
 

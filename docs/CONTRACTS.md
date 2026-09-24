@@ -2009,3 +2009,41 @@ events, identifies the final artifact by path and digest, and carries Skill
 versions. `validated` requires a final passing command and an artifact.
 Non-success requires a typed failure and no artifact. `committed` and
 `published` are fixed false because those transitions are outside the Harness.
+
+## E2E-05 governed Knowledge evolution
+
+`KnowledgeManifest` is the versioned catalog record for one local vault. It
+combines normal asset governance with domain, exact vault reference, immutable
+Raw digest, decisions digest, complete Knowledge content digest and ordered
+evaluation case identities. A published manifest requires domain approval,
+validation evidence and matching `knowledge-case:<id>` evaluation references.
+
+`KnowledgeQueryRequest` selects an exact scoped version. `KnowledgeAnswerRecord`
+binds that version and request trace to the complete answer and exact cited
+passages. Every sentence must contain a citation and every cited passage must be
+Raw evidence; a Wiki-only claim cannot become a grounded answer.
+
+`KnowledgeImprovementRequest` retains the exact answer, trace and cited evidence
+that prompted the feedback, plus expected information, deterministic
+reproduction and acceptance criteria. It begins with pending development
+approval. `authorize_improvement` represents maintainer triage and does not
+modify the published vault.
+
+`KnowledgeCandidateRequest` is the input to the Bridge-installed candidate
+workspace writer. It names the exact base version, approved improvement, new
+version, absolute target root, typed `WritePlan`, new and regression cases, and
+stable write stamp. The candidate preserves namespace/name, changes version,
+has unique case identities, and cannot embed credential material.
+
+`KnowledgeCandidate` is always draft or validated. `KnowledgeValidationEvidence`
+binds its exact content digest, Raw digest before/after and one result for every
+ordered case. A pass requires byte-identical Raw and all new and regression
+cases to return grounded answers containing required facts and excluding
+forbidden facts. Content drift or evidence from another candidate cannot be
+approved or published.
+
+`approve_candidate` records the separate domain-owner business decision only
+after passing validation. `publish_candidate` then creates the published
+manifest and its validation/evaluation references; neither function installs a
+capability or grants execution permission. `KnowledgeCatalog` admits only exact,
+published and digest-matching versions and retains earlier versions for rollback.
