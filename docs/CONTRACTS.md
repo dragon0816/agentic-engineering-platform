@@ -1952,3 +1952,32 @@ refusing. Every row would then arrive with no title and no comments, which
 reads exactly like a week in which nobody wrote anything, so it is a refusal
 here. A query GitHub partly refused comes back as `200` with an `errors`
 block, so the body decides and not the status.
+
+## E2E-02 SOP acceptance and Workflow validation
+
+`DraftWorkflowRequest` keeps the written SOP, target namespace/name and exact
+`required_capabilities` together without turning the acceptance requirement
+back into prose. Required identities are scoped, versioned and unique. They do
+not grant permission; they let the deterministic reviewer reject a candidate
+that silently omits an outcome the user required. `WorkflowDraft.request`
+echoes the accepted request so the ingress can prove what reached the drafter.
+
+`WorkflowFixture` is representative run arguments plus an independently chosen
+expected final output. `WorkflowAcceptanceRequest` keeps that fixture separate
+from the drafting request, and both reject embedded secret values through the
+normal contract boundary.
+
+`WorkflowValidationEvidence` records the request trace, exact manifest SHA-256,
+run identifier, completed step count, ordered capability dispatches, expected
+and observed outputs, and a typed pass/fail code. A pass has no failure code and
+must identify the run that produced it. The evidence is created by
+`PersonalWorkflowAuthor`, not by the model: it executes the draft in a
+throwaway Workflow inventory through the existing Gateway, engine, Bridge and
+policy. The draft is never added to the host inventory by validation.
+
+`publish_validated_workflow` is a pure lifecycle transition. It requires an
+approved `BusinessApproval` and passing evidence bound to the exact manifest
+digest. It does not install, register, distribute or authorize the result, and
+it does not change `TechnicalPolicy`. This preserves all three separations:
+validation from model confidence, business approval from technical policy, and
+publication from execution permission.

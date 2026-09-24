@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Architecture
 
-Status: Approved architecture baseline; Phases 1–6 implemented, Phase 7 active
+Status: Approved architecture baseline; Phases 1–6 implemented, Phase 7 and product E2E gates active
 
 ## 1. Purpose
 
@@ -277,6 +277,46 @@ Local Bridge
 ~~~
 
 This separation keeps reasoning replaceable while preserving reliable local execution boundaries.
+
+### E2E-02 bounded Workflow authoring and validation
+
+The first product gate extends the Personal Engineering Agent with one bounded
+use case rather than adding another agent runtime. A user supplies three
+separate inputs: an SOP, exact installed capability identities that express the
+required outcome, and a representative fixture with an independently expected
+output. The normal resident Agent admission and Gateway route invoke the
+existing `workflow-author.draft` capability. Model output is only a candidate
+`WorkflowManifest` and must remain in the `draft` lifecycle.
+
+```text
+user SOP + required capabilities + fixture
+                  |
+                  v
+resident Agent -> Gateway -> workflow-author.draft
+                               |
+                               v
+                      draft WorkflowManifest
+                               |
+                               v
+                 throwaway Gateway / WorkflowEngine
+                               |
+                               v
+                    existing Bridge and policy
+                               |
+                               v
+              observed output == expected output
+```
+
+The throwaway engine makes the candidate executable for validation without
+installing it in the host inventory or Registry. It dispatches every step
+through the host's existing Bridge, grants and approval policy. Completion is
+decided by the external fixture comparison, never by the model. A successful
+validation is bound to the exact manifest digest and run. Business approval may
+then move that manifest to `published`; technical policy, installation and
+runtime authorization remain independent decisions. Replaying an explicitly
+installed and authorized result uses the normal deterministic Gateway and must
+not call a model. This is the complete E2E-02 boundary and is not yet the
+general Coding Harness required by E2E-03.
 
 ### Team Platform Plane
 

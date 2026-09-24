@@ -29,8 +29,10 @@ transport, authorization and workflow 11 implementation slices have merged;
 workflow 10 rules are ported and its remaining slices and real parity run are
 still open. PR #96 merged the local interfaces, company-model wiring, bounded
 SOP-to-Workflow authoring, installed-browser automation and weekly mail draft.
-A product-direction review is open in PR #97 and documented in
-`docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`; it changes no runtime contract.
+A product-direction review merged in PR #97 and is documented in
+`docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
+E2E order. E2E-02 is implemented on `codex/e2e-02-sop-workflow`; E2E-03 is
+blocked until the E2E-02 pull request passes CI and merges.
 A row says `done` only after its pull request merges.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
@@ -44,6 +46,19 @@ commit passed GitHub Actions on Windows and Ubuntu with Python 3.11 and 3.12.
 |---|---|---|
 | Progress record | #40 | This file, backfilled from the merged pull requests, and named in the reading order of `CLAUDE.md` and `AGENTS.md` |
 | Flaky progress test | #44 | `test_workflow_progress` compared payload digits against the whole event, including a random run id that contained them about once in a few hundred runs |
+
+## Product E2E gates (active)
+
+The order is fixed by `docs/PRODUCT_ACCEPTANCE_TESTS.md`; a later row cannot
+start until the preceding row has a reproducible passing path.
+
+| Gate | PR | Status | What it covers |
+|---|---|---|---|
+| E2E-02 SOP to deterministic Workflow | #98 | in review; local verification passed | Natural-language SOP through resident Agent/Gateway, semantic capability requirements, inert fixture execution through Gateway/Workflow/Bridge, independent output grading, human publication decision and no-model deterministic replay |
+| E2E-03 parser/transformation development | — | blocked | Begins only after E2E-02 CI and merge |
+| E2E-05 knowledge continuous evolution | — | blocked | Begins only after E2E-03 passes |
+| E2E-04 software continuous evolution | — | blocked | Begins only after E2E-05 passes |
+| E2E-01 DUT/chipset engineering | — | blocked | Begins only after E2E-04 passes and requires production-like company-host evidence |
 
 ## Phase 0 — Architecture and inventory (complete)
 
