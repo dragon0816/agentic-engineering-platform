@@ -456,9 +456,9 @@ def build_router(
         commands,
         client,
         binding.routing_alias,
-        # Said in the configuration, where somebody had to write it: the
-        # flag means an engineer's words may leave this machine.
-        local_only=not binding.allow_remote_models,
+        # Off unless this host asked for a model running on its own hardware.
+        # The contract already refused the pair that cannot both be true.
+        local_only=binding.require_local_model,
     )
 
 
@@ -643,11 +643,11 @@ def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
                 "answered with `needs_input` rather than a guess"
             ),
         )
-    leaves = "" if binding.allow_remote_models else " (this machine only)"
+    here = " (a model on this machine only)" if binding.require_local_model else ""
     return DoctorCheck(
         name="models",
         status="passed",
-        detail=f"{aliases}; routing through {binding.routing_alias}{leaves}",
+        detail=f"{aliases}; routing through {binding.routing_alias}{here}",
     )
 
 

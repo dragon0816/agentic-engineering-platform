@@ -104,18 +104,24 @@ class ModelBinding(Contract):
     has models for capabilities to use and still answers `needs_input` to an
     unrecognized message, which is a reasonable thing to want.
 
-    `allow_remote_models` is deliberately a line somebody has to write. An
-    endpoint's `local` flag says where the model *runs*, and a company's own
-    internal gateway runs inside the company but not on this machine, so it
-    is not local. Turning this on is the statement that an engineer's words
-    leave this computer for that gateway. It is not something this platform
-    decides quietly on somebody's behalf, so the default is off and a host
-    that wants a company gateway says so where it can be read.
+    `require_local_model` narrows routing to an endpoint that runs on this
+    machine. An endpoint's `local` flag is about where the model *runs*: an
+    Ollama loading a model into this computer's own memory is local, and a
+    gateway is not, however close it is. Most machines cannot run a useful
+    model and will leave this off; the setting exists so that a workstation
+    with the memory to do it can say so, and so that a machine which must
+    keep working with nothing reachable can insist on it.
+
+    It is not a data boundary and does not pretend to be one. This platform
+    cannot tell a company's own gateway from anybody else's -- both are a URL
+    somebody wrote here -- so writing that URL, and mapping a credential to
+    go with it, is the decision. Asking for it twice would add a line to
+    every host and no information to any of them.
     """
 
     catalog: ModelCatalog
     routing_alias: Symbol | None = None
-    allow_remote_models: StrictBool = False
+    require_local_model: StrictBool = False
     # Per-alias wire details an adapter takes but the catalog does not
     # describe, such as a model that rejects the newer `max_completion_tokens`
     # name. Host wiring, which is why it is here and not in the catalog.
@@ -128,12 +134,15 @@ class ModelBinding(Contract):
         unknown = sorted(alias for alias in self.options if self.catalog.endpoint(alias) is None)
         if unknown:
             raise ValueError(f"options name no endpoint: {', '.join(unknown)}")
-        if self.routing_alias is not None and not self.allow_remote_models:
+        if self.require_local_model and self.routing_alias is not None:
             endpoint = self.catalog.endpoint(self.routing_alias)
             if endpoint is not None and not endpoint.capabilities.local:
+                # Refused here rather than at the first message, where it
+                # would read as "the model would not answer" instead of "this
+                # host was told two things it cannot both do".
                 raise ValueError(
-                    "the routing endpoint does not run on this machine; set "
-                    "allow_remote_models to state that requests may leave it"
+                    "require_local_model is set and the routing endpoint does not "
+                    "run on this machine"
                 )
         return self
 

@@ -394,8 +394,7 @@ speaks. In `host.json`:
           "streaming": true, "max_context_tokens": 128000 } }
     ]
   },
-  "routing_alias": "company",
-  "allow_remote_models": true
+  "routing_alias": "company"
 }
 ```
 
@@ -409,21 +408,44 @@ and, beside `credentials`, the variable that holds the key:
 exactly like the board token. `doctor` reports the endpoint, and reports the
 variable by name when it is not set — never its value.
 
-### `allow_remote_models` is a line somebody has to write
+There is no second line to write. Somebody put that URL in this file and
+mapped a credential to go with it; that is the decision, and this platform
+cannot tell one gateway from another anyway — both are a URL a person wrote.
 
-An endpoint's `local` flag says where the model *runs*. A company gateway runs
-inside the company but not on this computer, so it is not local, and this host
-refuses to route through it until the configuration says `allow_remote_models`.
-
-That line is the statement that **an engineer's words leave this computer** for
-that gateway. It is not something this platform should decide quietly on
-anybody's behalf, so there is no default that turns it on. A model running on
-this machine — an Ollama on `localhost` — needs no such line, because nothing
-leaves.
-
-`routing_alias` may also be left out. The catalog is then configured for
+`routing_alias` may be left out. The catalog is then configured for
 capabilities to use and nothing chooses what to run, which is a reasonable
 thing to want.
+
+### Running the model on this machine instead
+
+An endpoint's `local` flag is about where the model *runs*: an Ollama loading
+a model into this computer's own memory is local, and a gateway is not,
+however close it is. It is a statement about this machine's memory and
+compute, not about the network.
+
+Most workstations cannot run a useful model and will simply name the gateway.
+A machine that can — or one that has to keep working with nothing reachable —
+runs Ollama and says so:
+
+```json
+"models": {
+  "catalog": { "endpoints": [
+    { "alias": "here",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "base_url": "http://localhost:11434",
+      "capabilities": { "tool_calling": true, "local": true,
+        "max_context_tokens": 32000 } }
+  ]},
+  "routing_alias": "here",
+  "require_local_model": true
+}
+```
+
+`require_local_model` narrows routing to an endpoint that runs here. Setting it
+while `routing_alias` names a gateway is two things that cannot both be true,
+and is refused where it is written rather than at the first message — where it
+would read as the model declining to answer.
 
 ## Without typing commands
 

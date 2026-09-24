@@ -88,17 +88,22 @@ So what is actually missing is one slice of wiring:
 2. `build_gateway` building `ModelClients` from it and passing a client to
    `RequestRouter`.
 
-### The one thing for the owner to decide
+### What `local` means, and what it does not
 
-`RequestRouter` takes `local_only=True` by default, and an endpoint's `local`
-flag says where the model *runs*. A company-internal gateway runs inside the
-company but not on this machine, so it is `local: false`, and routing will
-refuse it until the host says `local_only: false`.
+An endpoint's `local` flag is about where the model **runs**: an Ollama
+loading a model into this computer's own memory is local; a gateway is not,
+however close it is. The owner confirmed on 2026-09-24 that this is the
+intent -- it is a statement about a machine's memory and compute, and it
+exists so that a workstation powerful enough to run its own model has a path
+to do it.
 
-That should stay a visible line in the configuration rather than become a
-default. It is the line that says an engineer's words leave this machine for
-the company's gateway, and whether that is acceptable is not a decision this
-repository should make silently.
+It is not a data boundary, and the host binding must not be built as though
+it were. This platform cannot tell a company's own gateway from anybody
+else's: both are a URL somebody wrote into `host.json` beside a mapped
+credential, and writing that is the decision. `require_local_model` is
+therefore off by default and narrows routing to a model running here; it is
+for the powerful workstation, and for a machine that has to keep working with
+nothing reachable.
 
 What a model may *do* once it is there -- as opposed to read -- remains open,
 and is the same question as the coding harness's, below.

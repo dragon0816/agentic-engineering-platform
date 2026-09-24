@@ -51,7 +51,6 @@ def binding(**changes: Any) -> dict[str, Any]:
     values: dict[str, Any] = {
         "catalog": {"endpoints": [endpoint()], "routes": [{"name": "default", "alias": "company"}]},
         "routing_alias": "company",
-        "allow_remote_models": True,
     }
     values.update(changes)
     return values
@@ -90,43 +89,58 @@ def test_a_configured_gateway_reaches_the_router(
         assert isinstance(router, RequestRouter)
         assert router.model is not None, "the host was given a gateway and did not use it"
         assert router.model_alias == "company"
-        assert router.local_only is False, "the configuration said requests may leave"
+        assert router.local_only is False, "nothing asked for a model on this machine"
 
 
-def test_a_remote_model_is_refused_until_the_host_says_it_may_leave(tmp_path: Path) -> None:
-    """The line that says an engineer's words leave this computer. It is
-    written by a person or the endpoint is not used for routing: an
-    acceptable default here would be a default about somebody's data."""
-    with pytest.raises(Exception, match="allow_remote_models"):
-        CompanyHostConfiguration.model_validate(
-            {
-                "device": device(),
-                "workspace_root": str(Path(__file__).resolve().parents[1]),
-                "models": binding(allow_remote_models=False),
-            }
-        )
-
-
-def test_a_model_on_this_machine_needs_no_such_line(tmp_path: Path) -> None:
-    """An Ollama on the same computer is not a place anybody's words go."""
-    here = ModelBinding.model_validate(
+def test_naming_a_gateway_is_the_whole_decision(tmp_path: Path) -> None:
+    """No second line to write. Somebody put that URL in the file and mapped
+    a credential to go with it; asking again would add a line to every host
+    and no information to any of them."""
+    config = CompanyHostConfiguration.model_validate(
         {
-            "catalog": {
-                "endpoints": [
-                    {
-                        "alias": "local",
-                        "provider": "ollama",
-                        "model": "qwen3:8b",
-                        "base_url": "http://localhost:11434",
-                        "capabilities": {"local": True, "max_context_tokens": 32_000},
-                    }
-                ]
-            },
-            "routing_alias": "local",
+            "device": device(),
+            "workspace_root": str(Path(__file__).resolve().parents[1]),
+            "models": binding(),
         }
     )
-    assert here.allow_remote_models is False
+    assert config.models is not None
+    assert config.models.require_local_model is False
+    assert config.models.routing_alias == "company"
+
+
+def _ollama(**changes: Any) -> dict[str, Any]:
+    return {
+        "catalog": {
+            "endpoints": [
+                {
+                    "alias": "local",
+                    "provider": "ollama",
+                    "model": "qwen3:8b",
+                    "base_url": "http://localhost:11434",
+                    "capabilities": {"local": True, "max_context_tokens": 32_000},
+                }
+            ]
+        },
+        "routing_alias": "local",
+        **changes,
+    }
+
+
+def test_a_machine_with_the_memory_to_run_one_can_insist_on_it(tmp_path: Path) -> None:
+    """The path left open for a workstation powerful enough to load a model
+    into its own memory, and for one that has to keep working with nothing
+    reachable."""
+    here = ModelBinding.model_validate(_ollama(require_local_model=True))
+    assert here.require_local_model is True
     assert here.routing_alias == "local"
+
+
+def test_insisting_on_a_local_model_and_naming_a_gateway_is_refused(tmp_path: Path) -> None:
+    """Two things that cannot both be true, refused where they were written
+    rather than at the first message, where it would read as the model
+    declining to answer."""
+    with pytest.raises(ValidationError, match="require_local_model is set"):
+        ModelBinding.model_validate(binding(require_local_model=True))
 
 
 def test_a_catalog_with_no_routing_alias_still_answers_needs_input(
@@ -135,7 +149,7 @@ def test_a_catalog_with_no_routing_alias_still_answers_needs_input(
     """Configuring models for capabilities to use, without letting one choose
     what to run, is a reasonable thing to want."""
     monkeypatch.setenv("AEP_LLM_TOKEN", "a value nobody prints")
-    config, layout = configured(tmp_path, routing_alias=None, allow_remote_models=False)
+    config, layout = configured(tmp_path, routing_alias=None)
     with build_runtime(config, layout=layout) as runtime:
         router = runtime.agent.gateway.router
         assert isinstance(router, RequestRouter)
@@ -200,7 +214,13 @@ def test_the_doctor_says_what_this_machine_can_reason_with(
     checks = {check.name: check for check in host_report(config, layout).checks}
     assert checks["models"].status == "passed"
     assert "routing through company" in checks["models"].detail
-    assert "this machine only" not in checks["models"].detail
+    assert "on this machine only" not in checks["models"].detail
+
+    insisting = config.model_copy(
+        update={"models": ModelBinding.model_validate(_ollama(require_local_model=True))}
+    )
+    checks = {check.name: check for check in host_report(insisting, layout).checks}
+    assert "a model on this machine only" in checks["models"].detail
 
 
 def test_the_doctor_never_prints_the_token(
