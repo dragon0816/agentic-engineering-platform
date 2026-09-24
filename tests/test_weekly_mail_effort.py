@@ -157,6 +157,24 @@ def test_the_mail_counts_only_what_somebody_worked_on() -> None:
     assert activity.excluded == ("A-2", "A-3"), "named, because fifty-nine vanishing is not a count"
 
 
+def test_a_week_with_nothing_in_it_still_produces_a_record() -> None:
+    """There is no chart to draw in a quiet week, so the drafted record
+    carries no path to one. `Text` refuses an empty string, so a field that
+    may be empty is a plain `str`; this was a real defect, found on
+    2026-09-24 only because a browser contract tripped over the same rule.
+    """
+    from capabilities.weekly_report.contracts import WeeklyMailDrafted
+
+    quiet = WeeklyMailDrafted(
+        week="2026_39W",
+        subject="GTM weekly report 2026_39W",
+        matched=0,
+        counted=0,
+    )
+    assert quiet.chart_path == "" and quiet.preview == ""
+    assert quiet.entry_id == "" and quiet.folder == ""
+
+
 def test_the_activity_filter_can_be_turned_off() -> None:
     """Off, the mail counts everything the week matched, and says so."""
     import datetime as _dt

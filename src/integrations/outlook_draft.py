@@ -81,8 +81,8 @@ class DraftReceipt(Contract):
     draft again; it is not a secret and carries no content."""
 
     saved: bool = False
-    entry_id: Text = ""
-    folder: Text = ""
+    entry_id: str = ""
+    folder: str = ""
 
 
 class DraftWriter(Protocol):

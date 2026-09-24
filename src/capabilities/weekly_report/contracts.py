@@ -365,8 +365,8 @@ class WeeklyMailDrafted(Contract):
     cc: tuple[Text, ...] = ()
     # Outlook's own identifier for the saved item, and the folder it landed
     # in. Neither is a secret and neither carries content.
-    entry_id: Text = ""
-    folder: Text = ""
+    entry_id: str = ""
+    folder: str = ""
     matched: int = Field(ge=0, strict=True)
     counted: int = Field(ge=0, strict=True)
     # Named rather than counted: fifty-nine items vanishing from a week with
@@ -375,8 +375,8 @@ class WeeklyMailDrafted(Contract):
     # Whether the count was narrowed to items somebody worked on, so a reader
     # of the record knows which of two questions these numbers answer.
     activity_required: StrictBool = True
-    chart_path: Text = ""
-    preview: Text = ""
+    chart_path: str = ""
+    preview: str = ""
 
     @model_validator(mode="after")
     def counted_is_what_is_left(self) -> Self:

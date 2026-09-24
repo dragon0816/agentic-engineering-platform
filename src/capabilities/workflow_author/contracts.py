@@ -88,7 +88,7 @@ class WorkflowDraft(Contract):
     # for a capability this machine does not have" readable rather than a
     # mystery.
     available: tuple[Symbol, ...] = ()
-    preview: Text = ""
+    preview: str = ""
 
     @model_validator(mode="after")
     def a_draft_or_a_reason(self) -> Self:
