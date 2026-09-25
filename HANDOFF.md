@@ -4,6 +4,7 @@ Updated: 2026-09-25 (Asia/Taipei).
 Branch: `feature/codex-remote-test-feedback`.
 Pull request: #105, https://github.com/dragon0816/agentic-engineering-platform/pull/105.
 Implementation commit: `1df61b619aa4f8380eacf2447ffcd235015c9d92`.
+Verified implementation/handoff head: `9eae1f4`.
 
 ## Completed
 
@@ -33,20 +34,22 @@ Implementation commit: `1df61b619aa4f8380eacf2447ffcd235015c9d92`.
   model, manual GitHub settings, retest lifecycle and exact dummy-Issue test.
 - Added contract tests for the narrow trigger, permission separation, secure
   action configuration, output documentation and Hermes template.
+- Created the repository's `codex-fix` label with a description scoped to
+  governed remote Hermes failure analysis.
+- PR #105 Windows/Python 3.12 run `36135227701` passed at `9eae1f4`, including
+  the full suite, Ruff, mypy, build, offline bundle install and artifact upload.
 
 ## In Progress
 
-- PR #105 is open. Its first GitHub Actions verification run was pending when
-  this handoff update was prepared. Recheck the exact final head after this
-  handoff commit is pushed.
+- PR #105 is open and green. Human review and merge remain pending.
 
 ## Remaining
 
 - Review and merge PR #105 after its exact-head Windows/Python 3.12 CI passes.
 - In repository Actions settings, add the secret `OPENAI_API_KEY`.
-- Ensure the `codex-fix` label exists. Ensure the human or Hermes identity that
-  applies it has repository write access. If Hermes is a GitHub App bot that
-  the action cannot classify, set `HERMES_GITHUB_BOT_USER` to its exact login.
+- Ensure the human or Hermes identity that applies `codex-fix` has repository
+  write access. If Hermes is a GitHub App bot that the action cannot classify,
+  set `HERMES_GITHUB_BOT_USER` to its exact login.
 - After the workflow is on the default branch, create a dummy Issue without the
   label, then apply `codex-fix`. Verify the same Issue receives the five-section
   comment and that no branch, PR, or merge is created.
@@ -101,6 +104,10 @@ passed
 
 git diff --check
 passed after removing the template's extra trailing blank line
+
+GitHub Actions run 36135227701 at 9eae1f4
+verify passed in 3m30s on Windows/Python 3.12, including the full pytest suite,
+Ruff, format, mypy, build, pip check, offline preview install and artifact upload
 ```
 
 The four skips are the existing Windows link-privilege and IPv6-loopback
@@ -122,8 +129,7 @@ or Python 3.11 validation was run, per owner instruction.
 
 ## Next Recommended Action
 
-Wait for the exact-head check on PR #105, fix any failure caused by this change,
-then review and merge the PR. Configure `OPENAI_API_KEY`, add the optional exact
-Hermes bot variable only if required, and follow
+Review and merge the green PR #105. Configure `OPENAI_API_KEY`, add the optional
+exact Hermes bot variable only if required, and follow
 `docs/remote-testing-codex-loop.md` with a dummy Issue. Do not use the first
 live run for a production hardware failure.
