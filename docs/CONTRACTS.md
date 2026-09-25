@@ -2047,3 +2047,45 @@ after passing validation. `publish_candidate` then creates the published
 manifest and its validation/evaluation references; neither function installs a
 capability or grants execution permission. `KnowledgeCatalog` admits only exact,
 published and digest-matching versions and retains earlier versions for rollback.
+
+## E2E-04 governed Software evolution
+
+`SoftwareManifest` is Registry metadata, not a source archive. It combines the
+normal scoped identity/owner/visibility/lifecycle/compatibility fields with an
+`ExternalRepository` provider, locator and exact revision, typed
+`SoftwareInterface` values and `SoftwareRelease` evidence. Published Software
+requires business approval, validation and evaluation references. The release
+revision must equal the repository revision.
+
+`SoftwareFailureReport` carries the exact target version and trace, expected and
+actual behavior, evidence, representative input, expected and observed output,
+reproduction environment and acceptance criteria. It contains no repository or
+owner field. `capture_improvement` resolves those from the exact catalog entry
+and creates a pending `SoftwareImprovementRequest`; user input cannot redirect
+development to another repository.
+
+`SoftwareDevelopmentRequest` carries only the improvement request. The
+Bridge-installed handler cross-checks its owner/repository against the catalog
+and uses trusted `InstalledRepository` configuration for the local root, path
+allowlist, validator, regression corpus and Skill versions. Owner triage and
+Bridge execution approval are both required and remain independent.
+
+`SoftwareDevelopmentResult.reproduction` is the declared validator outcome on
+the unchanged published revision. It must contain the reported failing case and
+the recorded observed output before the `CodingHarness` can run. A passing
+baseline yields `unreproduced`; a broken baseline or Harness regression yields
+`failed`. Neither state can contain a PR artifact.
+
+`PullRequestCandidate` binds the exact trace, Software version, repository,
+Harness change set and validation digest. Its `external_write`, `merged` and
+`released` fields are fixed false. The CI `InertSourceControlAdapter` only keeps
+these artifacts in memory.
+
+`PullRequestReview`, `MergeRecord` and `ReleaseRecord` are explicit human-owned
+transitions. A rejected review cannot produce merge evidence. Merge evidence
+binds the reviewed candidate digest, old and new repository revisions and human
+review; release evidence binds the new Software identity to that merge.
+`publish_software` requires another owner approval, preserves technical policy,
+and creates a new manifest whose `previous_version` remains registered for
+rollback. None of these contracts installs an executable capability or creates
+a Bridge grant.

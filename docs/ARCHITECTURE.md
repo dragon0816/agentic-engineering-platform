@@ -396,6 +396,50 @@ version; the prior exact version remains queryable for rollback. The first
 catalog is in memory and uses local vault paths, so it proves the lifecycle
 without claiming a production Registry or database.
 
+### E2E-04 governed Software evolution
+
+Software source remains in its external repository. The Share Platform stores
+only the exact scoped Software identity, owner, repository locator/revision,
+interfaces, compatibility and release evidence. A user report needs only the
+Software identity; the catalog derives the responsible owner and repository.
+
+```text
+user report -> Personal Agent -> Software issue capture
+                                  |
+                         exact asset/owner/repository
+                                  |
+                           owner triage approval
+                                  |
+                                  v
+Personal Agent -> Gateway -> Bridge-approved Software development
+                                  |
+                   reproduce against unchanged repository
+                                  |
+                       existing CodingHarness
+                                  |
+                     issue case + regressions pass
+                                  |
+                        inert PR/MR preparation
+                                  |
+                human review -> merge -> release -> republish
+```
+
+`SoftwareDevelopmentService` uses trusted installed-repository configuration to
+map the external locator to a confined local workspace, paths, validation
+command, regression cases and Skill versions. These execution details are not
+stored in the shared Software asset or supplied by the routing model. The
+reported failure must be observed before mutation and must match the user's
+recorded actual output. Only then may the existing bounded `CodingHarness`
+change the workspace.
+
+The source-control boundary receives only a validated change set. CI uses an
+in-memory adapter that prepares a review artifact and performs no Git or remote
+API write. Harness completion, PR preparation, repository review, merge,
+release and Share Platform republish are separate transitions. A new published
+Software version links the release evidence and retains the prior exact version
+for rollback. Publication does not install or authorize the Software on a
+Bridge.
+
 ### Team Platform Plane
 
 The shared Team Platform is primarily a **control plane**, not the default location where every engineer's reasoning executes. It owns shared capability/knowledge management such as:

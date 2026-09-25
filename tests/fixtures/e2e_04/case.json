@@ -1,0 +1,40 @@
+{
+  "requirement": "The published record transformer must convert numeric age text to an integer without changing category normalization.",
+  "expected_behavior": "Age text is converted to an integer and category text remains trimmed and lowercase.",
+  "actual_behavior": "Age text remains a string.",
+  "evidence": ["fixture:new-age-conversion observed age as text"],
+  "reproduction_environment": "Committed local fixture repository on Windows with Python 3.12.",
+  "acceptance_criteria": [
+    "The supplied failing example returns an integer age.",
+    "The existing category-normalization regression still passes."
+  ],
+  "example_input": [
+    {"category": " Device ", "category_new": "device", "age": "29"}
+  ],
+  "expected_output": [
+    {"category": "device", "age": 29}
+  ],
+  "observed_output": [
+    {"category": "device", "age": "29"}
+  ],
+  "fixed_candidate": {
+    "fields": [
+      {"target": "category", "source": "category", "operations": ["strip", "lower"]},
+      {"target": "age", "source": "age", "operations": ["integer"]}
+    ]
+  },
+  "regression_breaking_candidate": {
+    "fields": [
+      {"target": "category", "source": "category_new", "operations": []},
+      {"target": "age", "source": "age", "operations": ["integer"]}
+    ]
+  },
+  "regression_cases": [
+    {
+      "name": "existing-category-normalization",
+      "kind": "regression",
+      "input": [{"category": " SENSOR ", "age": 41}],
+      "expected": [{"category": "sensor", "age": 41}]
+    }
+  ]
+}
