@@ -35,6 +35,19 @@ def test_remote_test_workflow_separates_codex_from_issue_write_access() -> None:
     assert "github.rest.issues.createComment" in comment_job
 
 
+def test_remote_test_workflow_prepares_declared_python_test_environment() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    codex_job = text.split("  analyze:", 1)[1].split("  comment:", 1)[0]
+
+    assert "actions/setup-python@v5" in codex_job
+    assert 'python-version: "3.12"' in codex_job
+    assert 'python -m pip install -e ".[dev,office]"' in codex_job
+    assert codex_job.index("actions/setup-python@v5") < codex_job.index("openai/codex-action@v1")
+    assert codex_job.index('python -m pip install -e ".[dev,office]"') < codex_job.index(
+        "openai/codex-action@v1"
+    )
+
+
 def test_remote_test_contract_is_documented_and_templated() -> None:
     template = ISSUE_TEMPLATE.read_text(encoding="utf-8")
     documentation = DOCUMENTATION.read_text(encoding="utf-8")

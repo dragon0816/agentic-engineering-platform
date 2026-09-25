@@ -22,9 +22,12 @@ Hermes FAIL
 exactly `codex-fix`. Editing, commenting on, closing, reopening, or applying a
 different label to an Issue does not invoke Codex.
 
-The workflow checks out the current default-branch commit before invoking
-`openai/codex-action@v1`. It passes the repository and checked-out commit, the
-Issue number, title and body, and these optional Hermes fields:
+The workflow checks out the current default-branch commit, installs the
+repository-declared `.[dev,office]` test dependencies with Python 3.12, and
+then invokes `openai/codex-action@v1`. This fixed setup command is independent
+of Issue content, so remote test evidence cannot choose packages or commands.
+It passes the repository and checked-out commit, the Issue number, title and
+body, and these optional Hermes fields:
 
 - `Commit:`
 - `Build:` or `Package Version:`
@@ -60,6 +63,9 @@ The Codex job follows the official action's secure edit configuration:
   denying network access;
 - `safety-strategy: drop-sudo` removes elevated access before Codex starts;
 - checkout uses `persist-credentials: false`;
+- a fixed pre-Codex step installs only the repository's declared test
+  dependencies using Python 3.12; it does not use any Issue-provided command
+  or package name;
 - the job has only `contents: read` and `issues: read` GitHub permissions;
 - Codex is the last step in its job;
 - a separate job with only `issues: write` posts the structured result and has
