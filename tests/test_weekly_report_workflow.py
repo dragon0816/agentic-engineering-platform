@@ -723,9 +723,11 @@ def test_the_doctor_says_when_the_token_variable_is_not_set(
     cannot fetch anything."""
     config, layout, _ = host(tmp_path)
     monkeypatch.delenv("AEP_GITHUB_TOKEN", raising=False)
-    check = {c.name: c for c in host_report(config, layout).checks}["integrations"]
-    assert check.status == "failed"
+    report = host_report(config, layout)
+    check = {c.name: c for c in report.checks}["integrations"]
+    assert check.status == "pending"
     assert "AEP_GITHUB_TOKEN is not set" in check.detail, "which variable, by name"
+    assert report.runtime == "ready", "an optional board token does not stop the local Agent"
 
     monkeypatch.setenv("AEP_GITHUB_TOKEN", "a value nobody prints")
     passed = {c.name: c for c in host_report(config, layout).checks}["integrations"]

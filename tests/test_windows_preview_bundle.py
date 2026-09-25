@@ -102,6 +102,12 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         assert "--no-index" in install_line
         extras = ",".join(BUNDLED_EXTRAS)
         assert f'"agentic-engineering-platform[{extras}]"' in install_line
+        assert "membership.json" in installer
+        assert "bundle-manifest.json" in installer
+        assert "dut-validate --help" in installer
+        verifier = bundle.read(prefix + "verify.cmd").decode("utf-8")
+        assert "bundle source revision" in verifier
+        assert "dut-validate --help" in verifier
         for item in manifest["files"]:
             content = bundle.read(prefix + item["path"])
             assert hashlib.sha256(content).hexdigest() == item["sha256"]

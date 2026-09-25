@@ -52,8 +52,10 @@ install.cmd -Actor employee.id -PythonExe "C:\Python312\python.exe"
 
 The installer verifies every bundled file, creates a versioned virtual environment
 under `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0`, writes only
-non-secret device metadata, and runs `aep-host doctor`. It does not contact the
-shared platform or any company system.
+non-secret device metadata, binds the resident Agent to the actor entered at
+install time, and runs `aep-host doctor`. That local membership grants no
+capability by itself. The installer does not contact the shared platform or any
+company system.
 
 Run the checks again and export the JSON that will later be submitted through an
 authenticated enrollment flow:
@@ -68,9 +70,10 @@ capability-advertisement metadata, not proof that the device may execute anythin
 
 ## Run the resident Agent
 
-`aep-host doctor` reports `resident agent: pending` until this Bridge knows who
-may use it. Everything the Agent reads lives in the workspace the installer
-created:
+`aep-host doctor` reports `resident agent: ready` after installation because the
+installer creates the company workstation's single-owner membership from the
+Actor and derived Bridge ID. Everything the Agent reads lives in the workspace
+the installer created:
 
 ```text
 workspace\membership.json        who may use this Bridge
@@ -82,9 +85,9 @@ workspace\telegram.json          the Telegram ingress (optional)
 workspace\state.sqlite           what is installed and what has run (the Agent creates it)
 ```
 
-`membership.json` names this device and its one bound owner. Until the
-authenticated enrollment transport exists, you write it yourself from the same
-values as `host.json`:
+`membership.json` names this device and its one bound owner. The installer writes
+it from the same values as `host.json` and repairs it when a reinstall changes
+the Actor or Bridge ID. Its shape is:
 
 ```json
 {
@@ -292,6 +295,10 @@ refuses rather than report that.
 (`temp_sheet`, `week_style`, `jql`, `max_issues`, `markers`, the colours);
 `aep-host doctor` reports whether the site, the secret, the library and the
 workbook are all in place without contacting anything.
+
+When `AEP_GITHUB_TOKEN` is absent from the current terminal, `doctor` reports
+this optional integration as pending. The resident Agent remains ready; only
+operations that need the board token are unavailable in that session.
 
 Then write the shipped manifests into the workspace:
 

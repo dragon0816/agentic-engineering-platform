@@ -658,6 +658,7 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
             detail="no project board or weekly report is configured; only the file capability runs",
         )
     problems: list[str] = []
+    pending: list[str] = []
     if integrations.github_project is not None:
         mapped = config.credential_environment()
         variable = mapped.get(integrations.github_project.credential.name)
@@ -669,7 +670,7 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
             # a run that fails at the first fetch. `setx` on Windows sets it
             # for the next process, not this one, which is how a host passes
             # its own doctor and then cannot fetch anything.
-            problems.append(
+            pending.append(
                 f"the board token's environment variable {variable} is not set in this session"
             )
     settings = integrations.weekly_report
@@ -686,7 +687,11 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
         if not Path(settings.workbook_path).is_file():
             problems.append("the weekly workbook is not at the configured path")
     if problems:
-        return DoctorCheck(name="integrations", status="failed", detail="; ".join(problems))
+        return DoctorCheck(
+            name="integrations", status="failed", detail="; ".join((*problems, *pending))
+        )
+    if pending:
+        return DoctorCheck(name="integrations", status="pending", detail="; ".join(pending))
     parts = []
     board = integrations.github_project
     if board is not None:
