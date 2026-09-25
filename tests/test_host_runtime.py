@@ -75,6 +75,8 @@ def test_doctor_is_side_effect_free_and_reports_every_local_requirement(tmp_path
     unable = [line for line in report.limitations if "cannot execute" in line]
     assert unable == [line for line in unable if "workflow 13" in line], unable
     assert any("weekly report" in line and "needs" in line for line in report.limitations)
+    assert "no vendor DUT/instrument driver" in limitations
+    assert "DUT or instrument capability is included" not in limitations
     assert tuple(tmp_path.iterdir()) == before
 
 

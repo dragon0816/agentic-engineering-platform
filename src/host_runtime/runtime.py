@@ -20,8 +20,8 @@ LIMITATIONS = (
     "The GTM weekly report (source workflow 11) needs a project board and a workbook "
     "configured under `integrations`, and Excel installed to write; `doctor` reports "
     "whether this host has them.",
-    "No Git, browser, email, DUT or instrument capability is included, so this host "
-    "cannot execute workflow 13.",
+    "No Git, browser or email capability is included, and no vendor DUT/instrument "
+    "driver is bundled, so this host cannot execute workflow 13.",
 )
 
 
