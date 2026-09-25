@@ -33,8 +33,8 @@ A product-direction review merged in PR #97 and is documented in
 `docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
 E2E order. E2E-02 merged in PR #98, E2E-03 merged in PR #99 and E2E-05 merged
 in PR #100 after each exact head passed Windows/Python 3.12 CI. E2E-04 has a
-reproducible local green path on `codex/e2e-04-software-evolution`; pull-request
-review and CI remain.
+reproducible local green path on `codex/e2e-04-software-evolution`; PR #101 is
+open and its exact-head CI and merge remain.
 A row says `done` only after its pull request merges.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
@@ -59,7 +59,7 @@ start until the preceding row has a reproducible passing path.
 | E2E-02 SOP to deterministic Workflow | #98 | done | Natural-language SOP through resident Agent/Gateway, semantic capability requirements, inert fixture execution through Gateway/Workflow/Bridge, independent output grading, human publication decision and no-model deterministic replay |
 | E2E-03 parser/transformation development | #99 | done | Pinned bounded workspace, pre-mutation plan, actual patches, injected declared validator, deliberately failing first candidate, one structured repair, new plus regression validation, trace and Skill versions; no commit/push/publish |
 | E2E-05 knowledge continuous evolution | #100 | done | Exact version query with Raw citations, feedback evidence, approved Bridge candidate write, immutable Raw, persisted rejected claims, new plus regression evaluation, separate domain approval, versioned republish and rollback |
-| E2E-04 software continuous evolution | pending | implemented; local verification passed, CI pending | Exact external repository metadata, report routing, pre-change reproduction, approved Harness development, issue plus regression validation, inert PR preparation, separate human review/merge/release/republish and exact rollback |
+| E2E-04 software continuous evolution | #101 | implemented; PR open, CI pending | Exact external repository metadata, report routing, pre-change reproduction, approved Harness development, issue plus regression validation, inert PR preparation, separate human review/merge/release/republish and exact rollback |
 | E2E-01 DUT/chipset engineering | — | blocked | Begins only after E2E-04 passes and requires production-like company-host evidence |
 
 ## Phase 0 — Architecture and inventory (complete)

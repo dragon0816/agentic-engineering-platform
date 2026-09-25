@@ -1,8 +1,9 @@
-# Handoff — E2E-04 implementation complete; PR and merge pending
+# Handoff — E2E-04 PR #101 open; exact-head CI and merge pending
 
 Updated: 2026-09-25 (Asia/Taipei).
 Branch: `codex/e2e-04-software-evolution`.
 Base: `main` at `8ab7157544f0ce26954e2718f4c8e422f3f08ac5`.
+Pull request: #101, https://github.com/dragon0816/agentic-engineering-platform/pull/101
 
 Progress across all phases remains in `docs/TASKS.md`. This file contains the
 current stopping point and constraints needed to continue without chat history.
@@ -39,14 +40,13 @@ current stopping point and constraints needed to continue without chat history.
 
 ## In Progress
 
-- The implementation and documentation are verified locally but have not yet
-  been committed, pushed, reviewed by GitHub Actions or merged.
+- The implementation and documentation are committed and pushed in PR #101.
+  GitHub Actions verification of the final PR head and merge remain.
 
 ## Remaining
 
-- Create coherent commits, open a PR against `main`, require the exact PR head
-  to pass the Windows/Python 3.12 verification job, then merge without altering
-  the validated head.
+- Require the exact PR #101 head to pass the Windows/Python 3.12 verification
+  job, then merge without altering the validated head.
 - E2E-01 physical DUT/chipset engineering is the next and final gate in the
   approved product sequence. Do not start it until E2E-04 is merged and its
   reproducible green path is recorded.
@@ -130,8 +130,8 @@ Ubuntu or Python 3.11 validation was run, per owner instruction.
 
 ## Next Recommended Action
 
-Commit the verified implementation and documentation, open the E2E-04 PR, and
-merge only after the exact PR head passes the Windows/Python 3.12 verification
-job. Then update this handoff with the PR, merge and CI evidence. The following
-development phase is E2E-01; begin with its architecture/requirements gate and
-preserve inert CI while planning real validation on an enrolled company PC.
+Wait for PR #101's exact head to pass the Windows/Python 3.12 verification job,
+then merge that head and update this handoff with the merge and CI evidence. The
+following development phase is E2E-01; begin with its architecture/requirements
+gate and preserve inert CI while planning real validation on an enrolled
+company PC.
