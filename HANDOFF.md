@@ -1,8 +1,12 @@
 # Handoff — E2E-01 implementation ready; owner hardware evidence pending
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `codex/e2e-01-dut-engineering`.
-Pull request: #102, open; exact-head Windows/Python 3.12 CI pending.
+Branch: `main`.
+Pull requests: #102 merged as `c700366d951c1a990f64a5cdcd37519f28529700`;
+#103 merged as `60d5e18fb26f4331063eb7abd573037c9fd09a24`.
+Verified heads: #102 `2e69de744a8cc349ee8a730ad2f439127d2104cf`;
+#103 `98e529e07653751d769821bc173f88047cef13a6`.
+CI runs: #102 `36080782267`; #103 `36081352644`; both successful.
 
 Progress across all phases remains in `docs/TASKS.md`. This file is the current
 stopping point. Product E2E-01 is **not complete** until the owner runs the
@@ -40,11 +44,16 @@ human accepts the resulting production-like evidence.
   invocation, owner admission, Bridge policy and bundle contents.
 - Updated architecture, contracts, roadmap, tasks, README and the E2E-01 phase
   record only after the automated implementation passed its focused tests.
+- Corrected the preview's stale `doctor` limitation in PR #103 after a real
+  offline install exposed the contradiction between the new provider-neutral
+  DUT boundary and the absence of a bundled vendor driver.
+- Built and installed the final merged Windows preview. `aep-host
+  dut-validate --help`, `doctor`, and the corrected limitation all passed.
 
 ## In Progress
 
-- Run PR #102's exact-head Windows/Python 3.12 workflow, merge the unchanged
-  passing head, and replace this section with the final PR/CI record.
+- None. Implementation and package integration are complete. Stop here until
+  the owner performs the company-PC hardware run.
 
 ## Remaining
 
@@ -120,13 +129,29 @@ Ubuntu or Python 3.11 validation was run, per owner instruction.
 A local full run reached 1299 passed and then reported nine existing browser
 cases as failed/error because Edge exited without publishing its remote-debug
 port. The DUT suites passed, and the complete non-browser regression is green.
-The exact-head GitHub Windows workflow, which includes the browser suite and
-offline-preview install, is the merge authority and is still pending.
+The exact-head GitHub Windows workflows include the browser suite and offline
+preview build/install. PR #102 run `36080782267` and PR #103 run `36081352644`
+both passed before their exact heads were merged.
+
+Final merged package verification:
+
+```text
+.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e01-release
+Successfully built sdist and wheel
+
+.venv\Scripts\python.exe scripts\build_windows_preview.py --wheel .scratch\build-e2e01-release\agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir .scratch\e2e01-dependencies --output-dir dist --source-revision 60d5e18fb26f4331063eb7abd573037c9fd09a24
+dist\aep-windows-preview-0.1.0-60d5e18fb26f.zip
+
+Offline install with Python 3.12 passed; `aep-host dut-validate --help` and
+`aep-host doctor` passed.
+SHA256 6A14FDBECF62CD699EC5DBE1CF20BA29BC32345470F559C1B1FE8599BE4A6BDF
+```
 
 ## Company-PC validation procedure
 
-1. Download and extract the Windows preview from the merged commit's CI artifact
-   to a short path such as `C:\aep`.
+1. Copy `dist\aep-windows-preview-0.1.0-60d5e18fb26f.zip` to the company
+   computer, verify its SHA256 above, and extract it to a short path such as
+   `C:\aep`.
 2. Read `DUT_DRIVER_CONTRACT.md` and replace the ACME examples. Copy the reviewed
    Skill into the installed `workspace\assets\skills` directory.
 3. Add the `dut` object shown in the bundle README to installed `host.json`,
@@ -162,7 +187,8 @@ offline-preview install, is the merge authority and is still pending.
 
 ## Next Recommended Action
 
-Finish PR and CI integration first. After merge, stop implementation work and
-give the owner the CI-built Windows package. Do not redesign the DUT boundary,
-add vendor commands to core, or mark E2E-01 complete before real company-PC
-evidence and human review are committed.
+Give the owner the final Windows package and wait for the company-PC result.
+When `dut-evidence.json` arrives, verify its exact identities, production-like
+mode and every validator outcome, record the human review, and only then mark
+E2E-01 and the five-gate milestone complete. Do not redesign the boundary or add
+vendor commands to core while waiting.

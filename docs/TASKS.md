@@ -61,7 +61,7 @@ start until the preceding row has a reproducible passing path.
 | E2E-03 parser/transformation development | #99 | done | Pinned bounded workspace, pre-mutation plan, actual patches, injected declared validator, deliberately failing first candidate, one structured repair, new plus regression validation, trace and Skill versions; no commit/push/publish |
 | E2E-05 knowledge continuous evolution | #100 | done | Exact version query with Raw citations, feedback evidence, approved Bridge candidate write, immutable Raw, persisted rejected claims, new plus regression evaluation, separate domain approval, versioned republish and rollback |
 | E2E-04 software continuous evolution | #101 | done | Exact external repository metadata, report routing, pre-change reproduction, approved Harness development, issue plus regression validation, inert PR preparation, separate human review/merge/release/republish and exact rollback |
-| E2E-01 DUT/chipset engineering | #102 | owner validation pending | Provider-neutral contracts, bounded Harness + simulator proof, exact Skill/resource admission, high-risk Bridge policy, fixed local driver boundary and evidence CLI; real enrolled-company-PC evidence remains required |
+| E2E-01 DUT/chipset engineering | #102, #103 | owner validation pending | Provider-neutral contracts, bounded Harness + simulator proof, exact Skill/resource admission, high-risk Bridge policy, fixed local driver boundary and evidence CLI; real enrolled-company-PC evidence remains required |
 
 ## Phase 0 — Architecture and inventory (complete)
 
