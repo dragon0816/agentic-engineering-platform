@@ -1,7 +1,7 @@
 # Product gate E2E-04 — governed Software continuous evolution
 
-Status: implemented with a reproducible local Windows/Python 3.12 green path;
-pull-request CI and merge pending
+Status: complete; merged in PR #101 after the exact head passed the
+Windows/Python 3.12 verification workflow
 
 ## User scenario
 

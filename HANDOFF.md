@@ -1,9 +1,10 @@
-# Handoff — E2E-04 PR #101 open; exact-head CI and merge pending
+# Handoff — E2E-04 complete; E2E-01 is next
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `codex/e2e-04-software-evolution`.
-Base: `main` at `8ab7157544f0ce26954e2718f4c8e422f3f08ac5`.
-Pull request: #101, https://github.com/dragon0816/agentic-engineering-platform/pull/101
+Branch: `main`.
+Pull request: #101, merged as `31d5dbfe0e53f0e63aa7fbb3d4615b8db2ec271c`.
+Verified PR head: `4eec581c4438f74dda6ded06f5569f4cefe5b8aa`.
+CI run: `36077241493`, successful rerun job `107892304673`, passed in 3m24s.
 
 Progress across all phases remains in `docs/TASKS.md`. This file contains the
 current stopping point and constraints needed to continue without chat history.
@@ -37,19 +38,18 @@ current stopping point and constraints needed to continue without chat history.
   regression failures, source-code exclusion and secret-value rejection.
 - Updated architecture, contracts, roadmap, task status, README and the E2E-04
   phase record after the implementation had passed verification.
+- PR #101's exact head passed the Windows/Python 3.12 verification workflow and
+  was merged without changing the validated head.
 
 ## In Progress
 
-- The implementation and documentation are committed and pushed in PR #101.
-  GitHub Actions verification of the final PR head and merge remain.
+- None. Stop here at the completed E2E-04 gate.
 
 ## Remaining
 
-- Require the exact PR #101 head to pass the Windows/Python 3.12 verification
-  job, then merge without altering the validated head.
 - E2E-01 physical DUT/chipset engineering is the next and final gate in the
-  approved product sequence. Do not start it until E2E-04 is merged and its
-  reproducible green path is recorded.
+  approved product sequence. Its architecture and acceptance slice have not
+  started.
 - E2E-01 will require an enrolled company computer for real DUT/vendor-tool
   evidence. CI must remain inert.
 
@@ -115,6 +115,20 @@ The four skips are existing host-dependent cases: two Windows link privilege
 checks, IPv6 loopback availability and a directory-link privilege check. No
 Ubuntu or Python 3.11 validation was run, per owner instruction.
 
+GitHub Actions on PR #101's exact head:
+
+```text
+Platform verification / verify
+run 36077241493, rerun job 107892304673
+Windows, Python 3.12
+passed in 3m24s
+```
+
+The first attempt of the same exact head had one unrelated transient failure in
+the existing browser-profile test (`navigation_failed: WebSocketError`). The
+E2E-04 suite passed in that attempt. The unchanged-head rerun passed every job,
+including the full tests and Windows offline-preview build/install.
+
 ## Known issues
 
 - The source-control adapter is inert; no live GitHub/GitLab PR, merge or
@@ -130,8 +144,8 @@ Ubuntu or Python 3.11 validation was run, per owner instruction.
 
 ## Next Recommended Action
 
-Wait for PR #101's exact head to pass the Windows/Python 3.12 verification job,
-then merge that head and update this handoff with the merge and CI evidence. The
-following development phase is E2E-01; begin with its architecture/requirements
-gate and preserve inert CI while planning real validation on an enrolled
-company PC.
+Begin E2E-01 with an architecture and requirements gate based on its user-level
+scenario in `PRODUCT_ACCEPTANCE_TESTS.md`. Reuse the existing Harness and Bridge
+boundaries, keep CI inert, and define the smallest fixture proof plus a separate
+production-like validation plan for an enrolled company PC before implementing
+real DUT/vendor-tool behavior.
