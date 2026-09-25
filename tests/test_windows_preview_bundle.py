@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from agent.skills import SkillManifest
+from dut.contracts import DutPhysicalValidationRequest
 from scripts import build_windows_preview
 from scripts.build_windows_preview import (
     BUNDLE_NAME,
@@ -74,8 +76,20 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         # The things somebody double-clicks. An operator who has to type a
         # command with four flags to see a week's plan does not run it, so
         # these shipping is part of the bundle working, not a convenience.
-        for launcher in ("chat.cmd", "weekly-preview.cmd", "weekly-apply.cmd", "weekly-mail.cmd"):
+        for launcher in (
+            "chat.cmd",
+            "weekly-preview.cmd",
+            "weekly-apply.cmd",
+            "weekly-mail.cmd",
+            "dut-validate.cmd",
+        ):
             assert prefix + launcher in names
+        for dut_file in (
+            "DUT_DRIVER_CONTRACT.md",
+            "dut-request.example.json",
+            "dut-skill.example.json",
+        ):
+            assert prefix + dut_file in names
         assert all("config" not in name.lower() for name in names)
         assert all("token" not in name.lower() for name in names)
         # The extras the installer asks for are carried, not fetched: the
@@ -163,3 +177,14 @@ def test_the_builders_artefact_name_is_the_one_the_workflow_uses() -> None:
     ).read_text(encoding="utf-8")
     assert f"name: {build_windows_preview.ARTEFACT_PREFIX}${{{{ github.sha }}}}" in workflow
     assert f"path: dist/{BUNDLE_NAME.rsplit('-', 1)[0]}-*.zip" in workflow
+
+
+def test_the_bundled_dut_examples_are_contract_documents() -> None:
+    preview = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
+    request = DutPhysicalValidationRequest.model_validate_json(
+        (preview / "dut-request.example.json").read_text(encoding="utf-8"), strict=True
+    )
+    skills = json.loads((preview / "dut-skill.example.json").read_text(encoding="utf-8"))
+    skill = SkillManifest.model_validate(skills[0])
+    assert request.validation.skill == skill.metadata.identity
+    assert request.validation.target.resource_id == "dut-acme-001"

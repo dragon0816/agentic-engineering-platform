@@ -16,6 +16,7 @@ from pathlib import Path
 import pytest
 
 from capabilities.contracts import CapabilitySpec
+from capabilities.dut_engineering.handlers import DUT_PHYSICAL_VALIDATE_SPEC
 from capabilities.files import READ_FILE_SPEC
 from capabilities.runtime import CapabilityGrant, LocalPolicy
 from capabilities.weekly_report.handlers import (
@@ -29,9 +30,9 @@ from capabilities.weekly_report.handlers import (
 from common.execution import RequestContext, TraceIdentifiers
 
 README = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "README.md"
-#: Every capability a host built from this package installs: the bounded file
-#: read this package ships on its own, then the weekly report's four reads and
-#: its two writes -- the workbook and the mail draft. The page has to cover
+#: Every capability for which the preview documents a grant: the bounded file
+#: read, the weekly report's four reads and two writes, and the optional DUT
+#: validation boundary. The page has to cover
 #: all of them, because a reader who follows it and is refused cannot tell
 #: which grant is missing.
 SPECS = (
@@ -42,6 +43,7 @@ SPECS = (
     PLAN_SPEC,
     APPLY_SPEC,
     MAIL_SPEC,
+    DUT_PHYSICAL_VALIDATE_SPEC,
 )
 
 

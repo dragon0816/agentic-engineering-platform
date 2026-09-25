@@ -9,9 +9,9 @@ still implies no execution.
 
 from typing import Literal, Self
 
-from pydantic import model_validator
+from pydantic import Field, JsonValue, model_validator
 
-from common.assets import reject_embedded_secrets
+from common.assets import AssetIdentity, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeBinding, BridgeDevice
 from common.execution import TraceIdentifiers
@@ -83,6 +83,25 @@ class LocalAgentRequest(Contract):
     message: Text
     trace: TraceIdentifiers
     session_id: Symbol | None = None
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        if self.on_behalf_of == self.actor:
+            raise ValueError("a request on your own behalf names nobody else")
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class LocalCapabilityRequest(Contract):
+    """Exact local capability dispatch for operator tooling, without model routing."""
+
+    ingress: Ingress
+    actor: Symbol
+    on_behalf_of: Symbol | None = None
+    bridge_id: Symbol
+    target: AssetIdentity
+    arguments: dict[str, JsonValue] = Field(default_factory=dict)
+    trace: TraceIdentifiers
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

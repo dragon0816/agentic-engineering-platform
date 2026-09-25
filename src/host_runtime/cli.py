@@ -21,11 +21,13 @@ from typing import TypeVar
 from pydantic import ValidationError
 
 from agent.skills import SkillManifest
+from capabilities.dut_engineering.handlers import DUT_PHYSICAL_VALIDATE_SPEC
 from channels.telegram import TelegramIngress
 from common.assets import WorkflowManifest
 from common.base import Contract
 from common.execution import Failure, TraceIdentifiers
-from common.local_agent import LocalAgentRequest
+from common.local_agent import LocalAgentRequest, LocalCapabilityRequest
+from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from host_runtime.agent import LocalAgentOutcome
 from host_runtime.assets import export_assets
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
@@ -86,6 +88,13 @@ def _parser() -> argparse.ArgumentParser:
     jobs.add_argument("--config", required=True, type=Path)
     jobs.add_argument("--once", action="store_true", help="poll a single time and stop")
     jobs.add_argument("--interval", type=float, default=5.0, help="seconds between polls")
+    dut = commands.add_parser(
+        "dut-validate",
+        help="run an approved physical DUT request and retain its evidence as JSON",
+    )
+    dut.add_argument("--config", required=True, type=Path)
+    dut.add_argument("--request", required=True, type=Path)
+    dut.add_argument("--output", required=True, type=Path)
     export = commands.add_parser(
         "export-assets", help="write the shipped Skill and Workflow manifests as JSON files"
     )
@@ -457,6 +466,48 @@ def _jobs(runtime: HostRuntime, once: bool, interval: float) -> int:
         return 0
 
 
+def _dut_validate(runtime: HostRuntime, request_path: Path, output: Path) -> int:
+    """Run one exact physical capability through Agent admission and Bridge policy."""
+    try:
+        request = DutPhysicalValidationRequest.model_validate_json(
+            request_path.read_text(encoding="utf-8-sig"), strict=True
+        )
+    except OSError:
+        print(f"cannot read {request_path}", file=sys.stderr)
+        return 2
+    except (ValidationError, ValueError):
+        print("the DUT validation request is invalid, so nothing ran", file=sys.stderr)
+        return 2
+    direct = LocalCapabilityRequest(
+        ingress="local",
+        actor=runtime.actor,
+        bridge_id=runtime.config.device.bridge_id,
+        target=DUT_PHYSICAL_VALIDATE_SPEC.identity,
+        arguments=request.model_dump(mode="json"),
+        trace=_trace(),
+    )
+    outcome = asyncio.run(runtime.agent.execute_capability(direct))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(outcome.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    if outcome.refusal is not None:
+        print(f"refused: {outcome.refusal}; evidence written to {output}", file=sys.stderr)
+        return 1
+    capability = outcome.capability
+    if capability is None or capability.status != "succeeded":
+        code = capability.failure.code if capability and capability.failure else "not_run"
+        print(f"physical validation failed: {code}; evidence written to {output}", file=sys.stderr)
+        return 1
+    evidence = DutValidationEvidence.model_validate(capability.data)
+    if evidence.evidence_level != "production_like":
+        print(
+            f"recorded validation {evidence.status}; the production-like gate is still pending; "
+            f"evidence written to {output}"
+        )
+        return 1
+    print(f"physical validation {evidence.status}; evidence written to {output}")
+    return 0 if evidence.status == "passed" else 1
+
+
 def _write_in_utf8() -> None:
     """Say what happened in UTF-8, whatever code page this console has.
 
@@ -533,6 +584,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _sync(runtime, args.json)
         if args.command == "jobs":
             return _jobs(runtime, args.once, args.interval)
+        if args.command == "dut-validate":
+            return _dut_validate(runtime, args.request, args.output)
         return _telegram(runtime, args.once)
 
 
