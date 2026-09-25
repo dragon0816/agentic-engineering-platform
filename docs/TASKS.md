@@ -49,6 +49,7 @@ commit passed GitHub Actions on Windows and Ubuntu with Python 3.11 and 3.12.
 |---|---|---|
 | Progress record | #40 | This file, backfilled from the merged pull requests, and named in the reading order of `CLAUDE.md` and `AGENTS.md` |
 | Flaky progress test | #44 | `test_workflow_progress` compared payload digits against the whole event, including a random run id that contained them about once in a few hundred runs |
+| Remote Hermes failure feedback | #105 | A narrowly triggered `codex-fix` Issue workflow gives `openai/codex-action@v1` a no-network writable workspace, treats Issue content as bounded untrusted evidence, and posts structured analysis through a separate Issue-only writer job; it cannot push or merge |
 
 ## Product E2E gates (active)
 
