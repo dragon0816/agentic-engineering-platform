@@ -35,10 +35,20 @@ jobs:
           $installRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\ci-preview"
           & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
           $installedConfig = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
+          $device = $installedConfig.device
           if ($installedConfig.device.bridge_id -notlike 'bridge-*') { throw 'Computer-name Bridge ID was not generated.' }
+          $installedMembership = Get-Content "$installRoot\workspace\membership.json" -Raw | ConvertFrom-Json
+          if ($installedMembership.device.bridge_id -ne $installedConfig.device.bridge_id) { throw 'Installer membership has another Bridge ID.' }
+          if ($installedMembership.bindings[0].actor -ne 'ci-user') { throw 'Installer membership has another owner.' }
+          $bundleIdentity = Get-Content "$installRoot\bundle-manifest.json" -Raw | ConvertFrom-Json
+          if (-not $bundleIdentity.source_revision) { throw 'Installed bundle revision was not retained.' }
+          & "$installRoot\.venv\Scripts\aep-host.exe" dut-validate --help
+          if ($LASTEXITCODE -ne 0) { throw 'Installed runtime does not contain the DUT validation command.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
-          $pending = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
-          if ($pending -notcontains 'resident agent: pending') { throw 'A freshly installed host should report a pending resident agent.' }
+          $ready = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
+          if ($ready -notcontains 'resident agent: ready') { throw 'The installer should bind the resident Agent to its owner.' }
+          & "$($bundle.FullName)\verify.cmd" $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'The installed bundle did not pass verify.cmd.' }
           # The bundle is offline, so the extras it claims to carry have to be
           # importable from it alone -- no index was available to fill a gap.
           & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client"
@@ -47,14 +57,6 @@ jobs:
           if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__jira-weekly-report__1.0.0.json")) {
             throw 'The shipped weekly-report manifests were not written.'
           }
-          $device = $installedConfig.device
-          $membership = [ordered]@{
-              device = $device
-              bindings = @([ordered]@{ bridge_id = $device.bridge_id; actor = $device.registered_by; role = "operator" })
-          }
-          $membership | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath "$installRoot\workspace\membership.json" -Encoding UTF8
-          $ready = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
-          if ($ready -notcontains 'resident agent: ready') { throw 'A host that knows its members should report a ready resident agent.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" ask --config "$installRoot\host.json" --namespace engineering "files.read nothing.txt"
           if ($LASTEXITCODE -ne 0) { throw 'The resident agent did not answer a local request.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" status --config "$installRoot\host.json"
@@ -73,6 +75,10 @@ jobs:
               [ordered]@{ secret = "jira_token"; environment_variable = "AEP_JIRA_TOKEN" }
           )
           $configured | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\host.json" -Encoding UTF8
+          $foreignMembership = Get-Content "$installRoot\workspace\membership.json" -Raw | ConvertFrom-Json
+          $foreignMembership.device.bridge_id = 'bridge-stale-install'
+          $foreignMembership.bindings[0].bridge_id = 'bridge-stale-install'
+          $foreignMembership | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\workspace\membership.json" -Encoding UTF8
           & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
           if ($LASTEXITCODE -ne 0) { throw 'Installing over an existing host failed.' }
           $kept = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
@@ -84,6 +90,10 @@ jobs:
           }
           if ($kept.device.bridge_id -ne $device.bridge_id) {
             throw 'Reinstalling changed the device identity it should have rewritten unchanged.'
+          }
+          $repairedMembership = Get-Content "$installRoot\workspace\membership.json" -Raw | ConvertFrom-Json
+          if ($repairedMembership.device.bridge_id -ne $kept.device.bridge_id) {
+            throw 'Reinstalling did not repair stale membership identity.'
           }
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply

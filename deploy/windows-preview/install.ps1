@@ -7,7 +7,8 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $BundleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Manifest = Get-Content -LiteralPath (Join-Path $BundleRoot "manifest.json") -Raw | ConvertFrom-Json
+$ManifestPath = Join-Path $BundleRoot "manifest.json"
+$Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 
 if ([string]::IsNullOrWhiteSpace($BridgeId)) {
     $NormalizedComputerName = [Environment]::MachineName.ToLowerInvariant() -replace '[^a-z0-9_.-]', '-'
@@ -84,6 +85,15 @@ $PlatformWheel = $PlatformWheels[0]
 # package index.
 & $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows]"
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
+$HostExecutable = Join-Path $Venv "Scripts\aep-host.exe"
+# All preview packages currently report semantic version 0.1.0. Verify a
+# capability introduced by this build so an older 0.1.0 runtime can never look
+# like a successful update, then retain the exact source revision for support.
+& $HostExecutable dut-validate --help | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "The installed runtime does not match bundle revision $($Manifest.source_revision): dut-validate is missing."
+}
+Copy-Item -LiteralPath $ManifestPath -Destination (Join-Path $InstallRoot "bundle-manifest.json") -Force
 
 $Config = [ordered]@{
     schema_version = "1"
@@ -130,7 +140,18 @@ if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
     }
 }
 $Config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ConfigPath -Encoding UTF8
-& (Join-Path $Venv "Scripts\aep-host.exe") doctor --config (Join-Path $InstallRoot "host.json")
+$Membership = [ordered]@{
+    device = $Config.device
+    bindings = @([ordered]@{
+        bridge_id = $BridgeId
+        actor = $Actor
+        role = "operator"
+    })
+}
+$MembershipPath = Join-Path $Workspace "membership.json"
+$Membership | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $MembershipPath -Encoding UTF8
+& $HostExecutable doctor --config (Join-Path $InstallRoot "host.json")
 if ($LASTEXITCODE -ne 0) { throw "Host doctor failed." }
 Write-Host "Installed the local-only preview at $InstallRoot"
-Write-Host "The resident Agent is pending: it runs once $Workspace\membership.json names who may use this Bridge."
+Write-Host "Bundle source revision: $($Manifest.source_revision)"
+Write-Host "The resident Agent is bound to $Actor on $BridgeId. Capability grants remain separate."
