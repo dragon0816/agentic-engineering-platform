@@ -2,7 +2,7 @@
 
 Updated: 2026-09-25 (Asia/Taipei).
 Branch: `codex/e2e-01-dut-engineering`.
-Pull request: not opened yet.
+Pull request: #102, open; exact-head Windows/Python 3.12 CI pending.
 
 Progress across all phases remains in `docs/TASKS.md`. This file is the current
 stopping point. Product E2E-01 is **not complete** until the owner runs the
@@ -43,8 +43,8 @@ human accepts the resulting production-like evidence.
 
 ## In Progress
 
-- Create the PR, run the exact-head Windows/Python 3.12 workflow, merge the
-  unchanged passing head, and replace this section with the final PR/CI record.
+- Run PR #102's exact-head Windows/Python 3.12 workflow, merge the unchanged
+  passing head, and replace this section with the final PR/CI record.
 
 ## Remaining
 
