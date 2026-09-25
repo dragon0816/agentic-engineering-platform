@@ -1,229 +1,129 @@
-# Handoff — corrected E2E-01 owner package ready; hardware evidence pending
+# Handoff — remote Hermes failure feedback in PR #105
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `main`.
-Pull requests: #102 merged as `c700366d951c1a990f64a5cdcd37519f28529700`;
-#103 merged as `60d5e18fb26f4331063eb7abd573037c9fd09a24`;
-#104 merged as `6cb24d16464a5efe3b74c2a27961a5ac78b9beb6`.
-Verified heads: #102 `2e69de744a8cc349ee8a730ad2f439127d2104cf`;
-#103 `98e529e07653751d769821bc173f88047cef13a6`;
-#104 `cca05b26ab21f66cb5dc8610cb737df93a96ff4a`.
-CI runs: #102 `36080782267`; #103 `36081352644`; #104 `36105795115`;
-all successful.
-
-Progress across all phases remains in `docs/TASKS.md`. This file is the current
-stopping point. Product E2E-01 is **not complete** until the owner runs the
-Windows package on an enrolled company Bridge with a real DUT/instrument and a
-human accepts the resulting production-like evidence.
+Branch: `feature/codex-remote-test-feedback`.
+Pull request: #105, https://github.com/dragon0816/agentic-engineering-platform/pull/105.
+Implementation commit: `1df61b619aa4f8380eacf2447ffcd235015c9d92`.
 
 ## Completed
 
-- Added provider-neutral DUT, instrument, command, observation, deterministic
-  measurement/state validation, evidence, development and human-review
-  contracts under `src/dut/`.
-- Reused the E2E-03 bounded `CodingHarness` for a DUT controller change. The
-  development result is green only after the Harness repairs its deliberately
-  failing candidate and an independent simulator passes the new case and
-  regressions.
-- Added a high-risk physical validation capability. It is
-  `external_side_effect`, requires a permission, technical policy and approval
-  reference, and does not derive authority from a Skill or publication.
-- Added exact local capability execution through the existing resident Agent,
-  device admission and Bridge policy. No parallel authorization path was added.
-- Added company-host DUT configuration for an exact Skill, target/firmware,
-  optional instrument, resource availability, fixed driver executable and an
-  explicit `physical_enabled` switch.
-- Added a fixed-executable subprocess adapter. It uses an absolute executable,
-  fixed argument vector, `shell=False` and JSON over stdin/stdout. It contains
-  no vendor command behavior and the request/model cannot choose the program.
-- Added `aep-host dut-validate`, which saves the complete local outcome as JSON
-  and exits zero only for passing production-like physical evidence.
-- Added a Windows launcher, driver protocol, strict request example and
-  versioned Skill example to the offline preview. The bundle still contains no
-  vendor driver or vendor procedure.
-- Added automated E2E and company-host coverage for simulator development,
-  bounded repair, independent validation, unauthorized/wrong/unavailable
-  refusal, secret rejection, simulated-evidence rejection, fixed process
-  invocation, owner admission, Bridge policy and bundle contents.
-- Updated architecture, contracts, roadmap, tasks, README and the E2E-01 phase
-  record only after the automated implementation passed its focused tests.
-- Corrected the preview's stale `doctor` limitation in PR #103 after a real
-  offline install exposed the contradiction between the new provider-neutral
-  DUT boundary and the absence of a bundled vendor driver.
-- Built and installed the final merged Windows preview. `aep-host
-  dut-validate --help`, `doctor`, and the corrected limitation all passed.
-- Corrected the company-PC upgrade path after an older `0.1.0` runtime was
-  retained in practice. The installer now checks for `dut-validate`, retains
-  the exact bundle source revision, writes/repairs the Actor and Bridge
-  membership, and `verify.cmd` checks both build identity and command presence.
-- A missing `AEP_GITHUB_TOKEN` now leaves only the optional board integration
-  pending. It no longer keeps the local resident Agent pending. The token still
-  has to be present before any board-backed Workflow can run.
+- Added `.github/workflows/codex-remote-test-fix.yml`. It listens only for an
+  Issue `labeled` event and runs only when the newly applied label is exactly
+  `codex-fix`.
+- Used the current official `openai/codex-action@v1` contract: checkout first
+  with credentials disabled, `permission-profile: ":workspace"`,
+  `safety-strategy: drop-sudo`, a 30-minute limit and structured output.
+- Kept Issue content untrusted. A trusted `github-script` reads the event
+  object, strips control characters, applies size bounds, parses the optional
+  Hermes fields, and serializes the report into a clearly marked JSON evidence
+  block. No Issue text is interpolated into a shell command.
+- Kept GitHub write permission outside the Codex job. Codex is the last step in
+  the analysis job, which has only `contents: read` and `issues: read`; a second
+  job has only `issues: write` and posts the result to the same Issue.
+- Required the action's default write-access check for the labeler. An optional
+  repository variable, `HERMES_GITHUB_BOT_USER`, can name one exact GitHub App
+  bot through `allow-bot-users`; broad user or bot allowlists are absent.
+- Required the Issue comment to contain `Codex Analysis`, `Root Cause`,
+  `Changes`, `Local Test Result`, and `Next Action`. When a fix is justified,
+  Codex prepares and tests it in the ephemeral workspace and reports a unified
+  diff where practical. It has no credentials or network path to push, open a
+  PR, or merge.
+- Added `.github/ISSUE_TEMPLATE/hermes-remote-test-failure.md` and
+  `docs/remote-testing-codex-loop.md`, including the Hermes payload, security
+  model, manual GitHub settings, retest lifecycle and exact dummy-Issue test.
+- Added contract tests for the narrow trigger, permission separation, secure
+  action configuration, output documentation and Hermes template.
 
 ## In Progress
 
-- None. Implementation and package integration are complete. Stop here until
-  the owner performs the company-PC hardware run.
+- PR #105 is open. Its first GitHub Actions verification run was pending when
+  this handoff update was prepared. Recheck the exact final head after this
+  handoff commit is pushed.
 
 ## Remaining
 
-- The owner must provide the actual reviewed vendor Skill and a local driver
-  that implements `deploy/windows-preview/DUT_DRIVER_CONTRACT.md`.
-- On the enrolled company computer, configure the exact target, firmware,
-  optional instrument, grant and `physical_enabled` switch, then run the shipped
-  `dut-validate.cmd` against the edited request.
-- Inspect `dut-evidence.json`. It must be `mode: physical`,
-  `evidence_level: production_like`, `status: passed`, with every validator
-  outcome passing. A human domain owner must then accept the evidence before a
-  Skill or controller change is republished.
-- Record that evidence and review in the repository. Only then change E2E-01
-  and the five-gate product milestone to complete.
+- Review and merge PR #105 after its exact-head Windows/Python 3.12 CI passes.
+- In repository Actions settings, add the secret `OPENAI_API_KEY`.
+- Ensure the `codex-fix` label exists. Ensure the human or Hermes identity that
+  applies it has repository write access. If Hermes is a GitHub App bot that
+  the action cannot classify, set `HERMES_GITHUB_BOT_USER` to its exact login.
+- After the workflow is on the default branch, create a dummy Issue without the
+  label, then apply `codex-fix`. Verify the same Issue receives the five-section
+  comment and that no branch, PR, or merge is created.
+- Existing product work is unchanged: the E2E-01 real company-host DUT run and
+  human acceptance recorded by the previous handoff remain pending.
 
-## Architecture and migration decisions
+## Architecture decisions made
 
-- **REUSE** the resident `LocalAgent`, Gateway, Bridge executor, local policy,
-  enrollment/device admission and E2E-03 Coding Harness.
-- **ADD** provider-neutral DUT contracts, an adapter protocol, independent
-  validator, physical admission service and owner evidence CLI.
-- **DO NOT MIGRATE** vendor behavior. The documented source repositories were
-  searched for DUT, chipset, Qualcomm and MediaTek implementations and contained
-  no matching implementation. Do not invent vendor commands in core.
-- Vendor procedures live in an exact versioned Skill; low-level command behavior
-  lives in the reviewed host driver. Neither one grants execution permission.
-- CI may use simulator or recording adapters only. Their evidence is always
-  `simulated`; it cannot satisfy `DutChangeReview` or the product gate.
-- Physical execution is allowed only for the company workstation's bound owner,
-  through normal Bridge policy, with exact Skill/resource identity and an
-  explicit host enable switch. Refusals occur before driver invocation.
-- Driver exit code does not decide validation. The platform compares typed
-  units, measurement bounds and expected state. Out-of-limit evidence stays
-  failed.
-- Real credentials are never asset, request, driver-argument or evidence
-  content. A driver resolves any required credential from its approved runtime
-  environment.
+- This is a governed feedback/integration entry point, not a new Registry,
+  Bridge execution path or authorization path. It does not change the platform
+  contracts or grant execution permission from publication.
+- The Issue label is the automation trigger, while the action's actor check is
+  the authorization gate. Ordinary Issue edits never invoke Codex.
+- The secure first version deliberately has no repository write token in the
+  Codex job. The runner's tested workspace changes are represented in the
+  structured comment so a human can create and review the normal PR.
+- Remote hardware evidence remains authoritative. GitHub CI can run local and
+  unit tests, but cannot claim that a hardware failure is resolved until Hermes
+  rebuilds and reruns it.
 
 ## Exact verification commands and results
 
-Local Windows/Python 3.12:
+Local Windows / Python 3.12:
 
 ```text
-.venv\Scripts\python.exe -m pytest tests\test_product_e2e_01.py tests\test_dut_host.py tests\test_windows_preview_bundle.py tests\test_weekly_report_documented_grants.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e01-final-focused
-24 passed in 0.63s
+.venv\Scripts\python.exe -m pytest tests\test_codex_remote_test_workflow.py -q -p no:cacheprovider --basetemp .scratch\pytest-codex-workflow-green
+3 passed in 0.02s
 
-.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-e2e01-final
-1289 passed, 4 skipped in 33.34s
+.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-codex-remote-full
+1292 passed, 4 skipped in 34.32s
 
 .venv\Scripts\python.exe -m ruff check .
 All checks passed
 
 .venv\Scripts\python.exe -m ruff format --check .
-262 files already formatted
+265 files already formatted
 
 .venv\Scripts\python.exe -m mypy
-Success: no issues found in 211 source files
+Success: no issues found in 212 source files
 
-.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e01-final
+.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-codex-remote
 Successfully built sdist and wheel
 
 .venv\Scripts\python.exe -m pip check
 No broken requirements found
 
-git diff --check
+PyYAML safe-load of .github/workflows/codex-remote-test-fix.yml
+YAML syntax valid; jobs: analyze, comment
+
+node --check on both extracted actions/github-script blocks
 passed
+
+git diff --check
+passed after removing the template's extra trailing blank line
 ```
 
-The four skips are existing host-dependent cases: two Windows link privilege
-checks, IPv6 loopback availability and a directory-link privilege check. No
-Ubuntu or Python 3.11 validation was run, per owner instruction.
-
-A local full run reached 1299 passed and then reported nine existing browser
-cases as failed/error because Edge exited without publishing its remote-debug
-port. The DUT suites passed, and the complete non-browser regression is green.
-The exact-head GitHub Windows workflows include the browser suite and offline
-preview build/install. PR #102 run `36080782267` and PR #103 run `36081352644`
-both passed before their exact heads were merged.
-
-Final merged package verification:
-
-```text
-.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e01-release
-Successfully built sdist and wheel
-
-.venv\Scripts\python.exe scripts\build_windows_preview.py --wheel .scratch\build-e2e01-release\agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir .scratch\e2e01-dependencies --output-dir dist --source-revision 60d5e18fb26f4331063eb7abd573037c9fd09a24
-dist\aep-windows-preview-0.1.0-60d5e18fb26f.zip
-
-Offline install with Python 3.12 passed; `aep-host dut-validate --help` and
-`aep-host doctor` passed.
-SHA256 6A14FDBECF62CD699EC5DBE1CF20BA29BC32345470F559C1B1FE8599BE4A6BDF
-```
-
-Corrected owner package from merged PR #104:
-
-```text
-.venv\Scripts\python.exe -m pytest tests\test_host_wiring.py tests\test_weekly_report_workflow.py tests\test_windows_preview_bundle.py tests\test_dut_host.py -q -p no:cacheprovider --basetemp .scratch\pytest-preview-fix-expanded
-50 passed in 2.43s
-
-.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-preview-fix-full
-1289 passed, 4 skipped in 33.98s
-
-GitHub Windows/Python 3.12 exact-head run 36105795115
-successful, including full pytest, Ruff, format, mypy, build, pip check,
-offline bundle build/install, stale-membership reinstall and verify.cmd
-
-dist\aep-windows-preview-0.1.0-6cb24d16464a.zip
-source revision 6cb24d16464a5efe3b74c2a27961a5ac78b9beb6
-offline fresh install: resident agent ready; dut-validate present
-SHA256 71C8FAE9AAFBB5602FBC1C6323D53DDA0B2E8646F83CBDF52E37F83CCFA82A6E
-```
-
-## Company-PC validation procedure
-
-1. Copy `dist\aep-windows-preview-0.1.0-6cb24d16464a.zip` to the company
-   computer, verify the corrected package SHA256 above, and extract it to a
-   short path such as `C:\aep`.
-2. Read `DUT_DRIVER_CONTRACT.md` and replace the ACME examples. Copy the reviewed
-   Skill into the installed `workspace\assets\skills` directory.
-3. Add the `dut` object shown in the bundle README to installed `host.json`,
-   using the exact driver, target, firmware and optional instrument. Set
-   `physical_enabled` only when the setup is ready.
-4. Add the documented `dut-engineering/validate-physical@1.0.0` grant for the
-   bound owner with its permission, policy and approval reference.
-5. Edit `dut-request.example.json` so Bridge, Skill, resource identities and
-   acceptance limits match the host. Replace `workspace_revision` with the
-   64-character digest of the controller revision under test.
-6. Run `verify.cmd`, then:
-
-   ```bat
-   dut-validate.cmd dut-request.example.json dut-evidence.json
-   ```
-
-7. Keep the evidence even when the command returns nonzero. A nonzero result is
-   a refusal, execution failure, simulated result or failed measurement and must
-   not be approved.
+The four skips are the existing Windows link-privilege and IPv6-loopback
+cases. The known local Edge remote-debug suite was not rerun; the change is
+limited to GitHub workflow, Markdown and its static contract tests. No Ubuntu
+or Python 3.11 validation was run, per owner instruction.
 
 ## Known issues
 
-- No real DUT, instrument or vendor driver was available on this development
-  computer. The production-like gate is intentionally pending.
-- The earlier `60d5e18fb26f` package is superseded because its installer could
-  not distinguish or repair an older installed `0.1.0` runtime. Use only the
-  `6cb24d16464a` package named above for the next company-PC run.
-- The bundled Skill, target and command names are fake examples and must not be
-  used as company evidence.
-- The product records the supplied workspace revision in evidence; the operator
-  and reviewed driver remain responsible for selecting the actual revision under
-  test.
-- The local Edge remote-debug profile did not start during the full browser
-  suite. The unchanged browser implementation is covered by GitHub Windows CI.
+- The workflow cannot be triggered live until it is merged to the default
+  branch and `OPENAI_API_KEY` is configured.
+- The Codex workspace intentionally has no network. Artifact URLs are reported
+  for follow-up; Hermes should include a bounded log excerpt or a path already
+  present in the repository when Codex must inspect the content directly.
+- Workspace edits are ephemeral because giving Issue-driven analysis a push
+  token would materially expand the trust boundary. The structured response
+  asks for a complete unified diff where practical.
 - `.claude/` is user-owned local state. Do not commit, modify or remove it.
 
 ## Next Recommended Action
 
-Give the owner the corrected `6cb24d16464a` Windows package and wait for the
-company-PC result. Reinstalling it over the existing preview preserves the
-operator's extra `host.json` settings, repairs membership, and verifies that
-the runtime contains `dut-validate`.
-When `dut-evidence.json` arrives, verify its exact identities, production-like
-mode and every validator outcome, record the human review, and only then mark
-E2E-01 and the five-gate milestone complete. Do not redesign the boundary or add
-vendor commands to core while waiting.
+Wait for the exact-head check on PR #105, fix any failure caused by this change,
+then review and merge the PR. Configure `OPENAI_API_KEY`, add the optional exact
+Hermes bot variable only if required, and follow
+`docs/remote-testing-codex-loop.md` with a dummy Issue. Do not use the first
+live run for a production hardware failure.

@@ -40,4 +40,3 @@ Artifacts:
 - test_result.json
 - dut.log
 - instrument.log
-
