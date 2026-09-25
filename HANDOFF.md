@@ -1,12 +1,15 @@
-# Handoff — E2E-01 implementation ready; owner hardware evidence pending
+# Handoff — corrected E2E-01 owner package ready; hardware evidence pending
 
 Updated: 2026-09-25 (Asia/Taipei).
 Branch: `main`.
 Pull requests: #102 merged as `c700366d951c1a990f64a5cdcd37519f28529700`;
-#103 merged as `60d5e18fb26f4331063eb7abd573037c9fd09a24`.
+#103 merged as `60d5e18fb26f4331063eb7abd573037c9fd09a24`;
+#104 merged as `6cb24d16464a5efe3b74c2a27961a5ac78b9beb6`.
 Verified heads: #102 `2e69de744a8cc349ee8a730ad2f439127d2104cf`;
-#103 `98e529e07653751d769821bc173f88047cef13a6`.
-CI runs: #102 `36080782267`; #103 `36081352644`; both successful.
+#103 `98e529e07653751d769821bc173f88047cef13a6`;
+#104 `cca05b26ab21f66cb5dc8610cb737df93a96ff4a`.
+CI runs: #102 `36080782267`; #103 `36081352644`; #104 `36105795115`;
+all successful.
 
 Progress across all phases remains in `docs/TASKS.md`. This file is the current
 stopping point. Product E2E-01 is **not complete** until the owner runs the
@@ -49,6 +52,13 @@ human accepts the resulting production-like evidence.
   DUT boundary and the absence of a bundled vendor driver.
 - Built and installed the final merged Windows preview. `aep-host
   dut-validate --help`, `doctor`, and the corrected limitation all passed.
+- Corrected the company-PC upgrade path after an older `0.1.0` runtime was
+  retained in practice. The installer now checks for `dut-validate`, retains
+  the exact bundle source revision, writes/repairs the Actor and Bridge
+  membership, and `verify.cmd` checks both build identity and command presence.
+- A missing `AEP_GITHUB_TOKEN` now leaves only the optional board integration
+  pending. It no longer keeps the local resident Agent pending. The token still
+  has to be present before any board-backed Workflow can run.
 
 ## In Progress
 
@@ -147,11 +157,30 @@ Offline install with Python 3.12 passed; `aep-host dut-validate --help` and
 SHA256 6A14FDBECF62CD699EC5DBE1CF20BA29BC32345470F559C1B1FE8599BE4A6BDF
 ```
 
+Corrected owner package from merged PR #104:
+
+```text
+.venv\Scripts\python.exe -m pytest tests\test_host_wiring.py tests\test_weekly_report_workflow.py tests\test_windows_preview_bundle.py tests\test_dut_host.py -q -p no:cacheprovider --basetemp .scratch\pytest-preview-fix-expanded
+50 passed in 2.43s
+
+.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-preview-fix-full
+1289 passed, 4 skipped in 33.98s
+
+GitHub Windows/Python 3.12 exact-head run 36105795115
+successful, including full pytest, Ruff, format, mypy, build, pip check,
+offline bundle build/install, stale-membership reinstall and verify.cmd
+
+dist\aep-windows-preview-0.1.0-6cb24d16464a.zip
+source revision 6cb24d16464a5efe3b74c2a27961a5ac78b9beb6
+offline fresh install: resident agent ready; dut-validate present
+SHA256 71C8FAE9AAFBB5602FBC1C6323D53DDA0B2E8646F83CBDF52E37F83CCFA82A6E
+```
+
 ## Company-PC validation procedure
 
-1. Copy `dist\aep-windows-preview-0.1.0-60d5e18fb26f.zip` to the company
-   computer, verify its SHA256 above, and extract it to a short path such as
-   `C:\aep`.
+1. Copy `dist\aep-windows-preview-0.1.0-6cb24d16464a.zip` to the company
+   computer, verify the corrected package SHA256 above, and extract it to a
+   short path such as `C:\aep`.
 2. Read `DUT_DRIVER_CONTRACT.md` and replace the ACME examples. Copy the reviewed
    Skill into the installed `workspace\assets\skills` directory.
 3. Add the `dut` object shown in the bundle README to installed `host.json`,
@@ -176,6 +205,9 @@ SHA256 6A14FDBECF62CD699EC5DBE1CF20BA29BC32345470F559C1B1FE8599BE4A6BDF
 
 - No real DUT, instrument or vendor driver was available on this development
   computer. The production-like gate is intentionally pending.
+- The earlier `60d5e18fb26f` package is superseded because its installer could
+  not distinguish or repair an older installed `0.1.0` runtime. Use only the
+  `6cb24d16464a` package named above for the next company-PC run.
 - The bundled Skill, target and command names are fake examples and must not be
   used as company evidence.
 - The product records the supplied workspace revision in evidence; the operator
@@ -187,7 +219,10 @@ SHA256 6A14FDBECF62CD699EC5DBE1CF20BA29BC32345470F559C1B1FE8599BE4A6BDF
 
 ## Next Recommended Action
 
-Give the owner the final Windows package and wait for the company-PC result.
+Give the owner the corrected `6cb24d16464a` Windows package and wait for the
+company-PC result. Reinstalling it over the existing preview preserves the
+operator's extra `host.json` settings, repairs membership, and verifies that
+the runtime contains `dut-validate`.
 When `dut-evidence.json` arrives, verify its exact identities, production-like
 mode and every validator outcome, record the human review, and only then mark
 E2E-01 and the five-gate milestone complete. Do not redesign the boundary or add
