@@ -23,6 +23,10 @@ from pydantic import ValidationError
 from agent.gateway import Gateway
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
+from capabilities.dut_engineering.handlers import (
+    DUT_PHYSICAL_VALIDATE_SPEC,
+    PhysicalDutValidationHandler,
+)
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.weekly_report.contracts import (
@@ -60,8 +64,11 @@ from common.assets import ExecutionDependencies, WorkflowManifest
 from common.authorization import DeviceAuthorization
 from common.base import Contract
 from common.distribution import LocalStateError
-from common.execution import Failure
+from common.execution import Failure, TraceIdentifiers
 from common.local_agent import BridgeMembership
+from dut.adapters import DutAdapter, SubprocessDutAdapter
+from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
+from dut.runtime import PhysicalDutValidationService
 from host_runtime.agent import LocalAgent
 from host_runtime.contracts import CompanyHostConfiguration, DoctorCheck, HostDoctorReport
 
@@ -88,6 +95,7 @@ from models.credentials import CredentialResolver, EnvironmentCredentials
 from models.wire import MethodTransport, Transport
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
+from workflow.host_bridge import BridgeRegistration, LocalResource
 
 HostErrorCode = Literal[
     "membership_missing",
@@ -104,6 +112,8 @@ HostErrorCode = Literal[
     "credential_unmapped",
     "models_invalid",
     "state_unavailable",
+    "dut_skill_missing",
+    "dut_driver_missing",
 ]
 
 ContractT = TypeVar("ContractT", bound=Contract)
@@ -342,6 +352,80 @@ def build_integrations(
         )
 
 
+def build_dut(
+    config: CompanyHostConfiguration,
+    installed: InstalledCapabilities,
+    skills: SkillRegistry,
+    membership: BridgeMembership,
+    *,
+    adapter: DutAdapter | None = None,
+) -> None:
+    """Install the physical DUT boundary only from trusted host configuration."""
+    binding = config.dut
+    if binding is None:
+        return
+    installed_skill = next(
+        (
+            item.metadata.identity
+            for item in skills.discover(binding.skill.namespace)
+            if item.metadata.identity == binding.skill
+        ),
+        None,
+    )
+    if installed_skill is None:
+        raise HostError("dut_skill_missing")
+    if (
+        binding.physical_enabled
+        and adapter is None
+        and not Path(binding.driver.executable).is_file()
+    ):
+        raise HostError("dut_driver_missing", Path(binding.driver.executable))
+    selected: DutAdapter = adapter if adapter is not None else SubprocessDutAdapter(binding.driver)
+    resources = [
+        LocalResource(
+            resource_id=binding.target.resource_id,
+            kind="dut",
+            available=binding.device_available,
+        )
+    ]
+    if binding.instrument is not None:
+        resources.append(
+            LocalResource(
+                resource_id=binding.instrument.resource_id,
+                kind="instrument",
+                available=binding.instrument_available,
+            )
+        )
+    registration = BridgeRegistration(
+        bridge_id=config.device.bridge_id,
+        owner_id=config.device.registered_by,
+        trace=TraceIdentifiers(
+            trace_id="dut-host-config",
+            request_id="dut-host-config",
+            span_id="dut-host-config",
+        ),
+        capabilities=(DUT_PHYSICAL_VALIDATE_SPEC,),
+        local_resources=tuple(resources),
+    )
+    installed.register(
+        DUT_PHYSICAL_VALIDATE_SPEC,
+        PhysicalDutValidationHandler(
+            PhysicalDutValidationService(
+                membership,
+                registration,
+                installed_skill=installed_skill,
+                adapter=selected,
+                physical_enabled=binding.physical_enabled,
+                installed_target=binding.target,
+                installed_instrument=binding.instrument,
+            )
+        ),
+        DutPhysicalValidationRequest,
+        DutValidationEvidence,
+        ExecutionDependencies(central_required=False),
+    )
+
+
 def build_gateway(
     config: CompanyHostConfiguration,
     layout: HostLayout,
@@ -352,13 +436,15 @@ def build_gateway(
     writer: Callable[[], WorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
     model_transport: Transport | None = None,
+    membership: BridgeMembership | None = None,
+    dut_adapter: DutAdapter | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
     Routing is deterministic only: no model is configured on a company host
     in this slice, so an unrecognized message is `needs_input` rather than a
-    guess. The one capability handler the package ships is installed and
-    rooted at the workspace; every other capability a manifest names is
+    guess. Built-in handlers are installed only when their trusted local
+    configuration is present; every other capability a manifest names is
     absent, and a step that reaches for one fails closed.
 
     When the members' decisions are present, only the Workflows and Skills
@@ -398,6 +484,11 @@ def build_gateway(
         writer=writer,
         drafter=drafter,
     )
+    if config.dut is not None:
+        active_membership = (
+            membership if membership is not None else load_membership(config, layout)
+        )
+        build_dut(config, installed, skills, active_membership, adapter=dut_adapter)
     grants = (
         _decided_grants(authorization, installed)
         if authorization is not None
@@ -681,6 +772,38 @@ def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
     )
 
 
+def inspect_dut(config: CompanyHostConfiguration) -> DoctorCheck:
+    binding = config.dut
+    if binding is None:
+        return DoctorCheck(
+            name="dut",
+            status="pending",
+            detail=(
+                "no physical DUT driver is configured; simulator-only development remains available"
+            ),
+        )
+    if not binding.physical_enabled:
+        return DoctorCheck(
+            name="dut",
+            status="pending",
+            detail="the physical DUT driver is configured but explicitly disabled",
+        )
+    if not Path(binding.driver.executable).is_file():
+        return DoctorCheck(
+            name="dut",
+            status="failed",
+            detail="the configured physical DUT driver executable is not present",
+        )
+    return DoctorCheck(
+        name="dut",
+        status="passed",
+        detail=(
+            f"physical validation enabled for {binding.target.vendor} "
+            f"{binding.target.model} ({binding.target.device_id})"
+        ),
+    )
+
+
 def inspect_runtime(
     config: CompanyHostConfiguration, layout: HostLayout
 ) -> tuple[DoctorCheck, ...]:
@@ -787,6 +910,7 @@ def inspect_runtime(
         inspect_platform(config),
         inspect_integrations(config),
         inspect_models(config),
+        inspect_dut(config),
     )
 
 
@@ -839,6 +963,7 @@ def build_runtime(
     writer: Callable[[], WorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
     model_transport: Transport | None = None,
+    dut_adapter: DutAdapter | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
@@ -853,6 +978,8 @@ def build_runtime(
         writer=writer,
         drafter=drafter,
         model_transport=model_transport,
+        membership=membership,
+        dut_adapter=dut_adapter,
     )
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)

@@ -1,0 +1,35 @@
+{
+  "requirement": "Update the installed DUT controller so set_tx_power applies the approved gain while status remains unchanged.",
+  "artifact_path": "controller.json",
+  "initial_candidate": {
+    "tx_gain": 2.0,
+    "ready": true
+  },
+  "repaired_candidate": {
+    "tx_gain": 1.5,
+    "ready": true
+  },
+  "cases": [
+    {
+      "name": "new-approved-power-gain",
+      "kind": "new",
+      "input": {
+        "command": "set_tx_power",
+        "requested_dbm": 10.0
+      },
+      "expected": {
+        "measured_dbm": 15.0
+      }
+    },
+    {
+      "name": "existing-ready-state",
+      "kind": "regression",
+      "input": {
+        "command": "status"
+      },
+      "expected": {
+        "ready": true
+      }
+    }
+  ]
+}

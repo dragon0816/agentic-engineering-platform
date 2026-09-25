@@ -1,0 +1,40 @@
+{
+  "validation": {
+    "bridge_id": "bridge-your-computer",
+    "workspace_revision": "0000000000000000000000000000000000000000000000000000000000000000",
+    "skill": {
+      "namespace": "rf",
+      "name": "acme-dut-control",
+      "version": "1.0.0"
+    },
+    "target": {
+      "resource_id": "dut-acme-001",
+      "device_id": "acme-001",
+      "vendor": "acme",
+      "model": "radio-x1",
+      "firmware": "FW-2.3"
+    },
+    "commands": [
+      {
+        "name": "set_tx_power",
+        "arguments": {
+          "requested_dbm": 10.0
+        }
+      }
+    ],
+    "limits": [
+      {
+        "name": "tx_power",
+        "unit": "dBm",
+        "minimum": 14.5,
+        "maximum": 15.5
+      }
+    ],
+    "expected_state": [
+      {
+        "field": "ready",
+        "expected": true
+      }
+    ]
+  }
+}

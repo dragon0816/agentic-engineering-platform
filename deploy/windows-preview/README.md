@@ -8,8 +8,9 @@ It ships the capabilities the GTM weekly report needs — a bounded read of a fi
 inside the workspace, a project board reader, a workbook reader and the workbook writer —
 and the Skill and Workflow that run them. None of that does anything until you
 configure a project board and a workbook under `integrations`; `aep-host doctor`
-says whether you have. It contains no Git, browser, email, DUT or instrument
-adapter, so it cannot run workflow 13.
+says whether you have. It also contains a provider-neutral physical DUT boundary,
+but no vendor driver or vendor procedure. It contains no Git, browser or email
+execution adapter, so it cannot run workflow 13.
 
 **Nothing here is installed from a package index.** The bundle carries every
 wheel it needs and installs with `--no-index`, so it works on a machine whose
@@ -120,6 +121,82 @@ A route resolves whether or not it may run. Installing a Skill or Workflow is
 not permission to execute it: a dispatch is refused unless `grants.json` names
 the actor, the capability, its required permissions and policy, and an approval
 reference when the capability's policy asks for one.
+
+## Physical DUT validation (owner-run gate)
+
+This bundle can retain production-like DUT evidence, but only after you supply a
+reviewed vendor driver and explicitly enable it. CI never has either. Start from
+`dut-skill.example.json`, `dut-request.example.json` and
+`DUT_DRIVER_CONTRACT.md` in the extracted bundle. The example names are fake;
+replace every ACME value with the exact reviewed Skill, device, firmware,
+command and acceptance limits for your setup.
+
+Copy the reviewed Skill manifest into
+`workspace\assets\skills\dut-control.json`. Add a `dut` binding to `host.json`;
+the driver path must be absolute and its fixed arguments cannot contain
+credentials:
+
+```json
+"dut": {
+  "skill": { "namespace": "rf", "name": "acme-dut-control", "version": "1.0.0" },
+  "target": {
+    "resource_id": "dut-acme-001", "device_id": "acme-001", "vendor": "acme",
+    "model": "radio-x1", "firmware": "FW-2.3"
+  },
+  "driver": {
+    "executable": "C:/ApprovedTools/acme-dut-driver.exe",
+    "arguments": [], "timeout_seconds": 120
+  },
+  "physical_enabled": true,
+  "device_available": true
+}
+```
+
+When an instrument is required, add its exact identity and availability:
+
+```json
+"instrument": {
+  "resource_id": "instrument-rf-001", "instrument_id": "rf-001",
+  "model": "approved-model", "firmware": "1.2.3"
+},
+"instrument_available": true
+```
+
+Add the high-risk capability grant for this Bridge's bound actor. The Skill
+does not grant this permission:
+
+```json
+{
+  "actor": "employee.id",
+  "asset": { "namespace": "dut-engineering", "name": "validate-physical", "version": "1.0.0" },
+  "permissions": ["dut-engineering.validate-physical"],
+  "policy_refs": ["dut-physical-execution-policy"],
+  "approval_ref": "CHANGE-1234"
+}
+```
+
+Edit the request so its Bridge, Skill, target, optional instrument and firmware
+exactly match `host.json`. `workspace_revision` is the 64-character digest of
+the controller workspace revision under test. Then run:
+
+```bat
+verify.cmd
+dut-validate.cmd dut-request.example.json dut-evidence.json
+```
+
+The command first applies the company-workstation owner binding and normal
+Bridge policy. A wrong actor, Bridge, Skill, target, instrument, unavailable
+resource, missing grant, missing approval or disabled switch is refused before
+the driver runs. The driver receives typed JSON on standard input and returns
+state and measurements; the platform independently checks every declared limit
+and expected state. An out-of-limit result remains failed even when the driver
+exits successfully.
+
+Exit code zero means that the evidence is physical, production-like and passed.
+The complete evidence remains in `dut-evidence.json` for human review. A
+simulator or recording can exercise the same path during development, but its
+evidence is labelled `simulated`, returns a nonzero gate result and cannot be
+approved for republishing.
 
 When the shared platform has told this Bridge what its members chose, that
 arrives as `workspace\authorization.json` and replaces `grants.json`; having
@@ -460,6 +537,7 @@ at the top of each.
 | `weekly-preview.cmd` | Runs the dry run and prints the plan. Writes nothing. |
 | `weekly-apply.cmd` | Asks, then writes the plan into the workbook. |
 | `weekly-mail.cmd` | Saves this week's mail as a draft in Outlook. Sends nothing. |
+| `dut-validate.cmd` | Runs one explicitly approved DUT request and saves typed evidence. |
 
 `weekly-preview.cmd 2026_39W` names a week; with no argument it is this week.
 

@@ -1,107 +1,109 @@
-# Handoff — E2E-04 complete; E2E-01 is next
+# Handoff — E2E-01 implementation ready; owner hardware evidence pending
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `main`.
-Pull request: #101, merged as `31d5dbfe0e53f0e63aa7fbb3d4615b8db2ec271c`.
-Verified PR head: `4eec581c4438f74dda6ded06f5569f4cefe5b8aa`.
-CI run: `36077241493`, successful rerun job `107892304673`, passed in 3m24s.
+Branch: `codex/e2e-01-dut-engineering`.
+Pull request: #102, open; exact-head Windows/Python 3.12 CI pending.
 
-Progress across all phases remains in `docs/TASKS.md`. This file contains the
-current stopping point and constraints needed to continue without chat history.
+Progress across all phases remains in `docs/TASKS.md`. This file is the current
+stopping point. Product E2E-01 is **not complete** until the owner runs the
+Windows package on an enrolled company Bridge with a real DUT/instrument and a
+human accepts the resulting production-like evidence.
 
 ## Completed
 
-- Implemented the E2E-04 software continuous-evolution green path with a local
-  fixture repository and no external Git writes.
-- Added exact-version `SoftwareManifest`, external repository, interface and
-  release contracts. The Share Platform stores metadata and evidence only; it
-  does not copy software source code.
-- Added `SoftwareFailureReport` and `SoftwareImprovementRequest`. Issue capture
-  derives the responsible owner and exact repository/revision from the catalog.
-- Kept business approval, Bridge execution authorization, technical policy,
-  source review, merge, release and publication as separate transitions.
-- Added a pre-change reproduction gate. An unreproduced issue cannot enter the
-  Coding Harness, and a broken baseline regression prevents candidate creation.
-- Reused the E2E-03 `CodingHarness` for bounded repository modification and
-  validation. A failed acceptance case or repository regression blocks the
-  review artifact and release readiness.
-- Added an inert source-control adapter that produces an exact, digest-bound
-  pull-request candidate without contacting GitHub/GitLab or performing a Git
-  write. The Harness cannot merge, release or republish software.
-- Added explicit human source-review, merge, release and owner-republication
-  records. The new published version retains the prior exact version as its
-  rollback target and binds release evidence.
-- Added Bridge capabilities for issue capture (`read`) and approved change
-  preparation (`write`). Publishing software metadata does not install the
-  capability or authorize its execution on a Bridge.
-- Added four automated E2E tests covering the green path, unreproduced failures,
-  regression failures, source-code exclusion and secret-value rejection.
-- Updated architecture, contracts, roadmap, task status, README and the E2E-04
-  phase record after the implementation had passed verification.
-- PR #101's exact head passed the Windows/Python 3.12 verification workflow and
-  was merged without changing the validated head.
+- Added provider-neutral DUT, instrument, command, observation, deterministic
+  measurement/state validation, evidence, development and human-review
+  contracts under `src/dut/`.
+- Reused the E2E-03 bounded `CodingHarness` for a DUT controller change. The
+  development result is green only after the Harness repairs its deliberately
+  failing candidate and an independent simulator passes the new case and
+  regressions.
+- Added a high-risk physical validation capability. It is
+  `external_side_effect`, requires a permission, technical policy and approval
+  reference, and does not derive authority from a Skill or publication.
+- Added exact local capability execution through the existing resident Agent,
+  device admission and Bridge policy. No parallel authorization path was added.
+- Added company-host DUT configuration for an exact Skill, target/firmware,
+  optional instrument, resource availability, fixed driver executable and an
+  explicit `physical_enabled` switch.
+- Added a fixed-executable subprocess adapter. It uses an absolute executable,
+  fixed argument vector, `shell=False` and JSON over stdin/stdout. It contains
+  no vendor command behavior and the request/model cannot choose the program.
+- Added `aep-host dut-validate`, which saves the complete local outcome as JSON
+  and exits zero only for passing production-like physical evidence.
+- Added a Windows launcher, driver protocol, strict request example and
+  versioned Skill example to the offline preview. The bundle still contains no
+  vendor driver or vendor procedure.
+- Added automated E2E and company-host coverage for simulator development,
+  bounded repair, independent validation, unauthorized/wrong/unavailable
+  refusal, secret rejection, simulated-evidence rejection, fixed process
+  invocation, owner admission, Bridge policy and bundle contents.
+- Updated architecture, contracts, roadmap, tasks, README and the E2E-01 phase
+  record only after the automated implementation passed its focused tests.
 
 ## In Progress
 
-- None. Stop here at the completed E2E-04 gate.
+- Run PR #102's exact-head Windows/Python 3.12 workflow, merge the unchanged
+  passing head, and replace this section with the final PR/CI record.
 
 ## Remaining
 
-- E2E-01 physical DUT/chipset engineering is the next and final gate in the
-  approved product sequence. Its architecture and acceptance slice have not
-  started.
-- E2E-01 will require an enrolled company computer for real DUT/vendor-tool
-  evidence. CI must remain inert.
+- The owner must provide the actual reviewed vendor Skill and a local driver
+  that implements `deploy/windows-preview/DUT_DRIVER_CONTRACT.md`.
+- On the enrolled company computer, configure the exact target, firmware,
+  optional instrument, grant and `physical_enabled` switch, then run the shipped
+  `dut-validate.cmd` against the edited request.
+- Inspect `dut-evidence.json`. It must be `mode: physical`,
+  `evidence_level: production_like`, `status: passed`, with every validator
+  outcome passing. A human domain owner must then accept the evidence before a
+  Skill or controller change is republished.
+- Record that evidence and review in the repository. Only then change E2E-01
+  and the five-gate product milestone to complete.
 
 ## Architecture and migration decisions
 
-- **REUSE** the resident `LocalAgent`, Gateway, Bridge, installed capability and
-  local-policy path; E2E-04 introduces no parallel runtime.
-- **REUSE** the E2E-03 `CodingHarness`, validator boundary, bounded repair loop,
-  change set and validation evidence.
-- **ADAPT** the E2E-05 exact-version catalog, improvement-request, approval,
-  evidence and rollback concepts to external software repositories.
-- **ADD** only Software metadata/contracts, a local installed-repository
-  adapter, pre-change reproduction, an inert pull-request candidate and typed
-  human review/merge/release/republish transitions.
-- **DO NOT MIGRATE** a source-repository implementation for this slice. No
-  overlapping source capability was needed to satisfy the acceptance scenario.
-- Software source remains in the external repository identified by provider,
-  locator and revision. The Share Platform represents ownership, version,
-  interface, compatibility and release evidence.
-- Reproduction must happen before mutation. The exact reported case must fail
-  with the reported observed output while the existing regression set remains
-  green; otherwise development is refused.
-- Pull-request candidates are immutable, exact-change artifacts bound to the
-  Harness validation digest. They are not proof of human review, merge, release
-  or publication.
-- Human source review, merge authority, release authority and asset-owner
-  republishing remain explicit. No automated transition implies the next one.
-- This gate is an inert local proof. Production repository checkout, hosted
-  GitHub/GitLab PR APIs, branch protection, CI callbacks, release automation and
-  production Registry persistence remain outside its scope.
+- **REUSE** the resident `LocalAgent`, Gateway, Bridge executor, local policy,
+  enrollment/device admission and E2E-03 Coding Harness.
+- **ADD** provider-neutral DUT contracts, an adapter protocol, independent
+  validator, physical admission service and owner evidence CLI.
+- **DO NOT MIGRATE** vendor behavior. The documented source repositories were
+  searched for DUT, chipset, Qualcomm and MediaTek implementations and contained
+  no matching implementation. Do not invent vendor commands in core.
+- Vendor procedures live in an exact versioned Skill; low-level command behavior
+  lives in the reviewed host driver. Neither one grants execution permission.
+- CI may use simulator or recording adapters only. Their evidence is always
+  `simulated`; it cannot satisfy `DutChangeReview` or the product gate.
+- Physical execution is allowed only for the company workstation's bound owner,
+  through normal Bridge policy, with exact Skill/resource identity and an
+  explicit host enable switch. Refusals occur before driver invocation.
+- Driver exit code does not decide validation. The platform compares typed
+  units, measurement bounds and expected state. Out-of-limit evidence stays
+  failed.
+- Real credentials are never asset, request, driver-argument or evidence
+  content. A driver resolves any required credential from its approved runtime
+  environment.
 
 ## Exact verification commands and results
 
 Local Windows/Python 3.12:
 
 ```text
-.venv\Scripts\python.exe -m pytest tests\test_product_e2e_04.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e04-final
-4 passed in 0.32s
+.venv\Scripts\python.exe -m pytest tests\test_product_e2e_01.py tests\test_dut_host.py tests\test_windows_preview_bundle.py tests\test_weekly_report_documented_grants.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e01-final-focused
+24 passed in 0.63s
 
-.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .scratch\pytest-e2e04-full
-1300 passed, 4 skipped in 70.17s
+.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-e2e01-final
+1289 passed, 4 skipped in 33.34s
 
 .venv\Scripts\python.exe -m ruff check .
 All checks passed
 
 .venv\Scripts\python.exe -m ruff format --check .
-252 files already formatted
+262 files already formatted
 
 .venv\Scripts\python.exe -m mypy
-Success: no issues found in 203 source files
+Success: no issues found in 211 source files
 
-.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e04
+.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e01-final
 Successfully built sdist and wheel
 
 .venv\Scripts\python.exe -m pip check
@@ -115,37 +117,52 @@ The four skips are existing host-dependent cases: two Windows link privilege
 checks, IPv6 loopback availability and a directory-link privilege check. No
 Ubuntu or Python 3.11 validation was run, per owner instruction.
 
-GitHub Actions on PR #101's exact head:
+A local full run reached 1299 passed and then reported nine existing browser
+cases as failed/error because Edge exited without publishing its remote-debug
+port. The DUT suites passed, and the complete non-browser regression is green.
+The exact-head GitHub Windows workflow, which includes the browser suite and
+offline-preview install, is the merge authority and is still pending.
 
-```text
-Platform verification / verify
-run 36077241493, rerun job 107892304673
-Windows, Python 3.12
-passed in 3m24s
-```
+## Company-PC validation procedure
 
-The first attempt of the same exact head had one unrelated transient failure in
-the existing browser-profile test (`navigation_failed: WebSocketError`). The
-E2E-04 suite passed in that attempt. The unchanged-head rerun passed every job,
-including the full tests and Windows offline-preview build/install.
+1. Download and extract the Windows preview from the merged commit's CI artifact
+   to a short path such as `C:\aep`.
+2. Read `DUT_DRIVER_CONTRACT.md` and replace the ACME examples. Copy the reviewed
+   Skill into the installed `workspace\assets\skills` directory.
+3. Add the `dut` object shown in the bundle README to installed `host.json`,
+   using the exact driver, target, firmware and optional instrument. Set
+   `physical_enabled` only when the setup is ready.
+4. Add the documented `dut-engineering/validate-physical@1.0.0` grant for the
+   bound owner with its permission, policy and approval reference.
+5. Edit `dut-request.example.json` so Bridge, Skill, resource identities and
+   acceptance limits match the host. Replace `workspace_revision` with the
+   64-character digest of the controller revision under test.
+6. Run `verify.cmd`, then:
+
+   ```bat
+   dut-validate.cmd dut-request.example.json dut-evidence.json
+   ```
+
+7. Keep the evidence even when the command returns nonzero. A nonzero result is
+   a refusal, execution failure, simulated result or failed measurement and must
+   not be approved.
 
 ## Known issues
 
-- The source-control adapter is inert; no live GitHub/GitLab PR, merge or
-  release operation is part of the product E2E proof.
-- The installed repository is a trusted, host-configured local fixture. Remote
-  clone/fetch, credential handling and multi-tenant workspace allocation are
-  not implemented.
-- Routing and model responses are deterministic/scripted acceptance fixtures;
-  no live model/provider is used as acceptance evidence.
-- The Software catalog and lifecycle records are in memory; production
-  Registry/database persistence is outside this gate.
+- No real DUT, instrument or vendor driver was available on this development
+  computer. The production-like gate is intentionally pending.
+- The bundled Skill, target and command names are fake examples and must not be
+  used as company evidence.
+- The product records the supplied workspace revision in evidence; the operator
+  and reviewed driver remain responsible for selecting the actual revision under
+  test.
+- The local Edge remote-debug profile did not start during the full browser
+  suite. The unchanged browser implementation is covered by GitHub Windows CI.
 - `.claude/` is user-owned local state. Do not commit, modify or remove it.
 
 ## Next Recommended Action
 
-Begin E2E-01 with an architecture and requirements gate based on its user-level
-scenario in `PRODUCT_ACCEPTANCE_TESTS.md`. Reuse the existing Harness and Bridge
-boundaries, keep CI inert, and define the smallest fixture proof plus a separate
-production-like validation plan for an enrolled company PC before implementing
-real DUT/vendor-tool behavior.
+Finish PR and CI integration first. After merge, stop implementation work and
+give the owner the CI-built Windows package. Do not redesign the DUT boundary,
+add vendor commands to core, or mark E2E-01 complete before real company-PC
+evidence and human review are committed.

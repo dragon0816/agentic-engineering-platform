@@ -7,9 +7,11 @@ from urllib.parse import urlsplit
 from pydantic import Field, StrictBool, StringConstraints, field_validator, model_validator
 
 from capabilities.weekly_report.contracts import WeeklyReportSettings
-from common.assets import SecretRef, reject_embedded_secrets
+from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
+from dut.adapters import PhysicalDriverConfiguration
+from dut.contracts import DutTarget, InstrumentTarget
 from integrations.github_project import GitHubProjectConnection
 from models.catalog import ModelCatalog
 from workflow.host_bridge import BridgeRegistration
@@ -147,6 +149,25 @@ class ModelBinding(Contract):
         return self
 
 
+class DutHostBinding(Contract):
+    """Trusted, credential-free wiring for one company-host DUT driver."""
+
+    skill: AssetIdentity
+    target: DutTarget
+    instrument: InstrumentTarget | None = None
+    driver: PhysicalDriverConfiguration
+    physical_enabled: StrictBool = False
+    device_available: StrictBool = True
+    instrument_available: StrictBool = True
+
+    @model_validator(mode="after")
+    def instrument_availability(self) -> Self:
+        if self.instrument is None and not self.instrument_available:
+            raise ValueError("instrument availability requires an instrument")
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -174,6 +195,9 @@ class CompanyHostConfiguration(Contract):
     # matches commands and runs Workflows without reasoning about anything,
     # which is what every host did before this field existed.
     models: ModelBinding | None = None
+    # Optional physical DUT boundary. The driver is fixed by trusted local
+    # configuration and remains disabled until the operator explicitly opts in.
+    dut: DutHostBinding | None = None
     # How long one capability step may run. The platform's default of thirty
     # seconds is right for a file read and wrong for a Jira search over a
     # week's tickets with their comment threads and a throttle waited out;
@@ -257,6 +281,7 @@ class DoctorCheck(Contract):
         "platform",
         "integrations",
         "models",
+        "dut",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text

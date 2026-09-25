@@ -18,6 +18,7 @@ from typing import Literal, Self
 from pydantic import model_validator
 
 from agent.gateway import Gateway
+from capabilities.runtime import CapabilityInvocation
 from common.base import Contract, Symbol
 from common.distribution import (
     BridgeStateSnapshot,
@@ -28,7 +29,12 @@ from common.distribution import (
 )
 from common.enrollment import DeviceAdmissionCode, admit_device
 from common.execution import CapabilityResult, RequestContext, RouteDecision, TraceIdentifiers
-from common.local_agent import BridgeMembership, Ingress, LocalAgentRequest
+from common.local_agent import (
+    BridgeMembership,
+    Ingress,
+    LocalAgentRequest,
+    LocalCapabilityRequest,
+)
 from host_runtime.state import SqliteLocalState
 from workflow.engine import WorkflowRunSnapshot
 
@@ -194,6 +200,52 @@ class LocalAgent:
             workflow=snapshot,
             run=run,
             unrecorded=unrecorded,
+        )
+
+    async def execute_capability(self, request: LocalCapabilityRequest) -> LocalAgentOutcome:
+        """Execute one exact operator-selected capability through normal admission and policy.
+
+        This is the capability counterpart of an exact remote Workflow job. It
+        does not route or ask a model, and it adds no authority: LocalAgent
+        admission runs first and Bridge policy still decides the dispatch.
+        """
+        item = LocalCapabilityRequest.model_validate(request)
+        refusal = self.admit(item.actor, item.bridge_id, item.on_behalf_of)
+        if refusal is not None:
+            return LocalAgentOutcome(
+                trace=item.trace,
+                ingress=item.ingress,
+                actor=item.actor,
+                on_behalf_of=item.on_behalf_of,
+                refusal=refusal,
+            )
+        context = RequestContext(
+            trace=item.trace,
+            actor=item.actor,
+            namespace=item.target.namespace,
+            message=(
+                f"exact capability {item.target.namespace}/{item.target.name}@{item.target.version}"
+            ),
+            channel=item.ingress,
+        )
+        result = await self.gateway.bridge.execute(
+            CapabilityInvocation(
+                context=context,
+                target=item.target,
+                arguments=item.arguments,
+            )
+        )
+        return LocalAgentOutcome(
+            trace=item.trace,
+            ingress=item.ingress,
+            actor=item.actor,
+            on_behalf_of=item.on_behalf_of,
+            decision=RouteDecision(
+                kind="capability",
+                target=item.target,
+                reason="Exact local capability request",
+            ),
+            capability=result,
         )
 
     def _wait(self, requested: float | None) -> float | None:
