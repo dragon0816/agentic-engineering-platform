@@ -28,8 +28,12 @@ Base: `main` at `5dc6dffa3f144cd8d28f58d382157ed56cfd22a5`.
 
 ## In Progress
 
-- Create, review and merge the small PR for the Python test-environment
-  preparation. No code or platform contract changes are included.
+- Branch `fix/codex-action-test-environment` is pushed at `0da472e`. Creating
+  its review PR is blocked because the configured GitHub CLI token has only
+  `admin:repo_hook` and `project` scopes, not the `public_repo` scope GitHub
+  requires for `createPullRequest`. The in-app browser is also signed out.
+- The change is ready for a review-only PR. No code or platform contract
+  changes are included.
 
 ## Remaining
 
@@ -102,6 +106,8 @@ instruction.
 
 ## Next Recommended Action
 
-Review and merge the pending test-environment PR. Then rerun Issue #106 using
-one focused, reproducible remote failure with the exact commit, bounded error
-excerpt, expected/actual result and safe artifact references.
+Create a review-only PR from `fix/codex-action-test-environment` to `main`
+(sign in to GitHub in the browser or grant the CLI token `public_repo`), then
+review and merge it. Rerun Issue #106 using one focused, reproducible remote
+failure with the exact commit, bounded error excerpt, expected/actual result
+and safe artifact references.
