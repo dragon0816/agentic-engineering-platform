@@ -2089,3 +2089,48 @@ review; release evidence binds the new Software identity to that merge.
 and creates a new manifest whose `previous_version` remains registered for
 rollback. None of these contracts installs an executable capability or creates
 a Bridge grant.
+
+## E2E-01 DUT and instrument engineering
+
+`DutTarget` and `InstrumentTarget` identify the exact local resources involved,
+including DUT vendor/model/firmware and optional instrument model/firmware.
+Their `resource_id` values must also be advertised by the executing Bridge.
+`DutCommand` holds a named, typed JSON argument object and rejects credential
+material.
+
+`DutValidationRequest` binds a Bridge, 64-character workspace revision, exact
+versioned Skill, target, optional instrument, ordered unique commands and one or
+more deterministic acceptance criteria. `MeasurementLimit` has a unit and
+finite minimum and/or maximum. `ExpectedState` compares one observed state
+field to a typed JSON value. The request is invalid without at least one limit
+or expected state.
+
+Each adapter returns one `DutObservation` per command. `DutValidationService`
+constructs `ValidatorOutcome` values by comparing measurements, units and final
+state itself. `DutValidationEvidence` requires aligned commands/observations and
+derives its pass/fail status from all outcomes. An adapter mode of `simulator`
+or `recording` can only produce `simulated` evidence; `physical` is the sole
+source of `production_like` evidence.
+
+`DutDevelopmentRequest` combines an existing `CodingHarnessRequest` with the
+simulator request. Both must name the same starting workspace revision and the
+Harness must declare the exact Skill version. `DutDevelopmentResult` can report
+`simulated_validated` only when both the Harness and independent simulator pass,
+and its physical gate is always false.
+
+`DutPhysicalValidationRequest` is dispatched as the high-risk
+`dut-engineering/validate-physical@1.0.0` capability. `DutHostBinding` supplies
+the exact installed Skill, local target/instrument identities, availability,
+an absolute fixed driver command and an explicit physical enable switch. The
+company-host service applies device admission and checks registration, Skill,
+resource and execution-mode identity before invoking the adapter.
+
+`PhysicalDriverConfiguration` rejects relative executables and credential-like
+fixed arguments. `SubprocessDutAdapter` runs the fixed argument vector with no
+shell and exchanges JSON over standard input/output. It does not decide whether
+a measurement passed.
+
+`DutChangeReview` is the separate human business decision. An approved review
+requires passing production-like evidence and therefore cannot be constructed
+from CI simulation, a recording or an out-of-limit physical run. Review approval
+does not itself publish a Skill or grant future execution permission.

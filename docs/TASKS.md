@@ -33,8 +33,9 @@ A product-direction review merged in PR #97 and is documented in
 `docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
 E2E order. E2E-02 merged in PR #98, E2E-03 merged in PR #99 and E2E-05 merged
 in PR #100 after each exact head passed Windows/Python 3.12 CI. E2E-04 merged in
-PR #101 after its exact head passed Windows/Python 3.12 CI. E2E-01 is the next
-approved gate and requires a production-like company-host validation plan.
+PR #101 after its exact head passed Windows/Python 3.12 CI. E2E-01's inert
+simulator proof and Windows owner-run physical validation entry point are
+implemented; the production-like company-host run remains pending.
 A row says `done` only after its pull request merges.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
@@ -60,7 +61,7 @@ start until the preceding row has a reproducible passing path.
 | E2E-03 parser/transformation development | #99 | done | Pinned bounded workspace, pre-mutation plan, actual patches, injected declared validator, deliberately failing first candidate, one structured repair, new plus regression validation, trace and Skill versions; no commit/push/publish |
 | E2E-05 knowledge continuous evolution | #100 | done | Exact version query with Raw citations, feedback evidence, approved Bridge candidate write, immutable Raw, persisted rejected claims, new plus regression evaluation, separate domain approval, versioned republish and rollback |
 | E2E-04 software continuous evolution | #101 | done | Exact external repository metadata, report routing, pre-change reproduction, approved Harness development, issue plus regression validation, inert PR preparation, separate human review/merge/release/republish and exact rollback |
-| E2E-01 DUT/chipset engineering | — | next | Requires a fixture proof in inert CI and production-like evidence from an enrolled company computer |
+| E2E-01 DUT/chipset engineering | — | owner validation pending | Provider-neutral contracts, bounded Harness + simulator proof, exact Skill/resource admission, high-risk Bridge policy, fixed local driver boundary and evidence CLI; real enrolled-company-PC evidence remains required |
 
 ## Phase 0 — Architecture and inventory (complete)
 

@@ -92,6 +92,23 @@ python -m pytest tests/test_product_e2e_04.py -q
 
 See [the E2E-04 implementation record](docs/phases/E2E_04_SOFTWARE_EVOLUTION.md).
 
+E2E-01 adds the provider-neutral device/chipset development boundary. The
+existing Coding Harness performs a bounded change and a simulator independently
+checks the new case plus regressions. Physical validation is a separate,
+high-risk Bridge capability installed only from trusted company-host
+configuration. It pins the exact Skill, DUT, firmware, optional instrument and
+fixed local driver; typed state and measurement limits decide success. CI can
+exercise only simulator or recording adapters and cannot produce
+production-like evidence. Reproduce the inert gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_01.py tests/test_dut_host.py -q
+```
+
+See [the E2E-01 implementation and owner-run gate](docs/phases/E2E_01_DUT_ENGINEERING.md).
+The product gate remains pending until its Windows bundle is run on the enrolled
+company Bridge with real DUT/instrument evidence and accepted by a human reviewer.
+
 Phase 2 entry points are `agent.routing.RequestRouter`, `agent.skills.SkillRegistry`,
 `capabilities.runtime.InstalledCapabilities`, `workflow.dispatch.BridgeExecutor`
 and `capabilities.mcp.MCPAdapter`. See

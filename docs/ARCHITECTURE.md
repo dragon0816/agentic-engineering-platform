@@ -440,6 +440,50 @@ Software version links the release evidence and retains the prior exact version
 for rollback. Publication does not install or authorize the Software on a
 Bridge.
 
+### E2E-01 provider-neutral DUT engineering
+
+DUT development reuses the bounded Coding Harness, resident Agent, Gateway,
+Bridge policy and company-host enrollment path. Vendor knowledge is an exact
+versioned Skill and vendor command execution belongs to a reviewed local driver;
+the core runtime contains neither vendor procedures nor chipset commands.
+
+```text
+bounded requirement -> Coding Harness -> simulator -> independent validator
+                                                |
+                                       simulated evidence only
+
+approved operator request -> resident Agent admission -> Bridge policy
+                         -> fixed host driver -> state/measurements
+                         -> independent validator -> physical evidence
+                         -> human review -> later republish decision
+```
+
+Simulator and physical adapters share `DutValidationRequest` and
+`DutObservation`. The subprocess boundary uses one absolute executable selected
+by trusted host configuration, a fixed argument vector, `shell=False`, and JSON
+over standard input/output. A model, Skill or request cannot select an
+executable or create a permission grant.
+
+The physical capability is `external_side_effect` and high risk. Before the
+driver runs, the local Agent and Bridge require the bound company-workstation
+actor, exact Bridge identity, grant, approval reference and policy. The DUT
+service additionally requires the configured Skill version, target, firmware,
+optional instrument and advertised available resources. The host has a separate
+`physical_enabled` switch.
+
+The validator, rather than the driver exit code or model confidence, compares
+typed measurements, units and state. Evidence binds the trace, Bridge, workspace
+revision, Skill, DUT/firmware, optional instrument, ordered commands,
+observations and validator outcomes. Simulator and recording adapters always
+produce `simulated` evidence. Only a real physical adapter can produce
+`production_like` evidence, and only passing production-like evidence can enter
+an approved human review record.
+
+CI installs no vendor driver and cannot satisfy the physical gate. The Windows
+preview carries only the provider-neutral entry point, driver protocol and
+example configuration. Product E2E-01 remains pending until an enrolled company
+Bridge records a real passing run and a human accepts that evidence.
+
 ### Team Platform Plane
 
 The shared Team Platform is primarily a **control plane**, not the default location where every engineer's reasoning executes. It owns shared capability/knowledge management such as:

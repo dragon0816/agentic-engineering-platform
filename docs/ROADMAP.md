@@ -15,12 +15,13 @@ The product E2E gate order and observable completion evidence are defined in
 
 The fixed order is **E2E-02 → E2E-03 → E2E-05 → E2E-04 → E2E-01**. E2E-02
 merged in PR #98, E2E-03 in PR #99, E2E-05 in PR #100 and E2E-04 in PR #101.
-The E2E-04 proof reuses the resident Agent, Gateway, Bridge and Coding Harness,
-adds exact Software/repository metadata, requires pre-change failure
-reproduction, prepares an inert review artifact, and models human review,
-merge, release and republish as separate transitions. Its boundary is
-documented in `docs/phases/E2E_04_SOFTWARE_EVOLUTION.md`. E2E-01 is the next
-product gate and needs production-like validation on an enrolled company PC.
+E2E-01 now has an inert simulator proof and an owner-run Windows company-host
+entry point. It reuses the resident Agent, Gateway, Bridge policy and Coding
+Harness, while an exact Skill and fixed local driver supply vendor-specific
+behavior. CI cannot produce physical evidence. The five-gate milestone remains
+open until the owner records a passing production-like run on an enrolled
+company PC and a human accepts it. The implementation boundary and exact later
+run are documented in `docs/phases/E2E_01_DUT_ENGINEERING.md`.
 
 ## Objective
 
