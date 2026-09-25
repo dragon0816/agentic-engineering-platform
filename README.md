@@ -78,6 +78,20 @@ python -m pytest tests/test_product_e2e_05.py -q
 
 See [the E2E-05 implementation record](docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md).
 
+E2E-04 proves governed Software evolution without moving source code into the
+Share Platform. A user reports a failure against an exact Software version; the
+platform derives its owner and repository, reproduces the failure before any
+change, invokes the bounded Coding Harness, requires the issue case and existing
+regressions to pass, and prepares an inert PR/MR review artifact. Human review,
+merge, release and platform republish remain explicit transitions. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_04.py -q
+```
+
+See [the E2E-04 implementation record](docs/phases/E2E_04_SOFTWARE_EVOLUTION.md).
+
 Phase 2 entry points are `agent.routing.RequestRouter`, `agent.skills.SkillRegistry`,
 `capabilities.runtime.InstalledCapabilities`, `workflow.dispatch.BridgeExecutor`
 and `capabilities.mcp.MCPAdapter`. See

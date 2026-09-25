@@ -1,99 +1,107 @@
-# Handoff — E2E-05 complete; E2E-04 is next
+# Handoff — E2E-04 implementation complete; PR and merge pending
 
 Updated: 2026-09-25 (Asia/Taipei).
-Branch: `main`.
-E2E-05 pull request: #100, merged as `0f7437027af783f416d68b24bd7c6de746624f92`.
-Verified PR head: `31c48709cdf40454dfee6cf4a7d64ba3b91415e7`.
-CI run: `36038167378`, job `107763372657`, passed in 3m26s.
+Branch: `codex/e2e-04-software-evolution`.
+Base: `main` at `8ab7157544f0ce26954e2718f4c8e422f3f08ac5`.
 
 Progress across all phases remains in `docs/TASKS.md`. This file contains the
 current stopping point and constraints needed to continue without chat history.
 
 ## Completed
 
-- E2E-02, E2E-03 and E2E-05 are merged in the approved order through PRs #98,
-  #99 and #100.
-- E2E-05 adds exact-version `KnowledgeManifest` records and an in-memory
-  `KnowledgeCatalog` that admits only published, digest-matching local vaults and
-  retains previous versions for rollback.
-- `knowledge_query.ask` runs through the resident Personal Agent, Gateway and
-  Bridge. A grounded answer binds exact asset/version, trace, answer and Raw
-  passages, and every sentence must cite Raw evidence.
-- Feedback becomes a structured `KnowledgeImprovementRequest` with the original
-  answer/citations, expected information, reproduction and acceptance criteria.
-  It cannot mutate the published Knowledge version.
-- Maintainer triage approval is required before candidate development. Candidate
-  creation is a separately authorized Bridge `write` capability confined to a
-  host-configured workspace.
-- Candidate creation copies the base vault, applies a typed `WritePlan`, removes
-  partial output on failure, preserves Raw byte-for-byte and retains the settled
-  decision record.
-- Validation binds the exact candidate content and ordered new/regression cases.
-  A regression failure blocks approval, and any post-validation content drift
-  invalidates the evidence.
-- Domain-owner approval remains separate from technical validation, Bridge
-  authorization and publication. Publishing creates vNext while the old exact
-  version remains queryable.
-- Exact claims persisted as `- reject:` in `decisions.md` cannot be reintroduced
-  by a later candidate plan.
-- The product gate uses a committed miniature vault and a deterministic scripted
-  model; CI remains inert and performs no production side effects.
+- Implemented the E2E-04 software continuous-evolution green path with a local
+  fixture repository and no external Git writes.
+- Added exact-version `SoftwareManifest`, external repository, interface and
+  release contracts. The Share Platform stores metadata and evidence only; it
+  does not copy software source code.
+- Added `SoftwareFailureReport` and `SoftwareImprovementRequest`. Issue capture
+  derives the responsible owner and exact repository/revision from the catalog.
+- Kept business approval, Bridge execution authorization, technical policy,
+  source review, merge, release and publication as separate transitions.
+- Added a pre-change reproduction gate. An unreproduced issue cannot enter the
+  Coding Harness, and a broken baseline regression prevents candidate creation.
+- Reused the E2E-03 `CodingHarness` for bounded repository modification and
+  validation. A failed acceptance case or repository regression blocks the
+  review artifact and release readiness.
+- Added an inert source-control adapter that produces an exact, digest-bound
+  pull-request candidate without contacting GitHub/GitLab or performing a Git
+  write. The Harness cannot merge, release or republish software.
+- Added explicit human source-review, merge, release and owner-republication
+  records. The new published version retains the prior exact version as its
+  rollback target and binds release evidence.
+- Added Bridge capabilities for issue capture (`read`) and approved change
+  preparation (`write`). Publishing software metadata does not install the
+  capability or authorize its execution on a Bridge.
+- Added four automated E2E tests covering the green path, unreproduced failures,
+  regression failures, source-code exclusion and secret-value rejection.
+- Updated architecture, contracts, roadmap, task status, README and the E2E-04
+  phase record after the implementation had passed verification.
 
 ## In Progress
 
-- None. Stop here by owner instruction after Phase 3 / E2E-05.
+- The implementation and documentation are verified locally but have not yet
+  been committed, pushed, reviewed by GitHub Actions or merged.
 
 ## Remaining
 
-- E2E-04 software continuous evolution is the next gate in
-  `docs/PRODUCT_ACCEPTANCE_TESTS.md`. It has not started.
-- E2E-01 physical DUT/chipset engineering remains blocked behind E2E-04 and
-  will require later validation on an enrolled company computer.
-- The older Phase 7 workflow backlog remains separate from this fixed product
-  E2E sequence; do not resume it by inference.
+- Create coherent commits, open a PR against `main`, require the exact PR head
+  to pass the Windows/Python 3.12 verification job, then merge without altering
+  the validated head.
+- E2E-01 physical DUT/chipset engineering is the next and final gate in the
+  approved product sequence. Do not start it until E2E-04 is merged and its
+  reproducible green path is recorded.
+- E2E-01 will require an enrolled company computer for real DUT/vendor-tool
+  evidence. CI must remain inert.
 
-## Architecture decisions made
+## Architecture and migration decisions
 
-- **REUSE** resident `LocalAgent`, `Gateway`, `BridgeExecutor`, installed Skills
-  and `LocalPolicy`; there is no second agent/runtime or query path.
-- **REUSE** Phase 4 `Vault`, `QueryEngine`, Raw provenance, `WritePlan`, decision
-  records and immutable-Raw behavior.
-- **WRAP** exact-version query as a Bridge `read` capability and candidate vault
-  creation as a Bridge `write` capability requiring execution approval.
-- **ADD** only the missing version, feedback, candidate and evaluation contracts
-  plus an in-memory exact-version catalog for this gate.
-- **DO NOT MIGRATE** another source implementation. Existing migrated Knowledge
-  behavior already supplied the required base.
-- Feedback, maintainer triage, automated validation, domain approval,
-  publication and execution authorization are independent transitions.
-- Published versions and validation evidence carry exact digests. Validation
-  evidence cannot authorize different or later-modified content.
-- Rejected-claim enforcement is exact phrase matching. Semantic-equivalence
-  detection is deferred and must not be claimed as implemented.
-- This is an inert local proof, not a production Registry/database, remote vault
-  service, live-model evaluation or automatic issue/repository integration.
+- **REUSE** the resident `LocalAgent`, Gateway, Bridge, installed capability and
+  local-policy path; E2E-04 introduces no parallel runtime.
+- **REUSE** the E2E-03 `CodingHarness`, validator boundary, bounded repair loop,
+  change set and validation evidence.
+- **ADAPT** the E2E-05 exact-version catalog, improvement-request, approval,
+  evidence and rollback concepts to external software repositories.
+- **ADD** only Software metadata/contracts, a local installed-repository
+  adapter, pre-change reproduction, an inert pull-request candidate and typed
+  human review/merge/release/republish transitions.
+- **DO NOT MIGRATE** a source-repository implementation for this slice. No
+  overlapping source capability was needed to satisfy the acceptance scenario.
+- Software source remains in the external repository identified by provider,
+  locator and revision. The Share Platform represents ownership, version,
+  interface, compatibility and release evidence.
+- Reproduction must happen before mutation. The exact reported case must fail
+  with the reported observed output while the existing regression set remains
+  green; otherwise development is refused.
+- Pull-request candidates are immutable, exact-change artifacts bound to the
+  Harness validation digest. They are not proof of human review, merge, release
+  or publication.
+- Human source review, merge authority, release authority and asset-owner
+  republishing remain explicit. No automated transition implies the next one.
+- This gate is an inert local proof. Production repository checkout, hosted
+  GitHub/GitLab PR APIs, branch protection, CI callbacks, release automation and
+  production Registry persistence remain outside its scope.
 
 ## Exact verification commands and results
 
 Local Windows/Python 3.12:
 
 ```text
-.venv\Scripts\python.exe -m pytest tests\test_product_e2e_05.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e05-focused-final
-5 passed in 0.49s
+.venv\Scripts\python.exe -m pytest tests\test_product_e2e_04.py -q -p no:cacheprovider --basetemp .scratch\pytest-e2e04-final
+4 passed in 0.32s
 
-.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .scratch\pytest-e2e05-full-final
-1296 passed, 4 skipped in 68.51s
+.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .scratch\pytest-e2e04-full
+1300 passed, 4 skipped in 70.17s
 
 .venv\Scripts\python.exe -m ruff check .
 All checks passed
 
 .venv\Scripts\python.exe -m ruff format --check .
-244 files already formatted
+252 files already formatted
 
 .venv\Scripts\python.exe -m mypy
-Success: no issues found in 196 source files
+Success: no issues found in 203 source files
 
-.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e05-final2
+.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\build-e2e04
 Successfully built sdist and wheel
 
 .venv\Scripts\python.exe -m pip check
@@ -103,34 +111,27 @@ git diff --check
 passed
 ```
 
-GitHub Actions on PR #100:
-
-```text
-Platform verification / verify
-run 36038167378, job 107763372657
-Windows, Python 3.12
-passed in 3m26s
-```
-
-The four local skips are existing host-dependent cases: two Windows link
-privilege checks, IPv6 loopback availability and a directory-link privilege
-check. No Ubuntu or Python 3.11 validation was run, per owner instruction.
+The four skips are existing host-dependent cases: two Windows link privilege
+checks, IPv6 loopback availability and a directory-link privilege check. No
+Ubuntu or Python 3.11 validation was run, per owner instruction.
 
 ## Known issues
 
-- A live model/provider has not been used as E2E-05 acceptance evidence.
-- Rejected-claim protection currently enforces exact persisted phrases.
-- The catalog and vault paths are process-local; production Registry/database,
-  remote asset transport and distributed locking remain outside this gate.
-- Production candidate workspace allocation still needs a host/control-plane
-  adapter behind the same confined Bridge capability.
+- The source-control adapter is inert; no live GitHub/GitLab PR, merge or
+  release operation is part of the product E2E proof.
+- The installed repository is a trusted, host-configured local fixture. Remote
+  clone/fetch, credential handling and multi-tenant workspace allocation are
+  not implemented.
+- Routing and model responses are deterministic/scripted acceptance fixtures;
+  no live model/provider is used as acceptance evidence.
+- The Software catalog and lifecycle records are in memory; production
+  Registry/database persistence is outside this gate.
 - `.claude/` is user-owned local state. Do not commit, modify or remove it.
 
 ## Next Recommended Action
 
-Read `PRODUCT_VISION.md`, `PRODUCT_ACCEPTANCE_TESTS.md`, `docs/ARCHITECTURE.md`,
-`docs/TASKS.md` and this handoff. Prepare the E2E-04 software continuous
-evolution plan from its user-level acceptance scenario before changing code.
-Reuse the E2E-03 Harness and E2E-05 improvement/evidence/approval boundaries.
-Do not weaken exact versioning, external validation, rollback, or the separation
-of business approval, technical policy, publication and execution permission.
+Commit the verified implementation and documentation, open the E2E-04 PR, and
+merge only after the exact PR head passes the Windows/Python 3.12 verification
+job. Then update this handoff with the PR, merge and CI evidence. The following
+development phase is E2E-01; begin with its architecture/requirements gate and
+preserve inert CI while planning real validation on an enrolled company PC.
