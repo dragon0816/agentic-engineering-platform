@@ -43,8 +43,9 @@ GitHub write access.
 
 ## In Progress
 
-- PR #107 needs its updated branch pushed, then its Windows/Python 3.12 CI
-  needs to pass. It remains review-only and must not be merged automatically.
+- PR #107 exact implementation head `a23a043` passed GitHub Actions run
+  `36227946815` on Windows/Python 3.12 in 3m31s. It remains review-only and
+  must not be merged automatically.
 
 ## Remaining
 
@@ -105,6 +106,10 @@ passed through tests/test_codex_remote_test_workflow.py
 
 git diff --check
 passed
+
+GitHub Actions run 36227946815 at a23a043
+passed in 3m31s on Windows/Python 3.12, including pytest, Ruff, mypy, build,
+pip check, offline preview installation and artifact upload
 ```
 
 The four skips are existing Windows link-privilege and IPv6-loopback cases. No
@@ -121,6 +126,6 @@ Ubuntu or Python 3.11 validation was run locally, per owner instruction.
 
 ## Next Recommended Action
 
-Push the current PR #107 update and wait for its exact-head CI. After review
-and merge, enable GitHub Actions read/write workflow permissions and rerun one
-focused Hermes failure report to prove analysis-to-Draft-PR delivery.
+Review and merge green PR #107. Then enable GitHub Actions read/write workflow
+permissions and rerun one focused Hermes failure report to prove
+analysis-to-Draft-PR delivery.
