@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
+from shutil import which
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).parents[1]
@@ -53,6 +55,9 @@ def test_remote_test_workflow_delivers_only_validated_draft_prs() -> None:
 
 
 def test_remote_test_workflow_github_scripts_parse_as_javascript() -> None:
+    if which("node") is None:
+        pytest.skip("Node.js is not available to the Python test process")
+
     document = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
 
     for job in document["jobs"].values():
