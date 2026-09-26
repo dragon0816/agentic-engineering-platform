@@ -1,4 +1,7 @@
+import subprocess
 from pathlib import Path
+
+import yaml
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "codex-remote-test-fix.yml"
@@ -33,6 +36,38 @@ def test_remote_test_workflow_separates_codex_from_issue_write_access() -> None:
     assert "issues: write" in comment_job
     assert "OPENAI_API_KEY" not in comment_job
     assert "github.rest.issues.createComment" in comment_job
+
+
+def test_remote_test_workflow_delivers_only_validated_draft_prs() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    delivery_job = text.split("  deliver_draft:", 1)[1].split("  comment:", 1)[0]
+
+    assert "contents: write" in delivery_job
+    assert "pull-requests: write" in delivery_job
+    assert "OPENAI_API_KEY" not in delivery_job
+    assert "openai/codex-action@v1" not in delivery_job
+    assert "git apply --check" in delivery_job
+    assert "ALLOWED_PATH_PREFIXES" in delivery_job
+    assert "draft: true" in delivery_job
+    assert "git push" not in delivery_job
+
+
+def test_remote_test_workflow_github_scripts_parse_as_javascript() -> None:
+    document = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+
+    for job in document["jobs"].values():
+        for step in job.get("steps", []):
+            script = step.get("with", {}).get("script")
+            if script is None:
+                continue
+            completed = subprocess.run(
+                ["node", "--check", "-"],
+                input=f"async function githubScript() {{\n{script}\n}}\n",
+                capture_output=True,
+                encoding="utf-8",
+                check=False,
+            )
+            assert completed.returncode == 0, completed.stderr
 
 
 def test_remote_test_workflow_prepares_declared_python_test_environment() -> None:
@@ -73,5 +108,9 @@ def test_remote_test_contract_is_documented_and_templated() -> None:
         "Changes",
         "Local Test Result",
         "Next Action",
+        "Draft PR",
     ):
         assert heading in documentation
+
+    assert "Fix Ready" in documentation
+    assert "Draft PR" in documentation

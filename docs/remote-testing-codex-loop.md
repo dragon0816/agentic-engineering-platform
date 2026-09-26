@@ -1,16 +1,17 @@
 # Remote testing to Codex feedback loop
 
 This repository can turn a failure from a remote Hermes Testing Agent into a
-bounded Codex analysis. It automates diagnosis and preparation of a minimum
-fix; a human still reviews and merges any code change, and Hermes remains the
-authority for the remote hardware or software retest.
+bounded Codex analysis and, where evidence supports a narrow repair, a Draft
+pull request. A human still reviews and merges every code change, and Hermes
+remains the authority for the remote hardware or software retest.
 
 ```text
 Hermes FAIL
     -> GitHub Issue + codex-fix
     -> GitHub Action
     -> Codex analysis and workspace fix
-    -> human-reviewed fix/PR
+    -> validated Draft PR (when evidence supports a narrow repair)
+    -> human review
     -> CI build
     -> Hermes retest
 ```
@@ -38,17 +39,47 @@ body, and these optional Hermes fields:
 - `Failure Stage:`, `Failure:`, `Error:`, or `Failure Information:`
 - `Artifacts:`, `Logs:`, or `Log Paths:`
 
-The same Issue receives a comment with five sections: `Codex Analysis`, `Root
-Cause`, `Changes`, `Local Test Result`, and `Next Action`. A fix prepared in the
-runner workspace is ephemeral. The comment identifies the affected files and
-change so a human can review it and prepare a branch, commit, and pull request.
-The workflow never pushes, opens a PR, or merges to `main`.
+The same Issue receives a comment with `Codex Analysis`, `Root Cause`,
+`Changes`, `Local Test Result`, `Next Action`, and `Draft PR`. Codex marks a
+result `Fix Ready` only when the evidence supports a narrow repair, its local
+tests pass, and it can provide a complete unified diff. The delivery job then
+validates that diff and opens a Draft PR. A result without sufficient evidence,
+a passing local test, or a valid restricted diff produces analysis only.
+
+The workflow never merges to `main`. Every Draft PR requires ordinary human
+review, its normal CI checks, and a Hermes rebuild/retest before it can merge.
 
 Remote artifacts are not downloaded automatically. Put a bounded log excerpt
 in `Failure Information:` and provide repository paths or artifact links under
 `Artifacts:`. Codex can inspect a path already present in the checkout. A link
 is reported as evidence for the human and Hermes follow-up because the Codex
 workspace has no network access.
+
+## Automatic Draft PR delivery
+
+Codex runs in the analysis job without GitHub write permission or a persisted
+checkout credential. It may edit and test its temporary workspace, but it can
+only send a structured result and a bounded unified diff to the next job.
+
+The separate delivery job receives GitHub `contents: write` and
+`pull-requests: write` permissions. It does **not** execute the proposed code,
+tests, or any command from the Issue or Codex output. It accepts a patch only
+when all of these checks pass:
+
+- Codex set `Fix Ready` to `true`.
+- The patch is at most 60,000 characters with one to twelve standard Git diff
+  headers.
+- Every changed path is unchanged in name and lies under `src/`, `tests/`, or
+  `docs/`; binary changes, deletions, renames, workflow/configuration changes,
+  and path traversal are rejected.
+- `git apply --check` and `git diff --check` pass without running the patched
+  code.
+
+The job creates a uniquely named `codex/remote-test-issue-...` branch, commits
+the validated diff without repository hooks, and opens a GitHub Draft PR. It
+does not mark the PR ready, approve it, bypass branch protection, or merge it.
+If delivery fails, the Issue comment records that no Draft PR was created and
+the workflow run is the evidence for a human to inspect.
 
 ## Security boundary
 
@@ -68,8 +99,10 @@ The Codex job follows the official action's secure edit configuration:
   or package name;
 - the job has only `contents: read` and `issues: read` GitHub permissions;
 - Codex is the last step in its job;
-- a separate job with only `issues: write` posts the structured result and has
-  neither the API key nor the Codex workspace.
+- the isolated delivery job has `contents: write` and `pull-requests: write`,
+  but no `OPENAI_API_KEY`, no Codex workspace, and never executes patch code;
+- a final separate job with only `issues: write` posts the structured result
+  and has neither the API key nor the Codex workspace.
 
 By default, `openai/codex-action` accepts a trigger only from a user with write
 access to the repository. Do not configure `allow-users: "*"` or permit every
@@ -93,8 +126,10 @@ required human review remain responsible for merge authorization.
 3. Ensure the human or Hermes service account that applies the label has write
    access to the repository. If an exact GitHub App bot allowlist is required,
    add the repository variable `HERMES_GITHUB_BOT_USER` as described above.
-4. Keep GitHub Actions enabled. Keep branch protection and required human
-   review enabled for `main`.
+4. Keep GitHub Actions enabled and set **Settings -> Actions -> General ->
+   Workflow permissions** to **Read and write permissions**, so the isolated
+   delivery job can create a branch and Draft PR. Keep branch protection and
+   required human review enabled for `main`.
 
 ## Hermes Issue format
 
@@ -152,10 +187,12 @@ values in the Issue or its artifacts.
    and edits do not trigger Codex.
 4. Open **Actions -> Codex remote test failure analysis** and inspect the run.
 5. Confirm the same Issue receives one comment containing `Codex Analysis`,
-   `Root Cause`, `Changes`, `Local Test Result`, and `Next Action`.
-6. Confirm no branch, pull request, or merge was created. If the comment
-   recommends code changes, review the named changes, prepare a normal PR, let
-   CI build it, and send that build back to Hermes for the remote retest.
+   `Root Cause`, `Changes`, `Local Test Result`, `Next Action`, and `Draft PR`.
+6. For insufficient evidence, confirm no branch or Draft PR is created. For a
+   focused failure whose repair passes local tests and produces a restricted
+   complete diff, confirm one Draft PR is created. Review it normally, let CI
+   build it, and send that build back to Hermes for the remote retest. Never
+   merge it automatically.
 
 To rerun after adding evidence, remove `codex-fix`, update the Issue, and apply
 the label again. Updating an Issue while the label is already present does not
