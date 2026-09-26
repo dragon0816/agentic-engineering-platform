@@ -63,8 +63,9 @@ head. Hermes remains unable to approve or merge a PR.
 
 ## In Progress
 
-- The Hermes Next Action implementation is ready for complete local verification,
-  commit and push to PR #107.
+- Hermes Next Action implementation was committed as `aec3206` and pushed to
+  PR #107. Its exact Windows/Python 3.12 GitHub Actions run `36279203475` is
+  in progress.
 - An attempted CLI merge of PR #107 was blocked because the local GitHub token
   has only `admin:repo_hook, project` scopes and lacks `public_repo`. The
   in-app browser has no signed-in GitHub tab. The owner must merge in GitHub UI
@@ -177,9 +178,9 @@ Ubuntu or Python 3.11 validation was run locally, per owner instruction.
 
 ## Next Recommended Action
 
-Run full Windows/Python 3.12 verification, commit and push the Hermes Next
-Action update to PR #107, then have the owner merge it in GitHub UI. Configure
-Hermes polling and its durable processed-payload id store. For a future
-evidence-complete failure, verify the action creates a Draft PR plus
-`hermes-retest-requested`; Hermes retests its exact SHA and applies
-`hermes-retest-passed` only after CI and the predefined test profile pass.
+Confirm GitHub Actions run `36279203475` for `aec3206`, then have the owner
+merge PR #107 in GitHub UI. Configure Hermes polling and its durable
+processed-payload id store. For a future evidence-complete failure, verify the
+action creates a Draft PR plus `hermes-retest-requested`; Hermes retests its
+exact SHA and applies `hermes-retest-passed` only after CI and the predefined
+test profile pass.
