@@ -54,6 +54,22 @@ def test_remote_test_workflow_delivers_only_validated_draft_prs() -> None:
     assert "git push" not in delivery_job
 
 
+def test_remote_test_workflow_hands_only_declared_next_actions_to_hermes() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    comment_job = text.split("  comment:", 1)[1]
+
+    assert '"hermes_next_action"' in text
+    assert '"collect_evidence"' in text
+    assert '"manual_review"' in text
+    assert "hermes-evidence-requested" in comment_job
+    assert "hermes-retest-requested" in comment_job
+    assert "hermes-next-action/v1" in comment_job
+    assert "github-actions[bot]" in comment_job
+    assert "github.rest.issues.addLabels" in comment_job
+    assert "github.rest.issues.createComment" in comment_job
+    assert "github.rest.pulls.merge" not in comment_job
+
+
 def test_hermes_retest_workflow_notifies_a_reviewer_without_merging() -> None:
     text = RETEST_WORKFLOW.read_text(encoding="utf-8")
 
@@ -144,8 +160,11 @@ def test_remote_test_contract_is_documented_and_templated() -> None:
         "Local Test Result",
         "Next Action",
         "Draft PR",
+        "Hermes Next Action",
     ):
         assert heading in documentation
 
     assert "Fix Ready" in documentation
     assert "Draft PR" in documentation
+    assert "hermes-evidence-requested" in documentation
+    assert "hermes-retest-requested" in documentation

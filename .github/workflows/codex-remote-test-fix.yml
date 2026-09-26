@@ -159,6 +159,8 @@ jobs:
               large, give an exact patch summary sufficient for a human to prepare a PR.
             - Local Test Result: exact tests run and their results, or why none were run.
             - Next Action: human review/PR steps and the required Hermes rebuild/retest.
+            - Hermes Next Action: collect_evidence only when Hermes can gather
+              specific missing remote evidence; otherwise manual_review.
             - Fix Ready: true only when a narrow fix is supported by the evidence,
               local tests have passed, and the patch below is complete.
             - Patch: a complete unified diff of at most 60,000 characters. It may modify
@@ -197,6 +199,10 @@ jobs:
                 "changes": { "type": "string" },
                 "local_test_result": { "type": "string" },
                 "next_action": { "type": "string" },
+                "hermes_next_action": {
+                  "type": "string",
+                  "enum": ["collect_evidence", "manual_review"]
+                },
                 "fix_ready": { "type": "boolean" },
                 "patch": { "type": "string" }
               },
@@ -206,6 +212,7 @@ jobs:
                 "changes",
                 "local_test_result",
                 "next_action",
+                "hermes_next_action",
                 "fix_ready",
                 "patch"
               ],
@@ -349,6 +356,8 @@ jobs:
               return resultForComment(true, "Draft PR created for required human review.", {
                 url: pull.data.html_url,
                 branch,
+                number: pull.data.number,
+                head_sha: git(["rev-parse", "HEAD"]).trim(),
               });
             } catch (_error) {
               return resultForComment(false, "Draft PR delivery failed; inspect the workflow run without rerunning the patch.");
@@ -381,6 +390,7 @@ jobs:
                 changes: "None recorded.",
                 local_test_result: "No structured test result was returned.",
                 next_action: "Inspect the workflow run and supply any missing evidence.",
+                hermes_next_action: "manual_review",
               };
             }
             let delivery = { created: false, reason: "No draft PR was created." };
@@ -394,6 +404,79 @@ jobs:
               .replace(/\u0000/g, "")
               .slice(0, 10000)
               .trim();
+            const handoffAction = result.hermes_next_action === "collect_evidence"
+              ? "collect_evidence"
+              : "manual_review";
+            const handoff = (action, extra = {}) => JSON.stringify({
+              schema: "hermes-next-action/v1",
+              producer: "github-actions[bot]",
+              id: String(context.runId),
+              action,
+              repository: `${context.repo.owner}/${context.repo.repo}`,
+              source_issue: Number(process.env.ISSUE_NUMBER),
+              source_issue_url: context.payload.issue.html_url,
+              workflow_run: process.env.RUN_URL,
+              requested_evidence: clean(result.next_action),
+              ...extra,
+            });
+            const ensureAndAddLabel = async (issueNumber, name, description) => {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: [name],
+                });
+              } catch (error) {
+                if (error.status !== 422) throw error;
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name,
+                    color: "1d76db",
+                    description,
+                  });
+                } catch (createError) {
+                  if (createError.status !== 422) throw createError;
+                }
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: [name],
+                });
+              }
+            };
+            let hermesHandoff = "No automatic Hermes action was requested.";
+            if (delivery.created) {
+              const payload = handoff("retest_draft_pr", {
+                pull_request: Number(delivery.number),
+                pull_request_url: clean(delivery.url, 2000),
+                head_sha: clean(delivery.head_sha, 100),
+                required_check: "verify",
+              });
+              await ensureAndAddLabel(
+                Number(delivery.number),
+                "hermes-retest-requested",
+                "Requests a bounded Hermes retest of a Codex repair Draft PR.",
+              );
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: Number(delivery.number),
+                body: `## Hermes Next Action\n\n<!-- ${payload} -->\n\nHermes: rebuild and retest this exact head commit using the source Issue acceptance criteria. Do not merge or approve this PR.`,
+              });
+              hermesHandoff = `Queued Hermes retest: \`${payload}\``;
+            } else if (handoffAction === "collect_evidence") {
+              const payload = handoff("collect_evidence");
+              await ensureAndAddLabel(
+                Number(process.env.ISSUE_NUMBER),
+                "hermes-evidence-requested",
+                "Requests bounded evidence collection for a remote test failure.",
+              );
+              hermesHandoff = `Queued Hermes evidence collection: \`${payload}\``;
+            }
             const comment = [
               "## Codex Analysis",
               clean(result.codex_analysis),
@@ -409,6 +492,8 @@ jobs:
               delivery.created
                 ? `Created for human review: ${clean(delivery.url, 2000)}`
                 : clean(delivery.reason),
+              "## Hermes Next Action",
+              hermesHandoff,
               `\n[Workflow run](${process.env.RUN_URL})`,
             ].join("\n\n");
 

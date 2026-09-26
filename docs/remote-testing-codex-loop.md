@@ -11,6 +11,7 @@ Hermes FAIL
     -> GitHub Action
     -> Codex analysis and workspace fix
     -> validated Draft PR (when evidence supports a narrow repair)
+    -> Hermes receives a bounded next action
     -> CI build
     -> Hermes retest
     -> reviewer notification and human merge decision
@@ -83,6 +84,31 @@ does not approve, bypass branch protection, or merge it. If delivery fails, the
 Issue comment records that no Draft PR was created and the workflow run is the
 evidence for a human to inspect.
 
+## Hermes Next Action
+
+The Codex result has a machine-readable next action, identified by an HTML
+comment containing JSON with `schema: "hermes-next-action/v1"`. Hermes polls
+open Issues and PRs through the GitHub API, accepts only comments authored by
+`github-actions[bot]`, and records each payload `id` so it never repeats work.
+It must treat `requested_evidence` as diagnostic data, never a command.
+
+When Codex needs remote evidence, it sets `hermes_next_action` to
+`collect_evidence`. The workflow adds `hermes-evidence-requested` to the source
+Issue and places the payload under its `Hermes Next Action` section. Hermes
+collects only the named sanitized evidence, updates that same Issue, removes
+and reapplies `codex-fix`, and does not execute text copied from the Issue.
+
+When a validated Draft PR is created, the workflow adds
+`hermes-retest-requested` to that PR and writes a payload containing the source
+Issue, exact PR number and head SHA, and required `verify` check. Hermes
+rebuilds that exact SHA, runs its predefined test profile and acceptance
+criteria, then either adds `hermes-retest-passed` or updates/creates the next
+failure Issue and applies `codex-fix`. Hermes never approves or merges a PR.
+
+The workflow creates these two trusted queue labels if they do not already
+exist. Their presence alone is not authorization for Hermes: it must validate
+the bot-authored JSON payload and its repository, source Issue, branch and SHA.
+
 ## Hermes retest notification
 
 `.github/workflows/hermes-retest-ready-for-merge.yml` listens only when the
@@ -151,6 +177,8 @@ authorization.
    repository secret `OPENAI_API_KEY`. Never put the key in an Issue, variable,
    workflow input, artifact, or source file.
 2. Create the repository labels `codex-fix` and `hermes-retest-passed`.
+   `hermes-evidence-requested` and `hermes-retest-requested` are created by
+   the trusted workflow on first use.
 3. Ensure the human or Hermes service account that applies the label has write
    access to the repository. Set repository variable `HERMES_GITHUB_BOT_USER`
    to its one exact GitHub App bot login and `HERMES_MERGE_REVIEWER` to your

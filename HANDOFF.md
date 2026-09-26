@@ -1,6 +1,6 @@
-# Handoff — Hermes retest notifies the human merge reviewer
+# Handoff — remote Hermes loop has machine-readable next actions
 
-Updated: 2026-09-26 (Asia/Taipei).
+Updated: 2026-09-27 (Asia/Taipei).
 Branch: `fix/codex-action-test-environment`.
 Pull request: #107, https://github.com/dragon0816/agentic-engineering-platform/pull/107.
 Base: `main` at `5dc6dffa3f144cd8d28f58d382157ed56cfd22a5`.
@@ -11,6 +11,10 @@ Turn a qualified `codex-fix` remote Hermes failure report into a Codex analysis
 and, only where evidence supports a narrow repair, a human-reviewable GitHub
 Draft PR. After Hermes retests a green repair, notify the configured reviewer;
 the reviewer, never an Action, makes the merge decision.
+
+Hermes now receives a bounded, idempotent next-action payload after a Codex
+result: collect named remote evidence, or rebuild and retest an exact Draft PR
+head. Hermes remains unable to approve or merge a PR.
 
 ## Completed
 
@@ -46,11 +50,25 @@ the reviewer, never an Action, makes the merge decision.
   It verifies the exact head's `verify` check, marks an eligible Draft PR ready
   for review, requests the configured reviewer's review and posts the result.
   It has no checkout, OpenAI key, `contents: write`, or GitHub merge call.
+- The active main workflow was exercised against Issue #108 on 2026-09-26
+  (run `36250462848`): Codex analyzed its evidence and commented. It did not
+  make a patch because that checked-out main revision was still missing the
+  draft-delivery implementation and the result did not establish a narrow fix.
+- The uncommitted follow-up extends PR #107 with `hermes_next_action` in the
+  constrained Codex JSON schema. A bot-authored `hermes-next-action/v1` payload
+  carries an idempotency id, source Issue and workflow URL. `collect_evidence`
+  adds `hermes-evidence-requested` to the Issue; a delivered Draft PR gains
+  `hermes-retest-requested`, exact PR number, head SHA and required `verify`
+  check. The workflow creates only those two queue labels when absent.
 
 ## In Progress
 
-- The new retest-notification implementation is ready to commit and push to
-  PR #107. Its exact GitHub Actions result is pending the push.
+- The Hermes Next Action implementation is ready for complete local verification,
+  commit and push to PR #107.
+- An attempted CLI merge of PR #107 was blocked because the local GitHub token
+  has only `admin:repo_hook, project` scopes and lacks `public_repo`. The
+  in-app browser has no signed-in GitHub tab. The owner must merge in GitHub UI
+  or use a token with repository merge permission.
 
 ## Remaining
 
@@ -62,6 +80,9 @@ the reviewer, never an Action, makes the merge decision.
   labels, and `HERMES_MERGE_REVIEWER` to the owner's GitHub username. Create
   the `hermes-retest-passed` label. The notification job intentionally does
   nothing if either variable is missing.
+- Hermes must poll GitHub for `Hermes Next Action` comments authored by
+  `github-actions[bot]`, validate the `hermes-next-action/v1` JSON payload's
+  repository/source/branch/SHA, and persist each payload `id` before acting.
 - After PR #107 merges, remove `codex-fix`, replace Issue #106 with one focused
   evidence-complete failure report, and add `codex-fix` again. Verify either:
   analysis-only for insufficient evidence, or exactly one Draft PR for a
@@ -82,6 +103,9 @@ the reviewer, never an Action, makes the merge decision.
 - A Draft PR is a review artifact, not evidence that a remote failure is fixed.
   Normal CI and Hermes rebuild/retest are required before the human reviewer
   receives a merge notification. No Action approves or merges the PR.
+- The GitHub label is a queue signal, not a command authorization. Hermes acts
+  only on a matching trusted bot comment and executes its own predefined test
+  profile; it never executes Issue or payload text as shell commands.
 
 ## Exact verification commands and results
 
@@ -89,10 +113,16 @@ Windows / Python 3.12:
 
 ```text
 .venv\Scripts\python.exe -m pytest tests\test_codex_remote_test_workflow.py -q -p no:cacheprovider
-7 passed in 0.21s
+8 passed in 0.19s
 
-.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-codex-draft-pr-full
-1295 passed, 4 skipped in 34.87s
+.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-hermes-next-action-full-third
+1 failed, 1296 passed, 4 skipped in 33.40s
+The only failure was the known Windows local HTTP-server socket abort in
+tests/test_agent_web.py::test_every_api_call_needs_the_header (expected 401,
+received WinError 10053). It passed immediately in isolation:
+
+.venv\Scripts\python.exe -m pytest tests\test_agent_web.py -q -p no:cacheprovider --basetemp .scratch\pytest-hermes-next-action-agent-web
+16 passed in 7.80s
 
 .venv\Scripts\ruff.exe check .
 All checks passed
@@ -140,11 +170,16 @@ Ubuntu or Python 3.11 validation was run locally, per owner instruction.
   focused workflow tests, lint, formatting, mypy, build, pip check and YAML
   parsing passed. The pushed Windows/Python 3.12 CI result remains the
   authoritative full-suite check.
+- The Hermes Next Action full-suite run repeated the same local Windows socket
+  behavior in `test_every_api_call_needs_the_header`; `tests/test_agent_web.py`
+  passed in isolation. This is not caused by the workflow-only change.
 - `.claude/` is user-owned local state. Do not commit, modify or remove it.
 
 ## Next Recommended Action
 
-Push the retest notification update to PR #107 and confirm its exact
-Windows/Python 3.12 CI run. Then merge it manually. Configure the two repository
-variables and label above, and have Hermes apply `hermes-retest-passed` only
-after its retest and the exact PR `verify` check are green.
+Run full Windows/Python 3.12 verification, commit and push the Hermes Next
+Action update to PR #107, then have the owner merge it in GitHub UI. Configure
+Hermes polling and its durable processed-payload id store. For a future
+evidence-complete failure, verify the action creates a Draft PR plus
+`hermes-retest-requested`; Hermes retests its exact SHA and applies
+`hermes-retest-passed` only after CI and the predefined test profile pass.
