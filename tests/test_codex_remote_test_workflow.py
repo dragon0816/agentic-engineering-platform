@@ -3,7 +3,6 @@ from pathlib import Path
 from shutil import which
 
 import pytest
-import yaml
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "codex-remote-test-fix.yml"
@@ -58,21 +57,32 @@ def test_remote_test_workflow_github_scripts_parse_as_javascript() -> None:
     if which("node") is None:
         pytest.skip("Node.js is not available to the Python test process")
 
-    document = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    lines = WORKFLOW.read_text(encoding="utf-8").splitlines()
+    scripts: list[str] = []
+    for index, line in enumerate(lines):
+        if line != "          script: |":
+            continue
+        script_lines: list[str] = []
+        for candidate in lines[index + 1 :]:
+            if candidate.startswith("            "):
+                script_lines.append(candidate[12:])
+            elif candidate:
+                break
+            else:
+                script_lines.append("")
+        scripts.append("\n".join(script_lines))
 
-    for job in document["jobs"].values():
-        for step in job.get("steps", []):
-            script = step.get("with", {}).get("script")
-            if script is None:
-                continue
-            completed = subprocess.run(
-                ["node", "--check", "-"],
-                input=f"async function githubScript() {{\n{script}\n}}\n",
-                capture_output=True,
-                encoding="utf-8",
-                check=False,
-            )
-            assert completed.returncode == 0, completed.stderr
+    assert len(scripts) == 3
+
+    for script in scripts:
+        completed = subprocess.run(
+            ["node", "--check", "-"],
+            input=f"async function githubScript() {{\n{script}\n}}\n",
+            capture_output=True,
+            encoding="utf-8",
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stderr
 
 
 def test_remote_test_workflow_prepares_declared_python_test_environment() -> None:
