@@ -6,6 +6,7 @@ import pytest
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "codex-remote-test-fix.yml"
+RETEST_WORKFLOW = ROOT / ".github" / "workflows" / "hermes-retest-ready-for-merge.yml"
 ISSUE_TEMPLATE = ROOT / ".github" / "ISSUE_TEMPLATE" / "hermes-remote-test-failure.md"
 DOCUMENTATION = ROOT / "docs" / "remote-testing-codex-loop.md"
 
@@ -53,26 +54,45 @@ def test_remote_test_workflow_delivers_only_validated_draft_prs() -> None:
     assert "git push" not in delivery_job
 
 
+def test_hermes_retest_workflow_notifies_a_reviewer_without_merging() -> None:
+    text = RETEST_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "pull_request:\n    types: [labeled]" in text
+    assert "github.event.label.name == 'hermes-retest-passed'" in text
+    assert "pull_request_target" not in text
+    assert "permissions: {}" in text
+    assert "HERMES_GITHUB_BOT_USER" in text
+    assert "HERMES_MERGE_REVIEWER" in text
+    assert "startsWith(github.event.pull_request.head.ref, 'codex/remote-test-issue-')" in text
+    assert "github.rest.checks.listForRef" in text
+    assert 'conclusion !== "success"' in text
+    assert "markPullRequestReadyForReview" in text
+    assert "github.rest.pulls.requestReviewers" in text
+    assert "github.rest.issues.createComment" in text
+    assert "github.rest.pulls.merge" not in text
+
+
 def test_remote_test_workflow_github_scripts_parse_as_javascript() -> None:
     if which("node") is None:
         pytest.skip("Node.js is not available to the Python test process")
 
-    lines = WORKFLOW.read_text(encoding="utf-8").splitlines()
     scripts: list[str] = []
-    for index, line in enumerate(lines):
-        if line != "          script: |":
-            continue
-        script_lines: list[str] = []
-        for candidate in lines[index + 1 :]:
-            if candidate.startswith("            "):
-                script_lines.append(candidate[12:])
-            elif candidate:
-                break
-            else:
-                script_lines.append("")
-        scripts.append("\n".join(script_lines))
+    for workflow in (WORKFLOW, RETEST_WORKFLOW):
+        lines = workflow.read_text(encoding="utf-8").splitlines()
+        for index, line in enumerate(lines):
+            if line != "          script: |":
+                continue
+            script_lines: list[str] = []
+            for candidate in lines[index + 1 :]:
+                if candidate.startswith("            "):
+                    script_lines.append(candidate[12:])
+                elif candidate:
+                    break
+                else:
+                    script_lines.append("")
+            scripts.append("\n".join(script_lines))
 
-    assert len(scripts) == 3
+    assert len(scripts) == 4
 
     for script in scripts:
         completed = subprocess.run(
