@@ -36,6 +36,11 @@ in PR #100 after each exact head passed Windows/Python 3.12 CI. E2E-04 merged in
 PR #101 after its exact head passed Windows/Python 3.12 CI. E2E-01's inert
 simulator proof and Windows owner-run physical validation entry point are
 implemented; the production-like company-host run remains pending.
+PR #107 is open to extend the remote Hermes feedback loop with restricted
+Draft PR delivery, machine-readable `hermes-next-action/v1` handoffs, and a
+separate `hermes-retest-passed` notification path. Hermes polls and deduplicates
+trusted payloads to collect evidence or retest an exact repair SHA; the configured
+reviewer alone decides whether to merge.
 A row says `done` only after its pull request merges.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
