@@ -27,6 +27,17 @@ jobs:
         with:
           persist-credentials: false
 
+      # This fixed, repository-owned setup lets Codex run the same local tests
+      # available to CI. It is deliberately independent of untrusted Issue text.
+      - name: Set up Python for local regression tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install declared local test dependencies
+        run: python -m pip install -e ".[dev,office]"
+
       - name: Build the bounded remote-failure prompt
         uses: actions/github-script@v7
         with:
@@ -140,7 +151,7 @@ jobs:
             - If evidence is insufficient, do not guess or change code. State exactly what
               evidence the Hermes Testing Agent or a human must provide.
 
-            Report five fields using the required output schema:
+            Report seven fields using the required output schema:
             - Codex Analysis: evidence reviewed and whether implementation is implicated.
             - Root Cause: established cause, likely cause with uncertainty, or why unknown.
             - Changes: files changed and a complete unified diff where practical, or
@@ -148,6 +159,13 @@ jobs:
               large, give an exact patch summary sufficient for a human to prepare a PR.
             - Local Test Result: exact tests run and their results, or why none were run.
             - Next Action: human review/PR steps and the required Hermes rebuild/retest.
+            - Fix Ready: true only when a narrow fix is supported by the evidence,
+              local tests have passed, and the patch below is complete.
+            - Patch: a complete unified diff of at most 60,000 characters. It may modify
+              only existing or new files under src/, tests/, or docs/. Never include
+              binary changes, rename-only changes, deletions, .github/, configuration,
+              instruction, hook, dependency, or generated files. Use an empty string when
+              Fix Ready is false.
 
             <untrusted_remote_failure_json>
             ${untrustedIssue}
@@ -178,21 +196,167 @@ jobs:
                 "root_cause": { "type": "string" },
                 "changes": { "type": "string" },
                 "local_test_result": { "type": "string" },
-                "next_action": { "type": "string" }
+                "next_action": { "type": "string" },
+                "fix_ready": { "type": "boolean" },
+                "patch": { "type": "string" }
               },
               "required": [
                 "codex_analysis",
                 "root_cause",
                 "changes",
                 "local_test_result",
-                "next_action"
+                "next_action",
+                "fix_ready",
+                "patch"
               ],
               "additionalProperties": false
             }
 
-  comment:
+  # This job receives only Codex's structured result, never its credentials or
+  # workspace. It does not run the patch or tests: it validates a narrow diff,
+  # commits it without hooks, and opens a Draft PR for human review.
+  deliver_draft:
     needs: analyze
     if: ${{ needs.analyze.result == 'success' && needs.analyze.outputs.final_message != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      delivery_result: ${{ steps.create_draft.outputs.result }}
+    steps:
+      - name: Check out the reviewed base for draft delivery
+        uses: actions/checkout@v5
+        # This is the only job that persists GitHub's short-lived write token.
+        # No untrusted Issue command or patched code runs in this job.
+        with:
+          persist-credentials: true
+
+      - name: Validate the Codex patch and create a Draft PR
+        id: create_draft
+        uses: actions/github-script@v7
+        env:
+          CODEX_FINAL_MESSAGE: ${{ needs.analyze.outputs.final_message }}
+        with:
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+            const { execFileSync } = require("child_process");
+
+            const ALLOWED_PATH_PREFIXES = ["src/", "tests/", "docs/"];
+            const MAX_PATCH_CHARACTERS = 60000;
+            const workspace = process.env.GITHUB_WORKSPACE;
+            const issueNumber = context.payload.issue.number;
+            const resultForComment = (created, reason, extra = {}) => JSON.stringify({
+              created,
+              reason,
+              ...extra,
+            });
+            const clean = (value, limit = 6000) => String(value || "")
+              .replace(/\u0000/g, "")
+              .replace(/[\u0001-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
+              .slice(0, limit)
+              .trim();
+
+            let result;
+            try {
+              result = JSON.parse(process.env.CODEX_FINAL_MESSAGE || "");
+            } catch (_error) {
+              return resultForComment(false, "Codex returned no parseable structured result.");
+            }
+
+            if (result.fix_ready !== true) {
+              return resultForComment(false, "Codex did not mark a fix as evidence-ready.");
+            }
+
+            const patch = clean(result.patch, MAX_PATCH_CHARACTERS + 1);
+            if (!patch || patch.length > MAX_PATCH_CHARACTERS) {
+              return resultForComment(false, "The proposed patch is empty or exceeds the delivery limit.");
+            }
+            if (patch.includes("GIT binary patch") || /^deleted file mode /m.test(patch)) {
+              return resultForComment(false, "Binary or deletion patches cannot be delivered automatically.");
+            }
+
+            const headers = [...patch.matchAll(/^diff --git a\/(.+?) b\/(.+)$/gm)];
+            if (!headers.length || headers.length > 12) {
+              return resultForComment(false, "The patch must contain between one and twelve standard Git diff headers.");
+            }
+            const changedPaths = [];
+            for (const [, oldPath, newPath] of headers) {
+              const validPath = (candidate) =>
+                !candidate.includes("\\") &&
+                !candidate.includes("..") &&
+                !candidate.includes('"') &&
+                ALLOWED_PATH_PREFIXES.some((prefix) => candidate.startsWith(prefix));
+              if (oldPath !== newPath || !validPath(oldPath)) {
+                return resultForComment(false, "The patch contains a rename or a path outside src/, tests/, or docs/.");
+              }
+              changedPaths.push(oldPath);
+            }
+
+            const patchPath = path.join(workspace, ".codex-remote-test.patch");
+            fs.writeFileSync(patchPath, patch, "utf8");
+            const git = (args) => execFileSync(
+              "git",
+              ["-c", "core.hooksPath=/dev/null", ...args],
+              { cwd: workspace, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+            );
+            try {
+              const gitApplyCheck = ["apply", "--check", "--whitespace=error", patchPath];
+              execFileSync("git", gitApplyCheck, {
+                cwd: workspace,
+                encoding: "utf8",
+                stdio: ["ignore", "pipe", "pipe"],
+              });
+              git(["apply", "--whitespace=error", patchPath]);
+              git(["diff", "--check"]);
+            } catch (_error) {
+              return resultForComment(false, "The proposed patch did not pass git apply --check.");
+            } finally {
+              fs.rmSync(patchPath, { force: true });
+            }
+
+            const branch = `codex/remote-test-issue-${issueNumber}-${context.runId}`;
+            const title = `Draft: Codex remote test fix for #${issueNumber}`;
+            try {
+              git(["switch", "-c", branch]);
+              git(["config", "user.name", "github-actions[bot]"]);
+              git(["config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"]);
+              git(["add", "--", ...changedPaths]);
+              git(["commit", "-m", `fix: prepare remote test repair for #${issueNumber}`]);
+              git(["push", "origin", `HEAD:refs/heads/${branch}`]);
+              const pull = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                head: branch,
+                base: context.payload.repository.default_branch,
+                draft: true,
+                body: [
+                  `Automated Draft PR from remote test Issue #${issueNumber}.`,
+                  "Human review, CI, and a Hermes rebuild/retest are required before merge.",
+                  "",
+                  "## Codex Analysis",
+                  clean(result.codex_analysis),
+                  "",
+                  "## Root Cause",
+                  clean(result.root_cause),
+                  "",
+                  "## Local Test Result",
+                  clean(result.local_test_result),
+                ].join("\n"),
+              });
+              return resultForComment(true, "Draft PR created for required human review.", {
+                url: pull.data.html_url,
+                branch,
+              });
+            } catch (_error) {
+              return resultForComment(false, "Draft PR delivery failed; inspect the workflow run without rerunning the patch.");
+            }
+
+  comment:
+    needs: [analyze, deliver_draft]
+    if: ${{ always() && needs.analyze.result == 'success' && needs.analyze.outputs.final_message != '' }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -201,6 +365,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           CODEX_FINAL_MESSAGE: ${{ needs.analyze.outputs.final_message }}
+          DELIVERY_RESULT: ${{ needs.deliver_draft.outputs.delivery_result }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
@@ -218,6 +383,12 @@ jobs:
                 next_action: "Inspect the workflow run and supply any missing evidence.",
               };
             }
+            let delivery = { created: false, reason: "No draft PR was created." };
+            try {
+              delivery = JSON.parse(process.env.DELIVERY_RESULT || "");
+            } catch (_error) {
+              // Keep the original analysis comment even when draft delivery failed.
+            }
 
             const clean = (value) => String(value || "Not reported.")
               .replace(/\u0000/g, "")
@@ -234,6 +405,10 @@ jobs:
               clean(result.local_test_result),
               "## Next Action",
               clean(result.next_action),
+              "## Draft PR",
+              delivery.created
+                ? `Created for human review: ${clean(delivery.url, 2000)}`
+                : clean(delivery.reason),
               `\n[Workflow run](${process.env.RUN_URL})`,
             ].join("\n\n");
 

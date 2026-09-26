@@ -1,0 +1,92 @@
+name: Hermes retest ready for merge notification
+
+on:
+  pull_request:
+    types: [labeled]
+
+# Each job declares only the GitHub permissions it needs.
+permissions: {}
+
+concurrency:
+  group: hermes-retest-ready-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  notify_reviewer:
+    if: >
+      github.event.label.name == 'hermes-retest-passed' &&
+      github.actor == vars.HERMES_GITHUB_BOT_USER &&
+      vars.HERMES_GITHUB_BOT_USER != '' &&
+      vars.HERMES_MERGE_REVIEWER != '' &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'codex/remote-test-issue-')
+    runs-on: ubuntu-latest
+    permissions:
+      checks: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Mark a verified repair ready and notify the merge reviewer
+        uses: actions/github-script@v7
+        env:
+          MERGE_REVIEWER: ${{ vars.HERMES_MERGE_REVIEWER }}
+        with:
+          script: |
+            const pull = context.payload.pull_request;
+            const reviewer = process.env.MERGE_REVIEWER;
+            const checks = await github.paginate(github.rest.checks.listForRef, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pull.head.sha,
+              per_page: 100,
+            });
+            const verify = checks.find((check) => check.name === "verify");
+            if (verify?.conclusion !== "success") {
+              const message = "Hermes reported a passing retest, but the required verify check is not successful on this exact PR commit. Remove and reapply hermes-retest-passed after CI is green.";
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pull.number,
+                body: `## Hermes retest cannot be released\n\n${message}`,
+              });
+              core.setFailed(message);
+              return;
+            }
+
+            if (pull.draft) {
+              const node = await github.graphql(
+                `query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    pullRequest(number: $number) { id }
+                  }
+                }`,
+                { owner: context.repo.owner, repo: context.repo.repo, number: pull.number },
+              );
+              await github.graphql(
+                `mutation($id: ID!) {
+                  markPullRequestReadyForReview(input: { pullRequestId: $id }) {
+                    pullRequest { url }
+                  }
+                }`,
+                { id: node.repository.pullRequest.id },
+              );
+            }
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull.number,
+              reviewers: [reviewer],
+            });
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pull.number,
+              body: [
+                "## Hermes retest passed",
+                `@${reviewer} Hermes applied \`hermes-retest-passed\` after retesting this repair.`,
+                "The required `verify` check is green on this exact commit. The PR is ready for your merge decision.",
+                "No workflow has approved or merged this pull request.",
+              ].join("\n\n"),
+            });
