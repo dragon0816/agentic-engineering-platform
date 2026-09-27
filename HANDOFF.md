@@ -1,186 +1,159 @@
-# Handoff — remote Hermes loop has machine-readable next actions
+# Handoff — bounded Hermes validation lifecycle
 
 Updated: 2026-09-27 (Asia/Taipei).
-Branch: `fix/codex-action-test-environment`.
-Pull request: #107, https://github.com/dragon0816/agentic-engineering-platform/pull/107.
-Base: `main` at `5dc6dffa3f144cd8d28f58d382157ed56cfd22a5`.
+Branch: `feature/hermes-validation-lifecycle`.
+Base: `origin/main` at `0659ea8d881d256240d1d0f32323032225730682`.
+Pull request: #109, https://github.com/dragon0816/agentic-engineering-platform/pull/109.
 
 ## Goal
 
-Turn a qualified `codex-fix` remote Hermes failure report into a Codex analysis
-and, only where evidence supports a narrow repair, a human-reviewable GitHub
-Draft PR. After Hermes retests a green repair, notify the configured reviewer;
-the reviewer, never an Action, makes the merge decision.
+Complete the GitHub control-plane portion of the continuous Hermes validation
+loop:
 
-Hermes now receives a bounded, idempotent next-action payload after a Codex
-result: collect named remote evidence, or rebuild and retest an exact Draft PR
-head. Hermes remains unable to approve or merge a PR.
+```text
+Hermes validation request -> GitHub queue -> Hermes preflight/test
+  -> remote failure -> Codex repair -> Draft PR -> Hermes retest
+  -> human merge decision
+```
+
+Hermes is the execution/test worker. GitHub only emits authenticated,
+versioned queue messages and records state. Codex may prepare a bounded Draft
+PR; no workflow grants access, changes Bridge configuration, approves, or
+merges code.
 
 ## Completed
 
-- PR #105 is merged. It provides the narrow Issue-label trigger, the bounded
-  Hermes prompt, `openai/codex-action@v1` in a workspace-only/no-network job,
-  structured Issue comments, an Issue template and documentation.
-- Its live run on Issue #106 succeeded after the secret name and API billing
-  were corrected (run `36159459225`). Codex correctly did not guess a code
-  change because the report did not contain the tested commit or readable
-  artifact evidence.
-- PR #107 already adds a fixed Python 3.12 and `.[dev,office]` pre-Codex test
-  environment. This fixes the live run's `No module named pytest` limitation.
-- This branch now extends PR #107 with `deliver_draft`, an isolated GitHub
-  Actions job. Codex emits `fix_ready` plus a complete bounded unified diff;
-  delivery accepts only one to twelve non-binary, non-deleting, non-renaming
-  diffs under `src/`, `tests/` or `docs/`, and requires `git apply --check` and
-  `git diff --check` to pass.
-- Delivery never executes a proposed patch, test, or Issue-provided command. It
-  uses a fresh checkout, commits without repository hooks to a unique
-  `codex/remote-test-issue-...` branch, and opens a Draft PR. It cannot mark a
-  PR ready, approve it or merge it.
-- The Codex analysis job retains `contents: read` and `issues: read`, no
-  persisted checkout credential and no GitHub write capability. The delivery
-  job has only `contents: write` and `pull-requests: write`, no OpenAI key and
-  no Codex workspace. The final comment job alone has `issues: write`.
-- Added static tests for delivery boundaries, restricted paths, Draft PR mode,
-  and JavaScript parsing of every `actions/github-script` block. Documentation
-  now describes the delivery security model, GitHub configuration and retest
-  paths.
-- Added `hermes-retest-ready-for-merge.yml`. It responds only to a newly added
-  `hermes-retest-passed` PR label from the exact configured Hermes bot, on a
-  same-repository `codex/remote-test-issue-...` branch targeting `main`.
-  It verifies the exact head's `verify` check, marks an eligible Draft PR ready
-  for review, requests the configured reviewer's review and posts the result.
-  It has no checkout, OpenAI key, `contents: write`, or GitHub merge call.
-- The active main workflow was exercised against Issue #108 on 2026-09-26
-  (run `36250462848`): Codex analyzed its evidence and commented. It did not
-  make a patch because that checked-out main revision was still missing the
-  draft-delivery implementation and the result did not establish a narrow fix.
-- The uncommitted follow-up extends PR #107 with `hermes_next_action` in the
-  constrained Codex JSON schema. A bot-authored `hermes-next-action/v1` payload
-  carries an idempotency id, source Issue and workflow URL. `collect_evidence`
-  adds `hermes-evidence-requested` to the Issue; a delivered Draft PR gains
-  `hermes-retest-requested`, exact PR number, head SHA and required `verify`
-  check. The workflow creates only those two queue labels when absent.
+- PR #105 established the narrow `codex-fix` Issue trigger and separated
+  read-only Codex analysis from Issue-comment writes.
+- PR #107 is merged at `0659ea8`. It adds restricted Draft PR delivery,
+  `hermes-next-action/v1` handoffs, and `hermes-retest-passed` reviewer
+  notification. A human still merges.
+- The repository variable `HERMES_GITHUB_BOT_USER` is set to `dragon0816` and
+  `HERMES_MERGE_REVIEWER` is set to `dragon0816` for the current setup.
+- Added `validation.contracts` with serializable `ValidationRequest`,
+  `ValidationTarget`, `ValidationExecution`, and `OwnerDecision` contracts.
+  The request pins capability identity, 40-character source commit, build,
+  test profile, Bridge/actor, declared prerequisites, acceptance criteria and
+  bounded repair/retest counts.
+- Added `.github/workflows/hermes-validation-lifecycle.yml`. It emits
+  `hermes-validation/v1` payloads only when the expected bot/reviewer applies
+  the exact lifecycle label. It has no checkout, no token secret, no code
+  execution, and no merge operation.
+- A `manual_review` outcome from the Codex failure workflow now always creates
+  a trusted `owner_decision_required` Hermes payload and the
+  `hermes-owner-decision-requested` label. This replaces the previous
+  no-action comment that left Issue #108 idle.
+- Added the `Hermes validation request` Issue template and lifecycle
+  documentation. Updated the shared contract and progress records.
 
 ## In Progress
 
-- Hermes Next Action implementation was committed as `aec3206` and pushed to
-  PR #107. Its exact Windows/Python 3.12 GitHub Actions run `36279203475` is
-  in progress.
-- An attempted CLI merge of PR #107 was blocked because the local GitHub token
-  has only `admin:repo_hook, project` scopes and lacks `public_repo`. The
-  in-app browser has no signed-in GitHub tab. The owner must merge in GitHub UI
-  or use a token with repository merge permission.
+- PR #109 first CI run `36298521674` failed only because mypy rejected two
+  negative-test expressions in `tests/test_validation_contracts.py`; the
+  implementation was not reached. The tests now use Pydantic validation for
+  the deliberately incomplete fixture, focused pytest/Ruff/mypy pass, and a
+  replacement CI run is pending.
 
 ## Remaining
 
-- In GitHub **Settings -> Actions -> General**, set workflow permissions to
-  **Read and write permissions**. The delivery job otherwise cannot create the
-  branch and Draft PR; `OPENAI_API_KEY` remains a separate repository secret.
-- In **Settings -> Secrets and variables -> Actions -> Variables**, set
-  `HERMES_GITHUB_BOT_USER` to the exact GitHub App bot login that applies
-  labels, and `HERMES_MERGE_REVIEWER` to the owner's GitHub username. Create
-  the `hermes-retest-passed` label. The notification job intentionally does
-  nothing if either variable is missing.
-- Hermes must poll GitHub for `Hermes Next Action` comments authored by
-  `github-actions[bot]`, validate the `hermes-next-action/v1` JSON payload's
-  repository/source/branch/SHA, and persist each payload `id` before acting.
-- After PR #107 merges, remove `codex-fix`, replace Issue #106 with one focused
-  evidence-complete failure report, and add `codex-fix` again. Verify either:
-  analysis-only for insufficient evidence, or exactly one Draft PR for a
-  restricted patch with passing local tests.
-- Keep Hermes artifacts bounded and safe: exact commit, expected/actual,
-  failure excerpt and accessible repository paths. Hermes rebuild/retest remains
-  required before a human merges any Draft PR.
-- Existing product work is unchanged: E2E-01's real company-host DUT
-  validation remains owner-run and pending; CI remains inert.
+- The lifecycle labels have been created in GitHub:
+  `hermes-validation-requested`, `hermes-preflight-requested`,
+  `hermes-owner-decision-requested`, `hermes-owner-decision-approved`,
+  `hermes-owner-decision-rejected`, `hermes-validation-passed`, and
+  `hermes-validation-failed`.
+- Update Hermes to poll only trusted JSON payload comments, persist payload
+  ids, perform predefined preflight/test/retest actions, and never execute
+  Issue/payload prose as a command. The exact pasteable prompt is supplied in
+  the Codex final response for this slice.
+- Hermes must apply `hermes-validation-requested` only after it creates a
+  complete request manifest. On a preflight failure it must attach sanitized
+  evidence and use the existing `codex-fix` repair path only when an
+  implementation defect is supported.
+- A reviewer must perform any real grant/routing/Knowledge configuration
+  change before adding `hermes-owner-decision-approved`; the label merely
+  queues another preflight.
+- Execute one end-to-end dry validation request after merge. CI stays inert;
+  live company resources stay on the enrolled Bridge.
 
 ## Architecture decisions made
 
-- The remote repair loop is a governed integration entry point, not a Registry,
-  Bridge execution or runtime-authorization change.
-- Issue data and Codex output are untrusted evidence. Codex runs last in its
-  read-only analysis job; the write-capable delivery job never executes output
-  code and has a strict patch allowlist.
-- A Draft PR is a review artifact, not evidence that a remote failure is fixed.
-  Normal CI and Hermes rebuild/retest are required before the human reviewer
-  receives a merge notification. No Action approves or merges the PR.
-- The GitHub label is a queue signal, not a command authorization. Hermes acts
-  only on a matching trusted bot comment and executes its own predefined test
-  profile; it never executes Issue or payload text as shell commands.
+- This is a GitHub control-plane adapter. It does not replace Registry,
+  Bridge, Gateway, workflow execution, or authorization.
+- Validation requests declare prerequisites. They never grant a listed asset,
+  configure a model route, install Knowledge, or expose a secret.
+- Issue text, test logs and JSON payload fields are evidence, never executable
+  instructions. Hermes accepts only matching `github-actions[bot]` comments,
+  matching repository/Issue, supported schema/action and a durable unseen id.
+- Terminal states are explicit: passed, failed after bounded attempts, or owner
+  rejected. A green repair PR remains a human merge decision.
+- Existing Draft PR delivery stays limited to static, allowlisted diffs. The
+  validation workflow itself receives only `issues: write` for its comment and
+  label actions.
 
 ## Exact verification commands and results
 
-Windows / Python 3.12:
+Focused Windows / Python 3.12 checks completed before handoff:
 
 ```text
-.venv\Scripts\python.exe -m pytest tests\test_codex_remote_test_workflow.py -q -p no:cacheprovider
-8 passed in 0.19s
+.venv\Scripts\ruff.exe format tests\test_codex_remote_test_workflow.py
+1 file reformatted
 
-.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-hermes-next-action-full-third
-1 failed, 1296 passed, 4 skipped in 33.40s
-The only failure was the known Windows local HTTP-server socket abort in
-tests/test_agent_web.py::test_every_api_call_needs_the_header (expected 401,
-received WinError 10053). It passed immediately in isolation:
+.venv\Scripts\ruff.exe check src\validation tests\test_validation_contracts.py tests\test_codex_remote_test_workflow.py
+All checks passed!
 
-.venv\Scripts\python.exe -m pytest tests\test_agent_web.py -q -p no:cacheprovider --basetemp .scratch\pytest-hermes-next-action-agent-web
-16 passed in 7.80s
+.venv\Scripts\python.exe -m pytest tests\test_validation_contracts.py tests\test_codex_remote_test_workflow.py -q -p no:cacheprovider
+15 passed in 0.41s
 
+.venv\Scripts\mypy.exe src\validation
+Success: no issues found in 2 source files
+```
+
+Full local Windows / Python 3.12 verification completed:
+
+```text
 .venv\Scripts\ruff.exe check .
-All checks passed
+All checks passed!
 
 .venv\Scripts\ruff.exe format --check .
-265 files already formatted
+270 files already formatted
 
 .venv\Scripts\mypy.exe src
-Success: no issues found in 130 source files
+Success: no issues found in 132 source files
 
-.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\dist-codex-draft-pr
+PyYAML parse of every .github/workflows/*.yml
+all workflow YAML parsed
+
+.venv\Scripts\python.exe -m pytest -q --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch\pytest-hermes-validation-full
+1304 passed, 4 skipped in 36.50s
+
+.venv\Scripts\python.exe -m build --no-isolation --outdir .scratch\dist-hermes-validation
 Successfully built sdist and wheel
 
 .venv\Scripts\python.exe -m pip check
 No broken requirements found
 
-PyYAML safe-load of .github/workflows/codex-remote-test-fix.yml
-YAML parsed: analyze, deliver_draft, comment
-
-Node syntax check of every actions/github-script block
-passed through tests/test_codex_remote_test_workflow.py
-
 git diff --check
 passed
-
-GitHub Actions run 36228162454 at c70d1ea
-passed in 3m46s on Windows/Python 3.12, including pytest, Ruff, mypy, build,
-pip check, offline preview installation and artifact upload
 ```
 
-The four skips are existing Windows link-privilege and IPv6-loopback cases. No
-Ubuntu or Python 3.11 validation was run locally, per owner instruction.
+The four skips are existing Windows symlink-privilege and missing IPv6-loopback
+conditions. GitHub Windows/Python 3.12 CI verification is still required after
+the PR is pushed.
 
 ## Known issues
 
-- Issue #106 is not suitable to prove Draft PR creation: it reports multiple
-  failures and does not give Codex the exact checkout or readable artifacts.
-- GitHub may deny Draft PR delivery if repository Actions workflow permissions
-  stay read-only. The final Issue comment then reports delivery failure without
-  rerunning or executing the patch.
-- Two full local-suite attempts during this notification slice failed only on
-  existing Windows HTTP test-server `ConnectionAbortedError: [WinError 10053]`
-  cases while expecting a 404 (`test_platform_transport` once and
-  `test_agent_web` once). Each affected module passed immediately in isolation;
-  focused workflow tests, lint, formatting, mypy, build, pip check and YAML
-  parsing passed. The pushed Windows/Python 3.12 CI result remains the
-  authoritative full-suite check.
-- The Hermes Next Action full-suite run repeated the same local Windows socket
-  behavior in `test_every_api_call_needs_the_header`; `tests/test_agent_web.py`
-  passed in isolation. This is not caused by the workflow-only change.
+- The lifecycle labels are intentionally a one-time GitHub repository setup;
+  the new workflow does not create them. This keeps a malformed Issue from
+  silently expanding repository state. `hermes-owner-decision-requested` is
+  created by the existing Codex workflow when it is first needed.
+- Existing Windows full-suite runs can intermittently see a local HTTP server
+  socket abort (`WinError 10053`) in `tests/test_agent_web.py`; when it occurs,
+  rerun that module in isolation and report both results. It is unrelated to
+  this control-plane-only slice.
 - `.claude/` is user-owned local state. Do not commit, modify or remove it.
 
 ## Next Recommended Action
 
-Confirm GitHub Actions run `36279203475` for `aec3206`, then have the owner
-merge PR #107 in GitHub UI. Configure Hermes polling and its durable
-processed-payload id store. For a future evidence-complete failure, verify the
-action creates a Draft PR plus `hermes-retest-requested`; Hermes retests its
-exact SHA and applies `hermes-retest-passed` only after CI and the predefined
-test profile pass.
+Review PR #109 and merge only after GitHub Windows/Python 3.12 CI is green.
+Send the Hermes update prompt and start the first request through the new Issue
+template, adding `hermes-validation-requested` last.

@@ -7,6 +7,7 @@ import pytest
 ROOT = Path(__file__).parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "codex-remote-test-fix.yml"
 RETEST_WORKFLOW = ROOT / ".github" / "workflows" / "hermes-retest-ready-for-merge.yml"
+VALIDATION_WORKFLOW = ROOT / ".github" / "workflows" / "hermes-validation-lifecycle.yml"
 ISSUE_TEMPLATE = ROOT / ".github" / "ISSUE_TEMPLATE" / "hermes-remote-test-failure.md"
 DOCUMENTATION = ROOT / "docs" / "remote-testing-codex-loop.md"
 
@@ -63,6 +64,8 @@ def test_remote_test_workflow_hands_only_declared_next_actions_to_hermes() -> No
     assert '"manual_review"' in text
     assert "hermes-evidence-requested" in comment_job
     assert "hermes-retest-requested" in comment_job
+    assert "hermes-owner-decision-requested" in comment_job
+    assert "owner_decision_required" in comment_job
     assert "hermes-next-action/v1" in comment_job
     assert "github-actions[bot]" in comment_job
     assert "github.rest.issues.addLabels" in comment_job
@@ -88,12 +91,32 @@ def test_hermes_retest_workflow_notifies_a_reviewer_without_merging() -> None:
     assert "github.rest.pulls.merge" not in text
 
 
+def test_validation_lifecycle_queues_work_and_owner_decisions_without_execution() -> None:
+    text = VALIDATION_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "issues:\n    types: [labeled]" in text
+    assert "pull_request_target" not in text
+    assert "permissions: {}" in text
+    assert "hermes-validation-requested" in text
+    assert "hermes-preflight-requested" in text
+    assert "hermes-owner-decision-approved" in text
+    assert "hermes-owner-decision-rejected" in text
+    assert "hermes-validation-passed" in text
+    assert "hermes-validation-failed" in text
+    assert "hermes-validation/v1" in text
+    assert "preflight_and_test" in text
+    assert "resume_validation" in text
+    assert "terminal_rejected" in text
+    assert "github.rest.issues.addLabels" in text
+    assert "github.rest.pulls.merge" not in text
+
+
 def test_remote_test_workflow_github_scripts_parse_as_javascript() -> None:
     if which("node") is None:
         pytest.skip("Node.js is not available to the Python test process")
 
     scripts: list[str] = []
-    for workflow in (WORKFLOW, RETEST_WORKFLOW):
+    for workflow in (WORKFLOW, RETEST_WORKFLOW, VALIDATION_WORKFLOW):
         lines = workflow.read_text(encoding="utf-8").splitlines()
         for index, line in enumerate(lines):
             if line != "          script: |":
@@ -108,7 +131,7 @@ def test_remote_test_workflow_github_scripts_parse_as_javascript() -> None:
                     script_lines.append("")
             scripts.append("\n".join(script_lines))
 
-    assert len(scripts) == 4
+    assert len(scripts) == 7
 
     for script in scripts:
         completed = subprocess.run(
@@ -168,3 +191,15 @@ def test_remote_test_contract_is_documented_and_templated() -> None:
     assert "Draft PR" in documentation
     assert "hermes-evidence-requested" in documentation
     assert "hermes-retest-requested" in documentation
+
+
+def test_validation_request_template_and_lifecycle_documentation_exist() -> None:
+    template = ROOT / ".github" / "ISSUE_TEMPLATE" / "hermes-validation-request.md"
+    lifecycle = ROOT / "docs" / "hermes-validation-lifecycle.md"
+
+    assert "request_id:" in template.read_text(encoding="utf-8")
+    assert "package_commit:" in template.read_text(encoding="utf-8")
+    text = lifecycle.read_text(encoding="utf-8")
+    assert "hermes-validation/v1" in text
+    assert "owner_decision_required" in text
+    assert "does not itself change any grant" in text

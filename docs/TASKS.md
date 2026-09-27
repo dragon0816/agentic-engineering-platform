@@ -36,11 +36,13 @@ in PR #100 after each exact head passed Windows/Python 3.12 CI. E2E-04 merged in
 PR #101 after its exact head passed Windows/Python 3.12 CI. E2E-01's inert
 simulator proof and Windows owner-run physical validation entry point are
 implemented; the production-like company-host run remains pending.
-PR #107 is open to extend the remote Hermes feedback loop with restricted
-Draft PR delivery, machine-readable `hermes-next-action/v1` handoffs, and a
-separate `hermes-retest-passed` notification path. Hermes polls and deduplicates
-trusted payloads to collect evidence or retest an exact repair SHA; the configured
-reviewer alone decides whether to merge.
+PR #107 merged the remote Hermes feedback loop with restricted Draft PR
+delivery, machine-readable `hermes-next-action/v1` handoffs, and a separate
+`hermes-retest-passed` notification path. Hermes polls and deduplicates trusted
+payloads to collect evidence or retest an exact repair SHA; the configured
+reviewer alone decides whether to merge. The next slice adds an explicit,
+bounded validation-request lifecycle so Hermes can start from a requested
+validation instead of waiting for a manually constructed failure Issue.
 A row says `done` only after its pull request merges.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
@@ -55,6 +57,8 @@ commit passed GitHub Actions on Windows and Ubuntu with Python 3.11 and 3.12.
 | Progress record | #40 | This file, backfilled from the merged pull requests, and named in the reading order of `CLAUDE.md` and `AGENTS.md` |
 | Flaky progress test | #44 | `test_workflow_progress` compared payload digits against the whole event, including a random run id that contained them about once in a few hundred runs |
 | Remote Hermes failure feedback | #105 | A narrowly triggered `codex-fix` Issue workflow gives `openai/codex-action@v1` a no-network writable workspace, treats Issue content as bounded untrusted evidence, and posts structured analysis through a separate Issue-only writer job; it cannot push or merge |
+| Remote Hermes repair handoff | #107 | Restricted Draft PR delivery, bot-authenticated `hermes-next-action/v1` payloads, and a green-retest reviewer notification; no Action merges code |
+| Hermes validation lifecycle | pending | Versioned validation request/owner-decision contracts and a GitHub control-plane state machine that queues Hermes preflight/test, repair handoff and terminal notification without granting access or executing Issue text |
 
 ## Product E2E gates (active)
 

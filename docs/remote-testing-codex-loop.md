@@ -5,6 +5,11 @@ bounded Codex analysis and, where evidence supports a narrow repair, a Draft
 pull request. Hermes validates the repair against the pre-defined acceptance
 result; a human receives a notification and makes the final merge decision.
 
+For a validation that begins before a failure exists, use the separate
+[`Hermes validation lifecycle`](hermes-validation-lifecycle.md). It pins a
+deterministic test profile and makes preflight, owner decisions and terminal
+validation states explicit.
+
 ```text
 Hermes FAIL
     -> GitHub Issue + codex-fix
