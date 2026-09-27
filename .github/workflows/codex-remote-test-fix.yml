@@ -476,6 +476,14 @@ jobs:
                 "Requests bounded evidence collection for a remote test failure.",
               );
               hermesHandoff = `Queued Hermes evidence collection: \`${payload}\``;
+            } else {
+              const payload = handoff("owner_decision_required");
+              await ensureAndAddLabel(
+                Number(process.env.ISSUE_NUMBER),
+                "hermes-owner-decision-requested",
+                "Requests an owner decision before remote validation can continue.",
+              );
+              hermesHandoff = `Queued owner decision: \`${payload}\``;
             }
             const comment = [
               "## Codex Analysis",

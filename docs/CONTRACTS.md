@@ -5,6 +5,21 @@ Pydantic `model_dump_json` / `model_validate_json`. Metadata is frozen; Registry
 ingress revalidates and stores serialized snapshots so caller mutations cannot alter
 registered assets. Pydantic is a validation dependency, not a provider contract.
 
+## Hermes validation lifecycle
+
+`ValidationRequest` is a serializable, non-secret request for a bounded remote
+validation run. It pins an exact scoped capability, 40-character package commit,
+build and test profile; it also names the Bridge/actor and declared grants,
+model-routing and Knowledge prerequisites. These fields are preflight assertions,
+not grants or runtime configuration. At least one unique acceptance criterion is
+required, and Codex repair/Hermes retest limits are explicit bounded integers.
+
+`OwnerDecision` records a named business/policy decision with evidence. Its
+approval does not modify a grant, model route or Knowledge integration; Hermes
+re-runs the same preflight before continuing. The GitHub transport is documented
+in `docs/hermes-validation-lifecycle.md` and uses versioned JSON payloads rather
+than executing Issue text.
+
 ## Phase 7 enrollment boundary
 
 `Invitation` is non-secret metadata for one named actor. A host validates the
