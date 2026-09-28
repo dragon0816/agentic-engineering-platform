@@ -49,6 +49,11 @@ def test_personal_proof_deployment_workflow_is_narrow_and_machine_readable() -> 
     assert 'schema: "hermes-validation/v1"' in text
     assert "aep-windows-preview-${commit}" in text
     assert "github.rest.actions.listWorkflowRunArtifacts" in text
+    assert "github.rest.issues.createComment" in text
+    assert "source_issue: issue.data.number" in text
+    assert text.index("github.rest.issues.createComment") < text.index(
+        "github.rest.issues.addLabels"
+    )
     assert "hermes-preflight-requested" in text
     assert "github.rest.pulls.merge" not in text
     assert "actions/checkout" not in text
