@@ -40,6 +40,10 @@ DraftRefusalCode = Literal[
     "draft_unusable",
     # The SOP said nothing this host could act on.
     "nothing_to_draft",
+    # The local SOP PDF could not be read.  This is deliberately distinct
+    # from a model refusal: the operator can replace the fixture without
+    # changing a configured model or capability grant.
+    "sop_unreadable",
 ]
 
 
@@ -66,7 +70,11 @@ class DraftWorkflowRequest(Contract):
     be deciding the answer.
     """
 
-    sop: Text = Field(min_length=1)
+    sop: Text | None = Field(default=None, min_length=1)
+    # A company host may read a controlled PDF fixture under its workspace.
+    # The handler resolves it locally; a Registry asset never carries the
+    # original's contents.
+    sop_pdf_path: Text | None = None
     namespace: Slug
     name: Symbol | None = None
     # The user's executable acceptance expectation. These are exact identities,
@@ -80,6 +88,8 @@ class DraftWorkflowRequest(Contract):
 
     @model_validator(mode="after")
     def required_capability_identities_are_unique(self) -> Self:
+        if (self.sop is None) == (self.sop_pdf_path is None):
+            raise ValueError("provide exactly one of sop or sop_pdf_path")
         keys = [identity.key for identity in self.required_capabilities]
         if len(keys) != len(set(keys)):
             raise ValueError("required capabilities must have unique scoped identities")

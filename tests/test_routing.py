@@ -205,3 +205,17 @@ def test_routing_outcome_cannot_hide_an_unresolved_decision() -> None:
                 "origin": "model",
             }
         )
+
+
+def test_dot_command_accepts_a_closed_json_object_without_model_selection() -> None:
+    result = RequestRouter(CommandRouter(skills())).route(
+        request('run_testing.run {"suite":"smoke","retries":0}')
+    )
+    assert result.decision.kind == "capability"
+    assert result.arguments == {"suite": "smoke", "retries": 0}
+
+
+def test_malformed_dot_command_json_is_refused_without_execution() -> None:
+    result = RequestRouter(CommandRouter(skills())).route(request("run_testing.run {not-json}"))
+    assert result.decision.kind == "needs_input"
+    assert result.failure is not None and result.failure.code == "invalid_command_json"

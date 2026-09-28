@@ -168,6 +168,25 @@ class DutHostBinding(Contract):
         return self
 
 
+class KnowledgeHostBinding(Contract):
+    """One exact published Knowledge asset and its local immutable evidence.
+
+    Discovery metadata remains in the manifest under `assets/knowledge`; this
+    binding says which local Vault this Bridge may query.  It is deliberately
+    an exact identity, never a floating "latest" reference.
+    """
+
+    asset: AssetIdentity
+    vault_root: Text
+
+    @field_validator("vault_root")
+    @classmethod
+    def absolute_vault_root(cls, value: str) -> str:
+        if not (PureWindowsPath(value).is_absolute() or Path(value).is_absolute()):
+            raise ValueError("vault_root must be an absolute path")
+        return value
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -195,6 +214,11 @@ class CompanyHostConfiguration(Contract):
     # matches commands and runs Workflows without reasoning about anything,
     # which is what every host did before this field existed.
     models: ModelBinding | None = None
+    # Published Knowledge is installed only through exact local bindings.
+    # Querying it needs the same explicitly configured model used by the
+    # Personal Agent, so an empty binding cannot quietly become retrieval-only
+    # output that violates the grounded-answer contract.
+    knowledge: tuple[KnowledgeHostBinding, ...] = ()
     # Optional physical DUT boundary. The driver is fixed by trusted local
     # configuration and remains disabled until the operator explicitly opts in.
     dut: DutHostBinding | None = None
@@ -229,6 +253,11 @@ class CompanyHostConfiguration(Contract):
             raise ValueError("a secret is mapped to one environment variable")
         if self.workflow_wait_seconds < self.capability_timeout_seconds:
             raise ValueError("a caller waits at least as long as one step may run")
+        keys = [item.asset.key for item in self.knowledge]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Knowledge bindings must name unique exact versions")
+        if self.knowledge and (self.models is None or self.models.routing_alias is None):
+            raise ValueError("installed Knowledge query requires a configured routing model")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -246,6 +275,7 @@ class HostLayout(Contract):
     authorization: Path
     skills: Path
     workflows: Path
+    knowledge: Path
     telegram: Path
     state: Path
 
@@ -259,6 +289,7 @@ class HostLayout(Contract):
             authorization=root / "authorization.json",
             skills=root / "assets" / "skills",
             workflows=root / "assets" / "workflows",
+            knowledge=root / "assets" / "knowledge",
             telegram=root / "telegram.json",
             state=root / "state.sqlite",
         )
@@ -281,6 +312,7 @@ class DoctorCheck(Contract):
         "platform",
         "integrations",
         "models",
+        "knowledge",
         "dut",
     ]
     status: Literal["passed", "failed", "pending"]

@@ -45,11 +45,14 @@ REQUIRED_DEPENDENCIES = (
     # The `excel` extra: reading the weekly workbook without Excel.
     "openpyxl-",
     "et_xmlfile-",
+    # The `office` extra: controlled SOP PDF extraction.
+    "pypdf-",
+    "pillow-",
     # The `windows` extra: writing it through Excel.
     "pywin32-",
 )
 #: What `install.ps1` installs the platform wheel with.
-BUNDLED_EXTRAS = ("excel", "windows")
+BUNDLED_EXTRAS = ("excel", "office", "windows")
 
 
 def worst_case_path(relative: str) -> int:

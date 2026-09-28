@@ -27,6 +27,8 @@ BUNDLED_WHEELS = (
     "typing_inspection-0.1-py3-none-any.whl",
     "openpyxl-3.1.5-py2.py3-none-any.whl",
     "et_xmlfile-2.0.0-py3-none-any.whl",
+    "pypdf-6.0.0-py3-none-any.whl",
+    "pillow-11.0.0-cp312-cp312-win_amd64.whl",
     "pywin32-312-cp312-cp312-win_amd64.whl",
 )
 

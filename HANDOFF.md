@@ -1,14 +1,14 @@
-# Handoff — bounded Hermes validation lifecycle
+# Handoff — Company Bridge agent integration v1
 
-Updated: 2026-09-27 (Asia/Taipei).
-Branch: `feature/hermes-validation-lifecycle`.
-Base: `origin/main` at `0659ea8d881d256240d1d0f32323032225730682`.
-Pull request: #109, https://github.com/dragon0816/agentic-engineering-platform/pull/109.
+Updated: 2026-09-28 (Asia/Taipei).
+Branch: `feature/company-bridge-agent-integration-v1`.
+Base: `origin/main` at `705933c2a0230064c2528c8b96d00005c3a6a52f`.
 
 ## Goal
 
-Complete the GitHub control-plane portion of the continuous Hermes validation
-loop:
+Restore the three bounded Personal Agent routes that Hermes found missing on
+the Company Bridge: SOP-to-draft Workflow, grounded Knowledge asking, and a
+side-effect-free Personal Agent proof Workflow.
 
 ```text
 Hermes validation request -> GitHub queue -> Hermes preflight/test
@@ -22,6 +22,22 @@ PR; no workflow grants access, changes Bridge configuration, approves, or
 merges code.
 
 ## Completed
+
+- Added explicit shipped Skills for `workflow.draft`, `knowledge.ask`, and
+  `personal.proof`; known routes remain deterministic and never require model
+  intent selection.
+- Added a typed `KnowledgeHostBinding`: exact scoped asset identity plus local
+  Vault root.  The host loads only a matching published manifest whose Raw,
+  decision and content digests match its Vault.
+- Registered the existing `KnowledgeQueryHandler` only when that binding and
+  an existing configured routing model are present.
+- Extended Workflow drafting with a workspace-confined SOP PDF input.  It
+  reads no PDF outside the configured workspace, returns `sop_unreadable` on
+  failure, and still only returns a draft candidate.
+- Added JSON-object input support for deterministic dot commands; existing
+  text `args` commands remain unchanged.
+- Added `docs/company-agent-integration.md` with required host binding,
+  grants and Hermes green-path evidence.
 
 - PR #105 established the narrow `codex-fix` Issue trigger and separated
   read-only Codex analysis from Issue-comment writes.
@@ -48,6 +64,9 @@ merges code.
 
 ## In Progress
 
+- Run full Windows/Python 3.12 verification, update the Windows preview bundle
+  to include the optional PDF reader dependency, then commit and open a PR.
+
 - PR #109 first CI run `36298521674` failed only because mypy rejected two
   negative-test expressions in `tests/test_validation_contracts.py`; the
   implementation was not reached. The tests now use Pydantic validation for
@@ -55,6 +74,10 @@ merges code.
   replacement CI run is pending.
 
 ## Remaining
+
+- User reviews and merges the resulting PR only after GitHub CI is green.
+- Hermes rebuilds the merged exact SHA and runs its fixed Company Bridge
+  integration profile; it attaches evidence before adding a terminal label.
 
 - The lifecycle labels have been created in GitHub:
   `hermes-validation-requested`, `hermes-preflight-requested`,
@@ -77,6 +100,15 @@ merges code.
 
 ## Architecture decisions made
 
+- The Company Bridge is execution-plane wiring only.  Registry publication,
+  capability grants, model credentials and human approval stay separate.
+- SOP drafting is a `read` capability and cannot install, execute or publish
+  its candidate.  The test PDF remains local to the Bridge workspace.
+- Knowledge has no floating version selection: each host binding names an
+  exact published identity and verifies local provenance before use.
+- The proof workflow reuses the shipped filesystem-read capability and has no
+  external or write side effect.
+
 - This is a GitHub control-plane adapter. It does not replace Registry,
   Bridge, Gateway, workflow execution, or authorization.
 - Validation requests declare prerequisites. They never grant a listed asset,
@@ -91,6 +123,17 @@ merges code.
   label actions.
 
 ## Exact verification commands and results
+
+```text
+.venv\Scripts\ruff.exe check [changed modules and tests]
+All checks passed!
+
+.venv\Scripts\mypy.exe [changed modules]
+Success: no issues found in 11 source files
+
+.venv\Scripts\python.exe -m pytest tests\test_routing.py tests\test_company_agent_assets.py tests\test_workflow_author.py tests\test_host_wiring.py -q -p no:cacheprovider --basetemp .scratch\pytest-company-agent-final
+80 passed in 0.94s
+```
 
 Focused Windows / Python 3.12 checks completed before handoff:
 
