@@ -84,7 +84,7 @@ $PlatformWheel = $PlatformWheels[0]
 # the check above is what guarantees the directory holds exactly one build.
 # Still --no-index, so a missing wheel fails here rather than reaching for a
 # package index.
-& $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,office,windows]"
+& $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows]" "pypdf>=6,<7"
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
 $HostExecutable = Join-Path $Venv "Scripts\aep-host.exe"
 # All preview packages currently report semantic version 0.1.0. Verify a
