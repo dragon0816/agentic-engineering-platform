@@ -10,6 +10,7 @@ from capabilities.company_agent.manifest import (
 from capabilities.files import READ_FILE_SPEC
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from capabilities.workflow_author.handlers import DRAFT_SPEC
+from common.assets import WorkflowStep
 from host_runtime.assets import shipped
 
 
@@ -21,7 +22,9 @@ def test_company_agent_assets_expose_exact_deterministic_routes() -> None:
     assert knowledge.commands[0].target == KNOWLEDGE_QUERY_SPEC.identity
     assert personal.commands[0].target == PERSONAL_PROOF
     proof = personal_proof_workflow()
-    assert proof.steps[0].capability == READ_FILE_SPEC.identity
+    step = proof.steps[0]
+    assert isinstance(step, WorkflowStep)
+    assert step.capability == READ_FILE_SPEC.identity
     assert proof.dependencies.central_required is False
 
 
