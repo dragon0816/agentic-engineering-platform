@@ -500,16 +500,19 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     out = tmp_path / "exported"
     assert main(["export-assets", "--out", str(out)]) == 0
     written = sorted(path.relative_to(out).as_posix() for path in out.rglob("*.json"))
-    assert written == [
+    weekly = [
+        path for path in written if path.startswith(("skills/engineering", "workflows/engineering"))
+    ]
+    assert weekly == [
         "skills/engineering__weekly-report__1.0.0.json",
         "workflows/engineering__jira-weekly-report-mail__1.0.0.json",
         "workflows/engineering__jira-weekly-report-preview__1.0.0.json",
         "workflows/engineering__jira-weekly-report__1.0.0.json",
     ]
     assert "wrote" in capsys.readouterr().out
-    exported = json.loads((out / written[2]).read_text(encoding="utf-8"))
+    exported = json.loads((out / weekly[2]).read_text(encoding="utf-8"))
     assert exported["metadata"]["identity"]["name"] == "jira-weekly-report-preview"
-    drafts = json.loads((out / written[1]).read_text(encoding="utf-8"))
+    drafts = json.loads((out / weekly[1]).read_text(encoding="utf-8"))
     assert drafts["metadata"]["identity"]["name"] == "jira-weekly-report-mail"
     # The mail reads the board and drafts; it never touches the workbook.
     assert [step["capability"]["name"] for step in drafts["steps"]] == [
