@@ -59,6 +59,7 @@ commit passed GitHub Actions on Windows and Ubuntu with Python 3.11 and 3.12.
 | Remote Hermes failure feedback | #105 | A narrowly triggered `codex-fix` Issue workflow gives `openai/codex-action@v1` a no-network writable workspace, treats Issue content as bounded untrusted evidence, and posts structured analysis through a separate Issue-only writer job; it cannot push or merge |
 | Remote Hermes repair handoff | #107 | Restricted Draft PR delivery, bot-authenticated `hermes-next-action/v1` payloads, and a green-retest reviewer notification; no Action merges code |
 | Hermes validation lifecycle | pending | Versioned validation request/owner-decision contracts and a GitHub control-plane state machine that queues Hermes preflight/test, repair handoff and terminal notification without granting access or executing Issue text |
+| Deployment validation loop v1 | pending | A successful `main` Windows preview build creates one fixed, artifact-pinned `personal.proof` deployment request for the enrolled company Bridge; the action has no checkout, Bridge connection, credential, or merge authority |
 
 ## Product E2E gates (active)
 
