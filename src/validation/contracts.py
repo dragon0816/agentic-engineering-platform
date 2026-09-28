@@ -19,6 +19,28 @@ class ValidationTarget(RegistryContract):
     test_profile: Symbol
 
 
+class DeploymentArtifact(RegistryContract):
+    """One immutable CI artifact Hermes may install for a pinned commit.
+
+    This is deployment input, not a registry asset and not an authorization
+    grant.  The artifact name deliberately repeats the commit so a consumer
+    can reject a successful artifact that belongs to another revision.
+    """
+
+    repository: Text
+    package_commit: GitCommit
+    workflow_run_id: int = Field(gt=0, strict=True)
+    artifact_id: int = Field(gt=0, strict=True)
+    artifact_name: Text
+
+    @model_validator(mode="after")
+    def names_the_pinned_commit(self) -> Self:
+        expected = f"aep-windows-preview-{self.package_commit}"
+        if self.artifact_name != expected:
+            raise ValueError("artifact name must identify the pinned package commit")
+        return self
+
+
 class ValidationExecution(RegistryContract):
     """Execution identity and declared prerequisites; this does not grant them."""
 

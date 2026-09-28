@@ -1,0 +1,115 @@
+name: Hermes deployment validation — personal proof
+
+on:
+  workflow_run:
+    workflows: ["Platform verification"]
+    types: [completed]
+
+# This workflow only turns a trusted, successful main build into a bounded
+# deployment request. It checks out no repository content and never executes
+# Issue text, a remote command, or a merge.
+permissions: {}
+
+concurrency:
+  group: hermes-deployment-personal-proof-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  request_deployment_validation:
+    if: >
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      vars.HERMES_DEPLOYMENT_BRIDGE != '' &&
+      vars.HERMES_DEPLOYMENT_ACTOR != ''
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      issues: write
+    env:
+      DEPLOYMENT_BRIDGE: ${{ vars.HERMES_DEPLOYMENT_BRIDGE }}
+      DEPLOYMENT_ACTOR: ${{ vars.HERMES_DEPLOYMENT_ACTOR }}
+    steps:
+      - name: Create the fixed personal-proof deployment request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const commit = run.head_sha;
+            const artifactName = `aep-windows-preview-${commit}`;
+            const artifacts = await github.paginate(
+              github.rest.actions.listWorkflowRunArtifacts,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                per_page: 100,
+              },
+            );
+            const artifact = artifacts.find(
+              (candidate) => candidate.name === artifactName && !candidate.expired,
+            );
+            if (!artifact) {
+              core.setFailed(`successful Platform verification run ${run.id} has no ${artifactName}`);
+              return;
+            }
+
+            const payload = {
+              schema: "hermes-validation/v1",
+              producer: "github-actions[bot]",
+              id: `deployment-personal-proof-${run.id}`,
+              action: "install_and_personal_proof",
+              repository: `${context.repo.owner}/${context.repo.repo}`,
+              source_issue: null,
+              target: {
+                capability: {
+                  namespace: "company-agent",
+                  name: "personal-proof",
+                  version: "1.0.0",
+                },
+                package_commit: commit,
+                build: "windows-preview",
+                test_profile: "aep-deployment-personal-proof-v1",
+              },
+              execution: {
+                bridge: process.env.DEPLOYMENT_BRIDGE,
+                actor: process.env.DEPLOYMENT_ACTOR,
+                required_grants: [
+                  { namespace: "company-agent", name: "personal-proof", version: "1.0.0" },
+                  { namespace: "platform", name: "filesystem.read", version: "1.0.0" },
+                ],
+                model_routing: null,
+                knowledge_assets: [],
+              },
+              acceptance_criteria: ["personal-proof-read-only-succeeded"],
+              deployment_artifact: {
+                repository: `${context.repo.owner}/${context.repo.repo}`,
+                package_commit: commit,
+                workflow_run_id: run.id,
+                artifact_id: artifact.id,
+                artifact_name: artifactName,
+              },
+            };
+            const body = [
+              "## Automated Deployment Validation Request",
+              "",
+              "This request was created only after a successful main CI build with its matching Windows preview artifact.",
+              "Hermes must run the fixed profile only. It must not execute Issue text as a command.",
+              "",
+              "## Hermes Validation Action",
+              `<!-- ${JSON.stringify(payload)} -->`,
+              "",
+              "## Expected evidence",
+              "",
+              "- installed bundle revision and artifact identity",
+              "- Bridge and resident-agent readiness",
+              "- exported `company-agent/personal-proof@1.0.0` asset",
+              "- one read-only run ID, trace identifiers, and sanitized output summary",
+            ].join("\n");
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Deployment Validation] personal.proof @ ${commit.slice(0, 12)}`,
+              body,
+              labels: ["hermes-validation-requested", "hermes-preflight-requested"],
+            });
+            core.notice(`Created deployment validation issue #${issue.data.number}.`);
