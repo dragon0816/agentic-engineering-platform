@@ -70,7 +70,7 @@ def _prompt(
         catalogue,
         "",
         "The procedure:",
-        request.sop,
+        request.sop or "",
     ]
     if request.required_capabilities:
         asked.extend(

@@ -106,6 +106,18 @@ class CommandRouter:
             if command is None:
                 return needs_input(context, "unknown_command")
             raw_args = (match.group(3) or "").strip()
+            # A deterministic command may carry a closed structured input
+            # contract.  Preserve the established text `args` behaviour for
+            # existing Skills, but accept a JSON object when an operator (or
+            # Hermes) needs to invoke a typed capability without prompting a
+            # model to reconstruct fields.  Arrays/scalars remain plain text.
+            if raw_args.startswith("{"):
+                try:
+                    decoded = json.loads(raw_args)
+                except json.JSONDecodeError:
+                    return needs_input(context, "invalid_command_json")
+                if isinstance(decoded, dict):
+                    return selected(context, command, decoded)
             return selected(context, command, {"args": raw_args} if raw_args else {})
         for skill in self.skills.discover(context.namespace):
             for rule in skill.rules:

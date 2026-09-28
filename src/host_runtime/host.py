@@ -28,6 +28,7 @@ from capabilities.dut_engineering.handlers import (
     PhysicalDutValidationHandler,
 )
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, KnowledgeQueryHandler
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.weekly_report.contracts import (
     ReportingWindow,
@@ -89,6 +90,13 @@ from integrations.excel_writer import (
 from integrations.github_project import GitHubProjectClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
+from knowledge.evolution import (
+    KnowledgeAnswerRecord,
+    KnowledgeCatalog,
+    KnowledgeManifest,
+    KnowledgeQueryRequest,
+)
+from knowledge.vault import Vault
 from models.clients import ModelClients
 from models.contracts import ModelClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
@@ -111,6 +119,7 @@ HostErrorCode = Literal[
     "telegram_invalid",
     "credential_unmapped",
     "models_invalid",
+    "knowledge_invalid",
     "state_unavailable",
     "dut_skill_missing",
     "dut_driver_missing",
@@ -520,16 +529,49 @@ def build_gateway(
                 else "routing"
             ),
             local_only=binding.require_local_model if binding is not None else False,
+            workspace_root=layout.workspace_root,
         ),
         DraftWorkflowRequest,
         WorkflowDraft,
         ExecutionDependencies(central_required=False),
     )
+    if config.knowledge:
+        # Contract validation already requires a configured routing model;
+        # retain the defensive closed failure for callers constructing models
+        # outside Pydantic validation.
+        if drafting_model is None or binding is None or binding.routing_alias is None:
+            raise HostError("models_invalid")
+        catalog = build_knowledge_catalog(config, layout)
+        installed.register(
+            KNOWLEDGE_QUERY_SPEC,
+            KnowledgeQueryHandler(catalog, drafting_model, alias=binding.routing_alias),
+            KnowledgeQueryRequest,
+            KnowledgeAnswerRecord,
+            ExecutionDependencies(central_required=False),
+        )
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
     )
     return Gateway(router, bridge, WorkflowEngine(workflows, bridge))
+
+
+def build_knowledge_catalog(
+    config: CompanyHostConfiguration, layout: HostLayout
+) -> KnowledgeCatalog:
+    """Load only configured, published local Knowledge versions into a query catalog."""
+    manifests = _load_all(layout.knowledge, KnowledgeManifest)
+    available = {item.metadata.identity.key: item for item in manifests}
+    catalog = KnowledgeCatalog()
+    for binding in config.knowledge:
+        manifest = available.get(binding.asset.key)
+        if manifest is None:
+            raise HostError("knowledge_invalid", layout.knowledge)
+        try:
+            catalog.register(manifest, Vault(Path(binding.vault_root)))
+        except (OSError, ValueError):
+            raise HostError("knowledge_invalid", layout.knowledge) from None
+    return catalog
 
 
 def build_router(
