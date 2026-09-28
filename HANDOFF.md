@@ -1,8 +1,8 @@
 # Handoff — deployment validation loop v1
 
-Updated: 2026-09-28 (Asia/Taipei).
-Branch: `codex/deployment-validation-loop`.
-Base: `origin/main` at `fde0eea19cca455be462a8a26d3667f3292a3203`.
+Updated: 2026-09-29 (Asia/Taipei).
+Branch: `codex/deployment-payload-comment`.
+Base: `origin/main` at `90f4c7e486c77979981f3d23fa445933a155fafa`.
 
 ## Goal
 
@@ -35,23 +35,29 @@ profiles after this path is proven green.
   variables and Hermes acceptance requirements.
 - Added contract/workflow tests in `tests/test_deployment_validation_loop.py`.
 - Updated `docs/TASKS.md` with this active cross-cutting deployment slice.
+- PR #121 merged the first deployment-loop implementation. Its successful
+  main CI created Issue #122 with a correct artifact identity, but placed the
+  trusted payload in the Issue body. Hermes correctly refused it because its
+  trust boundary accepts Actions comments only.
+- The two repository variables are now configured:
+  `HERMES_DEPLOYMENT_BRIDGE=bridge-tp401555` and
+  `HERMES_DEPLOYMENT_ACTOR=leo.chi`.
 
 ## In Progress
 
-- Commit `1fc2df9` is pushed to `origin/codex/deployment-validation-loop`.
-  Local GitHub CLI authentication lacks the `public_repo` scope, so it cannot
-  create the PR; use the direct compare URL instead.
-- Hermes must implement/enable the fixed profile before it can consume the
-  generated deployment request. Hermes code is outside this repository.
+- Correct the handoff format: this branch creates the Issue first, writes the
+  `hermes-validation/v1` payload as a GitHub Actions comment with that exact
+  source Issue number, and only then applies the queue labels.
+- Hermes has implemented the fixed profile and generic poller, but it must
+  accept GitHub's API author identifier `github-actions` (and the displayed
+  `github-actions[bot]` equivalent) only for trusted action comments.
 
 ## Remaining
 
-1. Configure repository Actions variables:
-   - `HERMES_DEPLOYMENT_BRIDGE=bridge-tp401555`
-   - `HERMES_DEPLOYMENT_ACTOR=leo.chi`
-2. Have Hermes accept only the generated trusted payload and implement the
+1. Push, review and merge the payload-comment correction PR.
+2. Hermes accepts only the generated trusted action comment and performs the
    profile-owned install/update and read-only `personal.proof` verification.
-3. Push, review and merge this PR. The next successful `main` verification
+3. The next successful `main` verification
    should automatically create exactly one deployment validation Issue.
 4. Hermes installs the exact artifact, verifies the source revision,
    exports assets, runs `personal.proof` against its controlled local fixture,
@@ -72,7 +78,8 @@ profiles after this path is proven green.
   a bundle, execute Issue text, issue credentials, modify local configuration,
   or merge a pull request.
 - Hermes must use fixed profile-owned code; Issue content is evidence only and
-  cannot supply arbitrary commands or configuration instructions.
+  cannot supply arbitrary commands or configuration instructions. A queue
+  label is applied only after a trusted action comment exists.
 
 ## Verification
 
@@ -98,6 +105,25 @@ git diff --check
 passed
 ```
 
+Payload-comment correction verification:
+
+```text
+.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-payload-comment -q
+19 passed in 0.47s
+
+.venv\Scripts\python.exe -m ruff check .
+All checks passed!
+
+.venv\Scripts\python.exe -m ruff format --check .
+276 files already formatted
+
+.venv\Scripts\python.exe -m mypy
+Success: no issues found in 219 source files
+
+Node.js syntax check of the new actions/github-script block
+passed
+```
+
 The full local pytest suite was attempted with a workspace-local basetemp but
 did not complete inside the 30-second command window. A separate full run first
 stopped at existing `tests/test_browser.py` because Edge published no remote
@@ -107,18 +133,18 @@ does not modify browser code. GitHub Windows/Python 3.12 CI remains required.
 ## Known issues
 
 - `.claude/` is user-owned untracked state. Do not add, remove or modify it.
-- The new workflow cannot create a request until both required Actions variables
-  exist and the usual `hermes-*` labels exist in the repository.
+- Issue #122 is intentionally not consumed: it has no trusted payload comment.
+  It is evidence of the pre-correction protocol mismatch, not a valid test.
 - GitHub Actions evaluates a `workflow_run` workflow from the default branch.
   The successful `main` Platform verification created by merging this PR is
   expected to start the first deployment request automatically.
-- Hermes currently needs an update to recognize
-  `install_and_personal_proof` and `aep-deployment-personal-proof-v1`.
+- GitHub's API reports GitHub Actions comments as author `github-actions`,
+  whereas UI text may show `github-actions[bot]`; Hermes must use the fixed
+  two-value canonical allowlist, never a broad bot allowlist.
 
 ## Next recommended action
 
-Create the PR from
-`https://github.com/dragon0816/agentic-engineering-platform/compare/main...codex%2Fdeployment-validation-loop?expand=1`.
-Set the two repository variables before merging. The successful `main` CI run
-created by the merge should then trigger the first automatic Company Bridge
-deployment validation request.
+Create and merge the correction PR from
+`https://github.com/dragon0816/agentic-engineering-platform/compare/main...codex%2Fdeployment-payload-comment?expand=1`.
+The successful `main` CI run created by that merge should then create a new
+automatic Company Bridge deployment validation Issue with a trusted comment.

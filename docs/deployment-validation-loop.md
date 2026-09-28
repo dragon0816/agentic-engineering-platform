@@ -31,10 +31,10 @@ installed bundle revision and `package_commit` match exactly.
 After `Platform verification` succeeds for `main`,
 `.github/workflows/hermes-deployment-personal-proof.yml` locates only the
 artifact named `aep-windows-preview-<package_commit>` from that exact workflow
-run. It creates a GitHub Issue with a machine-readable
-`hermes-validation/v1` JSON marker. The marker contains the bounded profile,
-Bridge and actor configured by repository variables, and immutable deployment
-artifact identity.
+run. It creates a GitHub Issue, writes a machine-readable
+`hermes-validation/v1` JSON **comment**, and only then applies the queue
+labels. The marker contains the bounded profile, Bridge and actor configured
+by repository variables, and immutable deployment artifact identity.
 
 The workflow does not check out code, download an artifact, contact a Bridge,
 and does not execute Issue text. It does not grant a permission, configure a model, or merge a pull
@@ -57,8 +57,10 @@ enforcement point.
 
 Hermes accepts a deployment request only when all of the following hold:
 
-1. The JSON marker author is `github-actions[bot]` and schema is
-   `hermes-validation/v1`.
+1. The JSON marker is in a GitHub Actions comment and schema is
+   `hermes-validation/v1`. GitHub's API currently reports this author as
+   `github-actions`; Hermes may also accept the equivalent displayed form
+   `github-actions[bot]`, but no other account.
 2. `action` is exactly `install_and_personal_proof` and `test_profile` is
    exactly `aep-deployment-personal-proof-v1`.
 3. Repository, `package_commit`, workflow run, artifact name and `artifact_id`
