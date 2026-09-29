@@ -1,0 +1,55 @@
+{
+  "schema": "aep-loopback-model-responses/v1",
+  "workflow": {
+    "output_contract": "platform.workflow-manifest.v1",
+    "structured_output": {
+      "metadata": {
+        "identity": {
+          "namespace": "validation",
+          "name": "read-personal-proof",
+          "version": "1.0.0"
+        },
+        "owner": {
+          "type": "team",
+          "id": "engineering"
+        },
+        "visibility": "private",
+        "lifecycle": "draft"
+      },
+      "kind": "workflow",
+      "description": "Read the controlled Personal Proof fixture and return its content.",
+      "execution": {
+        "mode": "local"
+      },
+      "dependencies": {
+        "central_required": false,
+        "local_capabilities": [
+          "company-agent.personal-proof.fixture-read"
+        ]
+      },
+      "input_contract": "company-agent.personal-proof.input.v1",
+      "output_contract": "filesystem.read-file.output.v1",
+      "steps": [
+        {
+          "capability": {
+            "namespace": "company-agent",
+            "name": "personal-proof-fixture-read",
+            "version": "1.0.0"
+          },
+          "inputs": {
+            "path": {
+              "source": "run",
+              "path": [
+                "args"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "knowledge": {
+    "question": "What firmware version does Safe mode require?",
+    "text": "Safe mode requires firmware 2.0 [1]."
+  }
+}

@@ -80,3 +80,19 @@ evidence records before marking a validation passed:
 If a route is absent, an asset/grant/model/Vault prerequisite is missing, or
 the PDF cannot be read, Hermes must attach sanitized evidence to the existing
 Issue.  It must not mark the profile passed.
+
+
+
+## Deployable fixed integration profile
+
+The Windows preview ships `validation/company-agent-integration-v1/profile.json`
+and its SOP, Knowledge and response fixtures. Hermes uses this allowlisted,
+artifact-hashed profile in an isolated proof workspace. The profile configures
+a loopback OpenAI-compatible fixture with no credential, renders the exact
+published Knowledge manifest to its local Vault path, and installs only the
+three declared grants for the payload actor.
+
+This proves the Personal Agent, Bridge, deterministic commands, model adapter,
+Knowledge grounding and trace path together. The fixture model is intentionally
+not evidence that a production company LLM endpoint is reachable; that later
+check needs a separately configured `SecretRef` and must not change this proof.
