@@ -294,6 +294,13 @@ host configuration, adapter, Agent/Gateway/Bridge routes, grounding and traces
 without spending model API credit or contacting a production system. A live
 company gateway remains a separate deployment decision using `SecretRef`.
 
+The validation package does not reserve one machine-wide port. It declares a
+small loopback-only port range; Hermes starts its own responder on the first
+available port and injects that concrete URL only into the isolated proof
+workspace. Existing listeners are never stopped or reused. Exhausting the
+declared range is an environmental BLOCKED result rather than an implementation
+failure.
+
 The proof workspace is isolated and grants only the exact read capabilities
 declared by the profile. In particular, Personal Proof receives its dedicated
 fixture-rooted reader rather than general workspace read permission.

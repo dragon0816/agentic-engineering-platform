@@ -93,7 +93,12 @@ def test_owner_decision_requires_a_declared_kind_and_explicit_choice() -> None:
 def test_company_agent_profile_is_fixed_local_and_least_privilege() -> None:
     profile = CompanyAgentValidationProfile.model_validate_json(PROFILE.read_text(encoding="utf-8"))
 
-    assert profile.model.endpoint.base_url == "http://127.0.0.1:8765/v1"
+    assert profile.model.endpoint.base_url is None
+    assert profile.model.binding is not None
+    assert profile.model.binding.host == "127.0.0.1"
+    assert profile.model.binding.strategy == "first_available"
+    assert (profile.model.binding.port_start, profile.model.binding.port_end) == (18765, 18864)
+    assert profile.model.binding.base_path == "/v1"
     assert profile.model.endpoint.credential is None
     assert profile.model.endpoint.capabilities.local is True
     grants = {grant.asset.key: grant for grant in profile.grants}
@@ -126,6 +131,7 @@ def test_company_agent_profile_rejects_paths_outside_its_bundle(path: str) -> No
 
 def test_company_agent_profile_rejects_remote_or_credentialed_fixture_models() -> None:
     payload = json.loads(PROFILE.read_text(encoding="utf-8"))
+    payload["model"]["binding"] = None
     payload["model"]["endpoint"]["base_url"] = "https://gateway.example.invalid/v1"
     with pytest.raises(ValidationError, match="HTTP loopback"):
         CompanyAgentValidationProfile.model_validate(payload)
@@ -133,4 +139,31 @@ def test_company_agent_profile_rejects_remote_or_credentialed_fixture_models() -
     payload = json.loads(PROFILE.read_text(encoding="utf-8"))
     payload["model"]["endpoint"]["credential"] = {"name": "fixture_token"}
     with pytest.raises(ValidationError, match="carries no credential"):
+        CompanyAgentValidationProfile.model_validate(payload)
+
+
+@pytest.mark.parametrize(
+    ("changes", "message"),
+    [
+        ({"host": "localhost"}, "literal_error"),
+        ({"port_start": 80}, "greater than or equal to 1024"),
+        ({"port_start": 18864, "port_end": 18765}, "must not precede"),
+        ({"port_start": 18765, "port_end": 18893}, "at most 128 ports"),
+    ],
+)
+def test_company_agent_profile_rejects_unsafe_loopback_binding(
+    changes: dict[str, object], message: str
+) -> None:
+    payload = json.loads(PROFILE.read_text(encoding="utf-8"))
+    payload["model"]["binding"].update(changes)
+
+    with pytest.raises(ValidationError, match=message):
+        CompanyAgentValidationProfile.model_validate(payload)
+
+
+def test_dynamic_loopback_binding_cannot_hide_a_fixed_url() -> None:
+    payload = json.loads(PROFILE.read_text(encoding="utf-8"))
+    payload["model"]["endpoint"]["base_url"] = "http://127.0.0.1:8765/v1"
+
+    with pytest.raises(ValidationError, match="requires an unset endpoint base URL"):
         CompanyAgentValidationProfile.model_validate(payload)

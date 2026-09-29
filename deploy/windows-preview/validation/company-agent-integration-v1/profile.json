@@ -6,7 +6,7 @@
       "alias": "hermes-validation-loopback",
       "provider": "openai_compatible",
       "model": "aep-company-agent-fixture-v1",
-      "base_url": "http://127.0.0.1:8765/v1",
+      "base_url": null,
       "credential": null,
       "capabilities": {
         "reasoning": "high",
@@ -19,7 +19,14 @@
       }
     },
     "routing_alias": "hermes-validation-loopback",
-    "responses_path": "model-responses.json"
+    "responses_path": "model-responses.json",
+    "binding": {
+      "host": "127.0.0.1",
+      "strategy": "first_available",
+      "port_start": 18765,
+      "port_end": 18864,
+      "base_path": "/v1"
+    }
   },
   "grants": [
     {

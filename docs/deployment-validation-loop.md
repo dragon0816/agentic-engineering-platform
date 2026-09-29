@@ -33,6 +33,13 @@ responses make the proof deterministic and free of API cost. This validates
 host configuration, adapter wiring, routing and grounded result handling. It
 does not claim that a real company model gateway or its credential works.
 
+The artifact does not assume port `8765` is free. Its typed binding policy
+allows only `127.0.0.1`, the `/v1` path, and ports `18765` through `18864`.
+Hermes chooses the first candidate it can bind, starts and later stops only its
+own fixture process, and injects the selected URL into the isolated proof
+workspace. A listener owned by another process is skipped without being
+terminated. Exhausting the range is setup BLOCKED, not `codex-fix`.
+
 The profile declares exactly three local grants for the requested actor:
 `workflow-author/draft@1.0.0`, `knowledge-query/ask@1.0.0`, and
 `company-agent/personal-proof-fixture-read@1.0.0`. The last capability is
@@ -78,9 +85,10 @@ Hermes accepts a request only when:
    shipped profile/files match that manifest.
 5. Local Bridge ID and actor equal the payload.
 6. Setup occurs in an isolated proof workspace. Hermes structurally renders
-   the Knowledge manifest's vault path, starts only the loopback fixture model,
-   installs only the declared grants, exports assets, runs doctor, and then
-   invokes the three explicit commands.
+   the Knowledge manifest's vault path, selects a free port only from the
+   profile's loopback range, starts only the loopback fixture model, injects
+   its concrete URL, installs only the declared grants, exports assets, runs
+   doctor, and then invokes the three explicit commands.
 7. Evidence records the exact command outcome, run/trace IDs, Knowledge asset
    version and Raw citations. A preflight problem is `blocked`, not a
    functional FAIL.

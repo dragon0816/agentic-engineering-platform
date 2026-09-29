@@ -92,6 +92,14 @@ a loopback OpenAI-compatible fixture with no credential, renders the exact
 published Knowledge manifest to its local Vault path, and installs only the
 three declared grants for the payload actor.
 
+The profile leaves the endpoint `base_url` unset and declares a bounded
+`127.0.0.1` port policy. Hermes tries ports `18765` through `18864` in order,
+starts the fixture server on the first port it can bind, and then renders the
+actual `http://127.0.0.1:<port>/v1` URL into the isolated host configuration.
+It must never stop, attach to, or replace a process already listening on a
+candidate port. If it cannot own any declared port, setup remains BLOCKED and
+none of the functional criteria run.
+
 This proves the Personal Agent, Bridge, deterministic commands, model adapter,
 Knowledge grounding and trace path together. The fixture model is intentionally
 not evidence that a production company LLM endpoint is reachable; that later

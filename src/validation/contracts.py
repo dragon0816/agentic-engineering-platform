@@ -122,12 +122,31 @@ class ValidationGrantRequirement(RegistryContract):
         return self
 
 
+class LoopbackPortBinding(RegistryContract):
+    """Bounded ports a validation runner may try without disturbing other services."""
+
+    host: Literal["127.0.0.1"] = "127.0.0.1"
+    strategy: Literal["first_available"] = "first_available"
+    port_start: int = Field(ge=1024, le=65535, strict=True)
+    port_end: int = Field(ge=1024, le=65535, strict=True)
+    base_path: Literal["/v1"] = "/v1"
+
+    @model_validator(mode="after")
+    def bounded_range(self) -> Self:
+        if self.port_end < self.port_start:
+            raise ValueError("loopback port range end must not precede its start")
+        if self.port_end - self.port_start >= 128:
+            raise ValueError("loopback port range may contain at most 128 ports")
+        return self
+
+
 class LoopbackModelFixture(RegistryContract):
     """Credential-free model endpoint used only by the fixed remote proof."""
 
     endpoint: ModelEndpoint
     routing_alias: Symbol
     responses_path: Text
+    binding: LoopbackPortBinding | None = None
 
     @field_validator("responses_path")
     @classmethod
@@ -145,7 +164,13 @@ class LoopbackModelFixture(RegistryContract):
             raise ValueError("loopback validation model carries no credential")
         if not endpoint.capabilities.local:
             raise ValueError("loopback validation model must be declared local")
-        parsed = urlsplit(endpoint.base_url or "")
+        if self.binding is not None:
+            if endpoint.base_url is not None:
+                raise ValueError("a dynamic loopback binding requires an unset endpoint base URL")
+            return self
+        if endpoint.base_url is None:
+            raise ValueError("a validation model requires a fixed URL or dynamic loopback binding")
+        parsed = urlsplit(endpoint.base_url)
         if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost"}:
             raise ValueError("validation model endpoint must be HTTP loopback")
         return self
