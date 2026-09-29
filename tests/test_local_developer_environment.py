@@ -28,12 +28,28 @@ def test_loader_is_explicit_and_does_not_print_secret_values() -> None:
     loader = (ROOT / "scripts" / "import-local-env.ps1").read_text(encoding="utf-8")
 
     assert '"GH_TOKEN"' in loader
-    assert '"OPENAI_API_KEY"' in loader
     assert '"AEP_GITHUB_TOKEN"' in loader
+    assert '"OPENAI_API_KEY"' not in loader
     assert "Unsupported local environment variable" in loader
     assert "Write-Output $value" not in loader
     assert "Write-Host $value" not in loader
     assert "Get-Content" in loader
+
+
+def test_local_codex_worker_uses_pro_login_and_a_single_logon_task() -> None:
+    runner = (ROOT / "scripts" / "run-local-codex-worker.ps1").read_text(encoding="utf-8")
+    installer = (ROOT / "scripts" / "install-local-codex-worker-task.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    assert "import-local-env.ps1" in runner
+    assert "gh auth setup-git --hostname github.com" in runner
+    assert "codex login status" in runner
+    assert "--loop" in runner
+    assert "OPENAI_API_KEY" not in runner
+    assert "New-ScheduledTaskTrigger -AtLogOn" in installer
+    assert "-MultipleInstances IgnoreNew" in installer
+    assert "Start-ScheduledTask" in installer
 
 
 @pytest.mark.skipif(shutil.which("pwsh") is None, reason="PowerShell 7 is unavailable")

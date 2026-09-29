@@ -26,7 +26,6 @@ only these names and ignores allowed entries whose values remain empty:
 | Name | Used for |
 |---|---|
 | `GH_TOKEN` | GitHub CLI and GitHub API operations from this shell |
-| `OPENAI_API_KEY` | Direct local OpenAI API development; GitHub Actions still uses the repository secret |
 | `AEP_GITHUB_TOKEN` | AEP's local GitHub Projects integration |
 
 The file is plaintext on this computer even though Git ignores it. Keep it only
@@ -39,7 +38,9 @@ repository. Grant only the operations the developer needs. Normal development
 usually needs Contents, Pull requests, Issues and Actions; use read-only or
 read/write for each according to the work. Add Workflows only when editing
 workflow files, and Variables or Secrets only when managing those settings.
-Repository secrets remain the right place for GitHub Actions credentials.
+Repository secrets remain the right place for GitHub Actions credentials. The
+local Codex worker uses `codex login` and does not read an OpenAI API key from
+this file.
 
 The loader does not run automatically, persist values outside the current
 process, print secret values, or make runtime code discover local YAML files.

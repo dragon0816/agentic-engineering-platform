@@ -5,7 +5,6 @@ param(
 
 $allowedNames = @(
     "GH_TOKEN",
-    "OPENAI_API_KEY",
     "AEP_GITHUB_TOKEN"
 )
 
