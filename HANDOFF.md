@@ -1,104 +1,91 @@
 # Handoff
 
-Date: 2026-09-29 (Asia/Taipei)
-Branch: `codex/dynamic-loopback-port`
-Base: `origin/main` at `2c3fe68c363d31e1d4e6836313054f26ca6bb7d1`
-Implementation commit: `b1bdc0a`
-Pull request: https://github.com/dragon0816/agentic-engineering-platform/pull/131
+Date: 2026-09-30 (Asia/Taipei)
+Branch: `codex/local-worker-result-diagnostics`
+Base: `origin/main` at `4664a358cebcea9eba9efa361dadc76f3887feac`
 
 ## Goal
 
-Remove the machine-wide fixed-port assumption that blocked Company Agent
-deployment Issue #130 before any functional acceptance criterion could run.
+Recover the trusted Local Codex Pro repair worker after Issue #132 reached it
+successfully but stopped with `FileNotFoundError` before writing a structured
+result or opening a Draft PR.
 
 ## Completed
 
-- Added a typed `LoopbackPortBinding` contract. It permits only
-  `127.0.0.1`, `/v1`, non-privileged ports, `first_available` selection and a
-  range of at most 128 ports.
-- Evolved the existing profile compatibly: fixed credential-free loopback URLs
-  still validate, while the shipped Company Agent profile now leaves
-  `endpoint.base_url` unset and declares ports `18765..18864`.
-- Added negative contract tests for remote hosts, credentials, privileged or
-  reversed ranges, oversized ranges and simultaneous fixed/dynamic endpoints.
-- Documented that Hermes skips existing listeners, starts and stops only its
-  own fixture process, injects the selected URL into the isolated proof host
-  config and returns BLOCKED only when setup cannot own a declared port.
-- Preserved every PR #129 boundary: exact artifact identity, fixed profile,
-  three least-privilege grants, immutable Knowledge evidence and four existing
-  acceptance criteria.
+- Confirmed the Hermes-to-GitHub handoff completed: #132 contains trusted
+  failure evidence, `codex-fix`, and bot-authored request
+  `codex-local-132-d6e5edb4a9385e4a`.
+- Confirmed the development-computer worker created its isolated worktree and
+  result schema, but no `result.json`; no PR or merge occurred.
+- Added deterministic Codex executable resolution that prefers `codex.exe`,
+  then `codex.cmd`, before the generic name.
+- Converted a missing structured result into an explicit `CommandFailure`
+  rather than an unclassified `FileNotFoundError`.
+- Allowed an explicitly re-queued failed request to run once more. Claiming it
+  removes the queue label, so failure does not create a retry loop.
+- Preserved and reused a failed worker worktree only when its complete Git
+  status is clean; partially modified workspaces remain refused for review.
+- Documented the retry and executable/result boundaries.
 
 ## In Progress
 
-- PR #131 is open. GitHub Platform verification run 36586919177 passed in
-  7m32s, including the Windows offline preview build/install and artifact
-  upload.
+- Repair commit `26f7cf9` is pushed and open for review as PR #133:
+  https://github.com/dragon0816/agentic-engineering-platform/pull/133
 
 ## Remaining
 
-1. Hermes must update only its allowlisted
-   `aep-company-agent-integration-v1` runner to implement the new binding
-   policy. It must not kill or reuse PID 36208 or any unknown listener.
-2. After PR #131 is merged and main CI creates a new artifact/request, Hermes
-   should consume the new dynamic Issue. Issue #130 remains correct historical
-   BLOCKED evidence for the old artifact and should not be rewritten as PASS.
-3. Collect actual SOP draft, Knowledge answer, Personal Proof and out-of-root
-   refusal evidence from the new request.
+1. Review and merge PR #133.
+2. After merge, update the resident worker checkout to `main`, recreate its
+   broken Python 3.12 virtual environment, and restart the
+   `AEP Local Codex Worker` Scheduled Task so its in-memory code is current.
+3. Re-add `codex-local-queued` to #132 once. The same trusted request and clean
+   preserved worktree should be reused.
+4. Confirm the worker either opens a Draft PR or emits a bounded evidence
+   request; it must not produce another unclassified failure.
 
 ## Architecture decisions made
 
-- The collision is environment setup, not a repository implementation failure;
-  #130 correctly did not receive `codex-fix`.
-- Port choice belongs to the deterministic Hermes execution profile. GitHub
-  remains the control plane and the application still receives an ordinary
-  concrete OpenAI-compatible `base_url` in its isolated host configuration.
-- Existing listeners are outside this validation profile's ownership. A runner
-  may skip them but never terminate, attach to or replace them.
-- This proof remains credential-free and does not claim a production company
-  model endpoint works.
+- GitHub remains the durable queue; retry does not create a new Issue or request
+  identity.
+- A retry is operator-triggered by the queue label and bounded to one claim. It
+  is not an automatic loop.
+- Failed work is never silently discarded or reused after mutation.
+- The Codex subprocess still receives no GitHub token or OpenAI API key and has
+  no delivery authority; the deterministic outer worker verifies and delivers.
 
 ## Verification
 
-Supported target: Windows, Python 3.12. Browser tests remain excluded by owner
+Supported target: Windows, Python 3.12. Browser tests excluded per owner
 instruction.
 
 ```text
-python -m pytest tests/test_validation_contracts.py \
-  tests/test_company_agent_validation_profile.py \
-  tests/test_deployment_validation_loop.py tests/test_windows_preview_bundle.py
-30 passed
+python -m pytest tests/test_codex_remote_test_workflow.py -q
+19 passed
 
-python -m pytest --ignore=tests/test_browser.py
-1341 passed, 4 skipped
+python -m pytest --ignore=tests/test_browser.py -q
+1344 passed, 4 skipped
 
-python -m ruff check .
+python -m ruff check src/development/codex_worker.py tests/test_codex_remote_test_workflow.py
 All checks passed
 
-python -m ruff format --check .
-288 files already formatted
+python -m ruff format --check src/development/codex_worker.py tests/test_codex_remote_test_workflow.py
+2 files already formatted (after applying the formatter)
 
 python -m mypy src tests
 Success: no issues found in 224 source files
-
-GitHub Platform verification run 36586919177
-passed; Windows preview built, installed and uploaded
 ```
-
-The local managed worktree could not use the default pytest cache/temp roots,
-so verification used `-p no:cacheprovider` and a writable explicit
-`--basetemp`; the test results themselves were green.
 
 ## Known issues
 
-- Issue #130's artifact contains the old fixed `127.0.0.1:8765` profile and
-  cannot prove this change. A new successful main artifact is required.
-- PID 36208 owns the existing `uvicorn` listener on port 8765. Its purpose is
-  unknown and this change intentionally leaves it alone.
-- No production company model credential or endpoint was tested.
+- The resident scheduled process was launched from an older worker checkout and
+  must be restarted after this repair merges. Its existing `.venv` points to a
+  removed Windows Store Python path and must be recreated with Python 3.12.
+- Issue #132 remains `codex-local-failed`; it has not been re-queued while the
+  repair is unmerged.
+- Hermes' separate cron crash still needs its own runner-side traceback and fix;
+  it must not replay #132 while the Local Codex worker is being repaired.
 
 ## Next Recommended Action
 
-Review PR #131, then give Hermes the bounded-port runner prompt. Merge only
-after CI passes and Hermes confirms it can consume the new policy. The next
-successful main artifact should create a fresh dynamic deployment Issue and
-run the four functional criteria automatically.
+Review and merge PR #133, then update and restart the development computer's
+worker and re-add `codex-local-queued` to Issue #132 exactly once.
