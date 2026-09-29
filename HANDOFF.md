@@ -53,24 +53,23 @@ Hermes FAIL -> GitHub typed queue -> local Codex -> Draft PR + CI
 
 ## In Progress
 
-- Implementation and local verification are complete. Three commits are pushed
-  to `origin/codex/local-codex-worker`; Draft PR creation is blocked only by the
-  current GitHub CLI token scopes.
+- Implementation and local verification are complete. PR #126 is open. Its
+  implementation head `23509744e4fad2161dfa82636fcf4b00c80fc39e` passed GitHub
+  Platform verification run `36536170169` in 3m44s; this handoff-only update
+  causes the final check to run once more.
 
 ## Remaining
 
-1. Put a replacement fine-grained token in this worktree's ignored
-   `.env/local.yaml`, import it, and open the Draft PR against `main`.
-2. Review and merge the PR only after Platform verification is green.
-3. After merge, set repository variables `CODEX_EXECUTION_MODE=local-worker` and
+1. Review and merge green PR #126.
+2. After merge, set repository variables `CODEX_EXECUTION_MODE=local-worker` and
    `CODEX_LOCAL_WORKER_USER=dragon0816`. Preserve the already configured exact
    Hermes bot and merge-reviewer variables.
-4. On the trusted development computer, copy `.env/example.yaml` to
+3. On the trusted development computer, copy `.env/example.yaml` to
    `.env/local.yaml`, set a repository-limited `GH_TOKEN`, run `codex login`,
    then run `scripts/run-local-codex-worker.ps1 -Once`.
-5. Install/start `scripts/install-local-codex-worker-task.ps1` and execute the
+4. Install/start `scripts/install-local-codex-worker-task.ps1` and execute the
    documented harmless dummy Issue test end to end.
-6. Delete the GitHub repository secret `OPENAI_API_KEY` only after one dummy
+5. Delete the GitHub repository secret `OPENAI_API_KEY` only after one dummy
    request produces a Draft PR and GitHub produces the exact-SHA Hermes payload.
 
 ## Architecture decisions
@@ -114,10 +113,9 @@ through the PowerShell AST parser.
 
 - PR #125 is a separate green, open PR for fixture-scoped personal-proof
   authorization. This branch deliberately does not include it.
-- The current GitHub CLI credential can read Issues/PRs but receives HTTP 403
-  when reading repository Actions variables. A replacement `GH_TOKEN` needs
-  repository Metadata read, Contents read/write, Issues read/write, Pull requests
-  read/write and Variables read/write before Codex can configure those variables.
+- The replacement token in the ignored `.env/local.yaml` was verified as
+  `dragon0816`, can read repository Variables and created PR #126. It was never
+  printed or committed.
 - Full local pytest includes nine existing Edge/browser failures on this machine;
   per owner direction the applicable baseline excludes `tests/test_browser.py`.
 - `.claude/` in the primary checkout is user-owned local state and was not
@@ -125,5 +123,5 @@ through the PowerShell AST parser.
 
 ## Next recommended action
 
-Load the replacement token from `.env/local.yaml`, open the Draft PR, and wait
-for Platform verification. Never paste the token into chat or commit it.
+Review and merge PR #126. Then configure the two local-worker repository
+variables and install the logon worker before starting the dummy Issue test.
