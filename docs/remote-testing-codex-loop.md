@@ -108,6 +108,18 @@ state and temporary worktrees are under
 `%LOCALAPPDATA%\AgenticEngineeringPlatform\codex-worker`. A failed workspace is
 kept for diagnosis; a successfully delivered workspace is removed.
 
+The worker resolves a native `codex.exe` or Windows `codex.cmd` entry point
+before starting a repair; a PowerShell-only shim is not a valid subprocess
+boundary. A successful Codex process must also write the requested structured
+result file. Missing executable and missing-result failures remain terminal and
+visible instead of being mistaken for an implementation result.
+
+An operator may retry the same trusted request by re-adding
+`codex-local-queued` after correcting the worker environment. The worker reuses
+the preserved worktree only when its tracked and untracked Git status is clean,
+and claiming the retry removes the queue label. A second failure therefore
+stops again instead of polling forever.
+
 ## Hermes failure payload
 
 The Issue body remains human-readable:
