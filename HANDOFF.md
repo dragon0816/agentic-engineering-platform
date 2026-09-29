@@ -3,7 +3,8 @@
 Date: 2026-09-29 (Asia/Taipei)
 Branch: `codex/dynamic-loopback-port`
 Base: `origin/main` at `2c3fe68c363d31e1d4e6836313054f26ca6bb7d1`
-Pull request: pending
+Implementation commit: `b1bdc0a`
+Pull request: https://github.com/dragon0816/agentic-engineering-platform/pull/131
 
 ## Goal
 
@@ -29,18 +30,17 @@ deployment Issue #130 before any functional acceptance criterion could run.
 
 ## In Progress
 
-- The implementation is locally verified but its PR has not yet been opened.
+- PR #131 is open; GitHub CI is the remaining repository-side check.
 
 ## Remaining
 
-1. Commit, push and open the narrow PR.
-2. Hermes must update only its allowlisted
+1. Hermes must update only its allowlisted
    `aep-company-agent-integration-v1` runner to implement the new binding
    policy. It must not kill or reuse PID 36208 or any unknown listener.
-3. After the PR is merged and main CI creates a new artifact/request, Hermes
+2. After PR #131 is merged and main CI creates a new artifact/request, Hermes
    should consume the new dynamic Issue. Issue #130 remains correct historical
    BLOCKED evidence for the old artifact and should not be rewritten as PASS.
-4. Collect actual SOP draft, Knowledge answer, Personal Proof and out-of-root
+3. Collect actual SOP draft, Knowledge answer, Personal Proof and out-of-root
    refusal evidence from the new request.
 
 ## Architecture decisions made
@@ -93,7 +93,7 @@ so verification used `-p no:cacheprovider` and a writable explicit
 
 ## Next Recommended Action
 
-Open and review the narrow PR, then give Hermes the bounded-port runner prompt.
-Merge only after Hermes confirms it can consume the new policy. The next
+Review PR #131, then give Hermes the bounded-port runner prompt. Merge only
+after CI passes and Hermes confirms it can consume the new policy. The next
 successful main artifact should create a fresh dynamic deployment Issue and
 run the four functional criteria automatically.
