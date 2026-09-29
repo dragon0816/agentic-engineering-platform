@@ -27,7 +27,7 @@ Pull request: https://github.com/dragon0816/agentic-engineering-platform/pull/12
 
 ## In Progress
 
-- PR #129 is open. Check GitHub CI before merge.
+- PR #129 is open. GitHub Platform verification run 36575228427 passed in 4m36s.
 - Hermes does not yet implement the new fixed action/profile below.
 
 ## Remaining
@@ -84,6 +84,9 @@ personal_proof.txt: all present
 
 workflow YAML
 parsed successfully
+
+GitHub Platform verification run 36575228427
+passed; Windows preview built, installed and uploaded
 ```
 
 ## Known issues
@@ -95,7 +98,7 @@ parsed successfully
 
 ## Next Recommended Action
 
-Wait for PR #129 CI. In parallel, give Hermes the fixed-runner prompt. Merge
-only after CI is green and Hermes confirms the action/profile are allowlisted.
+Give Hermes the fixed-runner prompt. CI is green; merge PR #129 after Hermes
+confirms the action/profile are allowlisted.
 The next successful main artifact should create one dynamic validation Issue
 and begin the three-route proof automatically.
