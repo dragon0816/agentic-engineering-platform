@@ -1,150 +1,88 @@
-# Handoff — deployment validation loop v1
+# Handoff — machine-local developer credentials
 
 Updated: 2026-09-29 (Asia/Taipei).
-Branch: `codex/deployment-payload-comment`.
-Base: `origin/main` at `90f4c7e486c77979981f3d23fa445933a155fafa`.
+Branch: `codex/local-dev-secrets`.
+Base: `origin/main` at `8df437bac9d74572f38c74326cf961029d824674`.
 
 ## Goal
 
-Establish the first reproducible development-computer to company-computer loop
-without trying to validate every Company Agent capability at once:
-
-```text
-merged main -> successful Platform verification -> exact Windows artifact
--> fixed Hermes personal.proof deployment profile -> evidence -> terminal result
-```
-
-The first profile is intentionally read-only and side-effect-free. SOP PDF
-authoring, Knowledge asking, workflow 7/13 and DUT validation remain later
-profiles after this path is proven green.
+Let each development computer provide its own GitHub/OpenAI/AEP access tokens
+without committing them, repeatedly refreshing the shared GitHub CLI login, or
+making platform runtime code discover credential files.
 
 ## Completed
 
-- Added `DeploymentArtifact`, a serializable contract pinning repository,
-  40-character package commit, successful workflow run, artifact ID, and
-  artifact name. A differently named artifact is refused even if it exists.
-- Added `.github/workflows/hermes-deployment-personal-proof.yml`.
-  It runs only after successful `Platform verification` on `main`, locates
-  only `aep-windows-preview-<head SHA>` from that exact run, and creates a
-  machine-readable `hermes-validation/v1` deployment request Issue.
-- The generated request is fixed to
-  `aep-deployment-personal-proof-v1` and
-  `company-agent/personal-proof@1.0.0`; it names the target Bridge and actor
-  through repository variables, and includes immutable artifact metadata.
-- Added `docs/deployment-validation-loop.md` with the handoff, required GitHub
-  variables and Hermes acceptance requirements.
-- Added contract/workflow tests in `tests/test_deployment_validation_loop.py`.
-- Updated `docs/TASKS.md` with this active cross-cutting deployment slice.
-- PR #121 merged the first deployment-loop implementation. Its successful
-  main CI created Issue #122 with a correct artifact identity, but placed the
-  trusted payload in the Issue body. Hermes correctly refused it because its
-  trust boundary accepts Actions comments only.
-- The two repository variables are now configured:
-  `HERMES_DEPLOYMENT_BRIDGE=bridge-tp401555` and
-  `HERMES_DEPLOYMENT_ACTOR=leo.chi`.
+- Added an empty tracked `.env/example.yaml` and ignored every other file below
+  `.env/`, including the intended `.env/local.yaml`.
+- Added `scripts/import-local-env.ps1`. It explicitly loads a flat YAML mapping
+  into the current PowerShell process, accepts only `GH_TOKEN`,
+  `OPENAI_API_KEY`, and `AEP_GITHUB_TOKEN`, ignores unused empty entries,
+  rejects duplicates/unknown names, and prints loaded variable names only.
+- Documented per-computer setup, minimum GitHub token permissions, verification,
+  plaintext-at-rest risk, and the distinction from GitHub Actions secrets.
+- Added tests for empty examples, ignore policy, real PowerShell loading,
+  rejection of unknown names, and non-disclosure in output.
 
 ## In Progress
 
-- Correct the handoff format: this branch creates the Issue first, writes the
-  `hermes-validation/v1` payload as a GitHub Actions comment with that exact
-  source Issue number, and only then applies the queue labels.
-- Hermes has implemented the fixed profile and generic poller, but it must
-  accept GitHub's API author identifier `github-actions` (and the displayed
-  `github-actions[bot]` equivalent) only for trusted action comments.
+- The change is implemented and verified in its isolated worktree. It has not
+  been rebased onto PR #125 because that PR is green but not yet merged.
 
 ## Remaining
 
-1. Push, review and merge the payload-comment correction PR.
-2. Hermes accepts only the generated trusted action comment and performs the
-   profile-owned install/update and read-only `personal.proof` verification.
-3. The next successful `main` verification
-   should automatically create exactly one deployment validation Issue.
-4. Hermes installs the exact artifact, verifies the source revision,
-   exports assets, runs `personal.proof` against its controlled local fixture,
-   and records sanitized evidence plus a terminal label.
-5. Only after this profile has a reproducible green path, add the SOP draft
-   profile, then Knowledge, then side-effecting workflow/hardware profiles.
+1. Merge green PR #125.
+2. Fetch/rebase this branch onto the resulting `origin/main` and resolve the
+   expected `HANDOFF.md` replacement by keeping this handoff.
+3. Push and open a narrow PR for the local YAML credential helper.
+4. On each development computer, copy `.env/example.yaml` to
+   `.env/local.yaml`, enter that computer/user's token, and dot-source
+   `scripts/import-local-env.ps1` in the terminal that will run `gh`.
 
 ## Architecture decisions
 
-- GitHub is the control-plane handoff. The enrolled Company Bridge remains the
-  execution plane and enforces membership, grants and local resource access.
-- A CI artifact is immutable deployment input, not a Registry asset,
-  authorization grant, model configuration or secret.
-- The first profile has no model or Knowledge dependency. It proves bundle
-  delivery, Bridge/agent readiness, deterministic routing, workflow execution,
-  trace evidence and GitHub reporting before wider features are introduced.
-- The GitHub workflow does not check out source, run a Bridge command, download
-  a bundle, execute Issue text, issue credentials, modify local configuration,
-  or merge a pull request.
-- Hermes must use fixed profile-owned code; Issue content is evidence only and
-  cannot supply arbitrary commands or configuration instructions. A queue
-  label is applied only after a trusted action comment exists.
+- This is an explicit developer-shell helper outside the platform import path.
+  Runtime code, Registry assets, Workflows, Issues and GitHub Actions never read
+  the local YAML.
+- Tokens remain environment values at execution time. The repository carries
+  neither token values nor a production credential backend.
+- The parser intentionally supports only a flat allowlisted YAML mapping. It is
+  not a general YAML evaluator and cannot set arbitrary process variables.
+- `.env/local.yaml` is plaintext at rest despite being ignored. It is suitable
+  only for a trusted developer computer, with one narrow token per user and
+  machine; it must not be copied to a shared test workstation.
 
 ## Verification
 
-Completed on this branch:
-
 ```text
-.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_company_agent_assets.py tests/test_host_runtime.py tests/test_local_agent.py tests/test_windows_preview_bundle.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-deployment-verified -q
-49 passed in 1.34s
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest tests\test_local_developer_environment.py -q --basetemp .scratch\pytest-local-env
+4 passed in 1.06s
 
-.venv\Scripts\python.exe -m ruff check .
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff check .
 All checks passed!
 
-.venv\Scripts\python.exe -m ruff format --check .
-276 files already formatted
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff format --check .
+278 files already formatted
 
-.venv\Scripts\python.exe -m mypy
-Success: no issues found in 219 source files
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m mypy
+Success: no issues found in 220 source files
 
-Node.js syntax check of the new actions/github-script block
-passed
+git check-ignore -v .env/local.yaml
+.gitignore:11:.env/* .env/local.yaml
+
+git check-ignore .env/example.yaml
+not ignored (expected)
 
 git diff --check
 passed
 ```
 
-Payload-comment correction verification:
-
-```text
-.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-payload-comment -q
-19 passed in 0.47s
-
-.venv\Scripts\python.exe -m ruff check .
-All checks passed!
-
-.venv\Scripts\python.exe -m ruff format --check .
-276 files already formatted
-
-.venv\Scripts\python.exe -m mypy
-Success: no issues found in 219 source files
-
-Node.js syntax check of the new actions/github-script block
-passed
-```
-
-The full local pytest suite was attempted with a workspace-local basetemp but
-did not complete inside the 30-second command window. A separate full run first
-stopped at existing `tests/test_browser.py` because Edge published no remote
-debugging port (`browser_would_not_start`), after 57 passing tests. This branch
-does not modify browser code. GitHub Windows/Python 3.12 CI remains required.
-
 ## Known issues
 
-- `.claude/` is user-owned untracked state. Do not add, remove or modify it.
-- Issue #122 is intentionally not consumed: it has no trusted payload comment.
-  It is evidence of the pre-correction protocol mismatch, not a valid test.
-- GitHub Actions evaluates a `workflow_run` workflow from the default branch.
-  The successful `main` Platform verification created by merging this PR is
-  expected to start the first deployment request automatically.
-- GitHub's API reports GitHub Actions comments as author `github-actions`,
-  whereas UI text may show `github-actions[bot]`; Hermes must use the fixed
-  two-value canonical allowlist, never a broad bot allowlist.
+- PR #125 is separate and currently green. Do not mix its fixture-scoped
+  authorization changes into this branch before it merges.
+- `.claude/` in the primary checkout is user-owned local state; do not add,
+  remove or modify it.
 
 ## Next recommended action
 
-Create and merge the correction PR from
-`https://github.com/dragon0816/agentic-engineering-platform/compare/main...codex%2Fdeployment-payload-comment?expand=1`.
-The successful `main` CI run created by that merge should then create a new
-automatic Company Bridge deployment validation Issue with a trusted comment.
+Merge PR #125, then rebase and open the local developer credential PR.

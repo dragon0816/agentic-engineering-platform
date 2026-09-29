@@ -60,6 +60,7 @@ commit passed GitHub Actions on Windows and Ubuntu with Python 3.11 and 3.12.
 | Remote Hermes repair handoff | #107 | Restricted Draft PR delivery, bot-authenticated `hermes-next-action/v1` payloads, and a green-retest reviewer notification; no Action merges code |
 | Hermes validation lifecycle | pending | Versioned validation request/owner-decision contracts and a GitHub control-plane state machine that queues Hermes preflight/test, repair handoff and terminal notification without granting access or executing Issue text |
 | Deployment validation loop v1 | pending | A successful `main` Windows preview build creates one fixed, artifact-pinned `personal.proof` deployment request for the enrolled company Bridge; the action has no checkout, Bridge connection, credential, or merge authority |
+| Local developer credentials | pending | Each development computer may load an allowlisted, Git-ignored `.env/local.yaml` into its current PowerShell process; the tracked example is empty, runtime code never auto-discovers it, and GitHub Actions continues to use repository secrets |
 
 ## Product E2E gates (active)
 
