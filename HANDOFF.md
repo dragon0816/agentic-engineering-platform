@@ -23,6 +23,11 @@ Hermes FAIL -> GitHub typed queue -> local Codex -> Draft PR + CI
   `CODEX_EXECUTION_MODE=local-worker`, fingerprints the default-branch SHA,
   Issue body and bounded Hermes comments, and writes one bot-authored
   `codex-local-request/v1` payload per fingerprint.
+- The queue now requires the configured Hermes account to post a strict
+  `hermes-failure/v1` comment before `codex-fix`. Its `target_sha` is the exact
+  commit Hermes installed and becomes the local worker's base SHA. A failed
+  Draft-PR retest therefore continues from that repair instead of restarting
+  from `main`; prose and malformed/extra JSON fields are refused.
 - Added typed strict queue/result contracts and the local worker in
   `development.codex_worker`. It accepts only `github-actions[bot]` payloads,
   keeps durable local state, uses isolated Git worktrees, and bounds retries by
@@ -53,10 +58,9 @@ Hermes FAIL -> GitHub typed queue -> local Codex -> Draft PR + CI
 
 ## In Progress
 
-- Implementation and local verification are complete. PR #126 is open. Its
-  implementation head `23509744e4fad2161dfa82636fcf4b00c80fc39e` passed GitHub
-  Platform verification run `36536170169` in 3m44s; this handoff-only update
-  causes the final check to run once more.
+- Implementation and local verification are complete. PR #126 is open and was
+  green before the exact-SHA Hermes contract correction. The corrected branch
+  has passed the full local baseline and requires one final GitHub check.
 
 ## Remaining
 
@@ -94,6 +98,12 @@ C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\pyth
 
 C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q --basetemp .scratch\pytest-local-worker-full-2
 1323 passed, 4 skipped in 34.20s
+
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest tests/test_codex_remote_test_workflow.py -q --basetemp .scratch\pytest-hermes-failure-contract
+16 passed in 0.43s
+
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q --basetemp .scratch\pytest-hermes-sha-full
+1323 passed, 4 skipped in 35.04s
 
 C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff check .
 All checks passed!

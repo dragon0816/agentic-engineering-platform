@@ -18,7 +18,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
 TRUSTED_PRODUCER = "github-actions[bot]"
 REQUEST_HEADING = "## Codex Local Request"
@@ -48,6 +48,39 @@ DEFAULT_VERIFY_COMMANDS: tuple[tuple[str, ...], ...] = (
 )
 
 
+class HermesFailureEvidence(BaseModel):
+    """Failure facts asserted by the authenticated Hermes GitHub identity."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    schema_: Literal["hermes-failure/v1"] = Field(alias="schema")
+    producer: Literal["hermes-testing-agent"]
+    request_id: str = Field(min_length=8, max_length=120, pattern=r"^[a-zA-Z0-9._-]+$")
+    repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    source_issue: int = Field(gt=0)
+    target_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    build: str = Field(max_length=200)
+    machine: str = Field(max_length=200)
+    bridge: str = Field(max_length=200)
+    actor: str = Field(max_length=200)
+    profile: str = Field(max_length=200)
+    test: str = Field(max_length=500)
+    stage: str = Field(max_length=200)
+    expected: str = Field(max_length=8_000)
+    actual: str = Field(max_length=8_000)
+    failure_code: str = Field(max_length=200)
+    failure_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifacts: list[str] = Field(max_length=20)
+    reproducible: bool
+
+    @field_validator("artifacts")
+    @classmethod
+    def bound_artifacts(cls, value: list[str]) -> list[str]:
+        if any(len(item) > 2_000 for item in value):
+            raise ValueError("each artifact reference is limited to 2000 characters")
+        return value
+
+
 class CodexLocalRequest(BaseModel):
     """GitHub-authored queue item consumed by one trusted development computer."""
 
@@ -63,7 +96,7 @@ class CodexLocalRequest(BaseModel):
     failure_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     issue_title: str = Field(max_length=500)
     issue_body: str = Field(max_length=40_000)
-    hermes_comments: list[str] = Field(max_length=10)
+    hermes_failure: HermesFailureEvidence
 
     @field_validator("repository")
     @classmethod
@@ -72,12 +105,16 @@ class CodexLocalRequest(BaseModel):
             raise ValueError("repository must not contain surrounding whitespace")
         return value
 
-    @field_validator("hermes_comments")
-    @classmethod
-    def bound_hermes_comments(cls, value: list[str]) -> list[str]:
-        if any(len(comment) > 8_000 for comment in value):
-            raise ValueError("each Hermes comment is limited to 8000 characters")
-        return value
+    @model_validator(mode="after")
+    def failure_matches_queue_identity(self) -> CodexLocalRequest:
+        failure = self.hermes_failure
+        if failure.repository != self.repository:
+            raise ValueError("Hermes failure repository does not match the queue request")
+        if failure.source_issue != self.source_issue:
+            raise ValueError("Hermes failure Issue does not match the queue request")
+        if failure.target_sha != self.base_sha:
+            raise ValueError("Hermes failure target SHA does not match the queue base SHA")
+        return self
 
 
 class CodexLocalResult(BaseModel):
@@ -121,7 +158,7 @@ def build_prompt(request: CodexLocalRequest) -> str:
             "issue_number": request.source_issue,
             "issue_title": request.issue_title,
             "issue_body": request.issue_body,
-            "hermes_comments": request.hermes_comments,
+            "hermes_failure": request.hermes_failure.model_dump(mode="json", by_alias=True),
             "base_sha": request.base_sha,
             "failure_fingerprint": request.failure_fingerprint,
         },

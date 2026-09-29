@@ -20,7 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      contents: read
       issues: write
     steps:
       - name: Publish a typed local Codex request
@@ -42,18 +41,70 @@ jobs:
               issue_number: issue.number,
               per_page: 100,
             });
-            const hermesComments = comments
-              .filter((comment) => comment.user?.login === process.env.HERMES_USER)
-              .slice(-10)
-              .map((comment) => clean(comment.body, 8000));
+            const allowedFailureKeys = new Set([
+              "schema", "producer", "request_id", "repository", "source_issue",
+              "target_sha", "build", "machine", "bridge", "actor", "profile",
+              "test", "stage", "expected", "actual", "failure_code",
+              "failure_fingerprint", "artifacts", "reproducible",
+            ]);
+            const validText = (value, limit) =>
+              typeof value === "string" && value.length <= limit;
+            let hermesFailure = null;
+            for (const comment of [...comments].reverse()) {
+              if (comment.user?.login !== process.env.HERMES_USER) continue;
+              const match = String(comment.body || "").match(
+                /## Hermes Failure Evidence\s*\n+\s*<!--\s*(\{.*?\})\s*-->/s
+              );
+              if (!match) continue;
+              try {
+                const candidate = JSON.parse(match[1]);
+                const keys = Object.keys(candidate);
+                const valid =
+                  keys.length === allowedFailureKeys.size &&
+                  keys.every((key) => allowedFailureKeys.has(key)) &&
+                  candidate.schema === "hermes-failure/v1" &&
+                  candidate.producer === "hermes-testing-agent" &&
+                  candidate.repository === `${context.repo.owner}/${context.repo.repo}` &&
+                  candidate.source_issue === issue.number &&
+                  validText(candidate.request_id, 120) &&
+                  /^[A-Za-z0-9._-]{8,120}$/.test(candidate.request_id) &&
+                  validText(candidate.target_sha, 40) &&
+                  /^[0-9a-f]{40}$/.test(candidate.target_sha) &&
+                  validText(candidate.failure_fingerprint, 64) &&
+                  /^[0-9a-f]{64}$/.test(candidate.failure_fingerprint) &&
+                  validText(candidate.build, 200) &&
+                  validText(candidate.machine, 200) &&
+                  validText(candidate.bridge, 200) &&
+                  validText(candidate.actor, 200) &&
+                  validText(candidate.profile, 200) &&
+                  validText(candidate.test, 500) &&
+                  validText(candidate.stage, 200) &&
+                  validText(candidate.expected, 8000) &&
+                  validText(candidate.actual, 8000) &&
+                  validText(candidate.failure_code, 200) &&
+                  typeof candidate.reproducible === "boolean" &&
+                  Array.isArray(candidate.artifacts) &&
+                  candidate.artifacts.length <= 20 &&
+                  candidate.artifacts.every((item) => validText(item, 2000));
+                if (valid) {
+                  hermesFailure = candidate;
+                  break;
+                }
+              } catch (_error) {
+                // Ignore prose and malformed payloads; they never become work.
+              }
+            }
+            if (!hermesFailure) {
+              core.setFailed("No valid bot-authored hermes-failure/v1 payload was found.");
+              return;
+            }
             const fingerprint = crypto
               .createHash("sha256")
               .update(JSON.stringify({
                 issue: issue.number,
                 title,
                 body,
-                hermesComments,
-                sha: context.sha,
+                hermesFailure,
               }))
               .digest("hex");
             const requestId = `codex-local-${issue.number}-${fingerprint.slice(0, 16)}`;
@@ -64,11 +115,11 @@ jobs:
               repository: `${context.repo.owner}/${context.repo.repo}`,
               source_issue: issue.number,
               source_issue_url: issue.html_url,
-              base_sha: context.sha,
+              base_sha: hermesFailure.target_sha,
               failure_fingerprint: fingerprint,
               issue_title: title,
               issue_body: body,
-              hermes_comments: hermesComments,
+              hermes_failure: hermesFailure,
             };
             const marker = `\"request_id\":\"${requestId}\"`;
             if (comments.some((comment) =>

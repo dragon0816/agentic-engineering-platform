@@ -21,17 +21,18 @@ path.
 
 ## Trust boundaries
 
-Hermes creates or updates a failure Issue, records complete sanitized evidence,
-reads the result back, then applies `codex-fix`. GitHub accepts that label only
-when the labeler exactly matches `HERMES_GITHUB_BOT_USER` and
+Hermes creates or updates a failure Issue, then posts one fixed
+`hermes-failure/v1` JSON comment containing the exact commit it tested. It reads
+the comment back before applying `codex-fix`. GitHub accepts that label only when
+the labeler exactly matches `HERMES_GITHUB_BOT_USER` and
 `CODEX_EXECUTION_MODE` is `local-worker`.
 
 The queue workflow turns the Issue into a `codex-local-request/v1` JSON payload
-inside a comment authored by `github-actions[bot]`. The payload contains a
-default-branch SHA, the last ten bounded comments from the configured Hermes
-account, and a SHA-256 fingerprint. Reapplying the label to unchanged evidence
-does not create another request. A new Hermes evidence comment changes the
-fingerprint and permits exactly one new attempt.
+inside a comment authored by `github-actions[bot]`. Its base SHA comes only from
+the latest valid failure payload authored by the configured Hermes account. The
+whole payload is fingerprinted, so reapplying the label to unchanged evidence
+does not create another request. A failed PR retest names that PR's exact head
+SHA, preserving the previous repair in the next iteration.
 
 The local worker accepts only that schema and author. Issue title and body stay
 untrusted evidence. They never supply shell commands, test commands, branches,
@@ -63,7 +64,7 @@ After this implementation is merged, create these repository variables:
 | `HERMES_GITHUB_BOT_USER` | exact Hermes GitHub bot login |
 | `HERMES_MERGE_REVIEWER` | GitHub login that reviews the final PR |
 
-The workflows create the four `codex-local-*` labels when first used. Keep
+The workflows create the five `codex-local-*` labels when first used. Keep
 `OPENAI_API_KEY` temporarily while the local path is tested, then delete that
 repository secret after one dummy request reaches a Draft PR and Hermes receives
 its exact-SHA request.
@@ -109,7 +110,7 @@ kept for diagnosis; a successfully delivered workspace is removed.
 
 ## Hermes failure payload
 
-Hermes should report these fields in the Issue body before adding `codex-fix`:
+The Issue body remains human-readable:
 
 ```text
 [Test Failure]
@@ -137,6 +138,17 @@ Artifacts:
 - instrument.log
 ```
 
+Before adding `codex-fix`, the configured Hermes account must add and read back
+this machine-readable comment. All fields are required; `target_sha` is the exact
+commit installed and tested, and `failure_fingerprint` is Hermes' SHA-256 digest
+of the normalized failure evidence.
+
+```text
+## Hermes Failure Evidence
+
+<!-- {"schema":"hermes-failure/v1","producer":"hermes-testing-agent","request_id":"hermes-rf-lab-20260929-001","repository":"dragon0816/agentic-engineering-platform","source_issue":130,"target_sha":"0123456789abcdef0123456789abcdef01234567","build":"2.0.31","machine":"RF-LAB-PC-02","bridge":"bridge-tp401555","actor":"leo.chi","profile":"aep-company-agent-integration-v1","test":"wifi8_tx_verify","stage":"DUT_CONTROL","expected":"TX_START_OK","actual":"Timeout after 10 seconds","failure_code":"DUT_TIMEOUT","failure_fingerprint":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","artifacts":["test_result.json","dut.log","instrument.log"],"reproducible":true} -->
+```
+
 Never include access tokens, passwords, private keys, private file contents or
 other secret values in Issues, comments or artifacts.
 
@@ -144,7 +156,8 @@ other secret values in Issues, comments or artifacts.
 
 1. Confirm the repository variables are set and the scheduled task is running.
 2. Create a harmless failure Issue from the Hermes template without `codex-fix`.
-3. Have the configured Hermes bot add `codex-fix` last.
+3. Have the configured Hermes bot post/read back `hermes-failure/v1`, then add
+   `codex-fix` last.
 4. Confirm Actions posts one `Codex Local Request` comment and adds
    `codex-local-queued`.
 5. Within about 60 seconds, confirm the worker changes the label to
@@ -158,5 +171,6 @@ other secret values in Issues, comments or artifacts.
 8. Hermes retests that SHA. A pass notifies the configured reviewer, who decides
    whether to merge.
 
-Editing an Issue does not trigger Codex. To submit changed evidence, Hermes removes
-and reapplies `codex-fix`; the changed fingerprint becomes one new request.
+Editing an Issue does not trigger Codex. To submit changed evidence, Hermes posts
+a new payload with the exact SHA it tested, removes `codex-fix`, then reapplies
+it; the changed fingerprint becomes one new request.

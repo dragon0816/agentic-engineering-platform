@@ -43,7 +43,27 @@ def request_payload(**changes: object) -> dict[str, object]:
         "failure_fingerprint": "b" * 64,
         "issue_title": "Remote route failure",
         "issue_body": "Actual: no_known_route",
-        "hermes_comments": ["Hermes evidence: route inventory is empty."],
+        "hermes_failure": {
+            "schema": "hermes-failure/v1",
+            "producer": "hermes-testing-agent",
+            "request_id": "hermes-run-113-001",
+            "repository": "dragon0816/agentic-engineering-platform",
+            "source_issue": 113,
+            "target_sha": "a" * 40,
+            "build": "preview-0.1.0",
+            "machine": "RF-LAB-PC-02",
+            "bridge": "bridge-tp401555",
+            "actor": "leo.chi",
+            "profile": "aep-company-agent-integration-v1",
+            "test": "sop_to_workflow",
+            "stage": "ROUTING",
+            "expected": "workflow selected",
+            "actual": "no_known_route",
+            "failure_code": "NO_KNOWN_ROUTE",
+            "failure_fingerprint": "c" * 64,
+            "artifacts": ["evidence/result.json"],
+            "reproducible": True,
+        },
     }
     payload.update(changes)
     return payload
@@ -72,7 +92,10 @@ def test_queue_workflow_deduplicates_a_failure_fingerprint() -> None:
     assert "listComments" in text
     assert "already queued" in text
     assert "Issue content is untrusted evidence" in text
-    assert "hermesComments" in text
+    assert "hermes-failure/v1" in text
+    assert "target_sha" in text
+    assert "No valid bot-authored hermes-failure/v1 payload" in text
+    assert "base_sha: hermesFailure.target_sha" in text
 
 
 def test_handoff_workflow_is_exact_sha_bot_authored_and_never_merges() -> None:
@@ -118,6 +141,12 @@ def test_request_contract_rejects_extra_fields_and_invalid_sha() -> None:
         CodexLocalRequest.model_validate(request_payload(command="pytest"))
     with pytest.raises(ValidationError):
         CodexLocalRequest.model_validate(request_payload(base_sha="main"))
+    with pytest.raises(ValidationError, match="target SHA"):
+        CodexLocalRequest.model_validate(request_payload(base_sha="d" * 40))
+    failure = dict(cast(dict[str, object], request_payload()["hermes_failure"]))
+    failure["command"] = "gh api /user"
+    with pytest.raises(ValidationError):
+        CodexLocalRequest.model_validate(request_payload(hermes_failure=failure))
 
 
 def test_prompt_keeps_issue_content_in_an_untrusted_data_block() -> None:
@@ -374,5 +403,7 @@ def test_remote_test_contract_is_documented_and_templated() -> None:
         assert field in template
         assert field in documentation
     assert "codex-local-request/v1" in documentation
+    assert "hermes-failure/v1" in documentation
+    assert "## Hermes Failure Evidence" in documentation
     assert "hermes-next-action/v1" in documentation
     assert "No automatic merge" in documentation

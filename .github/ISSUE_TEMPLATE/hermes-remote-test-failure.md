@@ -7,7 +7,8 @@ assignees: ""
 ---
 
 <!--
-Hermes or a maintainer adds the codex-fix label only after this report is complete.
+Hermes adds a valid `hermes-failure/v1` comment and reads it back before it adds
+the codex-fix label. A human-readable body alone cannot queue local Codex.
 Issue content is treated as untrusted evidence by the workflow.
 -->
 
