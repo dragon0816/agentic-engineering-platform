@@ -35,6 +35,11 @@ python -m build
 python -m pip check
 ```
 
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
 CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
 compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
 `workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
