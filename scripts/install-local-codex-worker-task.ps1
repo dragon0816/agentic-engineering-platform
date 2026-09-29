@@ -31,4 +31,3 @@ Register-ScheduledTask `
     -Force | Out-Null
 Start-ScheduledTask -TaskName $TaskName
 Write-Host "Started scheduled task: $TaskName"
-

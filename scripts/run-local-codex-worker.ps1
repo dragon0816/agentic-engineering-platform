@@ -37,4 +37,3 @@ if (-not $Once) {
 
 & $python @arguments
 exit $LASTEXITCODE
-
