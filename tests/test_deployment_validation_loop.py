@@ -48,6 +48,8 @@ def test_personal_proof_deployment_workflow_is_narrow_and_machine_readable() -> 
     assert 'action: "install_and_personal_proof"' in text
     assert 'schema: "hermes-validation/v1"' in text
     assert "aep-windows-preview-${commit}" in text
+    assert 'name: "personal-proof-fixture-read"' in text
+    assert 'namespace: "platform", name: "filesystem.read"' not in text
     assert "github.rest.actions.listWorkflowRunArtifacts" in text
     assert "github.rest.issues.createComment" in text
     assert "source_issue: issue.data.number" in text

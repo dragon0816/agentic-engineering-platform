@@ -49,9 +49,21 @@ the returned answer must be grounded by Raw citations.
 ## Required grants
 
 Installation is not authorization.  The Bridge must separately grant the
-bound actor the policy requirements for `workflow-author.draft`,
-`knowledge-query.ask`, and `filesystem.read` before the relevant route can
-run.  The proof workflow is read-only and has no central dependency.
+bound actor the policy requirements for `workflow-author.draft` and
+`knowledge-query.ask` before those routes can run.
+
+The `personal.proof` deployment profile does **not** grant the general
+`filesystem/read-file` capability. It uses the distinct
+`company-agent/personal-proof-fixture-read@1.0.0` capability, wired only to:
+
+```text
+<workspace>\hermes-fixtures\personal-proof\
+```
+
+The fixed test profile may grant only this asset to the bound test actor, with
+`filesystem.read` permission and `personal-proof-fixture-read-policy`. A
+grant cannot read another workspace file because the handler resolves paths
+under that fixture root before it opens them. It has no central dependency.
 
 ## Hermes verification profile
 

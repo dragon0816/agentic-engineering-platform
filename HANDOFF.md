@@ -1,150 +1,101 @@
-# Handoff — deployment validation loop v1
+# Handoff — fixture-scoped personal-proof authorization
 
 Updated: 2026-09-29 (Asia/Taipei).
-Branch: `codex/deployment-payload-comment`.
-Base: `origin/main` at `90f4c7e486c77979981f3d23fa445933a155fafa`.
+Branch: `codex/personal-proof-fixture-policy`.
+Base: `origin/main` at `8df437bac9d74572f38c74326cf961029d824674`.
 
 ## Goal
 
-Establish the first reproducible development-computer to company-computer loop
-without trying to validate every Company Agent capability at once:
+Complete the first automatic development-to-company-computer validation path
+without allowing its read-only test grant to become a general filesystem grant.
 
 ```text
-merged main -> successful Platform verification -> exact Windows artifact
--> fixed Hermes personal.proof deployment profile -> evidence -> terminal result
+main CI artifact -> GitHub payload comment -> Hermes discovery
+-> exact bundle install -> fixture-scoped personal.proof -> evidence
 ```
-
-The first profile is intentionally read-only and side-effect-free. SOP PDF
-authoring, Knowledge asking, workflow 7/13 and DUT validation remain later
-profiles after this path is proven green.
 
 ## Completed
 
-- Added `DeploymentArtifact`, a serializable contract pinning repository,
-  40-character package commit, successful workflow run, artifact ID, and
-  artifact name. A differently named artifact is refused even if it exists.
-- Added `.github/workflows/hermes-deployment-personal-proof.yml`.
-  It runs only after successful `Platform verification` on `main`, locates
-  only `aep-windows-preview-<head SHA>` from that exact run, and creates a
-  machine-readable `hermes-validation/v1` deployment request Issue.
-- The generated request is fixed to
-  `aep-deployment-personal-proof-v1` and
-  `company-agent/personal-proof@1.0.0`; it names the target Bridge and actor
-  through repository variables, and includes immutable artifact metadata.
-- Added `docs/deployment-validation-loop.md` with the handoff, required GitHub
-  variables and Hermes acceptance requirements.
-- Added contract/workflow tests in `tests/test_deployment_validation_loop.py`.
-- Updated `docs/TASKS.md` with this active cross-cutting deployment slice.
-- PR #121 merged the first deployment-loop implementation. Its successful
-  main CI created Issue #122 with a correct artifact identity, but placed the
-  trusted payload in the Issue body. Hermes correctly refused it because its
-  trust boundary accepts Actions comments only.
-- The two repository variables are now configured:
-  `HERMES_DEPLOYMENT_BRIDGE=bridge-tp401555` and
-  `HERMES_DEPLOYMENT_ACTOR=leo.chi`.
+- PR #121 and its payload-comment correction are merged. GitHub now creates
+  trusted `hermes-validation/v1` comments before adding queue labels.
+- Hermes generically discovered and installed the exact deployment artifact for
+  Issue #124. It verified the bundle revision, Bridge/agent readiness and
+  shipped `company-agent/personal-proof@1.0.0` asset.
+- Hermes correctly blocked before execution because AEP had only the general
+  `filesystem/read-file` handler rooted at the whole workspace. It refused to
+  substitute a broad grant for fixture-only authorization.
+- Added `company-agent/personal-proof-fixture-read@1.0.0`. It requires the
+  ordinary `filesystem.read` permission but is a distinct capability asset,
+  handled only under `<workspace>\hermes-fixtures\personal-proof`.
+- Changed the Personal Proof workflow to call that capability, rather than the
+  general workspace reader. A grant for general `filesystem/read-file` cannot
+  authorize it.
+- Changed the generated GitHub deployment payload to require the exact fixture
+  capability grant; no longer names the incorrect `platform/filesystem.read`
+  asset identity.
+- Added fixture-boundary tests and updated deployment/Company Agent docs and
+  `docs/TASKS.md`.
 
 ## In Progress
 
-- Correct the handoff format: this branch creates the Issue first, writes the
-  `hermes-validation/v1` payload as a GitHub Actions comment with that exact
-  source Issue number, and only then applies the queue labels.
-- Hermes has implemented the fixed profile and generic poller, but it must
-  accept GitHub's API author identifier `github-actions` (and the displayed
-  `github-actions[bot]` equivalent) only for trusted action comments.
+- The fixture-scoped authorization implementation is uncommitted on this
+  branch and needs a review PR.
 
 ## Remaining
 
-1. Push, review and merge the payload-comment correction PR.
-2. Hermes accepts only the generated trusted action comment and performs the
-   profile-owned install/update and read-only `personal.proof` verification.
-3. The next successful `main` verification
-   should automatically create exactly one deployment validation Issue.
-4. Hermes installs the exact artifact, verifies the source revision,
-   exports assets, runs `personal.proof` against its controlled local fixture,
-   and records sanitized evidence plus a terminal label.
-5. Only after this profile has a reproducible green path, add the SOP draft
-   profile, then Knowledge, then side-effecting workflow/hardware profiles.
+1. Push, review and merge this branch.
+2. Hermes updates/reinstalls the exact new main artifact through its normal
+   generic deployment discovery.
+3. Hermes' fixed profile writes or verifies one pre-approved local grant only
+   for `company-agent/personal-proof-fixture-read@1.0.0`, actor `leo.chi`, and
+   the controlled fixture. It must not create a general filesystem grant.
+4. The changed local setup fingerprint causes the blocked deployment payload to
+   retry once. Hermes records a run ID, trace IDs and sanitized result, then
+   adds `hermes-validation-passed` only on success.
 
 ## Architecture decisions
 
-- GitHub is the control-plane handoff. The enrolled Company Bridge remains the
-  execution plane and enforces membership, grants and local resource access.
-- A CI artifact is immutable deployment input, not a Registry asset,
-  authorization grant, model configuration or secret.
-- The first profile has no model or Knowledge dependency. It proves bundle
-  delivery, Bridge/agent readiness, deterministic routing, workflow execution,
-  trace evidence and GitHub reporting before wider features are introduced.
-- The GitHub workflow does not check out source, run a Bridge command, download
-  a bundle, execute Issue text, issue credentials, modify local configuration,
-  or merge a pull request.
-- Hermes must use fixed profile-owned code; Issue content is evidence only and
-  cannot supply arbitrary commands or configuration instructions. A queue
-  label is applied only after a trusted action comment exists.
+- Registry/control-plane publication remains separate from local execution
+  authorization. This change supplies a local capability boundary; it does not
+  grant it automatically.
+- A capability grant is asset-specific. A new fixture-only capability is safer
+  than adding hidden path fields to the existing general filesystem grant.
+- The handler's allowed root is fixed by trusted host wiring, not a GitHub Issue
+  payload, model output or workflow argument. Paths outside the fixture return
+  a closed read outcome and reveal no data.
+- No model, Knowledge, browser, Git, DUT, email, network or write capability is
+  added by this slice.
 
 ## Verification
 
-Completed on this branch:
-
 ```text
-.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_company_agent_assets.py tests/test_host_runtime.py tests/test_local_agent.py tests/test_windows_preview_bundle.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-deployment-verified -q
-49 passed in 1.34s
+.venv\Scripts\python.exe -m pytest tests/test_personal_proof_fixture_policy.py tests/test_company_agent_assets.py tests/test_host_wiring.py tests/test_dispatch.py tests/test_deployment_validation_loop.py -q --basetemp .scratch\pytest-fixture-policy-final
+52 passed in 0.92s
 
 .venv\Scripts\python.exe -m ruff check .
 All checks passed!
 
 .venv\Scripts\python.exe -m ruff format --check .
-276 files already formatted
+277 files already formatted
 
 .venv\Scripts\python.exe -m mypy
-Success: no issues found in 219 source files
-
-Node.js syntax check of the new actions/github-script block
-passed
+Success: no issues found in 220 source files
 
 git diff --check
 passed
 ```
 
-Payload-comment correction verification:
-
-```text
-.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-payload-comment -q
-19 passed in 0.47s
-
-.venv\Scripts\python.exe -m ruff check .
-All checks passed!
-
-.venv\Scripts\python.exe -m ruff format --check .
-276 files already formatted
-
-.venv\Scripts\python.exe -m mypy
-Success: no issues found in 219 source files
-
-Node.js syntax check of the new actions/github-script block
-passed
-```
-
-The full local pytest suite was attempted with a workspace-local basetemp but
-did not complete inside the 30-second command window. A separate full run first
-stopped at existing `tests/test_browser.py` because Edge published no remote
-debugging port (`browser_would_not_start`), after 57 passing tests. This branch
-does not modify browser code. GitHub Windows/Python 3.12 CI remains required.
-
 ## Known issues
 
-- `.claude/` is user-owned untracked state. Do not add, remove or modify it.
-- Issue #122 is intentionally not consumed: it has no trusted payload comment.
-  It is evidence of the pre-correction protocol mismatch, not a valid test.
-- GitHub Actions evaluates a `workflow_run` workflow from the default branch.
-  The successful `main` Platform verification created by merging this PR is
-  expected to start the first deployment request automatically.
-- GitHub's API reports GitHub Actions comments as author `github-actions`,
-  whereas UI text may show `github-actions[bot]`; Hermes must use the fixed
-  two-value canonical allowlist, never a broad bot allowlist.
+- `.claude/` is user-owned local state; do not add, remove or modify it.
+- Issue #124 remains correctly blocked until a bundle containing this change is
+  merged and Hermes sees the changed fixture-policy setup fingerprint.
+- Full local pytest cannot be reported as green: it hits an unrelated existing
+  Edge browser startup failure in this environment. GitHub Windows/Python 3.12
+  CI is required for the PR.
 
 ## Next recommended action
 
-Create and merge the correction PR from
-`https://github.com/dragon0816/agentic-engineering-platform/compare/main...codex%2Fdeployment-payload-comment?expand=1`.
-The successful `main` CI run created by that merge should then create a new
-automatic Company Bridge deployment validation Issue with a trusted comment.
+Run final diff verification, commit and push this branch, then create a review
+PR. After merge, Hermes should resume through generic discovery rather than an
+Issue-number-specific instruction.

@@ -17,7 +17,10 @@ Codex PR -> human merge -> Platform verification succeeds on main
 
 The only profile in this first loop is `aep-deployment-personal-proof-v1`.
 It runs `company-agent/personal-proof@1.0.0`, which reads one controlled local
-fixture through `filesystem.read`. It has no model routing, Knowledge lookup,
+fixture through `company-agent/personal-proof-fixture-read@1.0.0`. This
+dedicated capability requires `filesystem.read` but is wired only to
+`<workspace>\hermes-fixtures\personal-proof`; it cannot read another
+workspace file. It has no model routing, Knowledge lookup,
 network request, write operation, DUT control, browser automation, email, Git
 write, or production side effect.
 
