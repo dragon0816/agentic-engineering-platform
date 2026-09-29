@@ -53,14 +53,16 @@ Hermes FAIL -> GitHub typed queue -> local Codex -> Draft PR + CI
 
 ## In Progress
 
-- Implementation and local verification are complete. The branch still needs a
-  commit, push, Draft PR and GitHub Windows/Python 3.12 verification.
+- Implementation and local verification are complete. Three commits are pushed
+  to `origin/codex/local-codex-worker`; Draft PR creation is blocked only by the
+  current GitHub CLI token scopes.
 
 ## Remaining
 
-1. Commit and push `codex/local-codex-worker`; open a Draft PR against `main`.
+1. Put a replacement fine-grained token in this worktree's ignored
+   `.env/local.yaml`, import it, and open the Draft PR against `main`.
 2. Review and merge the PR only after Platform verification is green.
-3. Set repository variables `CODEX_EXECUTION_MODE=local-worker` and
+3. After merge, set repository variables `CODEX_EXECUTION_MODE=local-worker` and
    `CODEX_LOCAL_WORKER_USER=dragon0816`. Preserve the already configured exact
    Hermes bot and merge-reviewer variables.
 4. On the trusted development computer, copy `.env/example.yaml` to
@@ -123,6 +125,5 @@ through the PowerShell AST parser.
 
 ## Next recommended action
 
-Commit, push and open the Draft PR. If GitHub rejects the push/PR or variable
-configuration, put a replacement token only in `.env/local.yaml`; never paste it
-into chat or commit it.
+Load the replacement token from `.env/local.yaml`, open the Draft PR, and wait
+for Platform verification. Never paste the token into chat or commit it.
