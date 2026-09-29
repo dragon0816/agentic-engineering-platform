@@ -1,11 +1,14 @@
 """Serializable requests and decisions for a bounded remote validation loop."""
 
+from pathlib import PurePosixPath, PureWindowsPath
 from typing import Annotated, Literal, Self
+from urllib.parse import urlsplit
 
 from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from common.assets import AssetIdentity, RegistryContract
-from common.base import Symbol, Text
+from common.base import Slug, Symbol, Text
+from models.catalog import ModelEndpoint
 
 GitCommit = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{40}$")]
 
@@ -87,3 +90,114 @@ class OwnerDecision(RegistryContract):
     kind: Literal["authorize_test_actor", "configure_model_routing", "enable_knowledge_integration"]
     choice: Literal["approved", "rejected"]
     evidence: Text
+
+
+def _profile_path(value: str) -> str:
+    """A profile may name only a file shipped inside its own bundle directory."""
+    path = PurePosixPath(value)
+    if (
+        path.is_absolute()
+        or PureWindowsPath(value).is_absolute()
+        or not value
+        or ".." in path.parts
+        or "\\" in value
+    ):
+        raise ValueError("validation fixture paths must be relative POSIX paths")
+    return value
+
+
+class ValidationGrantRequirement(RegistryContract):
+    """The exact local grant a fixed validation profile may install for its actor."""
+
+    asset: AssetIdentity
+    permissions: tuple[Symbol, ...] = Field(min_length=1)
+    policy_refs: tuple[Text, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def unique_policy_values(self) -> Self:
+        if len(self.permissions) != len(set(self.permissions)):
+            raise ValueError("validation grant permissions must be unique")
+        if len(self.policy_refs) != len(set(self.policy_refs)):
+            raise ValueError("validation grant policies must be unique")
+        return self
+
+
+class LoopbackModelFixture(RegistryContract):
+    """Credential-free model endpoint used only by the fixed remote proof."""
+
+    endpoint: ModelEndpoint
+    routing_alias: Symbol
+    responses_path: Text
+
+    @field_validator("responses_path")
+    @classmethod
+    def relative_responses_path(cls, value: str) -> str:
+        return _profile_path(value)
+
+    @model_validator(mode="after")
+    def fixed_openai_compatible_loopback(self) -> Self:
+        endpoint = self.endpoint
+        if endpoint.provider != "openai_compatible":
+            raise ValueError("validation model must use the production OpenAI-compatible adapter")
+        if endpoint.alias != self.routing_alias:
+            raise ValueError("validation model routing alias must name its endpoint")
+        if endpoint.credential is not None:
+            raise ValueError("loopback validation model carries no credential")
+        if not endpoint.capabilities.local:
+            raise ValueError("loopback validation model must be declared local")
+        parsed = urlsplit(endpoint.base_url or "")
+        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost"}:
+            raise ValueError("validation model endpoint must be HTTP loopback")
+        return self
+
+
+class SopValidationFixture(RegistryContract):
+    pdf_path: Text
+    namespace: Slug
+    name: Symbol
+    required_capabilities: tuple[AssetIdentity, ...] = Field(min_length=1)
+
+    @field_validator("pdf_path")
+    @classmethod
+    def relative_pdf_path(cls, value: str) -> str:
+        return _profile_path(value)
+
+
+class KnowledgeValidationFixture(RegistryContract):
+    asset: AssetIdentity
+    manifest_template_path: Text
+    vault_path: Text
+    vault_ref_placeholder: Text
+    question: Text
+
+    @field_validator("manifest_template_path", "vault_path")
+    @classmethod
+    def relative_paths(cls, value: str) -> str:
+        return _profile_path(value)
+
+
+class CompanyAgentValidationProfile(RegistryContract):
+    """Non-secret, allowlisted setup for the three Company Agent proof routes."""
+
+    schema_id: Literal["aep-company-agent-integration-profile/v1"] = Field(alias="schema")
+    profile: Literal["aep-company-agent-integration-v1"]
+    model: LoopbackModelFixture
+    grants: tuple[ValidationGrantRequirement, ...] = Field(min_length=1)
+    sop: SopValidationFixture
+    knowledge: KnowledgeValidationFixture
+    personal_proof_fixture_path: Text
+    acceptance_criteria: tuple[Symbol, ...] = Field(min_length=1)
+
+    @field_validator("personal_proof_fixture_path")
+    @classmethod
+    def relative_personal_proof_path(cls, value: str) -> str:
+        return _profile_path(value)
+
+    @model_validator(mode="after")
+    def unique_profile_requirements(self) -> Self:
+        assets = [grant.asset.key for grant in self.grants]
+        if len(assets) != len(set(assets)):
+            raise ValueError("validation grants must name unique assets")
+        if len(self.acceptance_criteria) != len(set(self.acceptance_criteria)):
+            raise ValueError("validation acceptance criteria must be unique")
+        return self

@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -5,11 +7,15 @@ from pydantic import ValidationError
 
 from common.assets import AssetIdentity
 from validation.contracts import (
+    CompanyAgentValidationProfile,
     OwnerDecision,
     ValidationExecution,
     ValidationRequest,
     ValidationTarget,
 )
+
+ROOT = Path(__file__).resolve().parents[1]
+PROFILE = ROOT / "deploy/windows-preview/validation/company-agent-integration-v1/profile.json"
 
 
 def asset(name: str) -> AssetIdentity:
@@ -82,3 +88,49 @@ def test_owner_decision_requires_a_declared_kind_and_explicit_choice() -> None:
                 "choice": "approved",
             }
         )
+
+
+def test_company_agent_profile_is_fixed_local_and_least_privilege() -> None:
+    profile = CompanyAgentValidationProfile.model_validate_json(PROFILE.read_text(encoding="utf-8"))
+
+    assert profile.model.endpoint.base_url == "http://127.0.0.1:8765/v1"
+    assert profile.model.endpoint.credential is None
+    assert profile.model.endpoint.capabilities.local is True
+    grants = {grant.asset.key: grant for grant in profile.grants}
+    assert set(grants) == {
+        ("workflow-author", "draft", "1.0.0"),
+        ("knowledge-query", "ask", "1.0.0"),
+        ("company-agent", "personal-proof-fixture-read", "1.0.0"),
+    }
+    assert grants[("workflow-author", "draft", "1.0.0")].permissions == ("workflow-author.draft",)
+    assert grants[("knowledge-query", "ask", "1.0.0")].permissions == ("knowledge-query.ask",)
+    assert grants[("company-agent", "personal-proof-fixture-read", "1.0.0")].permissions == (
+        "filesystem.read",
+    )
+    dumped = json.dumps(profile.model_dump(mode="json"))
+    assert "filesystem/read-file" not in dumped
+    assert "api_key" not in dumped.casefold()
+    assert profile.model.endpoint.credential is None
+
+
+@pytest.mark.parametrize(
+    "path", ("../outside.pdf", "C:/outside.pdf", "folder\\\\file.pdf", "/outside.pdf")
+)
+def test_company_agent_profile_rejects_paths_outside_its_bundle(path: str) -> None:
+    payload = json.loads(PROFILE.read_text(encoding="utf-8"))
+    payload["sop"]["pdf_path"] = path
+
+    with pytest.raises(ValidationError, match="relative POSIX paths"):
+        CompanyAgentValidationProfile.model_validate(payload)
+
+
+def test_company_agent_profile_rejects_remote_or_credentialed_fixture_models() -> None:
+    payload = json.loads(PROFILE.read_text(encoding="utf-8"))
+    payload["model"]["endpoint"]["base_url"] = "https://gateway.example.invalid/v1"
+    with pytest.raises(ValidationError, match="HTTP loopback"):
+        CompanyAgentValidationProfile.model_validate(payload)
+
+    payload = json.loads(PROFILE.read_text(encoding="utf-8"))
+    payload["model"]["endpoint"]["credential"] = {"name": "fixture_token"}
+    with pytest.raises(ValidationError, match="carries no credential"):
+        CompanyAgentValidationProfile.model_validate(payload)

@@ -278,6 +278,28 @@ Local Bridge
 
 This separation keeps reasoning replaceable while preserving reliable local execution boundaries.
 
+### Company Bridge deployment integration proof
+
+A successful main build may request a bounded production-like proof on the
+enrolled company computer. GitHub remains the control plane: it pins the exact
+Windows artifact, actor, Bridge, fixed profile and acceptance criteria. Hermes
+is the execution-plane worker and accepts only the bot-authored JSON contract;
+Issue prose is evidence, never executable instructions.
+
+The artifact ships an inert validation package for `workflow.draft`,
+`knowledge.ask` and `personal.proof`. It supplies a controlled SOP PDF, an
+exact published Knowledge Vault/manifest, fixture-scoped grants and a
+credential-free loopback OpenAI-compatible responder. This validates the real
+host configuration, adapter, Agent/Gateway/Bridge routes, grounding and traces
+without spending model API credit or contacting a production system. A live
+company gateway remains a separate deployment decision using `SecretRef`.
+
+The proof workspace is isolated and grants only the exact read capabilities
+declared by the profile. In particular, Personal Proof receives its dedicated
+fixture-rooted reader rather than general workspace read permission.
+Publication remains separate from execution authorization, and a passing
+remote proof never merges code.
+
 ### E2E-02 bounded Workflow authoring and validation
 
 The first product gate extends the Personal Engineering Agent with one bounded

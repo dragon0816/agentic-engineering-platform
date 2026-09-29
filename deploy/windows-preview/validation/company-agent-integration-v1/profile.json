@@ -1,0 +1,95 @@
+{
+  "schema": "aep-company-agent-integration-profile/v1",
+  "profile": "aep-company-agent-integration-v1",
+  "model": {
+    "endpoint": {
+      "alias": "hermes-validation-loopback",
+      "provider": "openai_compatible",
+      "model": "aep-company-agent-fixture-v1",
+      "base_url": "http://127.0.0.1:8765/v1",
+      "credential": null,
+      "capabilities": {
+        "reasoning": "high",
+        "tool_calling": false,
+        "structured_output": true,
+        "streaming": false,
+        "vision": false,
+        "local": true,
+        "max_context_tokens": 8192
+      }
+    },
+    "routing_alias": "hermes-validation-loopback",
+    "responses_path": "model-responses.json"
+  },
+  "grants": [
+    {
+      "asset": {
+        "namespace": "workflow-author",
+        "name": "draft",
+        "version": "1.0.0"
+      },
+      "permissions": [
+        "workflow-author.draft"
+      ],
+      "policy_refs": [
+        "workflow-author-policy"
+      ]
+    },
+    {
+      "asset": {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+      },
+      "permissions": [
+        "knowledge-query.ask"
+      ],
+      "policy_refs": [
+        "knowledge-grounding-policy"
+      ]
+    },
+    {
+      "asset": {
+        "namespace": "company-agent",
+        "name": "personal-proof-fixture-read",
+        "version": "1.0.0"
+      },
+      "permissions": [
+        "filesystem.read"
+      ],
+      "policy_refs": [
+        "personal-proof-fixture-read-policy"
+      ]
+    }
+  ],
+  "sop": {
+    "pdf_path": "sop/personal-proof-sop.pdf",
+    "namespace": "validation",
+    "name": "read-personal-proof",
+    "required_capabilities": [
+      {
+        "namespace": "company-agent",
+        "name": "personal-proof-fixture-read",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "knowledge": {
+    "asset": {
+      "namespace": "validation",
+      "name": "company-agent-guide",
+      "version": "1.0.0"
+    },
+    "manifest_template_path": "knowledge/manifest.template.json",
+    "vault_path": "knowledge/vault",
+    "vault_ref_placeholder": "${AEP_VALIDATION_KNOWLEDGE_VAULT}",
+    "question": "What firmware version does Safe mode require?"
+  },
+  "personal_proof_fixture_path": "personal-proof/personal_proof.txt",
+  "acceptance_criteria": [
+    "sop-draft-produced",
+    "knowledge-answer-raw-grounded",
+    "personal-proof-read-only-succeeded",
+    "out-of-root-read-refused"
+  ]
+}

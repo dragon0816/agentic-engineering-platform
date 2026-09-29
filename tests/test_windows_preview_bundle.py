@@ -164,7 +164,7 @@ def test_a_name_too_long_to_extract_is_refused_where_it_is_built(
     repo = Path(__file__).resolve().parents[1]
     platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
     platform_wheel.write_bytes(b"platform-wheel")
-    refusal = r"agentic_engineering_platform.*would need a 276 character path"
+    refusal = r"would need a [0-9]+ character path"
     with pytest.raises(ValueError, match=refusal):
         build(
             repo=repo,
@@ -195,3 +195,11 @@ def test_the_bundled_dut_examples_are_contract_documents() -> None:
     skill = SkillManifest.model_validate(skills[0])
     assert request.validation.skill == skill.metadata.identity
     assert request.validation.target.resource_id == "dut-acme-001"
+
+
+def test_source_distribution_includes_the_validation_profile_files() -> None:
+    manifest = (Path(__file__).resolve().parents[1] / "MANIFEST.in").read_text(encoding="utf-8")
+
+    assert "recursive-include deploy/windows-preview" in manifest
+    for suffix in ("*.json", "*.pdf", "*.txt"):
+        assert suffix in manifest

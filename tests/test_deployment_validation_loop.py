@@ -3,7 +3,7 @@ from pathlib import Path
 from validation.contracts import DeploymentArtifact
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW = ROOT / ".github" / "workflows" / "hermes-deployment-personal-proof.yml"
+WORKFLOW = ROOT / ".github" / "workflows" / "hermes-deployment-company-agent.yml"
 DOCUMENTATION = ROOT / "docs" / "deployment-validation-loop.md"
 
 
@@ -35,7 +35,7 @@ def test_deployment_artifact_rejects_a_name_for_another_commit() -> None:
         raise AssertionError("artifact for another commit was accepted")
 
 
-def test_personal_proof_deployment_workflow_is_narrow_and_machine_readable() -> None:
+def test_company_agent_deployment_workflow_is_narrow_and_machine_readable() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
 
     assert "workflow_run:" in text
@@ -44,11 +44,16 @@ def test_personal_proof_deployment_workflow_is_narrow_and_machine_readable() -> 
     assert "github.event.workflow_run.conclusion == 'success'" in text
     assert "HERMES_DEPLOYMENT_BRIDGE" in text
     assert "HERMES_DEPLOYMENT_ACTOR" in text
-    assert 'test_profile: "aep-deployment-personal-proof-v1"' in text
-    assert 'action: "install_and_personal_proof"' in text
+    assert 'test_profile: "aep-company-agent-integration-v1"' in text
+    assert 'action: "install_and_company_agent_integration"' in text
     assert 'schema: "hermes-validation/v1"' in text
     assert "aep-windows-preview-${commit}" in text
     assert 'name: "personal-proof-fixture-read"' in text
+    assert 'name: "draft"' in text
+    assert 'name: "ask"' in text
+    assert 'model_routing: "hermes-validation-loopback"' in text
+    assert 'name: "company-agent-guide"' in text
+    assert 'profile_path: "validation/company-agent-integration-v1/profile.json"' in text
     assert 'namespace: "platform", name: "filesystem.read"' not in text
     assert "github.rest.actions.listWorkflowRunArtifacts" in text
     assert "github.rest.issues.createComment" in text
@@ -61,12 +66,14 @@ def test_personal_proof_deployment_workflow_is_narrow_and_machine_readable() -> 
     assert "actions/checkout" not in text
 
 
-def test_deployment_loop_documentation_explains_the_fixed_first_profile() -> None:
+def test_deployment_loop_documentation_explains_the_fixed_company_profile() -> None:
     text = DOCUMENTATION.read_text(encoding="utf-8")
 
     for value in (
         "personal.proof",
-        "aep-deployment-personal-proof-v1",
+        "workflow.draft",
+        "knowledge.ask",
+        "aep-company-agent-integration-v1",
         "HERMES_DEPLOYMENT_BRIDGE",
         "HERMES_DEPLOYMENT_ACTOR",
         "artifact_id",
