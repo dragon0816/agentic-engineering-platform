@@ -23,6 +23,7 @@ from pydantic import ValidationError
 from agent.gateway import Gateway
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
+from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
 from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
     PhysicalDutValidationHandler,
@@ -480,6 +481,14 @@ def build_gateway(
     installed.register(
         READ_FILE_SPEC,
         ReadFileHandler(layout.workspace_root),
+        ReadFileInput,
+        ReadFileOutput,
+        ExecutionDependencies(central_required=False),
+    )
+    proof_fixture_root = layout.workspace_root / "hermes-fixtures" / "personal-proof"
+    installed.register(
+        personal_proof_fixture_read_spec(),
+        ReadFileHandler(proof_fixture_root),
         ReadFileInput,
         ReadFileOutput,
         ExecutionDependencies(central_required=False),

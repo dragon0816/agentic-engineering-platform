@@ -3,6 +3,7 @@
 from capabilities.company_agent.manifest import (
     PERSONAL_PROOF,
     knowledge_skill,
+    personal_proof_fixture_read_spec,
     personal_proof_skill,
     personal_proof_workflow,
     workflow_author_skill,
@@ -24,8 +25,10 @@ def test_company_agent_assets_expose_exact_deterministic_routes() -> None:
     proof = personal_proof_workflow()
     step = proof.steps[0]
     assert isinstance(step, WorkflowStep)
-    assert step.capability == READ_FILE_SPEC.identity
+    assert step.capability == personal_proof_fixture_read_spec().identity
     assert proof.dependencies.central_required is False
+    assert personal_proof_fixture_read_spec().policy.required_permissions == ("filesystem.read",)
+    assert personal_proof_fixture_read_spec().identity != READ_FILE_SPEC.identity
 
 
 def test_company_agent_assets_ship_with_the_host_bundle() -> None:

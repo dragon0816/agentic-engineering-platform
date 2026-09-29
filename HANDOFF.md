@@ -1,137 +1,100 @@
-# Handoff — local Codex Pro repair worker
+# Handoff — fixture-scoped Personal Proof authorization
 
 Updated: 2026-09-29 (Asia/Taipei).
-Branch: `codex/local-codex-worker`.
-Base: `origin/main` at `8df437bac9d74572f38c74326cf961029d824674`.
+Branch: `codex/personal-proof-fixture-policy`.
+Base merged into branch: `origin/main` at
+`5b6c3b1bcdf118319e07c4235f6678c291a39b35`.
 
 ## Goal
 
-Replace the API-billed GitHub Codex Action with a trusted development-computer
-worker that uses `codex login`/ChatGPT Pro, while keeping GitHub as the durable
-queue and Hermes as the exact-SHA real-environment validator.
+Allow the fixed Hermes deployment profile to execute `personal.proof` without
+turning its validation grant into general workspace filesystem access.
 
 ```text
-Hermes FAIL -> GitHub typed queue -> local Codex -> Draft PR + CI
-     ^                                             |
-     +---------- exact-SHA Hermes retest <---------+
+main artifact -> Hermes exact-SHA install -> fixture-only local grant
+-> personal.proof -> sanitized evidence
 ```
 
 ## Completed
 
-- Replaced `.github/workflows/codex-remote-test-fix.yml` with a queue-only
-  workflow. It accepts `codex-fix` only from `HERMES_GITHUB_BOT_USER` while
-  `CODEX_EXECUTION_MODE=local-worker`, fingerprints the default-branch SHA,
-  Issue body and bounded Hermes comments, and writes one bot-authored
-  `codex-local-request/v1` payload per fingerprint.
-- The queue now requires the configured Hermes account to post a strict
-  `hermes-failure/v1` comment before `codex-fix`. Its `target_sha` is the exact
-  commit Hermes installed and becomes the local worker's base SHA. A failed
-  Draft-PR retest therefore continues from that repair instead of restarting
-  from `main`; prose and malformed/extra JSON fields are refused.
-- Added typed strict queue/result contracts and the local worker in
-  `development.codex_worker`. It accepts only `github-actions[bot]` payloads,
-  keeps durable local state, uses isolated Git worktrees, and bounds retries by
-  request fingerprint.
-- Codex runs through `codex exec --ephemeral --sandbox workspace-write` with a
-  fixed repository-owned prompt and output schema. GitHub/OpenAI/AEP tokens,
-  GitHub CLI auth configuration, Git askpass and SSH agent variables are removed
-  from the Codex environment. An empty Git/GitHub configuration is supplied to
-  the subprocess while `CODEX_HOME` remains available for ChatGPT Pro auth.
-- Deterministic wrapper code refuses deletion/rename/conflict states and changes
-  outside `src/`, `tests/`, `docs/` and `HANDOFF.md`; it runs pytest (excluding
-  the known local Edge-only module), Ruff, format check, mypy and `git diff
-  --check` before commit/push/Draft PR creation.
-- Added `.github/workflows/codex-local-fix-handoff.yml`. A same-repository worker
-  PR from `CODEX_LOCAL_WORKER_USER` receives a bot-authored exact-SHA
-  `hermes-next-action/v1` retest payload. No workflow merges.
-- Added `.github/workflows/codex-local-evidence-handoff.yml`. When Codex names a
-  specific missing fact, the worker posts `codex-local-result/v1`; GitHub turns
-  it into a bot-authored bounded `collect_evidence` payload for Hermes. New
-  Hermes evidence changes the fingerprint and permits one new repair attempt.
-- Added an ignored per-computer `.env/local.yaml` flow. The tracked example is
-  empty and accepts only `GH_TOKEN` and `AEP_GITHUB_TOKEN`; the local worker uses
-  Codex subscription login, not an OpenAI API key.
-- Added foreground and Windows logon-task scripts. The resident worker polls
-  every 60 seconds and uses `gh auth setup-git` only in the outer deterministic
-  process.
-- Updated architecture, README, task record and operational documentation.
+- Added `company-agent/personal-proof-fixture-read@1.0.0`, a distinct local
+  capability requiring `filesystem.read` but wired by the trusted host only to
+  `<workspace>\hermes-fixtures\personal-proof`.
+- Changed `company-agent/personal-proof@1.0.0` to call the fixture reader. A
+  grant for the general `filesystem/read-file` asset cannot authorize it.
+- Changed the deployment payload to request only the fixture-reader asset.
+- Added tests for allowed fixture reads, traversal/out-of-root refusal,
+  default-deny behavior and asset-specific authorization.
+- Preserved the local Codex Pro worker merged in PR #126 while merging current
+  `main` into this branch. The only merge conflicts were the accumulating
+  `HANDOFF.md` and `docs/TASKS.md`; both now contain current state.
+- Issue #127 installed the PR #126 main artifact successfully after an initial
+  local ZIP lock. It remains correctly blocked because this fixture capability
+  is not yet on `main`.
 
 ## In Progress
 
-- Implementation and local verification are complete. PR #126 is open and was
-  green before the exact-SHA Hermes contract correction. The corrected branch
-  has passed the full local baseline and requires one final GitHub check.
+- PR #125 is updated locally to current `main`. Its prior CI was green, but the
+  refreshed merge commit still needs to be pushed and checked by GitHub.
 
 ## Remaining
 
-1. Review and merge green PR #126.
-2. After merge, set repository variables `CODEX_EXECUTION_MODE=local-worker` and
-   `CODEX_LOCAL_WORKER_USER=dragon0816`. Preserve the already configured exact
-   Hermes bot and merge-reviewer variables.
-3. On the trusted development computer, copy `.env/example.yaml` to
-   `.env/local.yaml`, set a repository-limited `GH_TOKEN`, run `codex login`,
-   then run `scripts/run-local-codex-worker.ps1 -Once`.
-4. Install/start `scripts/install-local-codex-worker-task.ps1` and execute the
-   documented harmless dummy Issue test end to end.
-5. Delete the GitHub repository secret `OPENAI_API_KEY` only after one dummy
-   request produces a Draft PR and GitHub produces the exact-SHA Hermes payload.
+1. Push this branch and wait for the refreshed PR #125 Platform verification.
+2. Review and merge PR #125 only after CI is green.
+3. Let the successful main build create a new artifact-pinned deployment
+   request. Hermes must install that exact SHA and grant only
+   `company-agent/personal-proof-fixture-read@1.0.0` to `leo.chi`.
+4. Hermes retries the fixed profile once after the artifact/setup fingerprint
+   changes and records run/trace IDs and sanitized evidence.
+5. Separately fix Hermes lifecycle concurrency: one resident poller, a
+   per-request lease, no replay of superseded payloads, artifact-specific temp
+   paths, and one terminal evidence comment per fingerprint.
 
 ## Architecture decisions
 
-- GitHub remains control plane/queue; the trusted development PC is the coding
-  execution plane; the company Bridge/Hermes environment remains the real
-  integration-validation plane.
-- ChatGPT authentication is local machine state and is never copied into a
-  GitHub-hosted runner, Issue, repository file or Hermes host.
-- Reasoning cannot deliver its own GitHub changes. Codex edits a token-free
-  worktree; deterministic code separately validates, commits, pushes and opens a
-  Draft PR.
-- Issue and comment prose remains untrusted data even when a trusted workflow
-  copies it. Only fixed schemas/actions cross machine boundaries.
-- Human review remains the only merge authority.
+- Registry publication, local capability installation and local execution
+  authorization remain separate.
+- The fixture root is fixed by trusted host wiring. GitHub Issue prose, model
+  output and workflow arguments cannot widen it.
+- A separate asset identity gives the local policy an enforceable boundary;
+  hidden path conditions are not added to a broad filesystem grant.
+- The proof remains read-only and local. No model, Knowledge, browser, Git,
+  network, email, DUT, filesystem-write or production side effect is added.
+- Hermes environment/setup failures remain BLOCKED and do not receive
+  `codex-fix` unless evidence proves a repository implementation defect.
 
 ## Verification
 
 ```text
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest tests/test_codex_remote_test_workflow.py tests/test_local_developer_environment.py -q --basetemp .scratch\pytest-local-codex-worker-5
-21 passed in 1.17s
+.venv\Scripts\python.exe -m pytest tests\test_personal_proof_fixture_policy.py tests\test_company_agent_assets.py tests\test_host_wiring.py tests\test_dispatch.py tests\test_deployment_validation_loop.py tests\test_platform_transport.py tests\test_codex_remote_test_workflow.py tests\test_local_developer_environment.py -q --basetemp .scratch\pytest-pr125-main-merge-focused
+89 passed, 1 skipped in 15.15s
 
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q --basetemp .scratch\pytest-local-worker-full-2
-1323 passed, 4 skipped in 34.20s
+.venv\Scripts\python.exe -m pytest --ignore=tests\test_browser.py -q --basetemp .scratch\pytest-pr125-main-merge-full
+1326 passed, 4 skipped in 35.03s
 
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest tests/test_codex_remote_test_workflow.py -q --basetemp .scratch\pytest-hermes-failure-contract
-16 passed in 0.43s
-
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q --basetemp .scratch\pytest-hermes-sha-full
-1323 passed, 4 skipped in 35.04s
-
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m ruff check .
 All checks passed!
 
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff format --check .
-280 files already formatted
+.venv\Scripts\python.exe -m ruff format --check .
+281 files already formatted
 
-C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m mypy
-Success: no issues found in 222 source files
-
-Workflow YAML parsed through PyYAML; every embedded `actions/github-script`
-program parsed through `node --check`; both PowerShell entry scripts parsed
-through the PowerShell AST parser.
+.venv\Scripts\python.exe -m mypy
+Success: no issues found in 223 source files
 ```
 
 ## Known issues
 
-- PR #125 is a separate green, open PR for fixture-scoped personal-proof
-  authorization. This branch deliberately does not include it.
-- The replacement token in the ignored `.env/local.yaml` was verified as
-  `dragon0816`, can read repository Variables and created PR #126. It was never
-  printed or committed.
-- Full local pytest includes nine existing Edge/browser failures on this machine;
-  per owner direction the applicable baseline excludes `tests/test_browser.py`.
-- `.claude/` in the primary checkout is user-owned local state and was not
-  touched.
+- `.claude/` is user-owned untracked state and must not be added or modified.
+- Pytest could not write `.pytest_cache` in this checkout; explicit
+  `--basetemp` was used and all applicable tests completed.
+- Hermes reported `[WinError 32]` for an old artifact path and then posted
+  repeated #127 evidence. The trusted current #127 payload is
+  `deployment-personal-proof-36541643800`, target SHA `5b6c3b1...`, artifact
+  `11020643502`; old payload `deployment-personal-proof-36456543696` must not be
+  replayed.
 
-## Next recommended action
+## Next Recommended Action
 
-Review and merge PR #126. Then configure the two local-worker repository
-variables and install the logon worker before starting the dummy Issue test.
+Commit and push the current merge resolution, wait for PR #125 CI, then merge
+only when green. Hermes should remain quiet for #127 until a new successful
+main artifact changes the deployment fingerprint.
