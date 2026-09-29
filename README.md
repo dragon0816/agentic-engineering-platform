@@ -35,6 +35,11 @@ python -m build
 python -m pip check
 ```
 
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
 CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
 compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
 `workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
@@ -201,3 +206,9 @@ each Bridge computer. The shared platform distributes published packages and hol
 timestamped status projections. Remote jobs are actor/device scoped: a company
 computer accepts its bound owner, a shared test computer accepts its bound users,
 and future Telegram polling maps a sender to the same platform actor before routing.
+
+Remote Hermes failures can be queued through GitHub for a trusted local Codex
+worker authenticated with ChatGPT Pro. GitHub Actions writes typed queue and
+Hermes-handoff payloads but runs no model and receives no ChatGPT credential. See
+[`docs/remote-testing-codex-loop.md`](docs/remote-testing-codex-loop.md) for setup,
+security boundaries and the reproducible dummy test.

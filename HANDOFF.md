@@ -1,150 +1,137 @@
-# Handoff — deployment validation loop v1
+# Handoff — local Codex Pro repair worker
 
 Updated: 2026-09-29 (Asia/Taipei).
-Branch: `codex/deployment-payload-comment`.
-Base: `origin/main` at `90f4c7e486c77979981f3d23fa445933a155fafa`.
+Branch: `codex/local-codex-worker`.
+Base: `origin/main` at `8df437bac9d74572f38c74326cf961029d824674`.
 
 ## Goal
 
-Establish the first reproducible development-computer to company-computer loop
-without trying to validate every Company Agent capability at once:
+Replace the API-billed GitHub Codex Action with a trusted development-computer
+worker that uses `codex login`/ChatGPT Pro, while keeping GitHub as the durable
+queue and Hermes as the exact-SHA real-environment validator.
 
 ```text
-merged main -> successful Platform verification -> exact Windows artifact
--> fixed Hermes personal.proof deployment profile -> evidence -> terminal result
+Hermes FAIL -> GitHub typed queue -> local Codex -> Draft PR + CI
+     ^                                             |
+     +---------- exact-SHA Hermes retest <---------+
 ```
-
-The first profile is intentionally read-only and side-effect-free. SOP PDF
-authoring, Knowledge asking, workflow 7/13 and DUT validation remain later
-profiles after this path is proven green.
 
 ## Completed
 
-- Added `DeploymentArtifact`, a serializable contract pinning repository,
-  40-character package commit, successful workflow run, artifact ID, and
-  artifact name. A differently named artifact is refused even if it exists.
-- Added `.github/workflows/hermes-deployment-personal-proof.yml`.
-  It runs only after successful `Platform verification` on `main`, locates
-  only `aep-windows-preview-<head SHA>` from that exact run, and creates a
-  machine-readable `hermes-validation/v1` deployment request Issue.
-- The generated request is fixed to
-  `aep-deployment-personal-proof-v1` and
-  `company-agent/personal-proof@1.0.0`; it names the target Bridge and actor
-  through repository variables, and includes immutable artifact metadata.
-- Added `docs/deployment-validation-loop.md` with the handoff, required GitHub
-  variables and Hermes acceptance requirements.
-- Added contract/workflow tests in `tests/test_deployment_validation_loop.py`.
-- Updated `docs/TASKS.md` with this active cross-cutting deployment slice.
-- PR #121 merged the first deployment-loop implementation. Its successful
-  main CI created Issue #122 with a correct artifact identity, but placed the
-  trusted payload in the Issue body. Hermes correctly refused it because its
-  trust boundary accepts Actions comments only.
-- The two repository variables are now configured:
-  `HERMES_DEPLOYMENT_BRIDGE=bridge-tp401555` and
-  `HERMES_DEPLOYMENT_ACTOR=leo.chi`.
+- Replaced `.github/workflows/codex-remote-test-fix.yml` with a queue-only
+  workflow. It accepts `codex-fix` only from `HERMES_GITHUB_BOT_USER` while
+  `CODEX_EXECUTION_MODE=local-worker`, fingerprints the default-branch SHA,
+  Issue body and bounded Hermes comments, and writes one bot-authored
+  `codex-local-request/v1` payload per fingerprint.
+- The queue now requires the configured Hermes account to post a strict
+  `hermes-failure/v1` comment before `codex-fix`. Its `target_sha` is the exact
+  commit Hermes installed and becomes the local worker's base SHA. A failed
+  Draft-PR retest therefore continues from that repair instead of restarting
+  from `main`; prose and malformed/extra JSON fields are refused.
+- Added typed strict queue/result contracts and the local worker in
+  `development.codex_worker`. It accepts only `github-actions[bot]` payloads,
+  keeps durable local state, uses isolated Git worktrees, and bounds retries by
+  request fingerprint.
+- Codex runs through `codex exec --ephemeral --sandbox workspace-write` with a
+  fixed repository-owned prompt and output schema. GitHub/OpenAI/AEP tokens,
+  GitHub CLI auth configuration, Git askpass and SSH agent variables are removed
+  from the Codex environment. An empty Git/GitHub configuration is supplied to
+  the subprocess while `CODEX_HOME` remains available for ChatGPT Pro auth.
+- Deterministic wrapper code refuses deletion/rename/conflict states and changes
+  outside `src/`, `tests/`, `docs/` and `HANDOFF.md`; it runs pytest (excluding
+  the known local Edge-only module), Ruff, format check, mypy and `git diff
+  --check` before commit/push/Draft PR creation.
+- Added `.github/workflows/codex-local-fix-handoff.yml`. A same-repository worker
+  PR from `CODEX_LOCAL_WORKER_USER` receives a bot-authored exact-SHA
+  `hermes-next-action/v1` retest payload. No workflow merges.
+- Added `.github/workflows/codex-local-evidence-handoff.yml`. When Codex names a
+  specific missing fact, the worker posts `codex-local-result/v1`; GitHub turns
+  it into a bot-authored bounded `collect_evidence` payload for Hermes. New
+  Hermes evidence changes the fingerprint and permits one new repair attempt.
+- Added an ignored per-computer `.env/local.yaml` flow. The tracked example is
+  empty and accepts only `GH_TOKEN` and `AEP_GITHUB_TOKEN`; the local worker uses
+  Codex subscription login, not an OpenAI API key.
+- Added foreground and Windows logon-task scripts. The resident worker polls
+  every 60 seconds and uses `gh auth setup-git` only in the outer deterministic
+  process.
+- Updated architecture, README, task record and operational documentation.
 
 ## In Progress
 
-- Correct the handoff format: this branch creates the Issue first, writes the
-  `hermes-validation/v1` payload as a GitHub Actions comment with that exact
-  source Issue number, and only then applies the queue labels.
-- Hermes has implemented the fixed profile and generic poller, but it must
-  accept GitHub's API author identifier `github-actions` (and the displayed
-  `github-actions[bot]` equivalent) only for trusted action comments.
+- Implementation and local verification are complete. PR #126 is open and was
+  green before the exact-SHA Hermes contract correction. The corrected branch
+  has passed the full local baseline and requires one final GitHub check.
 
 ## Remaining
 
-1. Push, review and merge the payload-comment correction PR.
-2. Hermes accepts only the generated trusted action comment and performs the
-   profile-owned install/update and read-only `personal.proof` verification.
-3. The next successful `main` verification
-   should automatically create exactly one deployment validation Issue.
-4. Hermes installs the exact artifact, verifies the source revision,
-   exports assets, runs `personal.proof` against its controlled local fixture,
-   and records sanitized evidence plus a terminal label.
-5. Only after this profile has a reproducible green path, add the SOP draft
-   profile, then Knowledge, then side-effecting workflow/hardware profiles.
+1. Review and merge green PR #126.
+2. After merge, set repository variables `CODEX_EXECUTION_MODE=local-worker` and
+   `CODEX_LOCAL_WORKER_USER=dragon0816`. Preserve the already configured exact
+   Hermes bot and merge-reviewer variables.
+3. On the trusted development computer, copy `.env/example.yaml` to
+   `.env/local.yaml`, set a repository-limited `GH_TOKEN`, run `codex login`,
+   then run `scripts/run-local-codex-worker.ps1 -Once`.
+4. Install/start `scripts/install-local-codex-worker-task.ps1` and execute the
+   documented harmless dummy Issue test end to end.
+5. Delete the GitHub repository secret `OPENAI_API_KEY` only after one dummy
+   request produces a Draft PR and GitHub produces the exact-SHA Hermes payload.
 
 ## Architecture decisions
 
-- GitHub is the control-plane handoff. The enrolled Company Bridge remains the
-  execution plane and enforces membership, grants and local resource access.
-- A CI artifact is immutable deployment input, not a Registry asset,
-  authorization grant, model configuration or secret.
-- The first profile has no model or Knowledge dependency. It proves bundle
-  delivery, Bridge/agent readiness, deterministic routing, workflow execution,
-  trace evidence and GitHub reporting before wider features are introduced.
-- The GitHub workflow does not check out source, run a Bridge command, download
-  a bundle, execute Issue text, issue credentials, modify local configuration,
-  or merge a pull request.
-- Hermes must use fixed profile-owned code; Issue content is evidence only and
-  cannot supply arbitrary commands or configuration instructions. A queue
-  label is applied only after a trusted action comment exists.
+- GitHub remains control plane/queue; the trusted development PC is the coding
+  execution plane; the company Bridge/Hermes environment remains the real
+  integration-validation plane.
+- ChatGPT authentication is local machine state and is never copied into a
+  GitHub-hosted runner, Issue, repository file or Hermes host.
+- Reasoning cannot deliver its own GitHub changes. Codex edits a token-free
+  worktree; deterministic code separately validates, commits, pushes and opens a
+  Draft PR.
+- Issue and comment prose remains untrusted data even when a trusted workflow
+  copies it. Only fixed schemas/actions cross machine boundaries.
+- Human review remains the only merge authority.
 
 ## Verification
 
-Completed on this branch:
-
 ```text
-.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_company_agent_assets.py tests/test_host_runtime.py tests/test_local_agent.py tests/test_windows_preview_bundle.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-deployment-verified -q
-49 passed in 1.34s
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest tests/test_codex_remote_test_workflow.py tests/test_local_developer_environment.py -q --basetemp .scratch\pytest-local-codex-worker-5
+21 passed in 1.17s
 
-.venv\Scripts\python.exe -m ruff check .
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q --basetemp .scratch\pytest-local-worker-full-2
+1323 passed, 4 skipped in 34.20s
+
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest tests/test_codex_remote_test_workflow.py -q --basetemp .scratch\pytest-hermes-failure-contract
+16 passed in 0.43s
+
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q --basetemp .scratch\pytest-hermes-sha-full
+1323 passed, 4 skipped in 35.04s
+
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff check .
 All checks passed!
 
-.venv\Scripts\python.exe -m ruff format --check .
-276 files already formatted
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m ruff format --check .
+280 files already formatted
 
-.venv\Scripts\python.exe -m mypy
-Success: no issues found in 219 source files
+C:\Users\OpenLab\Documents\workspace\agentic-ai-team-platform\.venv\Scripts\python.exe -m mypy
+Success: no issues found in 222 source files
 
-Node.js syntax check of the new actions/github-script block
-passed
-
-git diff --check
-passed
+Workflow YAML parsed through PyYAML; every embedded `actions/github-script`
+program parsed through `node --check`; both PowerShell entry scripts parsed
+through the PowerShell AST parser.
 ```
-
-Payload-comment correction verification:
-
-```text
-.venv\Scripts\python.exe -m pytest tests/test_deployment_validation_loop.py tests/test_validation_contracts.py tests/test_codex_remote_test_workflow.py --basetemp .scratch\pytest-payload-comment -q
-19 passed in 0.47s
-
-.venv\Scripts\python.exe -m ruff check .
-All checks passed!
-
-.venv\Scripts\python.exe -m ruff format --check .
-276 files already formatted
-
-.venv\Scripts\python.exe -m mypy
-Success: no issues found in 219 source files
-
-Node.js syntax check of the new actions/github-script block
-passed
-```
-
-The full local pytest suite was attempted with a workspace-local basetemp but
-did not complete inside the 30-second command window. A separate full run first
-stopped at existing `tests/test_browser.py` because Edge published no remote
-debugging port (`browser_would_not_start`), after 57 passing tests. This branch
-does not modify browser code. GitHub Windows/Python 3.12 CI remains required.
 
 ## Known issues
 
-- `.claude/` is user-owned untracked state. Do not add, remove or modify it.
-- Issue #122 is intentionally not consumed: it has no trusted payload comment.
-  It is evidence of the pre-correction protocol mismatch, not a valid test.
-- GitHub Actions evaluates a `workflow_run` workflow from the default branch.
-  The successful `main` Platform verification created by merging this PR is
-  expected to start the first deployment request automatically.
-- GitHub's API reports GitHub Actions comments as author `github-actions`,
-  whereas UI text may show `github-actions[bot]`; Hermes must use the fixed
-  two-value canonical allowlist, never a broad bot allowlist.
+- PR #125 is a separate green, open PR for fixture-scoped personal-proof
+  authorization. This branch deliberately does not include it.
+- The replacement token in the ignored `.env/local.yaml` was verified as
+  `dragon0816`, can read repository Variables and created PR #126. It was never
+  printed or committed.
+- Full local pytest includes nine existing Edge/browser failures on this machine;
+  per owner direction the applicable baseline excludes `tests/test_browser.py`.
+- `.claude/` in the primary checkout is user-owned local state and was not
+  touched.
 
 ## Next recommended action
 
-Create and merge the correction PR from
-`https://github.com/dragon0816/agentic-engineering-platform/compare/main...codex%2Fdeployment-payload-comment?expand=1`.
-The successful `main` CI run created by that merge should then create a new
-automatic Company Bridge deployment validation Issue with a trusted comment.
+Review and merge PR #126. Then configure the two local-worker repository
+variables and install the logon worker before starting the dummy Issue test.
