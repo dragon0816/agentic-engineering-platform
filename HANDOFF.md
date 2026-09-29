@@ -30,7 +30,9 @@ deployment Issue #130 before any functional acceptance criterion could run.
 
 ## In Progress
 
-- PR #131 is open; GitHub CI is the remaining repository-side check.
+- PR #131 is open. GitHub Platform verification run 36586919177 passed in
+  7m32s, including the Windows offline preview build/install and artifact
+  upload.
 
 ## Remaining
 
@@ -77,6 +79,9 @@ python -m ruff format --check .
 
 python -m mypy src tests
 Success: no issues found in 224 source files
+
+GitHub Platform verification run 36586919177
+passed; Windows preview built, installed and uploaded
 ```
 
 The local managed worktree could not use the default pytest cache/temp roots,
