@@ -1,104 +1,104 @@
 # Handoff
 
 Date: 2026-09-29 (Asia/Taipei)
-Branch: `codex/company-agent-prereqs`
-Base: `origin/main` at `076af0deba81807536934ed4c20fce3936ce8fd5`
-Implementation commit: `91ad837`
-Pull request: https://github.com/dragon0816/agentic-engineering-platform/pull/129
+Branch: `codex/dynamic-loopback-port`
+Base: `origin/main` at `2c3fe68c363d31e1d4e6836313054f26ca6bb7d1`
+Implementation commit: `b1bdc0a`
+Pull request: https://github.com/dragon0816/agentic-engineering-platform/pull/131
+
+## Goal
+
+Remove the machine-wide fixed-port assumption that blocked Company Agent
+deployment Issue #130 before any functional acceptance criterion could run.
 
 ## Completed
 
-- Replaced the single-route Personal Proof deployment request with one dynamic,
-  artifact-pinned `aep-company-agent-integration-v1` request. Issue numbers
-  are created at runtime; none is hardcoded.
-- Added typed contracts that restrict profile paths to relative POSIX paths,
-  restrict the fixture model to credential-free HTTP loopback, and declare
-  exact grant requirements.
-- Shipped a hash-verified validation package in the Windows preview:
-  controlled SOP PDF, valid draft Workflow response, exact published Knowledge
-  manifest and immutable Vault, grounded response, and Personal Proof fixture.
-- Kept grants separate and least-privilege:
-  `workflow-author/draft@1.0.0`, `knowledge-query/ask@1.0.0`, and
-  `company-agent/personal-proof-fixture-read@1.0.0`. No general
-  `filesystem/read-file` grant was added.
-- Marked the fixture tree byte-stable so Knowledge digests and PDF bytes do not
-  change across Windows/GitHub checkouts.
-- Updated architecture, deployment documentation, progress and sdist rules.
+- Added a typed `LoopbackPortBinding` contract. It permits only
+  `127.0.0.1`, `/v1`, non-privileged ports, `first_available` selection and a
+  range of at most 128 ports.
+- Evolved the existing profile compatibly: fixed credential-free loopback URLs
+  still validate, while the shipped Company Agent profile now leaves
+  `endpoint.base_url` unset and declares ports `18765..18864`.
+- Added negative contract tests for remote hosts, credentials, privileged or
+  reversed ranges, oversized ranges and simultaneous fixed/dynamic endpoints.
+- Documented that Hermes skips existing listeners, starts and stops only its
+  own fixture process, injects the selected URL into the isolated proof host
+  config and returns BLOCKED only when setup cannot own a declared port.
+- Preserved every PR #129 boundary: exact artifact identity, fixed profile,
+  three least-privilege grants, immutable Knowledge evidence and four existing
+  acceptance criteria.
 
 ## In Progress
 
-- PR #129 is open. GitHub Platform verification run 36575228427 passed in 4m36s.
-- Hermes does not yet implement the new fixed action/profile below.
+- PR #131 is open. GitHub Platform verification run 36586919177 passed in
+  7m32s, including the Windows offline preview build/install and artifact
+  upload.
 
 ## Remaining
 
-1. Hermes must allowlist action `install_and_company_agent_integration`,
-   profile `aep-company-agent-integration-v1`, and artifact path
-   `validation/company-agent-integration-v1/profile.json`.
-2. Hermes must run only the artifact profile in an isolated proof workspace,
-   structurally render the Knowledge vault path, own the loopback fixture
-   server, install only declared actor grants, run doctor/export-assets, and
-   collect all four acceptance records. Issue prose is never executable.
-3. After CI passes, the owner may merge PR #129. Successful main CI will create
-   a new validation Issue and trusted JSON payload automatically.
-4. A real company model endpoint remains a later, separately credentialed
-   check and is not required for this deterministic integration proof.
+1. Hermes must update only its allowlisted
+   `aep-company-agent-integration-v1` runner to implement the new binding
+   policy. It must not kill or reuse PID 36208 or any unknown listener.
+2. After PR #131 is merged and main CI creates a new artifact/request, Hermes
+   should consume the new dynamic Issue. Issue #130 remains correct historical
+   BLOCKED evidence for the old artifact and should not be rewritten as PASS.
+3. Collect actual SOP draft, Knowledge answer, Personal Proof and out-of-root
+   refusal evidence from the new request.
 
 ## Architecture decisions made
 
-- REUSE the existing Agent, Gateway, Bridge, workflow author, Knowledge query,
-  OpenAI-compatible adapter and Personal Proof boundaries.
-- ADD an artifact-owned fixed profile instead of a second runtime.
-- Use credential-free loopback to prove wiring without API cost; it is not
-  evidence of a production model endpoint.
-- Keep publication, local grants and technical policy separate.
-- Preserve #128's fixture-rooted reader and never broaden it.
+- The collision is environment setup, not a repository implementation failure;
+  #130 correctly did not receive `codex-fix`.
+- Port choice belongs to the deterministic Hermes execution profile. GitHub
+  remains the control plane and the application still receives an ordinary
+  concrete OpenAI-compatible `base_url` in its isolated host configuration.
+- Existing listeners are outside this validation profile's ownership. A runner
+  may skip them but never terminate, attach to or replace them.
+- This proof remains credential-free and does not claim a production company
+  model endpoint works.
 
 ## Verification
 
-Supported target: Windows, Python 3.12. Browser tests were excluded by owner
+Supported target: Windows, Python 3.12. Browser tests remain excluded by owner
 instruction.
 
 ```text
-pytest --ignore=tests/test_browser.py
-1330 passed, 4 skipped
+python -m pytest tests/test_validation_contracts.py \
+  tests/test_company_agent_validation_profile.py \
+  tests/test_deployment_validation_loop.py tests/test_windows_preview_bundle.py
+30 passed
 
-focused profile/workflow/bundle suite
-25 passed
+python -m pytest --ignore=tests/test_browser.py
+1341 passed, 4 skipped
 
-ruff check . / ruff format --check .
-passed; 288 files formatted
+python -m ruff check .
+All checks passed
 
-mypy
+python -m ruff format --check .
+288 files already formatted
+
+python -m mypy src tests
 Success: no issues found in 224 source files
 
-pip check
-No broken requirements found
-
-python -m build
-Successfully built sdist and wheel
-
-sdist inspection
-profile.json, model-responses.json, personal-proof-sop.pdf,
-personal_proof.txt: all present
-
-workflow YAML
-parsed successfully
-
-GitHub Platform verification run 36575228427
+GitHub Platform verification run 36586919177
 passed; Windows preview built, installed and uploaded
 ```
 
+The local managed worktree could not use the default pytest cache/temp roots,
+so verification used `-p no:cacheprovider` and a writable explicit
+`--basetemp`; the test results themselves were green.
+
 ## Known issues
 
+- Issue #130's artifact contains the old fixed `127.0.0.1:8765` profile and
+  cannot prove this change. A new successful main artifact is required.
+- PID 36208 owns the existing `uvicorn` listener on port 8765. Its purpose is
+  unknown and this change intentionally leaves it alone.
 - No production company model credential or endpoint was tested.
-- Until Hermes adds its allowlisted runner, the new request must block at
-  preflight and must not report a functional FAIL.
-- Human approval remains the merge gate.
 
 ## Next Recommended Action
 
-Give Hermes the fixed-runner prompt. CI is green; merge PR #129 after Hermes
-confirms the action/profile are allowlisted.
-The next successful main artifact should create one dynamic validation Issue
-and begin the three-route proof automatically.
+Review PR #131, then give Hermes the bounded-port runner prompt. Merge only
+after CI passes and Hermes confirms it can consume the new policy. The next
+successful main artifact should create a fresh dynamic deployment Issue and
+run the four functional criteria automatically.

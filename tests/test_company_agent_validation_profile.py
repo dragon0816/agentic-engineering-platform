@@ -36,6 +36,9 @@ def test_profile_files_are_present_and_sop_pdf_is_readable() -> None:
     assert "controlled personal proof fixture reader" in text
     assert (ROOT / profile.model.responses_path).is_file()
     assert (ROOT / profile.personal_proof_fixture_path).read_text(encoding="utf-8").strip()
+    assert profile.model.binding is not None
+    assert profile.model.endpoint.base_url is None
+    assert profile.model.binding.port_end - profile.model.binding.port_start < 128
 
 
 def test_profile_knowledge_manifest_matches_immutable_vault() -> None:

@@ -2,6 +2,7 @@
 
 from validation.contracts import (
     CompanyAgentValidationProfile,
+    LoopbackPortBinding,
     OwnerDecision,
     ValidationExecution,
     ValidationRequest,
@@ -10,6 +11,7 @@ from validation.contracts import (
 
 __all__ = [
     "CompanyAgentValidationProfile",
+    "LoopbackPortBinding",
     "OwnerDecision",
     "ValidationExecution",
     "ValidationRequest",
