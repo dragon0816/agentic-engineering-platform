@@ -35,15 +35,18 @@ main CI artifact -> GitHub payload comment -> Hermes discovery
   asset identity.
 - Added fixture-boundary tests and updated deployment/Company Agent docs and
   `docs/TASKS.md`.
+- Opened PR #125. Its first CI run exposed a stale integration-test expectation:
+  the host now advertises three built-in capabilities, while the test still
+  expected two. Updated that assertion to include the fixture-scoped reader.
 
 ## In Progress
 
-- The fixture-scoped authorization implementation is uncommitted on this
-  branch and needs a review PR.
+- PR #125 is open. The CI regression fix is ready to be pushed so Platform
+  verification can rerun.
 
 ## Remaining
 
-1. Push, review and merge this branch.
+1. Wait for PR #125 Platform verification to pass, then review and merge it.
 2. Hermes updates/reinstalls the exact new main artifact through its normal
    generic deployment discovery.
 3. Hermes' fixed profile writes or verifies one pre-approved local grant only
@@ -81,6 +84,12 @@ All checks passed!
 .venv\Scripts\python.exe -m mypy
 Success: no issues found in 220 source files
 
+.venv\Scripts\python.exe -m pytest tests\test_platform_transport.py tests\test_personal_proof_fixture_policy.py tests\test_company_agent_assets.py tests\test_deployment_validation_loop.py -q --basetemp .scratch\pytest-pr125-fix-focused
+25 passed, 1 skipped in 13.36s
+
+.venv\Scripts\python.exe -m pytest --ignore=tests\test_browser.py -q --basetemp .scratch\pytest-pr125-fix-full
+1315 passed, 4 skipped in 34.59s
+
 git diff --check
 passed
 ```
@@ -90,12 +99,12 @@ passed
 - `.claude/` is user-owned local state; do not add, remove or modify it.
 - Issue #124 remains correctly blocked until a bundle containing this change is
   merged and Hermes sees the changed fixture-policy setup fingerprint.
-- Full local pytest cannot be reported as green: it hits an unrelated existing
-  Edge browser startup failure in this environment. GitHub Windows/Python 3.12
-  CI is required for the PR.
+- Full local pytest cannot be reported as green: nine unrelated existing Edge
+  browser tests cannot start the browser in this environment. The other 1315
+  tests pass. GitHub Windows/Python 3.12 CI is required for the final gate.
 
 ## Next recommended action
 
-Run final diff verification, commit and push this branch, then create a review
-PR. After merge, Hermes should resume through generic discovery rather than an
-Issue-number-specific instruction.
+Wait for PR #125 Platform verification, review and merge only after it is
+green. After merge, Hermes should resume through generic discovery rather than
+an Issue-number-specific instruction.
