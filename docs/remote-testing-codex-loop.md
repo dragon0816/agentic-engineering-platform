@@ -1,214 +1,116 @@
-# Remote testing to Codex feedback loop
+# Remote testing and local Codex repair loop
 
-This repository can turn a failure from a remote Hermes Testing Agent into a
-bounded Codex analysis and, where evidence supports a narrow repair, a Draft
-pull request. Hermes validates the repair against the pre-defined acceptance
-result; a human receives a notification and makes the final merge decision.
-
-For a validation that begins before a failure exists, use the separate
-[`Hermes validation lifecycle`](hermes-validation-lifecycle.md). It pins a
-deterministic test profile and makes preflight, owner decisions and terminal
-validation states explicit.
+The repair loop uses GitHub as the durable queue and audit record, a trusted
+development computer for Codex, and the company computer for Hermes validation.
 
 ```text
 Hermes FAIL
-    -> GitHub Issue + codex-fix
-    -> GitHub Action
-    -> Codex analysis and workspace fix
-    -> validated Draft PR (when evidence supports a narrow repair)
-    -> Hermes receives a bounded next action
-    -> CI build
-    -> Hermes retest
-    -> reviewer notification and human merge decision
+  -> GitHub Issue + codex-fix
+  -> GitHub Actions writes codex-local-request/v1
+  -> local Codex worker (ChatGPT Pro login)
+  -> branch + Draft PR + CI
+  -> GitHub Actions writes hermes-next-action/v1
+  -> Hermes exact-SHA retest
+  -> owner reviews and merges
 ```
 
-## Trigger and result
+No automatic merge is permitted. GitHub-hosted runners do not receive ChatGPT
+credentials and no longer invoke `openai/codex-action`. The local worker uses the
+developer's existing `codex login` session; API-key billing is not part of this
+path.
 
-`.github/workflows/codex-remote-test-fix.yml` listens only for an Issue
-`labeled` event. The analysis job runs only when the newly applied label is
-exactly `codex-fix`. Editing, commenting on, closing, reopening, or applying a
-different label to an Issue does not invoke Codex.
+## Trust boundaries
 
-The workflow checks out the current default-branch commit, installs the
-repository-declared `.[dev,office]` test dependencies with Python 3.12, and
-then invokes `openai/codex-action@v1`. This fixed setup command is independent
-of Issue content, so remote test evidence cannot choose packages or commands.
-It passes the repository and checked-out commit, the Issue number, title and
-body, and these optional Hermes fields:
+Hermes creates or updates a failure Issue, then posts one fixed
+`hermes-failure/v1` JSON comment containing the exact commit it tested. It reads
+the comment back before applying `codex-fix`. GitHub accepts that label only when
+the labeler exactly matches `HERMES_GITHUB_BOT_USER` and
+`CODEX_EXECUTION_MODE` is `local-worker`.
 
-- `Commit:`
-- `Build:` or `Package Version:`
-- `Machine:` or `Test Machine:`
-- `Test:` or `Failed Test:`
-- `Expected:` or `Expected Result:`
-- `Actual:` or `Actual Result:`
-- `Failure Stage:`, `Failure:`, `Error:`, or `Failure Information:`
-- `Artifacts:`, `Logs:`, or `Log Paths:`
+The queue workflow turns the Issue into a `codex-local-request/v1` JSON payload
+inside a comment authored by `github-actions[bot]`. Its base SHA comes only from
+the latest valid failure payload authored by the configured Hermes account. The
+whole payload is fingerprinted, so reapplying the label to unchanged evidence
+does not create another request. A failed PR retest names that PR's exact head
+SHA, preserving the previous repair in the next iteration.
 
-The same Issue receives a comment with `Codex Analysis`, `Root Cause`,
-`Changes`, `Local Test Result`, `Next Action`, and `Draft PR`. Codex marks a
-result `Fix Ready` only when the evidence supports a narrow repair, its local
-tests pass, and it can provide a complete unified diff. The delivery job then
-validates that diff and opens a Draft PR. A result without sufficient evidence,
-a passing local test, or a valid restricted diff produces analysis only.
+The local worker accepts only that schema and author. Issue title and body stay
+untrusted evidence. They never supply shell commands, test commands, branches,
+paths or Codex instructions. Before `codex exec` starts, the worker removes
+`GH_TOKEN`, `GITHUB_TOKEN`, `AEP_GITHUB_TOKEN` and `OPENAI_API_KEY` from its
+environment. Codex runs with `workspace-write`; it cannot deliver GitHub changes.
 
-Neither workflow merges to `main`. Once Hermes reports a passing retest and CI
-is green, the PR becomes ready for review and the configured reviewer is
-notified. The reviewer decides whether to merge; code review and routine PR
-administration are not additional manual gates.
+After Codex exits, deterministic worker code checks the changed-path allowlist,
+runs the repository's fixed pytest/lint/type-check baseline, commits and pushes a
+branch, and opens a Draft PR. The local repair allowlist is `src/`, `tests/`,
+`docs/`, and `HANDOFF.md`. Workflow, secret, hook and dependency changes require
+a normal human-authored PR.
 
-Remote artifacts are not downloaded automatically. Put a bounded log excerpt
-in `Failure Information:` and provide repository paths or artifact links under
-`Artifacts:`. Codex can inspect a path already present in the checkout. A link
-is reported as evidence for the human and Hermes follow-up because the Codex
-workspace has no network access.
+The handoff workflow accepts only a same-repository Draft PR from
+`CODEX_LOCAL_WORKER_USER`, with the worker marker and branch prefix. It writes a
+bot-authored `hermes-next-action/v1` payload containing the exact PR head SHA and
+adds `hermes-retest-requested`. Hermes must execute its fixed profile, never PR or
+Issue prose. A passing Hermes result asks the human reviewer to merge; it never
+merges by itself.
 
-## Automatic Draft PR delivery
+## One-time GitHub configuration
 
-Codex runs in the analysis job without GitHub write permission or a persisted
-checkout credential. It may edit and test its temporary workspace, but it can
-only send a structured result and a bounded unified diff to the next job.
+After this implementation is merged, create these repository variables:
 
-The separate delivery job receives GitHub `contents: write` and
-`pull-requests: write` permissions. It does **not** execute the proposed code,
-tests, or any command from the Issue or Codex output. It accepts a patch only
-when all of these checks pass:
+| Variable | Value |
+|---|---|
+| `CODEX_EXECUTION_MODE` | `local-worker` |
+| `CODEX_LOCAL_WORKER_USER` | GitHub login used by this development computer, currently `dragon0816` |
+| `HERMES_GITHUB_BOT_USER` | exact Hermes GitHub bot login |
+| `HERMES_MERGE_REVIEWER` | GitHub login that reviews the final PR |
 
-- Codex set `Fix Ready` to `true`.
-- The patch is at most 60,000 characters with one to twelve standard Git diff
-  headers.
-- Every changed path is unchanged in name and lies under `src/`, `tests/`, or
-  `docs/`; binary changes, deletions, renames, workflow/configuration changes,
-  and path traversal are rejected.
-- `git apply --check` and `git diff --check` pass without running the patched
-  code.
+The workflows create the five `codex-local-*` labels when first used. Keep
+`OPENAI_API_KEY` temporarily while the local path is tested, then delete that
+repository secret after one dummy request reaches a Draft PR and Hermes receives
+its exact-SHA request.
 
-The job creates a uniquely named `codex/remote-test-issue-...` branch, commits
-the validated diff without repository hooks, and opens a GitHub Draft PR. It
-does not approve, bypass branch protection, or merge it. If delivery fails, the
-Issue comment records that no Draft PR was created and the workflow run is the
-evidence for a human to inspect.
+## One-time development-computer setup
 
-## Hermes Next Action
+Use Python 3.12. Install the repository and development dependencies, authenticate
+Codex with the ChatGPT account, and create the ignored credential file:
 
-The Codex result has a machine-readable next action, identified by an HTML
-comment containing JSON with `schema: "hermes-next-action/v1"`. Hermes polls
-open Issues and PRs through the GitHub API, accepts only comments authored by
-`github-actions[bot]`, and records each payload `id` so it never repeats work.
-It must treat `requested_evidence` as diagnostic data, never a command.
-
-When Codex needs remote evidence, it sets `hermes_next_action` to
-`collect_evidence`. The workflow adds `hermes-evidence-requested` to the source
-Issue and places the payload under its `Hermes Next Action` section. Hermes
-collects only the named sanitized evidence, updates that same Issue, removes
-and reapplies `codex-fix`, and does not execute text copied from the Issue.
-
-When a validated Draft PR is created, the workflow adds
-`hermes-retest-requested` to that PR and writes a payload containing the source
-Issue, exact PR number and head SHA, and required `verify` check. Hermes
-rebuilds that exact SHA, runs its predefined test profile and acceptance
-criteria, then either adds `hermes-retest-passed` or updates/creates the next
-failure Issue and applies `codex-fix`. Hermes never approves or merges a PR.
-
-The workflow creates these two trusted queue labels if they do not already
-exist. Their presence alone is not authorization for Hermes: it must validate
-the bot-authored JSON payload and its repository, source Issue, branch and SHA.
-
-## Hermes retest notification
-
-`.github/workflows/hermes-retest-ready-for-merge.yml` listens only when the
-exact `hermes-retest-passed` label is newly applied to a PR. It accepts the
-event only when all of these are true:
-
-- the labeler is exactly `HERMES_GITHUB_BOT_USER`;
-- the PR is from this repository, targets `main`, and its branch begins
-  `codex/remote-test-issue-`;
-- the configured `verify` check succeeded on that exact head commit; and
-- `HERMES_MERGE_REVIEWER` names the GitHub user to notify.
-
-When those gates pass, the workflow marks the Draft PR ready for review,
-requests review from `HERMES_MERGE_REVIEWER`, and comments with the Hermes and
-CI evidence. It never calls GitHub's merge API. If a check is not green, it
-comments with the reason and fails; Hermes removes and reapplies the label only
-after the exact commit is green.
-
-## Security boundary
-
-GitHub Issue content is untrusted. The workflow reads it through the GitHub
-event object, removes control characters, applies size limits, serializes it as
-JSON, and marks it as evidence rather than instructions. It is never inserted
-into a shell command.
-
-The Codex job follows the official action's secure edit configuration:
-
-- `permission-profile: ":workspace"` permits repository workspace edits while
-  denying network access;
-- `safety-strategy: drop-sudo` removes elevated access before Codex starts;
-- checkout uses `persist-credentials: false`;
-- a fixed pre-Codex step installs only the repository's declared test
-  dependencies using Python 3.12; it does not use any Issue-provided command
-  or package name;
-- the job has only `contents: read` and `issues: read` GitHub permissions;
-- Codex is the last step in its job;
-- the isolated delivery job has `contents: write` and `pull-requests: write`,
-  but no `OPENAI_API_KEY`, no Codex workspace, and never executes patch code;
-- a final separate job with only `issues: write` posts the structured result
-  and has neither the API key nor the Codex workspace.
-
-The retest notification workflow uses no checkout and no OpenAI key. It has
-only `checks: read`, `issues: write`, and `pull-requests: write`: enough to
-read the exact verification result, mark an eligible Draft PR ready, request
-one configured reviewer, and comment. It has no `contents: write` permission
-and contains no merge call.
-
-By default, `openai/codex-action` accepts a trigger only from a user with write
-access to the repository. Do not configure `allow-users: "*"` or permit every
-bot. If Hermes labels Issues through a GitHub App bot whose repository access
-cannot be established by the action, set the optional repository variable
-`HERMES_GITHUB_BOT_USER` to that one exact bot login, for example
-`hermes-testing[bot]`. The workflow passes only that exact value to
-`allow-bot-users`.
-
-Configure Hermes so it creates or updates the complete Issue first and applies
-`codex-fix` last. After it has rebuilt and retested a specific repair PR,
-Hermes applies `hermes-retest-passed` to that PR last. Grant its service account
-only the repository access needed to manage those Issues and labels. Branch
-protection and the named human reviewer remain responsible for merge
-authorization.
-
-## GitHub configuration
-
-1. In **Settings -> Secrets and variables -> Actions -> Secrets**, create the
-   repository secret `OPENAI_API_KEY`. Never put the key in an Issue, variable,
-   workflow input, artifact, or source file.
-2. Create the repository labels `codex-fix` and `hermes-retest-passed`.
-   `hermes-evidence-requested` and `hermes-retest-requested` are created by
-   the trusted workflow on first use.
-3. Ensure the human or Hermes service account that applies the label has write
-   access to the repository. Set repository variable `HERMES_GITHUB_BOT_USER`
-   to its one exact GitHub App bot login and `HERMES_MERGE_REVIEWER` to your
-   GitHub username. The retest notification job deliberately does nothing when
-   either variable is absent.
-4. Keep GitHub Actions enabled and set **Settings -> Actions -> General ->
-   Workflow permissions** to **Read and write permissions**, so the isolated
-   delivery job can create a branch and Draft PR. Keep branch protection and
-   required human review enabled for `main`.
-
-## Hermes Issue format
-
-Hermes may use `.github/ISSUE_TEMPLATE/hermes-remote-test-failure.md` or send
-the equivalent GitHub Issues API payload. Apply the label after the final body
-has been written.
-
-```json
-{
-  "title": "[Test Failure] wifi8_tx_verify timed out",
-  "body": "[Test Failure]\n\nCommit: abc123\n\nBuild: 2.0.31\n\nMachine: RF-LAB-PC-02\n\nTest: wifi8_tx_verify\n\nExpected:\nTX_START_OK\n\nActual:\nTimeout after 10 seconds\n\nFailure Stage:\nDUT_CONTROL\n\nFailure Information:\nDriver stopped responding after TX start.\n\nReproducible:\ntrue\n\nArtifacts:\n- test_result.json\n- dut.log\n- instrument.log",
-  "labels": ["codex-fix"]
-}
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,office]"
+codex login
+codex login status
+Copy-Item .env\example.yaml .env\local.yaml
+notepad .env\local.yaml
 ```
 
-The corresponding human-readable body is:
+Put the development computer's fine-grained GitHub token in `GH_TOKEN`. Limit it
+to this repository with Metadata read, Contents read/write, Issues read/write and
+Pull requests read/write. Do not put the ChatGPT login or a live OpenAI API key in
+the YAML file. The runner configures Git to use GitHub CLI's credential helper;
+the token remains in the outer deterministic process and is removed from the
+Codex subprocess environment.
+
+Test one poll in the foreground:
+
+```powershell
+.\scripts\run-local-codex-worker.ps1 -Once
+```
+
+When that succeeds, install the per-user worker at logon:
+
+```powershell
+.\scripts\install-local-codex-worker-task.ps1
+Get-ScheduledTask -TaskName "AEP Local Codex Worker"
+```
+
+The task runs one resident process which polls every 60 seconds. Durable request
+state and temporary worktrees are under
+`%LOCALAPPDATA%\AgenticEngineeringPlatform\codex-worker`. A failed workspace is
+kept for diagnosis; a successfully delivered workspace is removed.
+
+## Hermes failure payload
+
+The Issue body remains human-readable:
 
 ```text
 [Test Failure]
@@ -236,36 +138,39 @@ Artifacts:
 - instrument.log
 ```
 
-Never include API keys, access tokens, passwords, private keys, or other secret
-values in the Issue or its artifacts.
+Before adding `codex-fix`, the configured Hermes account must add and read back
+this machine-readable comment. All fields are required; `target_sha` is the exact
+commit installed and tested, and `failure_fingerprint` is Hermes' SHA-256 digest
+of the normalized failure evidence.
 
-## Test with a dummy Issue
+```text
+## Hermes Failure Evidence
 
-1. Complete the GitHub configuration above on the default branch.
-2. Open a new Issue with the template. Use a harmless failed test name and a
-   body that points to an existing unit test or intentionally describes an
-   evidence-insufficient remote failure.
-3. Create the Issue without `codex-fix`, then add `codex-fix` from a
-   write-authorized account. Adding it last proves that ordinary Issue creation
-   and edits do not trigger Codex.
-4. Open **Actions -> Codex remote test failure analysis** and inspect the run.
-5. Confirm the same Issue receives one comment containing `Codex Analysis`,
-   `Root Cause`, `Changes`, `Local Test Result`, `Next Action`, and `Draft PR`.
-6. For insufficient evidence, confirm no branch or Draft PR is created. For a
-   focused failure whose repair passes local tests and produces a restricted
-   complete diff, confirm one Draft PR is created. Let CI build it and Hermes
-   retest it.
-7. After CI and Hermes both pass, have the configured Hermes bot add
-   `hermes-retest-passed` to that PR. Confirm the PR becomes ready for review,
-   receives a review request and a passing-retest comment, then make the human
-   merge decision. Never merge it automatically.
+<!-- {"schema":"hermes-failure/v1","producer":"hermes-testing-agent","request_id":"hermes-rf-lab-20260929-001","repository":"dragon0816/agentic-engineering-platform","source_issue":130,"target_sha":"0123456789abcdef0123456789abcdef01234567","build":"2.0.31","machine":"RF-LAB-PC-02","bridge":"bridge-tp401555","actor":"leo.chi","profile":"aep-company-agent-integration-v1","test":"wifi8_tx_verify","stage":"DUT_CONTROL","expected":"TX_START_OK","actual":"Timeout after 10 seconds","failure_code":"DUT_TIMEOUT","failure_fingerprint":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","artifacts":["test_result.json","dut.log","instrument.log"],"reproducible":true} -->
+```
 
-To rerun after adding evidence, remove `codex-fix`, update the Issue, and apply
-the label again. Updating an Issue while the label is already present does not
-emit another matching `labeled` event.
+Never include access tokens, passwords, private keys, private file contents or
+other secret values in Issues, comments or artifacts.
 
-## References
+## Reproducible dummy test
 
-- [Official Codex Action README](https://github.com/openai/codex-action/blob/main/README.md)
-- [Official Codex Action security guidance](https://github.com/openai/codex-action/blob/main/docs/security.md)
-- [Codex permissions and sandboxing](https://learn.chatgpt.com/docs/permissions)
+1. Confirm the repository variables are set and the scheduled task is running.
+2. Create a harmless failure Issue from the Hermes template without `codex-fix`.
+3. Have the configured Hermes bot post/read back `hermes-failure/v1`, then add
+   `codex-fix` last.
+4. Confirm Actions posts one `Codex Local Request` comment and adds
+   `codex-local-queued`.
+5. Within about 60 seconds, confirm the worker changes the label to
+   `codex-local-running`.
+6. For sufficient evidence, confirm a `codex/remote-test-issue-*` Draft PR is
+   opened and CI starts. If Codex names specific missing evidence, confirm GitHub
+   posts a bot-authored `collect_evidence` request for Hermes. A failure that
+   cannot be resolved by bounded evidence stops with `codex-local-failed`.
+7. Confirm the Draft PR receives a bot-authored `Hermes Next Action` JSON comment
+   with its exact head SHA and `hermes-retest-requested`.
+8. Hermes retests that SHA. A pass notifies the configured reviewer, who decides
+   whether to merge.
+
+Editing an Issue does not trigger Codex. To submit changed evidence, Hermes posts
+a new payload with the exact SHA it tested, removes `codex-fix`, then reapplies
+it; the changed fingerprint becomes one new request.

@@ -809,6 +809,25 @@ Architecture, phase specifications, stable contracts, tests, repository Skills, 
 
 A coding-agent handoff is complete only when repository state is reproducible, verification status is explicit and the next action is recorded. Conversation memory is never required to resume development.
 
+Remote test repair uses the same boundary. GitHub is the durable control-plane
+queue and audit record; a trusted development computer runs a local coding worker;
+Hermes performs fixed-profile validation near the real resources. A GitHub-hosted
+runner never receives a developer's ChatGPT session, and Issue prose never becomes
+an executable command.
+
+```text
+Hermes evidence -> GitHub typed request -> local Codex workspace
+       ^                                      |
+       |                                      v
+exact-SHA retest <- GitHub typed handoff <- Draft PR + CI
+```
+
+The local worker separates reasoning from delivery: Codex may edit only its
+sandboxed worktree and receives no GitHub/service token; deterministic wrapper
+code validates paths and tests before it commits, pushes or opens a Draft PR.
+Human review remains the merge authority. The detailed contracts and operational
+setup live in `docs/remote-testing-codex-loop.md`.
+
 ## 9. Migration strategy
 
 Phase 0: architecture, contracts, migration inventory, including multi-agent extension points.
