@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -205,9 +206,30 @@ def sanitized_codex_environment(source: Mapping[str, str]) -> dict[str, str]:
     return {key: value for key, value in source.items() if key.upper() not in SECRET_ENV_NAMES}
 
 
-def codex_command(workspace: Path, schema_path: Path, output_path: Path) -> list[str]:
+def resolve_codex_executable() -> str:
+    """Resolve an executable that ``subprocess`` can launch without a shell.
+
+    PowerShell may resolve the extensionless npm shim or ``codex.ps1`` even
+    though ``CreateProcess`` cannot.  Prefer the native executable, then the
+    Windows command shim, before accepting the generic name.
+    """
+
+    for candidate in ("codex.exe", "codex.cmd", "codex"):
+        resolved = shutil.which(candidate)
+        if resolved is not None:
+            return resolved
+    raise FileNotFoundError("Codex CLI executable is not available to the local worker")
+
+
+def codex_command(
+    workspace: Path,
+    schema_path: Path,
+    output_path: Path,
+    *,
+    executable: str = "codex",
+) -> list[str]:
     return [
-        "codex",
+        executable,
         "exec",
         "--ephemeral",
         "--sandbox",
@@ -259,6 +281,14 @@ def result_schema() -> dict[str, Any]:
 
 class CommandFailure(RuntimeError):
     pass
+
+
+def load_codex_result(path: Path) -> CodexLocalResult:
+    """Require the structured result promised by a successful Codex process."""
+
+    if not path.is_file():
+        raise CommandFailure("Codex exited without writing its structured result")
+    return CodexLocalResult.model_validate_json(path.read_text(encoding="utf-8"))
 
 
 class EvidenceRequired(RuntimeError):
@@ -447,7 +477,12 @@ class LocalCodexWorker:
         handled = 0
         for issue in self.github.queued_issues():
             request = self._request_for_issue(issue)
-            if request is None or request.request_id in state:
+            if request is None:
+                continue
+            # A failed request is retried only when an operator explicitly
+            # re-adds ``codex-local-queued``.  Claiming it removes that label,
+            # so another failure remains terminal instead of polling forever.
+            if state.get(request.request_id) not in (None, "failed"):
                 continue
             state[request.request_id] = "running"
             self._save_state(state)
@@ -524,25 +559,38 @@ class LocalCodexWorker:
         workspace = self.worktree_root / request.request_id
         workspace.parent.mkdir(parents=True, exist_ok=True)
         if workspace.exists():
-            raise ValueError(f"worker workspace already exists: {workspace}")
-
-        self.runner.run(
-            ["git", "fetch", "origin", request.base_sha], cwd=self.repo_root, timeout=300
-        )
-        self.runner.run(
-            ["git", "worktree", "add", "--detach", str(workspace), request.base_sha],
-            cwd=self.repo_root,
-            timeout=300,
-        )
-        self.runner.run(["git", "switch", "-c", branch], cwd=workspace, timeout=120)
+            status = self.runner.run(
+                ["git", "status", "--porcelain", "--untracked-files=all"],
+                cwd=workspace,
+                timeout=120,
+            )
+            if status:
+                raise ValueError("failed worker workspace has repository changes")
+            head = self.runner.run(["git", "rev-parse", "HEAD"], cwd=workspace, timeout=120)
+            current_branch = self.runner.run(
+                ["git", "branch", "--show-current"], cwd=workspace, timeout=120
+            )
+            if head != request.base_sha or current_branch != branch:
+                raise ValueError("failed worker workspace does not match the queued request")
+        else:
+            self.runner.run(
+                ["git", "fetch", "origin", request.base_sha], cwd=self.repo_root, timeout=300
+            )
+            self.runner.run(
+                ["git", "worktree", "add", "--detach", str(workspace), request.base_sha],
+                cwd=self.repo_root,
+                timeout=300,
+            )
+            self.runner.run(["git", "switch", "-c", branch], cwd=workspace, timeout=120)
 
         control = workspace / ".scratch" / "codex-local-control"
         control.mkdir(parents=True, exist_ok=True)
         schema_path = control / "result-schema.json"
         output_path = control / "result.json"
+        output_path.unlink(missing_ok=True)
         schema_path.write_text(json.dumps(result_schema(), indent=2), encoding="utf-8")
         no_github_auth = control / "no-github-auth"
-        no_github_auth.mkdir()
+        no_github_auth.mkdir(exist_ok=True)
         empty_git_config = control / "empty.gitconfig"
         empty_git_config.write_text("", encoding="utf-8")
         codex_environment = sanitized_codex_environment(os.environ)
@@ -558,13 +606,18 @@ class LocalCodexWorker:
 
         try:
             self.runner.run(
-                codex_command(workspace, schema_path, output_path),
+                codex_command(
+                    workspace,
+                    schema_path,
+                    output_path,
+                    executable=resolve_codex_executable(),
+                ),
                 cwd=workspace,
                 env=codex_environment,
                 stdin=build_prompt(request),
                 timeout=3600,
             )
-            result = CodexLocalResult.model_validate_json(output_path.read_text(encoding="utf-8"))
+            result = load_codex_result(output_path)
             if not result.fix_ready:
                 if result.hermes_next_action == "collect_evidence":
                     evidence_required = True

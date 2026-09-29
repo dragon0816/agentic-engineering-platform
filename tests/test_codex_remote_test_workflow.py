@@ -10,12 +10,15 @@ from pydantic import ValidationError
 from development.codex_worker import (
     CodexLocalRequest,
     CodexLocalResult,
+    CommandFailure,
     EvidenceRequired,
     LocalCodexWorker,
     build_prompt,
     changed_paths_from_status,
     codex_command,
     extract_request,
+    load_codex_result,
+    resolve_codex_executable,
     result_schema,
     sanitized_codex_environment,
     validate_changed_paths,
@@ -182,6 +185,26 @@ def test_codex_subprocess_does_not_receive_service_credentials(tmp_path: Path) -
     assert "danger-full-access" not in command
 
 
+def test_codex_executable_prefers_a_native_or_command_entrypoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    looked_up: list[str] = []
+
+    def which(candidate: str) -> str | None:
+        looked_up.append(candidate)
+        return "C:/tools/codex.cmd" if candidate == "codex.cmd" else None
+
+    monkeypatch.setattr("development.codex_worker.shutil.which", which)
+
+    assert resolve_codex_executable() == "C:/tools/codex.cmd"
+    assert looked_up == ["codex.exe", "codex.cmd"]
+
+
+def test_missing_codex_result_is_an_explicit_worker_failure(tmp_path: Path) -> None:
+    with pytest.raises(CommandFailure, match="structured result"):
+        load_codex_result(tmp_path / "result.json")
+
+
 def test_delivery_path_allowlist_refuses_workflows_and_secrets() -> None:
     assert validate_changed_paths(("src/agent/routing.py", "tests/test_routing.py")) == (
         "src/agent/routing.py",
@@ -266,6 +289,59 @@ def test_worker_claims_and_completes_each_request_once(
     assert "Draft PR" in fake.messages[-1]
     assert json.loads((tmp_path / "state.json").read_text(encoding="utf-8")) == {
         str(payload["request_id"]): "completed"
+    }
+
+
+def test_readding_the_queue_label_retries_one_failed_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    payload = request_payload()
+    request_id = str(payload["request_id"])
+    (tmp_path / "state.json").write_text(json.dumps({request_id: "failed"}), encoding="utf-8")
+
+    class FakeGitHub:
+        labels: list[tuple[tuple[str, ...], tuple[str, ...]]] = []
+
+        def queued_issues(self) -> tuple[int, ...]:
+            return (113,)
+
+        def comments(self, issue: int) -> list[dict[str, Any]]:
+            return [
+                {
+                    "user": {"login": "github-actions[bot]"},
+                    "body": f"## Codex Local Request\n\n<!-- {json.dumps(payload)} -->",
+                }
+            ]
+
+        def edit_labels(
+            self, issue: int, *, add: tuple[str, ...] = (), remove: tuple[str, ...] = ()
+        ) -> None:
+            self.labels.append((add, remove))
+
+        def comment(self, issue: int, body: str) -> None:
+            pass
+
+    worker = LocalCodexWorker(
+        repository="dragon0816/agentic-engineering-platform",
+        repo_root=ROOT,
+        state_path=tmp_path / "state.json",
+        worktree_root=tmp_path / "worktrees",
+    )
+    fake = FakeGitHub()
+    cast(Any, worker).github = fake
+    monkeypatch.setattr(
+        worker,
+        "_execute",
+        lambda request: "https://github.com/dragon0816/agentic-engineering-platform/pull/999",
+    )
+
+    assert worker.poll_once() == 1
+    assert fake.labels[0] == (
+        ("codex-local-running",),
+        ("codex-local-queued", "codex-local-failed"),
+    )
+    assert json.loads((tmp_path / "state.json").read_text(encoding="utf-8")) == {
+        request_id: "completed"
     }
 
 
