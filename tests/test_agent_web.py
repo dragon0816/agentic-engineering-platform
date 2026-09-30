@@ -123,6 +123,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/ask", body={"message": "x"}).status == 401
     assert fetch(base(served) + "/api/platform/sync", body={}).status == 401
     assert fetch(base(served) + "/api/platform/sync", token="wrong", body={}).status == 401
+    assert fetch(base(served) + "/api/workflows/run", body={}).status == 401
 
 
 def test_the_token_in_the_address_does_not_open_the_api(served: AgentWebServer) -> None:
@@ -170,6 +171,7 @@ def test_it_lists_what_this_machine_has_without_naming_any_one_of_them(
     names = [workflow["name"] for workflow in assets["workflows"]]
     assert "read-local-file" in names
     assert all("steps" in workflow for workflow in assets["workflows"])
+    assert all("input_contract" in workflow for workflow in assets["workflows"])
     assert assets["runs"] == [], "nothing has run yet"
 
 
@@ -341,6 +343,17 @@ def test_page_only_synchronizes_after_the_explicit_button_action(
     assert "install-package" not in page
 
 
+def test_page_launches_exact_installed_workflows_and_shows_trace_identifiers(
+    served: AgentWebServer,
+) -> None:
+    page = served.page().decode("utf-8")
+    assert 'id="workflow-target"' in page
+    assert 'id="workflow-arguments"' in page
+    assert 'call("/api/workflows/run"' in page
+    assert "outcome.trace.trace_id" in page
+    assert "workflow.run.run_id" in page
+
+
 def test_asking_runs_the_real_agent_and_the_run_is_recorded(served: AgentWebServer) -> None:
     """The same Agent the command line reaches, on the same ingress. The run
     then shows up in the listing, which is how a person sees what happened."""
@@ -358,6 +371,65 @@ def test_asking_runs_the_real_agent_and_the_run_is_recorded(served: AgentWebServ
     assets = fetch(base(served) + "/api/assets", token=served.token).json()
     assert len(assets["runs"]) == 1
     assert assets["runs"][0]["status"] == "succeeded"
+
+
+def test_exact_workflow_launch_runs_through_the_agent_and_is_idempotent(
+    served: AgentWebServer,
+) -> None:
+    root = served.web.runtime.layout.workspace_root
+    request = {
+        "workflow": {
+            "namespace": "engineering",
+            "name": "read-local-file",
+            "version": "1.0.0",
+        },
+        "arguments": {"args": str(root / "notes.txt")},
+        "idempotency_key": "web-workflow-test-1",
+    }
+    first = fetch(base(served) + "/api/workflows/run", token=served.token, body=request).json()
+    assert first["ok"] is True
+    assert "succeeded" in first["answer"] and "first line" in first["answer"]
+    assert first["outcome"]["ingress"] == "local"
+    assert first["outcome"]["actor"] == "engineer"
+    assert first["outcome"]["workflow"]["run"]["trace"]["trace_id"].startswith("trace-")
+    run_id = first["outcome"]["workflow"]["run"]["run_id"]
+
+    second = fetch(base(served) + "/api/workflows/run", token=served.token, body=request).json()
+    assert second["outcome"]["workflow"]["run"]["run_id"] == run_id
+    assert len(served.web.runtime.state.runs()) == 1
+
+
+def test_workflow_launch_contract_cannot_claim_identity_or_hide_a_secret(
+    served: AgentWebServer,
+) -> None:
+    endpoint = base(served) + "/api/workflows/run"
+    identity = {
+        "namespace": "engineering",
+        "name": "read-local-file",
+        "version": "1.0.0",
+    }
+    claimed = fetch(
+        endpoint,
+        token=served.token,
+        body={
+            "workflow": identity,
+            "arguments": {},
+            "idempotency_key": "web-claim-1",
+            "actor": "somebody-else",
+        },
+    )
+    assert claimed.status == 400
+    secret = fetch(
+        endpoint,
+        token=served.token,
+        body={
+            "workflow": identity,
+            "arguments": {"api_key": "not-a-real-key"},
+            "idempotency_key": "web-secret-1",
+        },
+    )
+    assert secret.status == 400
+    assert served.web.runtime.state.runs() == ()
 
 
 def test_an_empty_or_shapeless_request_is_refused_before_the_agent(

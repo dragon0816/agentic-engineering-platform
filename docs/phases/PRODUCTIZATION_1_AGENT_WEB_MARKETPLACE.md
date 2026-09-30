@@ -189,3 +189,17 @@ contracts. Extension installation remains outside this productization slice.
 - the loopback, Host-header and per-process bearer guards apply to the action;
 - focused real-socket integration tests and the Windows/Python 3.12 verification
   baseline pass.
+
+## Exit evidence for slice 4
+
+- Personal Agent Web lists every installed Workflow by exact scoped identity
+  and shows its declared input-contract name without workflow-specific UI code;
+- one JSON object is submitted through a closed request that cannot claim the
+  actor, Bridge, authorization, route or model;
+- the resident Agent performs local membership admission, then the existing
+  Gateway exact-target, Workflow engine and Bridge policy path executes it;
+- retries carrying the same idempotency key join the same run;
+- success, refusal and Workflow failure are shown with run, trace and request
+  identifiers and the durable recent-run projection is refreshed;
+- real-socket tests prove execution and authorization boundaries; the Windows
+  Python 3.12 verification baseline passes.

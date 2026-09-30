@@ -49,7 +49,7 @@ from urllib.parse import parse_qs, urlparse
 from agent.skills import SkillManifest
 from common.assets import WorkflowManifest
 from common.execution import Failure, TraceIdentifiers
-from common.local_agent import LocalAgentRequest
+from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from host_runtime.answers import readable
 from host_runtime.contracts import (
     PlatformCatalogProjection,
@@ -57,6 +57,7 @@ from host_runtime.contracts import (
     PlatformProjection,
     PlatformSyncRequest,
     PlatformSyncResult,
+    WorkflowLaunchRequest,
 )
 from host_runtime.host import HostRuntime
 from host_runtime.workspace import documents
@@ -145,6 +146,8 @@ class AgentWeb:
                 "description": item.description,
                 "steps": len(item.steps),
                 "capabilities": list(item.dependencies.local_capabilities),
+                "input_contract": item.input_contract,
+                "output_contract": item.output_contract,
             }
             for item in manifests(layout.workflows, WorkflowManifest)
         ]
@@ -328,6 +331,33 @@ class AgentWeb:
             "outcome": json.loads(outcome.model_dump_json()),
         }
 
+    def launch_workflow(self, request: WorkflowLaunchRequest) -> dict[str, Any]:
+        """Run one exact installed Workflow through the resident Agent."""
+        item = WorkflowLaunchRequest.model_validate(request)
+        device = self.runtime.config.device
+        local = LocalWorkflowRequest(
+            actor=self.runtime.actor,
+            bridge_id=device.bridge_id,
+            workflow=item.workflow,
+            arguments=item.arguments,
+            idempotency_key=item.idempotency_key,
+            trace=_trace(),
+        )
+        import asyncio
+
+        with self._one_at_a_time:
+            outcome = asyncio.run(self.runtime.agent.execute_workflow(local))
+        succeeded = (
+            outcome.refusal is None
+            and outcome.workflow is not None
+            and outcome.workflow.run.status == "succeeded"
+        )
+        return {
+            "ok": succeeded,
+            "answer": readable(outcome),
+            "outcome": json.loads(outcome.model_dump_json()),
+        }
+
 
 class _Handler(BaseHTTPRequestHandler):
     server: "AgentWebServer"  # noqa: UP037 - the class is defined below
@@ -406,7 +436,7 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(401, {"error": "this request carried no usable token"})
             return
         path = urlparse(self.path).path
-        if path not in ("/api/ask", "/api/platform/sync"):
+        if path not in ("/api/ask", "/api/platform/sync", "/api/workflows/run"):
             self._json(404, {"error": "no such page"})
             return
         try:
@@ -437,6 +467,20 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(
                     500,
                     {"error": f"synchronization did not finish: {type(failure).__name__}"},
+                )
+            return
+        if path == "/api/workflows/run":
+            try:
+                launch = WorkflowLaunchRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid Workflow launch"})
+                return
+            try:
+                self._json(200, self.server.web.launch_workflow(launch))
+            except Exception as failure:  # noqa: BLE001 - a page shows everything
+                self._json(
+                    500,
+                    {"error": f"the Workflow did not finish: {type(failure).__name__}"},
                 )
             return
         try:

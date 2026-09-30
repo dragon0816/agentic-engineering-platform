@@ -190,10 +190,10 @@ Workflow launch, grounded Knowledge asking and finally durable Registry
 storage. Each step keeps publication, selection, installation and execution
 authorization separate.
 
-Slices 1 through 2c are complete. Slice 3 adapts the existing verified,
-all-or-nothing Bridge synchronization into one explicit Personal Agent Web
-action with typed before/after state; its implementation is in review. Generic
-Workflow launch remains the next slice after that action merges. See
+Slices 1 through 3 are complete. Slice 4 adds generic exact Workflow launch
+from Personal Agent Web through the existing Agent/Gateway/Workflow/Bridge
+path; its implementation is in review. Grounded Knowledge asking remains the
+next slice after that action merges. See
 `docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
 
 ## First implementation slice after Phase 0
