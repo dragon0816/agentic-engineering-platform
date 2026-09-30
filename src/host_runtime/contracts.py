@@ -10,6 +10,7 @@ from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
+from common.execution import Failure
 from dut.adapters import PhysicalDriverConfiguration
 from dut.contracts import DutTarget, InstrumentTarget
 from integrations.github_project import GitHubProjectConnection
@@ -87,6 +88,75 @@ class PlatformBinding(Contract):
                     raise ValueError("a member portal beyond loopback is reached over https")
                 raise ValueError("a platform beyond loopback is reached over https")
         reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+PlatformReachability = Literal["answered", "unreachable", "withdrawn", "rejected", "refused"]
+
+
+class PlatformCatalogProjection(Contract):
+    """One published package as shown by the local Personal Agent Web.
+
+    These are display facts only. In particular, none of the three booleans
+    is an execution permission.
+    """
+
+    kind: Symbol
+    namespace: Slug
+    name: Symbol
+    version: Text
+    description: str = ""
+    owner: Text
+    visibility: Symbol
+    lifecycle: Symbol
+    dependencies: tuple[Text, ...] = ()
+    runtime: str = ""
+    platforms: tuple[Symbol, ...] = ()
+    published: StrictBool
+    authorized: StrictBool
+    installed: StrictBool
+
+
+class PlatformDecisionProjection(Contract):
+    """One active device selection synchronized to the local Bridge."""
+
+    kind: Symbol
+    namespace: Slug
+    name: Symbol
+    version: Text
+    actor: Symbol
+    installed: StrictBool
+
+
+class PlatformProjection(Contract):
+    """Shared catalog state and the separate facts held on this Bridge."""
+
+    configured: StrictBool
+    member_portal_url: str = ""
+    connection: PlatformReachability | None = None
+    note: Text
+    catalog: tuple[PlatformCatalogProjection, ...] = ()
+    decisions: tuple[PlatformDecisionProjection, ...] = ()
+
+
+class PlatformSyncRequest(Contract):
+    """An explicit user action. It intentionally accepts no instruction."""
+
+
+class PlatformSyncResult(Contract):
+    """What the existing all-or-nothing sync did and what the UI observed."""
+
+    status: PlatformReachability
+    failure: Failure | None = None
+    installed: tuple[AssetIdentity, ...] = ()
+    selections: int | None = Field(default=None, ge=0, strict=True)
+    before: PlatformProjection
+    after: PlatformProjection
+
+    @model_validator(mode="after")
+    def typed_failure(self) -> Self:
+        if (self.status == "answered") != (self.failure is None):
+            raise ValueError("only an answered synchronization omits failure details")
         return self
 
 
