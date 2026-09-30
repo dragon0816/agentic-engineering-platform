@@ -306,8 +306,35 @@ session. The member request names only the bound Bridge and exact Workflow;
 the platform supplies the actor and decision time and resolves membership,
 entitlement and package state from its own records. A Bridge access token is
 rejected at this boundary. The selection page is a projection of this service
-and owns no authorization rule. A production invitation sign-in adapter is a
-deployment concern and is not fabricated by the in-memory reference.
+and owns no authorization rule.
+
+The invitation-only sign-in adapter keeps its bearer proof separate from the
+secret-free `Invitation` metadata. The platform stores only the proof
+fingerprint, an unknown proof and a wrong proof are indistinguishable, and a
+proof can be redeemed once. Redemption accepts the named invitation and
+creates the same short-lived direct-member session used by the selection
+entry point. It creates no Bridge binding, asset selection, installation or
+execution grant. The invitation link carries its proof in a URL fragment so
+the browser does not send it while loading the page; the page removes the
+fragment immediately and keeps the resulting member session in memory only.
+
+The shared catalog may present several product categories through one Web
+shell, but their runtime and installation boundaries remain distinct:
+
+- **Agent Add-ons** assemble governed Skills, Workflows, Knowledge and Agent
+  profiles for the Personal Agent. Executable local operations still resolve
+  to installed Bridge capabilities.
+- **Bridge Extensions** add typed local capabilities behind Bridge policy and
+  run through an extension lifecycle and execution boundary. They are not
+  standalone Applications.
+- **Applications** are independent software products with their own process,
+  service, UI, deployment and update lifecycle. The catalog may present an
+  existing governed `Software` asset as an App and advertise its API, MCP or
+  Workflow integration, but the Application is not loaded into the Agent or
+  Bridge.
+
+Discovery and governance metadata may be shared. Package format, installer,
+activation, health and rollback contracts are specific to each category.
 
 ### Company Bridge deployment integration proof
 

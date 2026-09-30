@@ -190,10 +190,10 @@ Workflow launch, grounded Knowledge asking and finally durable Registry
 storage. Each step keeps publication, selection, installation and execution
 authorization separate.
 
-Slice 1 is complete. Slice 2a adds a provider-neutral direct-member session,
-selection service, real HTTP boundary and generic Workflow selection page. A
-production invitation sign-in adapter remains slice 2b; the Bridge credential
-is never reused as browser authentication. See
+Slices 1 and 2a are complete. Slice 2b adds the invitation-only sign-in adapter:
+a separate one-time proof accepts the secret-free invitation and creates the
+existing short-lived member session without reusing the Bridge credential.
+Explicit synchronization remains the next slice. See
 `docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
 
 ## First implementation slice after Phase 0

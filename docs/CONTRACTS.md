@@ -1637,6 +1637,34 @@ HTTP is restricted to loopback; a network-exposed member portal requires TLS.
 No production sign-in provider or durable session store is supplied by this
 reference slice.
 
+## Invitation member sign-in (Productization 1, slice 2b)
+
+`InvitationProofGrant` is the secret-free platform record for the out-of-band
+proof associated with one pending `Invitation`: invitation id, named actor,
+SHA-256 fingerprint, issue/expiry time and `active`, `redeemed` or `revoked`
+state. The invitation remains ordinary membership metadata and gains no secret
+field. `IssuedInvitationProof` is deliberately not a serializable contract;
+its repr redacts the one generated secret.
+
+`InMemoryInvitationSignIn.invite` is the trusted invitation-issuer adapter. It
+validates the high-entropy proof and expiry before asking the existing
+enrollment registry to issue the metadata, so an invalid proof leaves no
+invitation behind. `accept` checks an unknown id against a non-matching
+fingerprint and returns the same `authentication_failed` as a wrong proof. A
+matched proof may report that it expired, was revoked or was already used.
+Successful redemption accepts the invitation as its named actor, marks the
+proof used and gives a direct `invitation-proof` identity to
+`InMemoryMemberSessions`; the member session cannot outlive the proof.
+
+`POST /v1/member/sign-in` accepts the proof only in the `Invitation`
+authorization scheme and requires an empty body, so a request cannot claim an
+actor, membership, Bridge, policy or permission. Success returns the opaque
+short-lived member bearer under `Cache-Control: no-store`. The invitation link
+puts the proof in the URL fragment; the page removes that fragment before
+redemption, retains the returned member bearer in memory and uses the existing
+catalog/select/revoke endpoints. The Bridge bearer scheme is rejected. Sign-in
+creates no Bridge binding, device selection, installation or execution grant.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
