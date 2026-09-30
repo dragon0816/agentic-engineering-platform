@@ -34,8 +34,8 @@ installation and execution authorization separate.
 
 - The implementation is committed as `233940e`, pushed and open for review in
   PR #142: https://github.com/dragon0816/agentic-engineering-platform/pull/142
-- Local verification is green. GitHub Platform verification and human
-  review/merge remain.
+- Local verification and GitHub Platform verification are green. Human
+  review/merge remains.
 
 ## Remaining
 
@@ -96,6 +96,10 @@ agentic_engineering_platform-0.1.0-py3-none-any.whl
 
 .venv\Scripts\python.exe -m pip check
 No broken requirements found.
+
+GitHub Platform verification run 36732055855
+PASS in 3m55s, including pytest, Ruff, Mypy, build, pip check, Windows offline
+preview install and artifact upload.
 ```
 
 The four full-suite skips are existing environment conditions: symlink/link
@@ -112,6 +116,10 @@ privileges, IPv6 loopback and directory links. No Ubuntu run was performed.
 - The previous Telegram/Hermes coordination handoff was stale after PR #140
   merged. This handoff replaces it; live coordination behavior was not changed
   here.
+- GitHub warns that the current `actions/checkout@v4`, `setup-python@v5` and
+  `upload-artifact@v4` actions target deprecated Node.js 20. GitHub currently
+  forces Node.js 24 and the run passes; dependency upgrades are a separate CI
+  maintenance change.
 
 ## Next Recommended Action
 
