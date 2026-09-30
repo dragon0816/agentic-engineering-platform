@@ -12,13 +12,16 @@ from typing import Any, Self
 from pydantic import ValidationError
 
 from common.base import Contract
+from common.identity import IssuedInvitationProof
 from common.member import MemberCatalogRequest, MemberRevokeRequest, MemberSelectRequest
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
 from control_plane.member_page import PAGE
+from control_plane.member_signin import InMemoryInvitationSignIn, InvitationSignInError
 
 API_PREFIX = "/v1/member/"
 MAX_BODY_BYTES = 256 * 1024
 BEARER = "Bearer "
+INVITATION = "Invitation "
 
 STATUS_FOR = {
     "authentication_failed": 401,
@@ -34,6 +37,9 @@ STATUS_FOR = {
     "selection_missing": 404,
     "decision_in_future": 400,
     "invalid_request": 400,
+    "invitation_expired": 401,
+    "invitation_used": 409,
+    "invitation_revoked": 401,
 }
 
 
@@ -44,6 +50,15 @@ def _credential(header: str | None) -> tuple[str, str] | None:
     if not separator or not session_id or not secret:
         return None
     return session_id, secret
+
+
+def _invitation_credential(header: str | None) -> tuple[str, str] | None:
+    if header is None or not header.startswith(INVITATION):
+        return None
+    invitation_id, separator, secret = header[len(INVITATION) :].strip().partition(":")
+    if not separator or not invitation_id or not secret:
+        return None
+    return invitation_id, secret
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -79,8 +94,11 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         operation = self.path.removeprefix(API_PREFIX) if self.path.startswith(API_PREFIX) else ""
-        if operation not in ("catalog", "select", "revoke"):
+        if operation not in ("sign-in", "catalog", "select", "revoke"):
             self._json(404, {"code": "invalid_request"})
+            return
+        if operation == "sign-in":
+            self._sign_in()
             return
         credential = _credential(self.headers.get("Authorization"))
         if credential is None:
@@ -123,6 +141,35 @@ class _Handler(BaseHTTPRequestHandler):
             return
         self._send(200, reply.model_dump_json().encode("utf-8"))
 
+    def _sign_in(self) -> None:
+        credential = _invitation_credential(self.headers.get("Authorization"))
+        if credential is None or self.server.sign_in is None:
+            self._json(401, {"code": "authentication_failed"})
+            return
+        if self.headers.get("Transfer-Encoding"):
+            self._json(400, {"code": "invalid_request"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            self._json(400, {"code": "invalid_request"})
+            return
+        if length != 0:
+            self._json(400, {"code": "invalid_request"})
+            return
+        try:
+            session = self.server.sign_in.accept(*credential)
+        except InvitationSignInError as error:
+            self._json(STATUS_FOR[error.code], {"code": error.code})
+            return
+        except Exception:  # noqa: BLE001 - no traceback crosses the sign-in boundary
+            self._json(500, {"code": "internal_error"})
+            return
+        self._json(
+            200,
+            {"session": session.bearer, "expires_at": session.grant.expires_at.isoformat()},
+        )
+
 
 class MemberPortalServer(ThreadingHTTPServer):
     daemon_threads = True
@@ -135,10 +182,12 @@ class MemberPortalServer(ThreadingHTTPServer):
         host: str = "127.0.0.1",
         port: int = 0,
         ssl_context: ssl.SSLContext | None = None,
+        sign_in: InMemoryInvitationSignIn | None = None,
     ) -> None:
         if ssl_context is None and host not in ("127.0.0.1", "localhost", "::1"):
             raise ValueError("a member portal exposed beyond loopback requires TLS")
         self.service = service
+        self.sign_in = sign_in
         super().__init__((host, port), _Handler)
         if ssl_context is not None:
             self.socket = ssl_context.wrap_socket(self.socket, server_side=True)
@@ -160,6 +209,10 @@ class MemberPortalServer(ThreadingHTTPServer):
         request, and the page immediately removes it from browser history.
         """
         return f"{self.base_url}/#session={session.bearer}"
+
+    def invitation_url(self, proof: IssuedInvitationProof) -> str:
+        """Out-of-band invitation link whose proof stays in the URL fragment."""
+        return f"{self.base_url}/#invitation={proof.bearer}"
 
     def start(self) -> Self:
         if self._thread is None:

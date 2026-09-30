@@ -62,8 +62,8 @@ state and fixture assets.
 2. **Member selection** — add a member-authenticated control-plane entry point
    and generic Workflow selection page for selecting/revoking a Workflow for a
    bound Bridge. Do not reuse the Bridge token as an interactive user session.
-   The provider-neutral session/HTTP proof is slice 2a; connecting a production
-   invitation sign-in adapter to session issuance is slice 2b.
+   The provider-neutral session/HTTP proof is slice 2a; connecting a one-time
+   invitation proof to invitation acceptance and session issuance is slice 2b.
 3. **Install/synchronize action** — expose the existing all-or-nothing sync as
    an explicit Web action, with before/after state and typed refusal.
 4. **Workflow launch form** — render declared inputs and submit through the
@@ -77,6 +77,15 @@ state and fixture assets.
 Skills and Knowledge use the same catalog contracts. The product may label
 `Software` assets as **Apps** in the user interface later; no overlapping core
 asset type is introduced.
+
+The user interface keeps three extension/product categories explicit. An
+**Agent Add-on** assembles governed Agent assets. A **Bridge Extension** adds
+typed local executable capabilities behind Bridge policy. An **Application**
+is an independent software product with its own process, UI and deployment
+lifecycle; the catalog may present its governed `Software` metadata and
+integration points, but does not load it into the Agent or Bridge. These
+categories may share discovery and governance, not installer or runtime
+contracts. Extension installation remains outside this productization slice.
 
 ## Out of scope for the first slice
 
@@ -129,3 +138,18 @@ asset type is introduced.
 - plain HTTP is loopback-only; a network-exposed portal requires TLS;
 - the generic page keeps the session in memory, removes its URL fragment and
   never persists it in browser storage.
+
+## Exit evidence for slice 2b
+
+- invitation metadata and stored proof grants contain no proof secret;
+- a weak proof or invalid expiry leaves no invitation behind;
+- unknown invitation ids and wrong proofs are indistinguishable;
+- an accepted proof creates the named member and one short-lived direct-member
+  session, then cannot be replayed;
+- expired and revoked proofs cannot create sessions;
+- the real HTTP sign-in endpoint accepts no actor, Bridge, membership,
+  permission, policy or decision-time claim;
+- a Bridge bearer cannot be used for direct member sign-in;
+- sign-in changes no Bridge binding, asset selection or execution grant;
+- the page removes the invitation fragment and stores neither invitation nor
+  member bearer in browser storage.

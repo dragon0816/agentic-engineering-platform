@@ -102,6 +102,42 @@ class IssuedAccessToken:
         return f"IssuedAccessToken(token_id={self.grant.token_id!r}, secret=[redacted])"
 
 
+class InvitationProofGrant(RegistryContract):
+    """Secret-free record for one out-of-band platform invitation proof."""
+
+    invitation_id: Symbol
+    actor: Symbol
+    fingerprint: Sha256
+    issued_at: AwareDatetime
+    expires_at: AwareDatetime
+    status: Literal["active", "redeemed", "revoked"] = "active"
+
+    @model_validator(mode="after")
+    def ends_after_issue(self) -> Self:
+        if self.expires_at <= self.issued_at:
+            raise ValueError("an invitation proof must expire after it is issued")
+        return self
+
+
+class IssuedInvitationProof:
+    """The one return value that carries an invitation proof secret."""
+
+    __slots__ = ("grant", "secret")
+
+    def __init__(self, grant: InvitationProofGrant, secret: str) -> None:
+        self.grant = grant
+        self.secret = secret
+
+    @property
+    def bearer(self) -> str:
+        return f"{self.grant.invitation_id}:{self.secret}"
+
+    def __repr__(self) -> str:
+        return (
+            f"IssuedInvitationProof(invitation_id={self.grant.invitation_id!r}, secret=[redacted])"
+        )
+
+
 def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bool:
     """Whether one member may use one published asset.
 
