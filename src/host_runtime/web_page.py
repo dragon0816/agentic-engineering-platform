@@ -153,6 +153,8 @@ tr:last-child td { border-bottom: none; }
   <section id="panel-platform">
     <h2>Published to your team</h2>
     <p class="note" id="platform-note">reading&hellip;</p>
+    <p><a id="member-portal" hidden target="_blank" rel="noopener noreferrer">
+      Open shared catalog controls</a></p>
     <div class="card"><div id="catalog" class="empty">reading&hellip;</div></div>
     <h2>Authorized on this Bridge</h2>
     <p class="note">Selections synchronized to this machine. A selection does not bypass
@@ -281,6 +283,14 @@ async function loadAssets() {
 async function loadPlatform() {
   const platform = await call("/api/platform");
   el("platform-note").textContent = platform.note;
+  const portal = el("member-portal");
+  if (platform.member_portal_url) {
+    portal.href = platform.member_portal_url;
+    portal.hidden = false;
+  } else {
+    portal.removeAttribute("href");
+    portal.hidden = true;
+  }
   el("catalog").replaceChildren(table(
     ["Type", "Asset", "Owner", "Visibility", "Needs", "Compatibility",
      "Authorized", "Installed", "What it is"],

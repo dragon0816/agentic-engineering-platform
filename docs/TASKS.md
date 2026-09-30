@@ -43,7 +43,8 @@ implemented; the production-like company-host run remains pending.
 |---|---|---|
 | 1 shared catalog read path | done | Authenticated, entitlement-filtered catalog over the existing platform transport; Web distinguishes published, authorized and installed state; discovery has no installation or execution side effect |
 | 2a member selection contract and entry point | done | PR #143: direct member session, entitlement-filtered Workflow list and select/revoke HTTP/page proof; Bridge credential is rejected and selection grants no execution permission |
-| 2b invitation member sign-in adapter | in review | One-time high-entropy invitation proof is stored only as a fingerprint, accepts the named secret-free invitation and produces the short-lived member session used by slice 2a; real HTTP proof carries no identity/permission claims |
+| 2b invitation member sign-in adapter | done | PR #145: one-time high-entropy invitation proof is stored only as a fingerprint, accepts the named secret-free invitation and produces the short-lived member session used by slice 2a; real HTTP proof carries no identity/permission claims |
+| 2c deployable Shared Platform composition | in review | One lifecycle serves the Bridge API and Member Portal over shared in-memory state; `aep-platform` writes one-time invitation links to an explicit delivery file and Personal Agent Web links to the separate member origin without forwarding its Bridge token |
 | 3 explicit synchronization | planned | Existing all-or-nothing sync is invoked deliberately and reports exact installed/refused state |
 | 4 generic Workflow launch | planned | Declared inputs execute through Agent/Gateway/Workflow/Bridge and expose progress, result and trace |
 | 5 grounded Knowledge asking | planned | Exact installed Knowledge version answers with source citations in the Personal Agent Web |

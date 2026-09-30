@@ -1665,6 +1665,29 @@ redemption, retains the returned member bearer in memory and uses the existing
 catalog/select/revoke endpoints. The Bridge bearer scheme is rejected. Sign-in
 creates no Bridge binding, device selection, installation or execution grant.
 
+## Shared Platform process composition (Productization 1, slice 2c)
+
+`control_plane.app.SharedPlatformState` groups the reference enrollment,
+Bridge-token, package, authorization, remote-control, artifact and member-session
+stores. `SharedPlatformApplication` builds `ControlPlaneService` and
+`MemberService` over those exact instances and owns one `ControlPlaneServer`
+plus one `MemberPortalServer`. Starting or stopping the application acts on
+both listeners; the transports remain separate even though the state is shared.
+
+`SharedPlatformConfiguration` is closed, serializable and secret-free. It names
+unique administrators, listener/port settings, optional local certificate and
+private-key **paths**, and `BootstrapInvitation` metadata with a bounded
+lifetime. It carries no proof, token, session or key value. A non-loopback
+listener requires both TLS paths and fixed control/member ports must differ.
+`application_from_config` generates proofs only after the configuration is
+valid. `aep-platform serve` requires an explicit invitation output file when
+bootstrap invitations exist and creates that file without overwriting one.
+
+`host_runtime.contracts.PlatformBinding.member_portal_url` is an optional
+credential-free origin. It applies the same origin shape and non-loopback HTTPS
+rules as `base_url`; it is not used by `PlatformClient`. `AgentWeb.platform`
+projects it solely as navigation metadata for the browser.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
@@ -1727,7 +1750,8 @@ in-memory references; a durable platform store is a later slice.
 
 `host_runtime.contracts.PlatformBinding` is how a host names its platform:
 `base_url` (an origin: https, or http on loopback only, with no path, query,
-fragment or credential), `token_id`, the `SecretRef` of the token's secret and a timeout; `CompanyHostConfiguration.platform` is
+fragment or credential), optional `member_portal_url` navigation metadata,
+`token_id`, the `SecretRef` of the token's secret and a timeout; `CompanyHostConfiguration.platform` is
 optional and a host without it works locally. `HostLayout` moved to the
 contracts module and is still importable from `host_runtime.host`.
 

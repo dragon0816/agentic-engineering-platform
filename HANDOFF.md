@@ -1,77 +1,75 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/invitation-member-signin`
-Base: `origin/main` at merge commit `6a5c8d3c757bd08b0b9b736ee0fd70404166d171`
-Implementation commit: `02d74503ef3bb2ab5c7b19cfb26af5e3a4ebe095`
-PR: https://github.com/dragon0816/agentic-engineering-platform/pull/145
+Branch: `codex/shared-platform-portal`
+Base: `origin/main` at merge commit `a2bd302` (PR #145)
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/147
 
 ## Goal
 
-Continue Productization 1 with slice 2b: connect the invitation-only shared
-platform enrollment flow to the short-lived direct-member browser session from
-slice 2a, without putting a secret in Registry assets or accepting a Bridge
-credential as an interactive member sign-in.
+Continue Productization 1 with slice 2c: compose the existing Bridge API,
+invitation sign-in, member sessions and Member Portal into one deployable
+Shared Platform reference process, then expose the separate Member Portal
+origin from Personal Agent Web without reusing or forwarding the Bridge token.
 
 ## Completed
 
-- Added `InvitationProofGrant`, a serializable secret-free record containing
-  only invitation identity, actor, proof fingerprint, lifetime and state.
-- Added `IssuedInvitationProof`, a deliberately non-serializable one-time
-  return value whose repr redacts the generated proof.
-- Added `InMemoryInvitationSignIn` as the provider-neutral reference adapter:
-  it validates proof strength and expiry before issuing invitation metadata,
-  gives unknown and wrong proofs the same answer, accepts the named invitation
-  once and creates the existing short-lived direct-member session.
-- Added real `POST /v1/member/sign-in` handling. It accepts only a distinct
-  `Invitation` authorization scheme and an empty body; a request cannot claim
-  actor, Bridge, membership, permission, policy or decision time.
-- Added invitation URL-fragment handoff to the generic member page. The page
-  removes the fragment immediately, redeems it and keeps the returned member
-  bearer in memory only.
-- Proved that sign-in creates no Bridge binding, asset selection, installation
-  or execution grant and that a Bridge bearer cannot be used for member sign-in.
-- Recorded the approved product taxonomy: Agent Add-ons, Bridge Extensions and
-  independent Applications may share discovery/governance, but retain separate
-  package, installer, runtime, health and rollback contracts.
+- Added `SharedPlatformState`, one owner for the in-memory enrollment,
+  Bridge-token, package, authorization, remote-control, artifact and member
+  session references.
+- Added `SharedPlatformApplication`, which constructs the Bridge and member
+  services over those exact references and starts/stops both HTTP listeners as
+  one lifecycle.
+- Added secret-free `SharedPlatformConfiguration` and `BootstrapInvitation`
+  contracts. Non-loopback listening requires certificate and private-key paths;
+  invitation proofs and key values have no configuration fields.
+- Added the `aep-platform serve` executable. When bootstrap invitations are
+  present it requires an explicit delivery file, creates it exclusively, and
+  does not print proof-bearing links as ordinary service status.
+- Added `examples/shared-platform.json` and an operator guide covering the TLS,
+  invitation-delivery and in-memory-reference limitations.
+- Extended `PlatformBinding` with optional `member_portal_url`. It is validated
+  as a credential-free origin and is never used by `PlatformClient`.
+- Personal Agent Web now projects and renders the separate Member Portal link.
+  Catalog traffic continues through the Bridge API and Bridge credential.
+- Proved over real loopback sockets that invitation redemption, later device
+  binding/token issuance, Bridge probe and member Workflow catalog all observe
+  the same enrollment state.
 - Updated Architecture, Contracts, Roadmap, Tasks and the active Productization
-  specification after implementation validation.
+  specification after the implementation passed focused verification.
 
 ## In Progress
 
-- PR #145 is open, mergeable and ready for owner review. Local verification
-  and exact-head Platform verification are green.
+- PR #147 is open. Exact-head GitHub Platform verification is pending.
 
 ## Remaining
 
-1. Owner review and merge PR #145 after confirming its green required check.
-2. Expose the member portal/sign-in composition from a deployable shared-platform
-   process and link it from Personal Agent Web. Keep the member and Bridge
-   credentials separate.
-3. Productization 1 slice 3: expose the existing all-or-nothing synchronization
-   as an explicit member Web action with typed before/after and refusal state.
-4. Before a generalized Marketplace installer, define separate installer
+1. Owner review and merge this slice after its exact-head CI is green.
+2. Productization 1 slice 3: expose the existing all-or-nothing synchronization
+   as an explicit Personal Agent Web action with typed before/after and refusal
+   state.
+3. Add generic Workflow launch, grounded Knowledge asking and then durable
+   Registry storage in that order.
+4. Before generalized marketplace installation, define distinct installer
    contracts for Agent Add-ons, Bridge Extensions and independent Applications.
-5. Continue with generic Workflow launch, grounded Knowledge asking and then
-   durable Registry storage.
 
 ## Architecture decisions made
 
-- Invitation metadata, invitation proof, member session and Bridge access token
-  are four distinct records/credentials.
-- The invitation proof is a high-entropy bearer delivered out of band. Only its
-  fingerprint is stored and it can be redeemed once.
-- A member session cannot outlive the proof that produced it and carries no
-  Bridge identity or membership claim.
-- Invitation redemption is control-plane membership work. It never authorizes
-  local capability execution.
-- The current source repositories contain no member sign-in implementation to
-  preserve. This slice **ADAPTS** the repository's proven invitation registry,
-  fingerprint comparison and member-session boundary instead of introducing a
-  second identity system.
-- Agent Add-ons extend the Personal Agent with governed assets; Bridge
-  Extensions add local executable capabilities behind Bridge policy;
-  Applications remain independently deployed software products.
+- **ADAPT** the existing in-repository control-plane and member references.
+  Source repositories contain no overlapping shared-platform member process to
+  migrate, so no new identity, Registry or execution implementation was added.
+- Bridge API and Member Portal share control-plane state and process lifecycle,
+  not credentials or authorization semantics.
+- The Member Portal URL is trusted local navigation metadata. It carries no
+  session, proof or Bridge credential and may not use plain HTTP beyond
+  loopback.
+- Invitation metadata belongs in configuration; invitation proof delivery is a
+  separate runtime output. The output file is a secret-bearing deployment
+  artifact and never a Registry asset.
+- TLS certificate/private-key paths may be configured; key contents and
+  passwords are never configuration or asset fields.
+- This slice deliberately retains in-memory stores. A durable Registry remains
+  after the validated Workflow/Knowledge user paths, per the approved roadmap.
 
 ## Verification
 
@@ -80,64 +78,70 @@ Browser automation was not run; HTTP behavior was exercised over real loopback
 sockets.
 
 ```text
-Focused member/enrollment suite:
-python -m pytest tests/test_member_signin.py tests/test_member_portal.py
-  tests/test_member_authorization.py tests/test_enrollment.py -q
-46 passed
+Focused Shared Platform/member/transport suite:
+python -m pytest tests/test_shared_platform_app.py tests/test_agent_web.py
+  tests/test_platform_transport.py tests/test_member_signin.py
+  tests/test_member_portal.py -q
+54 passed, 1 skipped
 
-Full suite (repository-writable basetemp/cache, browser test excluded):
+Full suite (browser test excluded per owner instruction):
 python -m pytest --ignore=tests/test_browser.py -q --basetemp=<repo>/.scratch/...
-1374 passed, 4 skipped
+1380 passed, 4 skipped in 40.82s
 
 python -m ruff check .
 All checks passed!
 
 python -m ruff format --check .
-298 files already formatted
+302 files already formatted
 
 python -m mypy src tests
-Success: no issues found in 233 source files
+Success: no issues found in 236 source files
 
-python -m build --outdir .scratch/dist-invitation
-Successfully built sdist and wheel; wheel includes
-control_plane/member_signin.py
+python -m build --outdir <repo>/.scratch/dist-shared-platform
+Successfully built sdist and wheel; wheel contains control_plane/app.py and
+control_plane/cli.py.
 
 python -m pip check
 No broken requirements found.
 
+Fresh isolated wheel install:
+pip install --no-deps --force-reinstall agentic_engineering_platform-0.1.0-py3-none-any.whl
+aep-platform --help
+PASS; the packaged executable exposes the `serve` command.
+
+Installed-wheel runtime smoke:
+aep-platform serve --config <scratch-config-with-free-ports>
+  --invitation-output <scratch-delivery>
+Bridge API health: true
+Member Portal health: true
+Invitation count: 1; expected actor and URL fragment shape confirmed without
+printing the proof.
+
 git diff --check
 PASS
-
-GitHub Platform verification run 36773758708
-PASS in 3m50s, including pytest, Ruff, Mypy, build, pip check, Windows offline
-preview install and artifact upload.
 ```
 
 The four full-suite skips are existing Windows environment conditions:
-symlink/link privileges, IPv6 loopback and directory links. The first full
-suite attempt could not create pytest's default `%TEMP%` directory in the
-managed sandbox; rerunning with an explicit repository-writable `--basetemp`
-produced the green result above. The worktree's stale `.venv` was not used;
-verification used the repository's Python 3.12.14 environment with this
-worktree's `src` on `PYTHONPATH`.
+symlink/link privileges, IPv6 loopback and directory links. Test caches and
+temporary files were directed to the repository's writable `.scratch` area.
 
 ## Known issues
 
-- Invitation proofs, member sessions, invitations, packages and selections are
-  still in-memory reference stores and are lost on process restart.
-- This slice covers initial invitation redemption. It does not add a durable
-  identity provider, password/passkey recovery or persistent browser login.
-- The invitation delivery channel is a trusted deployment concern; this code
-  returns the out-of-band link but sends no email or message.
-- The member portal remains a reference server and is not yet composed into a
-  deployed shared-platform command or linked from Personal Agent Web.
-- Agent Add-on, Bridge Extension and Application installers are architecture
-  boundaries only; no dynamic Extension loader is implemented in this PR.
+- Restarting the reference process loses members, invitations, sessions,
+  packages, selections and device records. It is not the durable Registry.
+- The CLI bootstraps invitations but has no administration UI/API for later
+  device registration, binding, package publishing or invitation management.
+- The invitation delivery file must be protected and removed by the operator;
+  no email or messaging delivery channel is included.
+- TLS configuration validation and SSL-context construction are covered, but
+  this slice did not run against a real internal certificate or network DNS.
+- Existing Bridge installations must add `member_portal_url` to `host.json`
+  before Personal Agent Web can show the link.
 
 ## Next Recommended Action
 
-After PR #145 passes final-head CI and merges, add the smallest deployable
-shared-platform composition that owns enrollment, invitation sign-in, member
-sessions and the member portal, then link Personal Agent Web to that entry
-point. Do not begin a generalized Extension/Application installer until that
-member path is reproducibly usable.
+After this PR merges, implement Productization 1 slice 3 as one reversible Web
+action over the existing `PlatformClient.synchronize` path. Show the catalog
+state immediately before and after synchronization, preserve the current
+all-or-nothing verification, and return typed unreachable/refused states
+without adding installation logic to the page.

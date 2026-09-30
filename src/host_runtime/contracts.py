@@ -49,31 +49,43 @@ class PlatformBinding(Contract):
     """
 
     base_url: Text
+    # Interactive member sign-in and selection use a different credential and
+    # may be served on a different port.  This optional origin is navigation
+    # metadata only; the Bridge client never sends its token there.
+    member_portal_url: Text | None = None
     token_id: Symbol
     credential: SecretRef
     timeout_seconds: int = Field(default=30, ge=1, le=300, strict=True)
 
-    @field_validator("base_url")
+    @field_validator("base_url", "member_portal_url")
     @classmethod
-    def without_trailing_slash(cls, value: str) -> str:
-        return value.rstrip("/")
+    def without_trailing_slash(cls, value: str | None) -> str | None:
+        return value.rstrip("/") if value is not None else None
 
     @model_validator(mode="after")
     def https_beyond_loopback(self) -> Self:
-        parts = urlsplit(self.base_url)
-        if (
-            parts.scheme not in ("https", "http")
-            or not parts.hostname
-            or parts.path
-            or parts.query
-            or parts.fragment
+        for field, url in (
+            ("base_url", self.base_url),
+            ("member_portal_url", self.member_portal_url),
         ):
-            raise ValueError("base_url is the origin of the shared platform")
-        if parts.username is not None or parts.password is not None:
-            # A credential in a URL is a credential in a file.
-            raise ValueError("base_url carries no credential; the token is a SecretRef")
-        if parts.scheme == "http" and not _loopback(self.base_url):
-            raise ValueError("a platform beyond loopback is reached over https")
+            if url is None:
+                continue
+            parts = urlsplit(url)
+            if (
+                parts.scheme not in ("https", "http")
+                or not parts.hostname
+                or parts.path
+                or parts.query
+                or parts.fragment
+            ):
+                raise ValueError(f"{field} is an origin of the shared platform")
+            if parts.username is not None or parts.password is not None:
+                # A credential in a URL is a credential in a file.
+                raise ValueError(f"{field} carries no credential")
+            if parts.scheme == "http" and not _loopback(url):
+                if field == "member_portal_url":
+                    raise ValueError("a member portal beyond loopback is reached over https")
+                raise ValueError("a platform beyond loopback is reached over https")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
