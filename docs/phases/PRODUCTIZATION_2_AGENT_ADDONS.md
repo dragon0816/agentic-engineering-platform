@@ -90,6 +90,19 @@ effect.
   command completes through Local Agent, Gateway, Workflow and Bridge policy;
 - selecting the Skill does not add or widen any capability grant.
 
+## Exit evidence for slice 2
+
+- a published exact `KnowledgeManifest` and its governed Raw/Wiki content
+  round-trip through one closed JSON package;
+- the portable manifest contains `package://vault`; the Bridge alone derives
+  the absolute installation path;
+- `drop/` originals and local ingest state are excluded from distribution;
+- traversal, absolute or noncanonical paths, identity mismatch, missing or
+  duplicate files, digest drift and embedded credential material are refused
+  before the target exists;
+- installation stages and reopens the full Vault, verifies all aggregate
+  digests, atomically exposes one exact version and never replaces it.
+
 ## Explicit exclusions
 
 - executable Bridge plug-in loading;

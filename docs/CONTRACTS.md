@@ -2278,6 +2278,26 @@ manifest and its validation/evaluation references; neither function installs a
 capability or grants execution permission. `KnowledgeCatalog` admits only exact,
 published and digest-matching versions and retains earlier versions for rollback.
 
+## Portable Knowledge package (Productization 2, slice 2)
+
+`PortableKnowledgePackage` carries one exact published `KnowledgeManifest` and
+its governed Vault content. Its manifest uses `package://vault`, never a local
+filesystem path. `KnowledgePackageFile` admits canonical relative POSIX paths
+only: the three root governance files, any immutable `raw/` evidence and
+Markdown under `wiki/`. It refuses absolute paths, drive-qualified paths,
+backslashes, traversal, `drop/`, ingest state/cache files, duplicate paths,
+file digest mismatch and recognizable credential material.
+
+The package requires `index.md`, `log.md`, `decisions.md`, at least one Raw
+file and at least one Wiki page. Its identity must equal the manifest identity;
+the Raw, decisions and complete Knowledge digests must match the manifest
+before installation. `package_knowledge` also proves the source Vault has not
+drifted. `install_knowledge_package` validates the complete serialized package,
+writes a sibling staging directory, reopens it through `Vault`, rechecks all
+aggregate digests and atomically exposes the target directory. The returned
+local manifest replaces only `vault_ref` with the host-derived absolute path.
+An existing exact version is never replaced.
+
 ## E2E-04 governed Software evolution
 
 `SoftwareManifest` is Registry metadata, not a source archive. It combines the

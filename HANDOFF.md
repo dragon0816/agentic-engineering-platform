@@ -1,98 +1,85 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/skill-marketplace`
-Base: `origin/main` at merge commit `792e427` (PR #155)
-PR: https://github.com/dragon0816/agentic-engineering-platform/pull/157
+Branch: `codex/portable-knowledge-package`
+Base: `origin/main` at merge commit `cfec50d` (PR #157)
+PR: pending
 
 ## Goal
 
-Begin Productization 2 with the first Agent Add-on Marketplace E2E: select an
-exact shared Skill in the member Web interface, synchronize it, rebuild the
-host and prove the Personal Agent uses the Skill's deterministic command.
+Productization 2 slice 2: define and prove a portable, path-safe Knowledge
+package before Knowledge joins member selection and Bridge synchronization.
 
 ## Completed
 
-- Added Productization 2 and planned Productization 3 specifications grounded
-  in Product Vision and the existing Agent Add-on / Bridge Extension /
-  independent Application architecture boundary.
-- Generalized the authenticated member catalog from Workflow-only to exact
-  Workflows and Skills. Other kinds remain refused until they have compatible
-  package and activation contracts.
-- Member select requests still carry only Bridge id and asset identity. The
-  platform derives `workflow` or `skill` from trusted Registry metadata; a
-  client-supplied kind is rejected by the closed contract.
-- Updated the dependency-free member UI to show add-on kind and selection.
-- Added a real-socket E2E crossing member selection, Personal Agent Web sync,
-  control-plane HTTP, all-or-nothing Bridge install, host rebuild, Skill
-  registry, deterministic routing, Workflow engine and Bridge policy.
-- Proved that selecting a Skill does not add or widen capability grants and
-  that an unsupported Knowledge kind cannot enter this install path.
-- Updated Architecture, Contracts, Roadmap and Tasks after the green path.
+- PR #157 passed exact-head Windows/Python 3.12 CI and auto-merged as
+  `cfec50d`; exact Skill selection, sync and Personal Agent use are on main.
+- Added `PortableKnowledgePackage` and `KnowledgePackageFile` contracts for one
+  exact published Knowledge version.
+- Package content is limited to governed Raw/Wiki content plus index, log and
+  settled decisions. `drop/` originals and local ingest state are excluded.
+- Portable manifests use `package://vault`; installation derives the local
+  absolute Vault path instead of trusting publisher input.
+- Added builder and staged atomic installer with file and aggregate digest
+  verification before exposure. Existing exact versions are never replaced.
+- Added rejection coverage for traversal, absolute/Windows paths,
+  noncanonical paths, unowned content, missing files, identity/digest drift and
+  recognizable embedded credentials.
+- Updated Architecture, Contracts, Tasks and the Productization 2 phase spec
+  after the tests passed.
 
 ## In Progress
 
-- PR #157 is open at implementation commit `2dfaa25`. Exact-head Platform
-  verification must pass before the owner-authorized automatic merge.
+- Open the slice 2 PR, wait for exact-head Platform verification and auto-merge
+  when green.
 
 ## Remaining
 
-1. Wait for PR #157 exact-head Windows/Python 3.12 verification and merge it
-   automatically when green.
-2. Productization 2 slice 2: define and implement one path-safe portable
-   Knowledge package containing an exact manifest plus immutable Raw and
-   curated Wiki content, with no publisher-controlled local Vault path.
-3. Continue slices 3–5 sequentially; Productization 3 runtime implementation
-   begins only after Productization 2 has a reproducible exit path.
+1. Productization 2 slice 3: admit exact Knowledge selection, synchronize its
+   portable package into a host-derived versioned Vault, derive an active local
+   binding and prove grounded Personal Agent Web asking after host rebuild.
+2. Slice 4: portable validated Agent profile and explicit local activation.
+3. Slice 5: explicit version update/removal and rollback to a usable prior
+   exact version.
+4. Begin Productization 3 only after the Productization 2 exit path passes.
 
 ## Architecture decisions made
 
-- **REUSE** the existing package, device selection, platform synchronization,
-  Skill manifest and Skill registry contracts. The missing behavior was a
-  Workflow-only member projection, not another installer.
-- Derive add-on kind from the Registry package. The member cannot relabel a
-  Skill as a Workflow or decide installation semantics.
-- Skills remain procedure/routing data and may target only an existing typed
-  Workflow or capability. This slice introduces no executable plug-in loader.
-- Keep Knowledge and Agent profiles out of the Skill/Workflow installer until
-  their portable package and activation contracts are explicit.
-- Productization 3 keeps Bridge Extensions separate from independent Apps;
-  its process isolation, signature and activation policy decisions remain
-  explicit gates before executable extension work.
+- **REUSE/ADAPT** `KnowledgeManifest`, Vault digests/provenance and the existing
+  package artifact boundary. No alternate Knowledge runtime was introduced.
+- A portable manifest carries a symbolic path. Only the Bridge may bind an
+  installed package to an absolute local Vault root.
+- Raw evidence and Wiki Markdown travel; source originals in `drop/` do not.
+  This preserves query provenance without redistributing source files whose
+  rights and size are not represented by the current contract.
+- Packages are inert JSON/base64 data. They contain no scripts, imports,
+  post-install commands, grants, model credentials or execution approval.
 
 ## Verification
 
-Supported target: Windows, Python 3.12 only. No Ubuntu run was performed.
-Browser automation was excluded per owner direction.
+Supported target: Windows, Python 3.12 only. No Ubuntu or browser automation.
 
 ```text
-Focused member/platform suite:
-python -m pytest tests/test_member_portal.py tests/test_skill_marketplace.py
-  tests/test_platform_transport.py tests/test_shared_platform_app.py -q
-31 passed, 1 skipped
-
-Final Skill/member/Personal Web suite:
-python -m pytest tests/test_skill_marketplace.py tests/test_member_portal.py
-  tests/test_agent_web.py -q
-38 passed
+Focused Knowledge package/evolution/query/Vault suite:
+41 passed, 1 skipped
 
 Full supported suite:
 python -m pytest --ignore=tests/test_browser.py -q
-1404 passed, 4 skipped in 54.97s
+1415 passed, 4 skipped in 55.37s
 
 python -m ruff check .
 All checks passed!
 
 python -m ruff format --check .
-307 files already formatted
+309 files already formatted
 
 python -m mypy
-Success: no issues found in 239 source files
+Success: no issues found in 241 source files
 
 python -m pip check
 No broken requirements found.
 
-python -m build --outdir <repo>/.scratch/build-skill-marketplace
+python -m build --no-isolation --outdir <repo>/.scratch/build-knowledge-package
 Successfully built sdist and wheel.
 
 git diff --check
@@ -104,18 +91,16 @@ privileges, IPv6 loopback and directory links.
 
 ## Known issues
 
-- The member portal currently requires the user to enter the Bridge id; a
-  later UX slice can project the member's bound devices without changing
-  selection authority.
-- Portable Knowledge, Agent-profile activation, add-on removal and rollback
-  are not part of this first slice.
-- Platform member/session/selection records remain reference in-memory state;
-  only Registry package metadata and artifacts are durable.
+- The package contract and local atomic installer are complete, but member
+  activation and platform synchronization intentionally remain slice 3.
+- The current aggregate Knowledge digest excludes binary files below
+  `raw/**/assets/` while `raw_sha256` covers them; both established digests are
+  verified and the package preserves those files.
 
 ## Next Recommended Action
 
-After PR #157 merges, implement Productization 2 slice 2 as a contract-first
-portable Knowledge package. Reuse `KnowledgeManifest`, Vault provenance and
-the existing all-or-nothing synchronization boundary; refuse traversal,
-identity mismatch, digest mismatch and any package-supplied absolute Vault
-path before writing.
+Open and merge this verified slice, then extend the trusted member selection
+and platform sync contracts to `knowledge`. Install its portable artifact into
+`workspace/assets/knowledge-vaults/<namespace>/<name>/<version>`, persist only
+the host-derived local manifest, rebuild the host, and drive the real Personal
+Agent Web grounded query path.
