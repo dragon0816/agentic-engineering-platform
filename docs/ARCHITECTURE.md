@@ -857,6 +857,22 @@ code validates paths and tests before it commits, pushes or opens a Draft PR.
 Human review remains the merge authority. The detailed contracts and operational
 setup live in `docs/remote-testing-codex-loop.md`.
 
+Validation and coding are **roles**, not permanent provider identities. The
+owner starts a validation request with scope and expected results, coordinates
+exceptions and decides whether to merge. A Validation Agent runs the fixed
+profile near real resources. A Coding Agent handles implementation failures.
+Hermes currently fills the validation role and Local Codex the coding role; a
+later Hermes worker may fill the coding role without changing the contracts.
+
+The agents classify a failure at the boundary. A behavior or implementation
+failure becomes a typed GitHub Issue and follows the branch/PR/exact-SHA retest
+loop above. A problem in deployment, polling, evidence handoff or the validation
+mechanism is exchanged as a bounded agent-coordination event in their shared
+Telegram group. The group supports immediate visibility and coordination; it
+does not grant repository authority. If mechanism analysis discovers a code
+change is required, the Validation Agent must create the GitHub Issue before the
+Coding Agent modifies code.
+
 ## 9. Migration strategy
 
 Phase 0: architecture, contracts, migration inventory, including multi-agent extension points.

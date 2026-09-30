@@ -29,6 +29,10 @@ def test_loader_is_explicit_and_does_not_print_secret_values() -> None:
 
     assert '"GH_TOKEN"' in loader
     assert '"AEP_GITHUB_TOKEN"' in loader
+    assert '"TELEGRAM_BOT_TOKEN"' in loader
+    assert '"TELEGRAM_OWNER_USER_ID"' in loader
+    assert '"TELEGRAM_HERMES_BOT_ID"' in loader
+    assert '"TELEGRAM_CONTROL_CHAT_ID"' in loader
     assert '"OPENAI_API_KEY"' not in loader
     assert "Unsupported local environment variable" in loader
     assert "Write-Output $value" not in loader

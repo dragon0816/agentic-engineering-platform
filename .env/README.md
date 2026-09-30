@@ -27,6 +27,10 @@ only these names and ignores allowed entries whose values remain empty:
 |---|---|
 | `GH_TOKEN` | GitHub CLI and GitHub API operations from this shell |
 | `AEP_GITHUB_TOKEN` | AEP's local GitHub Projects integration |
+| `TELEGRAM_BOT_TOKEN` | Dedicated Local Codex coordination bot; resolved only at Bot API calls |
+| `TELEGRAM_OWNER_USER_ID` | Numeric Telegram identity allowed to use the read-only `/status` command |
+| `TELEGRAM_HERMES_BOT_ID` | Numeric current Validation Agent (Hermes) bot identity allowed to announce fixed events |
+| `TELEGRAM_CONTROL_CHAT_ID` | Exact shared group/chat in which the two bots coordinate |
 
 The file is plaintext on this computer even though Git ignores it. Keep it only
 on a trusted development computer, never put it on a shared test workstation,
@@ -44,3 +48,8 @@ this file.
 
 The loader does not run automatically, persist values outside the current
 process, print secret values, or make runtime code discover local YAML files.
+All four `TELEGRAM_*` values are optional as a group. With all four blank the
+GitHub worker runs without Telegram. A partial or invalid Telegram configuration
+disables only Telegram and is recorded by error type in the local worker log;
+GitHub queue processing continues. The Telegram token is removed from every
+Codex subprocess environment.
