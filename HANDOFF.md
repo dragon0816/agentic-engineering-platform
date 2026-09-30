@@ -29,12 +29,12 @@ new queue item without weakening the fixed-schema, untrusted-evidence boundary.
 
 ## In Progress
 
-- The focused structured-evidence repair is verified locally and needs commit,
-  push, PR review, and merge.
+- Repair commit `aa697fc` is pushed and open for review as PR #135:
+  https://github.com/dragon0816/agentic-engineering-platform/pull/135
 
 ## Remaining
 
-1. Commit, push, and open the focused repair PR.
+1. Review and merge PR #135.
 2. After merge, reapply `codex-fix` to the newer Issue #134 once so GitHub queues
    its structured evidence for Local Codex. Keep #132 as historical evidence.
 3. Confirm #134 becomes `codex-local-running` and then produces either a Draft
@@ -95,5 +95,5 @@ the complete suite passed when rerun under the standard Windows TEMP root.
 
 ## Next Recommended Action
 
-Review and merge the structured-evidence repair PR. Then reapply `codex-fix` to
+Review and merge PR #135. Then reapply `codex-fix` to
 Issue #134 exactly once and monitor the resident Local Codex Worker.
