@@ -53,6 +53,50 @@ adds `hermes-retest-requested`. Hermes must execute its fixed profile, never PR 
 Issue prose. A passing Hermes result asks the human reviewer to merge; it never
 merges by itself.
 
+## Optional shared Telegram coordination group
+
+A dedicated Local Codex bot and the Hermes bot may share one Telegram group to
+remove the owner's manual copy-and-paste step. Telegram does not replace the
+GitHub queue:
+
+```text
+Hermes writes evidence/result to GitHub
+  -> Hermes bot posts one fixed event in the shared group
+  -> Local Codex bot verifies the referenced Issue in GitHub
+  -> Local Codex bot posts one terminal acknowledgement
+  -> Local Codex Worker reports running/evidence-required/failed/PR-ready
+     states to the same group
+```
+
+The Local Codex bot accepts only `/status` from the configured owner. It accepts
+only `aep-telegram-control/v1` JSON from the configured Hermes bot in the exact
+configured chat. General chat, instructions embedded in messages and commands
+from either bot have no execution effect. Events require `hop=0`; acknowledgements
+use `hop=1`, are terminal and must never be answered. The durable Telegram offset
+and event ids prevent replay after process restart. A poll handles at most 25
+updates and remembers at most 200 event ids.
+
+Example Hermes group message after the corresponding GitHub evidence is already
+present:
+
+```json
+{"schema":"aep-telegram-control/v1","producer":"hermes-testing-agent","event_id":"hermes-132-validation-failed-001","event":"validation_failed","repository":"dragon0816/agentic-engineering-platform","issue":132,"request_id":"deployment-company-agent-36591676672","target_sha":"0123456789abcdef0123456789abcdef01234567","hop":0}
+```
+
+The bot replies with `aep-telegram-control-ack/v1` after it can read that Issue.
+The reply contains current GitHub state/labels and `hop=1`. Hermes must ignore
+that acknowledgement and every `aep-telegram-worker-event/v1`; otherwise two bots
+could create a reply loop.
+
+Configure the four optional entries in the development computer's ignored
+`.env/local.yaml`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_USER_ID`,
+`TELEGRAM_HERMES_BOT_ID` and `TELEGRAM_CONTROL_CHAT_ID`. All ids are numeric; a
+group chat id is normally negative. All four blank disables Telegram while the
+GitHub worker continues. Both bots must be members of the configured group, and
+Telegram/BotFather settings must permit the bots to receive the fixed messages
+addressed to them. Use a dedicated bot token so another long-polling process does
+not cause Bot API HTTP 409 conflicts.
+
 ## One-time GitHub configuration
 
 After this implementation is merged, create these repository variables:
@@ -107,6 +151,11 @@ The task runs one resident process which polls every 60 seconds. Durable request
 state and temporary worktrees are under
 `%LOCALAPPDATA%\AgenticEngineeringPlatform\codex-worker`. A failed workspace is
 kept for diagnosis; a successfully delivered workspace is removed.
+
+When the optional Telegram configuration is complete, that same resident process
+also polls the dedicated coordination bot. There is no inbound port and no second
+Scheduled Task. Telegram errors are logged once per changed failure code and do
+not stop GitHub polling.
 
 The worker resolves a native `codex.exe` or Windows `codex.cmd` entry point
 before starting a repair; a PowerShell-only shim is not a valid subprocess

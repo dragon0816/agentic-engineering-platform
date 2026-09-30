@@ -5,7 +5,11 @@ param(
 
 $allowedNames = @(
     "GH_TOKEN",
-    "AEP_GITHUB_TOKEN"
+    "AEP_GITHUB_TOKEN",
+    "TELEGRAM_BOT_TOKEN",
+    "TELEGRAM_OWNER_USER_ID",
+    "TELEGRAM_HERMES_BOT_ID",
+    "TELEGRAM_CONTROL_CHAT_ID"
 )
 
 if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {

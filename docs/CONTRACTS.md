@@ -20,6 +20,33 @@ re-runs the same preflight before continuing. The GitHub transport is documented
 in `docs/hermes-validation-lifecycle.md` and uses versioned JSON payloads rather
 than executing Issue text.
 
+## Local Codex Telegram coordination
+
+`TelegramControlConfig` binds one dedicated Local Codex bot to an exact
+repository, owner numeric user id, Hermes numeric bot id and shared numeric chat
+id. Its credential is a `SecretRef`; the bot token is resolved from the execution
+environment for each Bot API call and is absent from the serializable contract.
+Owner, Hermes and chat identity have separate meanings. An entirely absent
+four-value configuration disables the optional channel. A partial configuration
+is invalid but cannot stop the GitHub worker.
+
+`HermesControlEvent` is a closed `aep-telegram-control/v1` notification with an
+exact repository, Issue, request id, target SHA, bounded event id and `hop=0`.
+Only the configured bot, reporting `is_bot=true` in the configured chat, may
+supply one. The receiver reads the Issue from GitHub before acknowledging it,
+persists the Bot API offset and a bounded event-id set, and emits at most one
+`aep-telegram-control-ack/v1` with `hop=1`. Acknowledgements are terminal and
+cannot become new events. Unknown fields, arbitrary text, other chats and other
+senders have no execution effect.
+
+The owner may issue only `/status` or `/status <issue-number>`. The command reads
+GitHub queue/Issue state and never changes labels, comments, branches or PRs.
+`aep-telegram-worker-event/v1` reports `running`, `waiting_evidence`, `failed` or
+`completed` on a best-effort basis. Telegram is an immediate coordination layer;
+`codex-local-request/v1`, GitHub comments and labels remain the durable authority.
+No Telegram message starts Codex directly, provides a shell command or grants
+merge authority.
+
 ## Phase 7 enrollment boundary
 
 `Invitation` is non-secret metadata for one named actor. A host validates the

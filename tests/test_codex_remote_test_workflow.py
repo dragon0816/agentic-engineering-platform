@@ -229,6 +229,10 @@ def test_codex_subprocess_does_not_receive_service_credentials(tmp_path: Path) -
             "AEP_GITHUB_TOKEN": "board-secret",
             "GH_CONFIG_DIR": "github-cli-auth-location",
             "CODEX_HOME": "auth-location",
+            "TELEGRAM_BOT_TOKEN": "telegram-secret",
+            "TELEGRAM_OWNER_USER_ID": "1001",
+            "TELEGRAM_HERMES_BOT_ID": "2002",
+            "TELEGRAM_CONTROL_CHAT_ID": "-1003003",
         }
     )
     command = codex_command(tmp_path, tmp_path / "schema.json", tmp_path / "result.json")
@@ -328,6 +332,21 @@ def test_worker_claims_and_completes_each_request_once(
     fake = FakeGitHub()
     cast(Any, worker).github = fake
     executions: list[str] = []
+    notifications: list[tuple[int, str, str, str | None]] = []
+
+    class Observer:
+        def notify_worker_state(
+            self,
+            *,
+            issue: int,
+            request_id: str,
+            state: str,
+            detail: str | None = None,
+        ) -> bool:
+            notifications.append((issue, request_id, state, detail))
+            return True
+
+    cast(Any, worker).observer = Observer()
 
     def execute(request: CodexLocalRequest) -> str:
         executions.append(request.request_id)
@@ -341,6 +360,15 @@ def test_worker_claims_and_completes_each_request_once(
     assert fake.labels[0][1] == ("codex-local-running",)
     assert fake.labels[-1][1] == ("codex-local-completed",)
     assert "Draft PR" in fake.messages[-1]
+    assert notifications == [
+        (113, str(payload["request_id"]), "running", None),
+        (
+            113,
+            str(payload["request_id"]),
+            "completed",
+            "https://github.com/dragon0816/agentic-engineering-platform/pull/999",
+        ),
+    ]
     assert json.loads((tmp_path / "state.json").read_text(encoding="utf-8")) == {
         str(payload["request_id"]): "completed"
     }

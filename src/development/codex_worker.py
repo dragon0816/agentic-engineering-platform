@@ -18,7 +18,7 @@ import tempfile
 import time
 from collections.abc import Mapping, Sequence
 from pathlib import Path, PurePosixPath
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
@@ -38,6 +38,10 @@ SECRET_ENV_NAMES = frozenset(
         "GITHUB_TOKEN",
         "OPENAI_API_KEY",
         "SSH_AUTH_SOCK",
+        "TELEGRAM_BOT_TOKEN",
+        "TELEGRAM_CONTROL_CHAT_ID",
+        "TELEGRAM_HERMES_BOT_ID",
+        "TELEGRAM_OWNER_USER_ID",
     }
 )
 ALLOWED_CHANGE_PREFIXES = ("src/", "tests/", "docs/")
@@ -377,6 +381,19 @@ class CommandFailure(RuntimeError):
     pass
 
 
+class WorkerObserver(Protocol):
+    """Best-effort visibility only; it cannot control worker execution."""
+
+    def notify_worker_state(
+        self,
+        *,
+        issue: int,
+        request_id: str,
+        state: Literal["running", "waiting_evidence", "failed", "completed"],
+        detail: str | None = None,
+    ) -> bool: ...
+
+
 def load_codex_result(path: Path) -> CodexLocalResult:
     """Require the structured result promised by a successful Codex process."""
 
@@ -460,6 +477,23 @@ class GitHubClient:
             raise CommandFailure("GitHub comments response was not a list")
         return value
 
+    def issue_summary(self, issue: int) -> dict[str, Any]:
+        value = self._json(
+            [
+                "gh",
+                "issue",
+                "view",
+                str(issue),
+                "--repo",
+                self.repository,
+                "--json",
+                "number,title,state,url,labels",
+            ]
+        )
+        if not isinstance(value, dict):
+            raise CommandFailure("GitHub Issue response was not an object")
+        return value
+
     def edit_labels(
         self, issue: int, *, add: Sequence[str] = (), remove: Sequence[str] = ()
     ) -> None:
@@ -531,6 +565,7 @@ class LocalCodexWorker:
         state_path: Path,
         worktree_root: Path,
         runner: CommandRunner | None = None,
+        observer: WorkerObserver | None = None,
     ) -> None:
         self.repository = repository
         self.repo_root = repo_root.resolve()
@@ -538,6 +573,26 @@ class LocalCodexWorker:
         self.worktree_root = worktree_root.resolve()
         self.runner = runner or CommandRunner()
         self.github = GitHubClient(repository, self.runner, self.repo_root)
+        self.observer = observer
+
+    def _notify(
+        self,
+        issue: int,
+        request_id: str,
+        state: Literal["running", "waiting_evidence", "failed", "completed"],
+        detail: str | None = None,
+    ) -> None:
+        if self.observer is None:
+            return
+        try:
+            self.observer.notify_worker_state(
+                issue=issue,
+                request_id=request_id,
+                state=state,
+                detail=detail,
+            )
+        except Exception:  # noqa: BLE001 - visibility must never change queue behavior
+            pass
 
     def _load_state(self) -> dict[str, str]:
         if not self.state_path.exists():
@@ -585,6 +640,7 @@ class LocalCodexWorker:
                 add=("codex-local-running",),
                 remove=("codex-local-queued", "codex-local-failed"),
             )
+            self._notify(issue, request.request_id, "running")
             try:
                 pr_url = self._execute(request)
             except EvidenceRequired as waiting:
@@ -614,6 +670,12 @@ class LocalCodexWorker:
                     f"Codex analysis: {waiting.result.codex_analysis}\n\n"
                     f"Requested evidence: {waiting.result.next_action}",
                 )
+                self._notify(
+                    issue,
+                    request.request_id,
+                    "waiting_evidence",
+                    waiting.result.next_action,
+                )
             except Exception as error:
                 state[request.request_id] = "failed"
                 self._save_state(state)
@@ -629,6 +691,7 @@ class LocalCodexWorker:
                     f"Reason: `{type(error).__name__}`. Inspect the local worker log; "
                     "no merge occurred.",
                 )
+                self._notify(issue, request.request_id, "failed", type(error).__name__)
             else:
                 state[request.request_id] = "completed"
                 self._save_state(state)
@@ -644,6 +707,7 @@ class LocalCodexWorker:
                     "GitHub will issue the trusted Hermes retest payload for the exact "
                     "PR head SHA.",
                 )
+                self._notify(issue, request.request_id, "completed", pr_url)
             handled += 1
         return handled
 
@@ -795,6 +859,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         state_path=options.state or local / "state.json",
         worktree_root=options.worktree_root or local / "worktrees",
     )
+    telegram = None
+    try:
+        from development.telegram_control import (
+            TelegramControlPlane,
+            config_from_environment,
+            environment_resolver,
+        )
+
+        telegram_config = config_from_environment(options.repository, os.environ)
+        if telegram_config is not None:
+            telegram = TelegramControlPlane(
+                telegram_config,
+                environment_resolver(os.environ),
+                worker.github,
+                state_path=local / "telegram-state.json",
+            )
+            worker.observer = telegram
+    except Exception as error:  # noqa: BLE001 - Telegram is optional visibility
+        local.mkdir(parents=True, exist_ok=True)
+        with (local / "worker.log").open("a", encoding="utf-8") as log:
+            log.write(f"Telegram control disabled safely: {type(error).__name__}\n")
+    last_telegram_failure: str | None = None
     while True:
         try:
             worker.poll_once()
@@ -804,6 +890,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             local.mkdir(parents=True, exist_ok=True)
             with (local / "worker.log").open("a", encoding="utf-8") as log:
                 log.write(f"poll failed safely: {type(error).__name__}\n")
+        if telegram is not None:
+            result = telegram.poll_once()
+            failure_code = result.failure.code if result.failure is not None else None
+            if failure_code is not None and failure_code != last_telegram_failure:
+                local.mkdir(parents=True, exist_ok=True)
+                with (local / "worker.log").open("a", encoding="utf-8") as log:
+                    log.write(f"Telegram control unavailable: {failure_code}\n")
+            last_telegram_failure = failure_code
         if not options.loop:
             return 0
         time.sleep(options.interval)
