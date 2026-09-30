@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import shutil
@@ -48,6 +49,85 @@ DEFAULT_VERIFY_COMMANDS: tuple[tuple[str, ...], ...] = (
     ("-m", "mypy"),
 )
 
+MAX_EVIDENCE_DETAILS_JSON_CHARS = 48_000
+MAX_EVIDENCE_DETAILS_DEPTH = 16
+
+
+def _validate_bounded_evidence_json(value: Any, *, depth: int = 0) -> None:
+    """Reject oversized or pathological nested evidence before prompting Codex."""
+
+    if depth > MAX_EVIDENCE_DETAILS_DEPTH:
+        raise ValueError("evidence details exceed the maximum nesting depth")
+    if value is None or isinstance(value, (bool, int)):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("evidence details contain a non-finite number")
+        return
+    if isinstance(value, str):
+        if len(value) > 10_000:
+            raise ValueError("an evidence detail string exceeds 10000 characters")
+        return
+    if isinstance(value, list):
+        if len(value) > 100:
+            raise ValueError("an evidence detail list exceeds 100 items")
+        for item in value:
+            _validate_bounded_evidence_json(item, depth=depth + 1)
+        return
+    if isinstance(value, dict):
+        if len(value) > 100:
+            raise ValueError("an evidence detail object exceeds 100 fields")
+        for key, item in value.items():
+            if not isinstance(key, str) or len(key) > 200:
+                raise ValueError("an evidence detail key is invalid")
+            _validate_bounded_evidence_json(item, depth=depth + 1)
+        return
+    raise ValueError("evidence details must contain only JSON values")
+
+
+class HermesArtifactIdentity(BaseModel):
+    """Exact CI artifact used by the fixed Hermes collection profile."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    id: int = Field(gt=0)
+    name: str = Field(min_length=1, max_length=500)
+    target_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+
+
+class HermesEvidenceDetails(BaseModel):
+    """Bounded structured evidence returned for a Codex evidence request."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    artifact: HermesArtifactIdentity
+    artifact_relative_path: str = Field(min_length=1, max_length=2_000)
+    collector_payload_id: str = Field(min_length=8, max_length=160, pattern=r"^[a-zA-Z0-9._-]+$")
+    exact_target_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    installed_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    knowledge_complete_result_json: dict[str, Any]
+    local_result_path: str = Field(min_length=1, max_length=2_000)
+    pass_evidence_preserved: dict[str, Any]
+    profile: str = Field(min_length=1, max_length=200)
+    sanitized_knowledge_invocation_payload: dict[str, Any]
+    sanitized_sop_invocation_payload: dict[str, Any]
+    sop_complete_result_json: dict[str, Any]
+    source_request_id: str = Field(min_length=8, max_length=120, pattern=r"^[a-zA-Z0-9._-]+$")
+    workflow_run_id: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def bound_nested_evidence(self) -> HermesEvidenceDetails:
+        value = self.model_dump(mode="json")
+        _validate_bounded_evidence_json(value)
+        serialized = json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+        if len(serialized) > MAX_EVIDENCE_DETAILS_JSON_CHARS:
+            raise ValueError("evidence details exceed 48000 JSON characters")
+        if self.artifact.target_sha != self.exact_target_sha:
+            raise ValueError("artifact target SHA does not match exact target SHA")
+        if self.installed_revision != self.exact_target_sha:
+            raise ValueError("installed revision does not match exact target SHA")
+        return self
+
 
 class HermesFailureEvidence(BaseModel):
     """Failure facts asserted by the authenticated Hermes GitHub identity."""
@@ -73,6 +153,7 @@ class HermesFailureEvidence(BaseModel):
     failure_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifacts: list[str] = Field(max_length=20)
     reproducible: bool
+    evidence_details: HermesEvidenceDetails | None = None
 
     @field_validator("artifacts")
     @classmethod
@@ -80,6 +161,19 @@ class HermesFailureEvidence(BaseModel):
         if any(len(item) > 2_000 for item in value):
             raise ValueError("each artifact reference is limited to 2000 characters")
         return value
+
+    @model_validator(mode="after")
+    def detailed_evidence_matches_failure(self) -> HermesFailureEvidence:
+        details = self.evidence_details
+        if details is None:
+            return self
+        if details.exact_target_sha != self.target_sha:
+            raise ValueError("evidence details target SHA does not match the failure")
+        if details.profile != self.profile:
+            raise ValueError("evidence details profile does not match the failure")
+        if details.source_request_id != self.request_id:
+            raise ValueError("evidence details request ID does not match the failure")
+        return self
 
 
 class CodexLocalRequest(BaseModel):

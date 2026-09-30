@@ -186,3 +186,13 @@ other secret values in Issues, comments or artifacts.
 Editing an Issue does not trigger Codex. To submit changed evidence, Hermes posts
 a new payload with the exact SHA it tested, removes `codex-fix`, then reapplies
 it; the changed fingerprint becomes one new request.
+
+When Codex requests bounded follow-up evidence, Hermes may add an optional
+`evidence_details` object to the next `hermes-failure/v1` payload. The object is
+accepted only from the configured Hermes identity and must contain the fixed
+artifact identity, request/profile identity, sanitized SOP and Knowledge
+invocations, their complete JSON results, and preserved passing evidence. Both
+GitHub Actions and the local worker reject extra top-level fields, mismatched
+SHAs or request IDs, non-JSON values, excessive nesting, oversized collections,
+and payloads over 48,000 JSON characters. The content remains untrusted evidence
+inside the Codex prompt and never supplies executable commands.
