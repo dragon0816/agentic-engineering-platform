@@ -3,7 +3,7 @@
 Date: 2026-10-01 (Asia/Taipei)
 Branch: `codex/web-knowledge-asking`
 Base: `origin/main` at merge commit `59d0542` (PR #151)
-PR: pending
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/153
 
 ## Goal
 
@@ -36,14 +36,13 @@ Agent, exact Knowledge capability and Bridge policy, preserving Raw citations.
 
 ## In Progress
 
-- Local implementation and the supported verification baseline are green.
-- Commit, push, pull request and exact-head CI remain to be completed.
+- PR #153 is open at commit `0239d64`; exact-head Platform verification is
+  pending.
 
 ## Remaining
 
-1. Commit and open the slice 5 pull request, wait for exact-head Platform
-   verification, and merge automatically when green under the owner's
-   2026-10-01 instruction.
+1. Wait for PR #153 exact-head Platform verification and merge automatically
+   when green under the owner's 2026-10-01 instruction.
 2. Productization 1 slice 6: replace the in-memory shared Registry references
    with the smallest persistent implementation that preserves current service,
    transport and Bridge execution contracts.
