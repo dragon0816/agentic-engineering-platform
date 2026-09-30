@@ -25,9 +25,9 @@ class MemberCatalogEntry(Contract):
     selected: bool = False
 
     @model_validator(mode="after")
-    def workflow_only(self) -> Self:
-        if self.package.kind != "workflow":
-            raise ValueError("the member Workflow catalog contains only Workflows")
+    def installable_add_on(self) -> Self:
+        if self.package.kind not in ("workflow", "skill"):
+            raise ValueError("the member add-on catalog contains only Workflows and Skills")
         return self
 
 
@@ -39,7 +39,7 @@ class MemberCatalogReply(Contract):
     def unique_assets(self) -> Self:
         keys = [item.package.metadata.identity.key for item in self.entries]
         if len(keys) != len(set(keys)):
-            raise ValueError("a Workflow is listed once")
+            raise ValueError("an add-on is listed once")
         return self
 
 
@@ -57,7 +57,7 @@ class MemberSelectionReply(Contract):
     selection: DeviceAssetSelection
 
     @model_validator(mode="after")
-    def workflow_only(self) -> Self:
-        if self.selection.kind != "workflow":
-            raise ValueError("the member Workflow entry point changes only Workflows")
+    def installable_add_on(self) -> Self:
+        if self.selection.kind not in ("workflow", "skill"):
+            raise ValueError("the member add-on entry point changes only Workflows and Skills")
         return self

@@ -62,6 +62,24 @@ bounded validation-request lifecycle so Hermes can start from a requested
 validation instead of waiting for a manually constructed failure Issue.
 A row says `done` only after its pull request merges.
 
+## Productization 2 — Agent Add-on Marketplace (active)
+
+| Slice | Status | Acceptance evidence |
+|---|---|---|
+| 1 Skill selection and activation | in progress | Member portal lists/selects exact Workflows and Skills, derives kind from the Registry, syncs the Skill and proves a rebuilt Agent uses its deterministic command without adding grants |
+| 2 portable Knowledge package | planned | One exact manifest, immutable Raw and curated Wiki content install through a path-safe closed package without a publisher-controlled local Vault path |
+| 3 Knowledge marketplace activation | planned | Member selection and sync create an exact local Knowledge binding used by grounded Personal Agent Web asking |
+| 4 Agent profile package and activation | planned | A validated installed profile explicitly narrows Skills, Knowledge, capabilities and model requirements without adding multi-Agent delegation |
+| 5 version change and rollback | planned | Explicit update/removal preserves one usable prior exact version and keeps authorization separate |
+
+## Productization 3 — Bridge Extensions and Application Catalog (planned)
+
+Runtime work starts only after Productization 2 has a reproducible passing exit
+path. The planned slices are typed category/compatibility contracts, inert
+extension staging, a bounded extension runner with health/rollback, independent
+Application discovery over governed Software metadata, and lifecycle UI. See
+`docs/phases/PRODUCTIZATION_3_EXTENSIONS_AND_APPS.md`.
+
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
 `ruff`, `mypy`, `pip check` and `python -m build` clean. Nine browser
 cases blocked by the command sandbox passed when rerun outside it. The same

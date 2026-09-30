@@ -198,7 +198,7 @@ class MemberService:
                 for selection in self.authorization.authorization(
                     item.bridge_id, issued_at=now
                 ).for_actor(who.actor)
-                if selection.kind == "workflow"
+                if selection.kind in ("workflow", "skill")
             }
             entries = tuple(
                 MemberCatalogEntry(
@@ -206,7 +206,6 @@ class MemberService:
                     selected=package.metadata.identity.key in selected,
                 )
                 for package in available
-                if package.kind == "workflow"
             )
         return MemberCatalogReply(bridge_id=item.bridge_id, entries=entries)
 
@@ -217,13 +216,18 @@ class MemberService:
         now = self._clock()
         with self._lock:
             who = self._who(session_id, secret, now)
+            package = self.authorization.packages.get(item.asset)
+            if package is None:
+                raise MemberError("asset_not_published")
+            if package.kind not in ("workflow", "skill"):
+                raise MemberError("kind_mismatch")
             try:
                 selected = self.authorization.select(
                     who,
                     DeviceAssetSelection(
                         bridge_id=item.bridge_id,
                         actor=who.actor,
-                        kind="workflow",
+                        kind=package.kind,
                         asset=item.asset,
                         decided_at=now,
                     ),
