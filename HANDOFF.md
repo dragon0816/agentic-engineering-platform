@@ -1,64 +1,64 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/durable-platform-registry`
-Base: `origin/main` at merge commit `779c08d` (PR #153)
-PR: https://github.com/dragon0816/agentic-engineering-platform/pull/155
+Branch: `codex/skill-marketplace`
+Base: `origin/main` at merge commit `792e427` (PR #155)
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/157
 
 ## Goal
 
-Complete Productization 1 slice 6 by making the Shared Platform package catalog
-and artifact store survive process restart without changing Registry,
-synchronization or Bridge execution contracts.
+Begin Productization 2 with the first Agent Add-on Marketplace E2E: select an
+exact shared Skill in the member Web interface, synchronize it, rebuild the
+host and prove the Personal Agent uses the Skill's deterministic command.
 
 ## Completed
 
-- Introduced the provider-neutral `PackageRegistry` boundary already consumed
-  by authorization and control-plane services.
-- Added `SqliteRegistry`, which stores validated `PublishedAssetPackage` JSON
-  by exact `namespace + name + version` and artifact bytes by reference.
-- Artifact SHA-256 is verified before an atomic package/artifact transaction;
-  duplicate exact versions remain rejected after restart.
-- Added schema versioning and fail-closed errors for unsupported schemas,
-  corrupt records and unavailable storage. The CLI reports these as unusable
-  configuration rather than starting or printing a traceback.
-- Added optional absolute `registry_path` configuration. The deployable example
-  uses it; omitting it retains the in-memory backend for inert tests.
-- Proved that existing catalog discovery and synchronization consume reopened
-  durable records through their unchanged contracts.
-- Kept credentials, invitation proofs, member sessions, device selections,
-  remote jobs, grants and all Bridge/local execution state outside the catalog.
-- Updated Architecture, Contracts, Roadmap, Tasks, Phase 7 notes, the active
-  Productization specification and deployment guide after validation.
+- Added Productization 2 and planned Productization 3 specifications grounded
+  in Product Vision and the existing Agent Add-on / Bridge Extension /
+  independent Application architecture boundary.
+- Generalized the authenticated member catalog from Workflow-only to exact
+  Workflows and Skills. Other kinds remain refused until they have compatible
+  package and activation contracts.
+- Member select requests still carry only Bridge id and asset identity. The
+  platform derives `workflow` or `skill` from trusted Registry metadata; a
+  client-supplied kind is rejected by the closed contract.
+- Updated the dependency-free member UI to show add-on kind and selection.
+- Added a real-socket E2E crossing member selection, Personal Agent Web sync,
+  control-plane HTTP, all-or-nothing Bridge install, host rebuild, Skill
+  registry, deterministic routing, Workflow engine and Bridge policy.
+- Proved that selecting a Skill does not add or widen capability grants and
+  that an unsupported Knowledge kind cannot enter this install path.
+- Updated Architecture, Contracts, Roadmap and Tasks after the green path.
 
 ## In Progress
 
-- PR #155 is open. Exact-head GitHub Platform verification must pass before the
-  owner-authorized automatic merge.
+- PR #157 is open at implementation commit `2dfaa25`. Exact-head Platform
+  verification must pass before the owner-authorized automatic merge.
 
 ## Remaining
 
-1. Wait for PR #155 exact-head Windows/Python 3.12 verification and merge it
+1. Wait for PR #157 exact-head Windows/Python 3.12 verification and merge it
    automatically when green.
-2. Read Product Vision, acceptance tests, Roadmap and Tasks from merged `main`
-   to name Productization stages 2 and 3. No stage-2/3 specification currently
-   exists, so add the smallest architecture/acceptance slice before
-   implementation rather than inventing a parallel platform.
-3. Begin the first stage-2 vertical proof and stop before stage 3 unless its
-   predecessor has a reproducible green path.
+2. Productization 2 slice 2: define and implement one path-safe portable
+   Knowledge package containing an exact manifest plus immutable Raw and
+   curated Wiki content, with no publisher-controlled local Vault path.
+3. Continue slices 3–5 sequentially; Productization 3 runtime implementation
+   begins only after Productization 2 has a reproducible exit path.
 
 ## Architecture decisions made
 
-- **ADAPT** the existing in-memory package interface behind `PackageRegistry`;
-  do not replace service, HTTP, member, authorization or Bridge wire contracts.
-- Persist package metadata and the bytes synchronization needs in the same
-  SQLite transaction. Metadata-only durability would make discovery survive
-  while making installation fail after restart.
-- Treat the Registry as the control-plane catalog only. Enrollment, runtime
-  authorization, sessions, jobs and execution have different lifecycles and
-  remain out of this bounded store.
-- Refuse unknown database schemas and invalid stored contracts. There is no
-  implicit migration or partial fallback to ambiguous data.
+- **REUSE** the existing package, device selection, platform synchronization,
+  Skill manifest and Skill registry contracts. The missing behavior was a
+  Workflow-only member projection, not another installer.
+- Derive add-on kind from the Registry package. The member cannot relabel a
+  Skill as a Workflow or decide installation semantics.
+- Skills remain procedure/routing data and may target only an existing typed
+  Workflow or capability. This slice introduces no executable plug-in loader.
+- Keep Knowledge and Agent profiles out of the Skill/Workflow installer until
+  their portable package and activation contracts are explicit.
+- Productization 3 keeps Bridge Extensions separate from independent Apps;
+  its process isolation, signature and activation policy decisions remain
+  explicit gates before executable extension work.
 
 ## Verification
 
@@ -66,28 +66,33 @@ Supported target: Windows, Python 3.12 only. No Ubuntu run was performed.
 Browser automation was excluded per owner direction.
 
 ```text
-Focused Registry/platform/transport suite:
-python -m pytest tests/test_registry_sqlite.py tests/test_shared_platform_app.py
-  tests/test_platform_transport.py -q
-33 passed, 1 skipped
+Focused member/platform suite:
+python -m pytest tests/test_member_portal.py tests/test_skill_marketplace.py
+  tests/test_platform_transport.py tests/test_shared_platform_app.py -q
+31 passed, 1 skipped
+
+Final Skill/member/Personal Web suite:
+python -m pytest tests/test_skill_marketplace.py tests/test_member_portal.py
+  tests/test_agent_web.py -q
+38 passed
 
 Full supported suite:
 python -m pytest --ignore=tests/test_browser.py -q
-1402 passed, 4 skipped in 54.14s
+1404 passed, 4 skipped in 54.97s
 
 python -m ruff check .
 All checks passed!
 
 python -m ruff format --check .
-304 files already formatted
+307 files already formatted
 
 python -m mypy
-Success: no issues found in 238 source files
+Success: no issues found in 239 source files
 
 python -m pip check
 No broken requirements found.
 
-python -m build --outdir <repo>/.scratch/build-durable-registry
+python -m build --outdir <repo>/.scratch/build-skill-marketplace
 Successfully built sdist and wheel.
 
 git diff --check
@@ -99,17 +104,18 @@ privileges, IPv6 loopback and directory links.
 
 ## Known issues
 
-- SQLite now makes only packages and artifacts durable. A platform restart
-  still loses enrollment, access tokens, member sessions, invitations, device
-  selections and remote jobs.
-- There is no Registry administration/publishing UI in this slice.
-- SQLite schema upgrades intentionally fail closed; a future schema change
-  needs an explicit, tested migration.
+- The member portal currently requires the user to enter the Bridge id; a
+  later UX slice can project the member's bound devices without changing
+  selection authority.
+- Portable Knowledge, Agent-profile activation, add-on removal and rollback
+  are not part of this first slice.
+- Platform member/session/selection records remain reference in-memory state;
+  only Registry package metadata and artifacts are durable.
 
 ## Next Recommended Action
 
-After PR #155 merges, inspect the merged product documents and create the next
-bounded productization specification. Based on the current product direction,
-the likely next user outcome is installing additional shared capability types
-from Personal Agent Web, but the exact stage boundary and acceptance scenario
-must be grounded in repository source-of-truth documents first.
+After PR #157 merges, implement Productization 2 slice 2 as a contract-first
+portable Knowledge package. Reuse `KnowledgeManifest`, Vault provenance and
+the existing all-or-nothing synchronization boundary; refuse traversal,
+identity mismatch, digest mismatch and any package-supplied absolute Vault
+path before writing.

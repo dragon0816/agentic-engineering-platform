@@ -66,7 +66,7 @@ A row says `done` only after its pull request merges.
 
 | Slice | Status | Acceptance evidence |
 |---|---|---|
-| 1 Skill selection and activation | in progress | Member portal lists/selects exact Workflows and Skills, derives kind from the Registry, syncs the Skill and proves a rebuilt Agent uses its deterministic command without adding grants |
+| 1 Skill selection and activation | in progress | PR #157: member portal lists/selects exact Workflows and Skills, derives kind from the Registry, syncs the Skill and proves a rebuilt Agent uses its deterministic command without adding grants |
 | 2 portable Knowledge package | planned | One exact manifest, immutable Raw and curated Wiki content install through a path-safe closed package without a publisher-controlled local Vault path |
 | 3 Knowledge marketplace activation | planned | Member selection and sync create an exact local Knowledge binding used by grounded Personal Agent Web asking |
 | 4 Agent profile package and activation | planned | A validated installed profile explicitly narrows Skills, Knowledge, capabilities and model requirements without adding multi-Agent delegation |
