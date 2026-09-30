@@ -72,6 +72,29 @@ def request_payload(**changes: object) -> dict[str, object]:
     return payload
 
 
+def evidence_details(*, request_id: str = "hermes-run-113-001") -> dict[str, object]:
+    return {
+        "artifact": {
+            "id": 12345,
+            "name": f"aep-windows-preview-{'a' * 40}",
+            "target_sha": "a" * 40,
+        },
+        "artifact_relative_path": "runs/example/artifacts/company-agent-integration-result.json",
+        "collector_payload_id": f"{request_id}-evidence",
+        "exact_target_sha": "a" * 40,
+        "installed_revision": "a" * 40,
+        "knowledge_complete_result_json": {"capability": {"status": "failed"}},
+        "local_result_path": "<USER_HOME>/runs/example/company-agent-integration-result.json",
+        "pass_evidence_preserved": {"PERSONAL_WORKFLOW": True},
+        "profile": "aep-company-agent-integration-v1",
+        "sanitized_knowledge_invocation_payload": {"command": ["aep-host", "ask"]},
+        "sanitized_sop_invocation_payload": {"command": ["aep-host", "ask"]},
+        "sop_complete_result_json": {"capability": {"status": "failed"}},
+        "source_request_id": request_id,
+        "workflow_run_id": 67890,
+    }
+
+
 def test_queue_workflow_has_a_narrow_authenticated_trigger_without_api_codex() -> None:
     text = QUEUE_WORKFLOW.read_text(encoding="utf-8")
 
@@ -99,6 +122,9 @@ def test_queue_workflow_deduplicates_a_failure_fingerprint() -> None:
     assert "target_sha" in text
     assert "No valid bot-authored hermes-failure/v1 payload" in text
     assert "base_sha: hermesFailure.target_sha" in text
+    assert '"evidence_details"' in text
+    assert "validEvidenceDetails" in text
+    assert "serialized.length <= 48000" in text
 
 
 def test_handoff_workflow_is_exact_sha_bot_authored_and_never_merges() -> None:
@@ -149,6 +175,34 @@ def test_request_contract_rejects_extra_fields_and_invalid_sha() -> None:
     failure = dict(cast(dict[str, object], request_payload()["hermes_failure"]))
     failure["command"] = "gh api /user"
     with pytest.raises(ValidationError):
+        CodexLocalRequest.model_validate(request_payload(hermes_failure=failure))
+
+
+def test_request_contract_accepts_bounded_structured_hermes_evidence() -> None:
+    payload = request_payload()
+    failure = dict(cast(dict[str, object], payload["hermes_failure"]))
+    failure["evidence_details"] = evidence_details()
+
+    request = CodexLocalRequest.model_validate(request_payload(hermes_failure=failure))
+
+    assert request.hermes_failure.evidence_details is not None
+    assert request.hermes_failure.evidence_details.workflow_run_id == 67890
+    assert "knowledge_complete_result_json" in build_prompt(request)
+
+
+def test_request_contract_rejects_unbounded_or_mismatched_structured_evidence() -> None:
+    payload = request_payload()
+    failure = dict(cast(dict[str, object], payload["hermes_failure"]))
+    oversized = evidence_details()
+    oversized["knowledge_complete_result_json"] = {"message": "x" * 10_001}
+    failure["evidence_details"] = oversized
+    with pytest.raises(ValidationError, match="10000"):
+        CodexLocalRequest.model_validate(request_payload(hermes_failure=failure))
+
+    mismatched = evidence_details()
+    mismatched["installed_revision"] = "d" * 40
+    failure["evidence_details"] = mismatched
+    with pytest.raises(ValidationError, match="installed revision"):
         CodexLocalRequest.model_validate(request_payload(hermes_failure=failure))
 
 

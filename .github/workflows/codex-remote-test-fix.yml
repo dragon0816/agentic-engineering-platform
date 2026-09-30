@@ -41,14 +41,74 @@ jobs:
               issue_number: issue.number,
               per_page: 100,
             });
-            const allowedFailureKeys = new Set([
+            const requiredFailureKeys = new Set([
               "schema", "producer", "request_id", "repository", "source_issue",
               "target_sha", "build", "machine", "bridge", "actor", "profile",
               "test", "stage", "expected", "actual", "failure_code",
               "failure_fingerprint", "artifacts", "reproducible",
             ]);
+            const allowedFailureKeys = new Set([
+              ...requiredFailureKeys,
+              "evidence_details",
+            ]);
             const validText = (value, limit) =>
               typeof value === "string" && value.length <= limit;
+            const boundedJson = (value, depth = 0) => {
+              if (depth > 16) return false;
+              if (value === null || typeof value === "boolean") return true;
+              if (typeof value === "number") return Number.isFinite(value);
+              if (typeof value === "string") return value.length <= 10000;
+              if (Array.isArray(value)) {
+                return value.length <= 100 && value.every((item) => boundedJson(item, depth + 1));
+              }
+              if (typeof value === "object") {
+                const entries = Object.entries(value);
+                return entries.length <= 100 && entries.every(([key, item]) =>
+                  key.length <= 200 && boundedJson(item, depth + 1)
+                );
+              }
+              return false;
+            };
+            const validEvidenceDetails = (details, failure) => {
+              if (!details || typeof details !== "object" || Array.isArray(details)) return false;
+              const requiredKeys = new Set([
+                "artifact", "artifact_relative_path", "collector_payload_id",
+                "exact_target_sha", "installed_revision", "knowledge_complete_result_json",
+                "local_result_path", "pass_evidence_preserved", "profile",
+                "sanitized_knowledge_invocation_payload", "sanitized_sop_invocation_payload",
+                "sop_complete_result_json", "source_request_id", "workflow_run_id",
+              ]);
+              const keys = Object.keys(details);
+              if (keys.length !== requiredKeys.size || !keys.every((key) => requiredKeys.has(key))) {
+                return false;
+              }
+              const artifact = details.artifact;
+              let serialized;
+              try {
+                serialized = JSON.stringify(details);
+              } catch (_error) {
+                return false;
+              }
+              return serialized.length <= 48000 &&
+                boundedJson(details) &&
+                validText(details.artifact_relative_path, 2000) &&
+                validText(details.local_result_path, 2000) &&
+                validText(details.collector_payload_id, 160) &&
+                /^[A-Za-z0-9._-]{8,160}$/.test(details.collector_payload_id) &&
+                validText(details.source_request_id, 120) &&
+                /^[A-Za-z0-9._-]{8,120}$/.test(details.source_request_id) &&
+                details.source_request_id === failure.request_id &&
+                details.exact_target_sha === failure.target_sha &&
+                details.installed_revision === failure.target_sha &&
+                details.profile === failure.profile &&
+                Number.isInteger(details.workflow_run_id) && details.workflow_run_id > 0 &&
+                artifact && typeof artifact === "object" && !Array.isArray(artifact) &&
+                Object.keys(artifact).length === 3 &&
+                Object.keys(artifact).every((key) => ["id", "name", "target_sha"].includes(key)) &&
+                Number.isInteger(artifact.id) && artifact.id > 0 &&
+                validText(artifact.name, 500) && artifact.name.length > 0 &&
+                artifact.target_sha === failure.target_sha;
+            };
             let hermesFailure = null;
             for (const comment of [...comments].reverse()) {
               if (comment.user?.login !== process.env.HERMES_USER) continue;
@@ -60,7 +120,7 @@ jobs:
                 const candidate = JSON.parse(match[1]);
                 const keys = Object.keys(candidate);
                 const valid =
-                  keys.length === allowedFailureKeys.size &&
+                  [...requiredFailureKeys].every((key) => keys.includes(key)) &&
                   keys.every((key) => allowedFailureKeys.has(key)) &&
                   candidate.schema === "hermes-failure/v1" &&
                   candidate.producer === "hermes-testing-agent" &&
@@ -85,7 +145,9 @@ jobs:
                   typeof candidate.reproducible === "boolean" &&
                   Array.isArray(candidate.artifacts) &&
                   candidate.artifacts.length <= 20 &&
-                  candidate.artifacts.every((item) => validText(item, 2000));
+                  candidate.artifacts.every((item) => validText(item, 2000)) &&
+                  (candidate.evidence_details === undefined ||
+                    validEvidenceDetails(candidate.evidence_details, candidate));
                 if (valid) {
                   hermesFailure = candidate;
                   break;

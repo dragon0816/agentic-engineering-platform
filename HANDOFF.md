@@ -1,57 +1,57 @@
 # Handoff
 
 Date: 2026-09-30 (Asia/Taipei)
-Branch: `codex/local-worker-result-diagnostics`
-Base: `origin/main` at `4664a358cebcea9eba9efa361dadc76f3887feac`
+Branch: `codex/hermes-structured-evidence`
+Base: `origin/main` at `127c69f059e470486ab44b63e964ce611dc6d018`
 
 ## Goal
 
-Recover the trusted Local Codex Pro repair worker after Issue #132 reached it
-successfully but stopped with `FileNotFoundError` before writing a structured
-result or opening a Draft PR.
+Allow the trusted Hermes evidence response requested by Local Codex to become a
+new queue item without weakening the fixed-schema, untrusted-evidence boundary.
 
 ## Completed
 
-- Confirmed the Hermes-to-GitHub handoff completed: #132 contains trusted
-  failure evidence, `codex-fix`, and bot-authored request
-  `codex-local-132-d6e5edb4a9385e4a`.
-- Confirmed the development-computer worker created its isolated worktree and
-  result schema, but no `result.json`; no PR or merge occurred.
-- Added deterministic Codex executable resolution that prefers `codex.exe`,
-  then `codex.cmd`, before the generic name.
-- Converted a missing structured result into an explicit `CommandFailure`
-  rather than an unclassified `FileNotFoundError`.
-- Allowed an explicitly re-queued failed request to run once more. Claiming it
-  removes the queue label, so failure does not create a retry loop.
-- Preserved and reused a failed worker worktree only when its complete Git
-  status is clean; partially modified workspaces remain refused for review.
-- Documented the retry and executable/result boundaries.
+- Confirmed PR #133 merged, updated the OpenLab Local Codex Worker checkout to
+  merge commit `127c69f`, rebuilt its Python 3.12 virtual environment, and
+  restarted the `AEP Local Codex Worker` Scheduled Task.
+- Re-queued Issue #132 once. The worker successfully replaced its earlier
+  `FileNotFoundError` with a bounded evidence request.
+- Confirmed Hermes returned complete evidence on both #132 and the newer #134.
+- Diagnosed the apparent successful-but-idle queue run: the workflow's exact
+  key allowlist rejected Hermes' new `evidence_details`, then selected the older
+  valid failure and deduplicated its already-existing request.
+- Added an optional structured evidence contract shared by GitHub validation and
+  the Python worker. It requires exact artifact/request/profile/SHA identities,
+  fixed top-level fields, JSON-only values, bounded depth/collections/strings,
+  and a 48,000-character total cap.
+- Replayed the actual latest #134 Hermes payload against the new Python contract;
+  it was accepted at 7,202 JSON characters for target `127c69f`.
 
 ## In Progress
 
-- Repair commit `26f7cf9` is pushed and open for review as PR #133:
-  https://github.com/dragon0816/agentic-engineering-platform/pull/133
+- Repair commit `aa697fc` is pushed and open for review as PR #135:
+  https://github.com/dragon0816/agentic-engineering-platform/pull/135
 
 ## Remaining
 
-1. Review and merge PR #133.
-2. After merge, update the resident worker checkout to `main`, recreate its
-   broken Python 3.12 virtual environment, and restart the
-   `AEP Local Codex Worker` Scheduled Task so its in-memory code is current.
-3. Re-add `codex-local-queued` to #132 once. The same trusted request and clean
-   preserved worktree should be reused.
-4. Confirm the worker either opens a Draft PR or emits a bounded evidence
-   request; it must not produce another unclassified failure.
+1. Review and merge PR #135.
+2. After merge, reapply `codex-fix` to the newer Issue #134 once so GitHub queues
+   its structured evidence for Local Codex. Keep #132 as historical evidence.
+3. Confirm #134 becomes `codex-local-running` and then produces either a Draft
+   repair PR or a bounded terminal result.
+4. If a Draft repair PR appears, let CI pass and have Hermes retest its exact
+   head SHA; human review remains required before merge.
 
 ## Architecture decisions made
 
-- GitHub remains the durable queue; retry does not create a new Issue or request
-  identity.
-- A retry is operator-triggered by the queue label and bounded to one claim. It
-  is not an automatic loop.
-- Failed work is never silently discarded or reused after mutation.
-- The Codex subprocess still receives no GitHub token or OpenAI API key and has
-  no delivery authority; the deterministic outer worker verifies and delivers.
+- `evidence_details` is optional, preserving initial `hermes-failure/v1`
+  payloads and existing producers.
+- Structured evidence remains data inside the untrusted prompt block. It cannot
+  provide commands, GitHub credentials, delivery authority, or merge authority.
+- GitHub and the local worker both validate the contract; accepting it only at
+  one boundary would leave the loop failing later or weaken defense in depth.
+- #134 is the next active repair because it tests the latest merged main SHA;
+  #132 is retained as auditable historical evidence.
 
 ## Verification
 
@@ -60,32 +60,40 @@ instruction.
 
 ```text
 python -m pytest tests/test_codex_remote_test_workflow.py -q
-19 passed
+21 passed
 
 python -m pytest --ignore=tests/test_browser.py -q
-1344 passed, 4 skipped
+1346 passed, 4 skipped
 
-python -m ruff check src/development/codex_worker.py tests/test_codex_remote_test_workflow.py
+python -m ruff check .
 All checks passed
 
-python -m ruff format --check src/development/codex_worker.py tests/test_codex_remote_test_workflow.py
-2 files already formatted (after applying the formatter)
+python -m ruff format --check .
+288 files already formatted
 
 python -m mypy src tests
 Success: no issues found in 224 source files
+
+Live #134 contract replay
+live_payload=accepted
+target_sha=127c69f059e470486ab44b63e964ce611dc6d018
+evidence_json_chars=7202
 ```
+
+The first full-suite attempt used a workspace `.scratch` basetemp and produced
+48 existing file-store failures with `unavailable`; the representative test and
+the complete suite passed when rerun under the standard Windows TEMP root.
 
 ## Known issues
 
-- The resident scheduled process was launched from an older worker checkout and
-  must be restarted after this repair merges. Its existing `.venv` points to a
-  removed Windows Store Python path and must be recreated with Python 3.12.
-- Issue #132 remains `codex-local-failed`; it has not been re-queued while the
-  repair is unmerged.
-- Hermes' separate cron crash still needs its own runner-side traceback and fix;
-  it must not replay #132 while the Local Codex worker is being repaired.
+- Until this branch merges, reapplying `codex-fix` merely selects the older
+  payload and reports workflow success without queueing the structured evidence.
+- #132 and #134 still carry `codex-local-evidence-requested`; neither should be
+  treated as a completed repair.
+- Hermes reported consuming both trusted evidence requests in one poll. The
+  latest-main #134 is the only Issue that should be advanced after this fix.
 
 ## Next Recommended Action
 
-Review and merge PR #133, then update and restart the development computer's
-worker and re-add `codex-local-queued` to Issue #132 exactly once.
+Review and merge PR #135. Then reapply `codex-fix` to
+Issue #134 exactly once and monitor the resident Local Codex Worker.
