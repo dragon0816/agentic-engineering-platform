@@ -43,7 +43,9 @@ replaceable.
 
 ## In Progress
 
-- PR #137 is open with green Platform verification and awaiting review/merge.
+- PR #137 is open and awaiting a clean latest-head Platform verification. The
+  first feature head passed; the role-contract head hit one existing browser
+  transport flake described below.
 
 ## Remaining
 
@@ -132,10 +134,18 @@ TELEGRAM_OWNER_USER_ID; no values printed
   no network or messaging side effects.
 - Telegram worker-state messages are best effort. A missed Telegram message does
   not lose work because GitHub remains authoritative.
+- GitHub run `36661359498` passed all eight new Telegram tests but its full suite
+  hit the existing Windows browser transport flake:
+  `test_a_signed_in_profile_is_what_carries_the_session` failed with
+  `navigation_failed: WebSocketError` after WinError 10053. The previous PR #137
+  run passed this test and the owner limits local verification to non-browser
+  Python 3.12 tests. The configured token lacks Actions write permission, so a
+  documentation commit starts a fresh run instead of calling rerun.
 
 ## Next Recommended Action
 
-Review and merge PR #137. Then update/restart the one resident Local Codex Worker
+Confirm the latest PR #137 run is green, then review and merge it. After merge,
+update/restart the one resident Local Codex Worker
 and run the two-message group smoke test:
 owner `/status`, followed by one Validation Agent implementation event whose
 GitHub evidence already exists and one Issue-free `mechanism_blocked` event.
