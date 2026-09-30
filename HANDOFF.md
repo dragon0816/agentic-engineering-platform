@@ -32,27 +32,27 @@ message text, mutate GitHub or grant access.
 - Documented the Coding and Validation Agent trust checks and the exact meaning
   of the model-routing guidance action in architecture, contracts and the remote
   loop runbook.
+- Committed the slice as `854bf2f`, pushed it and opened PR #140:
+  https://github.com/dragon0816/agentic-engineering-platform/pull/140
 
 ## In Progress
 
-- The implementation is verified locally but not yet committed, pushed or
-  opened as a pull request.
+- PR #140 is open; Platform verification passed and owner review/merge remains.
 - Issue #139 remains blocked until this slice is merged, the resident Local Codex
   worker is updated/restarted and Hermes implements the fixed guidance consumer.
 
 ## Remaining
 
-1. Commit and push this branch; open a PR against `main`.
-2. Confirm Platform verification is green and have the owner merge the PR.
-3. Fast-forward the resident Local Codex worker checkout and restart the existing
+1. Have the owner review and merge green PR #140.
+2. Fast-forward the resident Local Codex worker checkout and restart the existing
    `AEP Local Codex Worker` Scheduled Task.
-4. Confirm the shared group receives one guidance message for the retained #139
+3. Confirm the shared group receives one guidance message for the retained #139
    event and no duplicate on later polls.
-5. Hermes must accept guidance only from the configured Coding Bot in the exact
+4. Hermes must accept guidance only from the configured Coding Bot in the exact
    group, match event/request/SHA, allowlist the action, persist the event id,
    provision only the credential-free model fixture from its fixed profile and
    retry the same validation request.
-6. Hermes must report `mechanism_resolved` or a bounded `mechanism_update`; an
+5. Hermes must report `mechanism_resolved` or a bounded `mechanism_update`; an
    implementation failure still goes through GitHub and `codex-fix`.
 
 ## Architecture decisions made
@@ -110,6 +110,11 @@ suite passed as recorded above.
 
 ## Known issues
 
+- Hermes currently replays historical Issue #120 payload
+  `validation-36432983270` with the unchanged blocker `CI artifact unavailable`
+  and emits repeated GitHub/Telegram messages. This is a Hermes poller
+  idempotency defect: it must persist the blocker fingerprint, silently skip an
+  unchanged blocked request and keep the global poller available for #139.
 - Hermes does not yet consume `aep-agent-coordination-guidance/v1`; its local
   poller/skill must add this fixed schema and action before #139 can resume
   automatically.
@@ -124,6 +129,6 @@ suite passed as recorded above.
 
 ## Next Recommended Action
 
-Commit this verified slice, push it and open a PR against `main`. After the owner
-merges it, update/restart the resident worker; it should emit guidance for the
-already retained #139 blocker without another Hermes message.
+Review and merge green PR #140. Then update/restart the resident worker; it
+should emit guidance for the already retained #139 blocker without another
+Hermes message.
