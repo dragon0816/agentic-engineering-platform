@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from common.assets import SecretRef
 from development.telegram_control import (
+    MechanismGuidance,
     MechanismProblem,
     TelegramControlConfig,
     TelegramControlPlane,
@@ -297,6 +298,148 @@ def test_mechanism_problem_needs_no_issue_and_is_persisted_with_a_bounded_next_a
         ValidationControlEvent.model_validate(event(mechanism=mechanism))
     with pytest.raises(ValidationError):
         MechanismProblem.model_validate(mechanism | {"command": "restart everything"})
+
+
+def test_known_model_routing_blocker_emits_one_closed_guidance_after_ack(
+    tmp_path: Path,
+) -> None:
+    payload = event(
+        event_id="mechanism-blocked-139-model-routing",
+        event="mechanism_blocked",
+        issue=None,
+        request_id="validate-e2e-02-43d4b9a-20260930",
+        target_sha="b" * 40,
+        mechanism={
+            "code": "MODEL_ROUTING_NOT_CONFIGURED",
+            "summary": "The fixed validation profile could not start.",
+            "expected": "The profile-owned loopback model is available.",
+            "observed": "The host has no models configuration.",
+            "evidence_refs": ["github://example/issues/139#issuecomment-1"],
+            "requested_response": "diagnosis",
+        },
+    )
+    transport = Transport(
+        ok_updates(update(40, sender=2002, is_bot=True, text=json.dumps(payload))),
+        ok_sent(),
+        ok_sent(),
+    )
+
+    result = plane(tmp_path, transport).poll_once()
+
+    assert result.failure is None
+    assert result.processed == 2
+    ack = json.loads(transport.calls[1][1]["text"])
+    guidance = json.loads(transport.calls[2][1]["text"])
+    assert ack["next_action"] == "coding_agent_review_required"
+    assert guidance == {
+        "schema": "aep-agent-coordination-guidance/v1",
+        "producer": "coding-agent",
+        "event_id": "mechanism-blocked-139-model-routing",
+        "repository": REPOSITORY,
+        "issue": None,
+        "request_id": "validate-e2e-02-43d4b9a-20260930",
+        "target_sha": "b" * 40,
+        "mechanism_code": "MODEL_ROUTING_NOT_CONFIGURED",
+        "action": "provision_profile_model_routing",
+        "next_action": "retry_same_validation_request",
+        "hop": 1,
+    }
+    assert MechanismGuidance.model_validate(guidance).action == ("provision_profile_model_routing")
+    state = json.loads((tmp_path / "telegram-state.json").read_text(encoding="utf-8"))
+    assert state["guidance_event_ids"] == ["mechanism-blocked-139-model-routing"]
+
+    duplicate = Transport(
+        ok_updates(update(41, sender=2002, is_bot=True, text=json.dumps(payload)))
+    )
+    duplicate_result = plane(tmp_path, duplicate).poll_once()
+    assert duplicate_result.processed == 0
+    assert len(duplicate.calls) == 1
+
+
+def test_existing_model_routing_blocker_gets_guidance_after_worker_upgrade(
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "telegram-state.json"
+    state_path.write_text(
+        json.dumps(
+            {
+                "next_offset": 50,
+                "event_ids": ["mechanism-blocked-139-existing"],
+                "mechanism_events": [
+                    {
+                        "event_id": "mechanism-blocked-139-existing",
+                        "request_id": "validate-e2e-02-43d4b9a-20260930",
+                        "target_sha": "c" * 40,
+                        "issue": None,
+                        "problem": {
+                            "code": "MODEL_ROUTING_NOT_CONFIGURED",
+                            "summary": "The profile did not start.",
+                            "expected": "A profile-owned loopback model binding.",
+                            "observed": "No models configuration was present.",
+                            "evidence_refs": [],
+                            "requested_response": "diagnosis",
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    transport = Transport(ok_updates(), ok_sent())
+
+    result = plane(tmp_path, transport).poll_once()
+
+    assert result.failure is None
+    assert result.processed == 1
+    guidance = json.loads(transport.calls[1][1]["text"])
+    assert guidance["schema"] == "aep-agent-coordination-guidance/v1"
+    assert guidance["event_id"] == "mechanism-blocked-139-existing"
+    assert guidance["next_action"] == "retry_same_validation_request"
+
+
+def test_mechanism_guidance_contract_rejects_arbitrary_actions() -> None:
+    with pytest.raises(ValidationError):
+        MechanismGuidance.model_validate(
+            {
+                "schema": "aep-agent-coordination-guidance/v1",
+                "producer": "coding-agent",
+                "event_id": "mechanism-blocked-139-model-routing",
+                "repository": REPOSITORY,
+                "issue": None,
+                "request_id": "validate-e2e-02-43d4b9a-20260930",
+                "target_sha": "d" * 40,
+                "mechanism_code": "MODEL_ROUTING_NOT_CONFIGURED",
+                "action": "run_shell_command",
+                "next_action": "retry_same_validation_request",
+                "hop": 1,
+            }
+        )
+
+
+def test_resolved_model_routing_event_does_not_emit_retry_guidance(tmp_path: Path) -> None:
+    payload = event(
+        event_id="mechanism-resolved-139-model-routing",
+        event="mechanism_resolved",
+        issue=None,
+        mechanism={
+            "code": "MODEL_ROUTING_NOT_CONFIGURED",
+            "summary": "The profile-owned model binding is now installed.",
+            "expected": "The same request can resume.",
+            "observed": "Preflight found the fixed loopback route.",
+            "evidence_refs": [],
+            "requested_response": "resume_decision",
+        },
+    )
+    transport = Transport(
+        ok_updates(update(60, sender=2002, is_bot=True, text=json.dumps(payload))),
+        ok_sent(),
+    )
+
+    result = plane(tmp_path, transport).poll_once()
+
+    assert result.processed == 1
+    assert len(transport.calls) == 2
+    assert json.loads(transport.calls[1][1]["text"])["next_action"] == "resume_validation"
 
 
 def test_worker_notification_is_fixed_best_effort_json(tmp_path: Path) -> None:

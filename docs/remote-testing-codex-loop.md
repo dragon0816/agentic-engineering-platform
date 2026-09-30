@@ -64,6 +64,7 @@ Validation Agent writes implementation evidence/result to GitHub
   -> Validation bot posts one fixed event in the shared group
   -> Coding bot verifies the referenced Issue in GitHub
   -> Coding bot posts one terminal acknowledgement
+  -> known mechanism code may receive one closed guidance action
   -> Coding Worker reports running/evidence-required/failed/PR-ready
      states to the same group
 ```
@@ -103,9 +104,27 @@ a GitHub Issue. The Validation bot may send this bounded record instead:
 
 The Coding bot persists the bounded mechanism record and acknowledges
 `coding_agent_review_required`. It does not run the text as code or a Codex
-prompt. A later bounded handler may automate diagnosis. If the diagnosis needs
-a repository change, the Validation Agent creates the normal typed GitHub Issue;
-only that path may start implementation work.
+prompt. Unknown codes remain at that state. The first bounded diagnosis handler
+recognizes only an unresolved `MODEL_ROUTING_NOT_CONFIGURED` blocker and sends:
+
+```json
+{"schema":"aep-agent-coordination-guidance/v1","producer":"coding-agent","event_id":"mechanism-company-agent-001","repository":"dragon0816/agentic-engineering-platform","issue":null,"request_id":"deployment-company-agent-36591676672","target_sha":"0123456789abcdef0123456789abcdef01234567","mechanism_code":"MODEL_ROUTING_NOT_CONFIGURED","action":"provision_profile_model_routing","next_action":"retry_same_validation_request","hop":1}
+```
+
+The Validation Agent accepts guidance only from the configured Coding bot in the
+exact group, with matching event id, request id and target SHA. The only action
+means: load the credential-free model fixture already declared by the allowlisted
+validation profile, bind it through that profile's bounded loopback policy,
+validate the resulting host configuration and retry the same request. It does not
+permit a production endpoint, credential, arbitrary configuration or new request.
+Hermes records the guidance event id before acting and reports either
+`mechanism_resolved` or a new bounded `mechanism_update`; it never replies to the
+terminal acknowledgement. Coding-side durable guidance ids prevent a worker
+upgrade from sending the same decision twice, while Hermes-side idempotency covers
+the rare send-success/state-save-failure boundary.
+
+If the diagnosis needs a repository change, the Validation Agent creates the
+normal typed GitHub Issue; only that path may start implementation work.
 
 Configure the four optional entries in the development computer's ignored
 `.env/local.yaml`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_USER_ID`,
