@@ -39,7 +39,7 @@ from common.sync import (
     WireErrorCode,
 )
 from control_plane.authorization import InMemoryAuthorizationRegistry
-from control_plane.distribution import ControlError, InMemoryPackageRegistry, InMemoryRemoteControl
+from control_plane.distribution import ControlError, InMemoryRemoteControl, PackageRegistry
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity import AccessError, InMemoryAccessTokens
 
@@ -99,7 +99,7 @@ class ControlPlaneService:
         *,
         enrollment: InMemoryEnrollmentRegistry,
         tokens: InMemoryAccessTokens,
-        packages: InMemoryPackageRegistry,
+        packages: PackageRegistry,
         authorization: InMemoryAuthorizationRegistry,
         control: InMemoryRemoteControl,
         artifacts: Mapping[str, bytes],

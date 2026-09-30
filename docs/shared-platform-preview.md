@@ -11,8 +11,9 @@ separate:
 - neither credential can be used at the other boundary.
 
 The checked-in [`examples/shared-platform.json`](../examples/shared-platform.json)
-contains only non-secret bootstrap metadata. Start the loopback reference host
-from PowerShell with an invitation output outside source control:
+contains only non-secret bootstrap metadata and an absolute local Registry
+path. Start the loopback reference host from PowerShell with an invitation
+output outside source control:
 
 ```powershell
 $InviteOut = Join-Path $env:LOCALAPPDATA "AgenticEngineeringPlatform\invitation-links.json"
@@ -49,8 +50,9 @@ The Personal Agent Web link is configured independently from the Bridge API:
 non-secret navigation metadata rendered by Personal Agent Web; the Bridge
 token is never sent to it.
 
-This is still an in-memory reference deployment. Restarting it loses members,
-sessions, invitations, selections and package records. It does not yet expose
-an administration UI or load a durable Registry. Those limits are explicit so
-this composition validates the user path without prematurely choosing a
-production database or identity provider.
+Published package metadata and verified artifact bytes survive a restart in
+the configured SQLite Registry. Members, sessions, invitations, device
+selections and remote jobs remain in-memory reference state. The process does
+not yet expose an administration UI or production identity provider; the
+durable catalog does not move Bridge or Personal Agent execution into the
+shared platform.

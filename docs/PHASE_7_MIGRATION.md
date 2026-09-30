@@ -352,7 +352,7 @@ and `host-bridge/run-bridge.ps1`, read in `.scratch/rs-source` on 2026-09-23.
 | FastAPI application behind `requests`; the relay and the ops client each build their own HTTP session | | **REFUSE the dependencies.** The platform's install is `pydantic` alone: the server is `http.server.ThreadingHTTPServer`, the client is the `UrllibTransport` every adapter already uses, and there is no redirect following anywhere |
 | `/health` answers without a token and everything else requires one | | **PRESERVE.** `GET /v1/health` says only that the process is up; every operation authenticates |
 | The relay enrolls a worker with `POST /api/relay/enroll` during install and the token is useless "until an administrator" acts | Enrollment is a member's action at the dashboard | **PRESERVE the boundary.** Nothing member-facing is on this wire: invitation, registration, binding and token issue stay trusted-host calls on the platform, and a Bridge presents a token it was given |
-| The dashboard is the durable store of workers, runs and events | | **DEFER.** The service serves the in-memory references and says so; a durable platform store is a later slice |
+| The dashboard is the durable store of workers, runs and events | | **ADAPT in a later bounded slice.** Productization 1 now persists package metadata and artifact bytes only. Workers, runs, enrollment and other runtime state remain intentionally separate and in memory |
 
 ## Workflow 11
 
