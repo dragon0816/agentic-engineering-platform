@@ -1,137 +1,129 @@
 # Handoff
 
 Date: 2026-09-30 (Asia/Taipei)
-Branch: `codex/telegram-mechanism-guidance`
-Base: `origin/main` merge commit `43d4b9a393ca11af8b59585685ee79fb27141a74`
+Branch: `codex/agent-web-marketplace`
+Base: `origin/main` at `20b31e0828f5abd264054e90432684691f92b8ce`
 
 ## Goal
 
-Continue the shared Validation/Coding Telegram loop after a trusted mechanism
-blocker instead of stopping after `coding_agent_review_required`. Keep the
-response deterministic and bounded: Telegram still cannot start Codex, execute
-message text, mutate GitHub or grant access.
+Start Productization 1 by making the existing Personal Agent Web interface a
+truthful view of the shared platform. The first slice must let an enrolled
+Bridge discover published assets while keeping publication, device selection,
+installation and execution authorization separate.
 
 ## Completed
 
-- Reproduced the live gap with Issue #139. Hermes emitted
-  `MODEL_ROUTING_NOT_CONFIGURED`; the Coding Bot persisted it and acknowledged
-  it, but PR #137 intentionally had no diagnosis handler.
-- Added the closed `MechanismGuidance` contract with schema
-  `aep-agent-coordination-guidance/v1`.
-- Added the first and only guidance mapping:
-  `MODEL_ROUTING_NOT_CONFIGURED` -> `provision_profile_model_routing` ->
-  `retry_same_validation_request`.
-- Restricted guidance to unresolved `mechanism_blocked` records. A
-  `mechanism_update` or `mechanism_resolved` record cannot request another retry.
-- Added durable `guidance_event_ids` deduplication. Old PR #137 state remains
-  valid because the new field defaults empty and old mechanism records default
-  to `mechanism_blocked`.
-- Confirmed the deployed worker state already retains
-  `mechanism-blocked-139-43d4b9a-20260930T0645Z`, so updating the worker after
-  merge will emit guidance without asking Hermes to resend the blocker.
-- Documented the Coding and Validation Agent trust checks and the exact meaning
-  of the model-routing guidance action in architecture, contracts and the remote
-  loop runbook.
-- Made outbound worker-state, acknowledgement and guidance payloads readable in
-  Telegram with stable two-space JSON indentation while preserving the same
-  machine-readable contracts and plain-text transport.
-- Committed the slice as `854bf2f`, pushed it and opened PR #140:
-  https://github.com/dragon0816/agentic-engineering-platform/pull/140
+- Added the active Productization 1 specification and updated Roadmap/Tasks.
+- Added the read-only `catalog` operation to the existing authenticated
+  Bridge/platform wire.
+- Added typed `CatalogRequest`, `CatalogReply` and Bridge-side
+  `CatalogOutcome` contracts.
+- Applied visibility/ownership entitlement on the platform from its trusted
+  membership record. The request carries no groups or entitlement claims.
+- Added an optional credential-checked package description for discovery.
+- Extended the Personal Agent Web shared-platform tab to list published assets
+  and visibly separate `published`, `authorized` and `installed` state.
+- Preserved the existing all-or-nothing `sync` operation as the installation
+  path. Catalog reads contain no artifact bytes and create no selection,
+  installation or execution side effect.
+- Added integration coverage over the real control-plane HTTP transport and
+  real loopback Agent Web API, including before/after synchronization state.
+- Updated architecture and contract documentation after validation.
 
 ## In Progress
 
-- PR #140 is open; Platform verification passed and owner review/merge remains.
-- Issue #139 remains blocked until this slice is merged, the resident Local Codex
-  worker is updated/restarted and Hermes implements the fixed guidance consumer.
+- The implementation is committed as `233940e`, pushed and open for review in
+  PR #142: https://github.com/dragon0816/agentic-engineering-platform/pull/142
+- Local verification and GitHub Platform verification are green. Human
+  review/merge remains.
 
 ## Remaining
 
-1. Have the owner review and merge green PR #140.
-2. Fast-forward the resident Local Codex worker checkout and restart the existing
-   `AEP Local Codex Worker` Scheduled Task.
-3. Confirm the shared group receives one guidance message for the retained #139
-   event and no duplicate on later polls.
-4. Hermes must accept guidance only from the configured Coding Bot in the exact
-   group, match event/request/SHA, allowlist the action, persist the event id,
-   provision only the credential-free model fixture from its fixed profile and
-   retry the same validation request.
-5. Hermes must report `mechanism_resolved` or a bounded `mechanism_update`; an
-   implementation failure still goes through GitHub and `codex-fix`.
+1. Confirm PR #142 Platform verification, then merge the shared-catalog slice.
+2. Define the member-authenticated selection entry point for slice 2. Do not
+   use the Bridge access token as a general browser session.
+3. Add select/revoke UI only after that identity boundary is approved.
+4. Expose existing synchronization as an explicit Web action with typed
+   before/after state.
+5. Add the generic Workflow launch form through the existing
+   Agent/Gateway/Workflow/Bridge path, followed by grounded Knowledge asking.
+6. Add a durable Registry only after the catalog user path and contracts have
+   been validated.
 
 ## Architecture decisions made
 
-- Deterministic known-code guidance is the smallest reversible handler. The
-  mechanism prose is never sent to Codex or a shell.
-- The action is validation-environment setup, not production model
-  configuration. It may use only the credential-free model fixture already
-  declared by the allowlisted validation profile and its bounded loopback port
-  policy.
-- Unknown mechanism codes remain `coding_agent_review_required`.
-- Guidance has `hop=1` and does not authorize a reply loop. Hermes reports a new
-  `mechanism_update` or `mechanism_resolved` event with a new event id.
-- A repository code change still requires a typed GitHub Issue. Human review
-  remains the merge gate.
+- Team Platform remains Registry/control plane; the local Bridge remains the
+  execution plane.
+- Web is a projection and ingress. It does not own routing, policy,
+  installation, authorization or execution.
+- Publication, device authorization and installation are three independent
+  facts in the API and UI. None grants capability execution permission.
+- Catalog entitlement is computed from authenticated actor plus trusted
+  platform membership. Client-supplied groups are not representable.
+- Catalog failure leaves already-installed local-first assets usable.
+- Apps will later be a user-facing presentation of governed Software assets;
+  no overlapping core asset type was added.
+- No Telegram/GitHub orchestration or production database was added in this
+  slice.
 
 ## Verification
 
-Supported target: Windows, Python 3.12. Browser tests excluded per owner
-instruction.
+Supported target: Windows, Python 3.12. Browser automation excluded per owner
+instruction; the Agent Web API itself is tested over a real loopback socket.
 
 ```text
-python -m pytest tests/test_local_codex_telegram_control.py \
-  tests/test_codex_remote_test_workflow.py \
-  tests/test_local_developer_environment.py -q
-38 passed
+.venv\Scripts\python.exe -m pytest \
+  tests/test_platform_transport.py tests/test_agent_web.py \
+  tests/test_contracts.py tests/test_registry.py \
+  tests/test_member_authorization.py -q
+93 passed, 1 skipped (IPv6 loopback unavailable)
 
-python -m pytest --ignore=tests/test_browser.py -q
-1358 passed, 4 skipped
+.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q
+1361 passed, 4 skipped
 
-python -m ruff check .
-All checks passed
+.venv\Scripts\python.exe -m ruff check .
+All checks passed!
 
-python -m ruff format --check .
-290 files already formatted
+.venv\Scripts\python.exe -m ruff format --check .
+291 files already formatted
 
-python -m mypy src tests
+.venv\Scripts\python.exe -m mypy src tests
 Success: no issues found in 226 source files
 
-python -m build
+.venv\Scripts\python.exe -m build
 Successfully built agentic_engineering_platform-0.1.0.tar.gz and
 agentic_engineering_platform-0.1.0-py3-none-any.whl
 
-python -m pip check
-No broken requirements found
+.venv\Scripts\python.exe -m pip check
+No broken requirements found.
 
-git diff --check
-PASS
+GitHub Platform verification run 36732055855
+PASS in 3m55s, including pytest, Ruff, Mypy, build, pip check, Windows offline
+preview install and artifact upload.
 ```
 
-One earlier full-suite run hit the existing Windows loopback transport flake in
-`tests/test_agent_web.py::test_every_api_call_needs_the_header` with WinError
-10053. The test then passed three consecutive isolated runs, and the final full
-suite passed as recorded above.
+The four full-suite skips are existing environment conditions: symlink/link
+privileges, IPv6 loopback and directory links. No Ubuntu run was performed.
 
 ## Known issues
 
-- Hermes currently replays historical Issue #120 payload
-  `validation-36432983270` with the unchanged blocker `CI artifact unavailable`
-  and emits repeated GitHub/Telegram messages. This is a Hermes poller
-  idempotency defect: it must persist the blocker fingerprint, silently skip an
-  unchanged blocked request and keep the global poller available for #139.
-- Hermes does not yet consume `aep-agent-coordination-guidance/v1`; its local
-  poller/skill must add this fixed schema and action before #139 can resume
-  automatically.
-- The live Coding Bot still runs merge commit `43d4b9a...`; do not restart it
-  from this unmerged branch.
-- Telegram delivery is best effort. Coding-side durable guidance ids plus
-  Hermes-side event-id deduplication are both required across the rare boundary
-  where a send succeeds but state persistence fails.
-- The development `GH_TOKEN` lacks Issues write and Repository Variables read;
-  the existing GitHub CLI keyring was used to create Issue #139. No token was
-  printed or committed.
+- The Registry and control-plane service remain in-memory references.
+- Interactive selection lacks a member-authenticated Web entry point. The
+  Bridge credential is intentionally not widened to serve that role.
+- Existing packages without the new optional description still appear with
+  governed owner/version/dependency/compatibility metadata and an empty
+  description.
+- The previous Telegram/Hermes coordination handoff was stale after PR #140
+  merged. This handoff replaces it; live coordination behavior was not changed
+  here.
+- GitHub warns that the current `actions/checkout@v4`, `setup-python@v5` and
+  `upload-artifact@v4` actions target deprecated Node.js 20. GitHub currently
+  forces Node.js 24 and the run passes; dependency upgrades are a separate CI
+  maintenance change.
 
 ## Next Recommended Action
 
-Review and merge green PR #140. Then update/restart the resident worker; it
-should emit guidance for the already retained #139 blocker without another
-Hermes message.
+After this PR is merged, design Productization 1 slice 2 as a narrow identity
+and selection contract: an authenticated member selects or revokes one entitled
+Workflow for one bound Bridge, with contract tests proving that publication is
+still not execution permission.

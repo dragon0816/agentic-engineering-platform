@@ -12,7 +12,7 @@ from common.assets import (
     RegistryContract,
     reject_embedded_secrets,
 )
-from common.base import Contract, Sha256, Symbol
+from common.base import Contract, Sha256, Symbol, Text
 from common.enrollment import BridgeDevice
 from common.execution import (
     ExecutionAuthorization,
@@ -29,6 +29,9 @@ class PublishedAssetPackage(RegistryContract):
 
     kind: AssetKind
     metadata: AssetMetadata
+    # Short discovery copy, not executable content. Older packages remain
+    # valid and a catalogue can still show their governed metadata.
+    description: Text | None = None
 
     @model_validator(mode="after")
     def downloadable_published_version(self) -> Self:

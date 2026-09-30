@@ -151,8 +151,12 @@ tr:last-child td { border-bottom: none; }
   </section>
 
   <section id="panel-platform">
-    <h2>What the shared platform decided</h2>
+    <h2>Published to your team</h2>
     <p class="note" id="platform-note">reading&hellip;</p>
+    <div class="card"><div id="catalog" class="empty">reading&hellip;</div></div>
+    <h2>Authorized on this Bridge</h2>
+    <p class="note">Selections synchronized to this machine. A selection does not bypass
+      capability policy.</p>
     <div class="card"><div id="decisions" class="empty">reading&hellip;</div></div>
   </section>
 </main>
@@ -277,6 +281,15 @@ async function loadAssets() {
 async function loadPlatform() {
   const platform = await call("/api/platform");
   el("platform-note").textContent = platform.note;
+  el("catalog").replaceChildren(table(
+    ["Type", "Asset", "Owner", "Visibility", "Needs", "Compatibility",
+     "Authorized", "Installed", "What it is"],
+    platform.catalog,
+    (p) => [p.kind, p.namespace + "/" + p.name + "@" + p.version, p.owner,
+            p.visibility, p.dependencies.join(", ") || "\\u2014",
+            [p.runtime].concat(p.platforms).filter(Boolean).join(", ") || "\\u2014",
+            tag(p.authorized, "authorized", "not authorized"),
+            tag(p.installed, "installed", "not installed"), p.description || "\\u2014"]));
   el("decisions").replaceChildren(table(
     ["Kind", "Asset", "For", "On this machine"], platform.decisions,
     (d) => [d.kind, d.namespace + "/" + d.name + "@" + d.version, d.actor,
@@ -297,7 +310,7 @@ for (const name of Object.keys(panels)) {
     // Re-read every time it is opened: this is live state, not a snapshot.
     try { await panels[name](); loaded[name] = true; }
     catch (failure) {
-      const where = name === "installed" ? "skills" : "decisions";
+      const where = name === "installed" ? "skills" : "catalog";
       el(where).replaceChildren(text("Could not read this: " + failure.message));
     }
   });

@@ -48,6 +48,8 @@ from common.identity import AuthenticatedActor
 from common.sync import (
     AdvertiseRequest,
     ArtifactPayload,
+    CatalogReply,
+    CatalogRequest,
     PollReply,
     ProbeReply,
     ReportRequest,
@@ -378,6 +380,10 @@ def test_the_wire_contracts_are_closed_and_consistent(platform: Platform) -> Non
     assert SyncReply(authorization=bundle, plan=plan, artifacts=(payload,)).plan == plan
     with pytest.raises(ValidationError, match="listed once"):
         SyncRequest(installed=(WORKFLOW, WORKFLOW))
+    with pytest.raises(ValidationError, match="catalog kind is listed once"):
+        CatalogRequest(kinds=("workflow", "workflow"))
+    with pytest.raises(ValidationError):
+        CatalogRequest.model_validate({"namespace": "engineering", "access_token": "secret"})
     # A settled job is not offered, and a job that ran carries its run.
     platform.submit("job-1")
     record = platform.control.job("job-1")
@@ -425,6 +431,8 @@ def test_the_service_answers_each_operation_for_a_real_token(platform: Platform)
     token = platform.company_token.grant.token_id
     probe = service.probe(token, SECRET)
     assert probe.identity.actor == "engineer" and probe.identity.bridge_id == BRIDGE
+    catalogue = service.catalog(token, SECRET, CatalogRequest(kinds=("workflow",)))
+    assert [item.metadata.identity for item in catalogue.packages] == [WORKFLOW]
     # Somebody without the secret learns nothing else.
     with pytest.raises(ServiceError, match="authentication_failed"):
         service.probe(token, "not-the-secret-but-long-enough-to-present")
@@ -475,6 +483,51 @@ def test_the_service_answers_each_operation_for_a_real_token(platform: Platform)
     platform.enrollment.unbind("engineer", "bridge-shared", "shared-bot")
     with pytest.raises(ServiceError, match="binding_withdrawn"):
         service.probe(shared, SHARED_SECRET)
+
+
+def test_catalog_filters_visibility_from_trusted_membership(platform: Platform) -> None:
+    hidden = AssetIdentity(namespace="other", name="private-workflow", version="1.0.0")
+    content = json.dumps(workflow_manifest()).encode("utf-8")
+    platform.packages.publish(
+        PublishedAssetPackage(
+            kind="workflow",
+            description="Only another member may discover this.",
+            metadata=AssetMetadata(
+                identity=hidden,
+                owner=Owner(type="user", id="somebody-else"),
+                visibility="private",
+                lifecycle="published",
+                package=PackageMetadata(
+                    artifact_ref="registry://other/private-workflow/1.0.0",
+                    sha256=hashlib.sha256(content).hexdigest(),
+                ),
+            ),
+        )
+    )
+    token = platform.company_token.grant.token_id
+
+    result = platform.service.catalog(token, SECRET, CatalogRequest())
+
+    assert hidden not in tuple(item.metadata.identity for item in result.packages)
+    assert {item.metadata.identity for item in result.packages} == {WORKFLOW, SKILL}
+
+
+def test_catalog_crosses_http_without_installing_or_authorizing(
+    tmp_path: Path, server: ControlPlaneServer, platform: Platform
+) -> None:
+    _config, layout, runtime = host(tmp_path, platform, server.base_url)
+    with runtime:
+        assert runtime.platform is not None
+        before = platform.authorization.authorization(BRIDGE, issued_at=NOW + timedelta(hours=1))
+        result = run(runtime.platform.catalog(kinds=("workflow",)))
+        after = platform.authorization.authorization(BRIDGE, issued_at=NOW + timedelta(hours=1))
+
+        assert result.status == "answered"
+        assert isinstance(result.reply, CatalogReply)
+        assert [item.metadata.identity for item in result.reply.packages] == [WORKFLOW]
+        assert runtime.state.installed() == ()
+        assert not layout.authorization.exists()
+        assert before == after
 
 
 def test_health_and_bad_requests_over_http(server: ControlPlaneServer, platform: Platform) -> None:

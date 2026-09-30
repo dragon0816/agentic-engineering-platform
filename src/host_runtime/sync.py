@@ -1,6 +1,6 @@
 """The Bridge's side of the shared-platform wire.
 
-Six operations, each presented with this machine's access token, and every
+Seven operations, each presented with this machine's access token, and every
 answer classified into exactly one of five things before anything is done
 with it: `answered`; `unreachable`, which is retryable and changes nothing;
 `withdrawn`, which is the platform telling a Bridge that proved its secret
@@ -35,6 +35,7 @@ from agent.skills import SkillManifest
 from common.assets import AssetIdentity, WorkflowManifest
 from common.base import Contract, Symbol
 from common.distribution import (
+    AssetKind,
     BridgeStateSnapshot,
     InstallationPlan,
     InstalledAsset,
@@ -50,6 +51,8 @@ from common.sync import (
     WITHDRAWN,
     AdvertiseReply,
     AdvertiseRequest,
+    CatalogReply,
+    CatalogRequest,
     JobDisposition,
     PollReply,
     PollRequest,
@@ -118,6 +121,12 @@ class AdvertiseOutcome(Contract):
     status: Reachability
     failure: Failure | None = None
     capabilities: int | None = Field(default=None, ge=0, strict=True)
+
+
+class CatalogOutcome(Contract):
+    status: Reachability
+    failure: Failure | None = None
+    reply: CatalogReply | None = None
 
 
 class SyncOutcome(Contract):
@@ -270,6 +279,21 @@ class PlatformClient:
         except ValidationError:
             return ProbeOutcome(status="unreachable", failure=_bad_reply())
         return ProbeOutcome(status="answered", reply=reply)
+
+    async def catalog(
+        self, *, namespace: str | None = None, kinds: tuple[AssetKind, ...] = ()
+    ) -> CatalogOutcome:
+        """Read published metadata. This method writes no local state."""
+        answer = await asyncio.to_thread(
+            self._call, "catalog", CatalogRequest(namespace=namespace, kinds=kinds)
+        )
+        if answer.status != "answered":
+            return CatalogOutcome(status=answer.status, failure=answer.failure)
+        try:
+            reply = CatalogReply.model_validate(answer.data)
+        except ValidationError:
+            return CatalogOutcome(status="unreachable", failure=_bad_reply())
+        return CatalogOutcome(status="answered", reply=reply)
 
     async def advertise(self, registration: BridgeRegistration) -> AdvertiseOutcome:
         answer = await asyncio.to_thread(

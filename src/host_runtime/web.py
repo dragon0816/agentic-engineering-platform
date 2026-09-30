@@ -155,51 +155,90 @@ class AgentWeb:
         return {"skills": skills, "workflows": workflows, "runs": runs}
 
     def platform(self) -> dict[str, Any]:
-        """What the shared platform has decided this machine may run.
-
-        This is not a catalogue of everything the team has published, and it
-        does not pretend to be: the wire this Bridge speaks has `probe`,
-        `advertise`, `sync`, `report`, `poll` and `settle`, and none of them
-        lists the Registry. Showing the decisions in force is the true answer
-        available today; browsing what other people published needs an
-        operation the control plane does not yet have.
-        """
+        """Published assets plus this Bridge's separate local state."""
         if self.runtime.platform is None:
             return {
                 "configured": False,
                 "note": "No shared platform is configured on this machine.",
+                "catalog": [],
                 "decisions": [],
             }
-        decided = self.runtime.layout.authorization
-        if not decided.is_file():
-            return {
-                "configured": True,
-                "note": (
-                    "This machine is configured for a shared platform but has not "
-                    "synchronised yet, so nothing has been decided for it."
-                ),
-                "decisions": [],
-            }
-        installed = {
-            (item.identity.namespace, item.identity.name, item.identity.version)
-            for item in self.runtime.agent.snapshot(observed_at=datetime.now(UTC)).installed
-        }
+        import asyncio
+
+        with self._one_at_a_time:
+            discovered = asyncio.run(self.runtime.platform.catalog())
+
         try:
+            installed_assets = self.runtime.state.installed()
+        except Exception:  # noqa: BLE001 - doctor owns the detailed diagnosis
+            installed_assets = ()
+        installed = {item.identity.key for item in installed_assets}
+
+        decided = self.runtime.layout.authorization
+        authorization = None
+        if not decided.is_file():
+            decisions_note = (
+                "This machine has not synchronized its selections yet. Published assets "
+                "are visible but are not authorized or installed by discovery."
+            )
+        else:
             from common.authorization import DeviceAuthorization
 
-            authorization = DeviceAuthorization.model_validate_json(
-                decided.read_text(encoding="utf-8-sig")
+            try:
+                authorization = DeviceAuthorization.model_validate_json(
+                    decided.read_text(encoding="utf-8-sig")
+                )
+                decisions_note = (
+                    "Published, authorized and installed are separate states. "
+                    "Execution still requires Bridge policy permission."
+                )
+            except Exception:  # noqa: BLE001 - doctor owns the detailed diagnosis
+                decisions_note = (
+                    "The decisions this machine was given cannot be read; run `doctor`."
+                )
+
+        selected = {
+            (item.kind, item.asset.key)
+            for item in (() if authorization is None else authorization.selections)
+        }
+        catalog = []
+        if discovered.status == "answered" and discovered.reply is not None:
+            for package in discovered.reply.packages:
+                metadata = package.metadata
+                identity = metadata.identity
+                catalog.append(
+                    {
+                        "kind": package.kind,
+                        "namespace": identity.namespace,
+                        "name": identity.name,
+                        "version": identity.version,
+                        "description": package.description or "",
+                        "owner": f"{metadata.owner.type}:{metadata.owner.id}",
+                        "visibility": metadata.visibility,
+                        "lifecycle": metadata.lifecycle,
+                        "dependencies": [
+                            f"{item.namespace}/{item.name}@{item.version}"
+                            for item in metadata.dependencies
+                        ],
+                        "runtime": metadata.compatibility.runtime or "",
+                        "platforms": list(metadata.compatibility.platforms),
+                        "published": True,
+                        "authorized": (package.kind, identity.key) in selected,
+                        "installed": identity.key in installed,
+                    }
+                )
+            note = decisions_note
+        else:
+            code = discovered.failure.code if discovered.failure is not None else discovered.status
+            note = (
+                f"The shared catalog is unavailable ({code}). "
+                "Already installed local assets remain available."
             )
-        except Exception:  # noqa: BLE001 - reported, not raised, to a listing
-            return {
-                "configured": True,
-                "note": "The decisions this machine was given cannot be read; run `doctor`.",
-                "decisions": [],
-            }
+
         rows = []
         # Every selection here is in force: the contract refuses to carry a
         # revoked one, so nothing has to read a status to know what applies.
-        for selection in authorization.selections:
+        for selection in () if authorization is None else authorization.selections:
             asset = selection.asset
             key = (asset.namespace, asset.name, asset.version)
             rows.append(
@@ -214,11 +253,9 @@ class AgentWeb:
             )
         return {
             "configured": True,
-            "note": (
-                "What the members of this machine decided it may run. Browsing "
-                "everything the team has published is not something this Bridge can "
-                "ask for yet."
-            ),
+            "connection": discovered.status,
+            "note": note,
+            "catalog": catalog,
             "decisions": rows,
         }
 

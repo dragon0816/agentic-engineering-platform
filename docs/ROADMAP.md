@@ -1,6 +1,20 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 complete; Phase 7 — End-to-end migration and controlled deprecation active
+Status: Phases 1–6 complete; Phase 7 and Productization 1 active
+
+## Productization 1 — Personal Agent Web and Workflow Marketplace
+
+The approved productization milestone grows the existing loopback Personal
+Agent Web interface into the primary local workspace. The first vertical slice
+adds an entitlement-filtered shared catalog read path and visibly separates
+published, authorized and installed state. Later slices add member selection,
+explicit synchronization, generic Workflow execution and grounded Knowledge
+asking without bypassing the existing Agent/Gateway/Bridge contracts.
+
+The active specification is
+`docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`. Phase 7 production-like
+parity work remains active and supplies real company-Bridge evidence; this
+productization milestone does not declare source retirement complete.
 
 ## Product E2E milestone (approved and active)
 
