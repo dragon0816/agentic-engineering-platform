@@ -86,6 +86,11 @@ form.ask input {
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
 }
 form.ask input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+select, textarea {
+  width: 100%; padding: 9px 10px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; font: 13px var(--mono);
+}
+textarea { min-height: 100px; resize: vertical; }
 button.go {
   font: inherit; font-weight: 600; padding: 9px 18px; cursor: pointer;
   color: #fff; background: var(--accent); border: none; border-radius: 8px;
@@ -146,6 +151,18 @@ tr:last-child td { border-bottom: none; }
     <h2>Workflows</h2>
     <p class="note">What a Skill&rsquo;s command runs.</p>
     <div class="card"><div id="workflows" class="empty">reading&hellip;</div></div>
+    <h2>Run an installed Workflow</h2>
+    <p class="note">Choose an exact installed version. Arguments must match the shown input
+      contract. Execution still passes through Agent admission and Bridge policy.</p>
+    <div class="card" style="padding: 12px">
+      <label for="workflow-target">Workflow</label>
+      <select id="workflow-target" disabled></select>
+      <p class="note" id="workflow-contract">No installed Workflow.</p>
+      <label for="workflow-arguments">JSON arguments</label>
+      <textarea id="workflow-arguments" spellcheck="false">{}</textarea>
+      <p><button class="go" id="workflow-run" type="button" disabled>Run Workflow</button></p>
+      <pre id="workflow-result" class="note">Nothing has run.</pre>
+    </div>
     <h2>Recent runs</h2>
     <div class="card"><div id="runs" class="empty">reading&hellip;</div></div>
   </section>
@@ -283,7 +300,62 @@ async function loadAssets() {
   el("runs").replaceChildren(table(
     ["Run", "Workflow", "Status", "Asked by"], assets.runs,
     (r) => [r.run_id, r.workflow, r.status, r.actor]));
+  const target = el("workflow-target");
+  target.replaceChildren();
+  for (const workflow of assets.workflows) {
+    const option = document.createElement("option");
+    option.value = JSON.stringify({namespace: workflow.namespace, name: workflow.name,
+      version: workflow.version});
+    option.dataset.inputContract = workflow.input_contract;
+    option.textContent = workflow.namespace + "/" + workflow.name + "@" + workflow.version;
+    target.append(option);
+  }
+  target.disabled = assets.workflows.length === 0;
+  el("workflow-run").disabled = assets.workflows.length === 0;
+  showWorkflowContract();
 }
+
+function showWorkflowContract() {
+  const chosen = el("workflow-target").selectedOptions[0];
+  el("workflow-contract").textContent = chosen
+    ? "Input contract: " + chosen.dataset.inputContract : "No installed Workflow.";
+}
+
+el("workflow-target").addEventListener("change", showWorkflowContract);
+el("workflow-run").addEventListener("click", async () => {
+  const button = el("workflow-run"), result = el("workflow-result");
+  let argumentsValue;
+  try {
+    argumentsValue = JSON.parse(el("workflow-arguments").value);
+    if (!argumentsValue || Array.isArray(argumentsValue) || typeof argumentsValue !== "object") {
+      throw new Error("arguments must be one JSON object");
+    }
+  } catch (failure) {
+    result.textContent = "Cannot run: " + failure.message;
+    return;
+  }
+  const chosen = el("workflow-target").value;
+  if (!chosen) return;
+  button.disabled = true;
+  result.textContent = "Workflow is running\\u2026";
+  try {
+    const launched = await call("/api/workflows/run", {
+      workflow: JSON.parse(chosen),
+      arguments: argumentsValue,
+      idempotency_key: "web-" + Date.now() + "-" + Math.random().toString(16).slice(2),
+    });
+    const outcome = launched.outcome, workflow = outcome.workflow;
+    const identifiers = ["trace " + outcome.trace.trace_id,
+      "request " + outcome.trace.request_id];
+    if (workflow) identifiers.push("run " + workflow.run.run_id);
+    result.textContent = identifiers.join(" | ") + "\\n\\n" + launched.answer;
+    await loadAssets();
+  } catch (failure) {
+    result.textContent = "The Workflow did not finish: " + failure.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 function renderPlatform(platform) {
   el("platform-note").textContent = platform.note;

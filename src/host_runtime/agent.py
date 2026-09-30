@@ -34,6 +34,7 @@ from common.local_agent import (
     Ingress,
     LocalAgentRequest,
     LocalCapabilityRequest,
+    LocalWorkflowRequest,
 )
 from host_runtime.state import SqliteLocalState
 from workflow.engine import WorkflowRunSnapshot
@@ -246,6 +247,46 @@ class LocalAgent:
                 reason="Exact local capability request",
             ),
             capability=result,
+        )
+
+    async def execute_workflow(
+        self, request: LocalWorkflowRequest, *, workflow_timeout_seconds: float | None = None
+    ) -> LocalAgentOutcome:
+        """Execute an exact locally selected Workflow through normal policy."""
+        item = LocalWorkflowRequest.model_validate(request)
+        refusal = self.admit(item.actor, item.bridge_id)
+        if refusal is not None:
+            return LocalAgentOutcome(
+                trace=item.trace,
+                ingress=item.ingress,
+                actor=item.actor,
+                refusal=refusal,
+            )
+        context = RequestContext(
+            trace=item.trace,
+            actor=item.actor,
+            namespace=item.workflow.namespace,
+            message=(
+                "local workflow "
+                f"{item.workflow.namespace}/{item.workflow.name}@{item.workflow.version}"
+            ),
+            channel=item.ingress,
+        )
+        snapshot = await self.gateway.execute_workflow(
+            context,
+            item.workflow,
+            dict(item.arguments),
+            workflow_timeout_seconds=self._wait(workflow_timeout_seconds),
+            workflow_idempotency_key=item.idempotency_key,
+        )
+        run, unrecorded = await self._record(item.actor, None, snapshot)
+        return LocalAgentOutcome(
+            trace=item.trace,
+            ingress=item.ingress,
+            actor=item.actor,
+            workflow=snapshot,
+            run=run,
+            unrecorded=unrecorded,
         )
 
     def _wait(self, requested: float | None) -> float | None:

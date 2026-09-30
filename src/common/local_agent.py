@@ -14,7 +14,7 @@ from pydantic import Field, JsonValue, model_validator
 from common.assets import AssetIdentity, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeBinding, BridgeDevice
-from common.execution import TraceIdentifiers
+from common.execution import IdempotencyKey, TraceIdentifiers
 
 Ingress = Literal["local", "shared_platform", "telegram"]
 
@@ -107,5 +107,26 @@ class LocalCapabilityRequest(Contract):
     def no_credential_material(self) -> Self:
         if self.on_behalf_of == self.actor:
             raise ValueError("a request on your own behalf names nobody else")
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class LocalWorkflowRequest(Contract):
+    """Exact locally initiated Workflow execution without model routing.
+
+    This request adds no authority: the resident Agent admits the local actor,
+    and every Workflow step still crosses Bridge policy.
+    """
+
+    ingress: Literal["local"] = "local"
+    actor: Symbol
+    bridge_id: Symbol
+    workflow: AssetIdentity
+    arguments: dict[Symbol, JsonValue] = Field(default_factory=dict)
+    idempotency_key: IdempotencyKey
+    trace: TraceIdentifiers
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self

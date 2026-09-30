@@ -4,13 +4,20 @@ from pathlib import Path, PureWindowsPath
 from typing import Annotated, Literal, Self
 from urllib.parse import urlsplit
 
-from pydantic import Field, StrictBool, StringConstraints, field_validator, model_validator
+from pydantic import (
+    Field,
+    JsonValue,
+    StrictBool,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
 from common.enrollment import BridgeDevice
-from common.execution import Failure
+from common.execution import Failure, IdempotencyKey
 from dut.adapters import PhysicalDriverConfiguration
 from dut.contracts import DutTarget, InstrumentTarget
 from integrations.github_project import GitHubProjectConnection
@@ -157,6 +164,19 @@ class PlatformSyncResult(Contract):
     def typed_failure(self) -> Self:
         if (self.status == "answered") != (self.failure is None):
             raise ValueError("only an answered synchronization omits failure details")
+        return self
+
+
+class WorkflowLaunchRequest(Contract):
+    """One exact installed Workflow plus its contract-shaped JSON arguments."""
+
+    workflow: AssetIdentity
+    arguments: dict[Symbol, JsonValue] = Field(default_factory=dict)
+    idempotency_key: IdempotencyKey
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
 
