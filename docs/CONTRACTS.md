@@ -1706,6 +1706,26 @@ attempt, the active selection count and complete `before`/`after`
 `PlatformProjection` values. It carries no credential, artifact bytes or
 execution grant. `GET /api/platform` never invokes synchronization.
 
+## Personal Agent Web Workflow launch (Productization 1, slice 4)
+
+`WorkflowLaunchRequest` names one exact `AssetIdentity`, one JSON-object
+argument map and an `IdempotencyKey`. It has no actor, Bridge, authorization,
+route or model field and rejects embedded secret material. The Web adapter
+supplies host identity and a fresh trace to `LocalWorkflowRequest`.
+
+`LocalWorkflowRequest` is the provider-neutral exact local execution boundary.
+It is accepted only with `ingress=local`; `LocalAgent.execute_workflow` performs
+normal membership/device admission, calls `Gateway.execute_workflow` without
+model routing, records a real run and leaves Workflow preflight and every step's
+authorization to the existing engine and Bridge policy. Reusing an idempotency
+key with the same intent returns the same run. The Web response uses the
+existing `LocalAgentOutcome`, so refusal, Workflow status, result, run record and
+trace identifiers keep their established meanings.
+
+The installed-asset projection exposes the manifest's `input_contract` and
+`output_contract`. These are names, not field schemas. The current generic form
+therefore accepts one JSON object and never invents field definitions.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

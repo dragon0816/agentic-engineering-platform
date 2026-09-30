@@ -341,6 +341,16 @@ status plus complete catalog/Bridge projections from immediately before and
 after the attempt. An unavailable or refused sync leaves local state unchanged,
 and simply opening the Shared Platform tab remains read-only.
 
+An installed Workflow may be launched from Personal Agent Web by exact scoped
+identity. The page shows the manifest's symbolic `input_contract` and accepts a
+JSON object because the current manifest contract does not contain a JSON
+Schema from which named fields could be generated. The Web request cannot claim
+an actor or Bridge. The local adapter supplies those from the running host and
+hands a `LocalWorkflowRequest` to the resident Agent, which performs normal
+device admission before Gateway exact-target execution, Workflow preflight and
+Bridge capability policy. An idempotency key binds retries to one run; results
+include the external run and trace identifiers.
+
 The shared catalog may present several product categories through one Web
 shell, but their runtime and installation boundaries remain distinct:
 
