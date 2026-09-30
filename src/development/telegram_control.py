@@ -63,6 +63,12 @@ def _scrub(value: str) -> str:
     return SECRET_PATTERN.sub(REDACTED, value)
 
 
+def _readable_json(payload: Mapping[str, Any]) -> str:
+    """Serialize a machine-readable Telegram payload for human review."""
+
+    return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
 class GitHubStatusReader(Protocol):
     """The read-only GitHub surface allowed to Telegram."""
 
@@ -340,7 +346,7 @@ class TelegramControlPlane:
         }
         if detail:
             payload["detail"] = _scrub(detail)[:1000]
-        return self._send(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        return self._send(_readable_json(payload))
 
     def _mechanism_guidance(self, record: _MechanismRecord) -> MechanismGuidance | None:
         if (
@@ -490,7 +496,7 @@ class TelegramControlPlane:
                 "next_action": next_action,
                 "hop": 1,
             }
-            self._send(json.dumps(ack, ensure_ascii=False, separators=(",", ":")))
+            self._send(_readable_json(ack))
             processed += 1
 
         for record in mechanism_events:
@@ -499,7 +505,7 @@ class TelegramControlPlane:
             guidance = self._mechanism_guidance(record)
             if guidance is None:
                 continue
-            sent = self._send(guidance.model_dump_json(by_alias=True))
+            sent = self._send(_readable_json(guidance.model_dump(mode="json", by_alias=True)))
             if not sent:
                 continue
             guidance_event_ids.append(record.event_id)

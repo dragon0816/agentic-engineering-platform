@@ -213,6 +213,8 @@ def test_hermes_event_is_strict_verified_against_github_and_acknowledged_once(
     result = first.poll_once()
 
     assert result.processed == 1
+    assert transport.calls[1][1]["text"].startswith('{\n  "schema"')
+    assert '\n  "producer"' in transport.calls[1][1]["text"]
     ack = json.loads(transport.calls[1][1]["text"])
     assert ack == {
         "schema": "aep-agent-coordination-ack/v1",
@@ -330,6 +332,8 @@ def test_known_model_routing_blocker_emits_one_closed_guidance_after_ack(
     assert result.processed == 2
     ack = json.loads(transport.calls[1][1]["text"])
     guidance = json.loads(transport.calls[2][1]["text"])
+    assert transport.calls[1][1]["text"].startswith('{\n  "schema"')
+    assert transport.calls[2][1]["text"].startswith('{\n  "schema"')
     assert ack["next_action"] == "coding_agent_review_required"
     assert guidance == {
         "schema": "aep-agent-coordination-guidance/v1",
@@ -453,6 +457,7 @@ def test_worker_notification_is_fixed_best_effort_json(tmp_path: Path) -> None:
         detail="https://github.com/dragon0816/agentic-engineering-platform/pull/999",
     )
 
+    assert transport.calls[0][1]["text"].startswith('{\n  "schema"')
     message = json.loads(transport.calls[0][1]["text"])
     assert message["schema"] == "aep-telegram-worker-event/v1"
     assert message["state"] == "completed"

@@ -32,6 +32,9 @@ message text, mutate GitHub or grant access.
 - Documented the Coding and Validation Agent trust checks and the exact meaning
   of the model-routing guidance action in architecture, contracts and the remote
   loop runbook.
+- Made outbound worker-state, acknowledgement and guidance payloads readable in
+  Telegram with stable two-space JSON indentation while preserving the same
+  machine-readable contracts and plain-text transport.
 - Committed the slice as `854bf2f`, pushed it and opened PR #140:
   https://github.com/dragon0816/agentic-engineering-platform/pull/140
 
