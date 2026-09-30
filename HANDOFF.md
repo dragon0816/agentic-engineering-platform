@@ -3,7 +3,7 @@
 Date: 2026-10-01 (Asia/Taipei)
 Branch: `codex/web-sync-action`
 Base: `origin/main` at merge commit `c70a687` (PR #147)
-PR: pending creation
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/149
 
 ## Goal
 
@@ -37,12 +37,11 @@ immediately before and after the attempt.
 
 ## In Progress
 
-- Documentation and handoff are ready to commit. The branch still needs push,
-  PR creation and exact-head GitHub Platform verification.
+- PR #149 is open. Exact-head GitHub Platform verification is pending.
 
 ## Remaining
 
-1. Push this branch, open the PR and wait for exact-head CI.
+1. Wait for PR #149 exact-head CI and fix any failure caused by this slice.
 2. Owner review and merge after CI is green.
 3. Productization 1 slice 4: add a generic Workflow launch form driven by the
    installed Workflow contract and the existing Agent/Gateway path.
