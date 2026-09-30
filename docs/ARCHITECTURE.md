@@ -369,6 +369,15 @@ The Web layer performs no retrieval and chooses no model or Vault path. It
 shows the grounded answer and the handler's Raw citations, while local Vault
 locations remain trusted host configuration and never enter the Web API.
 
+Shared Knowledge travels as an inert, closed package containing one exact
+published `KnowledgeManifest`, immutable `raw/` evidence, curated Markdown
+under `wiki/`, and the Vault's index, log and settled decisions. The manifest
+inside the package uses the symbolic `package://vault` reference. A Bridge
+validates canonical relative paths, every file and aggregate digest, identity,
+governance and credential absence before writing; it derives the absolute local
+Vault path and never accepts one chosen by a publisher. Originals under
+`drop/` stay with their source environment and are not silently redistributed.
+
 The shared catalog may present several product categories through one Web
 shell, but their runtime and installation boundaries remain distinct:
 
