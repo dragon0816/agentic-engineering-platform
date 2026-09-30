@@ -8,9 +8,10 @@ from pydantic import ValidationError
 
 from common.assets import SecretRef
 from development.telegram_control import (
-    HermesControlEvent,
+    MechanismProblem,
     TelegramControlConfig,
     TelegramControlPlane,
+    ValidationControlEvent,
     config_from_environment,
 )
 from models.credentials import StaticCredentials
@@ -76,7 +77,7 @@ def config() -> TelegramControlConfig:
         repository=REPOSITORY,
         credential=SecretRef(name="local_codex_telegram"),
         owner_user_id=1001,
-        hermes_bot_id=2002,
+        validation_bot_id=2002,
         control_chat_id=-1003003,
     )
 
@@ -119,8 +120,8 @@ def plane(tmp_path: Path, transport: Transport) -> TelegramControlPlane:
 
 def event(**changes: object) -> dict[str, object]:
     value: dict[str, object] = {
-        "schema": "aep-telegram-control/v1",
-        "producer": "hermes-testing-agent",
+        "schema": "aep-agent-coordination/v1",
+        "producer": "validation-agent",
         "event_id": "hermes-132-validation-failed-001",
         "event": "validation_failed",
         "repository": REPOSITORY,
@@ -154,7 +155,7 @@ def test_environment_config_is_optional_all_or_nothing_and_never_contains_token(
 def test_config_keeps_owner_hermes_and_chat_identities_distinct() -> None:
     with pytest.raises(ValidationError, match="different identities"):
         TelegramControlConfig.model_validate(
-            config().model_dump(mode="python") | {"hermes_bot_id": 1001}
+            config().model_dump(mode="python") | {"validation_bot_id": 1001}
         )
 
 
@@ -213,8 +214,8 @@ def test_hermes_event_is_strict_verified_against_github_and_acknowledged_once(
     assert result.processed == 1
     ack = json.loads(transport.calls[1][1]["text"])
     assert ack == {
-        "schema": "aep-telegram-control-ack/v1",
-        "producer": "local-codex-worker",
+        "schema": "aep-agent-coordination-ack/v1",
+        "producer": "coding-agent",
         "event_id": "hermes-132-validation-failed-001",
         "repository": REPOSITORY,
         "issue": 132,
@@ -222,6 +223,7 @@ def test_hermes_event_is_strict_verified_against_github_and_acknowledged_once(
         "outcome": "observed",
         "github_state": "OPEN",
         "github_labels": ["codex-local-running", "hermes-validation-failed"],
+        "next_action": "github_state_observed",
         "hop": 1,
     }
 
@@ -235,9 +237,9 @@ def test_hermes_payload_rejects_extra_fields_wrong_identity_and_reply_loops(
     tmp_path: Path,
 ) -> None:
     with pytest.raises(ValidationError):
-        HermesControlEvent.model_validate(event(command="gh pr merge"))
+        ValidationControlEvent.model_validate(event(command="gh pr merge"))
     with pytest.raises(ValidationError):
-        HermesControlEvent.model_validate(event(hop=1))
+        ValidationControlEvent.model_validate(event(hop=1))
 
     transport = Transport(
         ok_updates(
@@ -255,6 +257,46 @@ def test_hermes_payload_rejects_extra_fields_wrong_identity_and_reply_loops(
 
     assert result.processed == 0
     assert len(transport.calls) == 1
+
+
+def test_mechanism_problem_needs_no_issue_and_is_persisted_with_a_bounded_next_action(
+    tmp_path: Path,
+) -> None:
+    mechanism = {
+        "code": "VALIDATION_POLLER_BLOCKED",
+        "summary": "The validation poller stopped before functional tests.",
+        "expected": "Consume the trusted payload once and run the fixed profile.",
+        "observed": "The poller reports setup unavailable and stays paused.",
+        "evidence_refs": ["hermes://runs/deployment-company-agent-001/result.json"],
+        "requested_response": "diagnosis",
+    }
+    payload = event(
+        event_id="mechanism-company-agent-001",
+        event="mechanism_blocked",
+        issue=None,
+        mechanism=mechanism,
+    )
+    transport = Transport(
+        ok_updates(update(30, sender=2002, is_bot=True, text=json.dumps(payload))),
+        ok_sent(),
+    )
+
+    result = plane(tmp_path, transport).poll_once()
+
+    assert result.processed == 1
+    ack = json.loads(transport.calls[1][1]["text"])
+    assert ack["schema"] == "aep-agent-coordination-ack/v1"
+    assert ack["issue"] is None
+    assert ack["next_action"] == "coding_agent_review_required"
+    state = json.loads((tmp_path / "telegram-state.json").read_text(encoding="utf-8"))
+    assert state["mechanism_events"][0]["problem"]["code"] == "VALIDATION_POLLER_BLOCKED"
+
+    with pytest.raises(ValidationError, match="mechanism details"):
+        ValidationControlEvent.model_validate(event(event="mechanism_blocked", issue=None))
+    with pytest.raises(ValidationError, match="only mechanism events"):
+        ValidationControlEvent.model_validate(event(mechanism=mechanism))
+    with pytest.raises(ValidationError):
+        MechanismProblem.model_validate(mechanism | {"command": "restart everything"})
 
 
 def test_worker_notification_is_fixed_best_effort_json(tmp_path: Path) -> None:

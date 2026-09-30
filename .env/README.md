@@ -29,7 +29,7 @@ only these names and ignores allowed entries whose values remain empty:
 | `AEP_GITHUB_TOKEN` | AEP's local GitHub Projects integration |
 | `TELEGRAM_BOT_TOKEN` | Dedicated Local Codex coordination bot; resolved only at Bot API calls |
 | `TELEGRAM_OWNER_USER_ID` | Numeric Telegram identity allowed to use the read-only `/status` command |
-| `TELEGRAM_HERMES_BOT_ID` | Numeric Hermes bot identity allowed to announce fixed events |
+| `TELEGRAM_HERMES_BOT_ID` | Numeric current Validation Agent (Hermes) bot identity allowed to announce fixed events |
 | `TELEGRAM_CONTROL_CHAT_ID` | Exact shared group/chat in which the two bots coordinate |
 
 The file is plaintext on this computer even though Git ignores it. Keep it only

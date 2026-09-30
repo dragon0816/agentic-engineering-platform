@@ -1,9 +1,10 @@
 """Bounded Telegram control channel for the trusted local Codex worker.
 
-GitHub remains the durable queue and source of truth.  Telegram provides only
-owner status reads, best-effort worker notifications, and a fixed Hermes event
-signal that is checked against GitHub before it is acknowledged.  No Telegram
-message can supply a command, change a label, start Codex, or merge a PR.
+GitHub remains the durable queue and source of truth for implementation work.
+Telegram provides owner status reads, best-effort worker notifications, and a
+fixed coordination protocol between the current validation and coding agents.
+No Telegram message can supply a command, change a label, start Codex, or merge
+a PR. Mechanism problems are retained as bounded data for coding-agent review.
 """
 
 from __future__ import annotations
@@ -42,7 +43,15 @@ MAX_UPDATES_PER_POLL = 25
 STATUS_COMMAND = re.compile(r"^/status(?:@[A-Za-z0-9_]+)?(?:\s+#?([1-9][0-9]*))?\s*$")
 
 WorkerState = Literal["running", "waiting_evidence", "failed", "completed"]
-HermesEventName = Literal["evidence_posted", "validation_passed", "validation_failed", "blocked"]
+ValidationEventName = Literal[
+    "evidence_posted",
+    "validation_passed",
+    "validation_failed",
+    "blocked",
+    "mechanism_blocked",
+    "mechanism_update",
+    "mechanism_resolved",
+]
 
 
 def _scrub(value: str) -> str:
@@ -63,7 +72,7 @@ class TelegramControlConfig(Contract):
     repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
     credential: SecretRef
     owner_user_id: int = Field(gt=0, strict=True)
-    hermes_bot_id: int = Field(gt=0, strict=True)
+    validation_bot_id: int = Field(gt=0, strict=True)
     control_chat_id: int = Field(strict=True)
     poll_timeout_seconds: int = Field(default=0, ge=0, le=10, strict=True)
     api_base: Text = "https://api.telegram.org"
@@ -85,24 +94,59 @@ class TelegramControlConfig(Contract):
 
     @model_validator(mode="after")
     def distinct_identities_without_secrets(self) -> Self:
-        if self.owner_user_id == self.hermes_bot_id:
-            raise ValueError("owner and Hermes bot must be different identities")
+        if self.owner_user_id == self.validation_bot_id:
+            raise ValueError("owner and validation bot must be different identities")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
 
-class HermesControlEvent(Contract):
-    """One non-authoritative notification sent by the Hermes bot."""
+class MechanismProblem(Contract):
+    """Bounded mechanism evidence, never instructions for a subprocess."""
 
-    schema_: Literal["aep-telegram-control/v1"] = Field(alias="schema")
-    producer: Literal["hermes-testing-agent"]
+    code: str = Field(min_length=1, max_length=120, pattern=r"^[A-Z0-9_]+$")
+    summary: str = Field(min_length=1, max_length=2_000)
+    expected: str = Field(min_length=1, max_length=4_000)
+    observed: str = Field(min_length=1, max_length=4_000)
+    evidence_refs: tuple[str, ...] = Field(default=(), max_length=10)
+    requested_response: Literal["diagnosis", "coordination", "resume_decision"]
+
+    @field_validator("evidence_refs")
+    @classmethod
+    def bounded_references(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        if any(not item.strip() or len(item) > 2_000 for item in value):
+            raise ValueError("mechanism evidence references must be 1..2000 characters")
+        return value
+
+    @model_validator(mode="after")
+    def no_embedded_secret(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class ValidationControlEvent(Contract):
+    """One non-authoritative notification sent by the validation bot."""
+
+    schema_: Literal["aep-agent-coordination/v1"] = Field(alias="schema")
+    producer: Literal["validation-agent"]
     event_id: str = Field(min_length=8, max_length=160, pattern=r"^[A-Za-z0-9._-]+$")
-    event: HermesEventName
+    event: ValidationEventName
     repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-    issue: int = Field(gt=0, strict=True)
+    issue: int | None = Field(default=None, gt=0, strict=True)
     request_id: str = Field(min_length=8, max_length=160, pattern=r"^[A-Za-z0-9._-]+$")
     target_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    mechanism: MechanismProblem | None = None
     hop: Literal[0]
+
+    @model_validator(mode="after")
+    def event_has_only_its_required_evidence(self) -> Self:
+        mechanism_event = self.event.startswith("mechanism_")
+        if mechanism_event and self.mechanism is None:
+            raise ValueError("mechanism events require mechanism details")
+        if not mechanism_event and self.mechanism is not None:
+            raise ValueError("only mechanism events may include mechanism details")
+        if not mechanism_event and self.issue is None:
+            raise ValueError("validation result events require a GitHub Issue")
+        return self
 
 
 class TelegramControlPollResult(Contract):
@@ -111,9 +155,18 @@ class TelegramControlPollResult(Contract):
     next_offset: int | None = Field(default=None, ge=0, strict=True)
 
 
+class _MechanismRecord(Contract):
+    event_id: str
+    request_id: str
+    target_sha: str
+    issue: int | None = None
+    problem: MechanismProblem
+
+
 class _State(Contract):
     next_offset: int | None = Field(default=None, ge=0, strict=True)
     event_ids: tuple[str, ...] = Field(default=(), max_length=MAX_EVENT_IDS)
+    mechanism_events: tuple[_MechanismRecord, ...] = Field(default=(), max_length=20)
 
 
 class _Update:
@@ -168,15 +221,15 @@ def config_from_environment(
         raise ValueError("Telegram control requires all four TELEGRAM_* settings")
     try:
         owner = int(values["TELEGRAM_OWNER_USER_ID"])
-        hermes = int(values["TELEGRAM_HERMES_BOT_ID"])
+        validation = int(values["TELEGRAM_HERMES_BOT_ID"])
         chat = int(values["TELEGRAM_CONTROL_CHAT_ID"])
     except ValueError as error:
-        raise ValueError("Telegram owner, Hermes and chat ids must be integers") from error
+        raise ValueError("Telegram owner, validation bot and chat ids must be integers") from error
     return TelegramControlConfig(
         repository=repository,
         credential=SecretRef(name=TELEGRAM_CONTROL_CREDENTIAL),
         owner_user_id=owner,
-        hermes_bot_id=hermes,
+        validation_bot_id=validation,
         control_chat_id=chat,
     )
 
@@ -324,6 +377,7 @@ class TelegramControlPlane:
         highest = state.next_offset
         processed = 0
         event_ids = list(state.event_ids)
+        mechanism_events = list(state.mechanism_events)
         for raw in items[:MAX_UPDATES_PER_POLL]:
             if isinstance(raw, dict) and type(raw.get("update_id")) is int:
                 highest = max(highest or 0, raw["update_id"] + 1)
@@ -336,38 +390,69 @@ class TelegramControlPlane:
                     self._send(reply)
                     processed += 1
                 continue
-            if item.sender_id != self.config.hermes_bot_id or not item.is_bot:
+            if item.sender_id != self.config.validation_bot_id or not item.is_bot:
                 continue
-            parsed = self._hermes_event(item.text)
+            parsed = self._validation_event(item.text)
             if parsed is None or parsed.event_id in event_ids:
                 continue
-            try:
-                snapshot = self._github.issue_summary(parsed.issue)
-            except Exception:  # noqa: BLE001 - no ack when GitHub cannot verify the signal
-                continue
+            snapshot: dict[str, Any] | None = None
+            if parsed.issue is not None:
+                try:
+                    snapshot = self._github.issue_summary(parsed.issue)
+                except Exception:  # noqa: BLE001 - no ack when GitHub cannot verify a reference
+                    continue
             event_ids.append(parsed.event_id)
             event_ids = event_ids[-MAX_EVENT_IDS:]
-            labels = sorted(
-                str(value.get("name"))
-                for value in snapshot.get("labels", [])
-                if isinstance(value, dict) and value.get("name")
+            if parsed.mechanism is not None:
+                mechanism_events.append(
+                    _MechanismRecord(
+                        event_id=parsed.event_id,
+                        request_id=parsed.request_id,
+                        target_sha=parsed.target_sha,
+                        issue=parsed.issue,
+                        problem=parsed.mechanism,
+                    )
+                )
+                mechanism_events = mechanism_events[-20:]
+            labels = (
+                sorted(
+                    str(value.get("name"))
+                    for value in snapshot.get("labels", [])
+                    if isinstance(value, dict) and value.get("name")
+                )
+                if snapshot is not None
+                else []
             )
+            next_action = {
+                "mechanism_blocked": "coding_agent_review_required",
+                "mechanism_update": "continue_coordination",
+                "mechanism_resolved": "resume_validation",
+            }.get(parsed.event, "github_state_observed")
             ack = {
-                "schema": "aep-telegram-control-ack/v1",
-                "producer": "local-codex-worker",
+                "schema": "aep-agent-coordination-ack/v1",
+                "producer": "coding-agent",
                 "event_id": parsed.event_id,
                 "repository": self.config.repository,
                 "issue": parsed.issue,
                 "request_id": parsed.request_id,
                 "outcome": "observed",
-                "github_state": str(snapshot.get("state") or "UNKNOWN"),
+                "github_state": (
+                    str(snapshot.get("state") or "UNKNOWN")
+                    if snapshot is not None
+                    else "NOT_APPLICABLE"
+                ),
                 "github_labels": labels,
+                "next_action": next_action,
                 "hop": 1,
             }
             self._send(json.dumps(ack, ensure_ascii=False, separators=(",", ":")))
             processed += 1
 
-        next_state = _State(next_offset=highest, event_ids=tuple(event_ids))
+        next_state = _State(
+            next_offset=highest,
+            event_ids=tuple(event_ids),
+            mechanism_events=tuple(mechanism_events),
+        )
         try:
             self._save_state(next_state)
         except Exception as error:  # noqa: BLE001 - caller sees typed state failure
@@ -388,7 +473,19 @@ class TelegramControlPlane:
         if issue_text is None:
             queued = self._github.queued_issues()
             listed = ", ".join(f"#{item}" for item in queued) if queued else "none"
-            return f"Local Codex worker is available. Queued GitHub Issues: {listed}."
+            try:
+                coordination_state = self._load_state()
+                latest = (
+                    coordination_state.mechanism_events[-1].problem.code
+                    if coordination_state.mechanism_events
+                    else "none"
+                )
+            except Exception:  # noqa: BLE001 - status remains useful without local coordination state
+                latest = "unavailable"
+            return (
+                f"Coding worker is available. Queued GitHub Issues: {listed}. "
+                f"Latest mechanism event: {latest}."
+            )
         issue = int(issue_text)
         try:
             snapshot = self._github.issue_summary(issue)
@@ -401,15 +498,15 @@ class TelegramControlPlane:
         )
         label_text = ", ".join(labels) if labels else "none"
         title = _scrub(str(snapshot.get("title") or ""))[:500]
-        state = _scrub(str(snapshot.get("state") or "UNKNOWN"))[:30]
-        return f"Issue #{issue} [{state}] {title}\nLabels: {label_text}"
+        issue_state = _scrub(str(snapshot.get("state") or "UNKNOWN"))[:30]
+        return f"Issue #{issue} [{issue_state}] {title}\nLabels: {label_text}"
 
-    def _hermes_event(self, text: str) -> HermesControlEvent | None:
+    def _validation_event(self, text: str) -> ValidationControlEvent | None:
         if len(text) > 4000:
             return None
         try:
             raw = json.loads(text)
-            event = HermesControlEvent.model_validate(raw)
+            event = ValidationControlEvent.model_validate(raw)
         except (ValueError, TypeError):
             return None
         if event.repository != self.config.repository:

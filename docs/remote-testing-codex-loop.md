@@ -53,23 +53,29 @@ adds `hermes-retest-requested`. Hermes must execute its fixed profile, never PR 
 Issue prose. A passing Hermes result asks the human reviewer to merge; it never
 merges by itself.
 
-## Optional shared Telegram coordination group
+## Optional shared Validation/Coding coordination group
 
-A dedicated Local Codex bot and the Hermes bot may share one Telegram group to
+A dedicated Coding Agent bot and Validation Agent bot may share one Telegram group to
 remove the owner's manual copy-and-paste step. Telegram does not replace the
 GitHub queue:
 
 ```text
-Hermes writes evidence/result to GitHub
-  -> Hermes bot posts one fixed event in the shared group
-  -> Local Codex bot verifies the referenced Issue in GitHub
-  -> Local Codex bot posts one terminal acknowledgement
-  -> Local Codex Worker reports running/evidence-required/failed/PR-ready
+Validation Agent writes implementation evidence/result to GitHub
+  -> Validation bot posts one fixed event in the shared group
+  -> Coding bot verifies the referenced Issue in GitHub
+  -> Coding bot posts one terminal acknowledgement
+  -> Coding Worker reports running/evidence-required/failed/PR-ready
      states to the same group
 ```
 
-The Local Codex bot accepts only `/status` from the configured owner. It accepts
-only `aep-telegram-control/v1` JSON from the configured Hermes bot in the exact
+The owner starts the first validation with its scope and expected result,
+coordinates exceptions in the group and retains merge authority. Hermes is the
+current Validation Agent and Local Codex is the current Coding Agent. Those are
+replaceable implementations of the roles; the coordination schema does not make
+either product a permanent architecture component.
+
+The Coding bot accepts only `/status` from the configured owner. It accepts
+only `aep-agent-coordination/v1` JSON from the configured Validation bot in the exact
 configured chat. General chat, instructions embedded in messages and commands
 from either bot have no execution effect. Events require `hop=0`; acknowledgements
 use `hop=1`, are terminal and must never be answered. The durable Telegram offset
@@ -80,13 +86,26 @@ Example Hermes group message after the corresponding GitHub evidence is already
 present:
 
 ```json
-{"schema":"aep-telegram-control/v1","producer":"hermes-testing-agent","event_id":"hermes-132-validation-failed-001","event":"validation_failed","repository":"dragon0816/agentic-engineering-platform","issue":132,"request_id":"deployment-company-agent-36591676672","target_sha":"0123456789abcdef0123456789abcdef01234567","hop":0}
+{"schema":"aep-agent-coordination/v1","producer":"validation-agent","event_id":"hermes-132-validation-failed-001","event":"validation_failed","repository":"dragon0816/agentic-engineering-platform","issue":132,"request_id":"deployment-company-agent-36591676672","target_sha":"0123456789abcdef0123456789abcdef01234567","hop":0}
 ```
 
-The bot replies with `aep-telegram-control-ack/v1` after it can read that Issue.
+The bot replies with `aep-agent-coordination-ack/v1` after it can read that Issue.
 The reply contains current GitHub state/labels and `hop=1`. Hermes must ignore
 that acknowledgement and every `aep-telegram-worker-event/v1`; otherwise two bots
 could create a reply loop.
+
+Mechanism problems do not masquerade as implementation failures and do not need
+a GitHub Issue. The Validation bot may send this bounded record instead:
+
+```json
+{"schema":"aep-agent-coordination/v1","producer":"validation-agent","event_id":"mechanism-company-agent-001","event":"mechanism_blocked","repository":"dragon0816/agentic-engineering-platform","issue":null,"request_id":"deployment-company-agent-36591676672","target_sha":"0123456789abcdef0123456789abcdef01234567","mechanism":{"code":"VALIDATION_POLLER_BLOCKED","summary":"The fixed profile did not start.","expected":"Consume the trusted request once and run the profile.","observed":"The poller stayed paused after setup.","evidence_refs":["hermes://runs/example/result.json"],"requested_response":"diagnosis"},"hop":0}
+```
+
+The Coding bot persists the bounded mechanism record and acknowledges
+`coding_agent_review_required`. It does not run the text as code or a Codex
+prompt. A later bounded handler may automate diagnosis. If the diagnosis needs
+a repository change, the Validation Agent creates the normal typed GitHub Issue;
+only that path may start implementation work.
 
 Configure the four optional entries in the development computer's ignored
 `.env/local.yaml`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_USER_ID`,
