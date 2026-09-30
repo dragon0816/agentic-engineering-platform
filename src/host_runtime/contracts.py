@@ -394,6 +394,7 @@ class HostLayout(Contract):
     skills: Path
     workflows: Path
     knowledge: Path
+    knowledge_vaults: Path
     telegram: Path
     state: Path
 
@@ -408,6 +409,7 @@ class HostLayout(Contract):
             skills=root / "assets" / "skills",
             workflows=root / "assets" / "workflows",
             knowledge=root / "assets" / "knowledge",
+            knowledge_vaults=root / "assets" / "knowledge-vaults",
             telegram=root / "telegram.json",
             state=root / "state.sqlite",
         )

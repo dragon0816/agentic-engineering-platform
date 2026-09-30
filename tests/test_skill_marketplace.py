@@ -109,9 +109,9 @@ def test_member_selects_skill_syncs_it_and_rebuilt_agent_uses_it(tmp_path: Path)
 
 def test_non_installable_kind_cannot_enter_member_add_on_selection() -> None:
     platform = Platform()
-    knowledge = AssetIdentity(namespace="engineering", name="guide", version="1.0.0")
+    profile = AssetIdentity(namespace="engineering", name="personal", version="1.0.0")
     content = b"{}"
-    published = platform.packages.publish(package(knowledge, "knowledge", content))
+    published = platform.packages.publish(package(profile, "agent", content))
     assert published.metadata.package is not None
     platform.artifacts[published.metadata.package.artifact_ref] = content
     sessions = InMemoryMemberSessions()
@@ -132,12 +132,12 @@ def test_non_installable_kind_cannot_enter_member_add_on_selection() -> None:
             {"bridge_id": BRIDGE},
         )
         assert status == 200
-        assert knowledge.model_dump() not in [
+        assert profile.model_dump() not in [
             item["package"]["metadata"]["identity"] for item in catalog["entries"]
         ]
         status, failure = post(
             member.base_url + "/v1/member/select",
             session.bearer,
-            {"bridge_id": BRIDGE, "asset": knowledge.model_dump()},
+            {"bridge_id": BRIDGE, "asset": profile.model_dump()},
         )
     assert status == 409 and failure == {"code": "kind_mismatch"}

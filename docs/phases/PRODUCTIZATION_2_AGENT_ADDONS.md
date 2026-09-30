@@ -82,8 +82,8 @@ effect.
   reports selection separately from publication;
 - select/revoke requests remain closed and cannot claim actor, kind,
   permission, policy, approval or decision time;
-- the platform derives Skill kind from its Registry package, while Knowledge
-  and other not-yet-installable kinds are refused;
+- the platform derives Skill kind from its Registry package; kinds without a
+  validated installer are refused;
 - the real control-plane HTTP and Bridge synchronization install the selected
   Skill and Workflow manifests all-or-nothing;
 - rebuilding the host loads the synchronized Skill and its deterministic
@@ -102,6 +102,20 @@ effect.
   before the target exists;
 - installation stages and reopens the full Vault, verifies all aggregate
   digests, atomically exposes one exact version and never replaces it.
+
+## Exit evidence for slice 3
+
+- the real member HTTP catalog lists/selects exact entitled Knowledge and the
+  request still cannot claim kind, actor, path, model, permission or grant;
+- the real control-plane and Bridge wire install the portable artifact under
+  a host-derived versioned Vault path and persist an exact local manifest;
+- outer Registry governance must match the manifest inside the artifact;
+- host rebuild derives only active synchronized exact Knowledge bindings and
+  refuses a selected manifest redirected outside its identity-derived path;
+- Personal Agent Web lists the version without exposing the Vault path and
+  returns a grounded answer with Raw citations after the platform is offline;
+- Knowledge selection leaves existing capability grants unchanged; model
+  configuration and the `knowledge-query` capability grant remain separate.
 
 ## Explicit exclusions
 

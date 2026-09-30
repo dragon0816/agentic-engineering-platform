@@ -26,8 +26,8 @@ class MemberCatalogEntry(Contract):
 
     @model_validator(mode="after")
     def installable_add_on(self) -> Self:
-        if self.package.kind not in ("workflow", "skill"):
-            raise ValueError("the member add-on catalog contains only Workflows and Skills")
+        if self.package.kind not in ("workflow", "skill", "knowledge"):
+            raise ValueError("the member add-on catalog contains only installable Agent Add-ons")
         return self
 
 
@@ -58,6 +58,6 @@ class MemberSelectionReply(Contract):
 
     @model_validator(mode="after")
     def installable_add_on(self) -> Self:
-        if self.selection.kind not in ("workflow", "skill"):
-            raise ValueError("the member add-on entry point changes only Workflows and Skills")
+        if self.selection.kind not in ("workflow", "skill", "knowledge"):
+            raise ValueError("the member entry point changes only installable Agent Add-ons")
         return self

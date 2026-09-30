@@ -1613,11 +1613,12 @@ rule, asked by everything that acts on a device's records.
 Bridge and, for a mutation, an exact asset identity. Their closed schemas have
 no actor, groups, permission, policy, approval or decision-time field. The
 member entry point supplies actor and time from its authenticated session and
-derives `workflow` or `skill` from the exact Registry package. A request cannot
+derives `workflow`, `skill` or `knowledge` from the exact Registry package. A request cannot
 claim or change kind. `MemberCatalogReply` contains entitled published
-Workflows and Skills with a separate `selected` fact; it neither carries
-artifact bytes nor changes installation or execution authorization. Other
-published kinds are excluded until they have a compatible validated installer.
+Workflows, Skills and Knowledge versions with a separate `selected` fact; it
+neither carries artifact bytes nor changes installation or execution
+authorization. Other published kinds are excluded until they have a compatible
+validated installer.
 
 `InMemoryMemberSessions.issue(identity)` is a trusted-host call made after an
 external sign-in adapter has produced a current `AuthenticatedActor`. It
@@ -2297,6 +2298,21 @@ writes a sibling staging directory, reopens it through `Vault`, rechecks all
 aggregate digests and atomically exposes the target directory. The returned
 local manifest replaces only `vault_ref` with the host-derived absolute path.
 An existing exact version is never replaced.
+
+An active `DeviceAssetSelection(kind="knowledge")` joins Workflow and Skill in
+`DeviceAuthorization.installable`; it remains distinct from a capability tool
+selection. `PlatformClient` requires Registry metadata (other than the outer
+artifact reference) to exactly match the portable manifest, derives
+`assets/knowledge-vaults/<namespace>/<name>/<version>`, installs the Vault and
+writes the local manifest containing only that host-derived path. A preexisting
+path or mismatching manifest/Vault is `asset_conflict`.
+
+On host rebuild, `build_knowledge_catalog` combines explicit trusted local
+bindings with active synchronized Knowledge selections. A synchronized
+manifest must point at its identity-derived directory. The query handler is
+registered before platform-selected capability grants are derived; Knowledge
+selection itself adds no grant. A configured routing model and a separate
+`knowledge-query/ask@1.0.0` capability selection/grant remain required.
 
 ## E2E-04 governed Software evolution
 

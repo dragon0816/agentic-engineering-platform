@@ -191,7 +191,10 @@ def install_knowledge_package(payload: bytes, target_root: Path) -> KnowledgeMan
     if target.exists():
         raise ValueError("Knowledge version already exists")
     target.parent.mkdir(parents=True, exist_ok=True)
-    stage = target.with_name(f"{target.name}.part-{uuid4().hex}")
+    # Keep the temporary component short: this installer targets Windows,
+    # where a correct package can otherwise cross the legacy path limit only
+    # because staging appended a full UUID to an already versioned path.
+    stage = target.with_name(f".part-{uuid4().hex[:8]}")
     try:
         (stage / "raw").mkdir(parents=True)
         (stage / "wiki").mkdir(parents=True)

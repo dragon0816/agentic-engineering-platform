@@ -144,7 +144,7 @@ def test_failed_install_leaves_no_target_or_partial_vault(tmp_path: Path) -> Non
         install_knowledge_package(json.dumps(invalid).encode(), target)
 
     assert not target.exists()
-    assert not list(tmp_path.glob("installed.part-*"))
+    assert not list(tmp_path.glob(".part-*"))
 
 
 def test_install_refuses_to_replace_an_existing_version(tmp_path: Path) -> None:

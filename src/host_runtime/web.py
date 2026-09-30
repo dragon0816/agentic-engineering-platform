@@ -61,7 +61,7 @@ from host_runtime.contracts import (
     PlatformSyncResult,
     WorkflowLaunchRequest,
 )
-from host_runtime.host import HostRuntime
+from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.workspace import documents
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
 
@@ -155,6 +155,13 @@ class AgentWeb:
             for item in manifests(layout.workflows, WorkflowManifest)
         ]
         configured_knowledge = {binding.asset.key for binding in self.runtime.config.knowledge}
+        authorization = load_authorization(self.runtime.config, layout)
+        if authorization is not None:
+            configured_knowledge.update(
+                selection.asset.key
+                for selection in authorization.selections
+                if selection.kind == "knowledge"
+            )
         knowledge = [
             {
                 "namespace": item.metadata.identity.namespace,
