@@ -1688,6 +1688,24 @@ credential-free origin. It applies the same origin shape and non-loopback HTTPS
 rules as `base_url`; it is not used by `PlatformClient`. `AgentWeb.platform`
 projects it solely as navigation metadata for the browser.
 
+## Personal Agent Web synchronization (Productization 1, slice 3)
+
+`PlatformProjection` is the typed local Web view of a shared catalog: platform
+configuration/reachability, credential-free Member Portal navigation, published
+package metadata, synchronized device decisions and installed flags. Published,
+authorized and installed remain independent facts and none is an execution
+permission.
+
+`PlatformSyncRequest` is a closed empty contract. It cannot select an asset,
+claim an actor or carry installation instructions. `POST /api/platform/sync`
+requires the loopback Web bearer and this exact empty request, then invokes the
+existing `PlatformClient.synchronize` under the Web adapter's one-at-a-time
+lock. `PlatformSyncResult` contains the existing five-state reachability result,
+typed failure details when it was not answered, identities installed by that
+attempt, the active selection count and complete `before`/`after`
+`PlatformProjection` values. It carries no credential, artifact bytes or
+execution grant. `GET /api/platform` never invokes synchronization.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

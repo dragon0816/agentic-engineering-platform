@@ -174,3 +174,18 @@ contracts. Extension installation remains outside this productization slice.
   origin/TLS checks as the Bridge endpoint and carries no credential;
 - Personal Agent Web renders that Member Portal link but continues to use the
   Bridge endpoint and Bridge token only for catalog reads.
+
+## Exit evidence for slice 3
+
+- opening or refreshing the Shared Platform view performs catalog discovery
+  only and writes no asset, inventory row or authorization bundle;
+- synchronization requires the explicit Web button and a closed empty request;
+- the Web adapter calls the existing verified, all-or-nothing
+  `PlatformClient.synchronize` path and owns no installer logic;
+- a successful response includes typed before/after projections and the exact
+  installed identities and active selection count;
+- missing configuration, unreachable platform and platform/local refusals are
+  typed, visible results and do not turn publication into authorization;
+- the loopback, Host-header and per-process bearer guards apply to the action;
+- focused real-socket integration tests and the Windows/Python 3.12 verification
+  baseline pass.
