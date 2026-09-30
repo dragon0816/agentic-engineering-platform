@@ -47,11 +47,13 @@ from typing import Any, Self
 from urllib.parse import parse_qs, urlparse
 
 from agent.skills import SkillManifest
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from common.assets import WorkflowManifest
 from common.execution import Failure, TraceIdentifiers
-from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
+from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
 from host_runtime.answers import readable
 from host_runtime.contracts import (
+    KnowledgeAskRequest,
     PlatformCatalogProjection,
     PlatformDecisionProjection,
     PlatformProjection,
@@ -61,6 +63,7 @@ from host_runtime.contracts import (
 )
 from host_runtime.host import HostRuntime
 from host_runtime.workspace import documents
+from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
 
 #: Anything larger than this is not a request to an Agent.
 MAX_BODY_BYTES = 256 * 1024
@@ -151,6 +154,19 @@ class AgentWeb:
             }
             for item in manifests(layout.workflows, WorkflowManifest)
         ]
+        configured_knowledge = {binding.asset.key for binding in self.runtime.config.knowledge}
+        knowledge = [
+            {
+                "namespace": item.metadata.identity.namespace,
+                "name": item.metadata.identity.name,
+                "version": item.metadata.identity.version,
+                "domain": item.domain,
+                "owner": f"{item.metadata.owner.type}:{item.metadata.owner.id}",
+                "visibility": item.metadata.visibility,
+            }
+            for item in manifests(layout.knowledge, KnowledgeManifest)
+            if item.metadata.identity.key in configured_knowledge
+        ]
         snapshot = self.runtime.agent.snapshot(observed_at=datetime.now(UTC))
         runs = [
             {
@@ -162,7 +178,7 @@ class AgentWeb:
             for run in snapshot.runs[-25:]
         ]
         runs.reverse()
-        return {"skills": skills, "workflows": workflows, "runs": runs}
+        return {"skills": skills, "workflows": workflows, "knowledge": knowledge, "runs": runs}
 
     def platform(self) -> dict[str, Any]:
         """Published assets plus this Bridge's separate local state."""
@@ -358,6 +374,38 @@ class AgentWeb:
             "outcome": json.loads(outcome.model_dump_json()),
         }
 
+    def ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
+        """Ask one exact installed Knowledge version through Bridge policy."""
+        item = KnowledgeAskRequest.model_validate(request)
+        device = self.runtime.config.device
+        local = LocalCapabilityRequest(
+            ingress="local",
+            actor=self.runtime.actor,
+            bridge_id=device.bridge_id,
+            target=KNOWLEDGE_QUERY_SPEC.identity,
+            arguments=KnowledgeQueryRequest(asset=item.asset, question=item.question).model_dump(
+                mode="json"
+            ),
+            trace=_trace(),
+        )
+        import asyncio
+
+        with self._one_at_a_time:
+            outcome = asyncio.run(self.runtime.agent.execute_capability(local))
+        record: KnowledgeAnswerRecord | None = None
+        if (
+            outcome.refusal is None
+            and outcome.capability is not None
+            and outcome.capability.status == "succeeded"
+        ):
+            record = KnowledgeAnswerRecord.model_validate(outcome.capability.data)
+        return {
+            "ok": record is not None,
+            "answer": record.answer.text if record is not None else readable(outcome),
+            "record": (None if record is None else json.loads(record.model_dump_json())),
+            "outcome": json.loads(outcome.model_dump_json()),
+        }
+
 
 class _Handler(BaseHTTPRequestHandler):
     server: "AgentWebServer"  # noqa: UP037 - the class is defined below
@@ -436,7 +484,12 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(401, {"error": "this request carried no usable token"})
             return
         path = urlparse(self.path).path
-        if path not in ("/api/ask", "/api/platform/sync", "/api/workflows/run"):
+        if path not in (
+            "/api/ask",
+            "/api/platform/sync",
+            "/api/workflows/run",
+            "/api/knowledge/ask",
+        ):
             self._json(404, {"error": "no such page"})
             return
         try:
@@ -481,6 +534,20 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(
                     500,
                     {"error": f"the Workflow did not finish: {type(failure).__name__}"},
+                )
+            return
+        if path == "/api/knowledge/ask":
+            try:
+                question = KnowledgeAskRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid Knowledge question"})
+                return
+            try:
+                self._json(200, self.server.web.ask_knowledge(question))
+            except Exception as failure:  # noqa: BLE001 - a page shows everything
+                self._json(
+                    500,
+                    {"error": f"the Knowledge question did not finish: {type(failure).__name__}"},
                 )
             return
         try:

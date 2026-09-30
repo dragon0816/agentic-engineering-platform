@@ -203,3 +203,19 @@ contracts. Extension installation remains outside this productization slice.
   identifiers and the durable recent-run projection is refreshed;
 - real-socket tests prove execution and authorization boundaries; the Windows
   Python 3.12 verification baseline passes.
+
+## Exit evidence for slice 5
+
+- Personal Agent Web lists each exact configured Knowledge version using its
+  validated local manifest and never returns the local Vault path;
+- one closed request names only the exact Knowledge identity and question and
+  cannot claim actor, Bridge, model, route, Vault or authorization state;
+- the local adapter invokes the existing `knowledge-query/ask@1.0.0`
+  capability through `LocalAgent` admission and Bridge policy;
+- the existing handler performs retrieval and synthesis and returns a
+  `KnowledgeAnswerRecord`; the Web layer owns no retrieval or model logic;
+- the answer, trace identifiers and every cited Raw passage retain their
+  source/page/slide/section provenance;
+- real-socket tests prove success, request closure, exact-version selection,
+  citation preservation and permission refusal; the Windows Python 3.12
+  verification baseline passes.

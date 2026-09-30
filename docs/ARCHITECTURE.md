@@ -351,6 +351,14 @@ device admission before Gateway exact-target execution, Workflow preflight and
 Bridge capability policy. An idempotency key binds retries to one run; results
 include the external run and trace identifiers.
 
+An installed Knowledge version is queried from Personal Agent Web by exact
+scoped identity. The browser request names only that identity and the question;
+the local adapter supplies actor, Bridge and trace, then dispatches the existing
+`knowledge-query/ask@1.0.0` capability through `LocalAgent` and Bridge policy.
+The Web layer performs no retrieval and chooses no model or Vault path. It
+shows the grounded answer and the handler's Raw citations, while local Vault
+locations remain trusted host configuration and never enter the Web API.
+
 The shared catalog may present several product categories through one Web
 shell, but their runtime and installation boundaries remain distinct:
 
