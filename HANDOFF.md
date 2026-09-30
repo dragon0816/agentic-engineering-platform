@@ -40,13 +40,13 @@ as a browser session.
 - The implementation is pushed on `codex/member-workflow-selection` and open
   for review in PR #143:
   https://github.com/dragon0816/agentic-engineering-platform/pull/143
-- Local verification is green. Exact-head GitHub Platform verification is the
-  remaining release check for slice 2a.
+- Local verification and the first PR Platform verification run are green.
+  Required-check review and owner merge remain for slice 2a.
 
 ## Remaining
 
-1. Confirm PR #143 exact-head Platform verification, then have the owner
-   review and merge it.
+1. Check PR #143's required Platform verification on its final head, then have
+   the owner review and merge it.
 2. Productization 1 slice 2b: connect the invitation-based shared-platform
    sign-in flow to trusted member-session issuance. Do not invent LDAP or
    reuse the Bridge credential.
@@ -107,6 +107,10 @@ No broken requirements found.
 
 git diff --check
 PASS
+
+GitHub Platform verification run 36765721475
+PASS in 3m58s, including pytest, Ruff, Mypy, build, pip check, Windows offline
+preview install and artifact upload.
 ```
 
 The four full-suite skips are existing environment conditions: symlink/link
