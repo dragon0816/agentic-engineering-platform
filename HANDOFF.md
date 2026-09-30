@@ -3,7 +3,7 @@
 Date: 2026-10-01 (Asia/Taipei)
 Branch: `codex/web-workflow-launch`
 Base: `origin/main` at merge commit `49dc7da` (PR #149)
-PR: pending creation
+PR: https://github.com/dragon0816/agentic-engineering-platform/pull/151
 
 ## Goal
 
@@ -34,13 +34,12 @@ Workflow engine and Bridge policy, with result and trace evidence.
 
 ## In Progress
 
-- Documentation and handoff are ready to commit. The branch needs push, PR
-  creation and exact-head Platform verification.
+- PR #151 is open. Exact-head Platform verification is pending.
 
 ## Remaining
 
-1. Push, open the PR and wait for exact-head CI; merge automatically when green
-   under the owner's 2026-10-01 instruction.
+1. Wait for PR #151 exact-head CI and merge automatically when green under the
+   owner's 2026-10-01 instruction.
 2. Productization 1 slice 5: browse exact installed Knowledge versions and ask
    one grounded question with citations in Personal Agent Web.
 3. Productization 1 slice 6: replace the in-memory shared catalog references
