@@ -46,9 +46,18 @@ mechanism behavior, bounded evidence references and the requested response type.
 It does not need a GitHub Issue because it cannot authorize implementation work.
 The Coding Bot persists the last 20 mechanism records and returns a deterministic
 next state: coding-agent review, continue coordination or resume validation. If
-review finds an implementation change is required, the Validation Agent creates
-the typed GitHub Issue before code changes begin. Autonomous mechanism diagnosis
-is a later bounded handler; Telegram prose never becomes a Codex prompt.
+the unresolved blocker code is exactly `MODEL_ROUTING_NOT_CONFIGURED`, a bounded
+handler emits one `MechanismGuidance` with schema
+`aep-agent-coordination-guidance/v1`, action
+`provision_profile_model_routing`, next action
+`retry_same_validation_request` and `hop=1`. The event id is durably deduplicated,
+including blockers retained by a pre-handler worker. The action means the
+Validation Agent may provision only the credential-free model fixture declared by
+its already allowlisted profile and retry the same request. It is not a model
+grant or arbitrary configuration authority. Unknown codes remain review-only.
+If review finds an implementation change is required, the Validation Agent
+creates the typed GitHub Issue before code changes begin. Telegram prose never
+becomes a Codex prompt.
 
 The owner may issue only `/status` or `/status <issue-number>`. The command reads
 GitHub queue/Issue state and never changes labels, comments, branches or PRs.

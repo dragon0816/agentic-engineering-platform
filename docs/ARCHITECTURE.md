@@ -869,9 +869,13 @@ failure becomes a typed GitHub Issue and follows the branch/PR/exact-SHA retest
 loop above. A problem in deployment, polling, evidence handoff or the validation
 mechanism is exchanged as a bounded agent-coordination event in their shared
 Telegram group. The group supports immediate visibility and coordination; it
-does not grant repository authority. If mechanism analysis discovers a code
-change is required, the Validation Agent must create the GitHub Issue before the
-Coding Agent modifies code.
+does not grant repository authority. A known low-risk mechanism code may map to
+one closed deterministic guidance action; unknown codes still require Coding
+Agent review. Guidance may repair and retry the validation mechanism, but it
+cannot start Codex, execute message text, change repository state or grant a
+permission. If mechanism analysis discovers a code change is required, the
+Validation Agent must create the GitHub Issue before the Coding Agent modifies
+code.
 
 ## 9. Migration strategy
 

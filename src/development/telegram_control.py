@@ -5,6 +5,8 @@ Telegram provides owner status reads, best-effort worker notifications, and a
 fixed coordination protocol between the current validation and coding agents.
 No Telegram message can supply a command, change a label, start Codex, or merge
 a PR. Mechanism problems are retained as bounded data for coding-agent review.
+Known mechanism codes may receive one closed deterministic guidance message;
+unknown codes remain review-only.
 """
 
 from __future__ import annotations
@@ -13,7 +15,7 @@ import json
 import re
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Literal, Protocol, Self
+from typing import Any, Literal, Protocol, Self, cast
 
 from pydantic import Field, JsonValue, field_validator, model_validator
 
@@ -52,10 +54,19 @@ ValidationEventName = Literal[
     "mechanism_update",
     "mechanism_resolved",
 ]
+MechanismEventName = Literal["mechanism_blocked", "mechanism_update", "mechanism_resolved"]
+MechanismGuidanceAction = Literal["provision_profile_model_routing"]
+MechanismGuidanceNextAction = Literal["retry_same_validation_request"]
 
 
 def _scrub(value: str) -> str:
     return SECRET_PATTERN.sub(REDACTED, value)
+
+
+def _readable_json(payload: Mapping[str, Any]) -> str:
+    """Serialize a machine-readable Telegram payload for human review."""
+
+    return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 class GitHubStatusReader(Protocol):
@@ -149,6 +160,22 @@ class ValidationControlEvent(Contract):
         return self
 
 
+class MechanismGuidance(Contract):
+    """One closed Coding Agent response for an allowlisted mechanism code."""
+
+    schema_: Literal["aep-agent-coordination-guidance/v1"] = Field(alias="schema")
+    producer: Literal["coding-agent"]
+    event_id: str = Field(min_length=8, max_length=160, pattern=r"^[A-Za-z0-9._-]+$")
+    repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    issue: int | None = Field(default=None, gt=0, strict=True)
+    request_id: str = Field(min_length=8, max_length=160, pattern=r"^[A-Za-z0-9._-]+$")
+    target_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    mechanism_code: Literal["MODEL_ROUTING_NOT_CONFIGURED"]
+    action: MechanismGuidanceAction
+    next_action: MechanismGuidanceNextAction
+    hop: Literal[1]
+
+
 class TelegramControlPollResult(Contract):
     processed: int = Field(default=0, ge=0, strict=True)
     failure: Failure | None = None
@@ -157,6 +184,7 @@ class TelegramControlPollResult(Contract):
 
 class _MechanismRecord(Contract):
     event_id: str
+    event: MechanismEventName = "mechanism_blocked"
     request_id: str
     target_sha: str
     issue: int | None = None
@@ -166,6 +194,7 @@ class _MechanismRecord(Contract):
 class _State(Contract):
     next_offset: int | None = Field(default=None, ge=0, strict=True)
     event_ids: tuple[str, ...] = Field(default=(), max_length=MAX_EVENT_IDS)
+    guidance_event_ids: tuple[str, ...] = Field(default=(), max_length=MAX_EVENT_IDS)
     mechanism_events: tuple[_MechanismRecord, ...] = Field(default=(), max_length=20)
 
 
@@ -317,7 +346,27 @@ class TelegramControlPlane:
         }
         if detail:
             payload["detail"] = _scrub(detail)[:1000]
-        return self._send(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        return self._send(_readable_json(payload))
+
+    def _mechanism_guidance(self, record: _MechanismRecord) -> MechanismGuidance | None:
+        if (
+            record.event != "mechanism_blocked"
+            or record.problem.code != "MODEL_ROUTING_NOT_CONFIGURED"
+        ):
+            return None
+        return MechanismGuidance(
+            schema="aep-agent-coordination-guidance/v1",
+            producer="coding-agent",
+            event_id=record.event_id,
+            repository=self.config.repository,
+            issue=record.issue,
+            request_id=record.request_id,
+            target_sha=record.target_sha,
+            mechanism_code="MODEL_ROUTING_NOT_CONFIGURED",
+            action="provision_profile_model_routing",
+            next_action="retry_same_validation_request",
+            hop=1,
+        )
 
     def poll_once(self) -> TelegramControlPollResult:
         try:
@@ -377,6 +426,7 @@ class TelegramControlPlane:
         highest = state.next_offset
         processed = 0
         event_ids = list(state.event_ids)
+        guidance_event_ids = list(state.guidance_event_ids)
         mechanism_events = list(state.mechanism_events)
         for raw in items[:MAX_UPDATES_PER_POLL]:
             if isinstance(raw, dict) and type(raw.get("update_id")) is int:
@@ -407,6 +457,7 @@ class TelegramControlPlane:
                 mechanism_events.append(
                     _MechanismRecord(
                         event_id=parsed.event_id,
+                        event=cast(MechanismEventName, parsed.event),
                         request_id=parsed.request_id,
                         target_sha=parsed.target_sha,
                         issue=parsed.issue,
@@ -445,12 +496,26 @@ class TelegramControlPlane:
                 "next_action": next_action,
                 "hop": 1,
             }
-            self._send(json.dumps(ack, ensure_ascii=False, separators=(",", ":")))
+            self._send(_readable_json(ack))
+            processed += 1
+
+        for record in mechanism_events:
+            if record.event_id in guidance_event_ids:
+                continue
+            guidance = self._mechanism_guidance(record)
+            if guidance is None:
+                continue
+            sent = self._send(_readable_json(guidance.model_dump(mode="json", by_alias=True)))
+            if not sent:
+                continue
+            guidance_event_ids.append(record.event_id)
+            guidance_event_ids = guidance_event_ids[-MAX_EVENT_IDS:]
             processed += 1
 
         next_state = _State(
             next_offset=highest,
             event_ids=tuple(event_ids),
+            guidance_event_ids=tuple(guidance_event_ids),
             mechanism_events=tuple(mechanism_events),
         )
         try:
