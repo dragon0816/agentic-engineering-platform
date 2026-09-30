@@ -1726,6 +1726,25 @@ The installed-asset projection exposes the manifest's `input_contract` and
 `output_contract`. These are names, not field schemas. The current generic form
 therefore accepts one JSON object and never invents field definitions.
 
+## Personal Agent Web Knowledge asking (Productization 1, slice 5)
+
+`KnowledgeAskRequest` contains one exact Knowledge `AssetIdentity` and one
+question. It has no actor, Bridge, route, model, Vault path or authorization
+field and rejects embedded credential material. The Web adapter supplies the
+running host's actor and Bridge plus a fresh trace, then builds the established
+`KnowledgeQueryRequest` as arguments to an exact `LocalCapabilityRequest` for
+`knowledge-query/ask@1.0.0`.
+
+`LocalAgent.execute_capability` performs membership/device admission and the
+existing Bridge still enforces the capability grant. The existing
+`KnowledgeQueryHandler` resolves the exact configured `KnowledgeManifest` and
+local `Vault`, runs deterministic retrieval plus the configured model, and
+returns the existing `KnowledgeAnswerRecord`. Personal Agent Web preserves its
+answer, cited passages, Raw source provenance and trace identifiers. Installed
+Knowledge discovery is the intersection of validated local manifests and exact
+host bindings; it exposes identity, domain, owner and visibility but never the
+local `vault_root`.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

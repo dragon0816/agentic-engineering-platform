@@ -163,6 +163,19 @@ tr:last-child td { border-bottom: none; }
       <p><button class="go" id="workflow-run" type="button" disabled>Run Workflow</button></p>
       <pre id="workflow-result" class="note">Nothing has run.</pre>
     </div>
+    <h2>Ask installed Knowledge</h2>
+    <p class="note">Choose an exact local Knowledge version. Answers must cite the
+      immutable Raw evidence retained by that version.</p>
+    <div class="card" style="padding: 12px">
+      <label for="knowledge-target">Knowledge</label>
+      <select id="knowledge-target" disabled></select>
+      <p class="note" id="knowledge-domain">No installed Knowledge.</p>
+      <label for="knowledge-question">Question</label>
+      <textarea id="knowledge-question" spellcheck="true"></textarea>
+      <p><button class="go" id="knowledge-ask" type="button" disabled>Ask Knowledge</button></p>
+      <pre id="knowledge-result" class="note">Nothing has been asked.</pre>
+      <div id="knowledge-citations" class="empty">No citations.</div>
+    </div>
     <h2>Recent runs</h2>
     <div class="card"><div id="runs" class="empty">reading&hellip;</div></div>
   </section>
@@ -220,9 +233,9 @@ function table(columns, rows, cell) {
   for (const name of columns) {
     const th = document.createElement("th"); th.append(text(name)); head.append(th);
   }
-  for (const row of rows) {
+  for (const [index, row] of rows.entries()) {
     const tr = t.insertRow();
-    for (const value of cell(row)) {
+    for (const value of cell(row, index)) {
       const td = tr.insertCell();
       if (value instanceof Node) td.append(value); else td.append(text(value));
     }
@@ -313,6 +326,19 @@ async function loadAssets() {
   target.disabled = assets.workflows.length === 0;
   el("workflow-run").disabled = assets.workflows.length === 0;
   showWorkflowContract();
+  const knowledgeTarget = el("knowledge-target");
+  knowledgeTarget.replaceChildren();
+  for (const knowledge of assets.knowledge) {
+    const option = document.createElement("option");
+    option.value = JSON.stringify({namespace: knowledge.namespace, name: knowledge.name,
+      version: knowledge.version});
+    option.dataset.domain = knowledge.domain;
+    option.textContent = knowledge.namespace + "/" + knowledge.name + "@" + knowledge.version;
+    knowledgeTarget.append(option);
+  }
+  knowledgeTarget.disabled = assets.knowledge.length === 0;
+  el("knowledge-ask").disabled = assets.knowledge.length === 0;
+  showKnowledgeDomain();
 }
 
 function showWorkflowContract() {
@@ -352,6 +378,51 @@ el("workflow-run").addEventListener("click", async () => {
     await loadAssets();
   } catch (failure) {
     result.textContent = "The Workflow did not finish: " + failure.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function showKnowledgeDomain() {
+  const chosen = el("knowledge-target").selectedOptions[0];
+  el("knowledge-domain").textContent = chosen
+    ? "Domain: " + chosen.dataset.domain : "No installed Knowledge.";
+}
+
+el("knowledge-target").addEventListener("change", showKnowledgeDomain);
+el("knowledge-ask").addEventListener("click", async () => {
+  const button = el("knowledge-ask"), result = el("knowledge-result");
+  const question = el("knowledge-question").value.trim();
+  const chosen = el("knowledge-target").value;
+  if (!question || !chosen) return;
+  button.disabled = true;
+  result.textContent = "Knowledge is answering\u2026";
+  el("knowledge-citations").replaceChildren(text("Waiting for grounded citations\u2026"));
+  try {
+    const answered = await call("/api/knowledge/ask", {
+      asset: JSON.parse(chosen), question: question,
+    });
+    const outcome = answered.outcome;
+    result.textContent = "trace " + outcome.trace.trace_id + " | request "
+      + outcome.trace.request_id + "\n\n" + answered.answer;
+    if (!answered.record) {
+      el("knowledge-citations").replaceChildren(text("No grounded answer was returned."));
+    } else {
+      el("knowledge-citations").replaceChildren(table(
+        ["#", "Evidence", "Location", "Passage"], answered.record.cited_passages,
+        (passage, index) => {
+          const citation = passage.citation;
+          const location = [citation.raw_ref, citation.wiki_page,
+            citation.page ? "page " + citation.page : "",
+            citation.slide ? "slide " + citation.slide : "",
+            citation.section ? "section " + citation.section : ""]
+            .filter(Boolean).join(" \u00b7 ");
+          return [index + 1, citation.kind, location || "\u2014", passage.text];
+        }));
+    }
+  } catch (failure) {
+    result.textContent = "The Knowledge question did not finish: " + failure.message;
+    el("knowledge-citations").replaceChildren(text("No citations."));
   } finally {
     button.disabled = false;
   }

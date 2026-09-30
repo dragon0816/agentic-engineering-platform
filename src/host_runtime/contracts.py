@@ -180,6 +180,22 @@ class WorkflowLaunchRequest(Contract):
         return self
 
 
+class KnowledgeAskRequest(Contract):
+    """One question against one exact installed Knowledge version.
+
+    Actor, Bridge, model and local Vault location are trusted host state and
+    therefore deliberately absent from this browser-facing request.
+    """
+
+    asset: AssetIdentity
+    question: Text
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 class HostIntegrations(Contract):
     """The external systems this host reaches and the workflows' settings,
     none of it secret: the project board whose token is a `SecretRef`, and

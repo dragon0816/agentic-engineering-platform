@@ -190,10 +190,10 @@ Workflow launch, grounded Knowledge asking and finally durable Registry
 storage. Each step keeps publication, selection, installation and execution
 authorization separate.
 
-Slices 1 through 3 are complete. Slice 4 adds generic exact Workflow launch
-from Personal Agent Web through the existing Agent/Gateway/Workflow/Bridge
-path; its implementation is in review. Grounded Knowledge asking remains the
-next slice after that action merges. See
+Slices 1 through 4 are complete. Slice 5 adds exact-version grounded Knowledge
+asking from Personal Agent Web through the existing local
+Agent/Gateway/Knowledge/Bridge path without exposing model or Vault
+configuration. Durable Registry storage remains the final slice. See
 `docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
 
 ## First implementation slice after Phase 0

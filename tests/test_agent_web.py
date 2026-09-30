@@ -12,15 +12,19 @@ import json
 import threading
 import urllib.error
 import urllib.request
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
 import pytest
-from test_host_wiring import ready
+from test_host_models import GatewayReply, binding, endpoint
+from test_host_wiring import grant_record, membership_record, ready, workspace
 from test_platform_transport import Platform, host
+from test_product_e2e_05 import V1, copy_vault, manifest
 
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from control_plane.http import ControlPlaneServer
+from host_runtime.contracts import KnowledgeAskRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 
@@ -33,6 +37,69 @@ class Reply:
 
     def json(self) -> Any:
         return json.loads(self.body)
+
+
+class KnowledgeGateway:
+    """One grounded model answer over the deterministic fixture retrieval."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    def send(
+        self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
+    ) -> GatewayReply:
+        self.calls.append({"url": url, "payload": json.loads(body)})
+        return GatewayReply(
+            200,
+            {
+                "id": "chatcmpl-knowledge-web",
+                "model": "fixture-model",
+                "choices": [
+                    {
+                        "index": 0,
+                        "finish_reason": "stop",
+                        "message": {
+                            "role": "assistant",
+                            "content": "Safe mode requires firmware 2.0 [1].",
+                        },
+                    }
+                ],
+                "usage": {"prompt_tokens": 20, "completion_tokens": 8},
+            },
+        )
+
+
+def knowledge_runtime(tmp_path: Path, *, authorized: bool = True) -> Any:
+    vault = copy_vault(tmp_path)
+    grants = grant_record()
+    if authorized:
+        grants.append(
+            {
+                "actor": "engineer",
+                "asset": KNOWLEDGE_QUERY_SPEC.identity.model_dump(mode="json"),
+                "permissions": list(KNOWLEDGE_QUERY_SPEC.policy.required_permissions),
+                "policy_refs": list(KNOWLEDGE_QUERY_SPEC.policy.policy_refs),
+            }
+        )
+    config, layout = workspace(
+        tmp_path,
+        membership=membership_record(),
+        grants=grants,
+        config_changes={
+            "models": binding(
+                catalog={
+                    "endpoints": [endpoint(credential=None, model="fixture-model")],
+                    "routes": [{"name": "default", "alias": "company"}],
+                }
+            ),
+            "knowledge": [{"asset": V1.model_dump(mode="json"), "vault_root": str(vault.root)}],
+        },
+    )
+    layout.knowledge.mkdir(parents=True, exist_ok=True)
+    (layout.knowledge / "widget-guide.json").write_text(
+        manifest(vault).model_dump_json(), encoding="utf-8"
+    )
+    return build_runtime(config, layout=layout, model_transport=KnowledgeGateway())
 
 
 def fetch(
@@ -57,6 +124,20 @@ def fetch(
 def served(tmp_path: Path) -> Iterator[AgentWebServer]:
     config, _layout = ready(tmp_path)
     with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            yield server
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+
+@pytest.fixture
+def served_knowledge(tmp_path: Path) -> Iterator[AgentWebServer]:
+    with knowledge_runtime(tmp_path) as runtime:
         server = AgentWebServer(AgentWeb(runtime))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -124,6 +205,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/platform/sync", body={}).status == 401
     assert fetch(base(served) + "/api/platform/sync", token="wrong", body={}).status == 401
     assert fetch(base(served) + "/api/workflows/run", body={}).status == 401
+    assert fetch(base(served) + "/api/knowledge/ask", body={}).status == 401
 
 
 def test_the_token_in_the_address_does_not_open_the_api(served: AgentWebServer) -> None:
@@ -352,6 +434,96 @@ def test_page_launches_exact_installed_workflows_and_shows_trace_identifiers(
     assert 'call("/api/workflows/run"' in page
     assert "outcome.trace.trace_id" in page
     assert "workflow.run.run_id" in page
+
+
+def test_it_lists_exact_installed_knowledge_without_local_vault_paths(
+    served_knowledge: AgentWebServer,
+) -> None:
+    assets = fetch(base(served_knowledge) + "/api/assets", token=served_knowledge.token).json()
+    assert assets["knowledge"] == [
+        {
+            "namespace": "engineering",
+            "name": "widget-guide",
+            "version": "1.0.0",
+            "domain": "engineering",
+            "owner": "team:engineering-knowledge",
+            "visibility": "team",
+        }
+    ]
+    assert "vault_root" not in json.dumps(assets)
+
+
+def test_grounded_knowledge_asking_runs_the_exact_capability_and_keeps_citations(
+    served_knowledge: AgentWebServer,
+) -> None:
+    answered = fetch(
+        base(served_knowledge) + "/api/knowledge/ask",
+        token=served_knowledge.token,
+        body={
+            "asset": V1.model_dump(mode="json"),
+            "question": "What firmware does Safe mode require?",
+        },
+    ).json()
+    assert answered["ok"] is True
+    assert answered["answer"] == "Safe mode requires firmware 2.0 [1]."
+    assert answered["record"]["asset"] == V1.model_dump(mode="json")
+    assert answered["record"]["cited_passages"]
+    assert all(
+        passage["citation"]["kind"] == "raw" for passage in answered["record"]["cited_passages"]
+    )
+    assert answered["outcome"]["actor"] == "engineer"
+    assert answered["outcome"]["decision"]["target"] == (
+        KNOWLEDGE_QUERY_SPEC.identity.model_dump(mode="json")
+    )
+    assert answered["outcome"]["capability"]["status"] == "succeeded"
+
+
+def test_knowledge_ask_contract_cannot_claim_identity_model_or_vault(
+    served_knowledge: AgentWebServer,
+) -> None:
+    endpoint_url = base(served_knowledge) + "/api/knowledge/ask"
+    ordinary = {"asset": V1.model_dump(mode="json"), "question": "What is Safe mode?"}
+    for extra in (
+        {"actor": "somebody-else"},
+        {"model": "some-model"},
+        {"vault_root": "C:/somewhere"},
+    ):
+        refused = fetch(
+            endpoint_url,
+            token=served_knowledge.token,
+            body={**ordinary, **extra},
+        )
+        assert refused.status == 400
+    secret = fetch(
+        endpoint_url,
+        token=served_knowledge.token,
+        body={"asset": V1.model_dump(mode="json"), "question": "api_key=not-a-real-key"},
+    )
+    assert secret.status == 400
+
+
+def test_knowledge_asking_still_requires_bridge_policy(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path, authorized=False) as runtime:
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(
+                asset=V1,
+                question="What firmware does Safe mode require?",
+            )
+        )
+    assert result["ok"] is False
+    assert result["outcome"]["capability"]["status"] == "failed"
+    assert result["outcome"]["capability"]["failure"]["code"] == "permission_denied"
+
+
+def test_page_asks_one_exact_knowledge_version_and_renders_citations(
+    served: AgentWebServer,
+) -> None:
+    page = served.page().decode("utf-8")
+    assert 'id="knowledge-target"' in page
+    assert 'id="knowledge-question"' in page
+    assert 'call("/api/knowledge/ask"' in page
+    assert "cited_passages" in page
+    assert "citation.raw_ref" in page
 
 
 def test_asking_runs_the_real_agent_and_the_run_is_recorded(served: AgentWebServer) -> None:

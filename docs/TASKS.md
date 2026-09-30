@@ -46,8 +46,8 @@ implemented; the production-like company-host run remains pending.
 | 2b invitation member sign-in adapter | done | PR #145: one-time high-entropy invitation proof is stored only as a fingerprint, accepts the named secret-free invitation and produces the short-lived member session used by slice 2a; real HTTP proof carries no identity/permission claims |
 | 2c deployable Shared Platform composition | done | PR #147: one lifecycle serves the Bridge API and Member Portal over shared in-memory state; `aep-platform` writes one-time invitation links to an explicit delivery file and Personal Agent Web links to the separate member origin without forwarding its Bridge token |
 | 3 explicit synchronization | done | PR #149: Personal Agent Web invokes the existing all-or-nothing sync only from an explicit button and returns typed before/after, installed, selection and refusal state; catalog discovery remains read-only |
-| 4 generic Workflow launch | in review | Personal Agent Web lists exact installed Workflows and input-contract names, accepts one JSON argument object and executes through Local Agent admission, Gateway exact targeting, Workflow engine and Bridge policy with idempotent run/trace results |
-| 5 grounded Knowledge asking | planned | Exact installed Knowledge version answers with source citations in the Personal Agent Web |
+| 4 generic Workflow launch | done | PR #151: Personal Agent Web lists exact installed Workflows and input-contract names, accepts one JSON argument object and executes through Local Agent admission, Gateway exact targeting, Workflow engine and Bridge policy with idempotent run/trace results |
+| 5 grounded Knowledge asking | in progress | Exact configured Knowledge versions are listed without Vault paths; one closed question request executes the existing exact Knowledge capability through Local Agent admission and Bridge policy and returns grounded Raw citations |
 | 6 durable Registry | planned | Validated catalog contracts use a small persistent store without changing Bridge execution contracts |
 
 The approved scope and first user-level acceptance scenario are in
