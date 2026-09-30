@@ -299,14 +299,16 @@ policy. Catalog failure does not disable already-installed local-first assets.
 
 The first productization slice deliberately keeps catalog discovery read-only.
 
-Workflow selection crosses a separate **member entry point** on the Team
+Installable Agent Add-on selection crosses a separate **member entry point** on the Team
 Platform. A trusted sign-in adapter first produces an `AuthenticatedActor`
 without a device identity and may then mint a short-lived opaque member
-session. The member request names only the bound Bridge and exact Workflow;
+session. The member request names only the bound Bridge and exact asset;
 the platform supplies the actor and decision time and resolves membership,
-entitlement and package state from its own records. A Bridge access token is
-rejected at this boundary. The selection page is a projection of this service
-and owns no authorization rule.
+entitlement, kind and package state from its own records. The current entry
+point admits Workflows and Skills because both use the validated manifest
+installer; Knowledge and Agent profiles wait for their own package and
+activation contracts. A Bridge access token is rejected at this boundary. The
+selection page is a projection of this service and owns no authorization rule.
 
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof

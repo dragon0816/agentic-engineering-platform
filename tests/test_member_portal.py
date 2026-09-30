@@ -16,7 +16,7 @@ from typing import Any
 
 import pytest
 from pydantic import ValidationError
-from test_platform_transport import NOW, WORKFLOW, Platform
+from test_platform_transport import NOW, SKILL, WORKFLOW, Platform
 
 from common.identity import AuthenticatedActor
 from common.member import MemberCatalogRequest, MemberSelectRequest
@@ -66,6 +66,7 @@ def test_member_requests_cannot_claim_identity_policy_or_time() -> None:
     MemberSelectRequest(bridge_id="bridge-company", asset=WORKFLOW)
     for field, value in (
         ("actor", "someone-else"),
+        ("kind", "workflow"),
         ("permissions", ["filesystem.write"]),
         ("policy_refs", ["bypass"]),
         ("decided_at", NOW),
@@ -114,12 +115,15 @@ def test_member_catalog_select_and_revoke_cross_real_http(
         {"bridge_id": "bridge-company"},
     )
     assert status == 200
-    assert all(item["package"]["kind"] == "workflow" for item in before["entries"])
+    assert {item["package"]["kind"] for item in before["entries"]} == {"workflow", "skill"}
     workflow = next(item for item in before["entries"] if item["package"]["kind"] == "workflow")
+    skill = next(item for item in before["entries"] if item["package"]["kind"] == "skill")
     assert workflow["package"]["metadata"]["identity"] == WORKFLOW.model_dump()
+    assert skill["package"]["metadata"]["identity"] == SKILL.model_dump()
     assert workflow["selected"] is True  # Platform fixture already selected it.
+    assert skill["selected"] is True
 
-    # Revoke and choose again through requests that carry no actor or grant.
+    # Revoke and choose again through requests that carry no actor, kind or grant.
     status, revoked = post(
         server.base_url + "/v1/member/revoke",
         issued.bearer,
@@ -136,6 +140,20 @@ def test_member_catalog_select_and_revoke_cross_real_http(
     assert selected["selection"]["kind"] == "workflow"
     assert selected["selection"]["decided_at"] == NOW.isoformat().replace("+00:00", "Z")
     # Selecting an installable Workflow creates no execution permission.
+    assert platform.authorization.grants("bridge-company") == grants_before
+
+    status, revoked = post(
+        server.base_url + "/v1/member/revoke",
+        issued.bearer,
+        {"bridge_id": "bridge-company", "asset": SKILL.model_dump()},
+    )
+    assert status == 200 and revoked["selection"]["kind"] == "skill"
+    status, selected = post(
+        server.base_url + "/v1/member/select",
+        issued.bearer,
+        {"bridge_id": "bridge-company", "asset": SKILL.model_dump()},
+    )
+    assert status == 200 and selected["selection"]["kind"] == "skill"
     assert platform.authorization.grants("bridge-company") == grants_before
 
 
@@ -168,7 +186,7 @@ def test_portal_page_is_a_generic_same_origin_selection_ui(
     _platform, _sessions, server = portal
     with urllib.request.urlopen(server.base_url + "/", timeout=20) as answer:
         page = answer.read().decode("utf-8")
-    assert "Shared Workflow Catalog" in page
+    assert "Shared Agent Add-on Catalog" in page
     assert "/v1/member/catalog" in page
     assert "/v1/member/select" in page
     assert "/v1/member/revoke" in page

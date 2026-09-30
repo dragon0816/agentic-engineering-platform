@@ -1,6 +1,27 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 and Productization 1 complete; Phase 7 active
+Status: Phases 1–6 and Productization 1 complete; Phase 7 and Productization 2 active
+
+## Productization 2 — Agent Add-on Marketplace
+
+Extend the completed Personal Agent Web foundation across governed Agent
+Add-ons. The first slice lets a member select an exact published Skill through
+the existing member portal, synchronize it through the existing Bridge wire
+and prove that a rebuilt Agent loads its deterministic command. Portable
+Knowledge, Knowledge activation, Agent profiles and version rollback follow as
+separate slices because they have different package and activation rules.
+
+The active specification is
+`docs/phases/PRODUCTIZATION_2_AGENT_ADDONS.md`.
+
+## Productization 3 — Bridge Extensions and Application Catalog
+
+After Productization 2 has a reproducible exit path, add a governed dynamic
+Bridge Extension lifecycle and a separate catalog projection for independent
+Applications. An extension adds typed local capabilities behind Bridge policy;
+an Application keeps its own process, deployment and update lifecycle. The
+planned boundaries and decisions are in
+`docs/phases/PRODUCTIZATION_3_EXTENSIONS_AND_APPS.md`.
 
 ## Productization 1 — Personal Agent Web and Workflow Marketplace
 

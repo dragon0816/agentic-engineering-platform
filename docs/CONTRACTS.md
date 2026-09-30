@@ -1607,15 +1607,17 @@ not administer that device). A withdrawn binding is history rather than a bar:
 device can be put back on it. `may_administer(actor, bridge_id)` is that one
 rule, asked by everything that acts on a device's records.
 
-## Member Workflow selection (Productization 1, slice 2a)
+## Member Agent Add-on selection (Productization 1 slice 2a; Productization 2 slice 1)
 
 `MemberCatalogRequest`, `MemberSelectRequest` and `MemberRevokeRequest` name a
 Bridge and, for a mutation, an exact asset identity. Their closed schemas have
 no actor, groups, permission, policy, approval or decision-time field. The
 member entry point supplies actor and time from its authenticated session and
-always creates a `workflow` selection. `MemberCatalogReply` contains entitled
-published Workflows with a separate `selected` fact; it neither carries
-artifact bytes nor changes installation or execution authorization.
+derives `workflow` or `skill` from the exact Registry package. A request cannot
+claim or change kind. `MemberCatalogReply` contains entitled published
+Workflows and Skills with a separate `selected` fact; it neither carries
+artifact bytes nor changes installation or execution authorization. Other
+published kinds are excluded until they have a compatible validated installer.
 
 `InMemoryMemberSessions.issue(identity)` is a trusted-host call made after an
 external sign-in adapter has produced a current `AuthenticatedActor`. It
