@@ -37,14 +37,16 @@ as a browser session.
 
 ## In Progress
 
-- The implementation is committed locally on
-  `codex/member-workflow-selection`. Review/PR creation and exact-head CI are
-  the remaining release steps for slice 2a.
+- The implementation is pushed on `codex/member-workflow-selection` and open
+  for review in PR #143:
+  https://github.com/dragon0816/agentic-engineering-platform/pull/143
+- Local verification is green. Exact-head GitHub Platform verification is the
+  remaining release check for slice 2a.
 
 ## Remaining
 
-1. Push the branch, open a PR against `main` and confirm exact-head Platform
-   verification.
+1. Confirm PR #143 exact-head Platform verification, then have the owner
+   review and merge it.
 2. Productization 1 slice 2b: connect the invitation-based shared-platform
    sign-in flow to trusted member-session issuance. Do not invent LDAP or
    reuse the Bridge credential.
