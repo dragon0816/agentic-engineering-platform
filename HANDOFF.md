@@ -1,57 +1,79 @@
 # Handoff
 
 Date: 2026-09-30 (Asia/Taipei)
-Branch: `codex/hermes-structured-evidence`
-Base: `origin/main` at `127c69f059e470486ab44b63e964ce611dc6d018`
+Branch: `codex/telegram-control-bot`
+Base: `origin/main` merge commit `72a7c3d7c1638b5e9e704288fd8a286e8267af9d`
 
 ## Goal
 
-Allow the trusted Hermes evidence response requested by Local Codex to become a
-new queue item without weakening the fixed-schema, untrusted-evidence boundary.
+Remove the owner's manual copy-and-paste step between Hermes and Local Codex by
+letting their dedicated Telegram bots coordinate in one shared group, without
+moving queue authority, evidence, code execution or merge authority out of
+GitHub.
 
 ## Completed
 
-- Confirmed PR #133 merged, updated the OpenLab Local Codex Worker checkout to
-  merge commit `127c69f`, rebuilt its Python 3.12 virtual environment, and
-  restarted the `AEP Local Codex Worker` Scheduled Task.
-- Re-queued Issue #132 once. The worker successfully replaced its earlier
-  `FileNotFoundError` with a bounded evidence request.
-- Confirmed Hermes returned complete evidence on both #132 and the newer #134.
-- Diagnosed the apparent successful-but-idle queue run: the workflow's exact
-  key allowlist rejected Hermes' new `evidence_details`, then selected the older
-  valid failure and deduplicated its already-existing request.
-- Added an optional structured evidence contract shared by GitHub validation and
-  the Python worker. It requires exact artifact/request/profile/SHA identities,
-  fixed top-level fields, JSON-only values, bounded depth/collections/strings,
-  and a 48,000-character total cap.
-- Replayed the actual latest #134 Hermes payload against the new Python contract;
-  it was accepted at 7,202 JSON characters for target `127c69f`.
+- Confirmed PR #135 merged with green Platform verification and based this slice
+  on its merge commit.
+- Added `development.telegram_control` with a closed non-secret configuration,
+  strict owner/Hermes/chat identity binding and token resolution through
+  `SecretRef` at Bot API call time.
+- Added owner-only `/status` and `/status <issue-number>` reads. No Telegram
+  command changes GitHub or starts Codex.
+- Added fixed `aep-telegram-control/v1` Hermes events, GitHub Issue read-back,
+  terminal `aep-telegram-control-ack/v1`, `hop` loop bounds, a 25-update poll
+  bound, durable offset and a 200-event replay bound.
+- Added best-effort `aep-telegram-worker-event/v1` notifications for Local Codex
+  `running`, `waiting_evidence`, `failed` and `completed` states.
+- Integrated Telegram into the existing Local Codex Worker process. Telegram
+  configuration and transport failure cannot stop GitHub polling; there is no
+  second Scheduled Task and no inbound port.
+- Added all four Telegram settings to the explicit local YAML allowlist and
+  removed the token and identity settings from every Codex subprocess.
+- Documented the group protocol, trust boundary, configuration and Hermes loop
+  rules. Added contract and regression tests.
+- Verified the actual ignored `local.yaml` loads all configured GitHub and
+  Telegram names without printing any value.
+- Committed implementation as `c11fa34` and opened PR #137:
+  https://github.com/dragon0816/agentic-engineering-platform/pull/137
 
 ## In Progress
 
-- Repair commit `aa697fc` is pushed and open for review as PR #135:
-  https://github.com/dragon0816/agentic-engineering-platform/pull/135
+- PR #137 is open and awaiting GitHub CI/review.
 
 ## Remaining
 
-1. Review and merge PR #135.
-2. After merge, reapply `codex-fix` to the newer Issue #134 once so GitHub queues
-   its structured evidence for Local Codex. Keep #132 as historical evidence.
-3. Confirm #134 becomes `codex-local-running` and then produces either a Draft
-   repair PR or a bounded terminal result.
-4. If a Draft repair PR appears, let CI pass and have Hermes retest its exact
-   head SHA; human review remains required before merge.
+1. Confirm PR #137 Platform verification is green and merge it.
+2. Update the resident checkout at
+   `C:\Users\OpenLab\.codex\worktrees\local-codex-worker\agentic-ai-team-platform`
+   to the new `main`, refresh its Python 3.12 environment if required, and
+   restart the existing `AEP Local Codex Worker` Scheduled Task once.
+3. Confirm only one process polls the dedicated Local Codex bot; HTTP 409 means
+   another process is using the same bot token.
+4. Send `/status` in the configured group and confirm a reply within one worker
+   interval (currently 60 seconds).
+5. Have Hermes post one fixed event only after it has written the corresponding
+   evidence/result to GitHub. Confirm one terminal ack appears and a duplicate
+   `event_id` produces no second ack.
+6. Run one controlled failure loop and confirm Local Codex worker state changes
+   appear in the group while GitHub remains the durable record.
 
 ## Architecture decisions made
 
-- `evidence_details` is optional, preserving initial `hermes-failure/v1`
-  payloads and existing producers.
-- Structured evidence remains data inside the untrusted prompt block. It cannot
-  provide commands, GitHub credentials, delivery authority, or merge authority.
-- GitHub and the local worker both validate the contract; accepting it only at
-  one boundary would leave the loop failing later or weaken defense in depth.
-- #134 is the next active repair because it tests the latest merged main SHA;
-  #132 is retained as auditable historical evidence.
+- The Telegram group is an immediate coordination layer. GitHub Issue comments,
+  labels and exact-SHA payloads remain the persistent control plane.
+- This is separate from the existing Personal Agent Telegram ingress. It cannot
+  route natural-language work, invoke a capability, mutate a repository or merge.
+- Bot-to-bot messages use fixed JSON rather than free-form conversation. The
+  Local Codex bot accepts only the configured Hermes bot with `is_bot=true` in
+  the exact configured chat. The owner and Hermes bot IDs are distinct.
+- Hermes event `hop=0` receives at most one terminal ack with `hop=1`. Hermes
+  must ignore acknowledgements and Local Codex worker events, preventing loops.
+- An absent four-value Telegram configuration disables the optional channel. A
+  partial/invalid configuration logs only the error type and leaves the GitHub
+  worker running.
+- No new architecture component is needed on GitHub and no API-billed OpenAI
+  action is reintroduced.
 
 ## Verification
 
@@ -59,41 +81,47 @@ Supported target: Windows, Python 3.12. Browser tests excluded per owner
 instruction.
 
 ```text
-python -m pytest tests/test_codex_remote_test_workflow.py -q
-21 passed
+python -m pytest tests/test_local_codex_telegram_control.py \
+  tests/test_local_developer_environment.py \
+  tests/test_codex_remote_test_workflow.py -q
+33 passed
 
 python -m pytest --ignore=tests/test_browser.py -q
-1346 passed, 4 skipped
+1353 passed, 4 skipped
 
 python -m ruff check .
 All checks passed
 
 python -m ruff format --check .
-288 files already formatted
+290 files already formatted
 
 python -m mypy src tests
-Success: no issues found in 224 source files
+Success: no issues found in 226 source files
 
-Live #134 contract replay
-live_payload=accepted
-target_sha=127c69f059e470486ab44b63e964ce611dc6d018
-evidence_json_chars=7202
+python -m build
+Successfully built agentic_engineering_platform-0.1.0.tar.gz and
+agentic_engineering_platform-0.1.0-py3-none-any.whl
+
+scripts/import-local-env.ps1 against the actual ignored local.yaml
+Loaded names: GH_TOKEN, AEP_GITHUB_TOKEN, TELEGRAM_BOT_TOKEN,
+TELEGRAM_HERMES_BOT_ID, TELEGRAM_CONTROL_CHAT_ID,
+TELEGRAM_OWNER_USER_ID; no values printed
 ```
-
-The first full-suite attempt used a workspace `.scratch` basetemp and produced
-48 existing file-store failures with `unavailable`; the representative test and
-the complete suite passed when rerun under the standard Windows TEMP root.
 
 ## Known issues
 
-- Until this branch merges, reapplying `codex-fix` merely selects the older
-  payload and reports workflow success without queueing the structured evidence.
-- #132 and #134 still carry `codex-local-evidence-requested`; neither should be
-  treated as a completed repair.
-- Hermes reported consuming both trusted evidence requests in one poll. The
-  latest-main #134 is the only Issue that should be advanced after this fix.
+- The resident Local Codex Worker still runs the pre-#137 checkout until this PR
+  merges and that checkout is updated/restarted. Restarting it before updating
+  would make the older loader reject the new Telegram YAML fields.
+- Bot API connectivity, group visibility and bot-to-bot delivery require one
+  live post-merge Telegram check. Unit tests use an injected transport and make
+  no network or messaging side effects.
+- Telegram worker-state messages are best effort. A missed Telegram message does
+  not lose work because GitHub remains authoritative.
 
 ## Next Recommended Action
 
-Review and merge PR #135. Then reapply `codex-fix` to
-Issue #134 exactly once and monitor the resident Local Codex Worker.
+Wait for PR #137 Platform verification, review and merge it. Then update/restart
+the one resident Local Codex Worker and run the two-message group smoke test:
+owner `/status`, followed by one Hermes fixed event whose GitHub evidence already
+exists.
