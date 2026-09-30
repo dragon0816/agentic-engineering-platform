@@ -159,6 +159,7 @@ class AgentWeb:
         if self.runtime.platform is None:
             return {
                 "configured": False,
+                "member_portal_url": "",
                 "note": "No shared platform is configured on this machine.",
                 "catalog": [],
                 "decisions": [],
@@ -251,8 +252,10 @@ class AgentWeb:
                     "installed": key in installed,
                 }
             )
+        binding = self.runtime.config.platform
         return {
             "configured": True,
+            "member_portal_url": binding.member_portal_url if binding is not None else "",
             "connection": discovered.status,
             "note": note,
             "catalog": catalog,

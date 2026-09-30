@@ -212,3 +212,11 @@ worker authenticated with ChatGPT Pro. GitHub Actions writes typed queue and
 Hermes-handoff payloads but runs no model and receives no ChatGPT credential. See
 [`docs/remote-testing-codex-loop.md`](docs/remote-testing-codex-loop.md) for setup,
 security boundaries and the reproducible dummy test.
+
+The first Shared Platform reference process is available as `aep-platform
+serve`. It starts the Bridge API and interactive Member Portal over shared
+in-memory state while preserving separate device and member credentials.
+Personal Agent Web can link to the Member Portal through the optional
+`member_portal_url` host setting. See
+[`docs/shared-platform-preview.md`](docs/shared-platform-preview.md) for the
+secret-free example configuration, TLS rule and invitation delivery procedure.

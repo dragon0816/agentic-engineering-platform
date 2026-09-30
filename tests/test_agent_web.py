@@ -210,6 +210,31 @@ def test_shared_platform_catalog_distinguishes_publish_authorize_and_install(
                 thread.join(timeout=5)
 
 
+def test_shared_platform_view_links_to_the_separate_member_portal(tmp_path: Path) -> None:
+    platform = Platform()
+    with ControlPlaneServer(platform.service) as control:
+        config, _layout, runtime = host(tmp_path, platform, control.base_url)
+        assert config.platform is not None
+        runtime.config = config.model_copy(
+            update={
+                "platform": config.platform.model_copy(
+                    update={"member_portal_url": "https://platform.internal:8443"}
+                )
+            }
+        )
+        with runtime:
+            web = AgentWeb(runtime)
+            projection = web.platform()
+            assert projection["member_portal_url"] == "https://platform.internal:8443"
+            server = AgentWebServer(web)
+            try:
+                page = server.page().decode("utf-8")
+            finally:
+                server.server_close()
+            assert "member-portal" in page
+            assert "Open shared catalog controls" in page
+
+
 def test_asking_runs_the_real_agent_and_the_run_is_recorded(served: AgentWebServer) -> None:
     """The same Agent the command line reaches, on the same ingress. The run
     then shows up in the listing, which is how a person sees what happened."""

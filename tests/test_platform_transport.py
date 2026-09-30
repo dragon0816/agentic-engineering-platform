@@ -424,6 +424,20 @@ def test_the_wire_contracts_are_closed_and_consistent(platform: Platform) -> Non
         PlatformBinding.model_validate(binding("https://platform.internal?access_token=abc"))
     with pytest.raises(ValidationError):
         PlatformBinding.model_validate(binding("https://platform.internal", secret="abc"))
+    linked = PlatformBinding.model_validate(
+        binding(
+            "https://platform.internal",
+            member_portal_url="https://platform.internal:8443/",
+        )
+    )
+    assert linked.member_portal_url == "https://platform.internal:8443"
+    with pytest.raises(ValidationError, match="member portal beyond loopback"):
+        PlatformBinding.model_validate(
+            binding(
+                "https://platform.internal",
+                member_portal_url="http://platform.internal:8443",
+            )
+        )
 
 
 def test_the_service_answers_each_operation_for_a_real_token(platform: Platform) -> None:

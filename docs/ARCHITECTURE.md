@@ -318,6 +318,21 @@ execution grant. The invitation link carries its proof in a URL fragment so
 the browser does not send it while loading the page; the page removes the
 fragment immediately and keeps the resulting member session in memory only.
 
+The first deployable reference composition runs the Bridge API and Member
+Portal in one process, with separate listeners and credentials over the same
+enrollment, package, authorization, remote-control and member-session state.
+The two listeners may share one TLS context but do not share authentication:
+the device-bound Bridge token is never accepted by the member entry point, and
+the member session is never accepted by the Bridge wire. Non-loopback binding
+requires TLS. Bootstrap configuration contains only secret-free invitation
+metadata and local TLS file paths; generated invitation proofs are written to
+an explicitly named one-time delivery file outside Registry assets.
+
+`PlatformBinding.member_portal_url` is optional navigation metadata. Personal
+Agent Web may render it as a link, but all Bridge catalog/sync traffic continues
+to use `PlatformBinding.base_url` and the Bridge credential. The page never
+receives or forwards that credential to the member origin.
+
 The shared catalog may present several product categories through one Web
 shell, but their runtime and installation boundaries remain distinct:
 

@@ -64,13 +64,17 @@ state and fixture assets.
    bound Bridge. Do not reuse the Bridge token as an interactive user session.
    The provider-neutral session/HTTP proof is slice 2a; connecting a one-time
    invitation proof to invitation acceptance and session issuance is slice 2b.
-3. **Install/synchronize action** — expose the existing all-or-nothing sync as
+3. **Shared Platform composition (slice 2c)** — run the Bridge API and Member Portal in
+   one deployable process over shared enrollment, package, authorization and
+   session state; give Personal Agent Web an explicit, non-secret Member Portal
+   link without sending the Bridge credential there.
+4. **Install/synchronize action** — expose the existing all-or-nothing sync as
    an explicit Web action, with before/after state and typed refusal.
-4. **Workflow launch form** — render declared inputs and submit through the
+5. **Workflow launch form** — render declared inputs and submit through the
    normal Agent/Gateway path; show progress, result and trace identifiers.
-5. **Knowledge query** — browse exact installed Knowledge versions and ask one
+6. **Knowledge query** — browse exact installed Knowledge versions and ask one
    grounded question with citations.
-6. **Durable shared catalog** — replace the in-memory Registry reference with a
+7. **Durable shared catalog** — replace the in-memory Registry reference with a
    small persistent implementation after the user path and contracts are
    validated.
 
@@ -153,3 +157,20 @@ contracts. Extension installation remains outside this productization slice.
 - sign-in changes no Bridge binding, asset selection or execution grant;
 - the page removes the invitation fragment and stores neither invitation nor
   member bearer in browser storage.
+
+## Exit evidence for slice 2c
+
+- one application lifecycle starts and stops both the Bridge API and Member
+  Portal while both use the same enrollment and authorization records;
+- an invitation redeemed over the real member HTTP entry point creates the
+  member later authenticated by the Bridge API after the separate device
+  binding/token step;
+- process configuration contains invitation metadata and TLS paths, never an
+  invitation proof, Bridge token, member bearer or private-key value;
+- generated invitation links are written once to an explicitly named local
+  delivery file and are not printed as ordinary service status;
+- a non-loopback listener is refused without TLS;
+- `PlatformBinding.member_portal_url` is navigation metadata with the same
+  origin/TLS checks as the Bridge endpoint and carries no credential;
+- Personal Agent Web renders that Member Portal link but continues to use the
+  Bridge endpoint and Bridge token only for catalog reads.
