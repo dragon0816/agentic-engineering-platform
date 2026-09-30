@@ -48,9 +48,16 @@ from urllib.parse import parse_qs, urlparse
 
 from agent.skills import SkillManifest
 from common.assets import WorkflowManifest
-from common.execution import TraceIdentifiers
+from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.answers import readable
+from host_runtime.contracts import (
+    PlatformCatalogProjection,
+    PlatformDecisionProjection,
+    PlatformProjection,
+    PlatformSyncRequest,
+    PlatformSyncResult,
+)
 from host_runtime.host import HostRuntime
 from host_runtime.workspace import documents
 
@@ -156,18 +163,19 @@ class AgentWeb:
 
     def platform(self) -> dict[str, Any]:
         """Published assets plus this Bridge's separate local state."""
+        with self._one_at_a_time:
+            return self._platform_projection().model_dump(mode="json")
+
+    def _platform_projection(self) -> PlatformProjection:
+        """Build one snapshot while the caller owns `_one_at_a_time`."""
         if self.runtime.platform is None:
-            return {
-                "configured": False,
-                "member_portal_url": "",
-                "note": "No shared platform is configured on this machine.",
-                "catalog": [],
-                "decisions": [],
-            }
+            return PlatformProjection(
+                configured=False,
+                note="No shared platform is configured on this machine.",
+            )
         import asyncio
 
-        with self._one_at_a_time:
-            discovered = asyncio.run(self.runtime.platform.catalog())
+        discovered = asyncio.run(self.runtime.platform.catalog())
 
         try:
             installed_assets = self.runtime.state.installed()
@@ -202,31 +210,31 @@ class AgentWeb:
             (item.kind, item.asset.key)
             for item in (() if authorization is None else authorization.selections)
         }
-        catalog = []
+        catalog: list[PlatformCatalogProjection] = []
         if discovered.status == "answered" and discovered.reply is not None:
             for package in discovered.reply.packages:
                 metadata = package.metadata
                 identity = metadata.identity
                 catalog.append(
-                    {
-                        "kind": package.kind,
-                        "namespace": identity.namespace,
-                        "name": identity.name,
-                        "version": identity.version,
-                        "description": package.description or "",
-                        "owner": f"{metadata.owner.type}:{metadata.owner.id}",
-                        "visibility": metadata.visibility,
-                        "lifecycle": metadata.lifecycle,
-                        "dependencies": [
+                    PlatformCatalogProjection(
+                        kind=package.kind,
+                        namespace=identity.namespace,
+                        name=identity.name,
+                        version=identity.version,
+                        description=package.description or "",
+                        owner=f"{metadata.owner.type}:{metadata.owner.id}",
+                        visibility=metadata.visibility,
+                        lifecycle=metadata.lifecycle,
+                        dependencies=tuple(
                             f"{item.namespace}/{item.name}@{item.version}"
                             for item in metadata.dependencies
-                        ],
-                        "runtime": metadata.compatibility.runtime or "",
-                        "platforms": list(metadata.compatibility.platforms),
-                        "published": True,
-                        "authorized": (package.kind, identity.key) in selected,
-                        "installed": identity.key in installed,
-                    }
+                        ),
+                        runtime=metadata.compatibility.runtime or "",
+                        platforms=metadata.compatibility.platforms,
+                        published=True,
+                        authorized=(package.kind, identity.key) in selected,
+                        installed=identity.key in installed,
+                    )
                 )
             note = decisions_note
         else:
@@ -236,31 +244,61 @@ class AgentWeb:
                 "Already installed local assets remain available."
             )
 
-        rows = []
+        rows: list[PlatformDecisionProjection] = []
         # Every selection here is in force: the contract refuses to carry a
         # revoked one, so nothing has to read a status to know what applies.
         for selection in () if authorization is None else authorization.selections:
             asset = selection.asset
             key = (asset.namespace, asset.name, asset.version)
             rows.append(
-                {
-                    "kind": selection.kind,
-                    "namespace": asset.namespace,
-                    "name": asset.name,
-                    "version": asset.version,
-                    "actor": selection.actor,
-                    "installed": key in installed,
-                }
+                PlatformDecisionProjection(
+                    kind=selection.kind,
+                    namespace=asset.namespace,
+                    name=asset.name,
+                    version=asset.version,
+                    actor=selection.actor,
+                    installed=key in installed,
+                )
             )
         binding = self.runtime.config.platform
-        return {
-            "configured": True,
-            "member_portal_url": binding.member_portal_url if binding is not None else "",
-            "connection": discovered.status,
-            "note": note,
-            "catalog": catalog,
-            "decisions": rows,
-        }
+        return PlatformProjection(
+            configured=True,
+            member_portal_url=(binding.member_portal_url or "") if binding is not None else "",
+            connection=discovered.status,
+            note=note,
+            catalog=tuple(catalog),
+            decisions=tuple(rows),
+        )
+
+    def synchronize(self) -> dict[str, Any]:
+        """Run the existing verified sync only after this explicit action."""
+        import asyncio
+
+        with self._one_at_a_time:
+            before = self._platform_projection()
+            if self.runtime.platform is None:
+                outcome = PlatformSyncResult(
+                    status="refused",
+                    failure=Failure(
+                        code="platform_not_configured",
+                        message="no shared platform is configured on this machine",
+                    ),
+                    before=before,
+                    after=before,
+                )
+            else:
+                synchronized = asyncio.run(
+                    self.runtime.platform.synchronize(self.runtime.layout, self.runtime.state)
+                )
+                outcome = PlatformSyncResult(
+                    status=synchronized.status,
+                    failure=synchronized.failure,
+                    installed=synchronized.installed,
+                    selections=synchronized.selections,
+                    before=before,
+                    after=self._platform_projection(),
+                )
+        return outcome.model_dump(mode="json")
 
     def ask(self, message: str, namespace: str | None = None) -> dict[str, Any]:
         chosen = namespace or self.namespace
@@ -367,7 +405,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not self._authorized():
             self._json(401, {"error": "this request carried no usable token"})
             return
-        if urlparse(self.path).path != "/api/ask":
+        path = urlparse(self.path).path
+        if path not in ("/api/ask", "/api/platform/sync"):
             self._json(404, {"error": "no such page"})
             return
         try:
@@ -380,6 +419,27 @@ class _Handler(BaseHTTPRequestHandler):
             return
         try:
             body = json.loads(self.rfile.read(length) or b"{}")
+        except (ValueError, TypeError):
+            self._json(400, {"error": "the request was not valid JSON"})
+            return
+        if path == "/api/platform/sync":
+            try:
+                PlatformSyncRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(
+                    400,
+                    {"error": "synchronization requires an empty synchronization request"},
+                )
+                return
+            try:
+                self._json(200, self.server.web.synchronize())
+            except Exception as failure:  # noqa: BLE001 - a page shows everything
+                self._json(
+                    500,
+                    {"error": f"synchronization did not finish: {type(failure).__name__}"},
+                )
+            return
+        try:
             message = str(body["message"]).strip()
         except (ValueError, KeyError, TypeError):
             self._json(400, {"error": "the request was not a message"})

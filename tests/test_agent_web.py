@@ -8,7 +8,6 @@ asked the question an attacker asks.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import threading
 import urllib.error
@@ -122,6 +121,8 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
         assert fetch(base(served) + path, token="wrong").status == 401
         assert fetch(base(served) + path, token=served.token).status == 200
     assert fetch(base(served) + "/api/ask", body={"message": "x"}).status == 401
+    assert fetch(base(served) + "/api/platform/sync", body={}).status == 401
+    assert fetch(base(served) + "/api/platform/sync", token="wrong", body={}).status == 401
 
 
 def test_the_token_in_the_address_does_not_open_the_api(served: AgentWebServer) -> None:
@@ -135,6 +136,13 @@ def test_a_name_that_resolves_here_is_still_refused(served: AgentWebServer) -> N
     refused = fetch(base(served) + "/api/about", token=served.token, host="agent.attacker.example")
     assert refused.status == 403
     assert "loopback" in refused.json()["error"]
+    refused = fetch(
+        base(served) + "/api/platform/sync",
+        token=served.token,
+        body={},
+        host="agent.attacker.example",
+    )
+    assert refused.status == 403
 
 
 def test_it_answers_no_cross_origin_header(served: AgentWebServer) -> None:
@@ -173,6 +181,11 @@ def test_a_machine_with_no_shared_platform_says_so(served: AgentWebServer) -> No
     assert "No shared platform is configured" in platform["note"]
     assert platform["decisions"] == []
 
+    synchronized = fetch(base(served) + "/api/platform/sync", token=served.token, body={}).json()
+    assert synchronized["status"] == "refused"
+    assert synchronized["failure"]["code"] == "platform_not_configured"
+    assert synchronized["before"] == synchronized["after"] == platform
+
 
 def test_shared_platform_catalog_distinguishes_publish_authorize_and_install(
     tmp_path: Path,
@@ -196,14 +209,21 @@ def test_shared_platform_catalog_distinguishes_publish_authorize_and_install(
                 assert workflow["owner"] == "team:engineering"
                 assert runtime.state.installed() == ()
 
-                assert runtime.platform is not None
-                synced = asyncio.run(runtime.platform.synchronize(layout, runtime.state))
-                assert synced.status == "answered"
-
-                after = fetch(base(server) + "/api/platform", token=server.token).json()
+                synced = fetch(
+                    base(server) + "/api/platform/sync", token=server.token, body={}
+                ).json()
+                assert synced["status"] == "answered"
+                assert {item["name"] for item in synced["installed"]} == {
+                    "read-local-file",
+                    "file-skill",
+                }
+                assert synced["selections"] == 3
+                assert synced["before"] == before
+                after = synced["after"]
                 workflow = next(row for row in after["catalog"] if row["kind"] == "workflow")
                 assert workflow["authorized"] is True
                 assert workflow["installed"] is True
+                assert after == fetch(base(server) + "/api/platform", token=server.token).json()
             finally:
                 server.shutdown()
                 server.server_close()
@@ -233,6 +253,92 @@ def test_shared_platform_view_links_to_the_separate_member_portal(tmp_path: Path
                 server.server_close()
             assert "member-portal" in page
             assert "Open shared catalog controls" in page
+
+
+def test_sync_request_is_closed_and_discovery_never_triggers_it(tmp_path: Path) -> None:
+    platform = Platform()
+    with ControlPlaneServer(platform.service) as control:
+        _config, layout, runtime = host(tmp_path, platform, control.base_url)
+        with runtime:
+            server = AgentWebServer(AgentWeb(runtime))
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                assert fetch(base(server) + "/api/platform", token=server.token).status == 200
+                assert runtime.state.installed() == ()
+                assert not layout.authorization.exists()
+
+                refused = fetch(
+                    base(server) + "/api/platform/sync",
+                    token=server.token,
+                    body={"asset": "engineering/read-local-file@1.0.0"},
+                )
+                assert refused.status == 400
+                assert "empty synchronization request" in refused.json()["error"]
+                assert runtime.state.installed() == ()
+                assert not layout.authorization.exists()
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+
+def test_unreachable_sync_is_typed_and_leaves_local_state_untouched(tmp_path: Path) -> None:
+    platform = Platform()
+    control = ControlPlaneServer(platform.service)
+    base_url = control.base_url
+    control.stop()
+    _config, layout, runtime = host(tmp_path, platform, base_url)
+    with runtime:
+        server = AgentWebServer(AgentWeb(runtime))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            result = fetch(base(server) + "/api/platform/sync", token=server.token, body={}).json()
+            assert result["status"] == "unreachable"
+            assert result["failure"]["retryable"] is True
+            assert result["before"]["connection"] == "unreachable"
+            assert result["after"]["connection"] == "unreachable"
+            assert runtime.state.installed() == ()
+            assert not layout.authorization.exists()
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+
+def test_local_sync_refusal_is_typed_and_leaves_local_state_untouched(tmp_path: Path) -> None:
+    platform = Platform()
+    with ControlPlaneServer(platform.service) as control:
+        _config, layout, runtime = host(tmp_path, platform, control.base_url)
+        layout.grants.write_text("[]", encoding="utf-8")
+        with runtime:
+            server = AgentWebServer(AgentWeb(runtime))
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                result = fetch(
+                    base(server) + "/api/platform/sync", token=server.token, body={}
+                ).json()
+                assert result["status"] == "refused"
+                assert result["failure"]["code"] == "sync_grants_conflict"
+                assert result["installed"] == []
+                assert runtime.state.installed() == ()
+                assert not layout.authorization.exists()
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+
+def test_page_only_synchronizes_after_the_explicit_button_action(
+    served: AgentWebServer,
+) -> None:
+    page = served.page().decode("utf-8")
+    assert 'id="platform-sync"' in page
+    assert 'call("/api/platform/sync", {})' in page
+    assert 'addEventListener("click"' in page
+    assert "install-package" not in page
 
 
 def test_asking_runs_the_real_agent_and_the_run_is_recorded(served: AgentWebServer) -> None:

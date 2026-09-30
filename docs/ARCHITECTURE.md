@@ -333,6 +333,14 @@ Agent Web may render it as a link, but all Bridge catalog/sync traffic continues
 to use `PlatformBinding.base_url` and the Bridge credential. The page never
 receives or forwards that credential to the member origin.
 
+Synchronization from Personal Agent Web is a deliberate local action. The Web
+adapter accepts an empty closed request and calls the same
+`PlatformClient.synchronize` used by the CLI; it contains no package installer,
+selection or authorization logic. The response carries typed synchronization
+status plus complete catalog/Bridge projections from immediately before and
+after the attempt. An unavailable or refused sync leaves local state unchanged,
+and simply opening the Shared Platform tab remains read-only.
+
 The shared catalog may present several product categories through one Web
 shell, but their runtime and installation boundaries remain distinct:
 

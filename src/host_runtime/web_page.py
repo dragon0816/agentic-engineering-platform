@@ -155,6 +155,10 @@ tr:last-child td { border-bottom: none; }
     <p class="note" id="platform-note">reading&hellip;</p>
     <p><a id="member-portal" hidden target="_blank" rel="noopener noreferrer">
       Open shared catalog controls</a></p>
+    <p><button class="go" id="platform-sync" type="button" disabled>
+      Synchronize selected assets</button></p>
+    <p class="note" id="platform-sync-result">
+      Synchronization runs only when you press the button.</p>
     <div class="card"><div id="catalog" class="empty">reading&hellip;</div></div>
     <h2>Authorized on this Bridge</h2>
     <p class="note">Selections synchronized to this machine. A selection does not bypass
@@ -171,11 +175,12 @@ const TOKEN = new URLSearchParams(location.search).get("token") || "";
 history.replaceState(null, "", location.pathname);
 
 async function call(path, body) {
+  const hasBody = body !== undefined;
   const options = {
-    method: body ? "POST" : "GET",
+    method: hasBody ? "POST" : "GET",
     headers: {"Authorization": "Bearer " + TOKEN},
   };
-  if (body) {
+  if (hasBody) {
     options.headers["Content-Type"] = "application/json";
     options.body = JSON.stringify(body);
   }
@@ -280,9 +285,9 @@ async function loadAssets() {
     (r) => [r.run_id, r.workflow, r.status, r.actor]));
 }
 
-async function loadPlatform() {
-  const platform = await call("/api/platform");
+function renderPlatform(platform) {
   el("platform-note").textContent = platform.note;
+  el("platform-sync").disabled = !platform.configured;
   const portal = el("member-portal");
   if (platform.member_portal_url) {
     portal.href = platform.member_portal_url;
@@ -305,6 +310,31 @@ async function loadPlatform() {
     (d) => [d.kind, d.namespace + "/" + d.name + "@" + d.version, d.actor,
             tag(d.installed, "installed", "not installed")]));
 }
+
+async function loadPlatform() {
+  renderPlatform(await call("/api/platform"));
+}
+
+el("platform-sync").addEventListener("click", async () => {
+  const button = el("platform-sync"), result = el("platform-sync-result");
+  button.disabled = true;
+  result.textContent = "Synchronizing selected assets\\u2026";
+  try {
+    const synchronized = await call("/api/platform/sync", {});
+    renderPlatform(synchronized.after);
+    if (synchronized.status === "answered") {
+      result.textContent = "Synchronization complete: " + synchronized.installed.length
+        + " installed, " + synchronized.selections + " active selections.";
+    } else {
+      const failure = synchronized.failure || {code: synchronized.status};
+      result.textContent = "Synchronization " + synchronized.status + ": " + failure.code;
+    }
+  } catch (failure) {
+    result.textContent = "Synchronization did not finish: " + failure.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 // -- Tabs -----------------------------------------------------------------
 
