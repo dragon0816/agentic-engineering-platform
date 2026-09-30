@@ -72,7 +72,12 @@ from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from dut.runtime import PhysicalDutValidationService
 from host_runtime.agent import LocalAgent
-from host_runtime.contracts import CompanyHostConfiguration, DoctorCheck, HostDoctorReport
+from host_runtime.contracts import (
+    CompanyHostConfiguration,
+    DoctorCheck,
+    HostDoctorReport,
+    KnowledgeHostBinding,
+)
 
 # Re-exported: the layout moved to the contracts module so the platform client
 # can take one without importing this module, and callers still find it here.
@@ -507,15 +512,6 @@ def build_gateway(
             membership if membership is not None else load_membership(config, layout)
         )
         build_dut(config, installed, skills, active_membership, adapter=dut_adapter)
-    grants = (
-        _decided_grants(authorization, installed)
-        if authorization is not None
-        else _configured_grants(layout)
-    )
-    try:
-        policy = LocalPolicy(grants)
-    except ValueError as error:
-        raise HostError("grants_invalid", layout.grants) from error
     # Registered last, and holding the registry it is in: what a Workflow may
     # be drafted from is whatever this machine ended up with, read per call.
     # A host with no model still installs it, so that "why can I not draft"
@@ -544,13 +540,18 @@ def build_gateway(
         WorkflowDraft,
         ExecutionDependencies(central_required=False),
     )
-    if config.knowledge:
+    selected_knowledge = (
+        ()
+        if authorization is None
+        else tuple(item for item in authorization.selections if item.kind == "knowledge")
+    )
+    if config.knowledge or selected_knowledge:
         # Contract validation already requires a configured routing model;
         # retain the defensive closed failure for callers constructing models
         # outside Pydantic validation.
         if drafting_model is None or binding is None or binding.routing_alias is None:
             raise HostError("models_invalid")
-        catalog = build_knowledge_catalog(config, layout)
+        catalog = build_knowledge_catalog(config, layout, authorization)
         installed.register(
             KNOWLEDGE_QUERY_SPEC,
             KnowledgeQueryHandler(catalog, drafting_model, alias=binding.routing_alias),
@@ -558,6 +559,19 @@ def build_gateway(
             KnowledgeAnswerRecord,
             ExecutionDependencies(central_required=False),
         )
+    # Derive policy only after every configured built-in capability is in the
+    # registry. A selected Knowledge query or workflow-author capability must
+    # not disappear merely because its handler is assembled from local model
+    # configuration later than the filesystem and integration handlers.
+    grants = (
+        _decided_grants(authorization, installed)
+        if authorization is not None
+        else _configured_grants(layout)
+    )
+    try:
+        policy = LocalPolicy(grants)
+    except ValueError as error:
+        raise HostError("grants_invalid", layout.grants) from error
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
@@ -566,13 +580,36 @@ def build_gateway(
 
 
 def build_knowledge_catalog(
-    config: CompanyHostConfiguration, layout: HostLayout
+    config: CompanyHostConfiguration,
+    layout: HostLayout,
+    authorization: DeviceAuthorization | None = None,
 ) -> KnowledgeCatalog:
     """Load only configured, published local Knowledge versions into a query catalog."""
     manifests = _load_all(layout.knowledge, KnowledgeManifest)
     available = {item.metadata.identity.key: item for item in manifests}
+    bindings = {binding.asset.key: binding for binding in config.knowledge}
+    if authorization is not None:
+        for selection in authorization.selections:
+            if selection.kind != "knowledge":
+                continue
+            manifest = available.get(selection.asset.key)
+            expected = (
+                layout.knowledge_vaults
+                / selection.asset.namespace
+                / selection.asset.name
+                / selection.asset.version
+            ).resolve()
+            if manifest is None or Path(manifest.vault_ref).resolve() != expected:
+                raise HostError("knowledge_invalid", layout.knowledge)
+            existing = bindings.get(selection.asset.key)
+            if existing is not None and Path(existing.vault_root).resolve() != expected:
+                raise HostError("knowledge_invalid", layout.knowledge)
+            bindings[selection.asset.key] = KnowledgeHostBinding(
+                asset=selection.asset, vault_root=str(expected)
+            )
     catalog = KnowledgeCatalog()
-    for binding in config.knowledge:
+    for key in sorted(bindings):
+        binding = bindings[key]
         manifest = available.get(binding.asset.key)
         if manifest is None:
             raise HostError("knowledge_invalid", layout.knowledge)

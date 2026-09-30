@@ -8,8 +8,8 @@ anything the member wrote, so a decision about *which* tools cannot become a
 decision about what they may do.
 
 Nothing here contacts a Bridge. It is the reference model for the shared
-platform's side of the owner's rule, and the transport that delivers an
-authorization to a device is a later slice.
+platform's side of the owner's rule; synchronization delivers its decisions
+through the existing Bridge transport.
 """
 
 from datetime import UTC, datetime
@@ -120,7 +120,7 @@ class InMemoryAuthorizationRegistry:
     def available(
         self, identity: AuthenticatedActor, *, now: datetime | None = None
     ) -> tuple[PublishedAssetPackage, ...]:
-        """Which published Workflows and Skills this member may use: the list
+        """Which published Agent Add-ons this member may use: the list
         they choose from. It answers only for a member the platform knows,
         has not disabled, and whose session is still valid, because a list of
         what somebody may use is itself something only they should see.
@@ -130,10 +130,10 @@ class InMemoryAuthorizationRegistry:
         return tuple(
             package
             for package in self.packages.discover()
-            # A decision names a Workflow, a Skill or a tool, and tools come
+            # A decision names an installable Add-on or a tool, and tools come
             # from the device rather than the Registry, so offering any other
             # published kind here would offer what cannot be chosen.
-            if package.kind in ("workflow", "skill")
+            if package.kind in ("workflow", "skill", "knowledge")
             and entitled(package.metadata, who.actor, groups)
         )
 

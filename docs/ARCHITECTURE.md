@@ -305,9 +305,9 @@ without a device identity and may then mint a short-lived opaque member
 session. The member request names only the bound Bridge and exact asset;
 the platform supplies the actor and decision time and resolves membership,
 entitlement, kind and package state from its own records. The current entry
-point admits Workflows and Skills because both use the validated manifest
-installer; Knowledge and Agent profiles wait for their own package and
-activation contracts. A Bridge access token is rejected at this boundary. The
+point admits Workflows, Skills and portable Knowledge because each has a
+validated inert installer; Agent profiles wait for their own activation
+contract. A Bridge access token is rejected at this boundary. The
 selection page is a projection of this service and owns no authorization rule.
 
 The invitation-only sign-in adapter keeps its bearer proof separate from the
@@ -377,6 +377,11 @@ validates canonical relative paths, every file and aggregate digest, identity,
 governance and credential absence before writing; it derives the absolute local
 Vault path and never accepts one chosen by a publisher. Originals under
 `drop/` stay with their source environment and are not silently redistributed.
+An active synchronized Knowledge selection becomes a local exact binding only
+when its saved manifest points at the identity-derived directory under
+`assets/knowledge-vaults`. It still needs a separately configured model and a
+separately selected/granted `knowledge-query` capability. Rebuilding the host
+loads that binding; loss of platform connectivity does not remove it.
 
 The shared catalog may present several product categories through one Web
 shell, but their runtime and installation boundaries remain distinct:

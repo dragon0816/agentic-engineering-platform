@@ -21,10 +21,10 @@ from pydantic import AwareDatetime, model_validator
 from common.assets import AssetIdentity, RegistryContract
 from common.base import Contract, Symbol, Text
 
-# A Workflow and a Skill are installed; a capability is a tool the policy
-# grants. The three lists stay separate because they are enforced in
+# Workflows, Skills and Knowledge are installed; a capability is a tool the policy
+# grants. The lists stay separate because they are enforced in
 # different places.
-RunnableKind = Literal["workflow", "skill", "capability"]
+RunnableKind = Literal["workflow", "skill", "knowledge", "capability"]
 
 
 class DeviceAssetSelection(RegistryContract):
@@ -83,8 +83,10 @@ class DeviceAuthorization(Contract):
         return tuple(item for item in self.selections if item.actor == actor)
 
     def installable(self) -> tuple[DeviceAssetSelection, ...]:
-        """What this device may install: the Workflows and Skills chosen."""
-        return tuple(item for item in self.selections if item.kind in ("workflow", "skill"))
+        """What this device may install: the inert Agent Add-ons chosen."""
+        return tuple(
+            item for item in self.selections if item.kind in ("workflow", "skill", "knowledge")
+        )
 
     def tools(self) -> tuple[DeviceAssetSelection, ...]:
         """What this device's policy may grant: the capabilities chosen."""

@@ -23,7 +23,9 @@ it would touch. A refusal at any step leaves the workspace untouched.
 
 import asyncio
 import json
+import shutil
 from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from time import monotonic
@@ -68,6 +70,9 @@ from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.contracts import HostLayout, PlatformBinding
 from host_runtime.state import SqliteLocalState
 from host_runtime.workspace import documents, write_atomically
+from knowledge.evolution import KnowledgeManifest, decision_digest, knowledge_digest, raw_digest
+from knowledge.package import PortableKnowledgePackage, install_knowledge_package
+from knowledge.vault import Vault, VaultError
 from models.credentials import CredentialResolver
 from models.wire import (
     RETRYABLE_STATUS,
@@ -175,6 +180,20 @@ class _Answer:
         self.status = status
         self.failure = failure
         self.data = data
+
+
+@dataclass(frozen=True)
+class _KnowledgeInstall:
+    payload: bytes
+    target: Path
+    manifest_path: Path
+    manifest: KnowledgeManifest
+
+
+@dataclass(frozen=True)
+class _VerifiedInstall:
+    files: tuple[tuple[Path, bytes], ...]
+    knowledge: tuple[_KnowledgeInstall, ...]
 
 
 def _identities_on_disk(directory: Path) -> dict[tuple[str, str, str], tuple[Path, bytes]]:
@@ -353,12 +372,35 @@ class PlatformClient:
         if reply.plan is not None:
             artifacts = {item.artifact_ref: item.raw for item in reply.artifacts}
             present = {item.identity.key for item in installed}
-            files = self._verified(reply.plan, artifacts, layout, state.bridge_id, present)
+            verified = self._verified(reply.plan, artifacts, layout, state.bridge_id, present)
             try:
-                for path, content in files:
+                for path, content in verified.files:
                     write_atomically(path, content)
             except OSError:
                 raise SyncRefused("workspace_unwritable") from None
+            for item in verified.knowledge:
+                created = False
+                try:
+                    installed_manifest = install_knowledge_package(item.payload, item.target)
+                    created = True
+                    if installed_manifest != item.manifest:
+                        raise SyncRefused("asset_invalid")
+                    write_atomically(
+                        item.manifest_path,
+                        item.manifest.model_dump_json(indent=2).encode("utf-8") + b"\n",
+                    )
+                except SyncRefused:
+                    if created and item.target.exists():
+                        shutil.rmtree(item.target)
+                    raise
+                except ValueError:
+                    if created and item.target.exists():
+                        shutil.rmtree(item.target)
+                    raise SyncRefused("asset_invalid") from None
+                except OSError:
+                    if created and item.target.exists():
+                        shutil.rmtree(item.target)
+                    raise SyncRefused("workspace_unwritable") from None
             try:
                 rows = state.install(reply.plan, artifacts)
             except LocalStateError as error:
@@ -382,7 +424,7 @@ class PlatformClient:
         layout: HostLayout,
         bridge_id: str,
         present: set[tuple[str, str, str]],
-    ) -> list[tuple[Path, bytes]]:
+    ) -> _VerifiedInstall:
         try:
             verify_installation(plan, artifacts, bridge_id=bridge_id, installed=present)
         except LocalStateError as error:
@@ -390,16 +432,62 @@ class PlatformClient:
         on_disk = {
             "workflow": _identities_on_disk(layout.workflows),
             "skill": _identities_on_disk(layout.skills),
+            "knowledge": _identities_on_disk(layout.knowledge),
         }
         files: list[tuple[Path, bytes]] = []
+        knowledge: list[_KnowledgeInstall] = []
         for package in plan.packages:
             artifact = package.metadata.package
             if artifact is None or package.kind not in on_disk:
-                # This host installs Skill and Workflow manifests and nothing
-                # else; a package of another kind has nowhere to go here.
+                # Other package kinds have no trusted installer on this host.
                 raise SyncRefused("asset_invalid")
             content = artifacts[artifact.artifact_ref]
             identity = package.metadata.identity
+            if package.kind == "knowledge":
+                try:
+                    portable = PortableKnowledgePackage.model_validate_json(content)
+                except ValidationError:
+                    raise SyncRefused("asset_invalid") from None
+                registry_metadata = package.metadata.model_copy(update={"package": None})
+                if portable.identity != identity or portable.manifest.metadata != registry_metadata:
+                    raise SyncRefused("asset_invalid")
+                target = (
+                    layout.knowledge_vaults / identity.namespace / identity.name / identity.version
+                )
+                local_manifest = portable.manifest.model_copy(
+                    update={"vault_ref": str(target.resolve())}
+                )
+                path = (
+                    layout.knowledge
+                    / f"{identity.namespace}__{identity.name}__{identity.version}.json"
+                )
+                existing = on_disk["knowledge"].get(identity.key)
+                if existing is not None:
+                    try:
+                        saved = KnowledgeManifest.model_validate_json(existing[1])
+                        vault = Vault(target)
+                    except (ValidationError, VaultError, OSError):
+                        raise SyncRefused("asset_conflict") from None
+                    if (
+                        existing[0] != path
+                        or saved != local_manifest
+                        or raw_digest(vault) != saved.raw_sha256
+                        or decision_digest(vault) != saved.decisions_sha256
+                        or knowledge_digest(vault) != saved.content_sha256
+                    ):
+                        raise SyncRefused("asset_conflict")
+                    continue
+                if target.exists():
+                    raise SyncRefused("asset_conflict")
+                knowledge.append(
+                    _KnowledgeInstall(
+                        payload=content,
+                        target=target,
+                        manifest_path=path,
+                        manifest=local_manifest,
+                    )
+                )
+                continue
             try:
                 manifest: SkillManifest | WorkflowManifest = (
                     WorkflowManifest.model_validate_json(content)
@@ -422,7 +510,7 @@ class PlatformClient:
                 # was interrupted after writing them is finished, not refused.
                 continue
             files.append((path, content))
-        return files
+        return _VerifiedInstall(files=tuple(files), knowledge=tuple(knowledge))
 
     async def report(self, snapshot: BridgeStateSnapshot) -> ReportOutcome:
         answer = await asyncio.to_thread(self._call, "report", ReportRequest(snapshot=snapshot))

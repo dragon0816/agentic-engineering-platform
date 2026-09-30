@@ -15,7 +15,7 @@ label{display:block;font-weight:650;margin-bottom:8px}input{padding:10px;width:m
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #e7ebf0}.muted{color:#5e6a7e}
 </style></head>
 <body><main><header><h1>Shared Agent Add-on Catalog</h1>
-<p class="muted">Choose which published Workflow or Skill this bound Bridge may synchronize. Selection does not grant execution permission.</p>
+<p class="muted">Choose which published Workflow, Skill or Knowledge version this bound Bridge may synchronize. Selection does not grant execution permission.</p>
 <label for="bridge">Bridge ID</label><input id="bridge" autocomplete="off"><button id="load">Load</button><p id="status"></p></header>
 <section><table><thead><tr><th>Add-on</th><th>Kind</th><th>Owner</th><th>Visibility</th><th>Selection</th></tr></thead><tbody id="rows"></tbody></table></section>
 </main><script>

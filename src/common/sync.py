@@ -10,8 +10,8 @@ the one member it is bound to, and a member signs in somewhere else.
 
 No contract on this wire has a field a secret could be put in. The token's
 secret travels in a header and nowhere else, and the artifact bytes a sync
-carries are Skill and Workflow manifests, which the Registry already refuses
-to hold with a credential in them.
+carries are validated inert Agent Add-on packages, which the Registry already
+refuses to hold with a credential in them.
 """
 
 import base64
