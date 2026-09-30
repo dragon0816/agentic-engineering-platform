@@ -32,12 +32,14 @@ installation and execution authorization separate.
 
 ## In Progress
 
-- The slice is implemented and verified locally. It still needs commit, push,
-  CI and human review/merge.
+- The implementation is committed as `233940e`, pushed and open for review in
+  PR #142: https://github.com/dragon0816/agentic-engineering-platform/pull/142
+- Local verification is green. GitHub Platform verification and human
+  review/merge remain.
 
 ## Remaining
 
-1. Merge the shared-catalog slice after green CI.
+1. Confirm PR #142 Platform verification, then merge the shared-catalog slice.
 2. Define the member-authenticated selection entry point for slice 2. Do not
    use the Bridge access token as a general browser session.
 3. Add select/revoke UI only after that identity boundary is approved.
