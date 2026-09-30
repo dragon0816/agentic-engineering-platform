@@ -1,129 +1,136 @@
 # Handoff
 
-Date: 2026-09-30 (Asia/Taipei)
-Branch: `codex/agent-web-marketplace`
-Base: `origin/main` at `20b31e0828f5abd264054e90432684691f92b8ce`
+Date: 2026-10-01 (Asia/Taipei)
+Branch: `codex/member-workflow-selection`
+Base: `origin/main` at `d26d2de05acc9690f3fded8e710ba3fa58b73714`
 
 ## Goal
 
-Start Productization 1 by making the existing Personal Agent Web interface a
-truthful view of the shared platform. The first slice must let an enrolled
-Bridge discover published assets while keeping publication, device selection,
-installation and execution authorization separate.
+Continue Productization 1 with slice 2a: give an authenticated platform member
+a provider-neutral entry point and generic page for selecting or revoking an
+entitled Workflow for a bound Bridge, without treating the Bridge credential
+as a browser session.
 
 ## Completed
 
-- Added the active Productization 1 specification and updated Roadmap/Tasks.
-- Added the read-only `catalog` operation to the existing authenticated
-  Bridge/platform wire.
-- Added typed `CatalogRequest`, `CatalogReply` and Bridge-side
-  `CatalogOutcome` contracts.
-- Applied visibility/ownership entitlement on the platform from its trusted
-  membership record. The request carries no groups or entitlement claims.
-- Added an optional credential-checked package description for discovery.
-- Extended the Personal Agent Web shared-platform tab to list published assets
-  and visibly separate `published`, `authorized` and `installed` state.
-- Preserved the existing all-or-nothing `sync` operation as the installation
-  path. Catalog reads contain no artifact bytes and create no selection,
-  installation or execution side effect.
-- Added integration coverage over the real control-plane HTTP transport and
-  real loopback Agent Web API, including before/after synchronization state.
-- Updated architecture and contract documentation after validation.
+- Added closed member contracts for catalog, select, revoke and selection
+  replies. Requests cannot carry actor, groups, permissions, policy,
+  approvals or decision time.
+- Added a short-lived member-session reference. A trusted sign-in adapter may
+  issue a session only from a current direct member authentication; an
+  identity carrying a Bridge id or `bridge-access-token` is rejected.
+- Stored only the session secret fingerprint. The issued secret is held in a
+  deliberately non-serializable object whose repr is redacted.
+- Added a transport-independent member service that checks the session,
+  Bridge binding, platform membership, entitlement and existing selection
+  rules before listing, selecting or revoking a Workflow.
+- Added real HTTP endpoints at `/v1/member/catalog`, `/select` and `/revoke`.
+  Plain HTTP is loopback-only; network exposure requires an SSL context.
+- Added a generic dependency-free Workflow selection page. It accepts the
+  short-lived session from an authenticated host in the URL fragment, removes
+  the fragment immediately and keeps no browser storage.
+- Proved over a real HTTP socket that select/revoke derives the actor and time
+  on the platform, rejects an actual Bridge access token, refuses an unbound
+  Bridge and does not change execution grants.
+- Updated Architecture, Contracts, Roadmap, Tasks and the active
+  Productization 1 specification after implementation validation.
 
 ## In Progress
 
-- The implementation is committed as `233940e`, pushed and open for review in
-  PR #142: https://github.com/dragon0816/agentic-engineering-platform/pull/142
-- Local verification and GitHub Platform verification are green. Human
-  review/merge remains.
+- The implementation is committed locally on
+  `codex/member-workflow-selection`. Review/PR creation and exact-head CI are
+  the remaining release steps for slice 2a.
 
 ## Remaining
 
-1. Confirm PR #142 Platform verification, then merge the shared-catalog slice.
-2. Define the member-authenticated selection entry point for slice 2. Do not
-   use the Bridge access token as a general browser session.
-3. Add select/revoke UI only after that identity boundary is approved.
-4. Expose existing synchronization as an explicit Web action with typed
-   before/after state.
-5. Add the generic Workflow launch form through the existing
-   Agent/Gateway/Workflow/Bridge path, followed by grounded Knowledge asking.
-6. Add a durable Registry only after the catalog user path and contracts have
-   been validated.
+1. Push the branch, open a PR against `main` and confirm exact-head Platform
+   verification.
+2. Productization 1 slice 2b: connect the invitation-based shared-platform
+   sign-in flow to trusted member-session issuance. Do not invent LDAP or
+   reuse the Bridge credential.
+3. After member sign-in is deployable, expose the member portal from the
+   shared-platform process and link it from the Personal Agent Web.
+4. Slice 3: expose the existing all-or-nothing synchronization as an explicit
+   Web action with typed before/after state.
+5. Continue with generic Workflow launch, grounded Knowledge asking and only
+   then durable Registry storage.
 
 ## Architecture decisions made
 
-- Team Platform remains Registry/control plane; the local Bridge remains the
-  execution plane.
-- Web is a projection and ingress. It does not own routing, policy,
-  installation, authorization or execution.
-- Publication, device authorization and installation are three independent
-  facts in the API and UI. None grants capability execution permission.
-- Catalog entitlement is computed from authenticated actor plus trusted
-  platform membership. Client-supplied groups are not representable.
-- Catalog failure leaves already-installed local-first assets usable.
-- Apps will later be a user-facing presentation of governed Software assets;
-  no overlapping core asset type was added.
-- No Telegram/GitHub orchestration or production database was added in this
-  slice.
+- Member selection belongs to a separate Team Platform entry point. It is not
+  another operation on the Bridge/platform wire.
+- The authentication adapter decides who the member is. Member requests never
+  carry identity or membership claims.
+- The existing authorization registry remains the source of selection,
+  entitlement and Bridge-binding rules; the page and HTTP layer add none.
+- A Workflow selection affects synchronization state only. Capability grants
+  and execution authorization remain unchanged.
+- The in-memory session broker is a reference behind a trusted sign-in
+  adapter, not a production identity provider or durable session database.
+- No Telegram/GitHub coordination behavior, production database or execution
+  path changed in this slice.
 
 ## Verification
 
-Supported target: Windows, Python 3.12. Browser automation excluded per owner
-instruction; the Agent Web API itself is tested over a real loopback socket.
+Supported target: Windows, Python 3.12. Browser automation was not run per the
+owner instruction; the member UI API was exercised through a real loopback
+HTTP server.
 
 ```text
-.venv\Scripts\python.exe -m pytest \
-  tests/test_platform_transport.py tests/test_agent_web.py \
-  tests/test_contracts.py tests/test_registry.py \
-  tests/test_member_authorization.py -q
-93 passed, 1 skipped (IPv6 loopback unavailable)
+Focused integration:
+python -m pytest tests/test_member_portal.py tests/test_member_authorization.py
+  tests/test_platform_transport.py tests/test_agent_web.py
+  tests/test_contracts.py -q
+89 passed, 1 skipped (IPv6 loopback unavailable)
 
-.venv\Scripts\python.exe -m pytest --ignore=tests/test_browser.py -q
-1361 passed, 4 skipped
+Full suite:
+python -m pytest --ignore=tests/test_browser.py -q
+1367 passed, 4 skipped
 
-.venv\Scripts\python.exe -m ruff check .
+python -m ruff check .
 All checks passed!
 
-.venv\Scripts\python.exe -m ruff format --check .
-291 files already formatted
+python -m ruff format --check .
+296 files already formatted
 
-.venv\Scripts\python.exe -m mypy src tests
-Success: no issues found in 226 source files
+python -m mypy src tests
+Success: no issues found in 231 source files
 
-.venv\Scripts\python.exe -m build
+python -m build
 Successfully built agentic_engineering_platform-0.1.0.tar.gz and
 agentic_engineering_platform-0.1.0-py3-none-any.whl
 
-.venv\Scripts\python.exe -m pip check
+python -m pip check
 No broken requirements found.
 
-GitHub Platform verification run 36732055855
-PASS in 3m55s, including pytest, Ruff, Mypy, build, pip check, Windows offline
-preview install and artifact upload.
+git diff --check
+PASS
 ```
 
 The four full-suite skips are existing environment conditions: symlink/link
-privileges, IPv6 loopback and directory links. No Ubuntu run was performed.
+privileges, IPv6 loopback and directory links. The managed worktree's old
+`.venv` referenced a removed Python installation, so verification used the
+repository's working Python 3.12.14 environment with this worktree's `src` on
+`PYTHONPATH` and a writable project `.scratch` basetemp/cache. No Ubuntu run
+was performed.
 
 ## Known issues
 
-- The Registry and control-plane service remain in-memory references.
-- Interactive selection lacks a member-authenticated Web entry point. The
-  Bridge credential is intentionally not widened to serve that role.
-- Existing packages without the new optional description still appear with
-  governed owner/version/dependency/compatibility metadata and an empty
-  description.
-- The previous Telegram/Hermes coordination handoff was stale after PR #140
-  merged. This handoff replaces it; live coordination behavior was not changed
-  here.
-- GitHub warns that the current `actions/checkout@v4`, `setup-python@v5` and
-  `upload-artifact@v4` actions target deprecated Node.js 20. GitHub currently
-  forces Node.js 24 and the run passes; dependency upgrades are a separate CI
-  maintenance change.
+- There is no production invitation sign-in adapter yet. Tests provide the
+  already-authenticated `AuthenticatedActor` that such an adapter must return.
+- The member sessions, enrollment, packages and selections are still in-memory
+  reference stores. Restarting the process loses them.
+- The member portal is not yet wired into a deployed shared-platform command;
+  this slice establishes and verifies its stable contracts and boundary.
+- The Personal Agent Web remains read-only for shared selection until slice 2b
+  supplies a real member sign-in/session handoff.
+- GitHub Actions currently warns about Node.js 20 action runtimes and upgrades
+  them to Node.js 24. Existing CI still passes; dependency upgrades remain a
+  separate maintenance change.
 
 ## Next Recommended Action
 
-After this PR is merged, design Productization 1 slice 2 as a narrow identity
-and selection contract: an authenticated member selects or revokes one entitled
-Workflow for one bound Bridge, with contract tests proving that publication is
-still not execution permission.
+Review and merge the slice 2a PR after exact-head CI passes. Then implement
+slice 2b as a narrow invitation-based sign-in adapter that produces the
+existing member session and opens the member portal; do not change the Bridge
+transport, authorization registry or execution policy.

@@ -298,8 +298,16 @@ Execution still passes through the Agent, Gateway, Workflow engine and Bridge
 policy. Catalog failure does not disable already-installed local-first assets.
 
 The first productization slice deliberately keeps catalog discovery read-only.
-Interactive member selection needs a member-authenticated platform entry point;
-the Bridge access token is not repurposed as a general browser session.
+
+Workflow selection crosses a separate **member entry point** on the Team
+Platform. A trusted sign-in adapter first produces an `AuthenticatedActor`
+without a device identity and may then mint a short-lived opaque member
+session. The member request names only the bound Bridge and exact Workflow;
+the platform supplies the actor and decision time and resolves membership,
+entitlement and package state from its own records. A Bridge access token is
+rejected at this boundary. The selection page is a projection of this service
+and owns no authorization rule. A production invitation sign-in adapter is a
+deployment concern and is not fabricated by the in-memory reference.
 
 ### Company Bridge deployment integration proof
 

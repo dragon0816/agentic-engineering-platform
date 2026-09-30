@@ -1607,6 +1607,36 @@ not administer that device). A withdrawn binding is history rather than a bar:
 device can be put back on it. `may_administer(actor, bridge_id)` is that one
 rule, asked by everything that acts on a device's records.
 
+## Member Workflow selection (Productization 1, slice 2a)
+
+`MemberCatalogRequest`, `MemberSelectRequest` and `MemberRevokeRequest` name a
+Bridge and, for a mutation, an exact asset identity. Their closed schemas have
+no actor, groups, permission, policy, approval or decision-time field. The
+member entry point supplies actor and time from its authenticated session and
+always creates a `workflow` selection. `MemberCatalogReply` contains entitled
+published Workflows with a separate `selected` fact; it neither carries
+artifact bytes nor changes installation or execution authorization.
+
+`InMemoryMemberSessions.issue(identity)` is a trusted-host call made after an
+external sign-in adapter has produced a current `AuthenticatedActor`. It
+refuses an identity carrying a Bridge id or the `bridge-access-token` method.
+The platform stores `MemberSessionGrant`, which contains a SHA-256 fingerprint
+of a random secret and never its value; `IssuedMemberSession` is deliberately
+not serializable and redacts its repr. Authentication gives unknown ids and
+wrong secrets the same `authentication_failed` answer and reports an expired
+session without extending it.
+
+`MemberService.catalog/select/revoke` authenticates that independent session,
+requires the actor to be bound to the named Bridge and delegates entitlement
+and selection invariants to `InMemoryAuthorizationRegistry`. The HTTP entry
+point is `POST /v1/member/catalog`, `/select` and `/revoke` with its own member
+bearer credential. It never accepts a Bridge credential. Its generic page can
+receive a short-lived session in a URL fragment from a trusted sign-in host,
+removes the fragment immediately and keeps the value in memory only. Plain
+HTTP is restricted to loopback; a network-exposed member portal requires TLS.
+No production sign-in provider or durable session store is supplied by this
+reference slice.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

@@ -42,7 +42,8 @@ implemented; the production-like company-host run remains pending.
 | Slice | Status | Acceptance evidence |
 |---|---|---|
 | 1 shared catalog read path | done | Authenticated, entitlement-filtered catalog over the existing platform transport; Web distinguishes published, authorized and installed state; discovery has no installation or execution side effect |
-| 2 member selection | planned | Interactive member identity selects/revokes an entitled Workflow for a bound Bridge without using the Bridge credential as a browser session |
+| 2a member selection contract and entry point | in review | Direct member session, entitlement-filtered Workflow list and select/revoke HTTP/page proof; Bridge credential is rejected and selection grants no execution permission |
+| 2b production member sign-in adapter | planned | Invitation-based shared-platform sign-in produces the short-lived member session used by slice 2a without putting credentials in Registry assets |
 | 3 explicit synchronization | planned | Existing all-or-nothing sync is invoked deliberately and reports exact installed/refused state |
 | 4 generic Workflow launch | planned | Declared inputs execute through Agent/Gateway/Workflow/Bridge and expose progress, result and trace |
 | 5 grounded Knowledge asking | planned | Exact installed Knowledge version answers with source citations in the Personal Agent Web |

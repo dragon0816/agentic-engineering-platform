@@ -59,9 +59,11 @@ state and fixture assets.
 1. **Catalog read path and Web projection** — typed catalog contracts,
    entitlement-filtered control-plane operation, Bridge client, Marketplace
    table and integration tests.
-2. **Member selection UI** — add a member-authenticated control-plane entry
-   point for selecting/revoking a Workflow for a bound Bridge. Do not reuse the
-   Bridge token as an interactive user session.
+2. **Member selection** — add a member-authenticated control-plane entry point
+   and generic Workflow selection page for selecting/revoking a Workflow for a
+   bound Bridge. Do not reuse the Bridge token as an interactive user session.
+   The provider-neutral session/HTTP proof is slice 2a; connecting a production
+   invitation sign-in adapter to session issuance is slice 2b.
 3. **Install/synchronize action** — expose the existing all-or-nothing sync as
    an explicit Web action, with before/after state and typed refusal.
 4. **Workflow launch form** — render declared inputs and submit through the
@@ -91,6 +93,11 @@ asset type is introduced.
 - The Bridge access token authenticates the bound member for catalog reads, but
   is not suitable as a general browser login. Member selection therefore stays
   outside the first slice.
+- The member entry point accepts a short-lived session created only after a
+  trusted sign-in adapter has produced an `AuthenticatedActor` with no Bridge
+  identity. The request can name a Bridge and Workflow but cannot claim actor,
+  groups, permission, policy or decision time. The first adapter remains out of
+  scope for slice 2a; tests inject its already-authenticated result.
 - The current Registry stores package metadata and artifact references. A
   short optional discovery description is added without embedding package
   content or secrets.
@@ -107,3 +114,18 @@ asset type is introduced.
 - focused tests, full `pytest` on Windows/Python 3.12, Ruff, Mypy, build and
   `pip check` pass;
 - `HANDOFF.md` records exact commands and the next slice.
+
+## Exit evidence for slice 2a
+
+- a Bridge access token cannot be exchanged for a member browser session;
+- a member session is short-lived, opaque and stored only as a secret-free
+  fingerprint record;
+- the member catalog lists only entitled Workflows for a Bridge bound to the
+  authenticated actor;
+- select/revoke requests cannot carry actor, membership, permission, policy or
+  decision-time claims;
+- selection and revocation cross the real member HTTP entry point and change
+  no execution grant;
+- plain HTTP is loopback-only; a network-exposed portal requires TLS;
+- the generic page keeps the session in memory, removes its URL fragment and
+  never persists it in browser storage.
