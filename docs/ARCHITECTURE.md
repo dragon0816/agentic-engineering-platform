@@ -328,6 +328,14 @@ requires TLS. Bootstrap configuration contains only secret-free invitation
 metadata and local TLS file paths; generated invitation proofs are written to
 an explicitly named one-time delivery file outside Registry assets.
 
+The deployable composition may configure a local SQLite Registry. It persists
+validated `PublishedAssetPackage` records and digest-verified artifact bytes
+behind the same package and artifact boundaries used by the in-memory
+reference. Catalog discovery, installation planning and Bridge synchronization
+therefore keep their existing wire contracts across a process restart. Member
+sessions, invitations, device selections, remote jobs and all Bridge/local
+execution state remain outside this catalog store.
+
 `PlatformBinding.member_portal_url` is optional navigation metadata. Personal
 Agent Web may render it as a link, but all Bridge catalog/sync traffic continues
 to use `PlatformBinding.base_url` and the Bridge credential. The page never

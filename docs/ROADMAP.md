@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 complete; Phase 7 and Productization 1 active
+Status: Phases 1–6 and Productization 1 complete; Phase 7 active
 
 ## Productization 1 — Personal Agent Web and Workflow Marketplace
 
@@ -190,10 +190,11 @@ Workflow launch, grounded Knowledge asking and finally durable Registry
 storage. Each step keeps publication, selection, installation and execution
 authorization separate.
 
-Slices 1 through 4 are complete. Slice 5 adds exact-version grounded Knowledge
-asking from Personal Agent Web through the existing local
-Agent/Gateway/Knowledge/Bridge path without exposing model or Vault
-configuration. Durable Registry storage remains the final slice. See
+All seven slices are complete. Personal Agent Web provides catalog discovery,
+member selection, explicit synchronization, generic Workflow launch and
+exact-version grounded Knowledge asking through the existing execution
+boundaries. The final slice persists published package metadata and verified
+artifact bytes in SQLite behind the existing Registry contracts. See
 `docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
 
 ## First implementation slice after Phase 0

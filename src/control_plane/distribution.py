@@ -2,7 +2,7 @@
 
 from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
-from typing import Literal, TypeVar
+from typing import Literal, Protocol, TypeVar
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -66,6 +66,24 @@ ContractT = TypeVar("ContractT", PublishedAssetPackage, InstalledAsset, RemoteJo
 
 def _copy(item: ContractT) -> ContractT:
     return item.model_copy(deep=True)
+
+
+class PackageRegistry(Protocol):
+    """The catalog boundary consumed by authorization and transport."""
+
+    def publish(self, package: PublishedAssetPackage) -> PublishedAssetPackage: ...
+
+    def discover(self, *, namespace: str | None = None) -> tuple[PublishedAssetPackage, ...]: ...
+
+    def get(self, identity: AssetIdentity) -> PublishedAssetPackage | None: ...
+
+    def plan(
+        self,
+        *,
+        actor: Symbol,
+        bridge_id: Symbol,
+        requested: tuple[AssetIdentity, ...],
+    ) -> InstallationPlan: ...
 
 
 class InMemoryPackageRegistry:

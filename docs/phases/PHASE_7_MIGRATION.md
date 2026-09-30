@@ -755,9 +755,10 @@ authorization and the installed assets exactly where they are.
    who is asking through `InMemoryAccessTokens.authenticate`, and acts only on
    the device the token was issued for. A payload naming another device is
    `device_mismatch`, whatever it says. The service is what a test drives
-   directly and what the HTTP server hands requests to. It serves the
-   in-memory references; a durable platform store is a later slice, and the
-   spec says so rather than pretending otherwise.
+   directly and what the HTTP server hands requests to. Productization 1 later
+   added a durable package/artifact Registry behind the same service boundary;
+   Phase 7's enrollment, authorization and remote-control references remain
+   in memory.
 3. `control_plane.http` is that service over HTTP from the standard library
    alone: `POST /v1/<operation>` with `Authorization: Bearer <token_id>:<secret>`,
    JSON in and out, a body limit, one request per connection, no redirect, no
@@ -842,8 +843,10 @@ authorization and the installed assets exactly where they are.
    `doctor` gains a `platform` check that reads the configuration and opens no
    socket. A host without a platform configured is a host that works locally,
    and every earlier command still runs on it.
-10. Nothing here is a durable platform store, a member sign-in, an installer of
-    anything but Skill and Workflow manifests, or TLS termination. The server
+10. This Phase 7 slice itself adds no durable platform store, member sign-in,
+    installer of anything but Skill and Workflow manifests, or TLS
+    termination. A later Productization 1 slice persists only catalog packages
+    and artifacts behind this unchanged transport. The server
     takes an `ssl.SSLContext` and wraps its socket with it when given one; a
     platform reached over the network is expected to be served that way, and
     the client's loopback exception exists so the wire can be exercised in a

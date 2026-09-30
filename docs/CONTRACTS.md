@@ -1745,6 +1745,27 @@ Knowledge discovery is the intersection of validated local manifests and exact
 host bindings; it exposes identity, domain, owner and visibility but never the
 local `vault_root`.
 
+## Durable shared Registry (Productization 1, slice 6)
+
+`PackageRegistry` is the control-plane catalog boundary used by authorization,
+catalog discovery, installation planning and synchronization. Both the
+in-memory reference and `SqliteRegistry` implement `publish`, `discover`,
+exact-identity `get` and `plan`; the existing services and Bridge wire do not
+depend on storage-specific behavior.
+
+`SqliteRegistry` stores the canonical validated `PublishedAssetPackage` JSON
+under its exact `namespace + name + version` identity and artifact bytes under
+their declared reference. When bytes are supplied, their SHA-256 digest is
+verified before one transaction commits package and artifact. Duplicate exact
+versions remain duplicates after restart. A schema version mismatch, invalid
+stored package or unavailable database fails closed.
+
+`SharedPlatformConfiguration.registry_path` is optional for inert tests and
+must be absolute when set. The deployable example sets it and exposes the
+Registry's artifact mapping to the unchanged synchronization service. The
+store contains no credentials, invitation proofs, member sessions, device
+selections, remote jobs, execution grants or Bridge/local execution state.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
@@ -1802,8 +1823,9 @@ request; a refusal sent *before* the body was read then swallows what the
 client already sent, briefly and boundedly, because a socket closed with
 unread data is reset rather than finished and a reset discards the refusal
 itself), an unauthenticated `GET /v1/health`, no request logging, no software
-name, and an optional `ssl.SSLContext` that wraps the socket. It serves the
-in-memory references; a durable platform store is a later slice.
+name, and an optional `ssl.SSLContext` that wraps the socket. Its package and
+artifact dependencies may be the in-memory reference or the durable Registry
+defined above; transport behavior is identical.
 
 `host_runtime.contracts.PlatformBinding` is how a host names its platform:
 `base_url` (an origin: https, or http on loopback only, with no path, query,

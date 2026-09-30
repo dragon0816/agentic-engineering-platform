@@ -1,6 +1,6 @@
 # Productization 1 — Personal Agent Web and Workflow Marketplace
 
-Status: active
+Status: complete
 
 ## User outcome
 
@@ -37,8 +37,8 @@ published Workflow visible to that member:
    Agent use continues.
 
 The green path is exercised over the real loopback Web API and the real HTTP
-control-plane transport. CI remains inert and uses only in-memory Registry
-state and fixture assets.
+control-plane transport. CI remains inert and uses fixture assets with both
+the in-memory reference and a temporary SQLite Registry.
 
 ## Architecture
 
@@ -219,3 +219,18 @@ contracts. Extension installation remains outside this productization slice.
 - real-socket tests prove success, request closure, exact-version selection,
   citation preservation and permission refusal; the Windows Python 3.12
   verification baseline passes.
+
+## Exit evidence for slice 6
+
+- the deployable Shared Platform accepts an absolute SQLite Registry path and
+  reopens published package metadata and artifact bytes after process restart;
+- package identity remains the exact `namespace + name + version` tuple and a
+  duplicate exact version is refused across restarts;
+- artifact bytes are committed only after their declared SHA-256 digest is
+  verified, and package plus artifact writes are atomic;
+- existing catalog discovery, installation planning and synchronization use
+  the durable implementation through the same contracts and wire format;
+- an unknown schema or corrupt record fails closed instead of serving
+  ambiguous Registry state;
+- credentials, invitation proofs, member sessions, device selections, remote
+  jobs and Bridge/local execution state are not stored in the catalog.

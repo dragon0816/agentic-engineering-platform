@@ -25,7 +25,7 @@ from common.base import Symbol
 from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeExecutionSubject
 from common.identity import AuthenticatedActor, entitled
-from control_plane.distribution import InMemoryPackageRegistry
+from control_plane.distribution import PackageRegistry
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 
 AuthorizationErrorCode = Literal[
@@ -70,9 +70,7 @@ def grant_from(spec: CapabilitySpec, selection: DeviceAssetSelection) -> Capabil
 class InMemoryAuthorizationRegistry:
     """Side-effect-free reference for what members decided their devices run."""
 
-    def __init__(
-        self, enrollment: InMemoryEnrollmentRegistry, packages: InMemoryPackageRegistry
-    ) -> None:
+    def __init__(self, enrollment: InMemoryEnrollmentRegistry, packages: PackageRegistry) -> None:
         self.enrollment = enrollment
         self.packages = packages
         self._selections: dict[tuple[str, str, tuple[str, str, str]], DeviceAssetSelection] = {}

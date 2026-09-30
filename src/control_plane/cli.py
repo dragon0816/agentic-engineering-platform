@@ -1,4 +1,4 @@
-"""Operator entry point for the in-memory shared-platform reference host."""
+"""Operator entry point for the shared-platform reference host."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from control_plane.app import (
     SharedPlatformConfiguration,
     application_from_config,
 )
+from control_plane.registry_sqlite import RegistryStoreError
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -72,7 +73,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return 2
         application, invitations = application_from_config(configuration)
-    except (OSError, ValidationError, ValueError, ssl.SSLError) as error:
+    except (OSError, ValidationError, ValueError, ssl.SSLError, RegistryStoreError) as error:
         print(f"shared platform configuration is unusable: {error}", file=sys.stderr)
         return 2
 

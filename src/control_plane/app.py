@@ -11,6 +11,7 @@ import ssl
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
+from pathlib import Path, PureWindowsPath
 from types import TracebackType
 from typing import Literal, Self
 
@@ -20,13 +21,18 @@ from common.base import Contract, Symbol, Text
 from common.enrollment import Invitation
 from common.identity import IssuedInvitationProof
 from control_plane.authorization import InMemoryAuthorizationRegistry
-from control_plane.distribution import InMemoryPackageRegistry, InMemoryRemoteControl
+from control_plane.distribution import (
+    InMemoryPackageRegistry,
+    InMemoryRemoteControl,
+    PackageRegistry,
+)
 from control_plane.enrollment import InMemoryEnrollmentRegistry
 from control_plane.http import ControlPlaneServer
 from control_plane.identity import InMemoryAccessTokens
 from control_plane.member import InMemoryMemberSessions, MemberService
 from control_plane.member_http import MemberPortalServer
 from control_plane.member_signin import InMemoryInvitationSignIn
+from control_plane.registry_sqlite import SqliteRegistry
 from control_plane.service import ControlPlaneService
 
 LOOPBACK = frozenset(("127.0.0.1", "localhost", "::1"))
@@ -60,6 +66,7 @@ class SharedPlatformConfiguration(Contract):
     tls_certificate_path: Text | None = None
     tls_private_key_path: Text | None = None
     invitations: tuple[BootstrapInvitation, ...] = ()
+    registry_path: Text | None = None
 
     @model_validator(mode="after")
     def coherent_listener(self) -> Self:
@@ -79,6 +86,11 @@ class SharedPlatformConfiguration(Contract):
             raise ValueError("bootstrap invitations need unique ids and actors")
         if any(item.invitation.issued_by not in self.administrators for item in self.invitations):
             raise ValueError("a bootstrap invitation is issued by a configured administrator")
+        if self.registry_path is not None and not (
+            PureWindowsPath(self.registry_path).is_absolute()
+            or Path(self.registry_path).is_absolute()
+        ):
+            raise ValueError("registry_path must be absolute")
         return self
 
 
@@ -88,7 +100,7 @@ class SharedPlatformState:
 
     enrollment: InMemoryEnrollmentRegistry
     tokens: InMemoryAccessTokens
-    packages: InMemoryPackageRegistry
+    packages: PackageRegistry
     authorization: InMemoryAuthorizationRegistry
     control: InMemoryRemoteControl
     artifacts: Mapping[str, bytes]
@@ -105,6 +117,20 @@ class SharedPlatformState:
             authorization=InMemoryAuthorizationRegistry(enrollment, packages),
             control=InMemoryRemoteControl(admission=enrollment.admit),
             artifacts={},
+            sessions=InMemoryMemberSessions(),
+        )
+
+    @classmethod
+    def durable(cls, path: Path | str, *, administrators: tuple[Symbol, ...]) -> Self:
+        enrollment = InMemoryEnrollmentRegistry(administrators=administrators)
+        registry = SqliteRegistry(path)
+        return cls(
+            enrollment=enrollment,
+            tokens=InMemoryAccessTokens(enrollment),
+            packages=registry,
+            authorization=InMemoryAuthorizationRegistry(enrollment, registry),
+            control=InMemoryRemoteControl(admission=enrollment.admit),
+            artifacts=registry.artifacts,
             sessions=InMemoryMemberSessions(),
         )
 
@@ -174,9 +200,14 @@ class SharedPlatformApplication:
         member_port: int = 0,
         ssl_context: ssl.SSLContext | None = None,
         clock: Callable[[], datetime] | None = None,
+        registry_path: Path | str | None = None,
     ) -> Self:
         return cls(
-            SharedPlatformState.empty(administrators=administrators),
+            (
+                SharedPlatformState.empty(administrators=administrators)
+                if registry_path is None
+                else SharedPlatformState.durable(registry_path, administrators=administrators)
+            ),
             host=host,
             control_port=control_port,
             member_port=member_port,
@@ -269,6 +300,7 @@ def application_from_config(
         member_port=config.member_port,
         ssl_context=server_ssl_context(config),
         clock=moment,
+        registry_path=config.registry_path,
     )
     issued: list[IssuedInvitationProof] = []
     try:
