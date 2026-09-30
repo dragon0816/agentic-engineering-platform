@@ -181,6 +181,21 @@ gates on the company Bridge; knowledge passes on a copy; account/device/run iden
 is attributable; rollback is rehearsed; and each retired entry point has owner
 approval and retained source evidence. See `docs/phases/PHASE_7_MIGRATION.md`.
 
+## Productization 1 — Personal Agent Web and Workflow Marketplace
+
+Turn the proven runtime and control-plane references into the first usable
+member path without moving execution into the shared platform. The sequence is
+catalog discovery, member selection, explicit synchronization, generic
+Workflow launch, grounded Knowledge asking and finally durable Registry
+storage. Each step keeps publication, selection, installation and execution
+authorization separate.
+
+Slice 1 is complete. Slice 2a adds a provider-neutral direct-member session,
+selection service, real HTTP boundary and generic Workflow selection page. A
+production invitation sign-in adapter remains slice 2b; the Bridge credential
+is never reused as browser authentication. See
+`docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
+
 ## First implementation slice after Phase 0
 
 The recommended Phase 1 PR is intentionally small:
