@@ -18,12 +18,14 @@ from datetime import UTC, datetime, timedelta
 from pydantic import ValidationError
 
 from common.base import Contract
-from common.identity import AuthenticatedActor
+from common.identity import AuthenticatedActor, entitled
 from common.sync import (
     OPERATIONS,
     AdvertiseReply,
     AdvertiseRequest,
     ArtifactPayload,
+    CatalogReply,
+    CatalogRequest,
     Operation,
     PollReply,
     PollRequest,
@@ -132,6 +134,26 @@ class ControlPlaneService:
             who, _ = self._who(token_id, secret, now)
         return ProbeReply(identity=who, platform_time=now)
 
+    def catalog(self, token_id: str, secret: str, request: CatalogRequest) -> CatalogReply:
+        """Published metadata visible to the authenticated member.
+
+        Membership comes from the platform record, never from the request.
+        Reading this does not create a device selection or an installation
+        plan.
+        """
+        item = CatalogRequest.model_validate(request)
+        now = self._clock()
+        with self._lock:
+            who, _ = self._who(token_id, secret, now)
+            member = self.enrollment.user(who.actor)
+            packages = tuple(
+                package
+                for package in self.packages.discover(namespace=item.namespace)
+                if (not item.kinds or package.kind in item.kinds)
+                and entitled(package.metadata, member.actor, member.groups)
+            )
+        return CatalogReply(packages=packages)
+
     def advertise(self, token_id: str, secret: str, request: AdvertiseRequest) -> AdvertiseReply:
         item = AdvertiseRequest.model_validate(request)
         with self._lock:
@@ -233,6 +255,8 @@ class ControlPlaneService:
         try:
             if named == "advertise":
                 return self.advertise(token_id, secret, AdvertiseRequest.model_validate(body))
+            if named == "catalog":
+                return self.catalog(token_id, secret, CatalogRequest.model_validate(body))
             if named == "sync":
                 return self.synchronize(token_id, secret, SyncRequest.model_validate(body))
             if named == "report":

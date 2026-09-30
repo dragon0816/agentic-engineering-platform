@@ -1609,10 +1609,15 @@ rule, asked by everything that acts on a device's records.
 
 ## Shared-platform transport (Phase 7, slice 2i)
 
-`common.sync` is the wire between a Bridge and the shared platform: six
-operations (`probe`, `advertise`, `sync`, `report`, `poll`, `settle`), each a
+`common.sync` is the wire between a Bridge and the shared platform: seven
+operations (`probe`, `catalog`, `advertise`, `sync`, `report`, `poll`, `settle`), each a
 closed request and reply. `ProbeReply` is the `AuthenticatedActor` the token
-produced, which must name a device, plus the platform's clock. `SyncRequest`
+produced, which must name a device, plus the platform's clock. `CatalogRequest`
+has optional namespace and asset-kind filters; `CatalogReply` contains unique
+`PublishedAssetPackage` metadata only. The platform reads groups from its own
+membership record and applies `entitled`, so a request cannot widen discovery.
+Catalog discovery carries no artifact bytes and creates no selection,
+installation plan or execution permission. `SyncRequest`
 lists what the Bridge has installed; `SyncReply` carries the device's
 `DeviceAuthorization`, an `InstallationPlan` for what the Bridge lacks and an
 `ArtifactPayload` (base64 in both directions) for exactly each planned
@@ -1674,7 +1679,7 @@ secret per call through the resolver and classifies every reply into a
 that is not a `WireFailure` — an intermediary's bare 401 included), always
 retryable; `withdrawn`; `rejected` (`authentication_failed`: this host's
 configuration is wrong); `refused` (anything else declined). Only `answered`
-changes anything on the Bridge. `probe`, `advertise` and `report` change
+changes anything on the Bridge. `probe`, `catalog`, `advertise` and `report` change
 nothing locally; the credential is resolved per call through
 `models.wire.authorized`, under the rule every HTTP adapter shares. `synchronize(layout, state)` refuses before calling when
 `grants.json` exists (`sync_grants_conflict`), then applies a reply in this

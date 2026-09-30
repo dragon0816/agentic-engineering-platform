@@ -8,6 +8,7 @@ asked the question an attacker asks.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import threading
 import urllib.error
@@ -18,7 +19,9 @@ from typing import Any
 
 import pytest
 from test_host_wiring import ready
+from test_platform_transport import Platform, host
 
+from control_plane.http import ControlPlaneServer
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 
@@ -169,6 +172,42 @@ def test_a_machine_with_no_shared_platform_says_so(served: AgentWebServer) -> No
     assert platform["configured"] is False
     assert "No shared platform is configured" in platform["note"]
     assert platform["decisions"] == []
+
+
+def test_shared_platform_catalog_distinguishes_publish_authorize_and_install(
+    tmp_path: Path,
+) -> None:
+    """Browsing changes nothing. The existing selection plus sync path is
+    what changes the two local facts shown beside the published package."""
+    platform = Platform()
+    with ControlPlaneServer(platform.service) as control:
+        _config, layout, runtime = host(tmp_path, platform, control.base_url)
+        with runtime:
+            web = AgentWeb(runtime)
+            server = AgentWebServer(web)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                before = fetch(base(server) + "/api/platform", token=server.token).json()
+                workflow = next(row for row in before["catalog"] if row["kind"] == "workflow")
+                assert workflow["published"] is True
+                assert workflow["authorized"] is False
+                assert workflow["installed"] is False
+                assert workflow["owner"] == "team:engineering"
+                assert runtime.state.installed() == ()
+
+                assert runtime.platform is not None
+                synced = asyncio.run(runtime.platform.synchronize(layout, runtime.state))
+                assert synced.status == "answered"
+
+                after = fetch(base(server) + "/api/platform", token=server.token).json()
+                workflow = next(row for row in after["catalog"] if row["kind"] == "workflow")
+                assert workflow["authorized"] is True
+                assert workflow["installed"] is True
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
 
 
 def test_asking_runs_the_real_agent_and_the_run_is_recorded(served: AgentWebServer) -> None:

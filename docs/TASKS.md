@@ -36,6 +36,21 @@ in PR #100 after each exact head passed Windows/Python 3.12 CI. E2E-04 merged in
 PR #101 after its exact head passed Windows/Python 3.12 CI. E2E-01's inert
 simulator proof and Windows owner-run physical validation entry point are
 implemented; the production-like company-host run remains pending.
+
+## Productization 1 — Personal Agent Web and Workflow Marketplace (active)
+
+| Slice | Status | Acceptance evidence |
+|---|---|---|
+| 1 shared catalog read path | done | Authenticated, entitlement-filtered catalog over the existing platform transport; Web distinguishes published, authorized and installed state; discovery has no installation or execution side effect |
+| 2 member selection | planned | Interactive member identity selects/revokes an entitled Workflow for a bound Bridge without using the Bridge credential as a browser session |
+| 3 explicit synchronization | planned | Existing all-or-nothing sync is invoked deliberately and reports exact installed/refused state |
+| 4 generic Workflow launch | planned | Declared inputs execute through Agent/Gateway/Workflow/Bridge and expose progress, result and trace |
+| 5 grounded Knowledge asking | planned | Exact installed Knowledge version answers with source citations in the Personal Agent Web |
+| 6 durable Registry | planned | Validated catalog contracts use a small persistent store without changing Bridge execution contracts |
+
+The approved scope and first user-level acceptance scenario are in
+`docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`. This milestone does not
+add another Telegram/GitHub orchestration layer.
 PR #107 merged the remote Hermes feedback loop with restricted Draft PR
 delivery, machine-readable `hermes-next-action/v1` handoffs, and a separate
 `hermes-retest-passed` notification path. Hermes polls and deduplicates trusted

@@ -1,7 +1,8 @@
 """The messages a Bridge and the shared platform exchange.
 
-Six operations, each presented with the Bridge's access token and each
-answered with a closed contract: a read-only probe, an advertisement of what
+Seven operations, each presented with the Bridge's access token and each
+answered with a closed contract: a read-only probe, a read-only catalogue of
+what the bound member may discover, an advertisement of what
 the Bridge can run, a synchronization of what its member decided it may run,
 a report of its authoritative state, a poll for the jobs waiting for it, and
 the settlement of one of them. Nothing member-facing is here: a Bridge acts as
@@ -21,11 +22,13 @@ from pydantic import AwareDatetime, Field, StrictBool, field_validator, model_va
 
 from common.assets import AssetIdentity, reject_embedded_secrets
 from common.authorization import DeviceAuthorization
-from common.base import Contract, Symbol, Text
+from common.base import Contract, Slug, Symbol, Text
 from common.distribution import (
+    AssetKind,
     BridgeStateSnapshot,
     InstallationPlan,
     LocalRunSummary,
+    PublishedAssetPackage,
     RemoteJobRecord,
 )
 from common.identity import AuthenticatedActor
@@ -33,8 +36,16 @@ from workflow.host_bridge import BridgeRegistration
 
 # The operations, as they appear in a path. A name not in this list is not an
 # operation, whatever the caller thinks.
-Operation = Literal["probe", "advertise", "sync", "report", "poll", "settle"]
-OPERATIONS: tuple[Operation, ...] = ("probe", "advertise", "sync", "report", "poll", "settle")
+Operation = Literal["probe", "catalog", "advertise", "sync", "report", "poll", "settle"]
+OPERATIONS: tuple[Operation, ...] = (
+    "probe",
+    "catalog",
+    "advertise",
+    "sync",
+    "report",
+    "poll",
+    "settle",
+)
 
 WireErrorCode = Literal[
     # Who is asking. The first is the only answer somebody without the secret
@@ -82,6 +93,36 @@ class ProbeReply(Contract):
     def made_on_a_device(self) -> Self:
         if self.identity.bridge_id is None:
             raise ValueError("a Bridge's authentication names the Bridge")
+        return self
+
+
+class CatalogRequest(Contract):
+    """Optional discovery filters. Empty means every entitled asset."""
+
+    namespace: Slug | None = None
+    kinds: tuple[AssetKind, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_kinds(self) -> Self:
+        if len(self.kinds) != len(set(self.kinds)):
+            raise ValueError("a catalog kind is listed once")
+        return self
+
+
+class CatalogReply(Contract):
+    """Published metadata the authenticated member may discover.
+
+    It is neither a device selection nor an installation plan, and carries no
+    artifact bytes.
+    """
+
+    packages: tuple[PublishedAssetPackage, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_assets(self) -> Self:
+        keys = [item.metadata.identity.key for item in self.packages]
+        if len(keys) != len(set(keys)):
+            raise ValueError("a catalog lists an exact asset once")
         return self
 
 

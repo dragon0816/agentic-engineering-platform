@@ -278,6 +278,29 @@ Local Bridge
 
 This separation keeps reasoning replaceable while preserving reliable local execution boundaries.
 
+### Personal Agent Web and shared catalog
+
+The Personal Agent Web is a loopback-only interface in the Personal
+Engineering / Execution Plane. It projects local Bridge state and calls the
+same Agent used by CLI and Telegram; it does not own routing, policy,
+installation or execution logic.
+
+Shared discovery crosses the existing authenticated Bridge/platform transport
+through a read-only `catalog` operation. The Team Platform filters published
+package metadata using the authenticated member and the platform's trusted
+membership groups. The Bridge never supplies its own entitlement claims.
+
+The interface presents three independent facts: **published** means the member
+may discover the Registry package; **authorized** means an active device
+selection has been synchronized; **installed** means the Bridge has verified
+and recorded the exact package. None of these grants a capability permission.
+Execution still passes through the Agent, Gateway, Workflow engine and Bridge
+policy. Catalog failure does not disable already-installed local-first assets.
+
+The first productization slice deliberately keeps catalog discovery read-only.
+Interactive member selection needs a member-authenticated platform entry point;
+the Bridge access token is not repurposed as a general browser session.
+
 ### Company Bridge deployment integration proof
 
 A successful main build may request a bounded production-like proof on the
