@@ -248,6 +248,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
         "/api/settings",
         "/api/assets",
         "/api/platform",
+        "/api/contributions",
     ):
         assert fetch(base(served) + path).status == 401
         assert fetch(base(served) + path, token="wrong").status == 401
@@ -261,6 +262,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/conversations").status == 401
     assert fetch(base(served) + "/api/conversations", body={}).status == 401
     assert fetch(base(served) + "/api/conversations/turn", body={}).status == 401
+    assert fetch(base(served) + "/api/contributions", body={}).status == 401
 
 
 def test_the_token_in_the_address_does_not_open_the_api(served: AgentWebServer) -> None:
@@ -402,6 +404,8 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert 'id="model-base-url"' in page
     assert "127.0.0.1:4000/v1" in page
     assert "Bridge Extensions" in page
+    assert 'id="tab-feedback"' in page
+    assert 'id="contribution-form"' in page
 
 
 def test_conversation_history_survives_a_runtime_restart(tmp_path: Path) -> None:
@@ -447,6 +451,128 @@ def test_conversation_requests_are_closed_and_owned_by_the_host(served: AgentWeb
         },
     )
     assert turn.status == 400
+
+
+def test_conversation_feedback_becomes_a_durable_governed_improvement_draft(
+    tmp_path: Path,
+) -> None:
+    config, _layout = ready(tmp_path)
+    with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            created = fetch(
+                base(server) + "/api/conversations", token=server.token, body={}
+            ).json()["conversation"]
+            fetch(
+                base(server) + "/api/conversations/turn",
+                token=server.token,
+                body={"session_id": created["session_id"], "message": "The file reader failed."},
+            )
+            before_runs = runtime.state.runs()
+            reply = fetch(
+                base(server) + "/api/contributions",
+                token=server.token,
+                body={
+                    "session_id": created["session_id"],
+                    "request_kind": "improvement",
+                    "target": {
+                        "namespace": "engineering",
+                        "name": "read-local-file",
+                        "version": "1.0.0",
+                    },
+                    "summary": "Read failures need a clear result.",
+                    "expected_behavior": "Return the file contents or a typed refusal.",
+                    "actual_behavior": "The user could not identify the reason.",
+                    "acceptance_criteria": ["The result names the refusal code."],
+                },
+            )
+            assert reply.status == 201
+            draft = reply.json()["draft"]
+            assert draft["asset_kind"] == "workflow"
+            assert draft["owner"] == {"type": "team", "id": "engineering"}
+            assert draft["lifecycle"] == "draft" and draft["publishable"] is False
+            assert draft["business_approval"]["status"] == "pending"
+            assert draft["technical_policy"]["status"] == "pending"
+            assert [item["role"] for item in draft["evidence"]] == ["user", "assistant"]
+            assert runtime.state.runs() == before_runs
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+    with build_runtime(config) as rebuilt:
+        drafts = AgentWeb(rebuilt).contribution_drafts()["drafts"]
+        assert len(drafts) == 1
+        assert drafts[0]["source_session_id"] == created["session_id"]
+
+
+def test_new_capability_draft_cannot_claim_governance_or_publish_itself(
+    served: AgentWebServer,
+) -> None:
+    created = fetch(base(served) + "/api/conversations", token=served.token, body={}).json()[
+        "conversation"
+    ]
+    fetch(
+        base(served) + "/api/conversations/turn",
+        token=served.token,
+        body={"session_id": created["session_id"], "message": "We repeat this task."},
+    )
+    request = {
+        "session_id": created["session_id"],
+        "request_kind": "new_capability",
+        "candidate_kind": "skill",
+        "proposed_name": "repeatable-team-procedure",
+        "summary": "Capture a repeatable procedure.",
+        "expected_behavior": "Other engineers can review the procedure.",
+        "actual_behavior": "It exists only in this conversation.",
+        "acceptance_criteria": ["A reviewer can reproduce the procedure."],
+    }
+    refused = fetch(
+        base(served) + "/api/contributions",
+        token=served.token,
+        body={
+            **request,
+            "owner": {"type": "organization", "id": "self-approved"},
+            "lifecycle": "published",
+        },
+    )
+    assert refused.status == 400
+
+    accepted = fetch(base(served) + "/api/contributions", token=served.token, body=request)
+    assert accepted.status == 201
+    draft = accepted.json()["draft"]
+    assert draft["namespace"] == "engineering"
+    assert draft["owner"] == {"type": "user", "id": "engineer"}
+    assert draft["target"] is None and draft["proposed_name"] == "repeatable-team-procedure"
+    assert draft["publishable"] is False
+
+
+def test_improvement_draft_requires_an_exact_installed_target(served: AgentWebServer) -> None:
+    created = fetch(base(served) + "/api/conversations", token=served.token, body={}).json()[
+        "conversation"
+    ]
+    fetch(
+        base(served) + "/api/conversations/turn",
+        token=served.token,
+        body={"session_id": created["session_id"], "message": "An unknown asset failed."},
+    )
+    reply = fetch(
+        base(served) + "/api/contributions",
+        token=served.token,
+        body={
+            "session_id": created["session_id"],
+            "request_kind": "improvement",
+            "target": {"namespace": "other", "name": "missing", "version": "1.0.0"},
+            "summary": "Unknown target",
+            "expected_behavior": "Target is installed.",
+            "actual_behavior": "Target is absent.",
+            "acceptance_criteria": ["Select an installed exact version."],
+        },
+    )
+    assert reply.status == 409
+    assert reply.json()["code"] == "target_not_installed"
 
 
 def test_natural_language_conversation_runs_an_installed_workflow_through_policy(

@@ -1,17 +1,20 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 and Productization 1–3 complete; Phase 7 remains active
+Status: Phases 1–6 and Productization 1–4 complete; Phase 7 remains active
 
-## Productization 4 — Personal Agent Usability
+## Productization 4 — Personal Agent Usability (complete)
 
 Turn the completed local Web foundation into an understandable Personal Agent
 workspace. Readiness and command discovery make installed capabilities usable;
 safe settings connect the existing provider-neutral model gateway without
 storing credential values. Slices 1–4 now include durable local conversation
 history and a bounded installed-command tool loop through existing Bridge
-policy. The capability-feedback experience follows as the final verified slice.
+policy. The final slice captures exact-version improvement requests and new
+Skill/Workflow proposals from durable conversation evidence as inert local
+drafts. Host-derived identity and separate pending business/technical review
+keep feedback from becoming self-publication.
 
-The active specification is
+The completed specification is
 `docs/phases/PRODUCTIZATION_4_PERSONAL_AGENT_USABILITY.md`.
 
 ## Productization 2 — Agent Add-on Marketplace

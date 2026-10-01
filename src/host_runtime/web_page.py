@@ -141,6 +141,7 @@ tr:last-child td { border-bottom: none; }
 </header>
 <nav>
   <button id="tab-ask" aria-selected="true">Ask</button>
+  <button id="tab-feedback" aria-selected="false">Improve</button>
   <button id="tab-installed" aria-selected="false">Installed here</button>
   <button id="tab-platform" aria-selected="false">Shared platform</button>
   <button id="tab-settings" aria-selected="false">Settings</button>
@@ -168,6 +169,49 @@ tr:last-child td { border-bottom: none; }
       command line and Telegram reach, with the same permissions and the same
       refusals. Nothing is written unless the command says so. One request runs
       at a time.</p>
+  </section>
+
+  <section id="panel-feedback">
+    <h2>Turn this conversation into a reviewable draft</h2>
+    <p class="note">Capture a problem with one exact installed version, or propose a new
+      Skill or Workflow. The Agent copies recent conversation evidence into a local draft.
+      It does not publish, install, execute or open an external issue.</p>
+    <div class="card settings">
+      <form id="contribution-form">
+        <label for="contribution-kind">Draft type</label>
+        <select id="contribution-kind">
+          <option value="improvement">Improve an installed capability</option>
+          <option value="new_capability">Propose a new Skill or Workflow</option>
+        </select>
+        <div id="improvement-fields">
+          <label for="contribution-target">Exact installed version</label>
+          <select id="contribution-target"></select>
+        </div>
+        <div id="candidate-fields" hidden>
+          <div class="two">
+            <div><label for="candidate-kind">Capability type</label>
+              <select id="candidate-kind"><option value="skill">Skill</option>
+                <option value="workflow">Workflow</option></select></div>
+            <div><label for="candidate-name">Proposed name</label>
+              <input id="candidate-name" placeholder="team-capability-name"></div>
+          </div>
+        </div>
+        <label for="contribution-summary">Problem or opportunity</label>
+        <input id="contribution-summary" required>
+        <label for="contribution-expected">Expected behavior</label>
+        <textarea id="contribution-expected" required></textarea>
+        <label for="contribution-actual">Current behavior or gap</label>
+        <textarea id="contribution-actual" required></textarea>
+        <label for="contribution-acceptance">Acceptance criteria (one per line)</label>
+        <textarea id="contribution-acceptance" required></textarea>
+        <p><button class="go" id="contribution-save" type="submit">Save draft</button></p>
+        <pre id="contribution-result" class="note">No draft saved yet.</pre>
+      </form>
+    </div>
+    <h2>Local drafts awaiting review</h2>
+    <p class="note">Business approval and technical policy remain separate and pending.
+      A later governed contribution path may validate and publish a new version.</p>
+    <div class="card"><div id="contribution-drafts" class="empty">reading&hellip;</div></div>
   </section>
 
   <section id="panel-settings">
@@ -295,7 +339,7 @@ async function call(path, body) {
   const reply = await fetch(path, options);
   if (!reply.ok && reply.status !== 200) {
     const failed = await reply.json().catch(() => ({error: reply.statusText}));
-    throw new Error(failed.error || ("the host answered " + reply.status));
+    throw new Error(failed.error || failed.code || ("the host answered " + reply.status));
   }
   return reply.json();
 }
@@ -532,6 +576,82 @@ async function loadAssets() {
   showKnowledgeDomain();
 }
 
+// -- Governed contribution drafts ---------------------------------------
+
+function showContributionFields() {
+  const candidate = el("contribution-kind").value === "new_capability";
+  el("improvement-fields").hidden = candidate;
+  el("candidate-fields").hidden = !candidate;
+  el("contribution-save").disabled = !candidate && !el("contribution-target").value;
+}
+
+el("contribution-kind").addEventListener("change", showContributionFields);
+
+function renderContributionDrafts(drafts) {
+  el("contribution-drafts").replaceChildren(table(
+    ["Draft", "Type", "Target / proposal", "Review", "Summary"], drafts,
+    (draft) => {
+      const subject = draft.target
+        ? draft.target.namespace + "/" + draft.target.name + "@" + draft.target.version
+        : draft.namespace + "/" + draft.proposed_name;
+      return [draft.draft_id, draft.request_kind, draft.asset_kind + " " + subject,
+              "business: " + draft.business_approval.status
+                + " · technical: " + draft.technical_policy.status,
+              draft.summary];
+    }));
+}
+
+async function loadContributions() {
+  const assets = await call("/api/assets");
+  const target = el("contribution-target"); target.replaceChildren();
+  for (const kind of ["skills", "workflows", "knowledge"]) {
+    for (const asset of assets[kind]) {
+      const option = document.createElement("option");
+      option.value = JSON.stringify({namespace: asset.namespace, name: asset.name,
+        version: asset.version});
+      option.textContent = kind.slice(0, -1) + " · " + asset.namespace + "/" + asset.name
+        + "@" + asset.version;
+      target.append(option);
+    }
+  }
+  target.disabled = target.options.length === 0;
+  const listed = await call("/api/contributions");
+  renderContributionDrafts(listed.drafts);
+  showContributionFields();
+}
+
+el("contribution-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const kind = el("contribution-kind").value;
+  const criteria = el("contribution-acceptance").value.split("\n")
+    .map((item) => item.trim()).filter(Boolean);
+  const body = {
+    session_id: activeConversation,
+    request_kind: kind,
+    summary: el("contribution-summary").value.trim(),
+    expected_behavior: el("contribution-expected").value.trim(),
+    actual_behavior: el("contribution-actual").value.trim(),
+    acceptance_criteria: criteria,
+  };
+  if (kind === "improvement") {
+    if (!el("contribution-target").value) return;
+    body.target = JSON.parse(el("contribution-target").value);
+  } else {
+    body.candidate_kind = el("candidate-kind").value;
+    body.proposed_name = el("candidate-name").value.trim();
+  }
+  const button = el("contribution-save"), result = el("contribution-result");
+  button.disabled = true; result.textContent = "Saving a local governed draft…";
+  try {
+    const saved = await call("/api/contributions", body);
+    result.textContent = "Saved " + saved.draft.draft_id
+      + ". It remains a local draft awaiting business and technical review.";
+    await loadContributions();
+  } catch (failure) {
+    result.textContent = "Draft was not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
+
 async function loadSettings() {
   const settings = await call("/api/settings"), model = settings.model;
   el("model-provider").value = model.provider || "openai_compatible";
@@ -712,7 +832,8 @@ el("platform-sync").addEventListener("click", async () => {
 
 // -- Tabs -----------------------------------------------------------------
 
-const panels = {ask: null, installed: loadAssets, platform: loadPlatform, settings: loadSettings};
+const panels = {ask: null, feedback: loadContributions, installed: loadAssets,
+  platform: loadPlatform, settings: loadSettings};
 const loaded = {};
 for (const name of Object.keys(panels)) {
   el("tab-" + name).addEventListener("click", async () => {

@@ -1,6 +1,6 @@
 # Productization 4 — Personal Agent Usability
 
-Status: active; slices 1–4 complete
+Status: complete; slices 1–5 complete
 
 ## User outcome
 
@@ -69,6 +69,22 @@ next slice is declared complete.
   the conversation API and Workflow runs remain in durable local state.
 - The normal company endpoint remains `http://127.0.0.1:4000/v1`; its served
   model id is still explicit host configuration.
+
+## Slice 5 acceptance criteria
+
+- A member can capture recent immutable conversation excerpts as either an
+  improvement request for one exact installed Skill, Workflow or Knowledge
+  version, or a new Skill/Workflow proposal.
+- Actor, namespace and owner are derived by the Host. Browser input cannot
+  claim those fields or an approval, lifecycle or publication state.
+- Each draft records the problem or opportunity, expected and actual behavior,
+  one or more acceptance criteria, exact conversation message ids and any
+  assistant trace identifiers.
+- Drafts survive restart in actor-filtered local state and perform no
+  capability execution or external write.
+- Every captured item remains `draft`, non-publishable and separately pending
+  business and technical-policy review. Capture cannot mutate, install or
+  publish an asset.
 
 ## Slice 1–2 acceptance criteria
 

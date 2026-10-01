@@ -424,6 +424,29 @@ def test_reporting_on_a_state_file_changes_nothing_about_it(tmp_path: Path) -> N
         assert runtime.state.cursor(TELEGRAM_CHANNEL) is None
 
 
+def test_a_version_three_local_state_adds_inert_contribution_storage(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    with build_runtime(config):
+        pass
+    with sqlite3.connect(layout.state) as editor:
+        editor.execute("UPDATE local_meta SET value = '3' WHERE key = 'schema_version'")
+        editor.execute("DROP TABLE contribution_drafts")
+        editor.commit()
+
+    with build_runtime(config) as runtime:
+        assert runtime.state.contribution_drafts("engineer") == ()
+
+    with sqlite3.connect(layout.state) as reader:
+        version = reader.execute(
+            "SELECT value FROM local_meta WHERE key = 'schema_version'"
+        ).fetchone()[0]
+        table = reader.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'contribution_drafts'"
+        ).fetchone()
+    assert version == "4"
+    assert table == ("contribution_drafts",)
+
+
 def authorization(*kinds: str, actor: str = "engineer") -> dict[str, Any]:
     """What the members of this device decided it may run, as the control
     plane would issue it. The shipped read capability's own policy requires
