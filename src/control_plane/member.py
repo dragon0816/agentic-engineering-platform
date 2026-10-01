@@ -21,7 +21,7 @@ from common.assets import RegistryContract
 from common.authorization import DeviceAssetSelection
 from common.base import Sha256, Symbol
 from common.enrollment import BridgeExecutionSubject
-from common.identity import ACCESS_TOKEN_METHOD, AuthenticatedActor
+from common.identity import ACCESS_TOKEN_METHOD, AuthenticatedActor, entitled
 from common.member import (
     MemberCatalogEntry,
     MemberCatalogReply,
@@ -35,6 +35,12 @@ from common.member import (
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
 from control_plane.enrollment import InMemoryEnrollmentRegistry
 from control_plane.identity import fingerprint
+from software.marketplace import (
+    ApplicationCatalog,
+    ApplicationCatalogReply,
+    ApplicationCatalogRequest,
+    project_application,
+)
 
 MIN_SESSION_SECRET_CHARS = 32
 
@@ -171,11 +177,13 @@ class MemberService:
         enrollment: InMemoryEnrollmentRegistry,
         authorization: InMemoryAuthorizationRegistry,
         sessions: InMemoryMemberSessions,
+        applications: ApplicationCatalog | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.enrollment = enrollment
         self.authorization = authorization
         self.sessions = sessions
+        self.applications = applications if applications is not None else ApplicationCatalog()
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
 
@@ -210,6 +218,22 @@ class MemberService:
                 for package in available
             )
         return MemberCatalogReply(bridge_id=item.bridge_id, entries=entries)
+
+    def application_catalog(
+        self, session_id: str, secret: str, request: ApplicationCatalogRequest
+    ) -> ApplicationCatalogReply:
+        """Entitled external Applications, independent of every Bridge."""
+        item = ApplicationCatalogRequest.model_validate(request)
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            member = self.enrollment.user(who.actor)
+            entries = tuple(
+                project_application(entry)
+                for entry in self.applications.discover(item.namespace)
+                if entitled(entry.software.metadata, member.actor, member.groups)
+            )
+        return ApplicationCatalogReply(applications=entries)
 
     def select(
         self, session_id: str, secret: str, request: MemberSelectRequest

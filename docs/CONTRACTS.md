@@ -2366,6 +2366,14 @@ prepares only the staged wheels using offline/no-dependency pip and launches a
 fixed isolated interpreter/module vector without a shell or credential-bearing
 environment. Advertisement remains separate from `LocalPolicy` authorization.
 
+`ApplicationCatalog` registers exact `ApplicationCatalogEntry` versions and
+refuses duplicate identity. `ApplicationCatalogRequest` contains only an
+optional namespace; `MemberService.application_catalog` derives the actor and
+groups from its authenticated member session and applies normal asset
+entitlement. `ApplicationCatalogReply` contains read-only projections and no
+Bridge id, package, selected, installed or active field. The member HTTP route
+is `/v1/member/applications`; it has no corresponding mutation route.
+
 ## Portable Knowledge package (Productization 2, slice 2)
 
 `PortableKnowledgePackage` carries one exact published `KnowledgeManifest` and

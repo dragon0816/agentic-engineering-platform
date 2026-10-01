@@ -22,6 +22,7 @@ from common.member import (
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
 from control_plane.member_page import PAGE
 from control_plane.member_signin import InMemoryInvitationSignIn, InvitationSignInError
+from software.marketplace import ApplicationCatalogRequest
 
 API_PREFIX = "/v1/member/"
 MAX_BODY_BYTES = 256 * 1024
@@ -99,7 +100,14 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         operation = self.path.removeprefix(API_PREFIX) if self.path.startswith(API_PREFIX) else ""
-        if operation not in ("sign-in", "catalog", "select", "replace", "revoke"):
+        if operation not in (
+            "sign-in",
+            "catalog",
+            "applications",
+            "select",
+            "replace",
+            "revoke",
+        ):
             self._json(404, {"code": "invalid_request"})
             return
         if operation == "sign-in":
@@ -126,6 +134,10 @@ class _Handler(BaseHTTPRequestHandler):
             if operation == "catalog":
                 reply = self.server.service.catalog(
                     *credential, MemberCatalogRequest.model_validate(raw)
+                )
+            elif operation == "applications":
+                reply = self.server.service.application_catalog(
+                    *credential, ApplicationCatalogRequest.model_validate(raw)
                 )
             elif operation == "select":
                 reply = self.server.service.select(
