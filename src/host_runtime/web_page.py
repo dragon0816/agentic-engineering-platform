@@ -88,11 +88,19 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 .said.bad { color: var(--bad); }
 .waiting { color: var(--dim); font-style: italic; }
 form.ask { display: flex; gap: 8px; margin: 12px 0 0; }
-form.ask input {
+form.ask textarea {
   flex: 1; font: inherit; padding: 9px 12px; color: var(--ink);
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  min-height: 76px;
 }
-form.ask input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+form.ask textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.command-menu { border: 1px solid var(--line); border-radius: 10px; padding: 6px;
+  background: var(--panel); margin: 8px 0; }
+.command-menu button { display: grid; grid-template-columns: 180px 1fr; width: 100%;
+  text-align: left; gap: 12px; border: 0; background: transparent; color: var(--ink);
+  padding: 8px; border-radius: 6px; cursor: pointer; }
+.command-menu button:hover, .command-menu button:focus { background: var(--accent-soft); }
+.command-menu code { color: var(--accent); }
 select, textarea {
   width: 100%; padding: 9px 10px; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 8px; font: 13px var(--mono);
@@ -227,18 +235,15 @@ tr:last-child td { border-bottom: none; }
     <div class="grid" id="readiness">
       <div class="status-card">Reading Agent readiness&hellip;</div>
     </div>
-    <h2>What can I ask?</h2>
-    <p class="note">These commands come from Skills installed on this computer.
-      Choose one to fill the request, then add the required details.</p>
-    <div class="quick" id="command-hints"><span class="empty">reading&hellip;</span></div>
     <div class="conversation-bar">
       <select id="conversation" aria-label="Conversation"></select>
       <button class="go" id="new-conversation" type="button">New</button>
     </div>
     <div id="log"></div>
+    <div id="command-palette" class="command-menu" role="listbox" hidden></div>
     <form class="ask" id="ask">
-      <input id="message" autocomplete="off" spellcheck="false"
-             placeholder="a command, such as  weekly.preview 2026_39W">
+      <textarea id="message" rows="3" autocomplete="off" spellcheck="true"
+        placeholder="Ask naturally, or type / to choose a command"></textarea>
       <button class="go" id="send" type="submit" disabled>Send</button>
     </form>
     <p class="hint">This is the Agent on this computer &mdash; the same one the
@@ -567,6 +572,7 @@ form.addEventListener("submit", async (event) => {
   const asked = field.value.trim();
   if (!asked) return;
   field.value = "";
+  el("command-palette").hidden = true;
   field.disabled = send.disabled = true;
   const said = turn(asked);
   try {
@@ -624,23 +630,40 @@ async function loadReadiness() {
   el("readiness").replaceChildren(...cards);
 }
 
-function renderCommandHints(assets) {
-  const buttons = [];
-  for (const skill of assets.skills) for (const command of skill.commands) {
+let slashCommands = [];
+function renderCommandPalette() {
+  const palette = el("command-palette"), query = field.value.trim().toLowerCase();
+  const visible = slashCommands.filter(item => !query || item.invocation.startsWith(query));
+  const buttons = visible.map(item => {
     const button = document.createElement("button"); button.type = "button";
-    button.textContent = command.invocation + "…";
-    button.title = command.kind + " " + command.target;
-    button.addEventListener("click", () => { field.value = command.invocation; field.focus(); });
-    buttons.push(button);
-  }
-  if (!buttons.length) {
-    el("command-hints").replaceChildren(text("No Skill commands are installed yet."));
-  } else el("command-hints").replaceChildren(...buttons);
+    button.setAttribute("role", "option");
+    const command = document.createElement("code"); command.textContent = item.invocation;
+    const description = document.createElement("span"); description.textContent = item.description;
+    button.append(command, description);
+    button.addEventListener("click", () => {
+      field.value = item.invocation; palette.hidden = true; field.focus();
+    });
+    return button;
+  });
+  palette.replaceChildren(...buttons);
+  palette.hidden = !field.value.trim().startsWith("/") || !buttons.length;
 }
+
+async function loadSlashCommands() {
+  slashCommands = (await call("/api/commands")).commands;
+  renderCommandPalette();
+}
+
+field.addEventListener("input", renderCommandPalette);
+field.addEventListener("keydown", event => {
+  if (event.key === "Escape") el("command-palette").hidden = true;
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault(); form.requestSubmit();
+  }
+});
 
 async function loadAssets() {
   const assets = await call("/api/assets");
-  renderCommandHints(assets);
   el("profiles").replaceChildren(table(
     ["Asset", "State", "Action", "What it is"], assets.profiles,
     (p) => {
@@ -1203,7 +1226,7 @@ for (const name of Object.keys(panels)) {
   el("tab-" + name).addEventListener("click", () => selectPrimaryTab(name));
 }
 
-Promise.all([loadAbout(), loadReadiness(), loadAssets(), loadConversations()])
+Promise.all([loadAbout(), loadReadiness(), loadAssets(), loadConversations(), loadSlashCommands()])
   .catch(showBootError);
 field.focus();
 </script>

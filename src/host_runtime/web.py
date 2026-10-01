@@ -85,6 +85,12 @@ from host_runtime.conversations import (
 from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
+from host_runtime.slash_commands import (
+    COMMANDS,
+    SlashCommandError,
+    SlashCommandInvocation,
+    parse_slash_command,
+)
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
 from models.contracts import ModelMessage
@@ -378,6 +384,9 @@ class AgentWeb:
             created = self.runtime.state.create_conversation(record)
         return {"conversation": json.loads(created.model_dump_json())}
 
+    def slash_commands(self) -> dict[str, Any]:
+        return {"commands": [item.model_dump(mode="json") for item in COMMANDS]}
+
     def contribution_drafts(self) -> dict[str, Any]:
         return {
             "drafts": [
@@ -398,6 +407,7 @@ class AgentWeb:
 
             target: AssetIdentity | None = None
             proposed_name = None
+            asset_kind: Literal["skill", "workflow", "knowledge", "platform"]
             if item.request_kind == "improvement":
                 target = item.target
                 if target is None:  # Closed request validation makes this unreachable.
@@ -407,13 +417,19 @@ class AgentWeb:
                     return {"ok": False, "code": "target_not_installed"}
                 asset_kind, owner = resolved
                 namespace = target.namespace
-            else:
+            elif item.request_kind == "new_capability":
                 if not self.namespace:
                     return {"ok": False, "code": "namespace_missing"}
                 if item.candidate_kind is None:  # Closed request validation makes this unreachable.
                     return {"ok": False, "code": "candidate_kind_required"}
                 asset_kind = item.candidate_kind
                 proposed_name = item.proposed_name
+                owner = Owner(type="user", id=self.runtime.actor)
+                namespace = self.namespace
+            else:
+                if not self.namespace:
+                    return {"ok": False, "code": "namespace_missing"}
+                asset_kind = "platform"
                 owner = Owner(type="user", id=self.runtime.actor)
                 namespace = self.namespace
 
@@ -469,9 +485,22 @@ class AgentWeb:
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
             started = datetime.now(UTC)
-            namespace = self.namespace
-            if not namespace:
+            try:
+                slash = parse_slash_command(item.message)
+            except SlashCommandError as error:
                 answer: dict[str, Any] = {
+                    "ok": False,
+                    "answer": f"Unsupported command ({error.code}). Type /help for commands.",
+                    "status": "needs_input",
+                }
+                slash = None
+            else:
+                answer = self._slash_command(slash) if slash is not None else {}
+            namespace = self.namespace
+            if answer:
+                pass
+            elif not namespace:
+                answer = {
                     "ok": False,
                     "answer": "No namespace is configured. Set `namespace` in host.json.",
                     "status": "needs_input",
@@ -577,11 +606,132 @@ class AgentWeb:
                 }
             )
             saved = self.runtime.state.save_conversation(updated)
+            problem = answer.pop("problem", None)
+            draft = None
+            if isinstance(problem, str):
+                drafted = self.create_contribution_draft(
+                    ContributionDraftCreateRequest(
+                        session_id=saved.session_id,
+                        request_kind="problem",
+                        summary=problem,
+                        expected_behavior=(
+                            "A reviewer can identify and reproduce the expected behavior."
+                        ),
+                        actual_behavior=problem,
+                        acceptance_criteria=(
+                            "A reviewer can triage this report from its evidence.",
+                        ),
+                    )
+                )
+                draft = drafted.get("draft")
         return {
             "ok": answer.get("ok", False),
             "conversation": json.loads(saved.model_dump_json()),
             "answer": answer,
+            "draft": draft,
         }
+
+    def _slash_command(self, command: SlashCommandInvocation) -> dict[str, Any]:
+        """Dispatch known commands without model intent selection."""
+
+        if command.name == "help":
+            listing = "\n".join(f"{item.invocation} — {item.description}" for item in COMMANDS)
+            return {"ok": True, "answer": listing, "status": "answered"}
+        if command.name == "problem":
+            summary = command.argument or "Problem reported from this conversation."
+            return {
+                "ok": True,
+                "answer": "Saved a governed local problem draft for human review.",
+                "status": "answered",
+                "problem": summary,
+            }
+        if command.name == "wiki_query":
+            if not command.argument:
+                return self._command_needs_input("Usage: /wiki-query <question>")
+            available = self.assets()["knowledge"]
+            if len(available) != 1:
+                return self._command_needs_input(
+                    "Select exactly one installed Knowledge asset before using /wiki-query."
+                )
+            selected = available[0]
+            result = self.ask_knowledge(
+                KnowledgeAskRequest(
+                    asset=AssetIdentity(
+                        namespace=selected["namespace"],
+                        name=selected["name"],
+                        version=selected["version"],
+                    ),
+                    question=command.argument,
+                )
+            )
+            return {
+                "ok": result["ok"],
+                "answer": result["answer"],
+                "status": "answered" if result["ok"] else "failed",
+                "outcome": result["outcome"],
+            }
+        if command.name == "run_workflow":
+            target_text, _, raw_arguments = command.argument.partition(" ")
+            try:
+                path, separator, version = target_text.rpartition("@")
+                namespace, slash, name = path.partition("/")
+                if not separator or not slash:
+                    raise ValueError("missing exact workflow version")
+                target = AssetIdentity(namespace=namespace, name=name, version=version)
+                arguments = self._command_arguments(raw_arguments)
+            except (ValueError, TypeError, json.JSONDecodeError):
+                return self._command_needs_input(
+                    "Usage: /run workflow <namespace>/<name>@<version> {JSON arguments}"
+                )
+        else:
+            workflow_name = {
+                "wiki_convert": "wiki-convert",
+                "wiki_ingest": "wiki-ingest",
+                "wiki_lint": "wiki-lint",
+            }[command.name]
+            matches = [
+                manifest.metadata.identity
+                for manifest in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if manifest.metadata.identity.name == workflow_name
+            ]
+            if len(matches) != 1:
+                return self._command_needs_input(
+                    f"Install exactly one {workflow_name} Workflow before using this command."
+                )
+            target = matches[0]
+            try:
+                arguments = self._command_arguments(command.argument)
+            except (ValueError, TypeError, json.JSONDecodeError):
+                return self._command_needs_input("Command arguments must be one JSON object.")
+        result = self.launch_workflow(
+            WorkflowLaunchRequest(
+                workflow=target,
+                arguments=arguments,
+                idempotency_key=f"web-{uuid.uuid4().hex}",
+            )
+        )
+        return {
+            "ok": result["ok"],
+            "answer": result["answer"],
+            "status": "answered" if result["ok"] else "failed",
+            "outcome": result["outcome"],
+        }
+
+    @staticmethod
+    def _command_arguments(raw: str) -> dict[str, Any]:
+        text = raw.strip()
+        if not text:
+            return {}
+        if not text.startswith("{"):
+            return {"args": text}
+        decoded = json.loads(text)
+        if not isinstance(decoded, dict):
+            raise ValueError("workflow arguments are an object")
+        return decoded
+
+    @staticmethod
+    def _command_needs_input(message: str) -> dict[str, Any]:
+        return {"ok": False, "answer": message, "status": "needs_input"}
 
     def assets(self) -> dict[str, Any]:
         """What this machine has installed, and what it has run.
@@ -1013,6 +1163,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
+        elif parsed.path == "/api/commands":
+            self._json(200, web.slash_commands())
         elif parsed.path == "/api/conversations":
             session_id = parse_qs(parsed.query).get("session_id", [None])[0]
             self._json(200, web.conversations(session_id))

@@ -35,7 +35,7 @@ class ContributionDraftCreateRequest(RegistryContract):
     """What a browser may ask to capture; governance fields are deliberately absent."""
 
     session_id: Symbol
-    request_kind: Literal["improvement", "new_capability"]
+    request_kind: Literal["improvement", "new_capability", "problem"]
     target: AssetIdentity | None = None
     candidate_kind: Literal["skill", "workflow"] | None = None
     proposed_name: Slug | None = None
@@ -53,8 +53,15 @@ class ContributionDraftCreateRequest(RegistryContract):
                 or self.proposed_name is not None
             ):
                 raise ValueError("an improvement names one exact installed target")
-        elif self.target is not None or self.candidate_kind is None or self.proposed_name is None:
-            raise ValueError("a new capability names a Skill or Workflow proposal")
+        elif self.request_kind == "new_capability":
+            if self.target is not None or self.candidate_kind is None or self.proposed_name is None:
+                raise ValueError("a new capability names a Skill or Workflow proposal")
+        elif (
+            self.target is not None
+            or self.candidate_kind is not None
+            or self.proposed_name is not None
+        ):
+            raise ValueError("a problem report names no asset or candidate")
         return self
 
 
@@ -62,11 +69,11 @@ class ContributionDraft(RegistryContract):
     """An inert local request. It is not an asset manifest or publication decision."""
 
     draft_id: Symbol
-    request_kind: Literal["improvement", "new_capability"]
+    request_kind: Literal["improvement", "new_capability", "problem"]
     actor: Symbol
     namespace: Slug
     owner: Owner
-    asset_kind: Literal["skill", "workflow", "knowledge"]
+    asset_kind: Literal["skill", "workflow", "knowledge", "platform"]
     target: AssetIdentity | None = None
     proposed_name: Slug | None = None
     summary: Text
@@ -92,10 +99,19 @@ class ContributionDraft(RegistryContract):
                 raise ValueError("an improvement draft retains one exact target")
             if self.target.namespace != self.namespace:
                 raise ValueError("an improvement draft retains the target namespace")
+        elif self.request_kind == "new_capability":
+            if (
+                self.target is not None
+                or self.proposed_name is None
+                or self.asset_kind not in {"skill", "workflow"}
+            ):
+                raise ValueError(
+                    "a new capability draft is an unpublished Skill or Workflow proposal"
+                )
         elif (
             self.target is not None
-            or self.proposed_name is None
-            or self.asset_kind not in {"skill", "workflow"}
+            or self.proposed_name is not None
+            or self.asset_kind != "platform"
         ):
-            raise ValueError("a new capability draft is an unpublished Skill or Workflow proposal")
+            raise ValueError("a problem report remains an unpublished platform draft")
         return self

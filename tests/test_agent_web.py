@@ -534,7 +534,9 @@ def test_persona_settings_reject_unbounded_soul(tmp_path: Path) -> None:
 def test_page_exposes_setup_commands_and_capability_management(served: AgentWebServer) -> None:
     page = fetch(base(served) + f"/?token={served.token}").body.decode("utf-8")
     assert 'id="tab-settings"' in page
-    assert 'id="command-hints"' in page
+    assert 'id="command-palette"' in page
+    assert '<textarea id="message" rows="3"' in page
+    assert "What can I ask?" not in page
     assert 'id="model-base-url"' in page
     assert "127.0.0.1:4000/v1" in page
     assert "Bridge Extensions" in page
@@ -642,6 +644,78 @@ def test_conversation_feedback_becomes_a_durable_governed_improvement_draft(
         drafts = AgentWeb(rebuilt).contribution_drafts()["drafts"]
         assert len(drafts) == 1
         assert drafts[0]["source_session_id"] == created["session_id"]
+
+
+def test_slash_help_and_problem_bypass_model_and_problem_stays_a_draft(
+    served: AgentWebServer,
+) -> None:
+    commands = fetch(base(served) + "/api/commands", token=served.token).json()["commands"]
+    assert {item["invocation"].strip() for item in commands} >= {
+        "/help",
+        "/run workflow",
+        "/wiki-convert",
+        "/wiki-ingest",
+        "/wiki-lint",
+        "/wiki-query",
+        "/problem",
+    }
+    created = fetch(base(served) + "/api/conversations", token=served.token, body={}).json()[
+        "conversation"
+    ]
+    help_turn = fetch(
+        base(served) + "/api/conversations/turn",
+        token=served.token,
+        body={"session_id": created["session_id"], "message": "/help"},
+    ).json()
+    assert help_turn["answer"]["status"] == "answered"
+    assert "/wiki-query" in help_turn["answer"]["answer"]
+
+    problem = fetch(
+        base(served) + "/api/conversations/turn",
+        token=served.token,
+        body={
+            "session_id": created["session_id"],
+            "message": "/problem The answer omitted its evidence.",
+        },
+    ).json()
+    assert problem["answer"]["status"] == "answered"
+    assert problem["draft"]["request_kind"] == "problem"
+    assert problem["draft"]["asset_kind"] == "platform"
+    assert problem["draft"]["publishable"] is False
+    assert problem["draft"]["business_approval"]["status"] == "pending"
+    assert problem["draft"]["technical_policy"]["status"] == "pending"
+
+
+def test_unknown_slash_command_never_reaches_model(served: AgentWebServer) -> None:
+    created = fetch(base(served) + "/api/conversations", token=served.token, body={}).json()[
+        "conversation"
+    ]
+    reply = fetch(
+        base(served) + "/api/conversations/turn",
+        token=served.token,
+        body={"session_id": created["session_id"], "message": "/invent-command"},
+    ).json()
+    assert reply["answer"]["status"] == "needs_input"
+    assert "unknown_slash_command" in reply["answer"]["answer"]
+
+
+def test_run_workflow_slash_command_uses_exact_installed_workflow(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    with build_runtime(config) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        result = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message=(
+                    "/run workflow engineering/read-local-file@1.0.0 "
+                    + json.dumps({"args": str(layout.workspace_root / "notes.txt")})
+                ),
+            )
+        )
+    assert result["answer"]["status"] == "answered"
+    assert result["answer"]["ok"] is True
+    assert "succeeded" in result["answer"]["answer"]
 
 
 def test_new_capability_draft_cannot_claim_governance_or_publish_itself(
