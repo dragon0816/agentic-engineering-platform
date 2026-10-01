@@ -46,6 +46,7 @@ from types import TracebackType
 from typing import Any, Self
 from urllib.parse import parse_qs, urlparse
 
+from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.skills import SkillManifest
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from common.assets import WorkflowManifest
@@ -53,6 +54,7 @@ from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
 from host_runtime.answers import readable
 from host_runtime.contracts import (
+    AgentProfileActivationRequest,
     KnowledgeAskRequest,
     PlatformCatalogProjection,
     PlatformDecisionProjection,
@@ -62,6 +64,7 @@ from host_runtime.contracts import (
     WorkflowLaunchRequest,
 )
 from host_runtime.host import HostRuntime, load_authorization
+from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.workspace import documents
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
 
@@ -174,6 +177,30 @@ class AgentWeb:
             for item in manifests(layout.knowledge, KnowledgeManifest)
             if item.metadata.identity.key in configured_knowledge
         ]
+        active_key = None
+        if layout.active_profile.is_file():
+            try:
+                active_key = ActiveAgentProfile.model_validate_json(
+                    layout.active_profile.read_text(encoding="utf-8-sig")
+                ).profile.key
+            except Exception:  # noqa: BLE001 - doctor owns malformed local state
+                active_key = None
+        selected_profiles = set()
+        if authorization is not None:
+            selected_profiles = {
+                item.asset.key for item in authorization.selections if item.kind == "agent"
+            }
+        profiles = [
+            {
+                "namespace": item.metadata.identity.namespace,
+                "name": item.metadata.identity.name,
+                "version": item.metadata.identity.version,
+                "description": item.description,
+                "active": item.metadata.identity.key == active_key,
+            }
+            for item in manifests(layout.agents, AgentProfile)
+            if item.metadata.identity.key in selected_profiles
+        ]
         snapshot = self.runtime.agent.snapshot(observed_at=datetime.now(UTC))
         runs = [
             {
@@ -185,7 +212,34 @@ class AgentWeb:
             for run in snapshot.runs[-25:]
         ]
         runs.reverse()
-        return {"skills": skills, "workflows": workflows, "knowledge": knowledge, "runs": runs}
+        return {
+            "profiles": profiles,
+            "skills": skills,
+            "workflows": workflows,
+            "knowledge": knowledge,
+            "runs": runs,
+        }
+
+    def activate_profile(self, request: AgentProfileActivationRequest) -> dict[str, Any]:
+        """Persist one validated profile choice; restart applies its narrowed runtime."""
+        item = AgentProfileActivationRequest.model_validate(request)
+        authorization = load_authorization(self.runtime.config, self.runtime.layout)
+        with self._one_at_a_time:
+            try:
+                active = activate_profile(
+                    self.runtime.config,
+                    self.runtime.layout,
+                    authorization,
+                    item.profile,
+                    actor=self.runtime.actor,
+                )
+            except ProfileError as failure:
+                return {"ok": False, "code": failure.code, "restart_required": False}
+        return {
+            "ok": True,
+            "active": json.loads(active.model_dump_json()),
+            "restart_required": True,
+        }
 
     def platform(self) -> dict[str, Any]:
         """Published assets plus this Bridge's separate local state."""
@@ -494,6 +548,7 @@ class _Handler(BaseHTTPRequestHandler):
         if path not in (
             "/api/ask",
             "/api/platform/sync",
+            "/api/profiles/activate",
             "/api/workflows/run",
             "/api/knowledge/ask",
         ):
@@ -527,6 +582,20 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(
                     500,
                     {"error": f"synchronization did not finish: {type(failure).__name__}"},
+                )
+            return
+        if path == "/api/profiles/activate":
+            try:
+                activation = AgentProfileActivationRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid profile activation"})
+                return
+            try:
+                self._json(200, self.server.web.activate_profile(activation))
+            except Exception as failure:  # noqa: BLE001 - a page shows everything
+                self._json(
+                    500,
+                    {"error": (f"profile activation did not finish: {type(failure).__name__}")},
                 )
             return
         if path == "/api/workflows/run":

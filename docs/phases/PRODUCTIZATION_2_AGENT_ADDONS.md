@@ -117,6 +117,21 @@ effect.
 - Knowledge selection leaves existing capability grants unchanged; model
   configuration and the `knowledge-query` capability grant remain separate.
 
+## Exit evidence for slice 4
+
+- the member catalog and selection wire admit exact published Agent profiles
+  without accepting actor, kind, path, permission, grant or model fields;
+- synchronization installs a closed inert profile artifact whose inner
+  governance metadata matches the Registry package;
+- Personal Agent Web shows installed selected profiles and exposes one explicit
+  exact-version activation action;
+- activation validates selected and installed Skill/Knowledge references,
+  separately selected capabilities and the configured routing model before it
+  atomically records local state;
+- rebuild filters existing registries and grants to the active profile, so a
+  profile can narrow but never widen authority;
+- delegation is refused and activation changes no platform capability grant.
+
 ## Explicit exclusions
 
 - executable Bridge plug-in loading;

@@ -466,14 +466,15 @@ def test_the_list_of_what_a_member_may_use_is_guarded_like_a_decision() -> None:
     # it needs the check of its own.
     with pytest.raises(AuthorizationError, match="actor_not_admitted"):
         registry.select(identity("tester"), selection(actor="tester", bridge_id="bridge-shared"))
-    # Only what this installer can name: Workflow, Skill and Knowledge. Agent
-    # profiles join only after their own package and activation contract.
+    # Only inert Agent Add-ons with validated installers: Workflow, Skill,
+    # Knowledge and Agent profiles. Tasks are still excluded.
     knowledge = AssetIdentity(namespace="engineering", name="handbook", version="1.0.0")
     packages.publish(package(knowledge, "knowledge"))
     profile = AssetIdentity(namespace="engineering", name="personal", version="1.0.0")
     packages.publish(package(profile, "agent"))
     assert [item.metadata.identity.name for item in registry.available(identity())] == [
         "handbook",
+        "personal",
         "shipment-skill",
         "weekly-report",
     ]

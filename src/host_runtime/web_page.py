@@ -145,6 +145,10 @@ tr:last-child td { border-bottom: none; }
   </section>
 
   <section id="panel-installed">
+    <h2>Agent profile</h2>
+    <p class="note">Choose one exact installed profile. Restart the Agent to apply its
+      narrower Skills, Knowledge, capability and model requirements.</p>
+    <div class="card"><div id="profiles" class="empty">reading&hellip;</div></div>
     <h2>Skills</h2>
     <p class="note">What can be asked for by name on this machine.</p>
     <div class="card"><div id="skills" class="empty">reading&hellip;</div></div>
@@ -303,6 +307,27 @@ async function loadAbout() {
 
 async function loadAssets() {
   const assets = await call("/api/assets");
+  el("profiles").replaceChildren(table(
+    ["Asset", "State", "Action", "What it is"], assets.profiles,
+    (p) => {
+      const button = document.createElement("button");
+      button.type = "button"; button.className = "go";
+      button.disabled = p.active; button.textContent = p.active ? "Active" : "Activate";
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          const result = await call("/api/profiles/activate", {profile: {
+            namespace: p.namespace, name: p.name, version: p.version}});
+          if (!result.ok) throw new Error(result.code);
+          alert("Profile selected. Restart the Agent to apply it.");
+          await loadAssets();
+        } catch (failure) {
+          alert("Profile was not activated: " + failure.message); button.disabled = false;
+        }
+      });
+      return [p.namespace + "/" + p.name + "@" + p.version,
+              tag(p.active, "active", "installed"), button, p.description];
+    }));
   el("skills").replaceChildren(table(
     ["Alias", "Commands", "Asset", "What it is"], assets.skills,
     (s) => [s.alias, s.commands.join(", ") || "\\u2014",

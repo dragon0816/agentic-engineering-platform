@@ -24,7 +24,7 @@ from common.base import Contract, Symbol, Text
 # Workflows, Skills and Knowledge are installed; a capability is a tool the policy
 # grants. The lists stay separate because they are enforced in
 # different places.
-RunnableKind = Literal["workflow", "skill", "knowledge", "capability"]
+RunnableKind = Literal["workflow", "skill", "knowledge", "agent", "capability"]
 
 
 class DeviceAssetSelection(RegistryContract):
@@ -85,7 +85,9 @@ class DeviceAuthorization(Contract):
     def installable(self) -> tuple[DeviceAssetSelection, ...]:
         """What this device may install: the inert Agent Add-ons chosen."""
         return tuple(
-            item for item in self.selections if item.kind in ("workflow", "skill", "knowledge")
+            item
+            for item in self.selections
+            if item.kind in ("workflow", "skill", "knowledge", "agent")
         )
 
     def tools(self) -> tuple[DeviceAssetSelection, ...]:

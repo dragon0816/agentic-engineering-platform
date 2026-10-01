@@ -33,6 +33,7 @@ from typing import Literal
 
 from pydantic import Field, StrictBool, ValidationError
 
+from agent.contracts import AgentProfile
 from agent.skills import SkillManifest
 from common.assets import AssetIdentity, WorkflowManifest
 from common.base import Contract, Symbol
@@ -433,6 +434,7 @@ class PlatformClient:
             "workflow": _identities_on_disk(layout.workflows),
             "skill": _identities_on_disk(layout.skills),
             "knowledge": _identities_on_disk(layout.knowledge),
+            "agent": _identities_on_disk(layout.agents),
         }
         files: list[tuple[Path, bytes]] = []
         knowledge: list[_KnowledgeInstall] = []
@@ -489,18 +491,28 @@ class PlatformClient:
                 )
                 continue
             try:
-                manifest: SkillManifest | WorkflowManifest = (
-                    WorkflowManifest.model_validate_json(content)
-                    if package.kind == "workflow"
-                    else SkillManifest.model_validate_json(content)
-                )
+                manifest: SkillManifest | WorkflowManifest | AgentProfile
+                if package.kind == "workflow":
+                    manifest = WorkflowManifest.model_validate_json(content)
+                elif package.kind == "skill":
+                    manifest = SkillManifest.model_validate_json(content)
+                else:
+                    manifest = AgentProfile.model_validate_json(content)
             except ValidationError:
                 raise SyncRefused("asset_invalid") from None
             if manifest.metadata.identity != identity:
                 # Bytes that describe another asset than the package claims
                 # would install under a name nobody chose.
                 raise SyncRefused("asset_invalid")
-            directory = layout.workflows if package.kind == "workflow" else layout.skills
+            if package.kind == "agent" and manifest.metadata != package.metadata.model_copy(
+                update={"package": None}
+            ):
+                raise SyncRefused("asset_invalid")
+            directory = {
+                "workflow": layout.workflows,
+                "skill": layout.skills,
+                "agent": layout.agents,
+            }[package.kind]
             path = directory / f"{identity.namespace}__{identity.name}__{identity.version}.json"
             existing = on_disk[package.kind].get(identity.key)
             if existing is not None:

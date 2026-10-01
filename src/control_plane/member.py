@@ -198,7 +198,7 @@ class MemberService:
                 for selection in self.authorization.authorization(
                     item.bridge_id, issued_at=now
                 ).for_actor(who.actor)
-                if selection.kind in ("workflow", "skill", "knowledge")
+                if selection.kind in ("workflow", "skill", "knowledge", "agent")
             }
             entries = tuple(
                 MemberCatalogEntry(
@@ -219,7 +219,7 @@ class MemberService:
             package = self.authorization.packages.get(item.asset)
             if package is None:
                 raise MemberError("asset_not_published")
-            if package.kind not in ("workflow", "skill", "knowledge"):
+            if package.kind not in ("workflow", "skill", "knowledge", "agent"):
                 raise MemberError("kind_mismatch")
             try:
                 selected = self.authorization.select(

@@ -20,6 +20,7 @@ from typing import Literal, Self, TypeVar
 
 from pydantic import ValidationError
 
+from agent.contracts import AgentProfile
 from agent.gateway import Gateway
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
@@ -82,6 +83,7 @@ from host_runtime.contracts import (
 # Re-exported: the layout moved to the contracts module so the platform client
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
+from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
@@ -126,6 +128,7 @@ HostErrorCode = Literal[
     "credential_unmapped",
     "models_invalid",
     "knowledge_invalid",
+    "profile_invalid",
     "state_unavailable",
     "dut_skill_missing",
     "dut_driver_missing",
@@ -466,9 +469,21 @@ def build_gateway(
     they chose are installed: a manifest sitting in the assets directory that
     nobody selected is not something this device may run."""
     allowed = authorization.allows if authorization is not None else None
+    try:
+        profile = load_active_profile(
+            config,
+            layout,
+            authorization,
+            actor=config.device.registered_by,
+        )
+    except ProfileError as error:
+        raise HostError("profile_invalid", layout.active_profile) from error
+    profile_skills = None if profile is None else {item.key for item in profile.skills}
     skills = SkillRegistry()
     for manifest in _load_all(layout.skills, SkillManifest):
         if allowed is not None and not allowed("skill", manifest.metadata.identity):
+            continue
+        if profile_skills is not None and manifest.metadata.identity.key not in profile_skills:
             continue
         try:
             skills.register(manifest)
@@ -551,7 +566,7 @@ def build_gateway(
         # outside Pydantic validation.
         if drafting_model is None or binding is None or binding.routing_alias is None:
             raise HostError("models_invalid")
-        catalog = build_knowledge_catalog(config, layout, authorization)
+        catalog = build_knowledge_catalog(config, layout, authorization, profile=profile)
         installed.register(
             KNOWLEDGE_QUERY_SPEC,
             KnowledgeQueryHandler(catalog, drafting_model, alias=binding.routing_alias),
@@ -568,6 +583,9 @@ def build_gateway(
         if authorization is not None
         else _configured_grants(layout)
     )
+    if profile is not None:
+        permitted = {item.key for item in profile.allowed_capabilities}
+        grants = tuple(item for item in grants if item.asset.key in permitted)
     try:
         policy = LocalPolicy(grants)
     except ValueError as error:
@@ -583,14 +601,21 @@ def build_knowledge_catalog(
     config: CompanyHostConfiguration,
     layout: HostLayout,
     authorization: DeviceAuthorization | None = None,
+    *,
+    profile: AgentProfile | None = None,
 ) -> KnowledgeCatalog:
     """Load only configured, published local Knowledge versions into a query catalog."""
     manifests = _load_all(layout.knowledge, KnowledgeManifest)
     available = {item.metadata.identity.key: item for item in manifests}
     bindings = {binding.asset.key: binding for binding in config.knowledge}
+    if profile is not None:
+        permitted = {item.key for item in profile.knowledge}
+        bindings = {key: value for key, value in bindings.items() if key in permitted}
     if authorization is not None:
         for selection in authorization.selections:
             if selection.kind != "knowledge":
+                continue
+            if profile is not None and selection.asset.key not in permitted:
                 continue
             manifest = available.get(selection.asset.key)
             expected = (
