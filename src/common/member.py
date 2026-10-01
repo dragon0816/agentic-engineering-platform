@@ -53,6 +53,25 @@ class MemberRevokeRequest(Contract):
     asset: AssetIdentity
 
 
+class MemberReplaceRequest(Contract):
+    """Atomic exact-version change within one Add-on family."""
+
+    bridge_id: Symbol
+    current: AssetIdentity
+    replacement: AssetIdentity
+
+    @model_validator(mode="after")
+    def distinct_same_family(self) -> Self:
+        if self.current.key == self.replacement.key:
+            raise ValueError("replacement must name another exact version")
+        if (self.current.namespace, self.current.name) != (
+            self.replacement.namespace,
+            self.replacement.name,
+        ):
+            raise ValueError("replacement must remain in one asset family")
+        return self
+
+
 class MemberSelectionReply(Contract):
     selection: DeviceAssetSelection
 
@@ -60,4 +79,20 @@ class MemberSelectionReply(Contract):
     def installable_add_on(self) -> Self:
         if self.selection.kind not in ("workflow", "skill", "knowledge", "agent"):
             raise ValueError("the member entry point changes only installable Agent Add-ons")
+        return self
+
+
+class MemberReplacementReply(Contract):
+    previous: DeviceAssetSelection
+    selection: DeviceAssetSelection
+
+    @model_validator(mode="after")
+    def one_atomic_family_change(self) -> Self:
+        if self.previous.status != "revoked" or self.selection.status != "active":
+            raise ValueError("replacement revokes one selection and activates one")
+        if self.previous.kind != self.selection.kind or (
+            self.previous.asset.namespace,
+            self.previous.asset.name,
+        ) != (self.selection.asset.namespace, self.selection.asset.name):
+            raise ValueError("replacement stays within one Add-on family and kind")
         return self

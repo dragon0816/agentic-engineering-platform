@@ -1642,6 +1642,24 @@ catalog and derived capability grants. It cannot add a manifest, handler,
 selection, grant or model endpoint. No active-profile file preserves the
 existing single-Agent behavior for locally managed hosts.
 
+## Agent Add-on version replacement (Productization 2, slice 5)
+
+`MemberReplaceRequest` names the bound Bridge, current exact identity and
+replacement exact identity. The closed contract requires distinct versions in
+one namespace/name family and contains no actor, kind, permission, path,
+approval or policy. The authenticated Registry derives the kind, verifies the
+current active selection, publication, entitlement and same kind, then commits
+the revoke/select pair together. `MemberReplacementReply` carries the revoked
+previous selection and active replacement.
+
+No validation failure mutates either selection. Bridge synchronization remains
+append-only for verified package bytes: it installs a missing replacement and
+writes the new authorization, while a retained previous version is ignored by
+runtime filtering. Replacing back to that previous exact identity therefore
+updates authorization without downloading or rewriting its package. Explicit
+`MemberRevokeRequest` removes active use; physical retention protects rollback
+and never implies authorization.
+
 `InMemoryMemberSessions.issue(identity)` is a trusted-host call made after an
 external sign-in adapter has produced a current `AuthenticatedActor`. It
 refuses an identity carrying a Bridge id or the `bridge-access-token` method.

@@ -132,6 +132,19 @@ effect.
   profile can narrow but never widen authority;
 - delegation is refused and activation changes no platform capability grant.
 
+## Exit evidence for slice 5
+
+- the authenticated member endpoint atomically replaces one active exact
+  version with another published, entitled version of the same family/kind;
+- requests cannot claim actor, kind, permission, approval, policy, path or
+  decision time, and every failure leaves the current version active;
+- Bridge synchronization installs missing replacement bytes but keeps the
+  previous verified version inert in local inventory;
+- rollback uses the same replace contract in reverse, reuses retained bytes
+  without a new installation and restores runtime behavior after sync;
+- update, rollback and revoke do not change separately derived capability
+  grants, and no local operation bypasses synchronized authorization.
+
 ## Explicit exclusions
 
 - executable Bridge plug-in loading;
