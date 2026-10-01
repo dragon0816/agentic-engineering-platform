@@ -97,6 +97,18 @@ button.go {
 }
 button.go[disabled] { opacity: .5; cursor: default; }
 .hint { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.status-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+  background: var(--panel); }
+.status-card strong { display: block; margin-bottom: 4px; }
+.quick { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0 14px; }
+.quick button { font: 12px var(--mono); color: var(--accent); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
+.settings { padding: 14px; }
+.settings label { display: block; font-size: 12px; color: var(--dim); margin: 10px 0 4px; }
+.settings input, .settings select { width: 100%; font: 13px var(--mono); padding: 9px 10px;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.settings .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; }
@@ -129,9 +141,17 @@ tr:last-child td { border-bottom: none; }
   <button id="tab-ask" aria-selected="true">Ask</button>
   <button id="tab-installed" aria-selected="false">Installed here</button>
   <button id="tab-platform" aria-selected="false">Shared platform</button>
+  <button id="tab-settings" aria-selected="false">Settings</button>
 </nav>
 <main>
   <section id="panel-ask" data-open>
+    <div class="grid" id="readiness">
+      <div class="status-card">Reading Agent readiness&hellip;</div>
+    </div>
+    <h2>What can I ask?</h2>
+    <p class="note">These commands come from Skills installed on this computer.
+      Choose one to fill the request, then add the required details.</p>
+    <div class="quick" id="command-hints"><span class="empty">reading&hellip;</span></div>
     <div id="log"></div>
     <form class="ask" id="ask">
       <input id="message" autocomplete="off" spellcheck="false"
@@ -142,6 +162,49 @@ tr:last-child td { border-bottom: none; }
       command line and Telegram reach, with the same permissions and the same
       refusals. Nothing is written unless the command says so. One request runs
       at a time.</p>
+  </section>
+
+  <section id="panel-settings">
+    <h2>Natural-language model</h2>
+    <p class="note">Connect the Agent to the existing OpenAI-compatible Gateway.
+      This page stores only connection metadata and optional secret/environment names.
+      It never accepts or stores an access-token value.</p>
+    <div class="card settings">
+      <form id="model-settings">
+        <div class="two">
+          <div><label for="model-provider">Provider</label>
+            <select id="model-provider"><option value="openai_compatible">
+              OpenAI-compatible Gateway</option>
+              <option value="ollama">Ollama on this computer</option></select></div>
+          <div><label for="model-alias">Alias</label>
+            <input id="model-alias" value="company" required></div>
+        </div>
+        <label for="model-base-url">Gateway URL</label>
+        <input id="model-base-url" required>
+        <label for="model-name">Model name served by the Gateway</label>
+        <input id="model-name" placeholder="Ask your Gateway administrator for this name" required>
+        <div class="two">
+          <div><label for="model-secret">SecretRef name (optional)</label>
+            <input id="model-secret" placeholder="llm_gateway_token"></div>
+          <div><label for="model-environment">Environment variable name (optional)</label>
+            <input id="model-environment" placeholder="AEP_LLM_TOKEN"></div>
+        </div>
+        <p class="note">If the Gateway requires a token, set the token value in the named
+          Windows environment variable before restarting the Agent.</p>
+        <p><button class="go" id="model-save" type="submit">Save model settings</button></p>
+        <pre id="model-result" class="note">Reading current settings&hellip;</pre>
+      </form>
+    </div>
+    <h2>Capability management</h2>
+    <div class="grid">
+      <div class="status-card"><strong>Skills, Workflows and Knowledge</strong>
+        Select versions in Shared Marketplace, then return here and synchronize them.</div>
+      <div class="status-card"><strong>Bridge Extensions</strong>
+        Staging and activation remain protected by device-owner approval and technical policy.</div>
+      <div class="status-card"><strong>Applications</strong>
+        Applications keep their own process and update lifecycle and are listed
+        separately in Marketplace.</div>
+    </div>
   </section>
 
   <section id="panel-installed">
@@ -310,8 +373,45 @@ async function loadAbout() {
   }
 }
 
+async function loadReadiness() {
+  const ready = await call("/api/readiness");
+  const cards = [];
+  const natural = document.createElement("div"); natural.className = "status-card";
+  const naturalTitle = document.createElement("strong");
+  naturalTitle.append(text(ready.natural_language.status === "ready"
+    ? "Natural language ready" : "Natural language needs setup"));
+  natural.append(naturalTitle, text(ready.natural_language.action)); cards.push(natural);
+  const installed = document.createElement("div"); installed.className = "status-card";
+  const installedTitle = document.createElement("strong");
+  installedTitle.append(text("Installed here"));
+  installed.append(installedTitle, text(ready.installed.skills + " Skills · "
+    + ready.installed.workflows + " Workflows · " + ready.installed.knowledge + " Knowledge"));
+  cards.push(installed);
+  const shared = document.createElement("div"); shared.className = "status-card";
+  const sharedTitle = document.createElement("strong"); sharedTitle.append(text(
+    ready.shared_platform.configured
+      ? "Shared platform connected" : "Shared platform not configured"));
+  shared.append(sharedTitle, text(ready.shared_platform.action)); cards.push(shared);
+  el("readiness").replaceChildren(...cards);
+}
+
+function renderCommandHints(assets) {
+  const buttons = [];
+  for (const skill of assets.skills) for (const command of skill.commands) {
+    const button = document.createElement("button"); button.type = "button";
+    button.textContent = command.invocation + "…";
+    button.title = command.kind + " " + command.target;
+    button.addEventListener("click", () => { field.value = command.invocation; field.focus(); });
+    buttons.push(button);
+  }
+  if (!buttons.length) {
+    el("command-hints").replaceChildren(text("No Skill commands are installed yet."));
+  } else el("command-hints").replaceChildren(...buttons);
+}
+
 async function loadAssets() {
   const assets = await call("/api/assets");
+  renderCommandHints(assets);
   el("profiles").replaceChildren(table(
     ["Asset", "State", "Action", "What it is"], assets.profiles,
     (p) => {
@@ -335,7 +435,7 @@ async function loadAssets() {
     }));
   el("skills").replaceChildren(table(
     ["Alias", "Commands", "Asset", "What it is"], assets.skills,
-    (s) => [s.alias, s.commands.join(", ") || "\\u2014",
+    (s) => [s.alias, s.commands.map((command) => command.invocation.trim()).join(", ") || "\\u2014",
             s.namespace + "/" + s.name + "@" + s.version, s.description]));
   el("workflows").replaceChildren(table(
     ["Asset", "Steps", "What it does"], assets.workflows,
@@ -375,6 +475,46 @@ async function loadAssets() {
   el("knowledge-ask").disabled = assets.knowledge.length === 0;
   showKnowledgeDomain();
 }
+
+async function loadSettings() {
+  const settings = await call("/api/settings"), model = settings.model;
+  el("model-provider").value = model.provider || "openai_compatible";
+  el("model-alias").value = model.alias || "company";
+  el("model-base-url").value = model.base_url || ["http:", "", "127.0.0.1:4000/v1"].join("/");
+  el("model-name").value = model.model || "";
+  el("model-secret").value = model.credential_secret || "";
+  el("model-environment").value = model.credential_environment || "";
+  el("model-save").disabled = !settings.writable;
+  el("model-result").textContent = model.configured
+    ? "Configured: " + model.alias + " → " + model.model + " at " + model.base_url
+      + (model.credential_secret ? "\nCredential value present: " + model.credential_present : "")
+    : (settings.writable
+      ? "No routing model is configured." : "Settings are read-only in this launch mode.");
+}
+
+el("model-settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const secret = el("model-secret").value.trim();
+  const environment = el("model-environment").value.trim();
+  const button = el("model-save"), result = el("model-result"); button.disabled = true;
+  result.textContent = "Validating and saving settings…";
+  const body = {
+    alias: el("model-alias").value.trim(), provider: el("model-provider").value,
+    model: el("model-name").value.trim(), base_url: el("model-base-url").value.trim(),
+  };
+  if (secret || environment) {
+    body.credential_secret = secret; body.credential_environment = environment;
+  }
+  try {
+    const saved = await call("/api/settings/model", body);
+    result.textContent = "Saved. Restart the Agent to use this model configuration."
+      + (environment
+        ? "\nSet the token value in Windows environment variable " + environment + "."
+        : "");
+  } catch (failure) {
+    result.textContent = "Settings were not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
 
 function showWorkflowContract() {
   const chosen = el("workflow-target").selectedOptions[0];
@@ -516,7 +656,7 @@ el("platform-sync").addEventListener("click", async () => {
 
 // -- Tabs -----------------------------------------------------------------
 
-const panels = {ask: null, installed: loadAssets, platform: loadPlatform};
+const panels = {ask: null, installed: loadAssets, platform: loadPlatform, settings: loadSettings};
 const loaded = {};
 for (const name of Object.keys(panels)) {
   el("tab-" + name).addEventListener("click", async () => {
@@ -536,6 +676,10 @@ for (const name of Object.keys(panels)) {
 
 loadAbout().catch((failure) => { el("who").textContent = "could not read this machine: "
   + failure.message; });
+loadReadiness().catch((failure) => { el("readiness").textContent =
+  "Could not read Agent readiness: " + failure.message; });
+loadAssets().catch((failure) => { el("command-hints").textContent =
+  "Could not read installed commands: " + failure.message; });
 field.focus();
 </script>
 </body>

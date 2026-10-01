@@ -299,7 +299,13 @@ def _chat(runtime: HostRuntime, actor: str | None, namespace: str | None) -> int
     return AgentWindow(runtime, chosen, actor=actor).run()
 
 
-def _web(runtime: HostRuntime, namespace: str | None, port: int, open_it: bool) -> int:
+def _web(
+    runtime: HostRuntime,
+    namespace: str | None,
+    port: int,
+    open_it: bool,
+    config_path: Path,
+) -> int:
     """Serve the page until interrupted.
 
     The address carries the token, so it is printed and not logged, and the
@@ -308,7 +314,9 @@ def _web(runtime: HostRuntime, namespace: str | None, port: int, open_it: bool) 
     """
     from host_runtime.web import AgentWeb, AgentWebServer
 
-    server = AgentWebServer(AgentWeb(runtime, namespace=namespace), port=port)
+    server = AgentWebServer(
+        AgentWeb(runtime, namespace=namespace, config_path=config_path), port=port
+    )
     with server:
         print("This machine's Agent is at:")
         print(f"  {server.address}")
@@ -575,7 +583,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "chat":
             return _chat(runtime, args.actor, args.namespace)
         if args.command == "web":
-            return _web(runtime, args.namespace, args.port, args.open)
+            return _web(runtime, args.namespace, args.port, args.open, args.config)
         if args.command == "status":
             return _status(runtime, args.json)
         if args.command == "probe":

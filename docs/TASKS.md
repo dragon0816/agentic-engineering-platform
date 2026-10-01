@@ -337,3 +337,20 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
    external credentials remain on that Bridge. CI never performs live validation.
 4. Rollback/retention: pin and retain the source plus working old Host Bridge;
    rehearse rollback before cutover. Archive later; do not delete in Phase 7.
+# Productization 4 — Personal Agent Usability
+
+- [x] Approve the incremental usability boundary: preserve the existing
+  Agent/Gateway/Bridge contracts and make them visible and configurable before
+  adding a bounded conversation/tool loop.
+- [x] Define a closed model-settings request that accepts endpoint metadata,
+  model id, routing alias and optional SecretRef/environment names, never a
+  credential value.
+- [x] Project actionable natural-language, shared-platform and installed-asset
+  readiness through Personal Agent Web.
+- [x] Derive clickable command hints from installed Skill manifests.
+- [x] Add a local Settings page for the existing OpenAI-compatible Gateway,
+  with full configuration validation, atomic save and restart semantics.
+- [ ] Add durable local conversation sessions and clarification UX.
+- [ ] Add a provider-neutral bounded tool loop with progress and evidence.
+- [ ] Add standardized feedback/candidate-asset creation from the conversation
+  workspace without bypassing review or publication governance.

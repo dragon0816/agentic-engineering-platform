@@ -18,6 +18,7 @@ from pydantic import ValidationError
 from test_host_wiring import device, host_json, ready
 
 from agent.routing import RequestRouter
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from host_runtime.cli import main
 from host_runtime.contracts import CompanyHostConfiguration, ModelBinding
 from host_runtime.host import HostError, build_router, build_runtime, host_report
@@ -77,6 +78,30 @@ def test_a_host_with_no_model_is_the_host_everyone_already_had(tmp_path: Path) -
     with build_runtime(config) as runtime:
         assert isinstance(runtime.agent.gateway.router, RequestRouter)
         assert runtime.agent.gateway.router.model is None
+
+
+def test_installed_knowledge_without_a_model_does_not_block_setup_or_workflows(
+    tmp_path: Path,
+) -> None:
+    """The Web settings needed to add a model must be reachable before the model exists."""
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "knowledge": [
+                {
+                    "asset": {
+                        "namespace": "engineering",
+                        "name": "guide",
+                        "version": "1.0.0",
+                    },
+                    "vault_root": str(tmp_path / "vault"),
+                }
+            ]
+        },
+    )
+    with build_runtime(config, layout=layout) as runtime:
+        assert runtime.agent.gateway.router.model is None
+        assert runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity) is None
 
 
 def test_a_configured_gateway_reaches_the_router(

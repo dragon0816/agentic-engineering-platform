@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import hmac
 import json
+import os
 import secrets
 import threading
 import uuid
@@ -57,8 +58,12 @@ from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
+    CompanyHostConfiguration,
+    CredentialBinding,
     ExtensionLifecycleProjection,
     KnowledgeAskRequest,
+    ModelBinding,
+    ModelSettingsUpdateRequest,
     PlatformCatalogProjection,
     PlatformDecisionProjection,
     PlatformProjection,
@@ -68,7 +73,7 @@ from host_runtime.contracts import (
 )
 from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.profiles import ProfileError, activate_profile
-from host_runtime.workspace import documents
+from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
 
 #: Anything larger than this is not a request to an Agent.
@@ -159,9 +164,16 @@ class AgentWeb:
     and so a different front end could be built on the same answers.
     """
 
-    def __init__(self, runtime: HostRuntime, *, namespace: str | None = None) -> None:
+    def __init__(
+        self,
+        runtime: HostRuntime,
+        *,
+        namespace: str | None = None,
+        config_path: Path | None = None,
+    ) -> None:
         self.runtime = runtime
         self.namespace = namespace if namespace is not None else runtime.config.namespace
+        self.config_path = config_path
         # One request at a time. The Agent's state is one SQLite file and a
         # capability may hold a workbook; two at once would be two runs
         # against the same things.
@@ -180,6 +192,134 @@ class AgentWeb:
             "platform": self.runtime.platform is not None,
         }
 
+    def readiness(self) -> dict[str, Any]:
+        """Actionable local readiness without probing an external service."""
+        assets = self.assets()
+        binding = self.runtime.config.models
+        natural_ready = binding is not None and binding.routing_alias is not None
+        return {
+            "natural_language": {
+                "status": "ready" if natural_ready else "setup_required",
+                "action": (
+                    "Natural-language routing is configured."
+                    if natural_ready
+                    else "Configure a routing model in Settings. Deterministic commands still work."
+                ),
+            },
+            "shared_platform": {
+                "configured": self.runtime.config.platform is not None,
+                "action": (
+                    "Open Shared platform to browse and synchronize selected assets."
+                    if self.runtime.config.platform is not None
+                    else "Configure a shared platform binding to install team capabilities."
+                ),
+            },
+            "installed": {
+                name: len(assets[name])
+                for name in ("profiles", "skills", "workflows", "knowledge", "extensions")
+            },
+        }
+
+    def settings(self) -> dict[str, Any]:
+        """Current non-secret settings suitable for a local operator page."""
+        binding = self.runtime.config.models
+        endpoint = None
+        if binding is not None and binding.routing_alias is not None:
+            endpoint = binding.catalog.endpoint(binding.routing_alias)
+        credential_environment = self.runtime.config.credential_environment()
+        credential = None if endpoint is None else endpoint.credential
+        return {
+            "writable": self.config_path is not None,
+            "restart_required": False,
+            "model": {
+                "configured": endpoint is not None,
+                "alias": "" if endpoint is None else endpoint.alias,
+                "provider": "" if endpoint is None else endpoint.provider,
+                "model": "" if endpoint is None else endpoint.model,
+                "base_url": "" if endpoint is None else endpoint.base_url or "",
+                "credential_secret": "" if credential is None else credential.name,
+                "credential_environment": (
+                    "" if credential is None else credential_environment.get(credential.name, "")
+                ),
+                "credential_present": (
+                    False
+                    if credential is None
+                    else bool(os.environ.get(credential_environment.get(credential.name, ""), ""))
+                ),
+                "require_local_model": (False if binding is None else binding.require_local_model),
+            },
+        }
+
+    def update_model_settings(self, request: ModelSettingsUpdateRequest) -> dict[str, Any]:
+        """Validate and atomically save one provider-neutral model endpoint."""
+        if self.config_path is None:
+            return {
+                "ok": False,
+                "code": "settings_read_only",
+                "restart_required": False,
+            }
+        checked = ModelSettingsUpdateRequest.model_validate(request)
+        credential = (
+            None if checked.credential_secret is None else {"name": checked.credential_secret}
+        )
+        model_binding = ModelBinding.model_validate(
+            {
+                "catalog": {
+                    "endpoints": [
+                        {
+                            "alias": checked.alias,
+                            "provider": checked.provider,
+                            "model": checked.model,
+                            "base_url": checked.base_url,
+                            "credential": credential,
+                            "capabilities": {
+                                "reasoning": checked.reasoning,
+                                "tool_calling": checked.tool_calling,
+                                "structured_output": checked.structured_output,
+                                "streaming": checked.streaming,
+                                "vision": checked.vision,
+                                "local": checked.local,
+                                "max_context_tokens": checked.max_context_tokens,
+                            },
+                        }
+                    ],
+                    "routes": [{"name": "default", "alias": checked.alias}],
+                },
+                "routing_alias": checked.alias,
+                "require_local_model": checked.require_local_model,
+            }
+        )
+        with self._one_at_a_time:
+            current = CompanyHostConfiguration.model_validate_json(
+                self.config_path.read_text(encoding="utf-8-sig")
+            )
+            old_model_secrets = {
+                item.credential.name
+                for item in (() if current.models is None else current.models.catalog.endpoints)
+                if item.credential is not None
+            }
+            credentials = [
+                item for item in current.credentials if item.secret not in old_model_secrets
+            ]
+            if checked.credential_secret is not None and checked.credential_environment is not None:
+                credentials.append(
+                    CredentialBinding(
+                        secret=checked.credential_secret,
+                        environment_variable=checked.credential_environment,
+                    )
+                )
+            candidate = current.model_dump(mode="json")
+            candidate["models"] = model_binding.model_dump(mode="json")
+            candidate["credentials"] = [item.model_dump(mode="json") for item in credentials]
+            updated = CompanyHostConfiguration.model_validate(candidate)
+            write_atomically(
+                self.config_path,
+                updated.model_dump_json(indent=2).encode("utf-8") + b"\n",
+            )
+        projection = self.settings()
+        projection.update({"ok": True, "restart_required": True})
+        return projection
+
     def assets(self) -> dict[str, Any]:
         """What this machine has installed, and what it has run.
 
@@ -195,7 +335,18 @@ class AgentWeb:
                 "version": item.metadata.identity.version,
                 "alias": item.alias,
                 "description": item.instructions,
-                "commands": [command.name for command in item.commands],
+                "commands": [
+                    {
+                        "name": command.name,
+                        "kind": command.kind,
+                        "target": (
+                            f"{command.target.namespace}/{command.target.name}"
+                            f"@{command.target.version}"
+                        ),
+                        "invocation": f"{item.alias}.{command.name} ",
+                    }
+                    for command in item.commands
+                ],
                 "default_command": item.default_command or "",
             }
             for item in manifests(layout.skills, SkillManifest)
@@ -589,6 +740,10 @@ class _Handler(BaseHTTPRequestHandler):
         web = self.server.web
         if parsed.path == "/api/about":
             self._json(200, web.about())
+        elif parsed.path == "/api/readiness":
+            self._json(200, web.readiness())
+        elif parsed.path == "/api/settings":
+            self._json(200, web.settings())
         elif parsed.path == "/api/assets":
             self._json(200, web.assets())
         elif parsed.path == "/api/platform":
@@ -610,6 +765,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/profiles/activate",
             "/api/workflows/run",
             "/api/knowledge/ask",
+            "/api/settings/model",
         ):
             self._json(404, {"error": "no such page"})
             return
@@ -625,6 +781,15 @@ class _Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
         except (ValueError, TypeError):
             self._json(400, {"error": "the request was not valid JSON"})
+            return
+        if path == "/api/settings/model":
+            try:
+                settings = ModelSettingsUpdateRequest.model_validate(body)
+                result = self.server.web.update_model_settings(settings)
+            except (OSError, ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid model settings"})
+                return
+            self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/platform/sync":
             try:

@@ -169,6 +169,40 @@ class PlatformSyncRequest(Contract):
     """An explicit user action. It intentionally accepts no instruction."""
 
 
+class ModelSettingsUpdateRequest(Contract):
+    """One local model endpoint selected by the device operator.
+
+    The request deliberately has no credential-value field.  A protected
+    gateway may name a symbolic secret and the environment variable that will
+    hold it after restart.
+    """
+
+    alias: Symbol
+    provider: Literal["openai_compatible", "ollama"]
+    model: Text
+    base_url: Text
+    credential_secret: Symbol | None = None
+    credential_environment: EnvironmentVariable | None = None
+    reasoning: Literal["none", "low", "medium", "high"] = "medium"
+    tool_calling: StrictBool = True
+    structured_output: StrictBool = True
+    streaming: StrictBool = False
+    vision: StrictBool = False
+    local: StrictBool = False
+    max_context_tokens: int = Field(default=128_000, ge=1, le=10_000_000, strict=True)
+    require_local_model: StrictBool = False
+
+    @model_validator(mode="after")
+    def credential_names_are_a_pair(self) -> Self:
+        if (self.credential_secret is None) != (self.credential_environment is None):
+            raise ValueError(
+                "credential_secret and credential_environment are both set or both absent"
+            )
+        if self.provider == "ollama" and self.credential_secret is not None:
+            raise ValueError("an Ollama endpoint does not accept a credential binding")
+        return self
+
+
 class PlatformSyncResult(Contract):
     """What the existing all-or-nothing sync did and what the UI observed."""
 
@@ -399,8 +433,6 @@ class CompanyHostConfiguration(Contract):
         keys = [item.asset.key for item in self.knowledge]
         if len(keys) != len(set(keys)):
             raise ValueError("Knowledge bindings must name unique exact versions")
-        if self.knowledge and (self.models is None or self.models.routing_alias is None):
-            raise ValueError("installed Knowledge query requires a configured routing model")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

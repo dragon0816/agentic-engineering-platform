@@ -1788,6 +1788,29 @@ Knowledge discovery is the intersection of validated local manifests and exact
 host bindings; it exposes identity, domain, owner and visibility but never the
 local `vault_root`.
 
+## Personal Agent Web model settings (Productization 4, slices 1–2)
+
+`ModelSettingsUpdateRequest` is the explicit local-operator write boundary for
+one routing endpoint. It contains a provider, stable alias, model id, base URL,
+declared capabilities and optional paired `credential_secret` /
+`credential_environment` names. It has no credential-value field, is closed to
+extra fields and is converted into the existing `ModelBinding`, `ModelCatalog`,
+`ModelEndpoint`, `SecretRef` and `CredentialBinding` contracts.
+
+`POST /api/settings/model` has the same loopback Host-header and per-process
+bearer guards as every Personal Agent Web action. The adapter reloads the
+current config, replaces only the previous model endpoint's credential
+bindings, validates the complete `CompanyHostConfiguration`, and atomically
+replaces the configured file. Invalid input changes nothing. Success requires
+a host restart and never changes the already-running runtime.
+
+`GET /api/readiness` and `GET /api/settings` are non-secret projections. They
+perform no endpoint probe and expose only configuration/readiness facts,
+installed counts and whether the named environment variable has a non-empty
+value. Installed Knowledge may remain configured while no routing model is
+available; in that state deterministic capabilities and the setup interface
+start, while `knowledge-query/ask` is not registered.
+
 ## Durable shared Registry (Productization 1, slice 6)
 
 `PackageRegistry` is the control-plane catalog boundary used by authorization,
