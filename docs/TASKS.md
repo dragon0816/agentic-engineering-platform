@@ -407,4 +407,4 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Move searchable multi-session management into the left sidebar.
 - [x] Refine Capabilities into installed list/detail panes with complete Skill Markdown.
 - [x] Add Share Platform Skills, Workflows, Extensions and Apps library tabs and actions.
-- [ ] Verify the revised experience in the local preview and update handoff evidence.
+- [x] Verify the revised experience in the local preview and update handoff evidence.

@@ -1,110 +1,101 @@
 # Handoff
 
-Date: 2026-10-01 (Asia/Taipei)
+Date: 2026-10-02 (Asia/Taipei)
+
 Branch: `main`
-Status: Product experience implementation complete and running locally
+
+Status: Productization 5 Agent Web experience refinement is complete and running locally
 
 ## Goal
 
-Deliver the approved Shared Platform and Personal Agent Web experience: durable
-invitation identity and administration, categorized Marketplace fixtures,
-persona settings, usable natural-language backends, deterministic slash
-commands, rich capability details and governed Skill/Workflow drafting and
-script execution.
+Make Personal Agent Web usable as the primary local Agent workspace: a compact
+Ask composer with switchable conversation backends, persistent sidebar session
+management, an inspectable installed-capability workspace and a native Share
+Platform library for governed discovery and synchronization.
 
 ## Completed
 
-- Shared Platform identity, invitation proofs, users, browser logins, member
-  sessions and Add-on selections persist in SQLite. Selection, revocation and
-  version replacement preserve their atomic authorization semantics across
-  restarts. The first bootstrap invitation is a
-  `platform_admin`; the UI supports account state and invitation management.
-- Marketplace has kind/category/status filters, two test Skills, two test
-  Workflows and one governed inert Bridge Extension. Extension administration
-  remains separate from member Add-on selection.
-- Agent Settings persists name, introduction and bounded `soul.md`; persona
-  guidance affects speaking style after system policy and does not grant tools.
-- Ask has a three-line editor and deterministic `/help`, `/run workflow`,
-  `/wiki-convert`, `/wiki-ingest`, `/wiki-lint`, `/wiki-query` and `/problem`
-  commands. Problem and new Skill/Workflow requests persist as pending drafts
-  and cannot approve or publish themselves.
-- Capabilities shows kind-specific Skill Markdown/script references, Workflow
-  parameter metadata, Knowledge locations, Extension lifecycle/docs and App
-  guidance. New Skill/Workflow forms live here; Improve navigation was removed.
-- Conversations can select Gateway, Codex, Claude Code or Copilot. Local CLIs
-  run with fixed restricted arguments, stdin-only prompts, bounded history,
-  isolated cwd and reduced environment. They return text only and cannot bypass
-  Bridge policy. Missing Gateway credentials and CLI authentication failures
-  are projected as unavailable states.
-- Published and approved Python/PowerShell script tools have exact
-  package-relative entrypoints, SHA-256 verification before registration and
-  every call, JSON stdin/stdout, fixed noninteractive interpreters, output and
-  timeout bounds, and normal Bridge authorization.
-- Member Add-on selection and Agent synchronization were exercised separately
-  from administrator Extension discovery. Two fixtures installed successfully;
-  the existing manual-grants file was restored after the isolated sync proof.
+- Ask no longer spends space on readiness cards. The multiline composer owns
+  the backend selector and compact readiness state.
+- A configured Gateway remains selectable even when its mapped credential is
+  absent. Settings explains the missing environment mapping without accepting
+  or storing a token value.
+- Codex, Claude Code and Copilot expose fixed authentication actions. The Web
+  request cannot supply a command or arguments; the host launches only the
+  adapter's fixed official login vector in a separate local process.
+- New session, Capabilities and Settings now live in a persistent left sidebar.
+  Searchable durable Sessions appear below them, show their backend/message
+  count and open Ask when selected. The former top-level page tabs and Ask
+  conversation dropdown were removed.
+- Capabilities uses type tabs, a searchable installed list and a scrollable
+  detail pane. Skill details show complete `SKILL.md`, commands and script-tool
+  metadata. Workflow, Knowledge, Extension and App details retain their typed
+  controls and governance guidance.
+- Share Platform Library provides Skills, Workflows, Extensions and Apps tabs,
+  category/status/search filters and cards that keep published, selected and
+  installed states distinct. Selected packages invoke the existing explicit
+  all-or-nothing synchronization; unselected packages and independent Apps
+  link to the authenticated Marketplace.
+- The shared-catalog Web projection now carries published asset categories for
+  filtering. Categories remain display metadata and do not grant entitlement,
+  authorization, installation or execution permission.
+- Headless Edge visual verification found and fixed an underscore-to-hyphen DOM
+  key mismatch for the Bridge Extension library tab. Ask, installed Skill
+  details and the Share Platform library were then rendered without an error
+  banner.
 
 ## Commits
 
-- `e3b6cfb` Define platform identity and Agent experience designs
-- `c6c489a` Plan platform and Agent experience slices
-- `74e6b02` Add marketplace identity and category contracts
-- `ee62d7d` Persist platform identity and invitation administration
-- `c58d1bc` Build authenticated marketplace experience
-- `8eed562` Add local Agent persona settings
-- `7e8ca64` Add deterministic Agent slash commands
-- `8af8f8b` Expand capability details and authoring
-- `d06f315` Add restricted local conversation backends
-- `79be7f2` Add governed local script tools
-- `44290af` Polish preview authentication and backend readiness
-- `2f2c036` Document completed Agent experience rollout
-- `e4b3938` Persist marketplace selections
+- `5e8eea0` Define Agent Web experience refinement
+- `d1959f9` Refine Agent workspace navigation requirements
+- `57af999` Refine Agent composer and backend authentication
+- `6151a47` Build Agent workspace sidebar and capability library
+- `9ae722c` Fix Share Platform extension tab rendering
 
 ## Verification
 
-- `pytest`: 1,502 passed, 4 skipped, 2 environment-specific deselected.
-  `tests/test_browser.py` and the Agent real-Chromium case were deselected because
-  this installed Chromium closes its CDP WebSocket immediately. The single
-  Excel-absence assertion was deselected because Excel is installed here.
-- Focused final regression: 63 passed, 1 real-Chromium test deselected.
-- Ruff lint: passed; Ruff formatting: 348 files formatted.
-- mypy strict: 271 source files passed.
-- sdist and wheel: built successfully; `pip check`: passed.
-- Live Shared Platform proof: actor `leo.chi`, role `platform_admin`, engineering
-  group, 4 installable catalog entries, 1 admin Extension, 4 category facets.
-- Live Add-on proof: 2 selections synchronized and installed.
-- Live restart proof: 1 Skill and 1 Workflow remained selected after the full
-  Shared Platform and Agent supervisor stopped and started again.
-- Live Agent proof: 7 slash commands, 5 local Skills, 5 local Workflows; Codex
-  restricted conversation returned `ready`.
+- Final full suite: 1,509 passed, 4 skipped, 2 environment-specific deselected.
+  The deselected cases are the known Edge CDP harness case and the assertion
+  that Excel is absent on a machine where Excel is installed.
+- Focused Agent Web suite: 53 passed, 1 real-Chromium case deselected.
+- Emitted browser JavaScript parses with Node.
+- Ruff lint passed and all 349 tracked Python files are formatted.
+- mypy strict passed for 271 source files.
+- Offline `python -m build --no-isolation` produced both sdist and wheel.
+- Direct Edge DevTools visual checks loaded current local API data, switched to
+  Capabilities, rendered full Skill Markdown and scrolled through Share
+  Platform Skills/category/status/install controls. All three local listeners
+  are active.
 
 ## Local runtime
 
 - Shared Platform control: `http://127.0.0.1:18765`
 - Marketplace: `http://127.0.0.1:18766`
-- Agent Web: `http://127.0.0.1:53581` with the per-process URL printed at startup
-- Durable preview database: `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-local\registry-v2.sqlite`
-- Non-secret runtime status: the adjacent `status-v2.json`
-- The ignored `.scratch/run_local_preview.ps1` supervises both services for this
-  workstation and `.scratch/run_local_shared_platform.py` seeds the fixtures.
+- Agent Web: `http://127.0.0.1:53581` with the per-process bootstrap URL printed
+  by the ignored `.scratch/run_local_preview.ps1` supervisor
+- Durable preview database:
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-local\registry-v2.sqlite`
+
+Current backend status after restart: Codex and Claude Code are installed and
+authenticated; Copilot is not installed. The Gateway is configured and
+selectable but its mapped credential is absent from the Agent process.
 
 ## Known limits
 
-- The configured Gateway remains `http://127.0.0.1:4000/v1`, model `gpt-5.5`,
-  but `LITELLM_MASTER_KEY` is not set in the service environment. Agent Web
-  therefore reports Gateway unavailable and chooses a working local CLI.
-- Claude Code is installed but the organization returns HTTP 403 because
-  subscription access is disabled. The adapter now reports
-  `backend_authentication_failed`. Codex is installed and passed the live turn.
-  Copilot CLI is not installed.
-- This host still uses manual `grants.json`. The isolated Add-on sync proof saved
-  its delivered authorization as `authorization.sync-validation.json` and
-  restored `grants.json`, so current Bridge execution policy is unchanged.
+- This workstation's repository browser harness loses Edge's CDP WebSocket at
+  the first page command. Direct isolated-profile Edge DevTools verification
+  succeeds and was used for the final rendered-page evidence.
+- Claude Code authentication is ready, but earlier live turns received the
+  organization's subscription-disabled HTTP 403. Backend authentication and
+  provider service access therefore remain separate status facts.
+- Applications keep an independent release lifecycle. The Agent library links
+  to Marketplace discovery and does not claim to install an Application into
+  the Bridge runtime.
 
 ## Next action
 
-Review the open Marketplace and Agent Web pages. Set `LITELLM_MASTER_KEY` before
-testing the Gateway; until then select Codex in Ask. Exercise persona editing,
-slash completion, capability details, draft creation and invitation creation.
-Do not treat the preview Extension as activated: it is discovery/admin fixture
-data only and still requires the separate device approval and staging flow.
+Review the running Agent Web in the in-app browser. Check New session and
+Session switching, select each installed capability type, inspect `SKILL.md`,
+then use the Share Platform tabs and filters. Set the configured Gateway's
+credential environment before testing Gateway turns; until then Codex is the
+working local conversation backend.
