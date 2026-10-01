@@ -461,6 +461,23 @@ With one, a request that matches nothing is shown to a model along with the
 Skills installed *here*, and the model may pick one of them. It can pick only
 what is installed: a name it invents is refused, and the run never starts.
 
+The Personal Agent Web **Settings** tab can write this configuration without
+hand-editing JSON. For the standard local company Gateway, enter:
+
+- Provider: `OpenAI-compatible Gateway`
+- Alias: `company`
+- Gateway URL: `http://127.0.0.1:4000/v1`
+- Model name: the model id served by that Gateway
+
+If the Gateway requires a token, enter only a `SecretRef` name and environment
+variable name. Put the token value in that Windows environment variable, then
+restart `aep-host web`. The Web form has no token-value field and never writes
+one into `host.json`.
+
+The **Ask** tab shows whether natural-language routing is ready and lists every
+deterministic command declared by installed Skills. Clicking a command only
+fills the request box; execution begins only after pressing **Send**.
+
 A company's LiteLLM gateway serves an OpenAI-shaped API, which is what this
 speaks. In `host.json`:
 

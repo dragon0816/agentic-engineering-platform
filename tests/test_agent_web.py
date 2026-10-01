@@ -19,7 +19,7 @@ from typing import Any
 import pytest
 from test_extension_package import DeterministicVerifier, package, trust
 from test_host_models import GatewayReply, binding, endpoint
-from test_host_wiring import grant_record, membership_record, ready, workspace
+from test_host_wiring import grant_record, host_json, membership_record, ready, workspace
 from test_platform_transport import Platform, host
 from test_product_e2e_05 import V1, copy_vault, manifest
 
@@ -27,7 +27,7 @@ from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from control_plane.http import ControlPlaneServer
 from extensions.package import stage_extension_package
 from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
-from host_runtime.contracts import KnowledgeAskRequest
+from host_runtime.contracts import CompanyHostConfiguration, KnowledgeAskRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 
@@ -200,7 +200,13 @@ def test_the_page_fetches_nothing_from_anywhere(served: AgentWebServer) -> None:
 def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     """The header is the whole cross-site defence: a page on another origin
     cannot set one without a preflight, and this server answers none."""
-    for path in ("/api/about", "/api/assets", "/api/platform"):
+    for path in (
+        "/api/about",
+        "/api/readiness",
+        "/api/settings",
+        "/api/assets",
+        "/api/platform",
+    ):
         assert fetch(base(served) + path).status == 401
         assert fetch(base(served) + path, token="wrong").status == 401
         assert fetch(base(served) + path, token=served.token).status == 200
@@ -209,6 +215,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/platform/sync", token="wrong", body={}).status == 401
     assert fetch(base(served) + "/api/workflows/run", body={}).status == 401
     assert fetch(base(served) + "/api/knowledge/ask", body={}).status == 401
+    assert fetch(base(served) + "/api/settings/model", body={}).status == 401
 
 
 def test_the_token_in_the_address_does_not_open_the_api(served: AgentWebServer) -> None:
@@ -243,6 +250,113 @@ def test_it_says_who_and_where_it_is(served: AgentWebServer) -> None:
     assert about["actor"] == "engineer"
     assert about["bridge_id"] == "bridge-company"
     assert about["namespace"] == "engineering"
+
+
+def test_readiness_explains_why_natural_language_is_not_available(
+    served: AgentWebServer,
+) -> None:
+    readiness = fetch(base(served) + "/api/readiness", token=served.token).json()
+    assert readiness["natural_language"]["status"] == "setup_required"
+    assert "model" in readiness["natural_language"]["action"].lower()
+    assert readiness["installed"] == {
+        "profiles": 0,
+        "skills": 1,
+        "workflows": 1,
+        "knowledge": 0,
+        "extensions": 0,
+    }
+    assert readiness["shared_platform"]["configured"] is False
+
+
+def test_installed_skill_commands_include_a_clickable_manifest_derived_invocation(
+    served: AgentWebServer,
+) -> None:
+    assets = fetch(base(served) + "/api/assets", token=served.token).json()
+    command = assets["skills"][0]["commands"][0]
+    assert command == {
+        "name": "read",
+        "kind": "workflow",
+        "target": "engineering/read-local-file@1.0.0",
+        "invocation": "files.read ",
+    }
+
+
+def test_model_settings_write_only_names_and_require_restart(tmp_path: Path) -> None:
+    config, _layout = ready(tmp_path)
+    config_path = host_json(tmp_path, config)
+    with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime, config_path=config_path))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            before = fetch(base(server) + "/api/settings", token=server.token).json()
+            assert before["writable"] is True
+            assert before["model"]["configured"] is False
+            saved = fetch(
+                base(server) + "/api/settings/model",
+                token=server.token,
+                body={
+                    "alias": "company",
+                    "provider": "openai_compatible",
+                    "model": "company-model",
+                    "base_url": "http://127.0.0.1:4000/v1",
+                    "credential_secret": "llm_gateway_token",
+                    "credential_environment": "AEP_LLM_TOKEN",
+                },
+            )
+            assert saved.status == 200
+            assert saved.json()["restart_required"] is True
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+    written = CompanyHostConfiguration.model_validate_json(config_path.read_text(encoding="utf-8"))
+    assert written.models is not None
+    endpoint = written.models.catalog.endpoints[0]
+    assert endpoint.base_url == "http://127.0.0.1:4000/v1"
+    assert endpoint.model == "company-model"
+    assert endpoint.credential is not None
+    assert endpoint.credential.name == "llm_gateway_token"
+    assert written.credential_environment()["llm_gateway_token"] == "AEP_LLM_TOKEN"
+    assert "token" not in saved.json()
+
+
+def test_model_settings_contract_refuses_secret_values_and_preserves_file(tmp_path: Path) -> None:
+    config, _layout = ready(tmp_path)
+    config_path = host_json(tmp_path, config)
+    original = config_path.read_bytes()
+    with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime, config_path=config_path))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            reply = fetch(
+                base(server) + "/api/settings/model",
+                token=server.token,
+                body={
+                    "alias": "company",
+                    "provider": "openai_compatible",
+                    "model": "company-model",
+                    "base_url": "http://127.0.0.1:4000/v1",
+                    "api_key": "must-not-be-accepted",
+                },
+            )
+            assert reply.status == 400
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+    assert config_path.read_bytes() == original
+
+
+def test_page_exposes_setup_commands_and_capability_management(served: AgentWebServer) -> None:
+    page = fetch(base(served) + f"/?token={served.token}").body.decode("utf-8")
+    assert 'id="tab-settings"' in page
+    assert 'id="command-hints"' in page
+    assert 'id="model-base-url"' in page
+    assert "127.0.0.1:4000/v1" in page
+    assert "Bridge Extensions" in page
 
 
 def test_it_lists_what_this_machine_has_without_naming_any_one_of_them(

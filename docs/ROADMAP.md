@@ -2,6 +2,17 @@
 
 Status: Phases 1–6 and Productization 1–3 complete; Phase 7 remains active
 
+## Productization 4 — Personal Agent Usability
+
+Turn the completed local Web foundation into an understandable Personal Agent
+workspace. Readiness and command discovery make installed capabilities usable;
+safe settings connect the existing provider-neutral model gateway without
+storing credential values. Conversation sessions, a bounded tool loop and the
+capability-feedback experience follow as separately verified slices.
+
+The active specification is
+`docs/phases/PRODUCTIZATION_4_PERSONAL_AGENT_USABILITY.md`.
+
 ## Productization 2 — Agent Add-on Marketplace
 
 Extend the completed Personal Agent Web foundation across governed Agent

@@ -560,12 +560,12 @@ def build_gateway(
         if authorization is None
         else tuple(item for item in authorization.selections if item.kind == "knowledge")
     )
-    if config.knowledge or selected_knowledge:
-        # Contract validation already requires a configured routing model;
-        # retain the defensive closed failure for callers constructing models
-        # outside Pydantic validation.
-        if drafting_model is None or binding is None or binding.routing_alias is None:
-            raise HostError("models_invalid")
+    if (config.knowledge or selected_knowledge) and (
+        drafting_model is not None and binding is not None and binding.routing_alias is not None
+    ):
+        # Knowledge remains installed but unavailable until a routing model is
+        # configured. Deterministic commands and the local Settings page must
+        # still start so the operator can resolve that prerequisite.
         catalog = build_knowledge_catalog(config, layout, authorization, profile=profile)
         installed.register(
             KNOWLEDGE_QUERY_SPEC,
