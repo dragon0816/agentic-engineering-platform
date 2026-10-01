@@ -8,16 +8,57 @@ the asset and Bridge records it already trusts.
 
 from typing import Self
 
-from pydantic import model_validator
+from pydantic import AwareDatetime, Field, model_validator
 
 from common.assets import AssetIdentity
 from common.authorization import DeviceAssetSelection
 from common.base import Contract, Symbol
 from common.distribution import PublishedAssetPackage
+from common.enrollment import Invitation, PlatformRole
 
 
 class MemberCatalogRequest(Contract):
     bridge_id: Symbol
+
+
+class MemberIdentityReply(Contract):
+    actor: Symbol
+    role: PlatformRole
+    groups: tuple[Symbol, ...] = ()
+    session_expires_at: AwareDatetime
+
+
+class AdminInvitationCreateRequest(Contract):
+    actor: Symbol
+    role: PlatformRole = "member"
+    groups: tuple[Symbol, ...] = ()
+    valid_for_minutes: int = Field(default=60, ge=1, le=7 * 24 * 60, strict=True)
+
+    @model_validator(mode="after")
+    def unique_groups(self) -> Self:
+        if len(self.groups) != len(set(self.groups)):
+            raise ValueError("invitation groups must be unique")
+        return self
+
+
+class AdminInvitationMetadata(Contract):
+    invitation: Invitation
+    expires_at: AwareDatetime
+
+
+class AdminInvitationListReply(Contract):
+    invitations: tuple[AdminInvitationMetadata, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_invitations(self) -> Self:
+        identifiers = [item.invitation.invitation_id for item in self.invitations]
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("an invitation is listed once")
+        return self
+
+
+class AdminInvitationRevokeRequest(Contract):
+    invitation_id: Symbol
 
 
 class MemberCatalogEntry(Contract):

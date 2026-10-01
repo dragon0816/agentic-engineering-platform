@@ -11,6 +11,8 @@ from pydantic import Field, model_validator
 
 from common.base import Contract, Symbol
 
+PlatformRole = Literal["member", "platform_admin"]
+
 
 class Invitation(Contract):
     invitation_id: Symbol
@@ -20,6 +22,7 @@ class Invitation(Contract):
     # member of. The platform has no company directory, so the invitation is
     # where membership comes from, and the accepted user is where it is kept.
     groups: tuple[Symbol, ...] = ()
+    role: PlatformRole = "member"
     status: Literal["pending", "accepted", "revoked"] = "pending"
     accepted_by: Symbol | None = None
 
@@ -38,6 +41,7 @@ class PlatformUser(Contract):
     # What the accepted invitation granted. Entitlement is read from here and
     # never from a claim arriving with a request.
     groups: tuple[Symbol, ...] = ()
+    role: PlatformRole = "member"
     status: Literal["active", "disabled"] = "active"
 
 

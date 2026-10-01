@@ -100,7 +100,12 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("invitation_used")
         if item.actor != checked_actor:
             raise EnrollmentError("invitation_actor_mismatch")
-        user = PlatformUser(actor=checked_actor, invitation_id=key, groups=item.groups)
+        user = PlatformUser(
+            actor=checked_actor,
+            invitation_id=key,
+            groups=item.groups,
+            role=item.role,
+        )
         accepted = Invitation.model_validate(
             {**item.model_dump(), "status": "accepted", "accepted_by": checked_actor}
         )

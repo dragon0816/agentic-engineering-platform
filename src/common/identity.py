@@ -19,7 +19,7 @@ from typing import Literal, Self
 from pydantic import AwareDatetime, model_validator
 
 from common.assets import AssetMetadata, RegistryContract
-from common.base import Sha256, Symbol
+from common.base import Sha256, Symbol, Text
 
 # How a Bridge says who it is acting for. Named here because the record of an
 # authentication has to say what produced it.
@@ -136,6 +136,41 @@ class IssuedInvitationProof:
         return (
             f"IssuedInvitationProof(invitation_id={self.grant.invitation_id!r}, secret=[redacted])"
         )
+
+
+class MemberLoginGrant(RegistryContract):
+    """Revocable browser login recorded without its bearer secret."""
+
+    login_id: Symbol
+    actor: Symbol
+    fingerprint: Sha256
+    label: Text
+    issued_at: AwareDatetime
+    expires_at: AwareDatetime
+    status: Literal["active", "revoked"] = "active"
+
+    @model_validator(mode="after")
+    def ends_after_issue(self) -> Self:
+        if self.expires_at <= self.issued_at:
+            raise ValueError("a browser login must expire after it is issued")
+        return self
+
+
+class IssuedMemberLogin:
+    """The one return value carrying a browser-login bearer secret."""
+
+    __slots__ = ("grant", "secret")
+
+    def __init__(self, grant: MemberLoginGrant, secret: str) -> None:
+        self.grant = grant
+        self.secret = secret
+
+    @property
+    def bearer(self) -> str:
+        return f"{self.grant.login_id}:{self.secret}"
+
+    def __repr__(self) -> str:
+        return f"IssuedMemberLogin(login_id={self.grant.login_id!r}, secret=[redacted])"
 
 
 def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bool:

@@ -169,6 +169,9 @@ class AssetMetadata(RegistryContract):
     visibility: Literal["private", "team", "organization", "public"]
     lifecycle: Literal["draft", "validated", "published", "deprecated"] = "draft"
     contributors: tuple[Symbol, ...] = ()
+    # Discovery facets only. They never grant visibility, installation or
+    # execution authority, and the empty default keeps older manifests valid.
+    categories: tuple[Slug, ...] = ()
     provenance: tuple[Provenance, ...] = ()
     dependencies: tuple[AssetIdentity, ...] = ()
     compatibility: Compatibility = Compatibility()
@@ -186,6 +189,8 @@ class AssetMetadata(RegistryContract):
             raise ValueError("deprecated assets require a reason")
         if self.replacement == self.identity:
             raise ValueError("an asset cannot replace itself")
+        if len(self.categories) != len(set(self.categories)):
+            raise ValueError("asset categories must be unique")
         return self
 
 
