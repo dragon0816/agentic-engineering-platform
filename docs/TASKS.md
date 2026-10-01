@@ -62,7 +62,7 @@ bounded validation-request lifecycle so Hermes can start from a requested
 validation instead of waiting for a manually constructed failure Issue.
 A row says `done` only after its pull request merges.
 
-## Productization 2 — Agent Add-on Marketplace (active)
+## Productization 2 — Agent Add-on Marketplace (complete)
 
 | Slice | Status | Acceptance evidence |
 |---|---|---|
@@ -70,14 +70,20 @@ A row says `done` only after its pull request merges.
 | 2 portable Knowledge package | done | PR #159: one exact manifest, immutable Raw and curated Wiki content install through a path-safe closed package without a publisher-controlled local Vault path |
 | 3 Knowledge marketplace activation | done | PR #161: member selection and sync create an exact host-derived local Knowledge binding; rebuilt Personal Agent Web answers with Raw citations while selection adds no capability grant |
 | 4 Agent profile package and activation | done | PR #163: member selection installs an inert exact profile; explicit local activation validates every dependency and narrows Skills, Knowledge, capabilities and model requirements without delegation |
-| 5 version change and rollback | in progress | Atomic exact-version replacement updates or rolls back active selection while retaining verified prior local bytes and leaving capability grants unchanged |
+| 5 version change and rollback | done | PR #165: atomic exact-version replacement updates or rolls back active selection while retaining verified prior local bytes and leaving capability grants unchanged |
 
-## Productization 3 — Bridge Extensions and Application Catalog (planned)
+## Productization 3 — Bridge Extensions and Application Catalog (active)
 
-Runtime work starts only after Productization 2 has a reproducible passing exit
-path. The planned slices are typed category/compatibility contracts, inert
-extension staging, a bounded extension runner with health/rollback, independent
-Application discovery over governed Software metadata, and lifecycle UI. See
+| Slice | Status | Acceptance evidence |
+|---|---|---|
+| 1 category and metadata contracts | in progress | Closed Bridge Extension compatibility/process/health/rollback metadata and an independent Application projection over governed Software; extensions remain outside Agent Add-ons |
+| 2 inert extension staging | planned | Signature, trust, digest, compatibility and path validation precede an atomic isolated-version write; no publisher code runs |
+| 3 bounded extension runner | planned | One approved version runs outside the Bridge process, advertises only healthy declared capabilities and records rollback evidence |
+| 4 Application catalog | planned | Members discover released external Software and declared integration points without Agent/Bridge installation |
+| 5 marketplace lifecycle UI | planned | Personal Agent Web shows extension lifecycle and external Application state with the applicable human gates |
+
+Productization 2 has a reproducible passing exit path. Productization 3 now
+proceeds through the independently verifiable slices in
 `docs/phases/PRODUCTIZATION_3_EXTENSIONS_AND_APPS.md`.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with

@@ -323,6 +323,20 @@ reuse those bytes; it still requires synchronized platform authorization.
 Revoking a selection removes its authority without deleting the only local
 rollback evidence.
 
+Bridge Extensions and independent Applications are separate marketplace
+categories. A Bridge Extension declares exact Windows/Python/ABI compatibility,
+a versioned JSON-lines subprocess protocol, typed Bridge capabilities, health
+limits, rollback retention and a public publisher-key reference. The Bridge
+never imports publisher code. Publication and staging do not approve activation
+and do not create a capability grant; only healthy capabilities declared by an
+approved active version may enter Bridge advertisement and normal policy.
+
+An Application is a projection of an existing governed `SoftwareManifest`. It
+may expose navigation plus declared HTTPS API, MCP or exact Workflow integration
+points, while its source, process, deployment and release lifecycle remain in
+the external Software product. The Agent and Bridge never install or load an
+Application as extension code.
+
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof
 fingerprint, an unknown proof and a wrong proof are indistinguishable, and a

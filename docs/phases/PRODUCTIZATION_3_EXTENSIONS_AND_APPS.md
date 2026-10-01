@@ -1,7 +1,6 @@
 # Productization 3 — Bridge Extensions and Application Catalog
 
-Status: planned; runtime implementation begins after Productization 2 has a
-reproducible passing exit path.
+Status: active; Productization 2 completed with PR #165.
 
 ## User outcome
 
@@ -51,14 +50,28 @@ the Registry.
 5. **Marketplace lifecycle UI** — make staged, active, unhealthy, rollback and
    external-application states visible and require the applicable human gate.
 
-## Required decisions before slice 2
+## Decisions for slices 2 and 3
 
-- extension process isolation and IPC contract;
-- signature/trust root and revocation policy;
-- supported language/runtime and offline dependency format;
-- who may approve activation on company and shared test computers;
-- health timeout, crash policy and retained rollback versions.
+- One exact extension version runs in one dedicated subprocess. The Bridge
+  never imports publisher code. Requests and replies use the versioned
+  line-delimited JSON protocol `aep-extension-jsonl/v1` over standard streams.
+- Packages use Ed25519 signatures. Registry metadata names a public `key_id`;
+  the local trust policy supplies trusted and revoked public keys. A missing,
+  unknown or revoked key, invalid signature or unverifiable package is refused.
+- The first runtime is Windows, Python 3.12, ABI `cp312-win_amd64`. Packages are
+  offline wheelhouses installed into isolated exact-version directories. No
+  dependency download or package install occurs during activation.
+- Company-workstation activation requires the registered device owner or
+  delegated device administrator plus approved technical policy. Shared test
+  computers require a device administrator/virtual member plus approved
+  technical policy. An extension package or Registry publication supplies
+  neither approval.
+- Startup timeout is 15 seconds, request timeout is 30 seconds and three
+  crashes within 300 seconds disable the version. At least two verified
+  versions are retained; startup, health or crash-limit failure may restore the
+  last healthy approved version and records typed evidence.
 
-These decisions are intentionally deferred from Productization 2. The shared
-catalog shell may show categories, but their packages and installers remain
-different as required by `docs/ARCHITECTURE.md`.
+These are narrow Windows-preview defaults rather than a general plug-in
+platform. The shared catalog may show categories, but Agent Add-on, Bridge
+Extension and Application packages/installers remain different as required by
+`docs/ARCHITECTURE.md`.

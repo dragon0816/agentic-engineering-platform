@@ -21,7 +21,7 @@ from common.execution import (
     TraceIdentifiers,
 )
 
-AssetKind = Literal["task", "workflow", "skill", "knowledge", "agent"]
+AssetKind = Literal["task", "workflow", "skill", "knowledge", "agent", "bridge_extension"]
 
 
 class PublishedAssetPackage(RegistryContract):
