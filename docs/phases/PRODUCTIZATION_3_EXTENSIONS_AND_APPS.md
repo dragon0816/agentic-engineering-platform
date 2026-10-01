@@ -50,6 +50,22 @@ the Registry.
 5. **Marketplace lifecycle UI** — make staged, active, unhealthy, rollback and
    external-application states visible and require the applicable human gate.
 
+## Slice 2 implementation boundary
+
+An extension package is an inert, closed envelope containing the exact
+published manifest, `requirements.lock`, offline wheels, per-file SHA-256
+digests, a canonical content digest and an Ed25519 signature. Canonical package
+paths permit only the lock file and direct children of `wheels/`; absolute,
+drive-qualified, backslash, traversal and publisher script paths are rejected.
+
+Staging requires an injected Ed25519 verifier and a local trust policy with the
+matching non-revoked public key. There is no permissive verifier. The host also
+checks exact compatibility, derives the destination from scoped identity,
+writes a sibling temporary directory, reopens and rechecks the complete
+package and atomically exposes the exact version. Staging does not create a
+virtual environment, install a wheel, import a module, start a process, approve
+activation, advertise a capability or grant execution permission.
+
 ## Decisions for slices 2 and 3
 
 - One exact extension version runs in one dedicated subprocess. The Bridge

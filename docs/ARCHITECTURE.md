@@ -337,6 +337,14 @@ points, while its source, process, deployment and release lifecycle remain in
 the external Software product. The Agent and Bridge never install or load an
 Application as extension code.
 
+Extension staging is deliberately inert. A closed package contains the exact
+manifest, an offline lock file and wheels, per-file and canonical package
+digests and an Ed25519 signature. The local host supplies the trusted public-key
+set and revocation state and injects a real verifier; an absent verifier has no
+fallback. Only compatible, valid packages reach an identity-derived version
+directory through an atomic staging write. This transition performs no package
+installation, import, activation, capability advertisement or authorization.
+
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof
 fingerprint, an unknown proof and a wrong proof are indistinguishable, and a
