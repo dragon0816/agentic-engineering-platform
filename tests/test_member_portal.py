@@ -186,12 +186,17 @@ def test_portal_page_is_a_generic_same_origin_selection_ui(
     _platform, _sessions, server = portal
     with urllib.request.urlopen(server.base_url + "/", timeout=20) as answer:
         page = answer.read().decode("utf-8")
-    assert "Shared Agent Add-on Catalog" in page
+    assert "Shared Capability Marketplace" in page
+    assert "Agent Add-ons" in page
+    assert "Applications" in page
     assert "/v1/member/catalog" in page
+    assert "/v1/member/applications" in page
     assert "/v1/member/select" in page
     assert "/v1/member/revoke" in page
     assert "localStorage" not in page
     assert "bridge-access-token" not in page
+    assert "/v1/member/install" not in page
+    assert "/v1/member/activate" not in page
 
 
 def test_plain_http_member_portal_is_loopback_only(

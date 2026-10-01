@@ -87,6 +87,60 @@ class ExtensionActivationRecord(Contract):
         return self
 
 
+class ExtensionLifecycleSnapshot(Contract):
+    """Latest local runtime evidence for exact staged extension versions."""
+
+    records: tuple[ExtensionActivationRecord, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_versions(self) -> Self:
+        keys = [item.extension.key for item in self.records]
+        if len(keys) != len(set(keys)):
+            raise ValueError("extension lifecycle records name unique exact versions")
+        current = [item for item in self.records if item.state in {"active", "rolled_back"}]
+        if len(current) > 1:
+            raise ValueError("only one extension version is the current runtime")
+        return self
+
+
+class ExtensionLifecycleStore:
+    """Atomic, secret-free lifecycle evidence consumed by Personal Agent Web."""
+
+    def __init__(self, path: Path) -> None:
+        self.path = Path(path)
+        self._lock = Lock()
+
+    def read(self) -> ExtensionLifecycleSnapshot:
+        if not self.path.is_file():
+            return ExtensionLifecycleSnapshot()
+        return ExtensionLifecycleSnapshot.model_validate_json(self.path.read_bytes())
+
+    def record(
+        self, item: ExtensionActivationRecord, *, replace_current: bool = False
+    ) -> ExtensionLifecycleSnapshot:
+        checked = ExtensionActivationRecord.model_validate(item)
+        with self._lock:
+            snapshot = self.read()
+            records = {
+                existing.extension.key: existing
+                for existing in snapshot.records
+                if not (
+                    replace_current
+                    and existing.extension != checked.extension
+                    and existing.state in {"active", "rolled_back"}
+                )
+            }
+            records[checked.extension.key] = checked
+            updated = ExtensionLifecycleSnapshot(
+                records=tuple(records[key] for key in sorted(records))
+            )
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = self.path.with_name(f".{self.path.name}.tmp")
+            temporary.write_text(updated.model_dump_json(indent=2) + "\n", encoding="utf-8")
+            os.replace(temporary, self.path)
+            return updated
+
+
 class ExtensionProcessSession(Protocol):
     def exchange(self, request: ExtensionRequest, timeout_seconds: int) -> ExtensionResponse: ...
 
@@ -263,16 +317,26 @@ class ExtensionManager:
         device_id: str,
         device_kind: Literal["company_workstation", "shared_test_computer"],
         factory: ExtensionProcessFactory,
+        lifecycle: ExtensionLifecycleStore | None = None,
         clock: Callable[[], float] = monotonic,
     ) -> None:
         self.device_id = device_id
         self.device_kind = device_kind
         self._factory = factory
+        self._lifecycle = lifecycle
         self._clock = clock
         self._active: _Active | None = None
         self._previous: _Active | None = None
         self._crashes: dict[tuple[str, str, str], list[float]] = {}
         self._record: ExtensionActivationRecord | None = None
+
+    def _remember(
+        self, record: ExtensionActivationRecord, *, replace_current: bool = False
+    ) -> ExtensionActivationRecord:
+        self._record = record
+        if self._lifecycle is not None:
+            self._lifecycle.record(record, replace_current=replace_current)
+        return record
 
     @staticmethod
     def _load(staged: StagedExtension) -> BridgeExtensionManifest:
@@ -323,12 +387,13 @@ class ExtensionManager:
         recent = [stamp for stamp in self._crashes.get(key, ()) if now - stamp <= window]
         self._crashes[key] = recent
         if len(recent) >= manifest.health.max_crashes:
-            self._record = ExtensionActivationRecord(
-                extension=manifest.metadata.identity,
-                state="disabled",
-                code="extension_crash_limit",
+            return self._remember(
+                ExtensionActivationRecord(
+                    extension=manifest.metadata.identity,
+                    state="disabled",
+                    code="extension_crash_limit",
+                )
             )
-            return self._record
         try:
             candidate = self._factory.start(staged, manifest)
             self._health(candidate, manifest)
@@ -336,32 +401,46 @@ class ExtensionManager:
             if "candidate" in locals():
                 candidate.close()
             if self._active is not None:
-                self._record = ExtensionActivationRecord(
-                    extension=self._active.manifest.metadata.identity,
-                    state="rolled_back",
-                    code="extension_activation_failed",
-                    advertised_capabilities=tuple(
-                        item.identity for item in self._active.manifest.capabilities
+                if self._lifecycle is not None:
+                    self._lifecycle.record(
+                        ExtensionActivationRecord(
+                            extension=manifest.metadata.identity,
+                            state="unhealthy",
+                            code="extension_activation_failed",
+                        )
+                    )
+                return self._remember(
+                    ExtensionActivationRecord(
+                        extension=self._active.manifest.metadata.identity,
+                        state="rolled_back",
+                        code="extension_activation_failed",
+                        advertised_capabilities=tuple(
+                            item.identity for item in self._active.manifest.capabilities
+                        ),
                     ),
+                    replace_current=True,
                 )
-                return self._record
-            self._record = ExtensionActivationRecord(
-                extension=manifest.metadata.identity,
-                state="unhealthy",
-                code="extension_activation_failed",
+            return self._remember(
+                ExtensionActivationRecord(
+                    extension=manifest.metadata.identity,
+                    state="unhealthy",
+                    code="extension_activation_failed",
+                )
             )
-            return self._record
         old = self._active
         self._active = _Active(staged, manifest, approval, candidate)
         self._previous = old
-        self._record = ExtensionActivationRecord(
-            extension=manifest.metadata.identity,
-            state="active",
-            advertised_capabilities=tuple(item.identity for item in manifest.capabilities),
+        record = self._remember(
+            ExtensionActivationRecord(
+                extension=manifest.metadata.identity,
+                state="active",
+                advertised_capabilities=tuple(item.identity for item in manifest.capabilities),
+            ),
+            replace_current=True,
         )
         if old is not None:
             old.session.close()
-        return self._record
+        return record
 
     @property
     def advertised_capabilities(self) -> tuple[CapabilitySpec, ...]:
@@ -370,10 +449,12 @@ class ExtensionManager:
         if self._record.state not in {"active", "rolled_back"}:
             return ()
         if self._active.session.poll() is not None:
-            self._record = ExtensionActivationRecord(
-                extension=self._active.manifest.metadata.identity,
-                state="unhealthy",
-                code="extension_process_exited",
+            self._remember(
+                ExtensionActivationRecord(
+                    extension=self._active.manifest.metadata.identity,
+                    state="unhealthy",
+                    code="extension_process_exited",
+                )
             )
             return ()
         return self._active.manifest.capabilities
@@ -412,12 +493,14 @@ class ExtensionManager:
         self._crashes[key] = recent
         failed.session.close()
         self._active = None
-        self._record = ExtensionActivationRecord(
-            extension=failed.manifest.metadata.identity,
-            state=(
-                "disabled" if len(recent) >= failed.manifest.health.max_crashes else "unhealthy"
-            ),
-            code="extension_process_failure",
+        self._remember(
+            ExtensionActivationRecord(
+                extension=failed.manifest.metadata.identity,
+                state=(
+                    "disabled" if len(recent) >= failed.manifest.health.max_crashes else "unhealthy"
+                ),
+                code="extension_process_failure",
+            )
         )
         if self._previous is not None and "health_failure" in failed.manifest.rollback.automatic_on:
             previous = self._previous
@@ -430,13 +513,16 @@ class ExtensionManager:
                 return
             self._active = _Active(previous.staged, previous.manifest, previous.approval, session)
             self._previous = None
-            self._record = ExtensionActivationRecord(
-                extension=previous.manifest.metadata.identity,
-                state="rolled_back",
-                code="extension_health_rollback",
-                advertised_capabilities=tuple(
-                    item.identity for item in previous.manifest.capabilities
+            self._remember(
+                ExtensionActivationRecord(
+                    extension=previous.manifest.metadata.identity,
+                    state="rolled_back",
+                    code="extension_health_rollback",
+                    advertised_capabilities=tuple(
+                        item.identity for item in previous.manifest.capabilities
+                    ),
                 ),
+                replace_current=True,
             )
 
     @property

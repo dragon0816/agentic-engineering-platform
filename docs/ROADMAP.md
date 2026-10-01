@@ -1,6 +1,6 @@
 # Agentic Engineering Platform — Roadmap
 
-Status: Phases 1–6 and Productization 1 complete; Phase 7 and Productization 2 active
+Status: Phases 1–6 and Productization 1–3 complete; Phase 7 remains active
 
 ## Productization 2 — Agent Add-on Marketplace
 
@@ -22,6 +22,11 @@ Applications. An extension adds typed local capabilities behind Bridge policy;
 an Application keeps its own process, deployment and update lifecycle. The
 planned boundaries and decisions are in
 `docs/phases/PRODUCTIZATION_3_EXTENSIONS_AND_APPS.md`.
+
+All five slices are complete. The Windows preview now has signed inert staging,
+device-approved out-of-process activation, health/rollback evidence, a separate
+Application catalog and lifecycle visibility through the Personal Agent Web
+and direct-member marketplace.
 
 ## Productization 1 — Personal Agent Web and Workflow Marketplace
 

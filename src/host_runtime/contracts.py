@@ -146,6 +146,25 @@ class PlatformProjection(Contract):
     decisions: tuple[PlatformDecisionProjection, ...] = ()
 
 
+class ExtensionLifecycleProjection(Contract):
+    """One locally staged Bridge Extension as visible to its operator.
+
+    This is evidence about local package/runtime state.  It is deliberately
+    not an activation request and carries no permission or approval.
+    """
+
+    namespace: Slug
+    name: Symbol
+    version: Text
+    description: str = ""
+    state: Literal["staged", "active", "refused", "unhealthy", "rolled_back", "disabled"]
+    publisher_key_id: Symbol
+    capabilities: tuple[Text, ...] = ()
+    approval_required: StrictBool
+    activation_gate: Text
+    code: Symbol | None = None
+
+
 class PlatformSyncRequest(Contract):
     """An explicit user action. It intentionally accepts no instruction."""
 
@@ -402,6 +421,8 @@ class HostLayout(Contract):
     knowledge: Path
     knowledge_vaults: Path
     agents: Path
+    extensions: Path
+    extension_lifecycle: Path
     active_profile: Path
     telegram: Path
     state: Path
@@ -419,6 +440,8 @@ class HostLayout(Contract):
             knowledge=root / "assets" / "knowledge",
             knowledge_vaults=root / "assets" / "knowledge-vaults",
             agents=root / "assets" / "agents",
+            extensions=root / "assets" / "extensions",
+            extension_lifecycle=root / "extension-lifecycle.json",
             active_profile=root / "active-agent-profile.json",
             telegram=root / "telegram.json",
             state=root / "state.sqlite",

@@ -72,19 +72,18 @@ A row says `done` only after its pull request merges.
 | 4 Agent profile package and activation | done | PR #163: member selection installs an inert exact profile; explicit local activation validates every dependency and narrows Skills, Knowledge, capabilities and model requirements without delegation |
 | 5 version change and rollback | done | PR #165: atomic exact-version replacement updates or rolls back active selection while retaining verified prior local bytes and leaving capability grants unchanged |
 
-## Productization 3 — Bridge Extensions and Application Catalog (active)
+## Productization 3 — Bridge Extensions and Application Catalog (complete)
 
 | Slice | Status | Acceptance evidence |
 |---|---|---|
 | 1 category and metadata contracts | done | PR #166: closed Bridge Extension compatibility/process/health/rollback metadata and an independent Application projection over governed Software; extensions remain outside Agent Add-ons |
 | 2 inert extension staging | done | PR #169: Ed25519 verifier boundary plus trust/revocation, digest, compatibility and path validation precede an atomic isolated-version write; no publisher code runs |
 | 3 bounded extension runner | done | PR #171: one device/policy-approved version uses an offline isolated environment and fixed JSON-lines subprocess; only healthy exact declarations advertise, while failure removes them and preserves/recovers a healthy prior version |
-| 4 Application catalog | in progress | Authenticated members discover entitled released external Software and declared integration points without naming a Bridge or receiving selection/install/activation operations |
-| 5 marketplace lifecycle UI | planned | Personal Agent Web shows extension lifecycle and external Application state with the applicable human gates |
+| 4 Application catalog | done | PR #172: authenticated members discover entitled released external Software and declared integration points without naming a Bridge or receiving selection/install/activation operations |
+| 5 marketplace lifecycle UI | done | Personal Agent Web shows valid staged Extension packages and atomically persisted runtime state without activation controls; the direct-member marketplace lists entitled external Applications and only opens declared Web UI links |
 
-Productization 2 has a reproducible passing exit path. Productization 3 now
-proceeds through the independently verifiable slices in
-`docs/phases/PRODUCTIZATION_3_EXTENSIONS_AND_APPS.md`.
+Productization 2 and Productization 3 have reproducible passing exit paths.
+Their independently verified boundaries remain in the phase specifications.
 
 At PR #96's merged head the combined Windows result is 1282 passed, 4 skipped, with
 `ruff`, `mypy`, `pip check` and `python -m build` clean. Nine browser
