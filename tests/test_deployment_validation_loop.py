@@ -58,6 +58,10 @@ def test_company_agent_deployment_workflow_is_narrow_and_machine_readable() -> N
     assert "github.rest.actions.listWorkflowRunArtifacts" in text
     assert "github.rest.issues.createComment" in text
     assert "source_issue: issue.data.number" in text
+    assert "Owner download and manual test" in text
+    assert "Personal Agent + Bridge artifact" in text
+    assert "run.html_url" in text
+    assert "START-HERE.md" in text
     assert text.index("github.rest.issues.createComment") < text.index(
         "github.rest.issues.addLabels"
     )

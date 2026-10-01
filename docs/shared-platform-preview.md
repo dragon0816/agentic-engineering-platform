@@ -1,5 +1,12 @@
 # Shared Platform reference process
 
+The Windows CI artifact `aep-shared-platform-windows-<main commit SHA>` packages
+this process as a separate offline role. After extraction, follow its bundled
+`START-HERE.md`; it installs under
+`%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-preview-0.1.0` and
+does not expose the Personal Agent/Bridge launcher. The Agent + Bridge uses the
+separate `aep-windows-preview-<same SHA>` artifact.
+
 `aep-platform serve` starts the Bridge API and the interactive Member Portal
 in one process. Both entry points use the same enrollment, package,
 authorization and member-session state while keeping their credentials

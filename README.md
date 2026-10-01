@@ -195,11 +195,17 @@ See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](d
 Profiles and sample assets remain outside package code so contributions do not
 require runtime edits. Production host distribution remains outside this preview.
 
-The Phase 7 Windows company-host technical preview is built with
-`scripts/build_windows_preview.py`. It installs a local `aep-host` CLI from bundled
-Python 3.12 wheels, validates the host with `aep-host doctor`, and exports an empty,
-credential-free Bridge enrollment request. See `deploy/windows-preview/README.md`.
-It has no shared-platform transport and cannot execute workflow 13 yet.
+CI publishes two separate Windows deployment roles from the same verified commit:
+
+- `aep-windows-preview-<SHA>` is the **Personal Agent + Web GUI + Bridge** package
+  built by `scripts/build_windows_preview.py` for company and test computers;
+- `aep-shared-platform-windows-<SHA>` is the **Shared Platform** package built by
+  `scripts/build_shared_platform_preview.py` for the Registry/Marketplace computer.
+
+Each is an offline Python 3.12 bundle with its own `START-HERE.md`, installer and
+verification command. The role installers remove the other role's executable
+entry point. See `deploy/windows-preview/README.md` and
+`deploy/shared-platform-preview/README.md`.
 
 Phase 7 keeps the Personal Agent, installed assets and authoritative run state on
 each Bridge computer. The shared platform distributes published packages and holds

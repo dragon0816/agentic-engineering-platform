@@ -278,6 +278,15 @@ Local Bridge
 
 This separation keeps reasoning replaceable while preserving reliable local execution boundaries.
 
+The Windows delivery mirrors this boundary with two artifacts from one verified
+commit. `aep-windows-preview-<SHA>` installs the Personal Agent Web and Bridge
+execution role. `aep-shared-platform-windows-<SHA>` installs the Registry,
+Member Marketplace and Bridge API control-plane role. Each installer exposes
+only its own executable entry point, uses its own versioned installation root
+and carries a role-specific operator guide. Sharing the Python distribution and
+contracts does not make the processes one deployment unit. Hermes deployment
+validation consumes only the Agent + Bridge artifact.
+
 ### Personal Agent Web and shared catalog
 
 The Personal Agent Web is a loopback-only interface in the Personal

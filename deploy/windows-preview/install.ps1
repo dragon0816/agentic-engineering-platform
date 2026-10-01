@@ -86,6 +86,10 @@ $PlatformWheel = $PlatformWheels[0]
 # package index.
 & $VenvPython -m pip install --disable-pip-version-check --no-index --find-links (Join-Path $BundleRoot "wheels") --force-reinstall "agentic-engineering-platform[excel,windows]" "pypdf>=6,<7"
 if ($LASTEXITCODE -ne 0) { throw "Offline wheel installation failed." }
+# This is the Agent + Bridge role. The wheel contains the shared contracts and
+# all project entry points, but this installation exposes only its own runtime.
+Get-ChildItem -LiteralPath (Join-Path $Venv "Scripts") -Filter "aep-platform*" -ErrorAction SilentlyContinue | Remove-Item -Force
+Get-ChildItem -LiteralPath (Join-Path $Venv "Scripts") -Filter "aep-local-codex-worker*" -ErrorAction SilentlyContinue | Remove-Item -Force
 $HostExecutable = Join-Path $Venv "Scripts\aep-host.exe"
 # All preview packages currently report semantic version 0.1.0. Verify a
 # capability introduced by this build so an older 0.1.0 runtime can never look

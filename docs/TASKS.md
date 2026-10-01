@@ -357,3 +357,16 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   durable Workflow evidence and typed stop reasons.
 - [x] Add standardized feedback/candidate-asset creation from the conversation
   workspace without bypassing review or publication governance.
+
+# Windows delivery roles
+
+- [x] Keep the company/test-computer artifact as the Personal Agent Web +
+  Bridge execution role, with a bundled Traditional Chinese `START-HERE.md`.
+- [x] Add an independent offline Shared Platform Windows artifact for the
+  Registry, Member Marketplace and Bridge API control-plane role.
+- [x] Make both installers expose only their own executable entry point and
+  preserve separate versioned installation roots and configuration.
+- [x] Install and smoke-test both artifacts in Windows/Python 3.12 CI; keep
+  Hermes company-agent validation pinned to the Agent + Bridge artifact.
+- [x] Put the exact Agent + Bridge artifact name, workflow-run link and bundled
+  manual instruction in every automated deployment-validation Issue.
