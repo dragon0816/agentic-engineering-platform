@@ -386,7 +386,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 
 # Agent persona, chat backends and capability authoring
 
-- [ ] Add local Agent name, introduction and bounded `soul.md` settings.
+- [x] Add local Agent name, introduction and bounded `soul.md` settings.
 - [ ] Add restricted local Claude Code, Codex and Copilot conversation backends.
 - [ ] Replace Ask hints with a deterministic slash-command palette and multiline input.
 - [ ] Add kind-specific Skill, Workflow, Knowledge, Extension and App detail sections.

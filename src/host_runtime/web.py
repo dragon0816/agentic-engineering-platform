@@ -83,6 +83,7 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
 )
 from host_runtime.host import HostRuntime, load_authorization
+from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
@@ -186,6 +187,7 @@ class AgentWeb:
         self.runtime = runtime
         self.namespace = namespace if namespace is not None else runtime.config.namespace
         self.config_path = config_path
+        self.persona = AgentPersonaStore(runtime.layout.workspace_root)
         # One request at a time. The Agent's state is one SQLite file and a
         # capability may hold a workbook; two at once would be two runs
         # against the same things.
@@ -195,6 +197,7 @@ class AgentWeb:
 
     def about(self) -> dict[str, Any]:
         device = self.runtime.config.device
+        persona = self.persona.load()
         return {
             "bridge_id": device.bridge_id,
             "actor": self.runtime.actor,
@@ -202,6 +205,8 @@ class AgentWeb:
             "kind": device.device_kind,
             "telegram": self.runtime.telegram is not None,
             "platform": self.runtime.platform is not None,
+            "name": persona.name,
+            "introduction": persona.introduction,
         }
 
     def readiness(self) -> dict[str, Any]:
@@ -243,6 +248,7 @@ class AgentWeb:
         return {
             "writable": self.config_path is not None,
             "restart_required": False,
+            "persona": self.persona.load().model_dump(mode="json"),
             "model": {
                 "configured": endpoint is not None,
                 "alias": "" if endpoint is None else endpoint.alias,
@@ -261,6 +267,13 @@ class AgentWeb:
                 "require_local_model": (False if binding is None else binding.require_local_model),
             },
         }
+
+    def update_persona_settings(self, request: AgentPersonaUpdateRequest) -> dict[str, Any]:
+        """Save local presentation guidance without changing runtime authority."""
+
+        with self._one_at_a_time:
+            saved = self.persona.save(request)
+        return {"ok": True, "restart_required": False, "persona": saved.model_dump(mode="json")}
 
     def update_model_settings(self, request: ModelSettingsUpdateRequest) -> dict[str, Any]:
         """Validate and atomically save one provider-neutral model endpoint."""
@@ -504,7 +517,13 @@ class AgentWeb:
                         ModelMessage(role=message.role, text=message.text)
                         for message in record.messages[-19:]
                     ) + (ModelMessage(role="user", text=item.message),)
-                    conversational = asyncio.run(self.runtime.agent.converse(local, history))
+                    conversational = asyncio.run(
+                        self.runtime.agent.converse(
+                            local,
+                            history,
+                            persona_guidance=self.persona.load().prompt_guidance(),
+                        )
+                    )
                     result = conversational.conversation
                     answer = {
                         "ok": result is not None and result.status == "answered",
@@ -1021,6 +1040,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/workflows/run",
             "/api/knowledge/ask",
             "/api/settings/model",
+            "/api/settings/persona",
             "/api/conversations",
             "/api/conversations/turn",
             "/api/contributions",
@@ -1048,6 +1068,15 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
             self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/settings/persona":
+            try:
+                persona = AgentPersonaUpdateRequest.model_validate(body)
+                result = self.server.web.update_persona_settings(persona)
+            except (OSError, ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid persona settings"})
+                return
+            self._json(200, result)
             return
         if path == "/api/conversations":
             try:

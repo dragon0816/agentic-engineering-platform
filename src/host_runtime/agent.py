@@ -184,6 +184,8 @@ class LocalAgent:
         self,
         request: LocalAgentRequest,
         history: tuple[ModelMessage, ...],
+        *,
+        persona_guidance: str | None = None,
     ) -> LocalConversationOutcome:
         """Run the bounded conversation loop after normal device admission."""
         item = LocalAgentRequest.model_validate(request)
@@ -203,7 +205,9 @@ class LocalAgent:
             channel=item.ingress,
             session_id=item.session_id,
         )
-        result = await self.gateway.converse(context, history)
+        result = await self.gateway.converse(
+            context, history, persona_guidance=persona_guidance
+        )
         runs: list[LocalRunSummary] = []
         unrecorded: list[LocalStateErrorCode] = []
         for tool in result.tools:

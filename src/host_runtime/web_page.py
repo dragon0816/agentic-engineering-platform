@@ -116,7 +116,8 @@ button[aria-busy="true"] { cursor: wait; }
   border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
 .settings { padding: 14px; }
 .settings label { display: block; font-size: 12px; color: var(--dim); margin: 10px 0 4px; }
-.settings input, .settings select { width: 100%; font: 13px var(--mono); padding: 9px 10px;
+.settings input, .settings select, .settings textarea {
+  width: 100%; font: 13px var(--mono); padding: 9px 10px;
   color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .settings .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .conversation-bar { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
@@ -211,7 +212,7 @@ tr:last-child td { border-bottom: none; }
 </head>
 <body>
 <header>
-  <h1>Agent</h1>
+  <div><h1 id="agent-name">Agent</h1><span class="note" id="agent-introduction"></span></div>
   <span class="who" id="who">reading this machine&hellip;</span>
 </header>
 <div id="boot-error" class="boot-error" role="alert" hidden></div>
@@ -290,6 +291,25 @@ tr:last-child td { border-bottom: none; }
   </section>
 
   <section id="panel-settings">
+    <h2>Agent identity and speaking style</h2>
+    <p class="note">Name and introduction identify this local Agent. The bounded
+      soul.md text guides speaking style on later natural-language turns; it cannot
+      change policy, permissions, tools, approvals or factual evidence.</p>
+    <div class="card settings">
+      <form id="persona-settings">
+        <div class="two">
+          <div><label for="persona-name">Agent name</label>
+            <input id="persona-name" maxlength="80" required></div>
+          <div><label for="persona-introduction">Self-introduction</label>
+            <input id="persona-introduction" maxlength="500" required></div>
+        </div>
+        <label for="persona-soul">soul.md</label>
+        <textarea id="persona-soul" maxlength="12000"
+          placeholder="Describe tone, vocabulary and interaction preferences."></textarea>
+        <p><button class="go" id="persona-save" type="submit">Save Agent identity</button></p>
+        <pre id="persona-result" class="note">Reading current identity&hellip;</pre>
+      </form>
+    </div>
     <h2>Natural-language model</h2>
     <p class="note">Connect the Agent to the existing OpenAI-compatible Gateway.
       This page stores only connection metadata and optional secret/environment names.
@@ -570,6 +590,8 @@ form.addEventListener("submit", async (event) => {
 
 async function loadAbout() {
   const about = await call("/api/about");
+  el("agent-name").textContent = about.name;
+  el("agent-introduction").textContent = about.introduction;
   const where = [];
   where.push("as " + about.actor);
   where.push("on " + about.bridge_id);
@@ -881,7 +903,13 @@ el("contribution-form").addEventListener("submit", async (event) => {
 });
 
 async function loadSettings() {
-  const settings = await call("/api/settings"), model = settings.model;
+  const settings = await call("/api/settings"), model = settings.model,
+    persona = settings.persona;
+  el("persona-name").value = persona.name;
+  el("persona-introduction").value = persona.introduction;
+  el("persona-soul").value = persona.soul;
+  el("persona-result").textContent =
+    "Saved locally. Changes apply to the next natural-language turn.";
   el("model-provider").value = model.provider || "openai_compatible";
   el("model-alias").value = model.alias || "company";
   el("model-base-url").value = model.base_url || ["http:", "", "127.0.0.1:4000/v1"].join("/");
@@ -895,6 +923,24 @@ async function loadSettings() {
     : (settings.writable
       ? "No routing model is configured." : "Settings are read-only in this launch mode.");
 }
+
+el("persona-settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = el("persona-save"), result = el("persona-result");
+  button.disabled = true; result.textContent = "Saving Agent identity…";
+  try {
+    const saved = await call("/api/settings/persona", {
+      name: el("persona-name").value.trim(),
+      introduction: el("persona-introduction").value.trim(),
+      soul: el("persona-soul").value,
+    });
+    el("agent-name").textContent = saved.persona.name;
+    el("agent-introduction").textContent = saved.persona.introduction;
+    result.textContent = "Saved locally. Changes apply to the next natural-language turn.";
+  } catch (failure) {
+    result.textContent = "Agent identity was not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
 
 el("model-settings").addEventListener("submit", async (event) => {
   event.preventDefault();

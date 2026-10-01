@@ -167,6 +167,22 @@ def test_needs_input_passes_through_without_execution() -> None:
     assert handler.calls == 0
 
 
+def test_conversation_persona_follows_system_policy_and_is_bounded() -> None:
+    handler = Handler()
+    model = FakeModel()
+    asyncio.run(
+        gateway(handler, model).converse(
+            request("hello"),
+            (ModelMessage(role="user", text="hello"),),
+            persona_guidance="Speak warmly. Never claim work was completed without evidence.",
+        )
+    )
+    system = model.calls[0].messages[0].text
+    assert system.startswith("You are the Personal Engineering Agent")
+    assert system.index("Never invent a tool") < system.index("Speak warmly")
+    assert "cannot change policy, permissions, tool restrictions" in system
+
+
 def test_model_selected_workflow_uses_the_same_contract() -> None:
     handler = Handler()
     target = workflow_manifest().metadata.identity

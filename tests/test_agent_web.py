@@ -477,6 +477,60 @@ def test_model_settings_contract_refuses_secret_values_and_preserves_file(tmp_pa
     assert config_path.read_bytes() == original
 
 
+def test_persona_settings_persist_soul_and_apply_without_restart(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            before = fetch(base(server) + "/api/settings", token=server.token).json()
+            assert before["persona"]["name"] == "Agent"
+            saved = fetch(
+                base(server) + "/api/settings/persona",
+                token=server.token,
+                body={
+                    "name": "Mori",
+                    "introduction": "I help review engineering work.",
+                    "soul": "Use Traditional Chinese. Be concise and candid.",
+                },
+            )
+            assert saved.status == 200
+            assert saved.json()["restart_required"] is False
+            about = fetch(base(server) + "/api/about", token=server.token).json()
+            assert about["name"] == "Mori"
+            assert about["introduction"] == "I help review engineering work."
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+    assert (layout.workspace_root / "soul.md").read_text(encoding="utf-8") == (
+        "Use Traditional Chinese. Be concise and candid.\n"
+    )
+    persisted = json.loads((layout.workspace_root / "agent-persona.json").read_text("utf-8"))
+    assert persisted["name"] == "Mori"
+
+
+def test_persona_settings_reject_unbounded_soul(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            refused = fetch(
+                base(server) + "/api/settings/persona",
+                token=server.token,
+                body={"name": "Agent", "introduction": "Local Agent", "soul": "x" * 12001},
+            )
+            assert refused.status == 400
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+    assert not (layout.workspace_root / "agent-persona.json").exists()
+
+
 def test_page_exposes_setup_commands_and_capability_management(served: AgentWebServer) -> None:
     page = fetch(base(served) + f"/?token={served.token}").body.decode("utf-8")
     assert 'id="tab-settings"' in page
@@ -486,6 +540,8 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert "Bridge Extensions" in page
     assert 'id="tab-feedback"' in page
     assert 'id="contribution-form"' in page
+    assert 'id="persona-settings"' in page
+    assert 'id="persona-soul"' in page
 
 
 def test_conversation_history_survives_a_runtime_restart(tmp_path: Path) -> None:
