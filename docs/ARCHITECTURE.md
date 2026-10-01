@@ -305,9 +305,13 @@ without a device identity and may then mint a short-lived opaque member
 session. The member request names only the bound Bridge and exact asset;
 the platform supplies the actor and decision time and resolves membership,
 entitlement, kind and package state from its own records. The current entry
-point admits Workflows, Skills and portable Knowledge because each has a
-validated inert installer; Agent profiles wait for their own activation
-contract. A Bridge access token is rejected at this boundary. The
+point admits Workflows, Skills, portable Knowledge and Agent profiles because
+each has a validated inert installer. Installing a profile still changes no
+running Agent: Personal Agent Web must explicitly activate one exact installed
+and selected version. Activation validates every referenced Skill, Knowledge,
+capability and routing-model requirement against existing local authority, then
+host rebuild uses the profile only to narrow those sets. Delegation remains
+refused. A Bridge access token is rejected at this boundary. The
 selection page is a projection of this service and owns no authorization rule.
 
 The invitation-only sign-in adapter keeps its bearer proof separate from the

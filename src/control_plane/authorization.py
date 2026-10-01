@@ -133,7 +133,7 @@ class InMemoryAuthorizationRegistry:
             # A decision names an installable Add-on or a tool, and tools come
             # from the device rather than the Registry, so offering any other
             # published kind here would offer what cannot be chosen.
-            if package.kind in ("workflow", "skill", "knowledge")
+            if package.kind in ("workflow", "skill", "knowledge", "agent")
             and entitled(package.metadata, who.actor, groups)
         )
 

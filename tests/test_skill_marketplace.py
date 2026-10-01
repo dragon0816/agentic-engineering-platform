@@ -107,11 +107,11 @@ def test_member_selects_skill_syncs_it_and_rebuilt_agent_uses_it(tmp_path: Path)
         assert outcome.workflow.run.status == "succeeded"
 
 
-def test_non_installable_kind_cannot_enter_member_add_on_selection() -> None:
+def test_non_installable_task_cannot_enter_member_add_on_selection() -> None:
     platform = Platform()
     profile = AssetIdentity(namespace="engineering", name="personal", version="1.0.0")
     content = b"{}"
-    published = platform.packages.publish(package(profile, "agent", content))
+    published = platform.packages.publish(package(profile, "task", content))
     assert published.metadata.package is not None
     platform.artifacts[published.metadata.package.artifact_ref] = content
     sessions = InMemoryMemberSessions()

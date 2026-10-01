@@ -1613,12 +1613,34 @@ rule, asked by everything that acts on a device's records.
 Bridge and, for a mutation, an exact asset identity. Their closed schemas have
 no actor, groups, permission, policy, approval or decision-time field. The
 member entry point supplies actor and time from its authenticated session and
-derives `workflow`, `skill` or `knowledge` from the exact Registry package. A request cannot
+derives `workflow`, `skill`, `knowledge` or `agent` from the exact Registry package. A request cannot
 claim or change kind. `MemberCatalogReply` contains entitled published
-Workflows, Skills and Knowledge versions with a separate `selected` fact; it
+Workflows, Skills, Knowledge and Agent-profile versions with a separate `selected` fact; it
 neither carries artifact bytes nor changes installation or execution
 authorization. Other published kinds are excluded until they have a compatible
 validated installer.
+
+## Agent profile activation (Productization 2, slice 4)
+
+An `AgentProfile` is distributed as its own closed JSON artifact. Registry
+metadata and the metadata inside the artifact must agree exactly after the
+outer package reference is removed. Synchronization installs the profile under
+an identity-derived filename and records it in local inventory; this is inert
+installation and grants no capability or model access.
+
+`AgentProfileActivationRequest` carries only one scoped profile identity.
+Actor, Bridge, authorization, installed paths and model configuration are
+trusted host state. Activation requires the exact profile selection, a
+published installed profile, every referenced Skill and Knowledge version to be
+selected and installed, every allowed capability to be separately selected,
+and the configured routing endpoint to satisfy `model_requirements`. Any
+`may_delegate_to` entry is refused in this milestone. A successful activation
+atomically writes `ActiveAgentProfile` and reports that host restart is needed.
+
+On rebuild, the active profile filters the existing Skill registry, Knowledge
+catalog and derived capability grants. It cannot add a manifest, handler,
+selection, grant or model endpoint. No active-profile file preserves the
+existing single-Agent behavior for locally managed hosts.
 
 `InMemoryMemberSessions.issue(identity)` is a trusted-host call made after an
 external sign-in adapter has produced a current `AuthenticatedActor`. It

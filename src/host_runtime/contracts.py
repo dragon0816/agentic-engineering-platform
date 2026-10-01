@@ -167,6 +167,12 @@ class PlatformSyncResult(Contract):
         return self
 
 
+class AgentProfileActivationRequest(Contract):
+    """Exact installed profile chosen locally; actor and authority are host state."""
+
+    profile: AssetIdentity
+
+
 class WorkflowLaunchRequest(Contract):
     """One exact installed Workflow plus its contract-shaped JSON arguments."""
 
@@ -395,6 +401,8 @@ class HostLayout(Contract):
     workflows: Path
     knowledge: Path
     knowledge_vaults: Path
+    agents: Path
+    active_profile: Path
     telegram: Path
     state: Path
 
@@ -410,6 +418,8 @@ class HostLayout(Contract):
             workflows=root / "assets" / "workflows",
             knowledge=root / "assets" / "knowledge",
             knowledge_vaults=root / "assets" / "knowledge-vaults",
+            agents=root / "assets" / "agents",
+            active_profile=root / "active-agent-profile.json",
             telegram=root / "telegram.json",
             state=root / "state.sqlite",
         )
