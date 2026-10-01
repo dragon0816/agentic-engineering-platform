@@ -357,6 +357,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   durable Workflow evidence and typed stop reasons.
 - [x] Add standardized feedback/candidate-asset creation from the conversation
   workspace without bypassing review or publication governance.
+- [x] Repair the emitted Agent Web JavaScript startup failure and replace the
+  diagnostic Installed/Shared Platform tables with an interactive capability
+  workspace, searchable installed categories, truthful lifecycle state and a
+  filtered shared catalog. Token bootstrap behavior remains unchanged.
 
 # Windows delivery roles
 

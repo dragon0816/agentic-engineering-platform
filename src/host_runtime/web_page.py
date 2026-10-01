@@ -17,7 +17,10 @@ it is installed.
 
 from __future__ import annotations
 
-PAGE = """<!DOCTYPE html>
+# Keep JavaScript escape sequences intact.  A normal Python string turns such
+# sequences as ``\n`` into literal line breaks inside JavaScript quoted strings,
+# which makes the whole inline script fail to parse and leaves the page inert.
+PAGE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -27,19 +30,23 @@ PAGE = """<!DOCTYPE html>
 :root {
   --bg: #ffffff; --panel: #f6f7f9; --line: #e2e5ea; --ink: #1c1f24;
   --dim: #666d78; --accent: #2f6db5; --good: #2e7d4f; --bad: #b3352f;
+  --accent-soft: #eaf2fb; --selected: #dceafb; --warn: #8a5a00;
   --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #15181c; --panel: #1d2127; --line: #2c323a; --ink: #e6e9ee;
     --dim: #97a0ac; --accent: #74a9e8; --good: #6cc48d; --bad: #e8827c;
+    --accent-soft: #1d3046; --selected: #243e5b; --warn: #e6b75a;
   }
 }
 :root[data-theme="dark"] {
   --bg: #15181c; --panel: #1d2127; --line: #2c323a; --ink: #e6e9ee;
   --dim: #97a0ac; --accent: #74a9e8; --good: #6cc48d; --bad: #e8827c;
+  --accent-soft: #1d3046; --selected: #243e5b; --warn: #e6b75a;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
   font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -61,7 +68,7 @@ nav button[aria-selected="true"] {
   border-color: var(--line); border-bottom-color: var(--bg); font-weight: 600;
 }
 main { padding: 0 16px 40px; border-top: 1px solid var(--line); margin-top: -1px; }
-section { display: none; padding-top: 18px; max-width: 1100px; }
+section { display: none; padding-top: 18px; max-width: 1240px; }
 section[data-open] { display: block; }
 h2 { font-size: 15px; margin: 22px 0 8px; }
 h2:first-child { margin-top: 4px; }
@@ -96,6 +103,9 @@ button.go {
   color: #fff; background: var(--accent); border: none; border-radius: 8px;
 }
 button.go[disabled] { opacity: .5; cursor: default; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button[aria-busy="true"] { cursor: wait; }
 .hint { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
 .status-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px;
@@ -128,9 +138,74 @@ tr:last-child td { border-bottom: none; }
 .tag.on { color: var(--good); border-color: var(--good); }
 .tag.off { color: var(--dim); }
 .empty { color: var(--dim); font-style: italic; padding: 10px; }
-@media (max-width: 620px) {
+.boot-error { margin: 12px 16px 0; padding: 12px 14px; color: var(--bad);
+  border: 1px solid var(--bad); border-radius: 8px; background: var(--panel); }
+.workspace-head { display: flex; align-items: end; justify-content: space-between;
+  gap: 16px; margin: 4px 0 14px; }
+.workspace-head h2 { margin: 0 0 2px; font-size: 18px; }
+.workspace-head p { margin: 0; }
+.cap-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.cap-tabs button { min-height: 44px; padding: 9px 14px; color: var(--dim);
+  background: transparent; border: 0; border-bottom: 3px solid transparent;
+  font: inherit; font-weight: 600; cursor: pointer; }
+.cap-tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.cap-count { margin-left: 5px; padding: 1px 6px; border-radius: 999px;
+  background: var(--panel); color: var(--dim); font-size: 11px; }
+.cap-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(360px, 1.4fr);
+  min-height: 360px; border: 1px solid var(--line); border-radius: 10px;
+  overflow: hidden; margin-top: 12px; }
+.cap-browser { border-right: 1px solid var(--line); background: var(--bg); }
+.cap-search { padding: 12px; border-bottom: 1px solid var(--line); }
+.cap-search input, .market-tools input, .market-tools select { width: 100%; min-height: 44px;
+  padding: 9px 11px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.cap-list { max-height: 430px; overflow-y: auto; }
+.cap-item { display: block; width: 100%; min-height: 58px; padding: 10px 12px;
+  text-align: left; color: var(--ink); background: transparent; border: 0;
+  border-bottom: 1px solid var(--line); cursor: pointer; font: inherit; }
+.cap-item:hover { background: var(--panel); }
+.cap-item[aria-selected="true"] { background: var(--selected); }
+.cap-item strong, .cap-item small { display: block; }
+.cap-item small { color: var(--dim); margin-top: 2px; }
+.cap-detail { padding: 20px; background: var(--panel); }
+.cap-detail h3 { margin: 0 0 4px; font-size: 18px; }
+.identity { color: var(--dim); font: 12px var(--mono); overflow-wrap: anywhere; }
+.detail-description { margin: 16px 0; }
+.meta-grid { display: grid; grid-template-columns: max-content 1fr; gap: 7px 14px;
+  margin: 16px 0; font-size: 13px; }
+.meta-grid dt { color: var(--dim); }
+.meta-grid dd { margin: 0; overflow-wrap: anywhere; }
+.inline-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.action-box { margin-top: 16px; padding: 14px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--bg); }
+.action-box label { display: block; margin: 9px 0 4px; font-size: 12px; color: var(--dim); }
+.market { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--line); }
+.market-tools { display: grid; grid-template-columns: minmax(220px, 1fr) 170px 170px auto auto;
+  gap: 8px; align-items: center; margin: 12px 0; }
+.market-tools a { min-height: 44px; display: inline-flex; align-items: center;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+  color: var(--accent); text-decoration: none; font-weight: 600; white-space: nowrap; }
+.market-grid { display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+.market-card { min-height: 180px; padding: 14px; border: 1px solid var(--line);
+  border-left: 4px solid var(--accent); border-radius: 9px; background: var(--panel); }
+.market-card h3 { margin: 0; font-size: 15px; overflow-wrap: anywhere; }
+.market-card p { margin: 8px 0; color: var(--dim); font-size: 13px; }
+.badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0; }
+.tag.warn { color: var(--warn); border-color: var(--warn); }
+.section-status { min-height: 22px; color: var(--dim); font-size: 13px; }
+.section-status.bad { color: var(--bad); }
+@media (max-width: 1000px) {
+  .market-tools { grid-template-columns: minmax(220px, 1fr) minmax(150px, .55fr); }
+}
+@media (max-width: 760px) {
   header { gap: 6px; }
   th, td { padding: 7px 6px; }
+  .cap-layout { grid-template-columns: 1fr; }
+  .cap-browser { border-right: 0; border-bottom: 1px solid var(--line); }
+  .cap-list { max-height: 260px; }
+  .market-tools { grid-template-columns: 1fr; }
+  .workspace-head { align-items: start; flex-direction: column; }
 }
 </style>
 </head>
@@ -139,11 +214,11 @@ tr:last-child td { border-bottom: none; }
   <h1>Agent</h1>
   <span class="who" id="who">reading this machine&hellip;</span>
 </header>
+<div id="boot-error" class="boot-error" role="alert" hidden></div>
 <nav>
   <button id="tab-ask" aria-selected="true">Ask</button>
   <button id="tab-feedback" aria-selected="false">Improve</button>
-  <button id="tab-installed" aria-selected="false">Installed here</button>
-  <button id="tab-platform" aria-selected="false">Shared platform</button>
+  <button id="tab-installed" aria-selected="false">Capabilities</button>
   <button id="tab-settings" aria-selected="false">Settings</button>
 </nav>
 <main>
@@ -258,64 +333,96 @@ tr:last-child td { border-bottom: none; }
   </section>
 
   <section id="panel-installed">
-    <h2>Agent profile</h2>
-    <p class="note">Choose one exact installed profile. Restart the Agent to apply its
-      narrower Skills, Knowledge, capability and model requirements.</p>
-    <div class="card"><div id="profiles" class="empty">reading&hellip;</div></div>
-    <h2>Skills</h2>
-    <p class="note">What can be asked for by name on this machine.</p>
-    <div class="card"><div id="skills" class="empty">reading&hellip;</div></div>
-    <h2>Workflows</h2>
-    <p class="note">What a Skill&rsquo;s command runs.</p>
-    <div class="card"><div id="workflows" class="empty">reading&hellip;</div></div>
-    <h2>Run an installed Workflow</h2>
-    <p class="note">Choose an exact installed version. Arguments must match the shown input
-      contract. Execution still passes through Agent admission and Bridge policy.</p>
-    <div class="card" style="padding: 12px">
-      <label for="workflow-target">Workflow</label>
+    <div class="workspace-head">
+      <div><h2>Installed on this Agent</h2>
+        <p class="note">Inspect what this computer can use and run only supported actions.</p></div>
+      <div class="inline-actions">
+        <button class="go" id="cap-refresh" type="button">Refresh status</button>
+      </div>
+    </div>
+    <div class="cap-tabs" role="tablist" aria-label="Installed capability types">
+      <button id="cap-tab-skills" role="tab" aria-selected="true" data-kind="skills">
+        Skills<span class="cap-count" id="count-skills">0</span></button>
+      <button id="cap-tab-workflows" role="tab" aria-selected="false" data-kind="workflows">
+        Workflows<span class="cap-count" id="count-workflows">0</span></button>
+      <button id="cap-tab-knowledge" role="tab" aria-selected="false" data-kind="knowledge">
+        Knowledge<span class="cap-count" id="count-knowledge">0</span></button>
+      <button id="cap-tab-extensions" role="tab" aria-selected="false" data-kind="extensions">
+        Extensions<span class="cap-count" id="count-extensions">0</span></button>
+      <button id="cap-tab-applications" role="tab" aria-selected="false"
+              data-kind="applications">
+        Apps<span class="cap-count" id="count-applications">0</span></button>
+    </div>
+    <div class="cap-layout">
+      <div class="cap-browser">
+        <div class="cap-search"><label for="capability-search">Search installed capabilities</label>
+          <input id="capability-search" type="search"
+                 placeholder="Name, namespace or description"></div>
+        <div id="capability-list" class="cap-list" role="listbox"
+             aria-label="Installed capabilities"></div>
+      </div>
+      <article id="capability-detail" class="cap-detail" aria-live="polite">
+        <div id="capability-detail-content" class="empty">
+          Reading installed capabilities&hellip;</div>
+        <div id="workflow-action" class="action-box" hidden>
+          <strong>Run this Workflow</strong>
+          <p class="note" id="workflow-contract">No installed Workflow.</p>
+          <label for="workflow-arguments">JSON arguments</label>
+          <textarea id="workflow-arguments" spellcheck="false">{}</textarea>
+          <p><button class="go" id="workflow-run" type="button" disabled>Run Workflow</button></p>
+          <pre id="workflow-result" class="section-status">Nothing has run.</pre>
+        </div>
+        <div id="knowledge-action" class="action-box" hidden>
+          <strong>Ask this Knowledge source</strong>
+          <p class="note" id="knowledge-domain">No installed Knowledge.</p>
+          <label for="knowledge-question">Question</label>
+          <textarea id="knowledge-question" spellcheck="true"></textarea>
+          <p><button class="go" id="knowledge-ask" type="button" disabled>Ask Knowledge</button></p>
+          <pre id="knowledge-result" class="section-status">Nothing has been asked.</pre>
+          <div id="knowledge-citations" class="empty">No citations.</div>
+        </div>
+      </article>
+    </div>
+    <div class="card settings" style="margin-top: 14px">
+      <h2>Agent profile</h2>
+      <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
+        model requirements. Restart after activation.</p>
+      <div id="profiles" class="empty">reading&hellip;</div>
+    </div>
+    <div hidden aria-hidden="true">
       <select id="workflow-target" disabled></select>
-      <p class="note" id="workflow-contract">No installed Workflow.</p>
-      <label for="workflow-arguments">JSON arguments</label>
-      <textarea id="workflow-arguments" spellcheck="false">{}</textarea>
-      <p><button class="go" id="workflow-run" type="button" disabled>Run Workflow</button></p>
-      <pre id="workflow-result" class="note">Nothing has run.</pre>
-    </div>
-    <h2>Ask installed Knowledge</h2>
-    <p class="note">Choose an exact local Knowledge version. Answers must cite the
-      immutable Raw evidence retained by that version.</p>
-    <div class="card" style="padding: 12px">
-      <label for="knowledge-target">Knowledge</label>
       <select id="knowledge-target" disabled></select>
-      <p class="note" id="knowledge-domain">No installed Knowledge.</p>
-      <label for="knowledge-question">Question</label>
-      <textarea id="knowledge-question" spellcheck="true"></textarea>
-      <p><button class="go" id="knowledge-ask" type="button" disabled>Ask Knowledge</button></p>
-      <pre id="knowledge-result" class="note">Nothing has been asked.</pre>
-      <div id="knowledge-citations" class="empty">No citations.</div>
     </div>
-    <h2>Bridge Extensions</h2>
-    <p class="note">Locally staged extension versions and their last runtime state.
-      Activation is a separate device-administrator action and still requires
-      technical policy approval.</p>
-    <div class="card"><div id="extensions" class="empty">reading&hellip;</div></div>
     <h2>Recent runs</h2>
     <div class="card"><div id="runs" class="empty">reading&hellip;</div></div>
-  </section>
 
-  <section id="panel-platform">
-    <h2>Published to your team</h2>
-    <p class="note" id="platform-note">reading&hellip;</p>
-    <p><a id="member-portal" hidden target="_blank" rel="noopener noreferrer">
-      Open shared marketplace (Agent Add-ons and Applications)</a></p>
-    <p><button class="go" id="platform-sync" type="button" disabled>
-      Synchronize selected assets</button></p>
-    <p class="note" id="platform-sync-result">
-      Synchronization runs only when you press the button.</p>
-    <div class="card"><div id="catalog" class="empty">reading&hellip;</div></div>
-    <h2>Authorized on this Bridge</h2>
-    <p class="note">Selections synchronized to this machine. A selection does not bypass
-      capability policy.</p>
-    <div class="card"><div id="decisions" class="empty">reading&hellip;</div></div>
+    <div class="market">
+      <div class="workspace-head">
+        <div><h2>Shared Platform</h2><p class="note" id="platform-note">reading&hellip;</p></div>
+      </div>
+      <div class="market-tools">
+        <input id="market-search" type="search" aria-label="Search shared platform"
+               placeholder="Search shared capabilities">
+        <select id="market-kind" aria-label="Filter by type">
+          <option value="all">All types</option></select>
+        <select id="market-status" aria-label="Filter by status">
+          <option value="all">All statuses</option><option value="installed">Installed</option>
+          <option value="authorized">Authorized</option><option value="available">Available</option>
+        </select>
+        <a id="member-portal" hidden target="_blank" rel="noopener noreferrer"
+           aria-label="Open shared marketplace (Agent Add-ons and Applications)">
+          Open Marketplace</a>
+        <button class="go" id="platform-sync" type="button" disabled>Synchronize selected</button>
+      </div>
+      <div id="platform-sync-result" class="section-status" role="status" aria-live="polite">
+        Synchronization runs only when you press the button.</div>
+      <div id="catalog" class="market-grid" aria-live="polite">
+        <div class="empty">reading&hellip;</div></div>
+      <details style="margin-top: 14px"><summary>Selections authorized on this Bridge</summary>
+        <p class="note">A synchronized selection does not bypass capability policy.</p>
+        <div class="card"><div id="decisions" class="empty">reading&hellip;</div></div>
+      </details>
+    </div>
   </section>
 </main>
 
@@ -383,7 +490,7 @@ function turn(asked) {
   const line = document.createElement("div");
   line.className = "asked"; line.append(text("> " + asked));
   const said = document.createElement("div");
-  said.className = "said waiting"; said.append(text("working\\u2026"));
+  said.className = "said waiting"; said.append(text("working\u2026"));
   block.append(line, said);
   log.append(block);
   log.scrollTop = log.scrollHeight;
@@ -467,7 +574,7 @@ async function loadAbout() {
   where.push("as " + about.actor);
   where.push("on " + about.bridge_id);
   if (about.namespace) where.push("namespace " + about.namespace);
-  el("who").textContent = where.join(" \\u00b7 ");
+  el("who").textContent = where.join(" \u00b7 ");
   if (!about.namespace) {
     field.placeholder = "no namespace is configured; set it in host.json";
   }
@@ -533,18 +640,6 @@ async function loadAssets() {
       return [p.namespace + "/" + p.name + "@" + p.version,
               tag(p.active, "active", "installed"), button, p.description];
     }));
-  el("skills").replaceChildren(table(
-    ["Alias", "Commands", "Asset", "What it is"], assets.skills,
-    (s) => [s.alias, s.commands.map((command) => command.invocation.trim()).join(", ") || "\\u2014",
-            s.namespace + "/" + s.name + "@" + s.version, s.description]));
-  el("workflows").replaceChildren(table(
-    ["Asset", "Steps", "What it does"], assets.workflows,
-    (w) => [w.namespace + "/" + w.name + "@" + w.version, w.steps, w.description]));
-  el("extensions").replaceChildren(table(
-    ["Extension", "State", "Capabilities", "Activation gate"], assets.extensions,
-    (x) => [x.namespace + "/" + x.name + "@" + x.version,
-            x.state + (x.code ? " (" + x.code + ")" : ""),
-            x.capabilities.join(", ") || "\u2014", x.activation_gate]));
   el("runs").replaceChildren(table(
     ["Run", "Workflow", "Status", "Asked by"], assets.runs,
     (r) => [r.run_id, r.workflow, r.status, r.actor]));
@@ -574,7 +669,140 @@ async function loadAssets() {
   knowledgeTarget.disabled = assets.knowledge.length === 0;
   el("knowledge-ask").disabled = assets.knowledge.length === 0;
   showKnowledgeDomain();
+  installedAssets = Object.assign({applications: []}, assets);
+  renderCapabilityBrowser();
+  return assets;
 }
+
+let installedAssets = {skills: [], workflows: [], knowledge: [], extensions: [],
+  applications: []};
+let activeCapabilityKind = "skills";
+let activeCapabilityKey = "";
+
+function capabilityKey(item) {
+  return item.namespace + "/" + item.name + "@" + item.version;
+}
+
+function capabilityTitle(item, kind) {
+  return kind === "skills" && item.alias ? item.alias : item.name;
+}
+
+function appendMeta(container, rows) {
+  const list = document.createElement("dl"); list.className = "meta-grid";
+  for (const [label, value] of rows) {
+    const term = document.createElement("dt"); term.append(text(label));
+    const detail = document.createElement("dd");
+    if (value instanceof Node) detail.append(value); else detail.append(text(value || "\u2014"));
+    list.append(term, detail);
+  }
+  container.append(list);
+}
+
+function showCapabilityDetail(item, kind) {
+  const content = el("capability-detail-content"); content.className = "";
+  content.replaceChildren();
+  el("workflow-action").hidden = true;
+  el("knowledge-action").hidden = true;
+  if (!item) {
+    content.className = "empty";
+    content.append(text(kind === "applications"
+      ? "Applications run independently and are discovered in the authenticated Shared Marketplace."
+      : "No installed " + kind + " match this search."));
+    return;
+  }
+  const title = document.createElement("h3"); title.append(text(capabilityTitle(item, kind)));
+  const identity = document.createElement("div"); identity.className = "identity";
+  identity.append(text(capabilityKey(item)));
+  const badges = document.createElement("div"); badges.className = "badges";
+  badges.append(tag(true, "installed", ""));
+  const description = document.createElement("p"); description.className = "detail-description";
+  description.append(text(item.description || "No description supplied."));
+  content.append(title, identity, badges, description);
+
+  if (kind === "skills") {
+    appendMeta(content, [["Alias", item.alias], ["Default command", item.default_command],
+      ["Commands", item.commands.map((command) => command.invocation.trim()).join(", ")]]);
+    if (item.commands.length) {
+      const actions = document.createElement("div"); actions.className = "inline-actions";
+      for (const command of item.commands) {
+        const button = document.createElement("button"); button.className = "go";
+        button.type = "button"; button.textContent = "Ask " + command.invocation.trim();
+        button.addEventListener("click", () => {
+          field.value = command.invocation; selectPrimaryTab("ask"); field.focus();
+        });
+        actions.append(button);
+      }
+      content.append(actions);
+    }
+  } else if (kind === "workflows") {
+    appendMeta(content, [["Steps", item.steps], ["Input contract", item.input_contract],
+      ["Output contract", item.output_contract],
+      ["Capabilities", item.capabilities.join(", ")]]);
+    el("workflow-target").value = JSON.stringify({namespace: item.namespace, name: item.name,
+      version: item.version});
+    showWorkflowContract(); el("workflow-action").hidden = false;
+  } else if (kind === "knowledge") {
+    appendMeta(content, [["Domain", item.domain], ["Owner", item.owner],
+      ["Visibility", item.visibility]]);
+    el("knowledge-target").value = JSON.stringify({namespace: item.namespace, name: item.name,
+      version: item.version});
+    showKnowledgeDomain(); el("knowledge-action").hidden = false;
+  } else if (kind === "extensions") {
+    badges.append(tag(item.state === "active", item.state, item.state));
+    appendMeta(content, [["Runtime state", item.state + (item.code ? " (" + item.code + ")" : "")],
+      ["Capabilities", item.capabilities.join(", ")], ["Publisher key", item.publisher_key_id],
+      ["Activation gate", item.activation_gate]]);
+    const gate = document.createElement("p"); gate.className = "note";
+    gate.append(text("Activation remains a device-administrator action. "
+      + "This page does not bypass approval or technical policy."));
+    content.append(gate);
+  }
+}
+
+function renderCapabilityBrowser() {
+  for (const kind of ["skills", "workflows", "knowledge", "extensions", "applications"]) {
+    el("count-" + kind).textContent = String(installedAssets[kind].length);
+    el("cap-tab-" + kind).setAttribute("aria-selected", String(kind === activeCapabilityKind));
+  }
+  const query = el("capability-search").value.trim().toLowerCase();
+  const rows = installedAssets[activeCapabilityKind].filter((item) =>
+    [item.name, item.namespace, item.alias, item.description, item.domain, item.state]
+      .filter(Boolean).join(" ").toLowerCase().includes(query));
+  if (!rows.some((item) => capabilityKey(item) === activeCapabilityKey)) {
+    activeCapabilityKey = rows.length ? capabilityKey(rows[0]) : "";
+  }
+  const buttons = rows.map((item) => {
+    const button = document.createElement("button"); button.type = "button";
+    button.className = "cap-item"; button.setAttribute("role", "option");
+    const selected = capabilityKey(item) === activeCapabilityKey;
+    button.setAttribute("aria-selected", String(selected));
+    const title = document.createElement("strong");
+    title.append(text(capabilityTitle(item, activeCapabilityKind)));
+    const secondary = document.createElement("small"); secondary.append(text(capabilityKey(item)));
+    button.append(title, secondary);
+    button.addEventListener("click", () => {
+      activeCapabilityKey = capabilityKey(item); renderCapabilityBrowser();
+    });
+    return button;
+  });
+  if (buttons.length) el("capability-list").replaceChildren(...buttons);
+  else {
+    const empty = document.createElement("div"); empty.className = "empty";
+    empty.append(text(activeCapabilityKind === "applications"
+      ? "Applications are managed in Shared Marketplace." : "No matching installed capabilities."));
+    el("capability-list").replaceChildren(empty);
+  }
+  showCapabilityDetail(rows.find((item) => capabilityKey(item) === activeCapabilityKey),
+    activeCapabilityKind);
+}
+
+for (const button of document.querySelectorAll(".cap-tabs button")) {
+  button.addEventListener("click", () => {
+    activeCapabilityKind = button.dataset.kind; activeCapabilityKey = "";
+    renderCapabilityBrowser();
+  });
+}
+el("capability-search").addEventListener("input", renderCapabilityBrowser);
 
 // -- Governed contribution drafts ---------------------------------------
 
@@ -714,7 +942,7 @@ el("workflow-run").addEventListener("click", async () => {
   const chosen = el("workflow-target").value;
   if (!chosen) return;
   button.disabled = true;
-  result.textContent = "Workflow is running\\u2026";
+  result.textContent = "Workflow is running\u2026";
   try {
     const launched = await call("/api/workflows/run", {
       workflow: JSON.parse(chosen),
@@ -725,7 +953,7 @@ el("workflow-run").addEventListener("click", async () => {
     const identifiers = ["trace " + outcome.trace.trace_id,
       "request " + outcome.trace.request_id];
     if (workflow) identifiers.push("run " + workflow.run.run_id);
-    result.textContent = identifiers.join(" | ") + "\\n\\n" + launched.answer;
+    result.textContent = identifiers.join(" | ") + "\n\n" + launched.answer;
     await loadAssets();
   } catch (failure) {
     result.textContent = "The Workflow did not finish: " + failure.message;
@@ -779,7 +1007,58 @@ el("knowledge-ask").addEventListener("click", async () => {
   }
 });
 
+let sharedPlatform = {configured: false, catalog: [], decisions: [], note: ""};
+
+function renderMarketCards() {
+  const query = el("market-search").value.trim().toLowerCase();
+  const kind = el("market-kind").value;
+  const status = el("market-status").value;
+  const rows = sharedPlatform.catalog.filter((item) => {
+    const matchesQuery = [item.name, item.namespace, item.description, item.owner, item.kind]
+      .filter(Boolean).join(" ").toLowerCase().includes(query);
+    const matchesKind = kind === "all" || item.kind === kind;
+    const matchesStatus = status === "all"
+      || (status === "installed" && item.installed)
+      || (status === "authorized" && item.authorized)
+      || (status === "available" && !item.authorized && !item.installed);
+    return matchesQuery && matchesKind && matchesStatus;
+  });
+  const cards = rows.map((item) => {
+    const card = document.createElement("article"); card.className = "market-card";
+    const title = document.createElement("h3");
+    title.append(text(item.namespace + "/" + item.name));
+    const identity = document.createElement("div"); identity.className = "identity";
+    identity.append(text(item.kind + " · version " + item.version));
+    const badges = document.createElement("div"); badges.className = "badges";
+    badges.append(tag(true, "available", ""));
+    if (item.authorized) badges.append(tag(true, "authorized", ""));
+    if (item.installed) badges.append(tag(true, "installed", ""));
+    if (!item.authorized) {
+      const pending = tag(false, "", "select in Marketplace"); pending.classList.add("warn");
+      badges.append(pending);
+    }
+    const description = document.createElement("p");
+    description.append(text(item.description || "No description supplied."));
+    const owner = document.createElement("p");
+    owner.append(text("Owner: " + item.owner + " · " + item.visibility));
+    const compatible = document.createElement("p");
+    const compatibility = [item.runtime].concat(item.platforms).filter(Boolean).join(", ");
+    compatible.append(text("Compatibility: " + (compatibility || "not declared")));
+    card.append(title, identity, badges, description, owner, compatible);
+    return card;
+  });
+  if (cards.length) el("catalog").replaceChildren(...cards);
+  else {
+    const empty = document.createElement("div"); empty.className = "empty";
+    empty.append(text(sharedPlatform.configured
+      ? "No shared capabilities match these filters. Applications are listed in Marketplace."
+      : "Configure a Shared Platform connection to discover team capabilities."));
+    el("catalog").replaceChildren(empty);
+  }
+}
+
 function renderPlatform(platform) {
+  sharedPlatform = platform;
   el("platform-note").textContent = platform.note;
   el("platform-sync").disabled = !platform.configured;
   const portal = el("member-portal");
@@ -790,15 +1069,17 @@ function renderPlatform(platform) {
     portal.removeAttribute("href");
     portal.hidden = true;
   }
-  el("catalog").replaceChildren(table(
-    ["Type", "Asset", "Owner", "Visibility", "Needs", "Compatibility",
-     "Authorized", "Installed", "What it is"],
-    platform.catalog,
-    (p) => [p.kind, p.namespace + "/" + p.name + "@" + p.version, p.owner,
-            p.visibility, p.dependencies.join(", ") || "\\u2014",
-            [p.runtime].concat(p.platforms).filter(Boolean).join(", ") || "\\u2014",
-            tag(p.authorized, "authorized", "not authorized"),
-            tag(p.installed, "installed", "not installed"), p.description || "\\u2014"]));
+  const kinds = [...new Set(platform.catalog.map((item) => item.kind))].sort();
+  const kindSelect = el("market-kind"), previousKind = kindSelect.value;
+  kindSelect.replaceChildren();
+  const all = document.createElement("option"); all.value = "all"; all.textContent = "All types";
+  kindSelect.append(all);
+  for (const value of kinds) {
+    const option = document.createElement("option"); option.value = value;
+    option.textContent = value.charAt(0).toUpperCase() + value.slice(1); kindSelect.append(option);
+  }
+  kindSelect.value = kinds.includes(previousKind) ? previousKind : "all";
+  renderMarketCards();
   el("decisions").replaceChildren(table(
     ["Kind", "Asset", "For", "On this machine"], platform.decisions,
     (d) => [d.kind, d.namespace + "/" + d.name + "@" + d.version, d.actor,
@@ -809,10 +1090,15 @@ async function loadPlatform() {
   renderPlatform(await call("/api/platform"));
 }
 
+el("market-search").addEventListener("input", renderMarketCards);
+el("market-kind").addEventListener("change", renderMarketCards);
+el("market-status").addEventListener("change", renderMarketCards);
+
 el("platform-sync").addEventListener("click", async () => {
   const button = el("platform-sync"), result = el("platform-sync-result");
-  button.disabled = true;
-  result.textContent = "Synchronizing selected assets\\u2026";
+  button.disabled = true; button.setAttribute("aria-busy", "true");
+  const originalLabel = button.textContent; button.textContent = "Synchronizing…";
+  result.textContent = "Synchronizing selected assets\u2026";
   try {
     const synchronized = await call("/api/platform/sync", {});
     renderPlatform(synchronized.after);
@@ -824,41 +1110,55 @@ el("platform-sync").addEventListener("click", async () => {
       result.textContent = "Synchronization " + synchronized.status + ": " + failure.code;
     }
   } catch (failure) {
+    result.classList.add("bad");
     result.textContent = "Synchronization did not finish: " + failure.message;
   } finally {
-    button.disabled = false;
+    button.disabled = false; button.removeAttribute("aria-busy");
+    button.textContent = originalLabel;
   }
+});
+
+async function loadCapabilities() {
+  const refresh = el("cap-refresh"); refresh.disabled = true;
+  refresh.setAttribute("aria-busy", "true"); refresh.textContent = "Refreshing…";
+  try {
+    await Promise.all([loadAssets(), loadPlatform()]);
+  } finally {
+    refresh.disabled = false; refresh.removeAttribute("aria-busy");
+    refresh.textContent = "Refresh status";
+  }
+}
+
+el("cap-refresh").addEventListener("click", () => {
+  loadCapabilities().catch(showBootError);
 });
 
 // -- Tabs -----------------------------------------------------------------
 
-const panels = {ask: null, feedback: loadContributions, installed: loadAssets,
-  platform: loadPlatform, settings: loadSettings};
-const loaded = {};
-for (const name of Object.keys(panels)) {
-  el("tab-" + name).addEventListener("click", async () => {
-    for (const other of Object.keys(panels)) {
-      el("tab-" + other).setAttribute("aria-selected", String(other === name));
-      el("panel-" + other).toggleAttribute("data-open", other === name);
-    }
-    if (name === "ask") { field.focus(); return; }
-    // Re-read every time it is opened: this is live state, not a snapshot.
-    try { await panels[name](); loaded[name] = true; }
-    catch (failure) {
-      const where = name === "installed" ? "skills" : "catalog";
-      el(where).replaceChildren(text("Could not read this: " + failure.message));
-    }
-  });
+const panels = {ask: null, feedback: loadContributions, installed: loadCapabilities,
+  settings: loadSettings};
+
+function showBootError(failure) {
+  const banner = el("boot-error"); banner.hidden = false;
+  banner.textContent = "Agent Web could not finish loading: " + failure.message;
 }
 
-loadAbout().catch((failure) => { el("who").textContent = "could not read this machine: "
-  + failure.message; });
-loadReadiness().catch((failure) => { el("readiness").textContent =
-  "Could not read Agent readiness: " + failure.message; });
-loadAssets().catch((failure) => { el("command-hints").textContent =
-  "Could not read installed commands: " + failure.message; });
-loadConversations().catch((failure) => { log.textContent =
-  "Could not load conversation history: " + failure.message; });
+async function selectPrimaryTab(name) {
+  for (const other of Object.keys(panels)) {
+    el("tab-" + other).setAttribute("aria-selected", String(other === name));
+    el("panel-" + other).toggleAttribute("data-open", other === name);
+  }
+  if (name === "ask") { field.focus(); return; }
+  try { await panels[name](); }
+  catch (failure) { showBootError(failure); }
+}
+
+for (const name of Object.keys(panels)) {
+  el("tab-" + name).addEventListener("click", () => selectPrimaryTab(name));
+}
+
+Promise.all([loadAbout(), loadReadiness(), loadAssets(), loadConversations()])
+  .catch(showBootError);
 field.focus();
 </script>
 </body>

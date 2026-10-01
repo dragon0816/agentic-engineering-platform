@@ -9,6 +9,8 @@ asked the question an attacker asks.
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 import threading
 import urllib.error
 import urllib.request
@@ -31,6 +33,7 @@ from host_runtime.contracts import CompanyHostConfiguration, KnowledgeAskRequest
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
+from integrations.browser import Browser, browser_path
 
 
 class Reply:
@@ -202,6 +205,83 @@ def test_it_listens_on_the_loopback_address_only(served: AgentWebServer) -> None
     """Not a setting. Nothing on the network can reach a machine's Agent."""
     assert served.server_address[0] == "127.0.0.1"
     assert "127.0.0.1" in served.address
+
+
+def test_the_emitted_browser_script_parses(served: AgentWebServer, tmp_path: Path) -> None:
+    """A broken inline script leaves the whole page visible but inert."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is not installed, so JavaScript syntax cannot be checked")
+    page = served.page().decode("utf-8")
+    script = page.split("<script>", 1)[1].split("</script>", 1)[0]
+    path = tmp_path / "agent-web.js"
+    path.write_text(script, encoding="utf-8")
+
+    checked = subprocess.run(
+        [node, "--check", str(path)],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=20,
+    )
+
+    assert checked.returncode == 0, checked.stderr
+
+
+def test_capability_workspace_exposes_real_categories_and_actions(
+    served: AgentWebServer,
+) -> None:
+    page = served.page().decode("utf-8")
+    for expected in (
+        'id="cap-tab-skills"',
+        'id="cap-tab-workflows"',
+        'id="cap-tab-knowledge"',
+        'id="cap-tab-extensions"',
+        'id="cap-tab-applications"',
+        'id="capability-search"',
+        'id="market-search"',
+        'id="market-kind"',
+        'id="market-status"',
+        'id="member-portal"',
+        'id="platform-sync"',
+    ):
+        assert expected in page
+    assert "/api/extensions/activate" not in page
+
+
+@pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
+def test_capability_workspace_is_interactive_in_a_real_browser(
+    served: AgentWebServer, tmp_path: Path
+) -> None:
+    browser = Browser(tmp_path / "agent-web-browser", timeout_s=60)
+    browser.start()
+    try:
+        browser.navigate(base(served) + f"/?token={served.token}")
+        view = browser.look()
+        controls = {item.element_id: item for item in view.elements}
+        browser.click(controls["tab-installed"].index, expected=controls["tab-installed"])
+        opened = browser.look()
+        assert "Installed on this Agent" in opened.text
+        assert "Shared Platform" in opened.text
+        capability_controls = {item.element_id: item for item in opened.elements}
+        browser.click(
+            capability_controls["cap-tab-workflows"].index,
+            expected=capability_controls["cap-tab-workflows"],
+        )
+        assert (
+            browser._evaluate(
+                'document.getElementById("cap-tab-workflows").getAttribute("aria-selected")'
+            )
+            == "true"
+        )
+        assert browser._evaluate('document.getElementById("boot-error").hidden') is True
+        assert (
+            browser._evaluate('getComputedStyle(document.getElementById("member-portal")).display')
+            == "none"
+        )
+    finally:
+        browser.close()
+        browser.discard_profile()
 
 
 def test_the_token_is_new_every_run_and_long(tmp_path: Path) -> None:
@@ -672,7 +752,7 @@ def test_it_shows_staged_and_runtime_extension_state_without_an_activation_actio
             "code": "extension_activation_failed",
         }
     ]
-    assert 'id="extensions"' in source
+    assert 'id="cap-tab-extensions"' in source
     assert "/api/extensions/activate" not in source
 
 
