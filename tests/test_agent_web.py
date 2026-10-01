@@ -243,10 +243,15 @@ def test_capability_workspace_exposes_real_categories_and_actions(
         'id="cap-tab-applications"',
         'id="capability-search"',
         'id="market-search"',
-        'id="market-kind"',
+        'id="market-tab-skill"',
+        'id="market-tab-workflow"',
+        'id="market-tab-bridge-extension"',
+        'id="market-tab-application"',
+        'id="market-category"',
         'id="market-status"',
         'id="member-portal"',
         'id="platform-sync"',
+        'procedure.className = "markdown-panel"',
     ):
         assert expected in page
     assert "/api/extensions/activate" not in page
@@ -262,6 +267,22 @@ def test_ask_uses_compact_composer_backend_control(served: AgentWebServer) -> No
     assert 'call("/api/backends/authenticate"' in page
 
 
+def test_workspace_navigation_and_sessions_live_in_the_sidebar(
+    served: AgentWebServer,
+) -> None:
+    page = served.page().decode("utf-8")
+    assert 'class="app-shell"' in page
+    assert 'class="sidebar"' in page
+    assert 'id="new-conversation"' in page
+    assert 'id="nav-capabilities"' in page
+    assert 'id="nav-settings"' in page
+    assert 'id="session-search"' in page
+    assert 'id="session-list"' in page
+    assert 'id="tab-ask"' not in page
+    assert 'id="tab-installed"' not in page
+    assert '<select id="conversation"' not in page
+
+
 @pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
 def test_capability_workspace_is_interactive_in_a_real_browser(
     served: AgentWebServer, tmp_path: Path
@@ -272,10 +293,13 @@ def test_capability_workspace_is_interactive_in_a_real_browser(
         browser.navigate(base(served) + f"/?token={served.token}")
         view = browser.look()
         controls = {item.element_id: item for item in view.elements}
-        browser.click(controls["tab-installed"].index, expected=controls["tab-installed"])
+        browser.click(
+            controls["nav-capabilities"].index,
+            expected=controls["nav-capabilities"],
+        )
         opened = browser.look()
         assert "Installed on this Agent" in opened.text
-        assert "Shared Platform" in opened.text
+        assert "Share Platform Library" in opened.text
         capability_controls = {item.element_id: item for item in opened.elements}
         browser.click(
             capability_controls["cap-tab-workflows"].index,
@@ -585,7 +609,7 @@ def test_persona_settings_reject_unbounded_soul(tmp_path: Path) -> None:
 
 def test_page_exposes_setup_commands_and_capability_management(served: AgentWebServer) -> None:
     page = fetch(base(served) + f"/?token={served.token}").body.decode("utf-8")
-    assert 'id="tab-settings"' in page
+    assert 'id="nav-settings"' in page
     assert 'id="command-palette"' in page
     assert '<textarea id="message" rows="3"' in page
     assert 'id="conversation-backend"' in page
@@ -1015,6 +1039,7 @@ def test_shared_platform_catalog_distinguishes_publish_authorize_and_install(
                 assert workflow["authorized"] is False
                 assert workflow["installed"] is False
                 assert workflow["owner"] == "team:engineering"
+                assert "categories" in workflow
                 assert runtime.state.installed() == ()
 
                 synced = fetch(

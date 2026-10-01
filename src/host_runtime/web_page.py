@@ -51,24 +51,46 @@ body {
   margin: 0; background: var(--bg); color: var(--ink);
   font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
 }
-header {
-  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
-  padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+.app-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+.sidebar {
+  position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh;
+  min-width: 0; padding: 16px 12px; border-right: 1px solid var(--line);
+  background: var(--panel); overflow: hidden;
 }
-header h1 { margin: 0; font-size: 16px; font-weight: 650; }
-header .who { color: var(--dim); font-size: 13px; }
-nav { display: flex; gap: 4px; padding: 10px 16px 0; flex-wrap: wrap; }
-nav button {
-  font: inherit; font-size: 14px; padding: 7px 14px; cursor: pointer; color: var(--dim);
-  background: none; border: 1px solid transparent; border-radius: 8px 8px 0 0;
+.brand { padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
+.brand h1 { margin: 0; font-size: 18px; font-weight: 700; }
+.brand .note { display: block; margin-top: 3px; }
+.side-actions { display: grid; gap: 4px; padding: 12px 0; }
+.side-actions button {
+  min-height: 42px; padding: 9px 10px; color: var(--ink); background: transparent;
+  border: 1px solid transparent; border-radius: 8px; text-align: left; font: inherit;
+  font-weight: 600; cursor: pointer;
 }
-nav button:hover { color: var(--ink); }
-nav button[aria-selected="true"] {
-  color: var(--ink); background: var(--bg);
-  border-color: var(--line); border-bottom-color: var(--bg); font-weight: 600;
+.side-actions button:hover, .side-actions button[aria-current="page"] {
+  background: var(--selected); border-color: var(--line);
 }
-main { padding: 0 16px 40px; border-top: 1px solid var(--line); margin-top: -1px; }
-section { display: none; padding-top: 18px; max-width: 1240px; }
+.side-actions button::before { display: inline-block; width: 24px; color: var(--accent); }
+#new-conversation::before { content: "+"; font-size: 20px; line-height: 0; }
+#nav-capabilities::before { content: "\25c7"; }
+#nav-settings::before { content: "\2699"; }
+.session-heading { display: flex; justify-content: space-between; align-items: center;
+  margin: 8px 8px 7px; color: var(--dim); font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; }
+.session-search { width: 100%; min-height: 38px; margin-bottom: 8px; font: inherit; }
+.session-list { flex: 1; overflow-y: auto; min-height: 120px; }
+.session-item { display: block; width: 100%; min-height: 58px; padding: 9px 10px;
+  color: var(--ink); background: transparent; border: 0; border-radius: 7px;
+  text-align: left; cursor: pointer; font: inherit; }
+.session-item:hover, .session-item[aria-selected="true"] { background: var(--selected); }
+.session-item strong, .session-item small { display: block; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.session-item small { margin-top: 2px; color: var(--dim); font-size: 11px; }
+.workspace { min-width: 0; }
+.topbar { display: flex; justify-content: flex-end; padding: 10px 18px;
+  border-bottom: 1px solid var(--line); background: var(--bg); }
+.topbar .who { color: var(--dim); font-size: 13px; }
+main { padding: 0 20px 40px; }
+section { display: none; padding-top: 18px; max-width: 1480px; margin: 0 auto; }
 section[data-open] { display: block; }
 h2 { font-size: 15px; margin: 22px 0 8px; }
 h2:first-child { margin-top: 4px; }
@@ -140,8 +162,6 @@ button[aria-busy="true"] { cursor: wait; }
   width: 100%; font: 13px var(--mono); padding: 9px 10px;
   color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .settings .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.conversation-bar { display: flex; gap: 8px; align-items: center; margin: 8px 0 10px; }
-.conversation-bar select { flex: 1; }
 dialog { width: min(500px, calc(100vw - 32px)); color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 12px; padding: 0; box-shadow: 0 18px 60px #0005; }
 dialog::backdrop { background: #0008; }
@@ -178,15 +198,15 @@ tr:last-child td { border-bottom: none; }
 .cap-tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .cap-count { margin-left: 5px; padding: 1px 6px; border-radius: 999px;
   background: var(--panel); color: var(--dim); font-size: 11px; }
-.cap-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(360px, 1.4fr);
-  min-height: 360px; border: 1px solid var(--line); border-radius: 10px;
+.cap-layout { display: grid; grid-template-columns: minmax(300px, .8fr) minmax(420px, 1.2fr);
+  min-height: 460px; border: 1px solid var(--line); border-radius: 10px;
   overflow: hidden; margin-top: 12px; }
 .cap-browser { border-right: 1px solid var(--line); background: var(--bg); }
 .cap-search { padding: 12px; border-bottom: 1px solid var(--line); }
 .cap-search input, .market-tools input, .market-tools select { width: 100%; min-height: 44px;
   padding: 9px 11px; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 8px; font: inherit; }
-.cap-list { max-height: 430px; overflow-y: auto; }
+.cap-list { max-height: 520px; overflow-y: auto; }
 .cap-item { display: block; width: 100%; min-height: 58px; padding: 10px 12px;
   text-align: left; color: var(--ink); background: transparent; border: 0;
   border-bottom: 1px solid var(--line); cursor: pointer; font: inherit; }
@@ -194,7 +214,7 @@ tr:last-child td { border-bottom: none; }
 .cap-item[aria-selected="true"] { background: var(--selected); }
 .cap-item strong, .cap-item small { display: block; }
 .cap-item small { color: var(--dim); margin-top: 2px; }
-.cap-detail { padding: 20px; background: var(--panel); }
+.cap-detail { padding: 20px; background: var(--panel); overflow-y: auto; max-height: 560px; }
 .cap-detail h3 { margin: 0 0 4px; font-size: 18px; }
 .identity { color: var(--dim); font: 12px var(--mono); overflow-wrap: anywhere; }
 .detail-description { margin: 16px 0; }
@@ -203,11 +223,25 @@ tr:last-child td { border-bottom: none; }
 .meta-grid dt { color: var(--dim); }
 .meta-grid dd { margin: 0; overflow-wrap: anywhere; }
 .inline-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.inline-actions a { display: inline-flex; align-items: center; min-height: 38px;
+  padding: 7px 11px; color: var(--accent); border: 1px solid var(--line);
+  border-radius: 8px; background: var(--bg); text-decoration: none; font-weight: 600; }
 .action-box { margin-top: 16px; padding: 14px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--bg); }
 .action-box label { display: block; margin: 9px 0 4px; font-size: 12px; color: var(--dim); }
+.markdown-panel { max-height: 330px; margin: 8px 0 16px; padding: 16px;
+  overflow: auto; white-space: pre-wrap; word-break: break-word; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+  font: 12.5px/1.65 var(--mono); }
 .market { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--line); }
-.market-tools { display: grid; grid-template-columns: minmax(220px, 1fr) 170px 170px auto auto;
+.market-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px;
+  border-bottom: 1px solid var(--line); }
+.market-tabs button { min-height: 42px; padding: 8px 14px; color: var(--dim);
+  background: transparent; border: 0; border-bottom: 3px solid transparent;
+  font: inherit; font-weight: 600; cursor: pointer; }
+.market-tabs button[aria-selected="true"] { color: var(--accent);
+  border-bottom-color: var(--accent); }
+.market-tools { display: grid; grid-template-columns: minmax(220px, 1fr) 180px 170px auto auto;
   gap: 8px; align-items: center; margin: 12px 0; }
 .market-tools a { min-height: 44px; display: inline-flex; align-items: center;
   padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
@@ -218,6 +252,7 @@ tr:last-child td { border-bottom: none; }
   border-left: 4px solid var(--accent); border-radius: 9px; background: var(--panel); }
 .market-card h3 { margin: 0; font-size: 15px; overflow-wrap: anywhere; }
 .market-card p { margin: 8px 0; color: var(--dim); font-size: 13px; }
+.market-card .inline-actions { margin-top: 12px; }
 .badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0; }
 .tag.warn { color: var(--warn); border-color: var(--warn); }
 .section-status { min-height: 22px; color: var(--dim); font-size: 13px; }
@@ -226,7 +261,12 @@ tr:last-child td { border-bottom: none; }
   .market-tools { grid-template-columns: minmax(220px, 1fr) minmax(150px, .55fr); }
 }
 @media (max-width: 760px) {
-  header { gap: 6px; }
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; max-height: 48vh; border-right: 0;
+    border-bottom: 1px solid var(--line); }
+  .session-list { max-height: 180px; }
+  .topbar { justify-content: flex-start; }
+  main { padding: 0 12px 32px; }
   th, td { padding: 7px 6px; }
   .cap-layout { grid-template-columns: 1fr; }
   .cap-browser { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -240,22 +280,29 @@ tr:last-child td { border-bottom: none; }
 </style>
 </head>
 <body>
-<header>
-  <div><h1 id="agent-name">Agent</h1><span class="note" id="agent-introduction"></span></div>
+<div class="app-shell">
+<aside class="sidebar" aria-label="Agent workspace">
+  <div class="brand">
+    <h1 id="agent-name">Agent</h1>
+    <span class="note" id="agent-introduction"></span>
+  </div>
+  <div class="side-actions">
+    <button id="new-conversation" type="button">New session</button>
+    <button id="nav-capabilities" type="button">Capabilities</button>
+    <button id="nav-settings" type="button">Settings</button>
+  </div>
+  <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
+  <input id="session-search" class="session-search" type="search"
+         aria-label="Search sessions" placeholder="Search sessions">
+  <div id="session-list" class="session-list" role="listbox" aria-label="Sessions"></div>
+</aside>
+<div class="workspace">
+<header class="topbar">
   <span class="who" id="who">reading this machine&hellip;</span>
 </header>
 <div id="boot-error" class="boot-error" role="alert" hidden></div>
-<nav>
-  <button id="tab-ask" aria-selected="true">Ask</button>
-  <button id="tab-installed" aria-selected="false">Capabilities</button>
-  <button id="tab-settings" aria-selected="false">Settings</button>
-</nav>
 <main>
   <section id="panel-ask" data-open>
-    <div class="conversation-bar">
-      <select id="conversation" aria-label="Conversation"></select>
-      <button class="go" id="new-conversation" type="button">New</button>
-    </div>
     <div id="log"></div>
     <div id="command-palette" class="command-menu" role="listbox" hidden></div>
     <form class="ask" id="ask">
@@ -443,13 +490,26 @@ tr:last-child td { border-bottom: none; }
 
     <div class="market">
       <div class="workspace-head">
-        <div><h2>Shared Platform</h2><p class="note" id="platform-note">reading&hellip;</p></div>
+        <div><h2>Share Platform Library</h2>
+          <p class="note" id="platform-note">reading&hellip;</p></div>
+      </div>
+      <div class="market-tabs" role="tablist" aria-label="Shared asset types">
+        <button id="market-tab-skill" role="tab" aria-selected="true" data-kind="skill">
+          Skills<span class="cap-count" id="market-count-skill">0</span></button>
+        <button id="market-tab-workflow" role="tab" aria-selected="false" data-kind="workflow">
+          Workflows<span class="cap-count" id="market-count-workflow">0</span></button>
+        <button id="market-tab-bridge-extension" role="tab" aria-selected="false"
+                data-kind="bridge_extension">
+          Extensions<span class="cap-count" id="market-count-bridge-extension">0</span></button>
+        <button id="market-tab-application" role="tab" aria-selected="false"
+                data-kind="application">
+          Apps<span class="cap-count" id="market-count-application">0</span></button>
       </div>
       <div class="market-tools">
         <input id="market-search" type="search" aria-label="Search shared platform"
                placeholder="Search shared capabilities">
-        <select id="market-kind" aria-label="Filter by type">
-          <option value="all">All types</option></select>
+        <select id="market-category" aria-label="Filter by category">
+          <option value="all">All categories</option></select>
         <select id="market-status" aria-label="Filter by status">
           <option value="all">All statuses</option><option value="installed">Installed</option>
           <option value="authorized">Authorized</option><option value="available">Available</option>
@@ -470,6 +530,8 @@ tr:last-child td { border-bottom: none; }
     </div>
   </section>
 </main>
+</div>
+</div>
 
 <script>
 "use strict";
@@ -529,6 +591,7 @@ function tag(on, yes, no) {
 
 const log = el("log"), form = el("ask"), field = el("message"), send = el("send");
 let activeConversation = "";
+let conversationRows = [];
 let backendStatuses = new Map();
 let activeBackend = "gateway";
 let pendingBackend = "";
@@ -560,6 +623,34 @@ function renderConversation(record) {
   }
 }
 
+function renderSessionList() {
+  const query = el("session-search").value.trim().toLowerCase();
+  const visible = conversationRows.filter((item) =>
+    [item.title, item.backend].filter(Boolean).join(" ").toLowerCase().includes(query));
+  el("session-count").textContent = String(conversationRows.length);
+  const buttons = visible.map((item) => {
+    const button = document.createElement("button"); button.type = "button";
+    button.className = "session-item"; button.setAttribute("role", "option");
+    button.setAttribute("aria-selected", String(item.session_id === activeConversation));
+    const title = document.createElement("strong"); title.append(text(item.title));
+    const detail = document.createElement("small");
+    detail.append(text(item.messages + " messages · " + item.backend));
+    button.append(title, detail);
+    button.addEventListener("click", async () => {
+      selectPrimaryTab("ask");
+      try { await loadChat(item.session_id); field.focus(); }
+      catch (failure) { showBootError(failure); }
+    });
+    return button;
+  });
+  if (buttons.length) el("session-list").replaceChildren(...buttons);
+  else {
+    const empty = document.createElement("div"); empty.className = "empty";
+    empty.append(text("No sessions match this search."));
+    el("session-list").replaceChildren(empty);
+  }
+}
+
 async function loadConversations(selectId) {
   let listed = await call("/api/conversations"
     + (selectId ? "?session_id=" + encodeURIComponent(selectId) : ""));
@@ -568,17 +659,13 @@ async function loadConversations(selectId) {
     selectId = created.conversation.session_id;
     listed = await call("/api/conversations?session_id=" + encodeURIComponent(selectId));
   }
-  const selector = el("conversation"); selector.replaceChildren();
-  for (const item of listed.conversations) {
-    const option = document.createElement("option"); option.value = item.session_id;
-    option.textContent = item.title; selector.append(option);
-  }
+  conversationRows = listed.conversations;
   activeConversation = selectId || listed.conversations[0].session_id;
-  selector.value = activeConversation;
   if (!listed.selected || listed.selected.session_id !== activeConversation) {
     listed = await call("/api/conversations?session_id="
       + encodeURIComponent(activeConversation));
   }
+  renderSessionList();
   renderConversation(listed.selected);
   const backend = el("conversation-backend");
   const selectedBackend = listed.selected ? listed.selected.backend : "gateway";
@@ -641,9 +728,7 @@ async function loadChat(selectId) {
   await loadConversations(selectId);
 }
 
-el("conversation").addEventListener("change", async () => {
-  await loadConversations(el("conversation").value);
-});
+el("session-search").addEventListener("input", renderSessionList);
 el("conversation-backend").addEventListener("change", async () => {
   try { await chooseBackend(el("conversation-backend").value); }
   catch (failure) { el("conversation-backend").value = activeBackend; showBootError(failure); }
@@ -673,6 +758,7 @@ el("backend-auth-check").addEventListener("click", async () => {
 });
 el("new-conversation").addEventListener("click", async () => {
   const created = await call("/api/conversations", {});
+  selectPrimaryTab("ask");
   await loadChat(created.conversation.session_id); field.focus();
 });
 
@@ -862,9 +948,9 @@ function showCapabilityDetail(item, kind) {
           + (script.runtime ? " · " + script.runtime + ": " + script.path : "")).join(", ")
         : "None declared"]]);
     const procedureTitle = document.createElement("h4");
-    procedureTitle.append(text("Procedure Markdown"));
+    procedureTitle.append(text("SKILL.md"));
     const procedure = document.createElement("pre");
-    procedure.className = "section-status";
+    procedure.className = "markdown-panel";
     procedure.append(text(item.procedure_markdown));
     content.append(procedureTitle, procedure);
     if (item.commands.length) {
@@ -1154,20 +1240,46 @@ el("knowledge-ask").addEventListener("click", async () => {
 });
 
 let sharedPlatform = {configured: false, catalog: [], decisions: [], note: ""};
+let activeMarketKind = "skill";
+
+function marketplaceAction(item) {
+  const actions = document.createElement("div"); actions.className = "inline-actions";
+  if (item.installed) {
+    const installed = document.createElement("button"); installed.type = "button";
+    installed.className = "go"; installed.disabled = true; installed.textContent = "Installed";
+    actions.append(installed); return actions;
+  }
+  if (item.authorized) {
+    const install = document.createElement("button"); install.type = "button";
+    install.className = "go"; install.textContent = "Install selected";
+    install.addEventListener("click", synchronizePlatform);
+    actions.append(install); return actions;
+  }
+  if (sharedPlatform.member_portal_url) {
+    const select = document.createElement("a"); select.href = sharedPlatform.member_portal_url;
+    select.target = "_blank"; select.rel = "noopener noreferrer";
+    select.textContent = item.kind === "bridge_extension"
+      ? "Review Extension" : "Select in Marketplace";
+    actions.append(select);
+  }
+  return actions;
+}
 
 function renderMarketCards() {
   const query = el("market-search").value.trim().toLowerCase();
-  const kind = el("market-kind").value;
+  const category = el("market-category").value;
   const status = el("market-status").value;
   const rows = sharedPlatform.catalog.filter((item) => {
+    const categories = item.categories || [];
     const matchesQuery = [item.name, item.namespace, item.description, item.owner, item.kind]
-      .filter(Boolean).join(" ").toLowerCase().includes(query);
-    const matchesKind = kind === "all" || item.kind === kind;
+      .concat(categories).filter(Boolean).join(" ").toLowerCase().includes(query);
+    const matchesKind = item.kind === activeMarketKind;
+    const matchesCategory = category === "all" || categories.includes(category);
     const matchesStatus = status === "all"
       || (status === "installed" && item.installed)
       || (status === "authorized" && item.authorized)
       || (status === "available" && !item.authorized && !item.installed);
-    return matchesQuery && matchesKind && matchesStatus;
+    return matchesQuery && matchesKind && matchesCategory && matchesStatus;
   });
   const cards = rows.map((item) => {
     const card = document.createElement("article"); card.className = "market-card";
@@ -1183,6 +1295,7 @@ function renderMarketCards() {
       const pending = tag(false, "", "select in Marketplace"); pending.classList.add("warn");
       badges.append(pending);
     }
+    for (const category of item.categories || []) badges.append(tag(false, "", category));
     const description = document.createElement("p");
     description.append(text(item.description || "No description supplied."));
     const owner = document.createElement("p");
@@ -1190,15 +1303,24 @@ function renderMarketCards() {
     const compatible = document.createElement("p");
     const compatibility = [item.runtime].concat(item.platforms).filter(Boolean).join(", ");
     compatible.append(text("Compatibility: " + (compatibility || "not declared")));
-    card.append(title, identity, badges, description, owner, compatible);
+    card.append(title, identity, badges, description, owner, compatible,
+      marketplaceAction(item));
     return card;
   });
   if (cards.length) el("catalog").replaceChildren(...cards);
   else {
     const empty = document.createElement("div"); empty.className = "empty";
-    empty.append(text(sharedPlatform.configured
-      ? "No shared capabilities match these filters. Applications are listed in Marketplace."
-      : "Configure a Shared Platform connection to discover team capabilities."));
+    const message = activeMarketKind === "application"
+      ? "Applications keep their own release lifecycle and are available in Marketplace."
+      : (sharedPlatform.configured
+        ? "No shared capabilities match these filters."
+        : "Configure a Share Platform connection to discover team capabilities.");
+    empty.append(text(message));
+    if (activeMarketKind === "application" && sharedPlatform.member_portal_url) {
+      const link = document.createElement("a"); link.href = sharedPlatform.member_portal_url;
+      link.target = "_blank"; link.rel = "noopener noreferrer";
+      link.textContent = " Open Marketplace"; empty.append(link);
+    }
     el("catalog").replaceChildren(empty);
   }
 }
@@ -1215,16 +1337,23 @@ function renderPlatform(platform) {
     portal.removeAttribute("href");
     portal.hidden = true;
   }
-  const kinds = [...new Set(platform.catalog.map((item) => item.kind))].sort();
-  const kindSelect = el("market-kind"), previousKind = kindSelect.value;
-  kindSelect.replaceChildren();
-  const all = document.createElement("option"); all.value = "all"; all.textContent = "All types";
-  kindSelect.append(all);
-  for (const value of kinds) {
-    const option = document.createElement("option"); option.value = value;
-    option.textContent = value.charAt(0).toUpperCase() + value.slice(1); kindSelect.append(option);
+  for (const kind of ["skill", "workflow", "bridge_extension", "application"]) {
+    const count = platform.catalog.filter((item) => item.kind === kind).length;
+    el("market-count-" + kind).textContent = String(count);
+    el("market-tab-" + kind).setAttribute("aria-selected",
+      String(activeMarketKind === kind));
   }
-  kindSelect.value = kinds.includes(previousKind) ? previousKind : "all";
+  const categorySelect = el("market-category"), previousCategory = categorySelect.value;
+  const categories = [...new Set(platform.catalog.flatMap((item) => item.categories || []))]
+    .sort();
+  categorySelect.replaceChildren();
+  const all = document.createElement("option"); all.value = "all";
+  all.textContent = "All categories"; categorySelect.append(all);
+  for (const value of categories) {
+    const option = document.createElement("option"); option.value = value;
+    option.textContent = value; categorySelect.append(option);
+  }
+  categorySelect.value = categories.includes(previousCategory) ? previousCategory : "all";
   renderMarketCards();
   el("decisions").replaceChildren(table(
     ["Kind", "Asset", "For", "On this machine"], platform.decisions,
@@ -1237,10 +1366,19 @@ async function loadPlatform() {
 }
 
 el("market-search").addEventListener("input", renderMarketCards);
-el("market-kind").addEventListener("change", renderMarketCards);
+el("market-category").addEventListener("change", renderMarketCards);
 el("market-status").addEventListener("change", renderMarketCards);
+for (const button of document.querySelectorAll(".market-tabs button")) {
+  button.addEventListener("click", () => {
+    activeMarketKind = button.dataset.kind;
+    for (const other of document.querySelectorAll(".market-tabs button")) {
+      other.setAttribute("aria-selected", String(other === button));
+    }
+    renderMarketCards();
+  });
+}
 
-el("platform-sync").addEventListener("click", async () => {
+async function synchronizePlatform() {
   const button = el("platform-sync"), result = el("platform-sync-result");
   button.disabled = true; button.setAttribute("aria-busy", "true");
   const originalLabel = button.textContent; button.textContent = "Synchronizing…";
@@ -1262,7 +1400,9 @@ el("platform-sync").addEventListener("click", async () => {
     button.disabled = false; button.removeAttribute("aria-busy");
     button.textContent = originalLabel;
   }
-});
+}
+
+el("platform-sync").addEventListener("click", synchronizePlatform);
 
 async function loadCapabilities() {
   const refresh = el("cap-refresh"); refresh.disabled = true;
@@ -1279,7 +1419,7 @@ el("cap-refresh").addEventListener("click", () => {
   loadCapabilities().catch(showBootError);
 });
 
-// -- Tabs -----------------------------------------------------------------
+// -- Workspace navigation -------------------------------------------------
 
 const panels = {ask: null, installed: loadCapabilities,
   settings: loadSettings};
@@ -1291,17 +1431,17 @@ function showBootError(failure) {
 
 async function selectPrimaryTab(name) {
   for (const other of Object.keys(panels)) {
-    el("tab-" + other).setAttribute("aria-selected", String(other === name));
     el("panel-" + other).toggleAttribute("data-open", other === name);
   }
+  el("nav-capabilities").toggleAttribute("aria-current", name === "installed");
+  el("nav-settings").toggleAttribute("aria-current", name === "settings");
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
 }
 
-for (const name of Object.keys(panels)) {
-  el("tab-" + name).addEventListener("click", () => selectPrimaryTab(name));
-}
+el("nav-capabilities").addEventListener("click", () => selectPrimaryTab("installed"));
+el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"));
 
 Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands()])
   .catch(showBootError);

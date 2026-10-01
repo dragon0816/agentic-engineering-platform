@@ -1744,9 +1744,10 @@ projects it solely as navigation metadata for the browser.
 
 `PlatformProjection` is the typed local Web view of a shared catalog: platform
 configuration/reachability, credential-free Member Portal navigation, published
-package metadata, synchronized device decisions and installed flags. Published,
-authorized and installed remain independent facts and none is an execution
-permission.
+package metadata including its declared categories, synchronized device decisions
+and installed flags. Categories are display/filter metadata and grant no entitlement.
+Published, authorized and installed remain independent facts and none is an
+execution permission.
 
 `PlatformSyncRequest` is a closed empty contract. It cannot select an asset,
 claim an actor or carry installation instructions. `POST /api/platform/sync`

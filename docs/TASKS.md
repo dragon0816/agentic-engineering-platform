@@ -403,8 +403,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Remove Ask readiness cards and move backend selection into the composer footer.
 - [x] Keep a configured Gateway selectable while showing credential readiness separately.
 - [x] Add fixed, explicit Codex, Claude Code and Copilot authentication flows.
-- [ ] Replace top page tabs with New session, Capabilities and Settings sidebar actions.
-- [ ] Move searchable multi-session management into the left sidebar.
-- [ ] Refine Capabilities into installed list/detail panes with complete Skill Markdown.
-- [ ] Add Share Platform Skills, Workflows, Extensions and Apps library tabs and actions.
+- [x] Replace top page tabs with New session, Capabilities and Settings sidebar actions.
+- [x] Move searchable multi-session management into the left sidebar.
+- [x] Refine Capabilities into installed list/detail panes with complete Skill Markdown.
+- [x] Add Share Platform Skills, Workflows, Extensions and Apps library tabs and actions.
 - [ ] Verify the revised experience in the local preview and update handoff evidence.

@@ -1073,6 +1073,7 @@ class AgentWeb:
                         owner=f"{metadata.owner.type}:{metadata.owner.id}",
                         visibility=metadata.visibility,
                         lifecycle=metadata.lifecycle,
+                        categories=metadata.categories,
                         dependencies=tuple(
                             f"{item.namespace}/{item.name}@{item.version}"
                             for item in metadata.dependencies

@@ -116,6 +116,7 @@ class PlatformCatalogProjection(Contract):
     owner: Text
     visibility: Symbol
     lifecycle: Symbol
+    categories: tuple[Symbol, ...] = ()
     dependencies: tuple[Text, ...] = ()
     runtime: str = ""
     platforms: tuple[Symbol, ...] = ()

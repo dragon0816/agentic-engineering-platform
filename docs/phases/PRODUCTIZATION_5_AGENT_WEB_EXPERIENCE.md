@@ -17,8 +17,8 @@ Platform discovery as one coherent capability browser.
 
 1. Remove the three readiness cards from Ask. Readiness remains available
    through typed API state and compact inline backend status.
-2. Keep conversation selection above the transcript. Move backend selection
-   into the composer footer below the multiline message input.
+2. Move conversation selection into the persistent sidebar. Move backend
+   selection into the composer footer below the multiline message input.
 3. A configured Gateway is selectable even when its mapped credential is not
    currently present. The composer explains the missing credential and links
    the operator to Settings; selecting it does not fabricate readiness.
