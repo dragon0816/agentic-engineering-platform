@@ -4,9 +4,10 @@ The Bridge computer owns the authoritative record of what is installed on it
 and what has run there; the control plane only projects it. This is that
 record: one file, one writer, every write one committed transaction, following
 the checkpoint store in `workflow.checkpoints_sqlite`. It holds installed-asset
-rows and compact run summaries and nothing else: no artifact bytes, no payload,
-no credential, no session. Every failure surfaces as a `LocalStateError` with a
-code and nothing else; no path, record or SQLite message is echoed.
+rows, compact run summaries, conversations and inert contribution drafts; no
+artifact bytes, external payload or credential is stored. Every failure surfaces
+as a `LocalStateError` with a code and nothing else; no path, record or SQLite
+message is echoed.
 """
 
 import sqlite3
@@ -31,12 +32,13 @@ from common.distribution import (
     verify_installation,
 )
 from common.enrollment import BridgeDevice
+from host_runtime.contributions import ContributionDraft
 from host_runtime.conversations import ConversationRecord
 
-# Version 3 adds local Personal Agent conversations. Tables are additive and
+# Version 4 adds local contribution drafts. Tables are additive and
 # every open creates them, so older files migrate rather than being refused.
-SCHEMA_VERSION = "3"
-_MIGRATABLE = frozenset({"1", "2"})
+SCHEMA_VERSION = "4"
+_MIGRATABLE = frozenset({"1", "2", "3"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS installed ("
@@ -51,6 +53,9 @@ _SCHEMA = (
     " channel TEXT PRIMARY KEY, position INTEGER NOT NULL)",
     "CREATE TABLE IF NOT EXISTS conversations ("
     " session_id TEXT PRIMARY KEY, actor TEXT NOT NULL, updated_at TEXT NOT NULL,"
+    " record TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS contribution_drafts ("
+    " draft_id TEXT PRIMARY KEY, actor TEXT NOT NULL, created_at TEXT NOT NULL,"
     " record TEXT NOT NULL)",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
@@ -341,6 +346,38 @@ class SqliteLocalState:
                 (actor, limit),
             ).fetchall()
             return tuple(ConversationRecord.model_validate_json(row[0]) for row in rows)
+
+    def create_contribution_draft(self, draft: ContributionDraft) -> ContributionDraft:
+        item = ContributionDraft.model_validate(draft)
+        with self._write() as conn:
+            if conn.execute(
+                "SELECT 1 FROM contribution_drafts WHERE draft_id = ?", (item.draft_id,)
+            ).fetchone():
+                raise LocalStateError("contribution_exists")
+            conn.execute(
+                "INSERT INTO contribution_drafts (draft_id, actor, created_at, record)"
+                " VALUES (?, ?, ?, ?)",
+                (
+                    item.draft_id,
+                    item.actor,
+                    item.created_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                ),
+            )
+        return item
+
+    def contribution_drafts(
+        self, actor: Symbol, *, limit: int = 50
+    ) -> tuple[ContributionDraft, ...]:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1 or limit > 100:
+            raise ValueError("contribution draft limit is between 1 and 100")
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT record FROM contribution_drafts WHERE actor = ?"
+                " ORDER BY created_at DESC, draft_id LIMIT ?",
+                (actor, limit),
+            ).fetchall()
+            return tuple(ContributionDraft.model_validate_json(row[0]) for row in rows)
 
     def cursor(self, channel: Symbol) -> int | None:
         """How far this ingress has consumed its channel, or None if it never

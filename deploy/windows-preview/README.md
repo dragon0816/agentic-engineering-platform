@@ -480,6 +480,13 @@ The **Ask** tab shows whether natural-language routing is ready and lists every
 deterministic command declared by installed Skills. Clicking a command only
 fills the request box; execution begins only after pressing **Send**.
 
+After a conversation, the **Improve** tab can save its recent messages as a
+local review draft. Choose one exact installed Skill, Workflow or Knowledge
+version to report a problem, or propose a new Skill or Workflow. The Host
+supplies identity and ownership. Saving the draft does not create an Issue,
+run code, install anything or publish it; business and technical review remain
+separately pending.
+
 A company's LiteLLM gateway serves an OpenAI-shaped API, which is what this
 speaks. In `host.json`:
 

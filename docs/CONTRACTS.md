@@ -1856,6 +1856,26 @@ written through the existing local-run evidence path. Installed/published
 status and model text grant no authority. A known deterministic command keeps
 the existing non-model route.
 
+## Personal Agent contribution drafts (Productization 4, slice 5)
+
+`ContributionDraftCreateRequest` is the closed browser input. It either names
+one exact installed `AssetIdentity` to improve, or proposes a new Skill or
+Workflow by kind and slug. It carries a source conversation, summary, expected
+and actual behavior, and one to ten acceptance criteria. It has no actor,
+namespace, owner, lifecycle, review or publication field.
+
+The Host resolves an improvement against installed Skill, Workflow and
+Knowledge manifests and copies the manifest kind and owner. For a new proposal
+it supplies the configured namespace and current actor as the draft owner. Up
+to twenty recent `ConversationExcerpt` values are copied into the resulting
+`ContributionDraft`, retaining message ids, text, roles and assistant trace
+identifiers as immutable evidence.
+
+Every record has lifecycle `draft`, `publishable=false`, and separate pending
+`BusinessApproval` and `TechnicalPolicy`. It is stored in the Bridge-local
+SQLite state and listed only for the running actor. Creation performs no Agent
+execution, external write, manifest creation, installation or publication.
+
 ## Durable shared Registry (Productization 1, slice 6)
 
 `PackageRegistry` is the control-plane catalog boundary used by authorization,

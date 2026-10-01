@@ -194,6 +194,7 @@ LocalStateErrorCode = Literal[
     "conversation_unknown",
     "conversation_owner_fixed",
     "conversation_update_stale",
+    "contribution_exists",
     "unavailable",
     "commit_unknown",
 ]

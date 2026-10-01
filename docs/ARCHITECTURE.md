@@ -295,6 +295,16 @@ turns and tool calls are bounded; typed stop reasons end failed repair rather
 than allowing an unbounded agent loop. Known commands continue to bypass model
 selection.
 
+Conversation feedback uses a separate local contribution boundary. The Host
+copies a bounded excerpt of the selected actor-owned conversation into an
+immutable draft. An improvement request must resolve to one exact installed
+Skill, Workflow or Knowledge version, so its kind and owner come from the
+manifest. A new capability proposal is limited to a Skill or Workflow and gets
+its actor and namespace from the running Host. Browser input cannot supply
+owner, lifecycle, approval or publication fields. Both forms remain local,
+non-publishable drafts with independent pending business and technical-policy
+reviews. Capturing one executes nothing and writes to no external system.
+
 Shared discovery crosses the existing authenticated Bridge/platform transport
 through a read-only `catalog` operation. The Team Platform filters published
 package metadata using the authenticated member and the platform's trusted

@@ -44,13 +44,13 @@ from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Self
+from typing import Any, Literal, Self
 from urllib.parse import parse_qs, urlparse
 
 from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.skills import SkillManifest
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
-from common.assets import WorkflowManifest
+from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
 from extensions.package import PortableExtensionPackage
@@ -70,6 +70,11 @@ from host_runtime.contracts import (
     PlatformSyncRequest,
     PlatformSyncResult,
     WorkflowLaunchRequest,
+)
+from host_runtime.contributions import (
+    ContributionDraft,
+    ContributionDraftCreateRequest,
+    ConversationExcerpt,
 )
 from host_runtime.conversations import (
     ConversationCreateRequest,
@@ -359,6 +364,90 @@ class AgentWeb:
         with self._one_at_a_time:
             created = self.runtime.state.create_conversation(record)
         return {"conversation": json.loads(created.model_dump_json())}
+
+    def contribution_drafts(self) -> dict[str, Any]:
+        return {
+            "drafts": [
+                json.loads(item.model_dump_json())
+                for item in self.runtime.state.contribution_drafts(self.runtime.actor)
+            ]
+        }
+
+    def create_contribution_draft(self, request: ContributionDraftCreateRequest) -> dict[str, Any]:
+        """Capture evidence without creating, installing or publishing an asset."""
+        item = ContributionDraftCreateRequest.model_validate(request)
+        with self._one_at_a_time:
+            conversation = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+            if conversation is None:
+                return {"ok": False, "code": "conversation_unknown"}
+            if not conversation.messages:
+                return {"ok": False, "code": "conversation_evidence_missing"}
+
+            target: AssetIdentity | None = None
+            proposed_name = None
+            if item.request_kind == "improvement":
+                target = item.target
+                if target is None:  # Closed request validation makes this unreachable.
+                    return {"ok": False, "code": "target_required"}
+                resolved = self._installed_contribution_target(target)
+                if resolved is None:
+                    return {"ok": False, "code": "target_not_installed"}
+                asset_kind, owner = resolved
+                namespace = target.namespace
+            else:
+                if not self.namespace:
+                    return {"ok": False, "code": "namespace_missing"}
+                if item.candidate_kind is None:  # Closed request validation makes this unreachable.
+                    return {"ok": False, "code": "candidate_kind_required"}
+                asset_kind = item.candidate_kind
+                proposed_name = item.proposed_name
+                owner = Owner(type="user", id=self.runtime.actor)
+                namespace = self.namespace
+
+            evidence = tuple(
+                ConversationExcerpt(
+                    message_id=message.message_id,
+                    role=message.role,
+                    text=message.text,
+                    trace=message.trace,
+                )
+                for message in conversation.messages[-20:]
+            )
+            draft = ContributionDraft(
+                draft_id=f"contribution-{uuid.uuid4().hex}",
+                request_kind=item.request_kind,
+                actor=self.runtime.actor,
+                namespace=namespace,
+                owner=owner,
+                asset_kind=asset_kind,
+                target=target,
+                proposed_name=proposed_name,
+                summary=item.summary,
+                expected_behavior=item.expected_behavior,
+                actual_behavior=item.actual_behavior,
+                acceptance_criteria=item.acceptance_criteria,
+                source_session_id=conversation.session_id,
+                evidence=evidence,
+                created_at=datetime.now(UTC),
+            )
+            saved = self.runtime.state.create_contribution_draft(draft)
+        return {"ok": True, "draft": json.loads(saved.model_dump_json())}
+
+    def _installed_contribution_target(
+        self, target: AssetIdentity | None
+    ) -> tuple[Literal["skill", "workflow", "knowledge"], Owner] | None:
+        if target is None:
+            return None
+        sources: tuple[tuple[Literal["skill", "workflow", "knowledge"], Path, type[Any]], ...] = (
+            ("skill", self.runtime.layout.skills, SkillManifest),
+            ("workflow", self.runtime.layout.workflows, WorkflowManifest),
+            ("knowledge", self.runtime.layout.knowledge, KnowledgeManifest),
+        )
+        for kind, directory, model in sources:
+            for manifest in manifests(directory, model):
+                if manifest.metadata.identity == target:
+                    return kind, manifest.metadata.owner
+        return None
 
     def conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
         item = ConversationTurnRequest.model_validate(request)
@@ -908,6 +997,8 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/conversations":
             session_id = parse_qs(parsed.query).get("session_id", [None])[0]
             self._json(200, web.conversations(session_id))
+        elif parsed.path == "/api/contributions":
+            self._json(200, web.contribution_drafts())
         elif parsed.path == "/api/assets":
             self._json(200, web.assets())
         elif parsed.path == "/api/platform":
@@ -932,6 +1023,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/model",
             "/api/conversations",
             "/api/conversations/turn",
+            "/api/contributions",
         ):
             self._json(404, {"error": "no such page"})
             return
@@ -973,6 +1065,15 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             result = self.server.web.conversation_turn(turn)
             self._json(200 if result.get("code") is None else 404, result)
+            return
+        if path == "/api/contributions":
+            try:
+                contribution = ContributionDraftCreateRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid contribution draft"})
+                return
+            result = self.server.web.create_contribution_draft(contribution)
+            self._json(201 if result.get("ok") else 409, result)
             return
         if path == "/api/platform/sync":
             try:

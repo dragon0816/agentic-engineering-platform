@@ -355,5 +355,5 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Add a provider-neutral bounded tool loop with installed-command aliases,
   OpenAI-compatible tool exchange, Bridge policy on every call, bounded context,
   durable Workflow evidence and typed stop reasons.
-- [ ] Add standardized feedback/candidate-asset creation from the conversation
+- [x] Add standardized feedback/candidate-asset creation from the conversation
   workspace without bypassing review or publication governance.
