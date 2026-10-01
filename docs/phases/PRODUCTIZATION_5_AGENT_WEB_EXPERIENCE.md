@@ -34,20 +34,26 @@ Platform discovery as one coherent capability browser.
 
 ### Slice 2 — Capability browser and Share Platform Library
 
-1. Use top-level capability tabs, a left selectable list and a right detail
+1. Replace the top Ask/Capabilities/Settings tabs with a persistent left
+   workspace sidebar. Its primary actions are New session, Capabilities and
+   Settings; selecting a Session opens Ask in the content area.
+2. Put searchable multi-session management below those primary actions. The
+   active Session is visibly selected and newly created Sessions appear there
+   without a page reload.
+3. Use top-level capability tabs, a left selectable list and a right detail
    pane. Keep the layout responsive below tablet width.
-2. Skill detail renders its complete installed procedure Markdown plus command
+4. Skill detail renders its complete installed procedure Markdown plus command
    and script-tool metadata. Workflow, Knowledge, Extension and App detail
    preserve their existing type-specific controls and governance text.
-3. Place an Agent-native Share Platform Library below the installed browser.
+5. Place an Agent-native Share Platform Library below the installed browser.
    It has Skills, Workflows, Extensions and Apps tabs plus search, category and
    lifecycle/status filters.
-4. Shared package cards expose published, selected and installed as separate
+6. Shared package cards expose published, selected and installed as separate
    states. A selected package can start the existing all-or-nothing sync; an
    unselected package opens the authenticated Marketplace for selection.
-5. Extension review and Application discovery link to the authenticated
+7. Extension review and Application discovery link to the authenticated
    Marketplace. They do not reuse Add-on selection or imply local activation.
-6. The UI remains dependency-free and inline in the installed wheel. It fetches
+8. The UI remains dependency-free and inline in the installed wheel. It fetches
    no fonts, scripts, styles or images from external origins.
 
 ## Safety and contract boundaries
@@ -65,8 +71,8 @@ Platform discovery as one coherent capability browser.
 
 - Contract tests cover configured-but-unready Gateway selection, fixed login
   command launch, signed-out and missing CLI states, and API authentication.
-- Page tests cover the compact composer, authentication dialog, capability
-  layout, Skill Markdown panel and Share Platform tabs/actions.
+- Page tests cover the compact composer, authentication dialog, sidebar session
+  management, capability layout, Skill Markdown panel and Share Platform tabs/actions.
 - JavaScript parses with Node, Python passes Ruff and mypy, and focused HTTP/UI
   regression tests pass before each slice is committed.
 - The final local preview is restarted and exercised with the configured
