@@ -1,130 +1,107 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/windows-preview-test-guide`
-Base: `main` at `e5e97cda7c8c7e1c0ba905546d444706a16b3477`
-PR: `#187` — https://github.com/dragon0816/agentic-engineering-platform/pull/187
+Branch: `main`
+Status: Product experience implementation complete and running locally
 
 ## Goal
 
-Make the two deployment roles explicit and independently installable: Personal
-Agent Web + Bridge on company/test computers, and Shared Platform on the
-Registry/Marketplace computer. Put a version-matched test manual inside each
-artifact and surface the correct Agent + Bridge download in automated Hermes
-validation Issues.
+Deliver the approved Shared Platform and Personal Agent Web experience: durable
+invitation identity and administration, categorized Marketplace fixtures,
+persona settings, usable natural-language backends, deterministic slash
+commands, rich capability details and governed Skill/Workflow drafting and
+script execution.
 
 ## Completed
 
-- Added `START-HERE.md` to the existing `aep-windows-preview-<SHA>` artifact and
-  explicitly identified it as the Personal Agent Web + Bridge role.
-- The Agent guide covers Python 3.12 installation, the fixed local Gateway URL,
-  Web startup, Ask, deterministic Workflow execution, Knowledge, Improve,
-  Shared Platform synchronization, expected results and sanitized evidence.
-- The Agent bundle builder now refuses to build without both operator guides.
-- Added a separate offline Shared Platform bundle builder and Windows template.
-  Its GitHub artifact is `aep-shared-platform-windows-<SHA>`.
-- The Shared Platform bundle installs `aep-platform serve`, a loopback-safe
-  `platform.json`, Registry workspace, start/verify/uninstall launchers and its
-  own Traditional Chinese operator guide.
-- Each role installer removes the other role's executable entry point. Shared
-  Python contracts remain common, but the deployed processes are separate.
-- Windows CI installs and verifies both bundles. It starts the Shared Platform
-  on isolated CI ports, opens the real Member Marketplace over HTTP, confirms
-  the durable SQLite Registry and uploads both artifacts.
-- Hermes deployment validation remains pinned to the backward-compatible
-  Agent + Bridge artifact name. Each generated Issue now contains its workflow
-  run, artifact name and instruction to open the bundled `START-HERE.md`.
-- Updated Architecture, Roadmap, Tasks, README and deployment documentation.
+- Shared Platform identity, invitation proofs, users, browser logins and member
+  sessions persist in SQLite. The first bootstrap invitation is a
+  `platform_admin`; the UI supports account state and invitation management.
+- Marketplace has kind/category/status filters, two test Skills, two test
+  Workflows and one governed inert Bridge Extension. Extension administration
+  remains separate from member Add-on selection.
+- Agent Settings persists name, introduction and bounded `soul.md`; persona
+  guidance affects speaking style after system policy and does not grant tools.
+- Ask has a three-line editor and deterministic `/help`, `/run workflow`,
+  `/wiki-convert`, `/wiki-ingest`, `/wiki-lint`, `/wiki-query` and `/problem`
+  commands. Problem and new Skill/Workflow requests persist as pending drafts
+  and cannot approve or publish themselves.
+- Capabilities shows kind-specific Skill Markdown/script references, Workflow
+  parameter metadata, Knowledge locations, Extension lifecycle/docs and App
+  guidance. New Skill/Workflow forms live here; Improve navigation was removed.
+- Conversations can select Gateway, Codex, Claude Code or Copilot. Local CLIs
+  run with fixed restricted arguments, stdin-only prompts, bounded history,
+  isolated cwd and reduced environment. They return text only and cannot bypass
+  Bridge policy. Missing Gateway credentials and CLI authentication failures
+  are projected as unavailable states.
+- Published and approved Python/PowerShell script tools have exact
+  package-relative entrypoints, SHA-256 verification before registration and
+  every call, JSON stdin/stdout, fixed noninteractive interpreters, output and
+  timeout bounds, and normal Bridge authorization.
+- Member Add-on selection and Agent synchronization were exercised separately
+  from administrator Extension discovery. Two fixtures installed successfully;
+  the existing manual-grants file was restored after the isolated sync proof.
 
-## In Progress
+## Commits
 
-- PR #187 contains the coherent two-role packaging change. Merge after its exact
-  head passes Windows/Python 3.12 Platform verification, then wait for the
-  merged-main artifacts.
-
-## Remaining
-
-1. Download the two merged-main artifacts and follow each bundled
-   `START-HERE.md` on its intended computer.
-2. Configure the Shared Platform computer's non-loopback address, TLS
-   certificate/private key and firewall before a company Bridge connects.
-3. The Shared Platform reference process still keeps members, invitations,
-   sessions, authorizations and remote jobs in memory; only package metadata and
-   bytes are durable in SQLite. Production durability remains future work.
-4. Phase 7 workflow/source parity and E2E-01 physical DUT validation remain the
-   active production-like work after deployment usability is confirmed.
-
-## Architecture decisions made
-
-- Agent + Bridge is the execution-plane deployment; Shared Platform is the
-  control-plane deployment. They are separate artifacts from one source commit.
-- The existing Agent artifact name remains `aep-windows-preview-<SHA>` for
-  Hermes compatibility. Its role is made explicit in UI text, Issue text and
-  the bundled guide rather than breaking the external allowlist now.
-- Packaging may share the project wheel and contracts, while installers expose
-  only the entry point for their deployment role.
-- Shared Platform installs loopback-only by default. Non-loopback operation must
-  supply TLS paths and deliberate firewall configuration.
-- A missing guide is a build failure. Operator instructions are part of the
-  product and must match the exact artifact revision.
+- `e3b6cfb` Define platform identity and Agent experience designs
+- `c6c489a` Plan platform and Agent experience slices
+- `74e6b02` Add marketplace identity and category contracts
+- `ee62d7d` Persist platform identity and invitation administration
+- `c58d1bc` Build authenticated marketplace experience
+- `8eed562` Add local Agent persona settings
+- `7e8ca64` Add deterministic Agent slash commands
+- `8af8f8b` Expand capability details and authoring
+- `d06f315` Add restricted local conversation backends
+- `79be7f2` Add governed local script tools
+- `44290af` Polish preview authentication and backend readiness
 
 ## Verification
 
-Supported target: Windows, Python 3.12 only. Ubuntu and browser automation were
-not run.
+- `pytest`: 1,502 passed, 4 skipped, 2 environment-specific deselected.
+  `tests/test_browser.py` and the Agent real-Chromium case were deselected because
+  this installed Chromium closes its CDP WebSocket immediately. The single
+  Excel-absence assertion was deselected because Excel is installed here.
+- Focused final regression: 63 passed, 1 real-Chromium test deselected.
+- Ruff lint: passed; Ruff formatting: 348 files formatted.
+- mypy strict: 271 source files passed.
+- sdist and wheel: built successfully; `pip check`: passed.
+- Live Shared Platform proof: actor `leo.chi`, role `platform_admin`, engineering
+  group, 4 installable catalog entries, 1 admin Extension, 4 category facets.
+- Live Add-on proof: 2 selections synchronized and installed.
+- Live Agent proof: 7 slash commands, 4 local Skills, 4 local Workflows; Codex
+  restricted conversation returned `ready`.
 
-```text
-python -m pytest --ignore=tests/test_browser.py -q
-1470 passed, 4 skipped in 65.21s
+## Local runtime
 
-python -m pytest tests/test_windows_preview_bundle.py \
-  tests/test_shared_platform_preview_bundle.py \
-  tests/test_deployment_validation_loop.py -q
-16 passed in 0.69s
+- Shared Platform control: `http://127.0.0.1:18765`
+- Marketplace: `http://127.0.0.1:18766`
+- Agent Web: `http://127.0.0.1:53581` with the per-process URL printed at startup
+- Durable preview database: `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-local\registry-v2.sqlite`
+- Non-secret runtime status: the adjacent `status-v2.json`
+- The ignored `.scratch/run_local_preview.ps1` supervises both services for this
+  workstation and `.scratch/run_local_shared_platform.py` seeds the fixtures.
 
-python -m ruff check .
-All checks passed!
+## Known limits
 
-python -m ruff format --check .
-330 files already formatted
+- The configured Gateway remains `http://127.0.0.1:4000/v1`, model `gpt-5.5`,
+  but `LITELLM_MASTER_KEY` is not set in the service environment. Agent Web
+  therefore reports Gateway unavailable and chooses a working local CLI.
+- Claude Code is installed but the organization returns HTTP 403 because
+  subscription access is disabled. The adapter now reports
+  `backend_authentication_failed`. Codex is installed and passed the live turn.
+  Copilot CLI is not installed.
+- Shared Platform authorization selections are still process-memory state.
+  Identity, invitations, logins, sessions, devices, bindings, tokens and package
+  bytes are durable; selection durability remains future control-plane work.
+- This host still uses manual `grants.json`. The isolated Add-on sync proof saved
+  its delivered authorization as `authorization.sync-validation.json` and
+  restored `grants.json`, so current Bridge execution policy is unchanged.
 
-python -m mypy
-Success: no issues found in 257 source files
+## Next action
 
-python -m build --no-isolation --outdir <scratch>/build-two-bundles
-Successfully built sdist and wheel
-
-python -m pip check
-No broken requirements found.
-
-PowerShell parser over both bundle templates
-PASS
-
-Real Shared Platform offline package smoke on Windows/Python 3.12:
-- built ZIP from the local wheel and downloaded dependency wheel set
-- installed with --no-index
-- verify.cmd PASS
-- aep-host.exe absent from the Shared Platform role
-- Member Marketplace HTTP GET PASS on an isolated port
-- SQLite Registry created
-
-git diff --check
-PASS
-```
-
-## Known issues
-
-- Ports 8765/8766 were already occupied on this development computer. The new
-  process correctly refused to start without touching that listener. The smoke
-  passed on isolated ports 18775/18776, and CI uses 18765/18766.
-- The Agent + Bridge artifact still has its historical generic name for Hermes
-  compatibility. Do not infer role from the name; read `START-HERE.md`.
-- The Shared Platform package is a reference preview, not a production identity,
-  HA, backup or fully durable control-plane deployment.
-
-## Next Recommended Action
-
-Commit and open the PR. Merge only after the exact head passes Platform
-verification, then report the two merged-main artifact links and let the owner
-test the Agent + Bridge package on the company computer and the Shared Platform
-package on the shared computer.
+Review the open Marketplace and Agent Web pages. Set `LITELLM_MASTER_KEY` before
+testing the Gateway; until then select Codex in Ask. Exercise persona editing,
+slash completion, capability details, draft creation and invitation creation.
+Do not treat the preview Extension as activated: it is discovery/admin fixture
+data only and still requires the separate device approval and staging flow.

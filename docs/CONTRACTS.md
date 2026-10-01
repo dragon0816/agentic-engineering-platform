@@ -2598,3 +2598,27 @@ a measurement passed.
 requires passing production-like evidence and therefore cannot be constructed
 from CI simulation, a recording or an out-of-limit physical run. Review approval
 does not itself publish a Skill or grant future execution permission.
+
+## Personal Agent identity, conversation and script tools
+
+`Invitation.role` and `PlatformUser.role` separate ordinary members from
+`platform_admin`. Invitation proofs are single-use. `MemberLoginGrant` is a
+revocable, durable browser credential that mints short `MemberSessionGrant`
+values; only its opaque bearer is kept in browser local storage. Identity,
+invitation, login and session records may share `SqliteIdentityStorage` without
+putting a bearer secret in SQLite.
+
+`ConversationRecord.backend` selects the configured Gateway or one restricted
+local CLI adapter. Local adapters accept the bounded transcript over stdin,
+run in an isolated working directory with a fixed argument vector and reduced
+environment, and return text only. They do not register or dispatch a Bridge
+capability. Slash commands are parsed before any conversation backend.
+
+`ScriptToolManifest` binds one published and approved exact asset identity to a
+package-relative `.py` or `.ps1` entrypoint, SHA-256, timeout, dependencies,
+secret references and an `execute` `CapabilitySpec`. The metadata and runtime
+technical policies must match. The Bridge verifies the file before registration
+and again before each invocation, uses a fixed noninteractive interpreter with
+no shell, exchanges JSON through stdin/stdout and still applies normal local
+policy and approval checks. `SkillManifest.script_tools` contains references
+for documentation only and grants no execution authority.

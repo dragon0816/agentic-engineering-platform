@@ -316,6 +316,9 @@ streaming `done` flag.
 | 2026-09-23 | A shared test workstation is wired to particular instruments and laid out as a test environment for automated testing; it belongs to that rig rather than to a desk, which is why a virtual member rather than a rota of employees fits it |
 | 2026-09-23 | The workbook is written through Excel itself (COM) on the company workstation rather than through a library. Delegated: the owner asked for the slice to be finished after being given both options and a recommendation. Reversible — the executor writes through a `WorkbookWriter` protocol and knows nothing about COM |
 | 2026-09-23 | Being an invited, authenticated member is the gate for using the platform's resources. A request is not narrowed further by who asked for it, and the list of people who may drive a machine stays host configuration rather than something the control plane delivers |
+| 2026-10-01 | Shared Platform browser access is invitation-only and persists a revocable browser-login proof locally; short member sessions remain memory-only. The first bootstrap invitation creates a `platform_admin`, who can issue and revoke later invitations. |
+| 2026-10-01 | Claude Code, Codex and Copilot are restricted local conversation backends, separate from `ModelCatalog`. They receive bounded text context in an isolated working directory and cannot return executable Agent tool calls; deterministic slash commands and Gateway tool calls remain under Bridge policy. |
+| 2026-10-01 | A Skill may reference scripts for documentation, but execution requires a separately installed script-tool capability with an exact package-relative path, SHA-256, fixed Python/PowerShell host, JSON stdin/stdout and normal Bridge approval. |
 
 ## Resolved owner decisions (Phase 7)
 
@@ -382,7 +385,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Add authenticated account and administrator invitation management to Marketplace.
 - [x] Add backward-compatible asset categories and entitled category filtering.
 - [x] Publish harmless test Skills, Workflows and one governed Bridge Extension.
-- [ ] Verify member Add-on selection/sync separately from administrator Extension staging.
+- [x] Verify member Add-on selection/sync separately from administrator Extension staging.
 
 # Agent persona, chat backends and capability authoring
 
