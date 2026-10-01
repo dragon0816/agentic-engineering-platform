@@ -131,6 +131,7 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/invitations",
             "admin/invitations/list",
             "admin/invitations/revoke",
+            "admin/extensions",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -168,6 +169,10 @@ class _Handler(BaseHTTPRequestHandler):
                 reply = self.server.service.application_catalog(
                     *credential, ApplicationCatalogRequest.model_validate(raw)
                 )
+            elif operation == "admin/extensions":
+                if raw != {}:
+                    raise ValueError("extension catalog accepts no request fields")
+                reply = self.server.service.extension_catalog(*credential)
             elif operation == "select":
                 reply = self.server.service.select(
                     *credential, MemberSelectRequest.model_validate(raw)

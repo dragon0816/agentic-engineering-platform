@@ -377,11 +377,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 
 # Shared Platform identity and marketplace usability
 
-- [ ] Persist invitation-only users, roles, groups, invitation proofs and member sessions.
-- [ ] Make the first accepted bootstrap invitation recipient a platform administrator.
-- [ ] Add authenticated account and administrator invitation management to Marketplace.
-- [ ] Add backward-compatible asset categories and entitled category filtering.
-- [ ] Publish harmless test Skills, Workflows and one governed Bridge Extension.
+- [x] Persist invitation-only users, roles, groups, invitation proofs and member sessions.
+- [x] Make the first accepted bootstrap invitation recipient a platform administrator.
+- [x] Add authenticated account and administrator invitation management to Marketplace.
+- [x] Add backward-compatible asset categories and entitled category filtering.
+- [x] Publish harmless test Skills, Workflows and one governed Bridge Extension.
 - [ ] Verify member Add-on selection/sync separately from administrator Extension staging.
 
 # Agent persona, chat backends and capability authoring

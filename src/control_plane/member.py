@@ -23,6 +23,8 @@ from common.base import Sha256, Symbol
 from common.enrollment import BridgeExecutionSubject
 from common.identity import ACCESS_TOKEN_METHOD, AuthenticatedActor, entitled
 from common.member import (
+    AdminExtensionCatalogEntry,
+    AdminExtensionCatalogReply,
     MemberCatalogEntry,
     MemberCatalogReply,
     MemberCatalogRequest,
@@ -232,6 +234,23 @@ class MemberService:
             if member.role != "platform_admin":
                 raise MemberError("not_administrator")
         return who
+
+    def extension_catalog(self, session_id: str, secret: str) -> AdminExtensionCatalogReply:
+        """List governed extension packages without staging or activating them."""
+
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            member = self.enrollment.user(who.actor)
+            if member.role != "platform_admin":
+                raise MemberError("not_administrator")
+            entries = tuple(
+                AdminExtensionCatalogEntry(package=package)
+                for package in self.authorization.packages.discover()
+                if package.kind == "bridge_extension"
+                and entitled(package.metadata, member.actor, member.groups)
+            )
+        return AdminExtensionCatalogReply(entries=entries)
 
     def catalog(
         self, session_id: str, secret: str, request: MemberCatalogRequest

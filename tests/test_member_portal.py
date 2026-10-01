@@ -8,10 +8,13 @@ decision time: the platform derives all of those from trusted state.
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 import urllib.error
 import urllib.request
 from collections.abc import Iterator
 from datetime import timedelta
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -180,7 +183,7 @@ def test_member_entry_point_rejects_bridge_credentials_and_unbound_devices(
     assert status == 403 and failure == {"code": "actor_not_admitted"}
 
 
-def test_portal_page_is_a_generic_same_origin_selection_ui(
+def test_portal_page_has_persistent_login_admin_and_filtered_marketplace_ui(
     portal: tuple[Platform, InMemoryMemberSessions, MemberPortalServer],
 ) -> None:
     _platform, _sessions, server = portal
@@ -193,7 +196,13 @@ def test_portal_page_is_a_generic_same_origin_selection_ui(
     assert "/v1/member/applications" in page
     assert "/v1/member/select" in page
     assert "/v1/member/revoke" in page
-    assert "localStorage" not in page
+    assert "localStorage" in page
+    assert "/v1/member/session" in page
+    assert "/v1/member/me" in page
+    assert "/v1/member/admin/invitations" in page
+    assert "/v1/member/admin/extensions" in page
+    assert "All categories" in page
+    assert "Select for install" in page
     assert "bridge-access-token" not in page
     assert "/v1/member/install" not in page
     assert "/v1/member/activate" not in page
@@ -211,3 +220,25 @@ def test_plain_http_member_portal_is_loopback_only(
     )
     with pytest.raises(ValueError, match="requires TLS"):
         MemberPortalServer(service, host="0.0.0.0")
+
+
+def test_marketplace_browser_script_parses(
+    portal: tuple[Platform, InMemoryMemberSessions, MemberPortalServer], tmp_path: Path
+) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is not installed, so JavaScript syntax cannot be checked")
+    _platform, _sessions, server = portal
+    with urllib.request.urlopen(server.base_url + "/", timeout=20) as answer:
+        page = answer.read().decode("utf-8")
+    script = page.split("<script>", 1)[1].split("</script>", 1)[0]
+    path = tmp_path / "marketplace.js"
+    path.write_text(script, encoding="utf-8")
+    checked = subprocess.run(
+        [node, "--check", str(path)],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=20,
+    )
+    assert checked.returncode == 0, checked.stderr

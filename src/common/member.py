@@ -61,6 +61,32 @@ class AdminInvitationRevokeRequest(Contract):
     invitation_id: Symbol
 
 
+class AdminExtensionCatalogEntry(Contract):
+    """Published Bridge Extension metadata visible to platform administrators."""
+
+    package: PublishedAssetPackage
+    deployment_state: str = "available"
+
+    @model_validator(mode="after")
+    def bridge_extension_only(self) -> Self:
+        if self.package.kind != "bridge_extension":
+            raise ValueError("the administrator extension catalog contains only extensions")
+        if self.deployment_state != "available":
+            raise ValueError("an unstaged Registry extension is only available")
+        return self
+
+
+class AdminExtensionCatalogReply(Contract):
+    entries: tuple[AdminExtensionCatalogEntry, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_extensions(self) -> Self:
+        keys = [item.package.metadata.identity.key for item in self.entries]
+        if len(keys) != len(set(keys)):
+            raise ValueError("an extension is listed once")
+        return self
+
+
 class MemberCatalogEntry(Contract):
     package: PublishedAssetPackage
     selected: bool = False

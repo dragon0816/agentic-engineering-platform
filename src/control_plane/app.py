@@ -70,6 +70,7 @@ class SharedPlatformConfiguration(Contract):
     tls_private_key_path: Text | None = None
     invitations: tuple[BootstrapInvitation, ...] = ()
     registry_path: Text | None = None
+    seed_preview_catalog: bool = False
 
     @model_validator(mode="after")
     def coherent_listener(self) -> Self:
@@ -323,6 +324,10 @@ def application_from_config(
         clock=moment,
         registry_path=config.registry_path,
     )
+    if config.seed_preview_catalog:
+        from control_plane.preview_catalog import seed_preview_catalog
+
+        seed_preview_catalog(application.state)
     issued: list[IssuedInvitationProof] = []
     try:
         for bootstrap in config.invitations:
