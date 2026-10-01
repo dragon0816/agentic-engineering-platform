@@ -144,7 +144,11 @@ class SharedPlatformState:
             enrollment=enrollment,
             tokens=InMemoryAccessTokens(enrollment, storage=storage),
             packages=registry,
-            authorization=InMemoryAuthorizationRegistry(enrollment, registry),
+            authorization=InMemoryAuthorizationRegistry(
+                enrollment,
+                registry,
+                storage=storage,
+            ),
             control=InMemoryRemoteControl(admission=enrollment.admit),
             artifacts=registry.artifacts,
             sessions=InMemoryMemberSessions(storage=storage),

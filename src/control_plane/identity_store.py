@@ -18,6 +18,7 @@ TABLES = frozenset(
         "identity_invitation_proofs",
         "identity_member_logins",
         "identity_member_sessions",
+        "authorization_selections",
     }
 )
 
@@ -55,10 +56,17 @@ class SqliteIdentityStorage:
         return tuple(str(row[0]) for row in rows)
 
     def put(self, table: str, key: str, value: Contract) -> None:
+        self.put_many(table, ((key, value),))
+
+    def put_many(self, table: str, records: tuple[tuple[str, Contract], ...]) -> None:
+        """Atomically replace one or more records in an allowlisted table."""
         checked = self._table(table)
+        payloads = tuple((key, value.model_dump_json()) for key, value in records)
+        if not payloads:
+            return
         with self._connect() as connection:
-            connection.execute(
+            connection.executemany(
                 f"INSERT INTO {checked}(record_key, payload) VALUES (?, ?) "  # noqa: S608
                 "ON CONFLICT(record_key) DO UPDATE SET payload = excluded.payload",
-                (key, value.model_dump_json()),
+                payloads,
             )

@@ -9,9 +9,15 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from common.enrollment import Invitation
+from common.assets import AssetIdentity
+from common.authorization import DeviceAssetSelection
+from common.enrollment import BridgeBinding, BridgeDevice, Invitation
+from common.execution import TraceIdentifiers
+from common.identity import AuthenticatedActor
 from control_plane.app import SharedPlatformApplication
 from control_plane.member import MemberError
+from control_plane.preview_catalog import seed_preview_catalog
+from workflow.host_bridge import BridgeRegistration
 
 NOW = datetime(2026, 10, 1, 9, 0, tzinfo=UTC)
 INVITATION_SECRET = "a-durable-invitation-proof-that-is-long-enough"
@@ -79,6 +85,61 @@ def test_invitation_member_session_and_login_survive_restart(tmp_path: Path) -> 
     )
     assert third.state.logins.authenticate(*login.bearer.split(":", 1), now=NOW).actor == "owner"
     third.stop()
+
+
+def test_member_asset_selection_survives_platform_restart(tmp_path: Path) -> None:
+    database = tmp_path / "platform.sqlite"
+    first = SharedPlatformApplication.empty(
+        administrators=("bootstrap-root",), registry_path=database, clock=lambda: NOW
+    )
+    invitation = bootstrap(first)
+    first.sign_in.accept(*invitation.split(":", 1))
+    seed_preview_catalog(first.state)
+    first.state.enrollment.register_device(
+        BridgeDevice(
+            bridge_id="bridge-owner",
+            registered_by="owner",
+            device_kind="company_workstation",
+            windows_account_mode="dedicated_user",
+            resource_scope="corporate_internal",
+            local_isolation="single_user",
+        ),
+        BridgeRegistration(
+            bridge_id="bridge-owner",
+            owner_id="owner",
+            trace=TraceIdentifiers(trace_id="durable", request_id="select", span_id="register"),
+        ),
+    )
+    first.state.enrollment.bind(
+        "owner",
+        BridgeBinding(bridge_id="bridge-owner", actor="owner", role="device_admin"),
+    )
+    selected = first.state.authorization.select(
+        AuthenticatedActor(
+            actor="owner",
+            method="invitation-proof",
+            authenticated_at=NOW - timedelta(minutes=1),
+            expires_at=NOW + timedelta(hours=1),
+        ),
+        DeviceAssetSelection(
+            bridge_id="bridge-owner",
+            actor="owner",
+            kind="workflow",
+            asset=AssetIdentity(namespace="preview", name="incident-triage", version="1.0.0"),
+            decided_at=NOW,
+        ),
+        now=NOW,
+    )
+    first.stop()
+
+    second = SharedPlatformApplication.empty(
+        administrators=("bootstrap-root",), registry_path=database, clock=lambda: NOW
+    )
+    try:
+        authorization = second.state.authorization.authorization("bridge-owner", issued_at=NOW)
+        assert authorization.selections == (selected,)
+    finally:
+        second.stop()
 
 
 def test_admin_can_invite_and_member_cannot(tmp_path: Path) -> None:

@@ -12,6 +12,7 @@ platform's side of the owner's rule; synchronization delivers its decisions
 through the existing Bridge transport.
 """
 
+import json
 from datetime import UTC, datetime
 from typing import Literal
 
@@ -27,6 +28,7 @@ from common.enrollment import BridgeExecutionSubject
 from common.identity import AuthenticatedActor, entitled
 from control_plane.distribution import PackageRegistry
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
+from control_plane.identity_store import SqliteIdentityStorage
 
 AuthorizationErrorCode = Literal[
     "session_expired",
@@ -70,10 +72,34 @@ def grant_from(spec: CapabilitySpec, selection: DeviceAssetSelection) -> Capabil
 class InMemoryAuthorizationRegistry:
     """Side-effect-free reference for what members decided their devices run."""
 
-    def __init__(self, enrollment: InMemoryEnrollmentRegistry, packages: PackageRegistry) -> None:
+    def __init__(
+        self,
+        enrollment: InMemoryEnrollmentRegistry,
+        packages: PackageRegistry,
+        *,
+        storage: SqliteIdentityStorage | None = None,
+    ) -> None:
         self.enrollment = enrollment
         self.packages = packages
-        self._selections: dict[tuple[str, str, tuple[str, str, str]], DeviceAssetSelection] = {}
+        self._storage = storage
+        self._selections = {
+            item.key: item
+            for item in (
+                DeviceAssetSelection.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("authorization_selections"))
+            )
+        }
+
+    @staticmethod
+    def _storage_key(item: DeviceAssetSelection) -> str:
+        return json.dumps(item.key, ensure_ascii=True, separators=(",", ":"))
+
+    def _save(self, *items: DeviceAssetSelection) -> None:
+        if self._storage is not None:
+            self._storage.put_many(
+                "authorization_selections",
+                tuple((self._storage_key(item), item) for item in items),
+            )
 
     def _member(self, actor: str, bridge_id: str) -> bool:
         return self.enrollment.admit(BridgeExecutionSubject(actor=actor, bridge_id=bridge_id))
@@ -186,6 +212,7 @@ class InMemoryAuthorizationRegistry:
         current = self._selections.get(item.key)
         if current is not None and current.status == "active":
             raise AuthorizationError("duplicate_selection")
+        self._save(item)
         self._selections[item.key] = item
         return item.model_copy(deep=True)
 
@@ -209,6 +236,7 @@ class InMemoryAuthorizationRegistry:
         if current is None or current.status != "active":
             raise AuthorizationError("selection_missing")
         revoked = DeviceAssetSelection.model_validate({**current.model_dump(), "status": "revoked"})
+        self._save(revoked)
         self._selections[key] = revoked
         return revoked.model_copy(deep=True)
 
@@ -255,6 +283,7 @@ class InMemoryAuthorizationRegistry:
             asset=new,
             decided_at=moment,
         )
+        self._save(revoked, selected)
         self._selections[existing.key] = revoked
         self._selections[selected.key] = selected
         return revoked.model_copy(deep=True), selected.model_copy(deep=True)
