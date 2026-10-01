@@ -1,9 +1,9 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/marketplace-lifecycle-ui`
-Base: `origin/main` at merge commit `0df644d` (PR #172)
-PR: #175 — https://github.com/dragon0816/agentic-engineering-platform/pull/175
+Branch: `codex/productization-3-final-handoff`
+Base: `main` at merge commit `fe461261` (PR #175)
+PR: final handoff update pending
 
 ## Goal
 
@@ -33,10 +33,12 @@ gates or combining their runtime semantics.
   specification after the implementation passed its focused tests.
 - Productization 3 is complete in repository code and has a reproducible
   Windows/Python 3.12 verification path.
+- PR #175 passed exact-head GitHub Actions and merged to `main` as
+  `fe461261a2fe183fd8a3fd5bb8a7d7a18c73b609`.
 
 ## In Progress
 
-- Wait for PR #175 exact-head Windows/Python 3.12 CI and auto-merge when green.
+- None. Productization 3 implementation and merge are complete.
 
 ## Remaining
 
@@ -98,7 +100,6 @@ PASS
 
 ## Next Recommended Action
 
-Merge the exact green head of this PR. Then use the updated phase/roadmap state
-to define the next small product milestone; do not extend Application install
-or Extension activation behavior without an approved contract and user-level
-acceptance scenario.
+Use the updated phase/roadmap state to define the next small product milestone.
+Do not extend Application install or Extension activation behavior without an
+approved contract and user-level acceptance scenario.
