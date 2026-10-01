@@ -76,8 +76,8 @@ A row says `done` only after its pull request merges.
 
 | Slice | Status | Acceptance evidence |
 |---|---|---|
-| 1 category and metadata contracts | in progress | Closed Bridge Extension compatibility/process/health/rollback metadata and an independent Application projection over governed Software; extensions remain outside Agent Add-ons |
-| 2 inert extension staging | planned | Signature, trust, digest, compatibility and path validation precede an atomic isolated-version write; no publisher code runs |
+| 1 category and metadata contracts | done | PR #166: closed Bridge Extension compatibility/process/health/rollback metadata and an independent Application projection over governed Software; extensions remain outside Agent Add-ons |
+| 2 inert extension staging | in progress | Ed25519 verifier boundary plus trust/revocation, digest, compatibility and path validation precede an atomic isolated-version write; no publisher code runs |
 | 3 bounded extension runner | planned | One approved version runs outside the Bridge process, advertises only healthy declared capabilities and records rollback evidence |
 | 4 Application catalog | planned | Members discover released external Software and declared integration points without Agent/Bridge installation |
 | 5 marketplace lifecycle UI | planned | Personal Agent Web shows extension lifecycle and external Application state with the applicable human gates |

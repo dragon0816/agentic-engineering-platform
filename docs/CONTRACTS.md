@@ -2341,6 +2341,16 @@ or one exact Workflow identity. `ApplicationProjection` exposes discovery and
 integration metadata only; it has no extension process, install package or
 Bridge activation field.
 
+`PortableExtensionPackage` is the inert staging envelope. It contains the exact
+published `BridgeExtensionManifest`, canonical `requirements.lock` and
+`wheels/*.whl` files, per-file SHA-256, a canonical content SHA-256 and
+`ExtensionSignature`. The signature key must equal the manifest's public
+`PublisherKeyRef`. `ExtensionTrustPolicy` contains explicit public keys and
+revocation state; `ExtensionSignatureVerifier` is injected and has no unsafe
+default. `stage_extension_package` checks all boundaries, derives an exact
+identity path and atomically exposes `StagedExtension`. The result says only
+`staged`; it carries no activation, health, grant or execution claim.
+
 ## Portable Knowledge package (Productization 2, slice 2)
 
 `PortableKnowledgePackage` carries one exact published `KnowledgeManifest` and
