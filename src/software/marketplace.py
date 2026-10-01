@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 from pydantic import model_validator
 
 from common.assets import AssetIdentity, RegistryContract
-from common.base import Symbol, Text
+from common.base import Slug, Symbol, Text
 from software.evolution import SoftwareManifest
 
 
@@ -68,6 +68,35 @@ class ApplicationProjection(RegistryContract):
     repository_locator: Text
     release_ref: Text
     integrations: tuple[ApplicationIntegration, ...]
+
+
+class ApplicationCatalogRequest(RegistryContract):
+    namespace: Slug | None = None
+
+
+class ApplicationCatalogReply(RegistryContract):
+    applications: tuple[ApplicationProjection, ...]
+
+
+class ApplicationCatalog:
+    """Exact Application metadata; it owns no process, package or deployment."""
+
+    def __init__(self) -> None:
+        self._entries: dict[tuple[str, str, str], ApplicationCatalogEntry] = {}
+
+    def register(self, entry: ApplicationCatalogEntry) -> None:
+        checked = ApplicationCatalogEntry.model_validate(entry)
+        key = checked.software.metadata.identity.key
+        if key in self._entries:
+            raise ValueError("Application version already registered")
+        self._entries[key] = checked
+
+    def discover(self, namespace: str | None = None) -> tuple[ApplicationCatalogEntry, ...]:
+        return tuple(
+            entry
+            for key, entry in sorted(self._entries.items())
+            if namespace is None or key[0] == namespace
+        )
 
 
 def project_application(entry: ApplicationCatalogEntry) -> ApplicationProjection:

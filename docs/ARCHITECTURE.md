@@ -358,6 +358,15 @@ runtime `LocalPolicy` grant. Windows subprocess separation reduces coupling and
 secret exposure but is not treated as an OS sandbox, so signer trust, technical
 policy and device activation approval remain required.
 
+The independent Application catalog is a member-session read boundary over
+published Software metadata. Platform-owned actor/group membership filters
+visibility; the request can narrow only namespace and cannot claim identity,
+entitlement, repository or device state. Because Applications run outside the
+Agent/Bridge plane, discovery requires no Bridge binding and exposes no
+selection, installation or activation operation. The projection contains
+identity, owner, external repository/release and declared integration points;
+reading it changes neither device authorization nor capability grants.
+
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof
 fingerprint, an unknown proof and a wrong proof are indistinguishable, and a

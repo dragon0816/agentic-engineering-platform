@@ -90,6 +90,21 @@ process separation and secret minimization, not an OS security-sandbox claim;
 trusted signature, technical policy and device activation approval remain
 mandatory.
 
+## Slice 4 implementation boundary
+
+`ApplicationCatalog` retains exact `ApplicationCatalogEntry` versions over
+published `SoftwareManifest` metadata. The authenticated member endpoint
+filters entries using platform-owned membership and the Software asset's
+visibility/ownership rules. The request may narrow a namespace, but carries no
+actor, group, repository, Bridge or entitlement claim.
+
+Application discovery does not require a Bridge binding because an Application
+is an external product. The reply contains the governed identity, owner,
+repository/release reference and declared Web/API/MCP/Workflow integrations. It
+contains no package, selected, installed or active state, and there is no
+Application select/install/activate member operation. Reading it cannot mutate
+device authorization or capability grants.
+
 ## Decisions for slices 2 and 3
 
 - One exact extension version runs in one dedicated subprocess. The Bridge

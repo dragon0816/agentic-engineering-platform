@@ -1,93 +1,84 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/extension-runner`
-Base: `origin/main` at merge commit `8e37cbe` (PR #169)
+Branch: `codex/application-catalog`
+Base: `origin/main` at merge commit `bd7964b` (PR #171)
 PR: pending
 
 ## Goal
 
-Productization 3 slice 3: activate one explicitly approved staged Bridge
-Extension outside the Bridge process, advertise only exact healthy declarations
-and recover a retained healthy version on failure.
+Productization 3 slice 4: provide authenticated, entitlement-filtered read-only
+discovery of independent Applications without treating them as Agent/Bridge
+packages.
 
 ## Completed
 
-- PR #169 passed exact-head Windows/Python 3.12 CI and auto-merged; signed
-  extension packages now stage atomically without executing publisher code.
-- Added closed correlated `aep-extension-jsonl/v1` health/invoke/shutdown
-  requests and healthy/succeeded/refused/failed responses.
-- Added `ExtensionActivationApproval`, binding actor, device kind/id, exact
-  extension and approved technical-policy reference. A wrong device/policy is
-  refused before any process or environment work.
-- Added offline isolated-environment preparation after approval. Only verified
-  staged wheel files are installed with `--no-index --no-deps`; a package-digest
-  marker permits reuse and partial environments are removed.
-- Added a fixed Windows subprocess adapter: exact isolated interpreter, `-I`,
-  manifest module, no shell, synchronized JSON-lines, minimal non-secret
-  environment and manifest timeouts.
-- Added `ExtensionManager`: exact health declarations gate all advertisements;
-  failed upgrades preserve the prior process, process failure removes the new
-  advertisement and can restart the retained approved version, while repeated
-  crashes disable reactivation inside the declared window.
-- Added real Windows subprocess protocol coverage plus deterministic tests for
-  approval, health identity, invoke, failed upgrade, automatic rollback, crash
-  limit and offline preparation.
+- PR #171 passed exact-head Windows/Python 3.12 CI and auto-merged; explicitly
+  approved staged extensions can now run through the bounded external runner.
+- Added `ApplicationCatalog`, retaining exact published Application versions
+  and refusing duplicate identities.
+- Added `ApplicationCatalogRequest` with optional namespace and
+  `ApplicationCatalogReply` containing only external Software projections.
+- Added `MemberService.application_catalog`. It authenticates the direct member
+  session, derives actor/groups from platform-owned enrollment and applies
+  normal visibility/owner entitlement. The request carries no actor/group,
+  repository, Bridge or entitlement claim.
+- Added `/v1/member/applications`. Discovery needs no Bridge binding and exposes
+  no Application select/install/activate operation.
+- Shared platform state now owns the Application catalog and supplies it to the
+  separate member entry point.
+- Real HTTP tests prove organization visibility, private exclusion, namespace
+  filtering, session authentication, no package/install/selection fields and
+  no device grant mutation.
 
 ## In Progress
 
-- Complete full verification, open the slice 3 PR, wait for exact-head CI and
+- Complete full verification, open the slice 4 PR, wait for exact-head CI and
   auto-merge when green.
 
 ## Remaining
 
-1. Slice 4: add read-only independent Application catalog discovery over
-   published Software metadata.
-2. Slice 5: add extension lifecycle and Application projections to Personal
-   Agent Web with applicable human gates.
+1. Slice 5: present independent Applications and Bridge Extension lifecycle in
+   Personal Agent Web, preserving the applicable human gates.
+2. Complete Productization 3 exit verification and documentation.
 
 ## Architecture decisions made
 
-- Extension publication, staging, activation approval, health advertisement
-  and `LocalPolicy` execution grant are separate states.
-- Environment preparation occurs only after device/policy approval and never
-  resolves packages from a network index.
-- A new version is health-checked before the previous process is stopped.
-- Windows process separation is not claimed as an OS sandbox. Signed publisher
-  trust, high-risk technical policy and device-owner/admin approval are still
-  mandatory; no host secrets are forwarded in the child environment.
+- Applications are external Software and therefore member-scoped rather than
+  device-selected. Discovery neither requires nor modifies a Bridge.
+- Application visibility uses the same platform-owned membership entitlement
+  semantics as other governed assets.
+- Repository locator and integration URLs appear only after entitlement and do
+  not become execution authority.
 
 ## Verification
 
 Supported target: Windows, Python 3.12 only. No Ubuntu or browser automation.
 
 ```text
-Focused extension package/runtime suite:
-17 passed
-
-Targeted ruff and format:
-PASS
+Focused member/Application/shared-platform HTTP suite:
+19 passed
 
 Targeted mypy:
 Success: no issues found in 5 source files
 
 python -m pytest --ignore=tests/test_browser.py -q
-1443 passed, 4 skipped in 60.09s
+1446 passed, 4 skipped in 60.24s
 
 python -m ruff check .
 All checks passed!
 
 python -m ruff format --check .
-321 files already formatted
+322 files already formatted
 
 python -m mypy
-Success: no issues found in 253 source files
+Success: no issues found in 254 source files
 
 python -m pip check
 No broken requirements found.
 
-python -m build --no-isolation --outdir <repo>/.scratch/build-p3-runner
-Successfully built sdist and wheel; both include `extensions/runtime.py`.
+python -m build --no-isolation --outdir <repo>/.scratch/build-p3-apps
+Successfully built sdist and wheel.
 
 git diff --check
 PASS
@@ -95,14 +86,13 @@ PASS
 
 ## Known issues
 
-- The subprocess boundary limits coupling, command construction and secret
-  inheritance, but does not provide Windows AppContainer/job-object filesystem
-  isolation. Extension activation remains a trusted, explicitly approved admin
-  operation.
-- Personal Agent Web lifecycle projection is slice 5; this slice provides the
-  typed state and runtime service only.
+- Application entries are in-memory in the reference composition. Durable
+  Application/Software storage can use the same catalog abstraction later;
+  this slice does not expand the Package Registry schema.
+- The member HTML page remains Agent Add-on-only until slice 5; the new route is
+  already available to that UI.
 
 ## Next Recommended Action
 
-Complete verification and merge this runner slice. Then expose independent
-Applications read-only before adding both categories to Personal Agent Web.
+Complete verification and merge this slice, then add lifecycle/read-only
+marketplace sections to Personal Agent Web without merging category semantics.

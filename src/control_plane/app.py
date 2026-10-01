@@ -34,6 +34,7 @@ from control_plane.member_http import MemberPortalServer
 from control_plane.member_signin import InMemoryInvitationSignIn
 from control_plane.registry_sqlite import SqliteRegistry
 from control_plane.service import ControlPlaneService
+from software.marketplace import ApplicationCatalog
 
 LOOPBACK = frozenset(("127.0.0.1", "localhost", "::1"))
 
@@ -105,6 +106,7 @@ class SharedPlatformState:
     control: InMemoryRemoteControl
     artifacts: Mapping[str, bytes]
     sessions: InMemoryMemberSessions = field(default_factory=InMemoryMemberSessions)
+    applications: ApplicationCatalog = field(default_factory=ApplicationCatalog)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -118,6 +120,7 @@ class SharedPlatformState:
             control=InMemoryRemoteControl(admission=enrollment.admit),
             artifacts={},
             sessions=InMemoryMemberSessions(),
+            applications=ApplicationCatalog(),
         )
 
     @classmethod
@@ -132,6 +135,7 @@ class SharedPlatformState:
             control=InMemoryRemoteControl(admission=enrollment.admit),
             artifacts=registry.artifacts,
             sessions=InMemoryMemberSessions(),
+            applications=ApplicationCatalog(),
         )
 
 
@@ -169,6 +173,7 @@ class SharedPlatformApplication:
             enrollment=state.enrollment,
             authorization=state.authorization,
             sessions=sessions,
+            applications=state.applications,
             clock=moment,
         )
         self.control_server = ControlPlaneServer(
