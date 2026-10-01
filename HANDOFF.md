@@ -3,7 +3,7 @@
 Date: 2026-10-01 (Asia/Taipei)
 Branch: `codex/windows-preview-test-guide`
 Base: `main` at `e5e97cda7c8c7e1c0ba905546d444706a16b3477`
-PR: pending
+PR: `#187` — https://github.com/dragon0816/agentic-engineering-platform/pull/187
 
 ## Goal
 
@@ -38,8 +38,9 @@ validation Issues.
 
 ## In Progress
 
-- Commit the coherent two-role packaging change, open a PR, wait for exact-head
-  Windows/Python 3.12 CI, merge after green, then wait for merged-main artifacts.
+- PR #187 contains the coherent two-role packaging change. Merge after its exact
+  head passes Windows/Python 3.12 Platform verification, then wait for the
+  merged-main artifacts.
 
 ## Remaining
 
