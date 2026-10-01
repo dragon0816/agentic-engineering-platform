@@ -285,6 +285,16 @@ Engineering / Execution Plane. It projects local Bridge state and calls the
 same Agent used by CLI and Telegram; it does not own routing, policy,
 installation or execution logic.
 
+Natural-language conversation uses a bounded Agent loop. Only commands from
+installed Skill manifests are exposed as model tools, and each provider tool
+name resolves back to the manifest's exact capability or Workflow identity.
+The model can choose and supply arguments; it cannot add an installed target or
+grant. Local Agent admission happens before the loop, and every selected call
+still crosses Workflow preflight and Bridge policy. History, observations,
+turns and tool calls are bounded; typed stop reasons end failed repair rather
+than allowing an unbounded agent loop. Known commands continue to bypass model
+selection.
+
 Shared discovery crosses the existing authenticated Bridge/platform transport
 through a read-only `catalog` operation. The Team Platform filters published
 package metadata using the authenticated member and the platform's trusted

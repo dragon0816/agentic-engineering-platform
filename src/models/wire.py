@@ -18,7 +18,7 @@ from typing import Any, Protocol
 from common.assets import REDACTED, SECRET_PATTERN
 from common.execution import Failure
 from models.catalog import ModelEndpoint
-from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent, ModelTool, ModelToolCall
 from models.credentials import CredentialMisconfigured
 
 MAX_ERROR_CHARS = 500
@@ -238,18 +238,50 @@ def provider_error(body: object) -> Failure | None:
     )
 
 
-def unsupported(request: ModelRequest) -> Failure | None:
-    """Tool calling, in either of the shapes a request can carry it. A
-    `ModelTool` names a platform contract, and rendering that as a provider
-    schema needs a registry that does not exist yet."""
-    # A replayed exchange carries its tool calls on the messages rather than
-    # in `tools`; sending it without them is an invalid conversation.
-    if request.tools or any(message.tool_calls for message in request.messages):
+TOOL_INPUT_SCHEMAS: dict[str, dict[str, Any]] = {
+    # The installed capability/workflow owns the real closed input contract.
+    # This provider schema only carries the JSON object to that boundary; it
+    # grants no authority and cannot name a target.
+    "platform.command-arguments.v1": {
+        "type": "object",
+        "additionalProperties": True,
+    }
+}
+
+
+def tool_schema(tool: ModelTool) -> dict[str, Any] | Failure:
+    schema = TOOL_INPUT_SCHEMAS.get(tool.input_contract)
+    if schema is None:
         return Failure(
-            code="tools_not_supported",
-            message="a tool's input contract cannot yet be rendered as a provider schema",
+            code="tool_contract_unsupported",
+            message="the tool input contract has no approved provider schema",
             retryable=False,
         )
+    return {
+        "type": "function",
+        "function": {
+            "name": tool.name,
+            "description": tool.description,
+            "parameters": schema,
+        },
+    }
+
+
+def unsupported(request: ModelRequest, *, tool_calling: bool = False) -> Failure | None:
+    """Refuse provider features the chosen wire adapter cannot represent."""
+    has_exchange = bool(request.tools) or any(
+        message.tool_calls or message.tool_call_id is not None for message in request.messages
+    )
+    if has_exchange and not tool_calling:
+        return Failure(
+            code="tools_not_supported",
+            message="this provider adapter does not support tool calling",
+            retryable=False,
+        )
+    for tool in request.tools:
+        rendered = tool_schema(tool)
+        if isinstance(rendered, Failure):
+            return rendered
     return None
 
 
@@ -341,6 +373,7 @@ def answered(
     text: str,
     input_tokens: int,
     output_tokens: int,
+    tool_calls: tuple[ModelToolCall, ...] = (),
     duration_ms: int | None = None,
 ) -> ModelResponse:
     return ModelResponse(
@@ -349,6 +382,7 @@ def answered(
         # asked for, so its own `model` is no evidence of what served this.
         model_alias=request.model_alias,
         text=text,
+        tool_calls=tool_calls,
         structured_output=structured(request, text),
         input_tokens=input_tokens,
         output_tokens=output_tokens,

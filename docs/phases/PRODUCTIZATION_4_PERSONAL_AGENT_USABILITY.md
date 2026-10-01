@@ -1,6 +1,6 @@
 # Productization 4 — Personal Agent Usability
 
-Status: active; slices 1–3 complete
+Status: active; slices 1–4 complete
 
 ## User outcome
 
@@ -54,6 +54,21 @@ next slice is declared complete.
 - Every submitted turn carries its stable session id through the existing
   `LocalAgentRequest`; routing and Bridge policy remain unchanged.
 - Refreshing or switching conversations causes no execution.
+
+## Slice 4 acceptance criteria
+
+- An OpenAI-compatible model sees only commands derived from installed Skill
+  manifests. Provider tool names map back to one exact capability or Workflow.
+- Every accepted call crosses the existing Gateway, Workflow and Bridge policy
+  boundaries. Model output cannot add a target, grant or execution permission.
+- A model may make at most four tool calls across five model turns. Unknown
+  tools are never executed, repeated failure stops with a typed reason, and
+  conversation history/tool observations are size bounded.
+- Known dot commands remain deterministic and bypass model selection.
+- Tool execution evidence, status and trace identifiers are returned through
+  the conversation API and Workflow runs remain in durable local state.
+- The normal company endpoint remains `http://127.0.0.1:4000/v1`; its served
+  model id is still explicit host configuration.
 
 ## Slice 1–2 acceptance criteria
 

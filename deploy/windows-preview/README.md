@@ -457,9 +457,11 @@ reason about anything else: a request that matches no installed command is
 answered with `needs_input`, not a guess. That is the whole behaviour of every
 host before this section existed, and it is a reasonable one to keep.
 
-With one, a request that matches nothing is shown to a model along with the
-Skills installed *here*, and the model may pick one of them. It can pick only
-what is installed: a name it invents is refused, and the run never starts.
+With one, a request that matches nothing enters a bounded conversation loop.
+The model sees only commands from Skills installed *here*. It may call one,
+observe the real result and explain it in ordinary language. It can pick only
+what is installed: a name it invents is never executed, every real call still
+needs Bridge policy, and four unsuccessful tool calls stop the loop.
 
 The Personal Agent Web **Settings** tab can write this configuration without
 hand-editing JSON. For the standard local company Gateway, enter:

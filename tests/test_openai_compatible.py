@@ -289,7 +289,7 @@ def test_a_reply_that_is_not_an_answer_is_unparseable() -> None:
     assert streamed[0].failure is not None and streamed[0].failure.code == "model_http_error"
 
 
-def test_tools_are_refused_until_a_contract_can_be_a_schema() -> None:
+def test_unknown_tool_contracts_are_refused_before_transport() -> None:
     transport = Transport(json_reply(ANSWER))
     response = OpenAICompatible(endpoint(), transport=transport).generate(
         request(
@@ -298,7 +298,7 @@ def test_tools_are_refused_until_a_contract_can_be_a_schema() -> None:
         )
     )
     assert response.failure is not None
-    assert response.failure.code == "tools_not_supported" and not response.failure.retryable
+    assert response.failure.code == "tool_contract_unsupported" and not response.failure.retryable
     assert transport.calls == []  # refused before anything was sent
 
 
@@ -335,10 +335,54 @@ def test_a_declared_credential_needs_a_resolver_and_can_fail_on_its_own() -> Non
     assert streamed[0].failure.code == "credential_unavailable"
 
 
-def test_a_replayed_tool_exchange_is_refused_like_a_tool_request() -> None:
-    transport = Transport(json_reply(ANSWER))
-    call = ModelToolCall(call_id="c1", name="read_file", arguments={"path": "a.md"})
+def test_an_approved_tool_is_rendered_and_a_call_can_be_replayed() -> None:
+    called = {
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "type": "function",
+                            "function": {
+                                "name": "files__read",
+                                "arguments": '{"args":"notes.txt"}',
+                            },
+                        }
+                    ],
+                }
+            }
+        ],
+        "usage": {"prompt_tokens": 5, "completion_tokens": 3},
+    }
+    transport = Transport(json_reply(called))
     response = OpenAICompatible(endpoint(), transport=transport).generate(
+        request(
+            requirements=ModelRequirements(tool_calling=True),
+            tools=(
+                ModelTool(
+                    name="files__read",
+                    description="Read an installed file",
+                    input_contract="platform.command-arguments.v1",
+                ),
+            ),
+        )
+    )
+    assert response.failure is None
+    assert response.tool_calls == (
+        ModelToolCall(call_id="c1", name="files__read", arguments={"args": "notes.txt"}),
+    )
+    rendered = transport.calls[0]["payload"]["tools"][0]
+    assert rendered["function"]["parameters"] == {
+        "type": "object",
+        "additionalProperties": True,
+    }
+
+    replay = Transport(json_reply(ANSWER))
+    call = ModelToolCall(call_id="c1", name="read_file", arguments={"path": "a.md"})
+    response = OpenAICompatible(endpoint(), transport=replay).generate(
         request(
             messages=(
                 ModelMessage(role="user", text="read it"),
@@ -347,9 +391,10 @@ def test_a_replayed_tool_exchange_is_refused_like_a_tool_request() -> None:
             )
         )
     )
-    assert response.failure is not None
-    assert response.failure.code == "tools_not_supported"
-    assert transport.calls == []
+    assert response.failure is None
+    messages = replay.calls[0]["payload"]["messages"]
+    assert messages[1]["tool_calls"][0]["function"]["arguments"] == '{"path": "a.md"}'
+    assert messages[2]["tool_call_id"] == "c1"
 
 
 def test_a_stream_that_is_not_a_stream_is_not_a_silent_success() -> None:

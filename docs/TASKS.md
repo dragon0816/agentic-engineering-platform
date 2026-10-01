@@ -255,7 +255,7 @@ knows about them.
 |---|---|
 | Phase 3 | A payload sweep, and process-liveness or lease-based suspension |
 | Phase 4 | A retrieval cache, host wiring that plans from an adopted document, a size-and-mtime shortcut for adopted-file drift checks, image description for legacy `raw/` |
-| Phase 5 | Tool calling in either adapter (it needs a registry that can render a contract as a provider schema), reading `tool_calls` back, retry behaviour, a pooled or async transport, a production credential backend |
+| Phase 5 | Ollama tool calling, streaming tool-call deltas, provider-schema mappings beyond the approved installed-command argument object, retry behaviour, a pooled or async transport, a production credential backend |
 | Phase 6 | Nothing persists an `ExecutionTrace` yet (a host writes them beside its checkpoints); `SECRET_PATTERN` is deliberately narrow and a provider-specific token shape it does not name is not redacted; `stayed_in_namespace` has no allowance for a capability legitimately shared across namespaces |
 | Phase 7, slice 2j | Taking somebody off a shared machine is a host action: their `telegram.json` entry keeps working after `disable_user` or `unbind`, because the request runs as the virtual member and `on_behalf_of` is never consulted. Offboarding has to include editing that file. Moving the sender list into the authorization bundle is the change that would make it a platform action, and the owner decided against it |
 | Phase 7, slice 3b | `ExcelComWriter` has never been run. There is no Excel in CI and none on this machine, so the adapter is written to the documented COM object model and exercised only through a recording writer, exactly as the pinned source's own tests exercised its Bridge. One run on a company workstation against a copy of the workbook should confirm it before any run against the real one — the same caveat the model adapters carry |
@@ -352,6 +352,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   with full configuration validation, atomic save and restart semantics.
 - [x] Add durable local conversation sessions and clarification UX, with
   host-owned identity, bounded message history, result status and trace evidence.
-- [ ] Add a provider-neutral bounded tool loop with progress and evidence.
+- [x] Add a provider-neutral bounded tool loop with installed-command aliases,
+  OpenAI-compatible tool exchange, Bridge policy on every call, bounded context,
+  durable Workflow evidence and typed stop reasons.
 - [ ] Add standardized feedback/candidate-asset creation from the conversation
   workspace without bypassing review or publication governance.
