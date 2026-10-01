@@ -190,13 +190,17 @@ LocalStateErrorCode = Literal[
     "run_owner_fixed",
     "run_update_stale",
     "cursor_rewind",
+    "conversation_exists",
+    "conversation_unknown",
+    "conversation_owner_fixed",
+    "conversation_update_stale",
     "unavailable",
     "commit_unknown",
 ]
 
 
 class LocalStateError(Exception):
-    """A local inventory or run-state rule refused a change. The code is the
+    """A local inventory, run or conversation rule refused a change. The code is the
     whole message: no artifact bytes, path or record is echoed."""
 
     def __init__(self, code: LocalStateErrorCode) -> None:

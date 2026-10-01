@@ -216,6 +216,9 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/workflows/run", body={}).status == 401
     assert fetch(base(served) + "/api/knowledge/ask", body={}).status == 401
     assert fetch(base(served) + "/api/settings/model", body={}).status == 401
+    assert fetch(base(served) + "/api/conversations").status == 401
+    assert fetch(base(served) + "/api/conversations", body={}).status == 401
+    assert fetch(base(served) + "/api/conversations/turn", body={}).status == 401
 
 
 def test_the_token_in_the_address_does_not_open_the_api(served: AgentWebServer) -> None:
@@ -357,6 +360,51 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert 'id="model-base-url"' in page
     assert "127.0.0.1:4000/v1" in page
     assert "Bridge Extensions" in page
+
+
+def test_conversation_history_survives_a_runtime_restart(tmp_path: Path) -> None:
+    config, _layout = ready(tmp_path)
+    config_path = host_json(tmp_path, config)
+    with build_runtime(config) as runtime:
+        server = AgentWebServer(AgentWeb(runtime, config_path=config_path))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            created = fetch(base(server) + "/api/conversations", token=server.token, body={}).json()
+            session_id = created["conversation"]["session_id"]
+            turn = fetch(
+                base(server) + "/api/conversations/turn",
+                token=server.token,
+                body={"session_id": session_id, "message": "please do something unknown"},
+            ).json()
+            assert turn["conversation"]["messages"][0]["role"] == "user"
+            assert turn["conversation"]["messages"][1]["role"] == "assistant"
+            assert turn["conversation"]["messages"][1]["status"] == "needs_input"
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+    with build_runtime(config) as rebuilt:
+        restored = AgentWeb(rebuilt).conversations(session_id)
+        assert restored["selected"]["session_id"] == session_id
+        assert len(restored["selected"]["messages"]) == 2
+
+
+def test_conversation_requests_are_closed_and_owned_by_the_host(served: AgentWebServer) -> None:
+    endpoint = base(served) + "/api/conversations"
+    assert fetch(endpoint, token=served.token, body={"actor": "somebody-else"}).status == 400
+    created = fetch(endpoint, token=served.token, body={}).json()["conversation"]
+    turn = fetch(
+        base(served) + "/api/conversations/turn",
+        token=served.token,
+        body={
+            "session_id": created["session_id"],
+            "message": "hello",
+            "namespace": "other",
+        },
+    )
+    assert turn.status == 400
 
 
 def test_it_lists_what_this_machine_has_without_naming_any_one_of_them(

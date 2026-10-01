@@ -109,6 +109,8 @@ button.go[disabled] { opacity: .5; cursor: default; }
 .settings input, .settings select { width: 100%; font: 13px var(--mono); padding: 9px 10px;
   color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .settings .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.conversation-bar { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
+.conversation-bar select { flex: 1; }
 
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; }
@@ -152,11 +154,15 @@ tr:last-child td { border-bottom: none; }
     <p class="note">These commands come from Skills installed on this computer.
       Choose one to fill the request, then add the required details.</p>
     <div class="quick" id="command-hints"><span class="empty">reading&hellip;</span></div>
+    <div class="conversation-bar">
+      <select id="conversation" aria-label="Conversation"></select>
+      <button class="go" id="new-conversation" type="button">New</button>
+    </div>
     <div id="log"></div>
     <form class="ask" id="ask">
       <input id="message" autocomplete="off" spellcheck="false"
              placeholder="a command, such as  weekly.preview 2026_39W">
-      <button class="go" id="send" type="submit">Send</button>
+      <button class="go" id="send" type="submit" disabled>Send</button>
     </form>
     <p class="hint">This is the Agent on this computer &mdash; the same one the
       command line and Telegram reach, with the same permissions and the same
@@ -325,6 +331,7 @@ function tag(on, yes, no) {
 // -- Ask ------------------------------------------------------------------
 
 const log = el("log"), form = el("ask"), field = el("message"), send = el("send");
+let activeConversation = "";
 
 function turn(asked) {
   const block = document.createElement("div");
@@ -339,6 +346,51 @@ function turn(asked) {
   return said;
 }
 
+function renderConversation(record) {
+  log.replaceChildren();
+  if (!record) return;
+  for (let index = 0; index < record.messages.length; index += 2) {
+    const asked = record.messages[index];
+    const replied = record.messages[index + 1];
+    const said = turn(asked.text);
+    if (replied) {
+      said.className = "said" + (replied.status === "failed" ? " bad" : "");
+      said.textContent = replied.text;
+    }
+  }
+}
+
+async function loadConversations(selectId) {
+  let listed = await call("/api/conversations"
+    + (selectId ? "?session_id=" + encodeURIComponent(selectId) : ""));
+  if (!listed.conversations.length) {
+    const created = await call("/api/conversations", {});
+    selectId = created.conversation.session_id;
+    listed = await call("/api/conversations?session_id=" + encodeURIComponent(selectId));
+  }
+  const selector = el("conversation"); selector.replaceChildren();
+  for (const item of listed.conversations) {
+    const option = document.createElement("option"); option.value = item.session_id;
+    option.textContent = item.title; selector.append(option);
+  }
+  activeConversation = selectId || listed.conversations[0].session_id;
+  selector.value = activeConversation;
+  if (!listed.selected || listed.selected.session_id !== activeConversation) {
+    listed = await call("/api/conversations?session_id="
+      + encodeURIComponent(activeConversation));
+  }
+  renderConversation(listed.selected);
+  send.disabled = false;
+}
+
+el("conversation").addEventListener("change", async () => {
+  await loadConversations(el("conversation").value);
+});
+el("new-conversation").addEventListener("click", async () => {
+  const created = await call("/api/conversations", {});
+  await loadConversations(created.conversation.session_id); field.focus();
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const asked = field.value.trim();
@@ -347,9 +399,13 @@ form.addEventListener("submit", async (event) => {
   field.disabled = send.disabled = true;
   const said = turn(asked);
   try {
-    const answer = await call("/api/ask", {message: asked});
+    const completed = await call("/api/conversations/turn", {
+      session_id: activeConversation, message: asked,
+    });
+    const answer = completed.answer;
     said.className = "said" + (answer.ok ? "" : " bad");
     said.textContent = answer.answer;
+    await loadConversations(activeConversation);
   } catch (failure) {
     said.className = "said bad";
     said.textContent = "The request did not finish: " + failure.message;
@@ -680,6 +736,8 @@ loadReadiness().catch((failure) => { el("readiness").textContent =
   "Could not read Agent readiness: " + failure.message; });
 loadAssets().catch((failure) => { el("command-hints").textContent =
   "Could not read installed commands: " + failure.message; });
+loadConversations().catch((failure) => { log.textContent =
+  "Could not load conversation history: " + failure.message; });
 field.focus();
 </script>
 </body>

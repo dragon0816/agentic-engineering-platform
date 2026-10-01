@@ -71,6 +71,12 @@ from host_runtime.contracts import (
     PlatformSyncResult,
     WorkflowLaunchRequest,
 )
+from host_runtime.conversations import (
+    ConversationCreateRequest,
+    ConversationMessage,
+    ConversationRecord,
+    ConversationTurnRequest,
+)
 from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.workspace import documents, write_atomically
@@ -177,7 +183,7 @@ class AgentWeb:
         # One request at a time. The Agent's state is one SQLite file and a
         # capability may hold a workbook; two at once would be two runs
         # against the same things.
-        self._one_at_a_time = threading.Lock()
+        self._one_at_a_time = threading.RLock()
 
     # -- what the pages ask for ---------------------------------------
 
@@ -319,6 +325,94 @@ class AgentWeb:
         projection = self.settings()
         projection.update({"ok": True, "restart_required": True})
         return projection
+
+    def conversations(self, session_id: str | None = None) -> dict[str, Any]:
+        records = self.runtime.state.conversations(self.runtime.actor)
+        selected = (
+            None
+            if session_id is None
+            else self.runtime.state.conversation(session_id, self.runtime.actor)
+        )
+        return {
+            "conversations": [
+                {
+                    "session_id": item.session_id,
+                    "title": item.title,
+                    "updated_at": item.updated_at.isoformat(),
+                    "messages": len(item.messages),
+                }
+                for item in records
+            ],
+            "selected": (None if selected is None else json.loads(selected.model_dump_json())),
+        }
+
+    def create_conversation(self) -> dict[str, Any]:
+        now = datetime.now(UTC)
+        record = ConversationRecord(
+            session_id=f"conversation-{uuid.uuid4().hex}",
+            actor=self.runtime.actor,
+            title="New conversation",
+            created_at=now,
+            updated_at=now,
+        )
+        with self._one_at_a_time:
+            created = self.runtime.state.create_conversation(record)
+        return {"conversation": json.loads(created.model_dump_json())}
+
+    def conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
+        item = ConversationTurnRequest.model_validate(request)
+        with self._one_at_a_time:
+            record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+            if record is None:
+                return {"ok": False, "code": "conversation_unknown"}
+            started = datetime.now(UTC)
+            answer = self.ask(item.message, session_id=item.session_id)
+            finished = datetime.now(UTC)
+            outcome = answer.get("outcome")
+            decision = outcome.get("decision") if isinstance(outcome, dict) else None
+            status = (
+                "needs_input"
+                if isinstance(decision, dict) and decision.get("kind") == "needs_input"
+                else ("answered" if answer.get("ok") else "failed")
+            )
+            trace = outcome.get("trace") if isinstance(outcome, dict) else None
+            title = (
+                item.message[:72] + ("…" if len(item.message) > 72 else "")
+                if not record.messages
+                else record.title
+            )
+            updated = record.model_copy(
+                update={
+                    "title": title,
+                    "updated_at": finished,
+                    "messages": record.messages
+                    + (
+                        ConversationMessage(
+                            message_id=f"message-{uuid.uuid4().hex}",
+                            role="user",
+                            text=item.message,
+                            created_at=started,
+                            status="submitted",
+                        ),
+                        ConversationMessage(
+                            message_id=f"message-{uuid.uuid4().hex}",
+                            role="assistant",
+                            text=str(answer["answer"]),
+                            created_at=finished,
+                            status=status,
+                            trace=(
+                                None if trace is None else TraceIdentifiers.model_validate(trace)
+                            ),
+                        ),
+                    ),
+                }
+            )
+            saved = self.runtime.state.save_conversation(updated)
+        return {
+            "ok": answer.get("ok", False),
+            "conversation": json.loads(saved.model_dump_json()),
+            "answer": answer,
+        }
 
     def assets(self) -> dict[str, Any]:
         """What this machine has installed, and what it has run.
@@ -590,7 +684,12 @@ class AgentWeb:
                 )
         return outcome.model_dump(mode="json")
 
-    def ask(self, message: str, namespace: str | None = None) -> dict[str, Any]:
+    def ask(
+        self,
+        message: str,
+        namespace: str | None = None,
+        session_id: str | None = None,
+    ) -> dict[str, Any]:
         chosen = namespace or self.namespace
         if not chosen:
             return {
@@ -607,6 +706,7 @@ class AgentWeb:
             namespace=chosen,
             message=message,
             trace=_trace(),
+            session_id=session_id,
         )
         import asyncio
 
@@ -744,6 +844,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
+        elif parsed.path == "/api/conversations":
+            session_id = parse_qs(parsed.query).get("session_id", [None])[0]
+            self._json(200, web.conversations(session_id))
         elif parsed.path == "/api/assets":
             self._json(200, web.assets())
         elif parsed.path == "/api/platform":
@@ -766,6 +869,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/workflows/run",
             "/api/knowledge/ask",
             "/api/settings/model",
+            "/api/conversations",
+            "/api/conversations/turn",
         ):
             self._json(404, {"error": "no such page"})
             return
@@ -790,6 +895,23 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
             self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/conversations":
+            try:
+                ConversationCreateRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "conversation creation requires an empty request"})
+                return
+            self._json(201, self.server.web.create_conversation())
+            return
+        if path == "/api/conversations/turn":
+            try:
+                turn = ConversationTurnRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid conversation turn"})
+                return
+            result = self.server.web.conversation_turn(turn)
+            self._json(200 if result.get("code") is None else 404, result)
             return
         if path == "/api/platform/sync":
             try:

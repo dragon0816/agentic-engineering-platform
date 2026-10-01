@@ -1811,6 +1811,20 @@ value. Installed Knowledge may remain configured while no routing model is
 available; in that state deterministic capabilities and the setup interface
 start, while `knowledge-query/ask` is not registered.
 
+`ConversationCreateRequest` is closed and empty; the host supplies actor,
+session id and timestamps. `ConversationTurnRequest` carries only a session id
+and message and rejects embedded credential material. `ConversationRecord`
+contains one host actor, a bounded chronological tuple of user/assistant
+`ConversationMessage` values, status and assistant trace evidence. Conversation
+rows live only in the Bridge's SQLite local state, survive restart, and are
+filtered by the running actor. A saved update must preserve the complete stored
+prefix, actor and monotonic update time.
+
+The conversation Web adapter passes the stable session id into the existing
+`LocalAgentRequest`. It does not turn transcript text into identity,
+authorization, model configuration or execution permission. Listing, selecting
+and refreshing conversation history perform no Agent call.
+
 ## Durable shared Registry (Productization 1, slice 6)
 
 `PackageRegistry` is the control-plane catalog boundary used by authorization,
