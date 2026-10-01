@@ -3,7 +3,7 @@
 Date: 2026-10-01 (Asia/Taipei)
 Branch: `codex/marketplace-lifecycle-ui`
 Base: `origin/main` at merge commit `0df644d` (PR #172)
-PR: pending
+PR: #175 — https://github.com/dragon0816/agentic-engineering-platform/pull/175
 
 ## Goal
 
@@ -36,8 +36,7 @@ gates or combining their runtime semantics.
 
 ## In Progress
 
-- Open the slice 5 PR, wait for exact-head Windows/Python 3.12 CI and auto-merge
-  when green.
+- Wait for PR #175 exact-head Windows/Python 3.12 CI and auto-merge when green.
 
 ## Remaining
 

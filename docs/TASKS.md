@@ -80,7 +80,7 @@ A row says `done` only after its pull request merges.
 | 2 inert extension staging | done | PR #169: Ed25519 verifier boundary plus trust/revocation, digest, compatibility and path validation precede an atomic isolated-version write; no publisher code runs |
 | 3 bounded extension runner | done | PR #171: one device/policy-approved version uses an offline isolated environment and fixed JSON-lines subprocess; only healthy exact declarations advertise, while failure removes them and preserves/recovers a healthy prior version |
 | 4 Application catalog | done | PR #172: authenticated members discover entitled released external Software and declared integration points without naming a Bridge or receiving selection/install/activation operations |
-| 5 marketplace lifecycle UI | done | Personal Agent Web shows valid staged Extension packages and atomically persisted runtime state without activation controls; the direct-member marketplace lists entitled external Applications and only opens declared Web UI links |
+| 5 marketplace lifecycle UI | done | PR #175: Personal Agent Web shows valid staged Extension packages and atomically persisted runtime state without activation controls; the direct-member marketplace lists entitled external Applications and only opens declared Web UI links |
 
 Productization 2 and Productization 3 have reproducible passing exit paths.
 Their independently verified boundaries remain in the phase specifications.
