@@ -2351,6 +2351,21 @@ default. `stage_extension_package` checks all boundaries, derives an exact
 identity path and atomically exposes `StagedExtension`. The result says only
 `staged`; it carries no activation, health, grant or execution claim.
 
+`ExtensionActivationApproval` is trusted device-local input that binds one
+exact staged version to actor, device kind/id and approved technical-policy
+reference. `ExtensionRequest` and `ExtensionResponse` are closed correlated
+`aep-extension-jsonl/v1` messages for health, invoke and shutdown. A healthy
+response declares exactly the signed manifest's ordered capability identities.
+
+`ExtensionManager` admits no advertisement before successful health. Its
+`ExtensionActivationRecord` distinguishes active, refused, unhealthy,
+rolled-back and disabled state. Failed upgrade preserves the previous session;
+process failure removes advertisement, enforces the manifest crash window and
+may restart the retained approved version. `SubprocessExtensionFactory`
+prepares only the staged wheels using offline/no-dependency pip and launches a
+fixed isolated interpreter/module vector without a shell or credential-bearing
+environment. Advertisement remains separate from `LocalPolicy` authorization.
+
 ## Portable Knowledge package (Productization 2, slice 2)
 
 `PortableKnowledgePackage` carries one exact published `KnowledgeManifest` and
