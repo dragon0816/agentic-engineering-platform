@@ -13,7 +13,12 @@ from pydantic import ValidationError
 
 from common.base import Contract
 from common.identity import IssuedInvitationProof
-from common.member import MemberCatalogRequest, MemberRevokeRequest, MemberSelectRequest
+from common.member import (
+    MemberCatalogRequest,
+    MemberReplaceRequest,
+    MemberRevokeRequest,
+    MemberSelectRequest,
+)
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
 from control_plane.member_page import PAGE
 from control_plane.member_signin import InMemoryInvitationSignIn, InvitationSignInError
@@ -94,7 +99,7 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         operation = self.path.removeprefix(API_PREFIX) if self.path.startswith(API_PREFIX) else ""
-        if operation not in ("sign-in", "catalog", "select", "revoke"):
+        if operation not in ("sign-in", "catalog", "select", "replace", "revoke"):
             self._json(404, {"code": "invalid_request"})
             return
         if operation == "sign-in":
@@ -125,6 +130,10 @@ class _Handler(BaseHTTPRequestHandler):
             elif operation == "select":
                 reply = self.server.service.select(
                     *credential, MemberSelectRequest.model_validate(raw)
+                )
+            elif operation == "replace":
+                reply = self.server.service.replace(
+                    *credential, MemberReplaceRequest.model_validate(raw)
                 )
             else:
                 reply = self.server.service.revoke(

@@ -212,6 +212,53 @@ class InMemoryAuthorizationRegistry:
         self._selections[key] = revoked
         return revoked.model_copy(deep=True)
 
+    def replace(
+        self,
+        identity: AuthenticatedActor,
+        bridge_id: Symbol,
+        current: AssetIdentity,
+        replacement: AssetIdentity,
+        *,
+        now: datetime | None = None,
+    ) -> tuple[DeviceAssetSelection, DeviceAssetSelection]:
+        """Validate a version switch completely before changing either record."""
+        moment = now if now is not None else datetime.now(UTC)
+        who = self._valid(identity, moment)
+        device = TypeAdapter(Symbol).validate_python(bridge_id)
+        old = AssetIdentity.model_validate(current)
+        new = AssetIdentity.model_validate(replacement)
+        if old.key == new.key:
+            raise AuthorizationError("duplicate_selection")
+        if (old.namespace, old.name) != (new.namespace, new.name):
+            raise AuthorizationError("kind_mismatch")
+        if not self._member(who.actor, device):
+            raise AuthorizationError("actor_not_admitted")
+        existing = self._selections.get((device, who.actor, old.key))
+        if existing is None or existing.status != "active" or existing.kind == "capability":
+            raise AuthorizationError("selection_missing")
+        package = self.packages.get(new)
+        if package is None:
+            raise AuthorizationError("asset_not_published")
+        if package.kind != existing.kind:
+            raise AuthorizationError("kind_mismatch")
+        if not entitled(package.metadata, who.actor, self._member_groups(who.actor)):
+            raise AuthorizationError("asset_not_entitled")
+        replacement_key = (device, who.actor, new.key)
+        current_replacement = self._selections.get(replacement_key)
+        if current_replacement is not None and current_replacement.status == "active":
+            raise AuthorizationError("duplicate_selection")
+        revoked = existing.model_copy(update={"status": "revoked"})
+        selected = DeviceAssetSelection(
+            bridge_id=device,
+            actor=who.actor,
+            kind=package.kind,
+            asset=new,
+            decided_at=moment,
+        )
+        self._selections[existing.key] = revoked
+        self._selections[selected.key] = selected
+        return revoked.model_copy(deep=True), selected.model_copy(deep=True)
+
     def authorization(self, bridge_id: Symbol, *, issued_at: datetime) -> DeviceAuthorization:
         """What this device may run, as of now: the decisions in force."""
         key = TypeAdapter(Symbol).validate_python(bridge_id)

@@ -26,6 +26,8 @@ from common.member import (
     MemberCatalogEntry,
     MemberCatalogReply,
     MemberCatalogRequest,
+    MemberReplacementReply,
+    MemberReplaceRequest,
     MemberRevokeRequest,
     MemberSelectionReply,
     MemberSelectRequest,
@@ -250,3 +252,22 @@ class MemberService:
             except AuthorizationError as error:
                 raise MemberError(_AUTHORIZATION_CODES.get(error.code, "invalid_request")) from None
         return MemberSelectionReply(selection=revoked)
+
+    def replace(
+        self, session_id: str, secret: str, request: MemberReplaceRequest
+    ) -> MemberReplacementReply:
+        item = MemberReplaceRequest.model_validate(request)
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            try:
+                previous, selected = self.authorization.replace(
+                    who,
+                    item.bridge_id,
+                    item.current,
+                    item.replacement,
+                    now=now,
+                )
+            except AuthorizationError as error:
+                raise MemberError(_AUTHORIZATION_CODES.get(error.code, "invalid_request")) from None
+        return MemberReplacementReply(previous=previous, selection=selected)

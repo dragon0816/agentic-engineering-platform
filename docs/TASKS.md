@@ -69,8 +69,8 @@ A row says `done` only after its pull request merges.
 | 1 Skill selection and activation | done | PR #157: member portal lists/selects exact Workflows and Skills, derives kind from the Registry, syncs the Skill and proves a rebuilt Agent uses its deterministic command without adding grants |
 | 2 portable Knowledge package | done | PR #159: one exact manifest, immutable Raw and curated Wiki content install through a path-safe closed package without a publisher-controlled local Vault path |
 | 3 Knowledge marketplace activation | done | PR #161: member selection and sync create an exact host-derived local Knowledge binding; rebuilt Personal Agent Web answers with Raw citations while selection adds no capability grant |
-| 4 Agent profile package and activation | in progress | Member selection installs an inert exact profile; explicit local activation validates every dependency and narrows Skills, Knowledge, capabilities and model requirements without delegation |
-| 5 version change and rollback | planned | Explicit update/removal preserves one usable prior exact version and keeps authorization separate |
+| 4 Agent profile package and activation | done | PR #163: member selection installs an inert exact profile; explicit local activation validates every dependency and narrows Skills, Knowledge, capabilities and model requirements without delegation |
+| 5 version change and rollback | in progress | Atomic exact-version replacement updates or rolls back active selection while retaining verified prior local bytes and leaving capability grants unchanged |
 
 ## Productization 3 — Bridge Extensions and Application Catalog (planned)
 

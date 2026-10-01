@@ -314,6 +314,15 @@ host rebuild uses the profile only to narrow those sets. Delegation remains
 refused. A Bridge access token is rejected at this boundary. The
 selection page is a projection of this service and owns no authorization rule.
 
+Version changes use the same member boundary and exact identities. One atomic
+replacement revokes the selected version and selects another published,
+entitled version of the same namespace/name/kind. The Bridge installs missing
+bytes on its next explicit synchronization and retains prior verified versions
+as inert local inventory. Rollback is the same replacement in reverse and can
+reuse those bytes; it still requires synchronized platform authorization.
+Revoking a selection removes its authority without deleting the only local
+rollback evidence.
+
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof
 fingerprint, an unknown proof and a wrong proof are indistinguishable, and a
