@@ -406,6 +406,12 @@ def test_installed_skill_commands_include_a_clickable_manifest_derived_invocatio
         "target": "engineering/read-local-file@1.0.0",
         "invocation": "files.read ",
     }
+    assert assets["skills"][0]["procedure_markdown"].startswith("Read a file")
+    assert assets["skills"][0]["script_tools"] == []
+    assert assets["workflows"][0]["parameters"] == {
+        "editor": "json_object",
+        "input_contract": "engineering.read-local-file.input.v1",
+    }
 
 
 def test_model_settings_write_only_names_and_require_restart(tmp_path: Path) -> None:
@@ -540,8 +546,9 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert 'id="model-base-url"' in page
     assert "127.0.0.1:4000/v1" in page
     assert "Bridge Extensions" in page
-    assert 'id="tab-feedback"' in page
+    assert 'id="tab-feedback"' not in page
     assert 'id="contribution-form"' in page
+    assert "Create a Skill or Workflow draft" in page
     assert 'id="persona-settings"' in page
     assert 'id="persona-soul"' in page
 
@@ -880,6 +887,8 @@ def test_it_shows_staged_and_runtime_extension_state_without_an_activation_actio
                 "Registered device owner or delegated device administrator approval required."
             ),
             "code": "extension_activation_failed",
+            "documentation": "Fixture integration",
+            "lifecycle": "Staged locally; activation requires an explicit device approval.",
         }
     ]
     assert 'id="cap-tab-extensions"' in source
@@ -1065,10 +1074,11 @@ def test_page_launches_exact_installed_workflows_and_shows_trace_identifiers(
     assert "workflow.run.run_id" in page
 
 
-def test_it_lists_exact_installed_knowledge_without_local_vault_paths(
+def test_it_lists_exact_installed_knowledge_with_its_local_configuration(
     served_knowledge: AgentWebServer,
 ) -> None:
     assets = fetch(base(served_knowledge) + "/api/assets", token=served_knowledge.token).json()
+    location = served_knowledge.web.runtime.config.knowledge[0].vault_root
     assert assets["knowledge"] == [
         {
             "namespace": "engineering",
@@ -1077,9 +1087,10 @@ def test_it_lists_exact_installed_knowledge_without_local_vault_paths(
             "domain": "engineering",
             "owner": "team:engineering-knowledge",
             "visibility": "team",
+            "location": location,
+            "vault_ref": location,
         }
     ]
-    assert "vault_root" not in json.dumps(assets)
 
 
 def test_grounded_knowledge_asking_runs_the_exact_capability_and_keeps_citations(

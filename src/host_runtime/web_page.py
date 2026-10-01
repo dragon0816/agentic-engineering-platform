@@ -226,7 +226,6 @@ tr:last-child td { border-bottom: none; }
 <div id="boot-error" class="boot-error" role="alert" hidden></div>
 <nav>
   <button id="tab-ask" aria-selected="true">Ask</button>
-  <button id="tab-feedback" aria-selected="false">Improve</button>
   <button id="tab-installed" aria-selected="false">Capabilities</button>
   <button id="tab-settings" aria-selected="false">Settings</button>
 </nav>
@@ -250,49 +249,6 @@ tr:last-child td { border-bottom: none; }
       command line and Telegram reach, with the same permissions and the same
       refusals. Nothing is written unless the command says so. One request runs
       at a time.</p>
-  </section>
-
-  <section id="panel-feedback">
-    <h2>Turn this conversation into a reviewable draft</h2>
-    <p class="note">Capture a problem with one exact installed version, or propose a new
-      Skill or Workflow. The Agent copies recent conversation evidence into a local draft.
-      It does not publish, install, execute or open an external issue.</p>
-    <div class="card settings">
-      <form id="contribution-form">
-        <label for="contribution-kind">Draft type</label>
-        <select id="contribution-kind">
-          <option value="improvement">Improve an installed capability</option>
-          <option value="new_capability">Propose a new Skill or Workflow</option>
-        </select>
-        <div id="improvement-fields">
-          <label for="contribution-target">Exact installed version</label>
-          <select id="contribution-target"></select>
-        </div>
-        <div id="candidate-fields" hidden>
-          <div class="two">
-            <div><label for="candidate-kind">Capability type</label>
-              <select id="candidate-kind"><option value="skill">Skill</option>
-                <option value="workflow">Workflow</option></select></div>
-            <div><label for="candidate-name">Proposed name</label>
-              <input id="candidate-name" placeholder="team-capability-name"></div>
-          </div>
-        </div>
-        <label for="contribution-summary">Problem or opportunity</label>
-        <input id="contribution-summary" required>
-        <label for="contribution-expected">Expected behavior</label>
-        <textarea id="contribution-expected" required></textarea>
-        <label for="contribution-actual">Current behavior or gap</label>
-        <textarea id="contribution-actual" required></textarea>
-        <label for="contribution-acceptance">Acceptance criteria (one per line)</label>
-        <textarea id="contribution-acceptance" required></textarea>
-        <p><button class="go" id="contribution-save" type="submit">Save draft</button></p>
-        <pre id="contribution-result" class="note">No draft saved yet.</pre>
-      </form>
-    </div>
-    <h2>Local drafts awaiting review</h2>
-    <p class="note">Business approval and technical policy remain separate and pending.
-      A later governed contribution path may validate and publish a new version.</p>
-    <div class="card"><div id="contribution-drafts" class="empty">reading&hellip;</div></div>
   </section>
 
   <section id="panel-settings">
@@ -408,6 +364,32 @@ tr:last-child td { border-bottom: none; }
         </div>
       </article>
     </div>
+    <details class="card settings" style="margin-top: 14px">
+      <summary><strong>Create a Skill or Workflow draft</strong></summary>
+      <p class="note">The current conversation is copied as evidence. The draft remains local,
+        unpublished and pending both business and technical review.</p>
+      <form id="contribution-form">
+        <div class="two">
+          <div><label for="candidate-kind">Capability type</label>
+            <select id="candidate-kind"><option value="skill">Skill</option>
+              <option value="workflow">Workflow</option></select></div>
+          <div><label for="candidate-name">Proposed name</label>
+            <input id="candidate-name" placeholder="team-capability-name" required></div>
+        </div>
+        <label for="contribution-summary">Purpose</label>
+        <input id="contribution-summary" required>
+        <label for="contribution-expected">Expected behavior</label>
+        <textarea id="contribution-expected" required></textarea>
+        <label for="contribution-actual">Current gap</label>
+        <textarea id="contribution-actual" required></textarea>
+        <label for="contribution-acceptance">Acceptance criteria (one per line)</label>
+        <textarea id="contribution-acceptance" required></textarea>
+        <p><button class="go" id="contribution-save" type="submit">Save candidate draft</button></p>
+        <pre id="contribution-result" class="note">No draft saved yet.</pre>
+      </form>
+      <h3>Local drafts awaiting review</h3>
+      <div id="contribution-drafts" class="empty">reading&hellip;</div>
+    </details>
     <div class="card settings" style="margin-top: 14px">
       <h2>Agent profile</h2>
       <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
@@ -766,7 +748,16 @@ function showCapabilityDetail(item, kind) {
 
   if (kind === "skills") {
     appendMeta(content, [["Alias", item.alias], ["Default command", item.default_command],
-      ["Commands", item.commands.map((command) => command.invocation.trim()).join(", ")]]);
+      ["Commands", item.commands.map((command) => command.invocation.trim()).join(", ")],
+      ["Script tools", item.script_tools.length
+        ? item.script_tools.map((script) => script.runtime + ": " + script.path).join(", ")
+        : "None declared"]]);
+    const procedureTitle = document.createElement("h4");
+    procedureTitle.append(text("Procedure Markdown"));
+    const procedure = document.createElement("pre");
+    procedure.className = "section-status";
+    procedure.append(text(item.procedure_markdown));
+    content.append(procedureTitle, procedure);
     if (item.commands.length) {
       const actions = document.createElement("div"); actions.className = "inline-actions";
       for (const command of item.commands) {
@@ -782,13 +773,15 @@ function showCapabilityDetail(item, kind) {
   } else if (kind === "workflows") {
     appendMeta(content, [["Steps", item.steps], ["Input contract", item.input_contract],
       ["Output contract", item.output_contract],
-      ["Capabilities", item.capabilities.join(", ")]]);
+      ["Capabilities", item.capabilities.join(", ")],
+      ["Parameter editor", "JSON object validated as " + item.parameters.input_contract]]);
     el("workflow-target").value = JSON.stringify({namespace: item.namespace, name: item.name,
       version: item.version});
     showWorkflowContract(); el("workflow-action").hidden = false;
   } else if (kind === "knowledge") {
     appendMeta(content, [["Domain", item.domain], ["Owner", item.owner],
-      ["Visibility", item.visibility]]);
+      ["Visibility", item.visibility], ["Location", item.location],
+      ["Manifest vault reference", item.vault_ref]]);
     el("knowledge-target").value = JSON.stringify({namespace: item.namespace, name: item.name,
       version: item.version});
     showKnowledgeDomain(); el("knowledge-action").hidden = false;
@@ -796,11 +789,15 @@ function showCapabilityDetail(item, kind) {
     badges.append(tag(item.state === "active", item.state, item.state));
     appendMeta(content, [["Runtime state", item.state + (item.code ? " (" + item.code + ")" : "")],
       ["Capabilities", item.capabilities.join(", ")], ["Publisher key", item.publisher_key_id],
-      ["Activation gate", item.activation_gate]]);
+      ["Activation gate", item.activation_gate], ["Lifecycle", item.lifecycle],
+      ["Documentation", item.documentation]]);
     const gate = document.createElement("p"); gate.className = "note";
     gate.append(text("Activation remains a device-administrator action. "
       + "This page does not bypass approval or technical policy."));
     content.append(gate);
+  } else if (kind === "applications") {
+    appendMeta(content, [["Owner", item.owner], ["Repository", item.repository],
+      ["Release", item.release], ["Documentation", item.documentation]]);
   }
 }
 
@@ -851,22 +848,13 @@ el("capability-search").addEventListener("input", renderCapabilityBrowser);
 
 // -- Governed contribution drafts ---------------------------------------
 
-function showContributionFields() {
-  const candidate = el("contribution-kind").value === "new_capability";
-  el("improvement-fields").hidden = candidate;
-  el("candidate-fields").hidden = !candidate;
-  el("contribution-save").disabled = !candidate && !el("contribution-target").value;
-}
-
-el("contribution-kind").addEventListener("change", showContributionFields);
-
 function renderContributionDrafts(drafts) {
   el("contribution-drafts").replaceChildren(table(
     ["Draft", "Type", "Target / proposal", "Review", "Summary"], drafts,
     (draft) => {
       const subject = draft.target
         ? draft.target.namespace + "/" + draft.target.name + "@" + draft.target.version
-        : draft.namespace + "/" + draft.proposed_name;
+        : (draft.proposed_name ? draft.namespace + "/" + draft.proposed_name : draft.namespace);
       return [draft.draft_id, draft.request_kind, draft.asset_kind + " " + subject,
               "business: " + draft.business_approval.status
                 + " · technical: " + draft.technical_policy.status,
@@ -875,44 +863,24 @@ function renderContributionDrafts(drafts) {
 }
 
 async function loadContributions() {
-  const assets = await call("/api/assets");
-  const target = el("contribution-target"); target.replaceChildren();
-  for (const kind of ["skills", "workflows", "knowledge"]) {
-    for (const asset of assets[kind]) {
-      const option = document.createElement("option");
-      option.value = JSON.stringify({namespace: asset.namespace, name: asset.name,
-        version: asset.version});
-      option.textContent = kind.slice(0, -1) + " · " + asset.namespace + "/" + asset.name
-        + "@" + asset.version;
-      target.append(option);
-    }
-  }
-  target.disabled = target.options.length === 0;
   const listed = await call("/api/contributions");
   renderContributionDrafts(listed.drafts);
-  showContributionFields();
 }
 
 el("contribution-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const kind = el("contribution-kind").value;
   const criteria = el("contribution-acceptance").value.split("\n")
     .map((item) => item.trim()).filter(Boolean);
   const body = {
     session_id: activeConversation,
-    request_kind: kind,
+    request_kind: "new_capability",
     summary: el("contribution-summary").value.trim(),
     expected_behavior: el("contribution-expected").value.trim(),
     actual_behavior: el("contribution-actual").value.trim(),
     acceptance_criteria: criteria,
   };
-  if (kind === "improvement") {
-    if (!el("contribution-target").value) return;
-    body.target = JSON.parse(el("contribution-target").value);
-  } else {
-    body.candidate_kind = el("candidate-kind").value;
-    body.proposed_name = el("candidate-name").value.trim();
-  }
+  body.candidate_kind = el("candidate-kind").value;
+  body.proposed_name = el("candidate-name").value.trim();
   const button = el("contribution-save"), result = el("contribution-result");
   button.disabled = true; result.textContent = "Saving a local governed draft…";
   try {
@@ -1191,7 +1159,7 @@ async function loadCapabilities() {
   const refresh = el("cap-refresh"); refresh.disabled = true;
   refresh.setAttribute("aria-busy", "true"); refresh.textContent = "Refreshing…";
   try {
-    await Promise.all([loadAssets(), loadPlatform()]);
+    await Promise.all([loadAssets(), loadPlatform(), loadContributions()]);
   } finally {
     refresh.disabled = false; refresh.removeAttribute("aria-busy");
     refresh.textContent = "Refresh status";
@@ -1204,7 +1172,7 @@ el("cap-refresh").addEventListener("click", () => {
 
 // -- Tabs -----------------------------------------------------------------
 
-const panels = {ask: null, feedback: loadContributions, installed: loadCapabilities,
+const panels = {ask: null, installed: loadCapabilities,
   settings: loadSettings};
 
 function showBootError(failure) {

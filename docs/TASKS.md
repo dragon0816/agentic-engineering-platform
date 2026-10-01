@@ -389,6 +389,6 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Add local Agent name, introduction and bounded `soul.md` settings.
 - [ ] Add restricted local Claude Code, Codex and Copilot conversation backends.
 - [x] Replace Ask hints with a deterministic slash-command palette and multiline input.
-- [ ] Add kind-specific Skill, Workflow, Knowledge, Extension and App detail sections.
+- [x] Add kind-specific Skill, Workflow, Knowledge, Extension and App detail sections.
 - [ ] Add governed Python/PowerShell script tool contracts and Bridge execution.
 - [ ] Move new Skill/Workflow draft creation into Capabilities and remove Improve.

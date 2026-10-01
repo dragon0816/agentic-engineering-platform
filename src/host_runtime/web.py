@@ -748,6 +748,9 @@ class AgentWeb:
                 "version": item.metadata.identity.version,
                 "alias": item.alias,
                 "description": item.instructions,
+                "procedure_markdown": item.instructions,
+                # Executable scripts are declared separately from Skill guidance.
+                "script_tools": [],
                 "commands": [
                     {
                         "name": command.name,
@@ -774,10 +777,17 @@ class AgentWeb:
                 "capabilities": list(item.dependencies.local_capabilities),
                 "input_contract": item.input_contract,
                 "output_contract": item.output_contract,
+                "parameters": {
+                    "editor": "json_object",
+                    "input_contract": item.input_contract,
+                },
             }
             for item in manifests(layout.workflows, WorkflowManifest)
         ]
-        configured_knowledge = {binding.asset.key for binding in self.runtime.config.knowledge}
+        knowledge_locations = {
+            binding.asset.key: binding.vault_root for binding in self.runtime.config.knowledge
+        }
+        configured_knowledge = set(knowledge_locations)
         authorization = load_authorization(self.runtime.config, layout)
         if authorization is not None:
             configured_knowledge.update(
@@ -793,6 +803,10 @@ class AgentWeb:
                 "domain": item.domain,
                 "owner": f"{item.metadata.owner.type}:{item.metadata.owner.id}",
                 "visibility": item.metadata.visibility,
+                "location": knowledge_locations.get(
+                    item.metadata.identity.key, "Installed by synchronized selection"
+                ),
+                "vault_ref": item.vault_ref,
             }
             for item in manifests(layout.knowledge, KnowledgeManifest)
             if item.metadata.identity.key in configured_knowledge
@@ -838,7 +852,14 @@ class AgentWeb:
             "workflows": workflows,
             "knowledge": knowledge,
             "extensions": [
-                item.model_dump(mode="json") for item in extension_lifecycle(self.runtime)
+                {
+                    **item.model_dump(mode="json"),
+                    "documentation": item.description,
+                    "lifecycle": (
+                        "Staged locally; activation requires an explicit device approval."
+                    ),
+                }
+                for item in extension_lifecycle(self.runtime)
             ],
             "runs": runs,
         }
