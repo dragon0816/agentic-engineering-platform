@@ -2319,6 +2319,28 @@ manifest and its validation/evaluation references; neither function installs a
 capability or grants execution permission. `KnowledgeCatalog` admits only exact,
 published and digest-matching versions and retains earlier versions for rollback.
 
+## Bridge Extension and Application categories (Productization 3, slice 1)
+
+`BridgeExtensionManifest` is governed Registry metadata for publisher code that
+may add local Bridge capabilities. It fixes the supported Windows, Python and
+ABI boundary; names an out-of-process module and versioned JSON-lines protocol;
+declares unique typed `CapabilitySpec` values; and carries bounded startup,
+request, crash and rollback policy. A published manifest requires technical
+approval, policy references and validation evidence. `PublisherKeyRef` names a
+public Ed25519 trust-root identity only and never contains a private key.
+
+`PublishedAssetPackage.kind` can identify a `bridge_extension`, but
+`MemberCatalogEntry` continues to reject it because Agent Add-on selection is
+not extension activation. Staging, local activation approval, healthy runtime
+advertisement and capability authorization remain separate later boundaries.
+
+`ApplicationCatalogEntry` projects one published `SoftwareManifest` as an
+independent Application. Its named integrations are HTTPS or loopback Web/API/
+MCP endpoints whose callable interface must be declared by the Software asset,
+or one exact Workflow identity. `ApplicationProjection` exposes discovery and
+integration metadata only; it has no extension process, install package or
+Bridge activation field.
+
 ## Portable Knowledge package (Productization 2, slice 2)
 
 `PortableKnowledgePackage` carries one exact published `KnowledgeManifest` and

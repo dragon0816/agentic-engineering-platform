@@ -1,105 +1,105 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/addon-version-rollback`
-Base: `origin/main` at merge commit `0e3137a` (PR #163)
+Branch: `codex/extension-application-contracts`
+Base: `origin/main` at merge commit `487a4a9` (PR #165)
 PR: pending
 
 ## Goal
 
-Productization 2 slice 5: provide an atomic exact-version update and rollback
-path without deleting verified prior packages or mixing installation with
-execution authorization.
+Productization 3 slice 1: establish closed, provider-neutral categories for
+out-of-process Bridge Extensions and independent Applications before any
+publisher code can be staged or executed.
 
 ## Completed
 
-- PR #163 passed exact-head Windows/Python 3.12 CI and auto-merged; inert exact
-  Agent profiles can now be selected, synchronized and explicitly activated.
-- Added closed `MemberReplaceRequest` and `MemberReplacementReply` contracts.
-  Requests name one Bridge, current exact identity and replacement exact
-  identity; actor, kind, policy and decision time remain trusted platform state.
-- Added an atomic authorization-registry replace operation. It validates active
-  ownership, same asset family/kind, publication and entitlement before
-  revoking the current selection and activating the replacement.
-- Added `POST /v1/member/replace` and made the generic member catalog show
-  `Switch` when another exact version in the same family is currently selected.
-- Retained prior verified package bytes and inventory rows. Sync installs a
-  missing new exact version; rollback synchronizes only authorization and reuses
-  the prior local version with no download or rewrite.
-- Added a real HTTP E2E proving v1 execution, v2 switch/install/execution,
-  v1 rollback with zero installation, retained v1/v2 files and unchanged
-  capability grants. Failure cases prove no partial selection mutation.
+- Productization 2 is complete. PR #165 passed exact-head Windows/Python 3.12
+  CI and auto-merged; version switching and rollback retain verified inactive
+  package bytes without changing capability grants.
+- Added `BridgeExtensionManifest` with exact Windows/Python/ABI/protocol
+  compatibility, a dedicated-process entry point, typed capabilities, bounded
+  health/crash/rollback policy and a public Ed25519 publisher-key reference.
+- Published extensions require approved technical policy, policy references
+  and validation evidence. Duplicate capabilities and protocol mismatches are
+  rejected.
+- Added `bridge_extension` to Registry package kinds while keeping it outside
+  `MemberCatalogEntry`; extension publication remains separate from Agent
+  Add-on selection, activation and capability authorization.
+- Added `ApplicationCatalogEntry` and `ApplicationProjection` over a published
+  `SoftwareManifest`. Applications expose only declared HTTPS/loopback API,
+  MCP, UI or exact Workflow integration metadata and never become Agent/Bridge
+  packages.
+- Recorded Productization 3 runtime decisions: one dedicated subprocess per
+  exact version, JSON-lines IPC, Ed25519 trust/revocation, offline Windows
+  Python 3.12 wheelhouses, separate activation approval, bounded health/crash
+  policy and retention of at least two verified versions.
 
 ## In Progress
 
-- Open the slice 5 PR, wait for exact-head Windows/Python 3.12 CI and auto-merge
-  when green.
+- Finish full verification, open the slice 1 PR, wait for exact-head CI and
+  auto-merge when green.
 
 ## Remaining
 
-1. After merge, mark Productization 2 complete and record its combined exit
+1. Productization 3 slice 2: verify and atomically stage signed, compatible,
+   path-safe offline extension packages without importing or executing code.
+2. Slice 3: activate an approved staged version through the bounded external
+   runner, advertise only healthy declared capabilities and retain rollback
    evidence.
-2. Begin Productization 3 slice 1: category and compatibility contracts for
-   Agent Add-ons, Bridge Extensions and independent Applications.
-3. Continue Productization 3 with inert extension staging before any executable
-   extension runner.
+3. Slice 4: add read-only independent Application catalog discovery.
+4. Slice 5: add extension lifecycle and Application projections to Personal
+   Agent Web with the applicable human gates.
 
 ## Architecture decisions made
 
-- **REUSE/ADAPT** existing select/revoke, append-only local inventory and sync.
-  Version replacement is one new atomic member operation, not another package
-  manager.
-- Removal means explicit revocation of active use. Local verified bytes remain
-  inert so rollback evidence is not destroyed.
-- A replacement must keep namespace/name/kind and change only exact version.
-- Rollback is an ordinary authorized replacement in reverse. Local state never
-  overrides or invents platform authorization.
-- Capability grants are derived separately and remain unchanged by Add-on
-  update, rollback or revoke.
+- Agent Add-ons, Bridge Extensions and Applications have distinct lifecycle
+  and installation boundaries even when one marketplace presents them.
+- Registry publication, package staging, activation approval, capability
+  advertisement and execution authorization remain separate decisions.
+- Publisher code never runs in the Agent or Bridge core process.
+- An Application remains external governed Software; its marketplace entry is
+  discovery/integration metadata rather than an executable package.
+- No production side effect or external-system write is introduced by this
+  slice.
 
 ## Verification
 
 Supported target: Windows, Python 3.12 only. No Ubuntu or browser automation.
 
 ```text
-Focused lifecycle/member suite:
-23 passed
+Focused contract suite:
+47 passed
 
-Full supported suite:
 python -m pytest --ignore=tests/test_browser.py -q
-1421 passed, 4 skipped in 59.02s
+1426 passed, 4 skipped in 59.37s
+
+python -m mypy
+Success: no issues found in 249 source files
 
 python -m ruff check .
 All checks passed!
 
 python -m ruff format --check .
-313 files already formatted
-
-python -m mypy
-Success: no issues found in 245 source files
+317 files already formatted
 
 python -m pip check
 No broken requirements found.
 
-python -m build --no-isolation --outdir <repo>/.scratch/build-version-lifecycle
-Successfully built sdist and wheel.
+python -m build --no-isolation --outdir <repo>/.scratch/build-p3-contracts
+Successfully built sdist and wheel; both include the new modules.
 
 git diff --check
 PASS
 ```
 
-The four skips are existing Windows environment conditions: symlink/link
-privileges, IPv6 loopback and directory links.
-
 ## Known issues
 
-- Physical package garbage collection is intentionally absent. An unselected
-  exact version is inert local rollback material, not active authority.
-- Productization 3 executable Bridge Extensions still require their declared
-  trust, isolation, activation and health contracts before runtime loading.
+- Signature bytes, trust-store resolution, staging and activation are
+  intentionally absent until slice 2; a manifest cannot execute anything.
+- Windows process isolation is a bounded subprocess boundary, not a claim of
+  OS sandbox equivalence. The Bridge still enforces capability policy.
 
 ## Next Recommended Action
 
-Open and merge this verified slice. Then mark Productization 2 complete and
-start Productization 3 with category/compatibility contracts and inert package
-staging only. Do not load publisher code into the Agent or Bridge process.
+Complete verification and merge this slice, then implement inert signed
+extension staging. Do not import or launch publisher code in slice 2.
