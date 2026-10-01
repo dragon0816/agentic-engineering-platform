@@ -1,0 +1,91 @@
+"""Restricted local CLI conversation backend contracts and process boundary."""
+
+import json
+import subprocess
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+from host_runtime.conversation_backends import (
+    BACKEND_TIMEOUT_SECONDS,
+    MAX_BACKEND_OUTPUT_CHARS,
+    LocalConversationBackends,
+)
+from models.contracts import ModelMessage
+
+
+class Runner:
+    def __init__(self, stdout: str = "", *, returncode: int = 0, timeout: bool = False) -> None:
+        self.stdout = stdout
+        self.returncode = returncode
+        self.timeout = timeout
+        self.calls: list[tuple[list[str], dict[str, Any]]] = []
+
+    def __call__(self, argv: list[str], **kwargs: Any) -> Any:
+        self.calls.append((argv, kwargs))
+        if self.timeout:
+            raise subprocess.TimeoutExpired(argv, kwargs["timeout"])
+        return SimpleNamespace(returncode=self.returncode, stdout=self.stdout, stderr="ignored")
+
+
+def installed(name: str) -> str | None:
+    return f"C:/fixed/{name}.exe" if name in {"claude", "codex"} else None
+
+
+def history() -> tuple[ModelMessage, ...]:
+    return (ModelMessage(role="user", text="What can you help with?"),)
+
+
+def test_status_reports_only_fixed_local_cli_names(tmp_path: Path) -> None:
+    backends = LocalConversationBackends(tmp_path, which=installed)
+    statuses = {item.name: item for item in backends.statuses(gateway_available=False)}
+    assert statuses["gateway"].available is False
+    assert statuses["claude_code"].available is True
+    assert statuses["codex"].available is True
+    assert statuses["copilot"].available is False
+
+
+def test_claude_uses_stdin_fixed_restrictions_and_blank_working_root(tmp_path: Path) -> None:
+    runner = Runner(json.dumps({"result": "A bounded answer."}))
+    backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
+    result = backends.complete("claude_code", history(), persona_guidance="Speak plainly.")
+    argv, call = runner.calls[0]
+    assert result.status == "answered" and result.text == "A bounded answer."
+    assert argv[0] == "C:/fixed/claude.exe"
+    assert "--restricted" in argv and "--tools" in argv
+    assert "What can you help with?" not in argv
+    assert "Do not use tools" in call["input"]
+    assert call["cwd"] == tmp_path / ".conversation-backends"
+    assert call["timeout"] == BACKEND_TIMEOUT_SECONDS
+    assert "GITHUB_TOKEN" not in call["env"]
+
+
+def test_codex_jsonl_is_reduced_to_final_text_and_output_is_bounded(tmp_path: Path) -> None:
+    stdout = "\n".join(
+        (
+            json.dumps({"type": "thread.started", "thread_id": "ignored"}),
+            json.dumps(
+                {
+                    "type": "item.completed",
+                    "item": {"type": "agent_message", "text": "x" * 20_000},
+                }
+            ),
+        )
+    )
+    runner = Runner(stdout)
+    result = LocalConversationBackends(tmp_path, which=installed, runner=runner).complete(
+        "codex", history(), persona_guidance="Be concise."
+    )
+    argv, _call = runner.calls[0]
+    assert result.status == "answered" and len(result.text) == MAX_BACKEND_OUTPUT_CHARS
+    assert argv[1:3] == ["exec", "--json"]
+    assert "--sandbox" in argv and "read-only" in argv
+    assert "--ephemeral" in argv and "--ignore-user-config" in argv
+
+
+def test_timeout_and_missing_cli_are_typed_without_stderr_leaks(tmp_path: Path) -> None:
+    timed = LocalConversationBackends(tmp_path, which=installed, runner=Runner(timeout=True))
+    timeout = timed.complete("claude_code", history(), persona_guidance="Plain.")
+    assert timeout.status == "timeout" and timeout.code == "backend_timeout"
+    missing = timed.complete("copilot", history(), persona_guidance="Plain.")
+    assert missing.status == "unavailable" and missing.code == "backend_not_installed"

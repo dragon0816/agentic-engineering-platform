@@ -16,6 +16,7 @@ import urllib.error
 import urllib.request
 from collections.abc import Iterator, Mapping
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -30,7 +31,8 @@ from control_plane.http import ControlPlaneServer
 from extensions.package import stage_extension_package
 from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
 from host_runtime.contracts import CompanyHostConfiguration, KnowledgeAskRequest
-from host_runtime.conversations import ConversationTurnRequest
+from host_runtime.conversation_backends import LocalConversationBackends
+from host_runtime.conversations import ConversationBackendSelectRequest, ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 from integrations.browser import Browser, browser_path
@@ -170,9 +172,10 @@ def fetch(
 
 @pytest.fixture
 def served(tmp_path: Path) -> Iterator[AgentWebServer]:
-    config, _layout = ready(tmp_path)
+    config, layout = ready(tmp_path)
     with build_runtime(config) as runtime:
-        server = AgentWebServer(AgentWeb(runtime))
+        backends = LocalConversationBackends(layout.workspace_root, which=lambda _name: None)
+        server = AgentWebServer(AgentWeb(runtime, conversation_backends=backends))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
@@ -326,6 +329,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
         "/api/about",
         "/api/readiness",
         "/api/settings",
+        "/api/backends",
         "/api/assets",
         "/api/platform",
         "/api/contributions",
@@ -342,6 +346,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/conversations").status == 401
     assert fetch(base(served) + "/api/conversations", body={}).status == 401
     assert fetch(base(served) + "/api/conversations/turn", body={}).status == 401
+    assert fetch(base(served) + "/api/conversations/backend", body={}).status == 401
     assert fetch(base(served) + "/api/contributions", body={}).status == 401
 
 
@@ -542,6 +547,8 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert 'id="tab-settings"' in page
     assert 'id="command-palette"' in page
     assert '<textarea id="message" rows="3"' in page
+    assert 'id="conversation-backend"' in page
+    assert 'call("/api/backends")' in page
     assert "What can I ask?" not in page
     assert 'id="model-base-url"' in page
     assert "127.0.0.1:4000/v1" in page
@@ -580,6 +587,45 @@ def test_conversation_history_survives_a_runtime_restart(tmp_path: Path) -> None
         restored = AgentWeb(rebuilt).conversations(session_id)
         assert restored["selected"]["session_id"] == session_id
         assert len(restored["selected"]["messages"]) == 2
+
+
+def test_local_cli_backend_selection_answers_and_persists(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+
+    def run_cli(argv: list[str], **kwargs: Any) -> Any:
+        assert argv[0] == "C:/fixed/claude.exe"
+        assert kwargs["cwd"] == layout.workspace_root / ".conversation-backends"
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps({"result": "Answered by Claude."}),
+            stderr="",
+        )
+
+    backends = LocalConversationBackends(
+        layout.workspace_root,
+        which=lambda name: "C:/fixed/claude.exe" if name == "claude" else None,
+        runner=run_cli,
+    )
+    with build_runtime(config) as runtime:
+        web = AgentWeb(runtime, conversation_backends=backends)
+        created = web.create_conversation()["conversation"]
+        selected = web.select_conversation_backend(
+            ConversationBackendSelectRequest(
+                session_id=created["session_id"], backend="claude_code"
+            )
+        )
+        assert selected["ok"] is True
+        answered = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"], message="What can you do?"
+            )
+        )
+        assert answered["answer"]["answer"] == "Answered by Claude."
+        assert answered["conversation"]["backend"] == "claude_code"
+
+    with build_runtime(config) as rebuilt:
+        restored = AgentWeb(rebuilt).conversations(created["session_id"])
+        assert restored["selected"]["backend"] == "claude_code"
 
 
 def test_conversation_requests_are_closed_and_owned_by_the_host(served: AgentWebServer) -> None:

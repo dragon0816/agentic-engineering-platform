@@ -76,7 +76,9 @@ from host_runtime.contributions import (
     ContributionDraftCreateRequest,
     ConversationExcerpt,
 )
+from host_runtime.conversation_backends import LocalConversationBackends
 from host_runtime.conversations import (
+    ConversationBackendSelectRequest,
     ConversationCreateRequest,
     ConversationMessage,
     ConversationRecord,
@@ -189,11 +191,15 @@ class AgentWeb:
         *,
         namespace: str | None = None,
         config_path: Path | None = None,
+        conversation_backends: LocalConversationBackends | None = None,
     ) -> None:
         self.runtime = runtime
         self.namespace = namespace if namespace is not None else runtime.config.namespace
         self.config_path = config_path
         self.persona = AgentPersonaStore(runtime.layout.workspace_root)
+        self.backends = conversation_backends or LocalConversationBackends(
+            runtime.layout.workspace_root
+        )
         # One request at a time. The Agent's state is one SQLite file and a
         # capability may hold a workbook; two at once would be two runs
         # against the same things.
@@ -219,14 +225,17 @@ class AgentWeb:
         """Actionable local readiness without probing an external service."""
         assets = self.assets()
         binding = self.runtime.config.models
-        natural_ready = binding is not None and binding.routing_alias is not None
+        gateway_ready = binding is not None and binding.routing_alias is not None
+        backends = self.backends.statuses(gateway_available=gateway_ready)
+        ready_backends = [item.label for item in backends if item.available]
+        natural_ready = bool(ready_backends)
         return {
             "natural_language": {
                 "status": "ready" if natural_ready else "setup_required",
                 "action": (
-                    "Natural-language routing is configured."
+                    "Ready backends: " + ", ".join(ready_backends) + "."
                     if natural_ready
-                    else "Configure a routing model in Settings. Deterministic commands still work."
+                    else "Configure a Gateway model or install and sign in to a supported local CLI."
                 ),
             },
             "shared_platform": {
@@ -365,6 +374,7 @@ class AgentWeb:
                     "title": item.title,
                     "updated_at": item.updated_at.isoformat(),
                     "messages": len(item.messages),
+                    "backend": item.backend,
                 }
                 for item in records
             ],
@@ -383,6 +393,41 @@ class AgentWeb:
         with self._one_at_a_time:
             created = self.runtime.state.create_conversation(record)
         return {"conversation": json.loads(created.model_dump_json())}
+
+    def conversation_backends(self) -> dict[str, Any]:
+        binding = self.runtime.config.models
+        gateway = binding is not None and binding.routing_alias is not None
+        return {
+            "backends": [
+                item.model_dump(mode="json")
+                for item in self.backends.statuses(gateway_available=gateway)
+            ]
+        }
+
+    def select_conversation_backend(
+        self, request: ConversationBackendSelectRequest
+    ) -> dict[str, Any]:
+        item = ConversationBackendSelectRequest.model_validate(request)
+        available = {
+            row.name: row.available
+            for row in self.backends.statuses(
+                gateway_available=(
+                    self.runtime.config.models is not None
+                    and self.runtime.config.models.routing_alias is not None
+                )
+            )
+        }
+        if not available.get(item.backend, False):
+            return {"ok": False, "code": "backend_unavailable"}
+        with self._one_at_a_time:
+            record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+            if record is None:
+                return {"ok": False, "code": "conversation_unknown"}
+            updated = record.model_copy(
+                update={"backend": item.backend, "updated_at": datetime.now(UTC)}
+            )
+            saved = self.runtime.state.save_conversation(updated)
+        return {"ok": True, "conversation": json.loads(saved.model_dump_json())}
 
     def slash_commands(self) -> dict[str, Any]:
         return {"commands": [item.model_dump(mode="json") for item in COMMANDS]}
@@ -499,6 +544,26 @@ class AgentWeb:
             namespace = self.namespace
             if answer:
                 pass
+            elif record.backend != "gateway":
+                history = tuple(
+                    ModelMessage(role=message.role, text=message.text)
+                    for message in record.messages[-19:]
+                ) + (ModelMessage(role="user", text=item.message),)
+                completed = self.backends.complete(
+                    record.backend,
+                    history,
+                    persona_guidance=self.persona.load().prompt_guidance(),
+                )
+                answer = {
+                    "ok": completed.status == "answered",
+                    "answer": (
+                        completed.text
+                        if completed.status == "answered"
+                        else f"The {record.backend} backend is unavailable ({completed.code})."
+                    ),
+                    "status": "answered" if completed.status == "answered" else "failed",
+                    "backend": completed.model_dump(mode="json"),
+                }
             elif not namespace:
                 answer = {
                     "ok": False,
@@ -1184,6 +1249,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
+        elif parsed.path == "/api/backends":
+            self._json(200, web.conversation_backends())
         elif parsed.path == "/api/commands":
             self._json(200, web.slash_commands())
         elif parsed.path == "/api/conversations":
@@ -1216,6 +1283,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/persona",
             "/api/conversations",
             "/api/conversations/turn",
+            "/api/conversations/backend",
             "/api/contributions",
         ):
             self._json(404, {"error": "no such page"})
@@ -1267,6 +1335,15 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             result = self.server.web.conversation_turn(turn)
             self._json(200 if result.get("code") is None else 404, result)
+            return
+        if path == "/api/conversations/backend":
+            try:
+                selection = ConversationBackendSelectRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid backend selection"})
+                return
+            result = self.server.web.select_conversation_backend(selection)
+            self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/contributions":
             try:

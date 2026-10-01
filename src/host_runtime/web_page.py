@@ -236,6 +236,7 @@ tr:last-child td { border-bottom: none; }
     </div>
     <div class="conversation-bar">
       <select id="conversation" aria-label="Conversation"></select>
+      <select id="conversation-backend" aria-label="Conversation backend"></select>
       <button class="go" id="new-conversation" type="button">New</button>
     </div>
     <div id="log"></div>
@@ -538,15 +539,49 @@ async function loadConversations(selectId) {
       + encodeURIComponent(activeConversation));
   }
   renderConversation(listed.selected);
+  const backend = el("conversation-backend");
+  const selectedBackend = listed.selected ? listed.selected.backend : "gateway";
+  const requested = [...backend.options].find(option =>
+    option.value === selectedBackend && !option.disabled);
+  if (requested) backend.value = selectedBackend;
+  else {
+    const fallback = [...backend.options].find(option => !option.disabled);
+    if (fallback) {
+      backend.value = fallback.value;
+      await call("/api/conversations/backend", {
+        session_id: activeConversation, backend: fallback.value,
+      });
+    }
+  }
   send.disabled = false;
+}
+
+async function loadBackends() {
+  const data = await call("/api/backends"), select = el("conversation-backend");
+  select.replaceChildren();
+  for (const backend of data.backends) {
+    const option = document.createElement("option"); option.value = backend.name;
+    option.textContent = backend.label + (backend.available ? "" : " — unavailable");
+    option.disabled = !backend.available; option.title = backend.detail; select.append(option);
+  }
+}
+
+async function loadChat(selectId) {
+  await loadBackends();
+  await loadConversations(selectId);
 }
 
 el("conversation").addEventListener("change", async () => {
   await loadConversations(el("conversation").value);
 });
+el("conversation-backend").addEventListener("change", async () => {
+  await call("/api/conversations/backend", {
+    session_id: activeConversation, backend: el("conversation-backend").value,
+  });
+});
 el("new-conversation").addEventListener("click", async () => {
   const created = await call("/api/conversations", {});
-  await loadConversations(created.conversation.session_id); field.focus();
+  await loadChat(created.conversation.session_id); field.focus();
 });
 
 form.addEventListener("submit", async (event) => {
@@ -1194,7 +1229,7 @@ for (const name of Object.keys(panels)) {
   el("tab-" + name).addEventListener("click", () => selectPrimaryTab(name));
 }
 
-Promise.all([loadAbout(), loadReadiness(), loadAssets(), loadConversations(), loadSlashCommands()])
+Promise.all([loadAbout(), loadReadiness(), loadAssets(), loadChat(), loadSlashCommands()])
   .catch(showBootError);
 field.focus();
 </script>

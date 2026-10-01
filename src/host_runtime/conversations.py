@@ -8,6 +8,7 @@ from pydantic import Field, model_validator
 from common.assets import reject_embedded_secrets
 from common.base import Contract, Symbol, Text
 from common.execution import TraceIdentifiers
+from host_runtime.conversation_backends import ConversationBackendName
 
 
 class ConversationMessage(Contract):
@@ -32,6 +33,7 @@ class ConversationRecord(Contract):
     session_id: Symbol
     actor: Symbol
     title: Text
+    backend: ConversationBackendName = "gateway"
     created_at: datetime
     updated_at: datetime
     messages: tuple[ConversationMessage, ...] = Field(default=(), max_length=100)
@@ -60,3 +62,8 @@ class ConversationTurnRequest(Contract):
     def no_credential_material(self) -> Self:
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
+
+
+class ConversationBackendSelectRequest(Contract):
+    session_id: Symbol
+    backend: ConversationBackendName
