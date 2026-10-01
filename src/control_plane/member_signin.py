@@ -19,6 +19,7 @@ from common.enrollment import Invitation
 from common.identity import AuthenticatedActor, InvitationProofGrant, IssuedInvitationProof
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity import fingerprint
+from control_plane.identity_store import SqliteIdentityStorage
 from control_plane.member import InMemoryMemberSessions, IssuedMemberSession
 
 INVITATION_PROOF_METHOD = "invitation-proof"
@@ -51,6 +52,7 @@ class InMemoryInvitationSignIn:
         sessions: InMemoryMemberSessions,
         clock: Callable[[], datetime] | None = None,
         session_ttl: timedelta = DEFAULT_MEMBER_SESSION,
+        storage: SqliteIdentityStorage | None = None,
     ) -> None:
         if session_ttl <= timedelta(0):
             raise ValueError("member session duration must be positive")
@@ -58,8 +60,21 @@ class InMemoryInvitationSignIn:
         self.sessions = sessions
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._session_ttl = session_ttl
-        self._grants: dict[str, InvitationProofGrant] = {}
+        self._storage = storage
+        self._grants = {
+            item.invitation_id: item
+            for item in (
+                InvitationProofGrant.model_validate_json(raw)
+                for raw in (
+                    () if storage is None else storage.records("identity_invitation_proofs")
+                )
+            )
+        }
         self._lock = threading.Lock()
+
+    def _save(self, grant: InvitationProofGrant) -> None:
+        if self._storage is not None:
+            self._storage.put("identity_invitation_proofs", grant.invitation_id, grant)
 
     def invite(
         self,
@@ -84,6 +99,7 @@ class InMemoryInvitationSignIn:
         with self._lock:
             self.enrollment.issue(item)
             self._grants[grant.invitation_id] = grant
+            self._save(grant)
         return IssuedInvitationProof(grant.model_copy(deep=True), value)
 
     def accept(self, invitation_id: str, secret: str) -> IssuedMemberSession:
@@ -118,6 +134,7 @@ class InMemoryInvitationSignIn:
                 {**grant.model_dump(), "status": "redeemed"}
             )
             self._grants[grant.invitation_id] = redeemed
+            self._save(redeemed)
             return session
 
     def grant(self, invitation_id: str) -> InvitationProofGrant:
@@ -137,4 +154,8 @@ class InMemoryInvitationSignIn:
                 {**item.model_dump(), "status": "revoked"}
             )
             self._grants[invitation_id] = revoked
+            self._save(revoked)
             return revoked.model_copy(deep=True)
+
+    def grants(self) -> tuple[InvitationProofGrant, ...]:
+        return tuple(item.model_copy(deep=True) for item in self._grants.values())

@@ -26,6 +26,7 @@ from common.member import (
     MemberCatalogEntry,
     MemberCatalogReply,
     MemberCatalogRequest,
+    MemberIdentityReply,
     MemberReplacementReply,
     MemberReplaceRequest,
     MemberRevokeRequest,
@@ -35,6 +36,7 @@ from common.member import (
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
 from control_plane.enrollment import InMemoryEnrollmentRegistry
 from control_plane.identity import fingerprint
+from control_plane.identity_store import SqliteIdentityStorage
 from software.marketplace import (
     ApplicationCatalog,
     ApplicationCatalogReply,
@@ -58,6 +60,7 @@ MemberErrorCode = Literal[
     "selection_missing",
     "decision_in_future",
     "invalid_request",
+    "not_administrator",
 ]
 
 
@@ -105,8 +108,19 @@ class IssuedMemberSession:
 class InMemoryMemberSessions:
     """Side-effect-free session reference used behind a trusted sign-in adapter."""
 
-    def __init__(self) -> None:
-        self._grants: dict[str, MemberSessionGrant] = {}
+    def __init__(self, *, storage: SqliteIdentityStorage | None = None) -> None:
+        self._storage = storage
+        self._grants = {
+            item.session_id: item
+            for item in (
+                MemberSessionGrant.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_member_sessions"))
+            )
+        }
+
+    def _save(self, grant: MemberSessionGrant) -> None:
+        if self._storage is not None:
+            self._storage.put("identity_member_sessions", grant.session_id, grant)
 
     def issue(
         self,
@@ -133,6 +147,7 @@ class InMemoryMemberSessions:
             expires_at=who.expires_at,
         )
         self._grants[grant.session_id] = grant
+        self._save(grant)
         return IssuedMemberSession(grant.model_copy(deep=True), value)
 
     def authenticate(
@@ -190,9 +205,33 @@ class MemberService:
     def _who(self, session_id: str, secret: str, now: datetime) -> AuthenticatedActor:
         return self.sessions.authenticate(session_id, secret, now=now)
 
+    def now(self) -> datetime:
+        return self._clock()
+
     def _admitted(self, who: AuthenticatedActor, bridge_id: str) -> None:
         if not self.enrollment.admit(BridgeExecutionSubject(actor=who.actor, bridge_id=bridge_id)):
             raise MemberError("actor_not_admitted")
+
+    def identity(self, session_id: str, secret: str) -> MemberIdentityReply:
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            member = self.enrollment.user(who.actor)
+        return MemberIdentityReply(
+            actor=member.actor,
+            role=member.role,
+            groups=member.groups,
+            session_expires_at=who.expires_at,
+        )
+
+    def administrator(self, session_id: str, secret: str) -> AuthenticatedActor:
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            member = self.enrollment.user(who.actor)
+            if member.role != "platform_admin":
+                raise MemberError("not_administrator")
+        return who
 
     def catalog(
         self, session_id: str, secret: str, request: MemberCatalogRequest

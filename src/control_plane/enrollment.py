@@ -17,6 +17,7 @@ from common.enrollment import (
     Invitation,
     PlatformUser,
 )
+from control_plane.identity_store import SqliteIdentityStorage
 from workflow.host_bridge import BridgeRegistration
 
 EnrollmentErrorCode = Literal[
@@ -24,6 +25,7 @@ EnrollmentErrorCode = Literal[
     "duplicate_invitation",
     "invitation_missing",
     "invitation_used",
+    "invitation_revoked",
     "invitation_actor_mismatch",
     "user_missing",
     "user_disabled",
@@ -54,20 +56,70 @@ def _copy(item: ContractT) -> ContractT:
 class InMemoryEnrollmentRegistry:
     """Side-effect-free reference for invitation and Bridge membership rules."""
 
-    def __init__(self, *, administrators: tuple[Symbol, ...]) -> None:
+    def __init__(
+        self,
+        *,
+        administrators: tuple[Symbol, ...],
+        storage: SqliteIdentityStorage | None = None,
+    ) -> None:
         checked = tuple(TypeAdapter(Symbol).validate_python(item) for item in administrators)
         if not checked or len(checked) != len(set(checked)):
             raise ValueError("administrators must be non-empty and unique")
         self._administrators = frozenset(checked)
-        self._invitations: dict[str, Invitation] = {}
-        self._users: dict[str, PlatformUser] = {}
-        self._devices: dict[str, BridgeDevice] = {}
-        self._advertisements: dict[str, BridgeRegistration] = {}
-        self._bindings: dict[tuple[str, str], BridgeBinding] = {}
+        self._storage = storage
+        self._invitations = {
+            item.invitation_id: item
+            for item in (
+                Invitation.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_invitations"))
+            )
+        }
+        self._users = {
+            item.actor: item
+            for item in (
+                PlatformUser.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_users"))
+            )
+        }
+        self._devices = {
+            item.bridge_id: item
+            for item in (
+                BridgeDevice.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_devices"))
+            )
+        }
+        self._advertisements = {
+            item.bridge_id: item
+            for item in (
+                BridgeRegistration.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_advertisements"))
+            )
+        }
+        self._bindings = {
+            (item.bridge_id, item.actor): item
+            for item in (
+                BridgeBinding.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_bindings"))
+            )
+        }
+
+    def _save(self, table: str, key: str, item: Contract) -> None:
+        if self._storage is not None:
+            self._storage.put(table, key, item)
 
     def _admin(self, actor: str) -> None:
-        if actor not in self._administrators:
+        user = self._users.get(actor)
+        if actor not in self._administrators and not (
+            user is not None and user.status == "active" and user.role == "platform_admin"
+        ):
             raise EnrollmentError("not_administrator")
+
+    def is_administrator(self, actor: Symbol) -> bool:
+        try:
+            self._admin(TypeAdapter(Symbol).validate_python(actor))
+        except EnrollmentError:
+            return False
+        return True
 
     def issue(self, invitation: Invitation) -> Invitation:
         item = Invitation.model_validate(invitation).model_copy(deep=True)
@@ -81,7 +133,24 @@ class InMemoryEnrollmentRegistry:
         ):
             raise EnrollmentError("duplicate_invitation")
         self._invitations[item.invitation_id] = item
+        self._save("identity_invitations", item.invitation_id, item)
         return _copy(item)
+
+    def invitations(self) -> tuple[Invitation, ...]:
+        return tuple(_copy(item) for item in self._invitations.values())
+
+    def revoke_invitation(self, requested_by: Symbol, invitation_id: Symbol) -> Invitation:
+        self._admin(TypeAdapter(Symbol).validate_python(requested_by))
+        key = TypeAdapter(Symbol).validate_python(invitation_id)
+        item = self._invitations.get(key)
+        if item is None:
+            raise EnrollmentError("invitation_missing")
+        if item.status != "pending":
+            raise EnrollmentError("invitation_used")
+        revoked = Invitation.model_validate({**item.model_dump(), "status": "revoked"})
+        self._invitations[key] = revoked
+        self._save("identity_invitations", key, revoked)
+        return _copy(revoked)
 
     def invitation(self, invitation_id: Symbol) -> Invitation:
         key = TypeAdapter(Symbol).validate_python(invitation_id)
@@ -111,6 +180,8 @@ class InMemoryEnrollmentRegistry:
         )
         self._invitations = {**self._invitations, key: accepted}
         self._users = {**self._users, checked_actor: user}
+        self._save("identity_invitations", key, accepted)
+        self._save("identity_users", checked_actor, user)
         return _copy(user)
 
     def user(self, actor: Symbol) -> PlatformUser:
@@ -138,6 +209,8 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("advertisement_identity_mismatch")
         self._devices = {**self._devices, item.bridge_id: item}
         self._advertisements = {**self._advertisements, item.bridge_id: advert}
+        self._save("identity_devices", item.bridge_id, item)
+        self._save("identity_advertisements", item.bridge_id, advert)
         return _copy(item)
 
     def device(self, bridge_id: Symbol) -> BridgeDevice:
@@ -171,6 +244,7 @@ class InMemoryEnrollmentRegistry:
         if advert.bridge_id != key or advert.owner_id != device.registered_by:
             raise EnrollmentError("advertisement_identity_mismatch")
         self._advertisements = {**self._advertisements, key: advert}
+        self._save("identity_advertisements", key, advert)
         return _copy(advert)
 
     def may_administer(self, requested_by: Symbol, bridge_id: Symbol) -> bool:
@@ -188,6 +262,8 @@ class InMemoryEnrollmentRegistry:
         user = self._users.get(requested_by)
         if user is None or user.status != "active":
             return False
+        if user.role == "platform_admin":
+            return True
         if requested_by == device.registered_by:
             return True
         existing = self._bindings.get((device.bridge_id, requested_by))
@@ -230,6 +306,7 @@ class InMemoryEnrollmentRegistry:
         if item.role == "device_admin" and item.actor != device.registered_by:
             raise EnrollmentError("binding_forbidden")
         self._bindings = {**self._bindings, key: item}
+        self._save("identity_bindings", f"{item.bridge_id}:{item.actor}", item)
         return _copy(item)
 
     def unbind(self, requested_by: Symbol, bridge_id: Symbol, actor: Symbol) -> BridgeBinding:
@@ -250,6 +327,7 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("binding_missing")
         withdrawn = BridgeBinding.model_validate({**current.model_dump(), "status": "revoked"})
         self._bindings = {**self._bindings, key: withdrawn}
+        self._save("identity_bindings", f"{key[0]}:{key[1]}", withdrawn)
         return _copy(withdrawn)
 
     def members(self, bridge_id: Symbol) -> tuple[BridgeBinding, ...]:
@@ -285,6 +363,7 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("user_missing")
         updated = PlatformUser.model_validate({**user.model_dump(), "status": "disabled"})
         self._users = {**self._users, key: updated}
+        self._save("identity_users", key, updated)
         return _copy(updated)
 
     def enable_user(self, requested_by: Symbol, actor: Symbol) -> PlatformUser:
@@ -296,6 +375,7 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("user_missing")
         updated = PlatformUser.model_validate({**user.model_dump(), "status": "active"})
         self._users = {**self._users, key: updated}
+        self._save("identity_users", key, updated)
         return _copy(updated)
 
     def disable_device(self, requested_by: Symbol, bridge_id: Symbol) -> BridgeDevice:
@@ -308,4 +388,5 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("binding_forbidden")
         updated = BridgeDevice.model_validate({**device.model_dump(), "status": "disabled"})
         self._devices = {**self._devices, key: updated}
+        self._save("identity_devices", key, updated)
         return _copy(updated)

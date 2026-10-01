@@ -32,6 +32,7 @@ from common.identity import (
     IssuedAccessToken,
 )
 from control_plane.enrollment import InMemoryEnrollmentRegistry
+from control_plane.identity_store import SqliteIdentityStorage
 
 # A generated secret is 32 random bytes in URL-safe form. The minimum below
 # is what a caller-supplied one must reach: the fingerprint comparison is
@@ -72,9 +73,25 @@ def fingerprint(secret: str) -> str:
 class InMemoryAccessTokens:
     """Side-effect-free reference for issuing and checking access tokens."""
 
-    def __init__(self, enrollment: InMemoryEnrollmentRegistry) -> None:
+    def __init__(
+        self,
+        enrollment: InMemoryEnrollmentRegistry,
+        *,
+        storage: SqliteIdentityStorage | None = None,
+    ) -> None:
         self.enrollment = enrollment
-        self._grants: dict[str, BridgeAccessGrant] = {}
+        self._storage = storage
+        self._grants = {
+            item.token_id: item
+            for item in (
+                BridgeAccessGrant.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_access_tokens"))
+            )
+        }
+
+    def _save(self, grant: BridgeAccessGrant) -> None:
+        if self._storage is not None:
+            self._storage.put("identity_access_tokens", grant.token_id, grant)
 
     def _admitted(self, actor: str, bridge_id: str) -> bool:
         return self.enrollment.admit(BridgeExecutionSubject(actor=actor, bridge_id=bridge_id))
@@ -133,6 +150,7 @@ class InMemoryAccessTokens:
             expires_at=expires_at,
         )
         self._grants[grant.token_id] = grant
+        self._save(grant)
         return IssuedAccessToken(grant.model_copy(deep=True), value)
 
     def authenticate(
@@ -213,6 +231,7 @@ class InMemoryAccessTokens:
         self._permitted(requester, item.actor, item.bridge_id)
         revoked = BridgeAccessGrant.model_validate({**item.model_dump(), "status": "revoked"})
         self._grants[key] = revoked
+        self._save(revoked)
         return revoked.model_copy(deep=True)
 
     def revoke_for(

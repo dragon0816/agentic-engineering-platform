@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import secrets
 import ssl
 import threading
+from datetime import timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import TracebackType
 from typing import Any, Self
@@ -12,14 +14,20 @@ from typing import Any, Self
 from pydantic import ValidationError
 
 from common.base import Contract
+from common.enrollment import Invitation
 from common.identity import IssuedInvitationProof
 from common.member import (
+    AdminInvitationCreateRequest,
+    AdminInvitationListReply,
+    AdminInvitationMetadata,
+    AdminInvitationRevokeRequest,
     MemberCatalogRequest,
     MemberReplaceRequest,
     MemberRevokeRequest,
     MemberSelectRequest,
 )
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
+from control_plane.member_login import InMemoryMemberLogins
 from control_plane.member_page import PAGE
 from control_plane.member_signin import InMemoryInvitationSignIn, InvitationSignInError
 from software.marketplace import ApplicationCatalogRequest
@@ -28,6 +36,7 @@ API_PREFIX = "/v1/member/"
 MAX_BODY_BYTES = 256 * 1024
 BEARER = "Bearer "
 INVITATION = "Invitation "
+LOGIN = "Login "
 
 STATUS_FOR = {
     "authentication_failed": 401,
@@ -46,6 +55,7 @@ STATUS_FOR = {
     "invitation_expired": 401,
     "invitation_used": 409,
     "invitation_revoked": 401,
+    "not_administrator": 403,
 }
 
 
@@ -65,6 +75,15 @@ def _invitation_credential(header: str | None) -> tuple[str, str] | None:
     if not separator or not invitation_id or not secret:
         return None
     return invitation_id, secret
+
+
+def _login_credential(header: str | None) -> tuple[str, str] | None:
+    if header is None or not header.startswith(LOGIN):
+        return None
+    login_id, separator, secret = header[len(LOGIN) :].strip().partition(":")
+    if not separator or not login_id or not secret:
+        return None
+    return login_id, secret
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -102,16 +121,24 @@ class _Handler(BaseHTTPRequestHandler):
         operation = self.path.removeprefix(API_PREFIX) if self.path.startswith(API_PREFIX) else ""
         if operation not in (
             "sign-in",
+            "session",
+            "me",
             "catalog",
             "applications",
             "select",
             "replace",
             "revoke",
+            "admin/invitations",
+            "admin/invitations/list",
+            "admin/invitations/revoke",
         ):
             self._json(404, {"code": "invalid_request"})
             return
         if operation == "sign-in":
             self._sign_in()
+            return
+        if operation == "session":
+            self._refresh_session()
             return
         credential = _credential(self.headers.get("Authorization"))
         if credential is None:
@@ -131,7 +158,9 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             raw: object = json.loads(self.rfile.read(length)) if length else {}
             reply: Contract
-            if operation == "catalog":
+            if operation == "me":
+                reply = self.server.service.identity(*credential)
+            elif operation == "catalog":
                 reply = self.server.service.catalog(
                     *credential, MemberCatalogRequest.model_validate(raw)
                 )
@@ -147,10 +176,71 @@ class _Handler(BaseHTTPRequestHandler):
                 reply = self.server.service.replace(
                     *credential, MemberReplaceRequest.model_validate(raw)
                 )
-            else:
+            elif operation == "revoke":
                 reply = self.server.service.revoke(
                     *credential, MemberRevokeRequest.model_validate(raw)
                 )
+            elif operation == "admin/invitations":
+                create = AdminInvitationCreateRequest.model_validate(raw)
+                who = self.server.service.administrator(*credential)
+                sign_in = self.server.sign_in
+                if sign_in is None:
+                    raise MemberError("invalid_request")
+                proof = sign_in.invite(
+                    Invitation(
+                        invitation_id=f"invite-{secrets.token_hex(8)}",
+                        actor=create.actor,
+                        issued_by=who.actor,
+                        groups=create.groups,
+                        role=create.role,
+                    ),
+                    expires_at=self.server.service.now()
+                    + timedelta(minutes=create.valid_for_minutes),
+                )
+                metadata = AdminInvitationMetadata(
+                    invitation=self.server.service.enrollment.invitation(
+                        proof.grant.invitation_id
+                    ),
+                    expires_at=proof.grant.expires_at,
+                )
+                self._json(
+                    200,
+                    {
+                        "invitation": metadata.model_dump(mode="json"),
+                        "url": self.server.invitation_url(proof),
+                    },
+                )
+                return
+            elif operation == "admin/invitations/list":
+                self.server.service.administrator(*credential)
+                sign_in = self.server.sign_in
+                if sign_in is None:
+                    raise MemberError("invalid_request")
+                grants = {
+                    grant.invitation_id: grant for grant in sign_in.grants()
+                }
+                reply = AdminInvitationListReply(
+                    invitations=tuple(
+                        AdminInvitationMetadata(
+                            invitation=invitation,
+                            expires_at=grants[invitation.invitation_id].expires_at,
+                        )
+                        for invitation in self.server.service.enrollment.invitations()
+                        if invitation.invitation_id in grants
+                    )
+                )
+            else:
+                revoke_request = AdminInvitationRevokeRequest.model_validate(raw)
+                who = self.server.service.administrator(*credential)
+                sign_in = self.server.sign_in
+                if sign_in is None:
+                    raise MemberError("invalid_request")
+                invitation = self.server.service.enrollment.revoke_invitation(
+                    who.actor, revoke_request.invitation_id
+                )
+                sign_in.revoke(revoke_request.invitation_id)
+                self._json(200, {"invitation": invitation.model_dump(mode="json")})
+                return
         except (ValidationError, ValueError):
             self._json(400, {"code": "invalid_request"})
             return
@@ -180,10 +270,42 @@ class _Handler(BaseHTTPRequestHandler):
             return
         try:
             session = self.server.sign_in.accept(*credential)
+            login = self.server.logins.issue(
+                session.grant.actor,
+                label="Marketplace browser",
+                now=self.server.service.now(),
+            )
         except InvitationSignInError as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
             return
         except Exception:  # noqa: BLE001 - no traceback crosses the sign-in boundary
+            self._json(500, {"code": "internal_error"})
+            return
+        self._json(
+            200,
+            {
+                "session": session.bearer,
+                "login": login.bearer,
+                "expires_at": session.grant.expires_at.isoformat(),
+            },
+        )
+
+    def _refresh_session(self) -> None:
+        credential = _login_credential(self.headers.get("Authorization"))
+        if credential is None:
+            self._json(401, {"code": "authentication_failed"})
+            return
+        try:
+            identity = self.server.logins.authenticate(
+                *credential, now=self.server.service.now()
+            )
+            session = self.server.service.sessions.issue(
+                identity, now=self.server.service.now()
+            )
+        except MemberError as error:
+            self._json(STATUS_FOR[error.code], {"code": error.code})
+            return
+        except Exception:  # noqa: BLE001
             self._json(500, {"code": "internal_error"})
             return
         self._json(
@@ -204,11 +326,13 @@ class MemberPortalServer(ThreadingHTTPServer):
         port: int = 0,
         ssl_context: ssl.SSLContext | None = None,
         sign_in: InMemoryInvitationSignIn | None = None,
+        logins: InMemoryMemberLogins | None = None,
     ) -> None:
         if ssl_context is None and host not in ("127.0.0.1", "localhost", "::1"):
             raise ValueError("a member portal exposed beyond loopback requires TLS")
         self.service = service
         self.sign_in = sign_in
+        self.logins = logins if logins is not None else InMemoryMemberLogins()
         super().__init__((host, port), _Handler)
         if ssl_context is not None:
             self.socket = ssl_context.wrap_socket(self.socket, server_side=True)

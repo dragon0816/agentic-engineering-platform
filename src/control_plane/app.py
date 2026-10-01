@@ -26,11 +26,13 @@ from control_plane.distribution import (
     InMemoryRemoteControl,
     PackageRegistry,
 )
-from control_plane.enrollment import InMemoryEnrollmentRegistry
+from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.http import ControlPlaneServer
 from control_plane.identity import InMemoryAccessTokens
+from control_plane.identity_store import SqliteIdentityStorage
 from control_plane.member import InMemoryMemberSessions, MemberService
 from control_plane.member_http import MemberPortalServer
+from control_plane.member_login import InMemoryMemberLogins
 from control_plane.member_signin import InMemoryInvitationSignIn
 from control_plane.registry_sqlite import SqliteRegistry
 from control_plane.service import ControlPlaneService
@@ -87,6 +89,8 @@ class SharedPlatformConfiguration(Contract):
             raise ValueError("bootstrap invitations need unique ids and actors")
         if any(item.invitation.issued_by not in self.administrators for item in self.invitations):
             raise ValueError("a bootstrap invitation is issued by a configured administrator")
+        if self.invitations and self.invitations[0].invitation.role != "platform_admin":
+            raise ValueError("the first bootstrap invitation must create a platform administrator")
         if self.registry_path is not None and not (
             PureWindowsPath(self.registry_path).is_absolute()
             or Path(self.registry_path).is_absolute()
@@ -107,6 +111,8 @@ class SharedPlatformState:
     artifacts: Mapping[str, bytes]
     sessions: InMemoryMemberSessions = field(default_factory=InMemoryMemberSessions)
     applications: ApplicationCatalog = field(default_factory=ApplicationCatalog)
+    identity_storage: SqliteIdentityStorage | None = None
+    logins: InMemoryMemberLogins = field(default_factory=InMemoryMemberLogins)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -121,21 +127,29 @@ class SharedPlatformState:
             artifacts={},
             sessions=InMemoryMemberSessions(),
             applications=ApplicationCatalog(),
+            identity_storage=None,
+            logins=InMemoryMemberLogins(),
         )
 
     @classmethod
     def durable(cls, path: Path | str, *, administrators: tuple[Symbol, ...]) -> Self:
-        enrollment = InMemoryEnrollmentRegistry(administrators=administrators)
+        storage = SqliteIdentityStorage(path)
+        enrollment = InMemoryEnrollmentRegistry(
+            administrators=administrators,
+            storage=storage,
+        )
         registry = SqliteRegistry(path)
         return cls(
             enrollment=enrollment,
-            tokens=InMemoryAccessTokens(enrollment),
+            tokens=InMemoryAccessTokens(enrollment, storage=storage),
             packages=registry,
             authorization=InMemoryAuthorizationRegistry(enrollment, registry),
             control=InMemoryRemoteControl(admission=enrollment.admit),
             artifacts=registry.artifacts,
-            sessions=InMemoryMemberSessions(),
+            sessions=InMemoryMemberSessions(storage=storage),
             applications=ApplicationCatalog(),
+            identity_storage=storage,
+            logins=InMemoryMemberLogins(storage=storage),
         )
 
 
@@ -159,6 +173,7 @@ class SharedPlatformApplication:
             enrollment=state.enrollment,
             sessions=sessions,
             clock=moment,
+            storage=state.identity_storage,
         )
         self.control_service = ControlPlaneService(
             enrollment=state.enrollment,
@@ -189,6 +204,7 @@ class SharedPlatformApplication:
                 port=member_port,
                 ssl_context=ssl_context,
                 sign_in=self.sign_in,
+                logins=state.logins,
             )
         except BaseException:
             self.control_server.server_close()
@@ -310,6 +326,17 @@ def application_from_config(
     issued: list[IssuedInvitationProof] = []
     try:
         for bootstrap in config.invitations:
+            try:
+                application.state.enrollment.invitation(
+                    bootstrap.invitation.invitation_id
+                )
+            except EnrollmentError as error:
+                if error.code != "invitation_missing":
+                    raise
+            else:
+                # Identity state is durable. A process restart neither issues
+                # a second proof nor rewrites the first delivery file.
+                continue
             now = moment()
             issued.append(
                 application.issue_invitation(
