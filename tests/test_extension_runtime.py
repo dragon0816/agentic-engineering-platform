@@ -23,7 +23,10 @@ from extensions.package import (
 )
 from extensions.runtime import (
     ExtensionActivationApproval,
+    ExtensionActivationRecord,
     ExtensionInvocationError,
+    ExtensionLifecycleSnapshot,
+    ExtensionLifecycleStore,
     ExtensionManager,
     ExtensionRequest,
     ExtensionResponse,
@@ -231,6 +234,52 @@ def test_unhealthy_upgrade_keeps_previous_healthy_version(tmp_path: Path) -> Non
     assert runtime.advertised_capabilities[0].identity.version == "1.0.0"
     assert not original.closed
     assert factory.sessions[-1].closed
+
+
+def test_lifecycle_store_preserves_failed_upgrade_and_current_rollback(
+    tmp_path: Path,
+) -> None:
+    factory = Factory()
+    store = ExtensionLifecycleStore(tmp_path / "extension-lifecycle.json")
+    runtime = ExtensionManager(
+        device_id="bridge-lab",
+        device_kind="shared_test_computer",
+        factory=factory,
+        lifecycle=store,
+    )
+    runtime.activate(staged(tmp_path, "1.0.0"), approval("1.0.0"))
+    factory.next_healthy = False
+
+    runtime.activate(staged(tmp_path, "2.0.0"), approval("2.0.0"))
+
+    records = {item.extension.version: item for item in store.read().records}
+    assert records["1.0.0"].state == "rolled_back"
+    assert records["2.0.0"].state == "unhealthy"
+    assert all("approval" not in item.model_dump(mode="json") for item in records.values())
+
+
+def test_lifecycle_snapshot_refuses_two_current_runtime_versions() -> None:
+    with pytest.raises(ValueError, match="only one extension version"):
+        ExtensionLifecycleSnapshot(
+            records=(
+                ExtensionActivationRecord(
+                    extension={
+                        "namespace": "lab",
+                        "name": "fixture-extension",
+                        "version": "1.0.0",
+                    },
+                    state="active",
+                ),
+                ExtensionActivationRecord(
+                    extension={
+                        "namespace": "lab",
+                        "name": "fixture-extension",
+                        "version": "2.0.0",
+                    },
+                    state="active",
+                ),
+            )
+        )
 
 
 def test_process_failure_removes_new_version_and_automatically_rolls_back(

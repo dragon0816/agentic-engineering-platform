@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from test_extension_package import DeterministicVerifier, package, trust
 from test_host_models import GatewayReply, binding, endpoint
 from test_host_wiring import grant_record, membership_record, ready, workspace
 from test_platform_transport import Platform, host
@@ -24,6 +25,8 @@ from test_product_e2e_05 import V1, copy_vault, manifest
 
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from control_plane.http import ControlPlaneServer
+from extensions.package import stage_extension_package
+from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
 from host_runtime.contracts import KnowledgeAskRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
@@ -257,6 +260,52 @@ def test_it_lists_what_this_machine_has_without_naming_any_one_of_them(
     assert assets["runs"] == [], "nothing has run yet"
 
 
+def test_it_shows_staged_and_runtime_extension_state_without_an_activation_action(
+    tmp_path: Path,
+) -> None:
+    config, layout = ready(tmp_path)
+    staged = stage_extension_package(
+        package().model_dump_json().encode(),
+        layout.extensions,
+        trust(),
+        DeterministicVerifier(),
+    )
+    ExtensionLifecycleStore(layout.extension_lifecycle).record(
+        ExtensionActivationRecord(
+            extension=staged.identity,
+            state="unhealthy",
+            code="extension_activation_failed",
+        )
+    )
+
+    with build_runtime(config, layout=layout) as runtime:
+        assets = AgentWeb(runtime).assets()
+        page = AgentWebServer(AgentWeb(runtime))
+        try:
+            source = page.page().decode("utf-8")
+        finally:
+            page.server_close()
+
+    assert assets["extensions"] == [
+        {
+            "namespace": "lab",
+            "name": "fixture-extension",
+            "version": "1.0.0",
+            "description": "Fixture integration",
+            "state": "unhealthy",
+            "publisher_key_id": "lab-release-key",
+            "capabilities": ["lab/read-fixture@1.0.0"],
+            "approval_required": True,
+            "activation_gate": (
+                "Registered device owner or delegated device administrator approval required."
+            ),
+            "code": "extension_activation_failed",
+        }
+    ]
+    assert 'id="extensions"' in source
+    assert "/api/extensions/activate" not in source
+
+
 def test_a_machine_with_no_shared_platform_says_so(served: AgentWebServer) -> None:
     """And does not show an empty table that reads as "nobody published
     anything"."""
@@ -336,7 +385,7 @@ def test_shared_platform_view_links_to_the_separate_member_portal(tmp_path: Path
             finally:
                 server.server_close()
             assert "member-portal" in page
-            assert "Open shared catalog controls" in page
+            assert "Open shared marketplace (Agent Add-ons and Applications)" in page
 
 
 def test_sync_request_is_closed_and_discovery_never_triggers_it(tmp_path: Path) -> None:

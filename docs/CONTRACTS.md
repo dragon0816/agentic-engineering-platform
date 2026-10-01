@@ -2374,6 +2374,21 @@ entitlement. `ApplicationCatalogReply` contains read-only projections and no
 Bridge id, package, selected, installed or active field. The member HTTP route
 is `/v1/member/applications`; it has no corresponding mutation route.
 
+`ExtensionLifecycleSnapshot` is the secret-free, atomic local evidence file
+written by `ExtensionManager`. It retains the latest
+`ExtensionActivationRecord` for each exact version while ensuring at most one
+current active/rolled-back version. A failed upgrade records the candidate as
+unhealthy and the retained version as rolled back. It contains no activation
+approval, signer private key, credential or execution grant.
+
+`ExtensionLifecycleProjection` is the Personal Agent Web view produced only by
+joining a valid identity-derived staged package with that optional local
+evidence. Without runtime evidence a valid package is `staged`. It shows the
+publisher key id, declared capability identities and applicable human gate,
+but is not accepted by any activation endpoint. The direct-member page consumes
+`ApplicationCatalogReply` separately and renders only declared external Web UI
+links; API, MCP and Workflow integration metadata remains descriptive.
+
 ## Portable Knowledge package (Productization 2, slice 2)
 
 `PortableKnowledgePackage` carries one exact published `KnowledgeManifest` and

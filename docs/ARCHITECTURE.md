@@ -367,6 +367,16 @@ selection, installation or activation operation. The projection contains
 identity, owner, external repository/release and declared integration points;
 reading it changes neither device authorization nor capability grants.
 
+Extension lifecycle visibility is local evidence rather than Registry state.
+The bounded runner writes a secret-free atomic snapshot beside the host state;
+Personal Agent Web reconciles that snapshot only with valid packages beneath
+the identity-derived extension root. It can show staged, active, unhealthy,
+rolled-back, refused and disabled states, but it exposes no activation route.
+Activation remains a device-local administrator decision under technical
+policy. Independent Applications appear in the direct-member marketplace and
+may expose external Web navigation; they never gain an Agent/Bridge install or
+activation control through that UI.
+
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof
 fingerprint, an unknown proof and a wrong proof are indistinguishable, and a

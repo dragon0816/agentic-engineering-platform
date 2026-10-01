@@ -52,9 +52,12 @@ from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from common.assets import WorkflowManifest
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
+from extensions.package import PortableExtensionPackage
+from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
+    ExtensionLifecycleProjection,
     KnowledgeAskRequest,
     PlatformCatalogProjection,
     PlatformDecisionProjection,
@@ -94,6 +97,59 @@ def manifests(directory: Path, model: type[Any]) -> tuple[Any, ...]:
         except Exception:  # noqa: BLE001 - a listing shows what it can read
             continue
     return tuple(found)
+
+
+def extension_lifecycle(runtime: HostRuntime) -> tuple[ExtensionLifecycleProjection, ...]:
+    """Project valid staged packages and optional runtime evidence without executing code."""
+    layout = runtime.layout
+    try:
+        current = {
+            item.extension.key: item
+            for item in ExtensionLifecycleStore(layout.extension_lifecycle).read().records
+        }
+    except Exception:  # noqa: BLE001 - doctor owns malformed local state
+        current = {}
+    gate = (
+        "Registered device owner or delegated device administrator approval required."
+        if runtime.config.device.device_kind == "company_workstation"
+        else "Device administrator or virtual-member approval required."
+    )
+    projected: list[ExtensionLifecycleProjection] = []
+    if not layout.extensions.is_dir():
+        return ()
+    for path in sorted(layout.extensions.glob("*/*/*/package.json")):
+        try:
+            package = PortableExtensionPackage.model_validate_json(path.read_bytes())
+            expected = (
+                layout.extensions
+                / package.identity.namespace
+                / package.identity.name
+                / package.identity.version
+                / "package.json"
+            )
+            if path.resolve() != expected.resolve():
+                continue
+            record = current.get(package.identity.key)
+            projected.append(
+                ExtensionLifecycleProjection(
+                    namespace=package.identity.namespace,
+                    name=package.identity.name,
+                    version=package.identity.version,
+                    description=package.manifest.description,
+                    state="staged" if record is None else record.state,
+                    publisher_key_id=package.signature.key_id,
+                    capabilities=tuple(
+                        f"{item.identity.namespace}/{item.identity.name}@{item.identity.version}"
+                        for item in package.manifest.capabilities
+                    ),
+                    approval_required=True,
+                    activation_gate=gate,
+                    code=None if record is None else record.code,
+                )
+            )
+        except Exception:  # noqa: BLE001 - invalid staging is diagnosed elsewhere
+            continue
+    return tuple(projected)
 
 
 class AgentWeb:
@@ -217,6 +273,9 @@ class AgentWeb:
             "skills": skills,
             "workflows": workflows,
             "knowledge": knowledge,
+            "extensions": [
+                item.model_dump(mode="json") for item in extension_lifecycle(self.runtime)
+            ],
             "runs": runs,
         }
 

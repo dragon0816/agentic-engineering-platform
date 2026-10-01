@@ -1,6 +1,7 @@
 # Productization 3 — Bridge Extensions and Application Catalog
 
-Status: active; Productization 2 completed with PR #165.
+Status: complete; Productization 2 completed with PR #165 and all five
+Productization 3 slices have reproducible Windows/Python 3.12 coverage.
 
 ## User outcome
 
@@ -104,6 +105,37 @@ repository/release reference and declared Web/API/MCP/Workflow integrations. It
 contains no package, selected, installed or active state, and there is no
 Application select/install/activate member operation. Reading it cannot mutate
 device authorization or capability grants.
+
+## Slice 5 implementation boundary
+
+Personal Agent Web discovers extension state only from valid packages below the
+host-derived extension root and from the secret-free atomic lifecycle snapshot
+written by the bounded runner. Missing or malformed package/state data is not
+executed and is left to host diagnostics. The page renders staged, active,
+unhealthy, rolled-back, refused and disabled states plus declared capabilities
+and the applicable device approval gate. It exposes no activation endpoint, so
+viewing local state cannot approve a publisher, start a process or create a
+capability grant.
+
+The separate authenticated member marketplace renders Applications from the
+existing entitlement-filtered member endpoint. A declared Web UI can be opened
+as an external navigation link. API, MCP and Workflow integrations remain
+descriptive until a future governed integration flow exists. Applications have
+no select, install or activate operation and are never represented as local
+Agent or Bridge packages.
+
+## Exit evidence
+
+- signed extension staging remains inert and path-safe;
+- device/policy approval remains mandatory before the bounded subprocess can
+  advertise exact healthy capabilities;
+- runtime transitions are persisted atomically without approvals, tokens or
+  other credentials;
+- Personal Agent Web exposes local Extension lifecycle state but no activation
+  control;
+- the member marketplace lists entitled Applications through a direct member
+  session and performs no Bridge or package mutation;
+- the complete Windows/Python 3.12 test, lint, type and build baseline passes.
 
 ## Decisions for slices 2 and 3
 

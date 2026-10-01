@@ -180,6 +180,11 @@ tr:last-child td { border-bottom: none; }
       <pre id="knowledge-result" class="note">Nothing has been asked.</pre>
       <div id="knowledge-citations" class="empty">No citations.</div>
     </div>
+    <h2>Bridge Extensions</h2>
+    <p class="note">Locally staged extension versions and their last runtime state.
+      Activation is a separate device-administrator action and still requires
+      technical policy approval.</p>
+    <div class="card"><div id="extensions" class="empty">reading&hellip;</div></div>
     <h2>Recent runs</h2>
     <div class="card"><div id="runs" class="empty">reading&hellip;</div></div>
   </section>
@@ -188,7 +193,7 @@ tr:last-child td { border-bottom: none; }
     <h2>Published to your team</h2>
     <p class="note" id="platform-note">reading&hellip;</p>
     <p><a id="member-portal" hidden target="_blank" rel="noopener noreferrer">
-      Open shared catalog controls</a></p>
+      Open shared marketplace (Agent Add-ons and Applications)</a></p>
     <p><button class="go" id="platform-sync" type="button" disabled>
       Synchronize selected assets</button></p>
     <p class="note" id="platform-sync-result">
@@ -335,6 +340,11 @@ async function loadAssets() {
   el("workflows").replaceChildren(table(
     ["Asset", "Steps", "What it does"], assets.workflows,
     (w) => [w.namespace + "/" + w.name + "@" + w.version, w.steps, w.description]));
+  el("extensions").replaceChildren(table(
+    ["Extension", "State", "Capabilities", "Activation gate"], assets.extensions,
+    (x) => [x.namespace + "/" + x.name + "@" + x.version,
+            x.state + (x.code ? " (" + x.code + ")" : ""),
+            x.capabilities.join(", ") || "\u2014", x.activation_gate]));
   el("runs").replaceChildren(table(
     ["Run", "Workflow", "Status", "Asked by"], assets.runs,
     (r) => [r.run_id, r.workflow, r.status, r.actor]));
