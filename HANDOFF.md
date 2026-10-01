@@ -14,8 +14,10 @@ script execution.
 
 ## Completed
 
-- Shared Platform identity, invitation proofs, users, browser logins and member
-  sessions persist in SQLite. The first bootstrap invitation is a
+- Shared Platform identity, invitation proofs, users, browser logins, member
+  sessions and Add-on selections persist in SQLite. Selection, revocation and
+  version replacement preserve their atomic authorization semantics across
+  restarts. The first bootstrap invitation is a
   `platform_admin`; the UI supports account state and invitation management.
 - Marketplace has kind/category/status filters, two test Skills, two test
   Workflows and one governed inert Bridge Extension. Extension administration
@@ -55,6 +57,8 @@ script execution.
 - `d06f315` Add restricted local conversation backends
 - `79be7f2` Add governed local script tools
 - `44290af` Polish preview authentication and backend readiness
+- `2f2c036` Document completed Agent experience rollout
+- `e4b3938` Persist marketplace selections
 
 ## Verification
 
@@ -69,7 +73,9 @@ script execution.
 - Live Shared Platform proof: actor `leo.chi`, role `platform_admin`, engineering
   group, 4 installable catalog entries, 1 admin Extension, 4 category facets.
 - Live Add-on proof: 2 selections synchronized and installed.
-- Live Agent proof: 7 slash commands, 4 local Skills, 4 local Workflows; Codex
+- Live restart proof: 1 Skill and 1 Workflow remained selected after the full
+  Shared Platform and Agent supervisor stopped and started again.
+- Live Agent proof: 7 slash commands, 5 local Skills, 5 local Workflows; Codex
   restricted conversation returned `ready`.
 
 ## Local runtime
@@ -91,9 +97,6 @@ script execution.
   subscription access is disabled. The adapter now reports
   `backend_authentication_failed`. Codex is installed and passed the live turn.
   Copilot CLI is not installed.
-- Shared Platform authorization selections are still process-memory state.
-  Identity, invitations, logins, sessions, devices, bindings, tokens and package
-  bytes are durable; selection durability remains future control-plane work.
 - This host still uses manual `grants.json`. The isolated Add-on sync proof saved
   its delivered authorization as `authorization.sync-validation.json` and
   restored `grants.json`, so current Bridge execution policy is unchanged.

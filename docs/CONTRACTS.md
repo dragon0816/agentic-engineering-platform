@@ -1477,7 +1477,7 @@ authorization carrying it. `for_actor`, `installable` (Workflows and Skills),
 `tools` (capabilities) and `allows(kind, asset)` read it.
 
 `control_plane.authorization.InMemoryAuthorizationRegistry(enrollment,
-packages)` records decisions and refuses the ones a member may not make:
+packages, storage=...)` records decisions and refuses the ones a member may not make:
 `actor_not_admitted` for a device they are not bound to, `asset_not_published`
 and `kind_mismatch` against the Registry, `tool_not_advertised` for a
 capability the device does not say it has, `approval_required` for a tool
@@ -1494,6 +1494,15 @@ grants are that member's; on a shared test workstation they are the virtual
 member's. The approver is checked against the platform's members rather than
 the device's, because one member per machine would otherwise leave
 `approved_by` able to name only the member giving the approval.
+
+The storage argument is optional so isolated tests and in-process references
+keep the same contract. A durable Shared Platform loads every validated
+`DeviceAssetSelection` from the allowlisted `authorization_selections` SQLite
+table. Select and revoke persist the replacement record before changing the
+in-process view. Exact-version replacement writes the revoked prior version and
+active replacement in one transaction, preserving its all-or-nothing contract
+across process restarts. Persisting a selection still creates no grant; grants
+continue to be derived from the device's current capability advertisement.
 
 A company host reads `authorization.json` from its workspace when it is there.
 `build_gateway` then installs only the Workflows and Skills the members chose,
@@ -1893,9 +1902,12 @@ stored package or unavailable database fails closed.
 
 `SharedPlatformConfiguration.registry_path` is optional for inert tests and
 must be absolute when set. The deployable example sets it and exposes the
-Registry's artifact mapping to the unchanged synchronization service. The
-store contains no credentials, invitation proofs, member sessions, device
-selections, remote jobs, execution grants or Bridge/local execution state.
+Registry's artifact mapping to the unchanged synchronization service.
+`SqliteRegistry` itself contains no credentials, invitation proofs, member
+sessions, device selections, remote jobs, execution grants or Bridge/local
+execution state. `SharedPlatformState.durable` uses separate allowlisted JSON
+tables in the same database for identity, browser login and authorization
+selection records; Registry package and artifact semantics remain independent.
 
 ## Shared-platform transport (Phase 7, slice 2i)
 

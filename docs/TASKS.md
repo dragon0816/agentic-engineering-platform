@@ -319,6 +319,7 @@ streaming `done` flag.
 | 2026-10-01 | Shared Platform browser access is invitation-only and persists a revocable browser-login proof locally; short member sessions remain memory-only. The first bootstrap invitation creates a `platform_admin`, who can issue and revoke later invitations. |
 | 2026-10-01 | Claude Code, Codex and Copilot are restricted local conversation backends, separate from `ModelCatalog`. They receive bounded text context in an isolated working directory and cannot return executable Agent tool calls; deterministic slash commands and Gateway tool calls remain under Bridge policy. |
 | 2026-10-01 | A Skill may reference scripts for documentation, but execution requires a separately installed script-tool capability with an exact package-relative path, SHA-256, fixed Python/PowerShell host, JSON stdin/stdout and normal Bridge approval. |
+| 2026-10-01 | Shared Platform member Add-on selections are durable authorization records in the same SQLite database as identity state. Select/revoke replaces one exact record, while version replacement commits the revoked and active records atomically; persistence still grants no execution permission by itself. |
 
 ## Resolved owner decisions (Phase 7)
 
@@ -386,6 +387,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Add backward-compatible asset categories and entitled category filtering.
 - [x] Publish harmless test Skills, Workflows and one governed Bridge Extension.
 - [x] Verify member Add-on selection/sync separately from administrator Extension staging.
+- [x] Persist member Add-on selections and restore them across Shared Platform restarts.
 
 # Agent persona, chat backends and capability authoring
 
