@@ -1338,9 +1338,10 @@ function renderPlatform(platform) {
     portal.hidden = true;
   }
   for (const kind of ["skill", "workflow", "bridge_extension", "application"]) {
+    const domKind = kind.replaceAll("_", "-");
     const count = platform.catalog.filter((item) => item.kind === kind).length;
-    el("market-count-" + kind).textContent = String(count);
-    el("market-tab-" + kind).setAttribute("aria-selected",
+    el("market-count-" + domKind).textContent = String(count);
+    el("market-tab-" + domKind).setAttribute("aria-selected",
       String(activeMarketKind === kind));
   }
   const categorySelect = el("market-category"), previousCategory = categorySelect.value;

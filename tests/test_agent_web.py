@@ -265,6 +265,7 @@ def test_ask_uses_compact_composer_backend_control(served: AgentWebServer) -> No
     assert 'id="backend-auth-dialog"' in page
     assert 'id="backend-auth-start"' in page
     assert 'call("/api/backends/authenticate"' in page
+    assert 'const domKind = kind.replaceAll("_", "-")' in page
 
 
 def test_workspace_navigation_and_sessions_live_in_the_sidebar(
