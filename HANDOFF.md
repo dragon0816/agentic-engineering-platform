@@ -4,7 +4,7 @@ Date: 2026-10-02 (Asia/Taipei)
 
 Branch: `main`
 
-Status: Productization 5 Agent Web experience refinement is complete and running locally
+Status: Productization 5 Agent Web experience refinement and Gateway chat repair are complete and running locally
 
 ## Goal
 
@@ -43,6 +43,13 @@ Platform library for governed discovery and synchronization.
   key mismatch for the Bridge Extension library tab. Ask, installed Skill
   details and the Share Platform library were then rendered without an error
   banner.
+- Gateway chat failed before reaching LiteLLM because the Agent preview process
+  lacked its configured `LITELLM_MASTER_KEY`. The ignored local supervisor now
+  loads that key from the existing Gateway `.env` into the Agent process only;
+  no credential value is stored in host settings or committed files.
+- A missing mapped Gateway credential now produces an actionable conversation
+  error naming the configured environment variable. The underlying typed
+  `credential_unavailable` failure remains available to clients.
 
 ## Commits
 
@@ -51,10 +58,11 @@ Platform library for governed discovery and synchronization.
 - `57af999` Refine Agent composer and backend authentication
 - `6151a47` Build Agent workspace sidebar and capability library
 - `9ae722c` Fix Share Platform extension tab rendering
+- `730b6cf` Explain missing Gateway credentials in Agent chat
 
 ## Verification
 
-- Final full suite: 1,509 passed, 4 skipped, 2 environment-specific deselected.
+- Final full suite: 1,510 passed, 4 skipped, 2 environment-specific deselected.
   The deselected cases are the known Edge CDP harness case and the assertion
   that Excel is absent on a machine where Excel is installed.
 - Focused Agent Web suite: 53 passed, 1 real-Chromium case deselected.
@@ -62,6 +70,9 @@ Platform library for governed discovery and synchronization.
 - Ruff lint passed and all 349 tracked Python files are formatted.
 - mypy strict passed for 271 source files.
 - Offline `python -m build --no-isolation` produced both sdist and wheel.
+- A new missing-credential regression test passed. Live Agent Web API status
+  reported the Gateway ready with `gpt-5.5`, and a natural-language Chinese turn
+  completed through the configured LiteLLM Gateway.
 - Direct Edge DevTools visual checks loaded current local API data, switched to
   Capabilities, rendered full Skill Markdown and scrolled through Share
   Platform Skills/category/status/install controls. All three local listeners
@@ -76,9 +87,9 @@ Platform library for governed discovery and synchronization.
 - Durable preview database:
   `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-local\registry-v2.sqlite`
 
-Current backend status after restart: Codex and Claude Code are installed and
-authenticated; Copilot is not installed. The Gateway is configured and
-selectable but its mapped credential is absent from the Agent process.
+Current backend status after restart: Gateway, Codex and Claude Code are ready;
+Copilot is not installed. `gpt-5.5` completed a live natural-language Agent
+Web turn in Traditional Chinese through the Gateway.
 
 ## Known limits
 
@@ -91,11 +102,13 @@ selectable but its mapped credential is absent from the Agent process.
 - Applications keep an independent release lifecycle. The Agent library links
   to Marketplace discovery and does not claim to install an Application into
   the Bridge runtime.
+- The Gateway key loader in `.scratch/run_local_preview.ps1` is a workstation
+  preview convenience and is ignored by Git. Other launch methods must provide
+  the mapped environment variable to the Agent process through their normal
+  secret provisioning mechanism.
 
 ## Next action
 
-Review the running Agent Web in the in-app browser. Check New session and
-Session switching, select each installed capability type, inspect `SKILL.md`,
-then use the Share Platform tabs and filters. Set the configured Gateway's
-credential environment before testing Gateway turns; until then Codex is the
-working local conversation backend.
+Review the running Agent Web in the in-app browser. The Gateway is selectable
+in the Ask composer and can now answer ordinary chat. Also check New session,
+Session switching, installed capability details and Share Platform filters.
