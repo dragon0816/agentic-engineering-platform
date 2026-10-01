@@ -1,5 +1,9 @@
 # Company Bridge host — Windows technical preview
 
+**Start with `START-HERE.md` in this folder.** It is the short, version-matched
+installation and acceptance checklist. This file is the detailed operator and
+integration reference.
+
 This preview proves a credential-free, per-user installation and company-device
 configuration before the shared-platform enrollment transport exists. It installs
 a resident Agent that runs the Skills and Workflows you place in its workspace.

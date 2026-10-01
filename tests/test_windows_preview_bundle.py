@@ -14,6 +14,7 @@ from scripts.build_windows_preview import (
     BUNDLE_NAME,
     BUNDLED_EXTRAS,
     MAX_EXTRACTED_PATH,
+    REQUIRED_OPERATOR_GUIDES,
     build,
     worst_case_path,
 )
@@ -73,6 +74,8 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         assert manifest["platform"] == "windows-amd64"
         assert prefix + "install.ps1" in names
         assert prefix + "uninstall.ps1" in names
+        for guide in REQUIRED_OPERATOR_GUIDES:
+            assert prefix + guide in names
         assert prefix + "wheels/" + platform_wheel.name in names
         # The things somebody double-clicks. An operator who has to type a
         # command with four flags to see a week's plan does not run it, so
@@ -106,9 +109,25 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         assert "membership.json" in installer
         assert "bundle-manifest.json" in installer
         assert "dut-validate --help" in installer
+        assert 'Filter "aep-platform*"' in installer
+        assert 'Filter "aep-local-codex-worker*"' in installer
         verifier = bundle.read(prefix + "verify.cmd").decode("utf-8")
         assert "bundle source revision" in verifier
         assert "dut-validate --help" in verifier
+        start_here = bundle.read(prefix + "START-HERE.md").decode("utf-8")
+        for expected in (
+            "http://127.0.0.1:4000/v1",
+            'aep-host.exe" web',
+            "Ask",
+            "Workflows",
+            "Knowledge",
+            "Improve",
+            "Shared platform",
+            "Bridge Extensions",
+            "Expected result",
+            "Evidence",
+        ):
+            assert expected in start_here
         for item in manifest["files"]:
             content = bundle.read(prefix + item["path"])
             assert hashlib.sha256(content).hexdigest() == item["sha256"]
@@ -129,6 +148,25 @@ def test_a_bundle_missing_a_wheel_its_extras_need_is_refused(tmp_path: Path) -> 
                 output_dir=tmp_path / "output",
                 revision="b" * 40,
             )
+
+
+def test_a_bundle_missing_the_start_guide_is_refused(
+    tmp_path: Path,
+) -> None:
+    template = tmp_path / "repo" / "deploy" / "windows-preview"
+    template.mkdir(parents=True)
+    (template / "README.md").write_text("advanced guide", encoding="utf-8")
+    platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
+    platform_wheel.write_bytes(b"platform-wheel")
+
+    with pytest.raises(ValueError, match="START-HERE.md"):
+        build(
+            repo=tmp_path / "repo",
+            platform_wheel=platform_wheel,
+            dependency_dir=dependency_dir(tmp_path),
+            output_dir=tmp_path / "output",
+            revision="b" * 40,
+        )
 
 
 def test_every_bundled_name_survives_the_way_people_get_the_bundle(tmp_path: Path) -> None:

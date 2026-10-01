@@ -44,6 +44,9 @@ jobs:
           if (-not $bundleIdentity.source_revision) { throw 'Installed bundle revision was not retained.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" dut-validate --help
           if ($LASTEXITCODE -ne 0) { throw 'Installed runtime does not contain the DUT validation command.' }
+          if (Test-Path "$installRoot\.venv\Scripts\aep-platform.exe") {
+            throw 'The Agent + Bridge role exposed the Shared Platform launcher.'
+          }
           & "$installRoot\.venv\Scripts\aep-host.exe" enrollment-request --config "$installRoot\host.json" --output "$installRoot\enrollment-request.json"
           $ready = & "$installRoot\.venv\Scripts\aep-host.exe" doctor --config "$installRoot\host.json"
           if ($ready -notcontains 'resident agent: ready') { throw 'The installer should bind the resident Agent to its owner.' }
@@ -97,10 +100,69 @@ jobs:
           }
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
-      - name: Upload Windows technical preview
+      - name: Build and install Shared Platform offline preview
+        shell: pwsh
+        run: |
+          python -m pip download --only-binary=:all: --dest dist/shared-platform-wheels "pydantic>=2.10,<3"
+          python -m scripts.build_shared_platform_preview --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/shared-platform-wheels
+          $archive = Get-ChildItem dist/aep-shared-platform-preview-*.zip | Select-Object -First 1
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/shared-platform-expanded
+          $bundle = Get-ChildItem dist/shared-platform-expanded -Directory | Select-Object -First 1
+          $installRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\ci-shared-platform-preview"
+          & "$($bundle.FullName)\install.ps1" -Administrator ci-platform-admin -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Shared Platform installation failed.' }
+          if (Test-Path "$installRoot\.venv\Scripts\aep-host.exe") {
+            throw 'The Shared Platform role exposed the Agent + Bridge launcher.'
+          }
+          & "$($bundle.FullName)\verify.cmd" $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'The Shared Platform bundle did not pass verify.cmd.' }
+          # Use CI-only ports so this smoke is independent from the preview's
+          # operator defaults and any runner service that reserves 8765/8766.
+          $ciConfig = Get-Content "$installRoot\platform.json" -Raw | ConvertFrom-Json
+          $ciConfig.control_port = 18765
+          $ciConfig.member_port = 18766
+          $ciConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\platform.json" -Encoding UTF8
+          $stdout = Join-Path $installRoot "ci-platform.stdout.log"
+          $stderr = Join-Path $installRoot "ci-platform.stderr.log"
+          $process = Start-Process -FilePath "$installRoot\.venv\Scripts\aep-platform.exe" -ArgumentList @("serve", "--config", "$installRoot\platform.json") -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          try {
+            $ready = $false
+            foreach ($attempt in 1..20) {
+              try {
+                $response = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:18766/" -TimeoutSec 2
+                if ($response.StatusCode -eq 200 -and $response.Content -match "Shared Capability Marketplace") {
+                  $ready = $true
+                  break
+                }
+              }
+              catch {
+                Start-Sleep -Milliseconds 500
+              }
+            }
+            if (-not $ready) {
+              $details = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { "no stderr" }
+              throw "Shared Platform Member Portal did not become ready: $details"
+            }
+            if (-not (Test-Path "$installRoot\workspace\registry.sqlite")) {
+              throw 'Shared Platform did not create its durable Registry database.'
+            }
+          }
+          finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+          }
+          & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
+          & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
+      - name: Upload Personal Agent and Bridge Windows preview
         uses: actions/upload-artifact@v4
         with:
           name: aep-windows-preview-${{ github.sha }}
           path: dist/aep-windows-preview-*.zip
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Shared Platform Windows preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: aep-shared-platform-windows-${{ github.sha }}
+          path: dist/aep-shared-platform-preview-*.zip
           if-no-files-found: error
           retention-days: 14

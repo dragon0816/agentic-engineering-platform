@@ -52,6 +52,9 @@ REQUIRED_DEPENDENCIES = (
 )
 #: What `install.ps1` installs the platform wheel with.
 BUNDLED_EXTRAS = ("excel", "windows")
+#: These operator guides are part of the installable product.  A release that
+#: cannot tell its tester how to install and validate it is not a usable bundle.
+REQUIRED_OPERATOR_GUIDES = ("START-HERE.md", "README.md")
 
 
 def worst_case_path(relative: str) -> int:
@@ -104,6 +107,9 @@ def build(
     if missing:
         raise ValueError("dependency wheel directory is incomplete")
     template = repo / "deploy" / "windows-preview"
+    missing_guides = [name for name in REQUIRED_OPERATOR_GUIDES if not (template / name).is_file()]
+    if missing_guides:
+        raise ValueError("Windows preview operator guide is missing: " + ", ".join(missing_guides))
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary) / BUNDLE_NAME
         shutil.copytree(template, root)

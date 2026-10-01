@@ -235,7 +235,10 @@ All seven slices are complete. Personal Agent Web provides catalog discovery,
 member selection, explicit synchronization, generic Workflow launch and
 exact-version grounded Knowledge asking through the existing execution
 boundaries. The final slice persists published package metadata and verified
-artifact bytes in SQLite behind the existing Registry contracts. See
+artifact bytes in SQLite behind the existing Registry contracts. Windows CI
+delivers this as two role-specific offline artifacts from the same commit:
+Personal Agent Web + Bridge for execution computers, and Shared Platform for
+the Registry/Marketplace computer. See
 `docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
 
 ## First implementation slice after Phase 0

@@ -51,6 +51,9 @@ wired only to the profile fixture directory. No general
 After `Platform verification` succeeds for `main`,
 `.github/workflows/hermes-deployment-company-agent.yml` locates only the
 artifact named `aep-windows-preview-<package_commit>` from that exact run.
+That artifact is specifically the Personal Agent + Bridge role. The separate
+`aep-shared-platform-windows-<package_commit>` artifact is never installed by
+the company-agent Hermes profile.
 It creates a new GitHub Issue, posts a bot-authored
 `hermes-validation/v1` JSON comment, and only then applies the queue labels.
 The payload has a dynamic `source_issue`; no Issue number is hardcoded.
