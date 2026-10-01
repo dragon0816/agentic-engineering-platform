@@ -397,3 +397,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Add kind-specific Skill, Workflow, Knowledge, Extension and App detail sections.
 - [x] Add governed Python/PowerShell script tool contracts and Bridge execution.
 - [x] Move new Skill/Workflow draft creation into Capabilities and remove Improve.
+
+# Productization 5 — Agent Web experience refinement
+
+- [ ] Remove Ask readiness cards and move backend selection into the composer footer.
+- [ ] Keep a configured Gateway selectable while showing credential readiness separately.
+- [ ] Add fixed, explicit Codex, Claude Code and Copilot authentication flows.
+- [ ] Refine Capabilities into installed list/detail panes with complete Skill Markdown.
+- [ ] Add Share Platform Skills, Workflows, Extensions and Apps library tabs and actions.
+- [ ] Verify the revised experience in the local preview and update handoff evidence.

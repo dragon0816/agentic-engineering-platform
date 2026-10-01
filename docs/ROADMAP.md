@@ -2,6 +2,16 @@
 
 Status: Phases 1–6 and Productization 1–4 complete; Phase 7 remains active
 
+## Productization 5 — Agent Web Experience Refinement (active)
+
+Compact the Ask workspace around the transcript and composer, make configured
+Gateway and local CLI choices understandable and usable, and align the
+Capabilities workspace with the installed-list/detail/Shared-Platform layout
+approved by the owner. Backend login remains an explicit fixed local action;
+Marketplace selection, installation, Extension activation and Application
+lifecycle stay separate. The specification is
+`docs/phases/PRODUCTIZATION_5_AGENT_WEB_EXPERIENCE.md`.
+
 ## Productization 4 — Personal Agent Usability (complete)
 
 Turn the completed local Web foundation into an understandable Personal Agent
