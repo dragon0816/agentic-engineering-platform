@@ -81,9 +81,7 @@ def manifest(runtime: str, entrypoint: str, digest: str) -> dict[str, Any]:
     }
 
 
-def write_package(
-    root: Path, *, runtime: str = "python", payload: str | None = None
-) -> Path:
+def write_package(root: Path, *, runtime: str = "python", payload: str | None = None) -> Path:
     package = root / IDENTITY.namespace / IDENTITY.name / IDENTITY.version
     package.mkdir(parents=True)
     if runtime == "python":

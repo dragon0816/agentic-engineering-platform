@@ -89,3 +89,22 @@ def test_timeout_and_missing_cli_are_typed_without_stderr_leaks(tmp_path: Path) 
     assert timeout.status == "timeout" and timeout.code == "backend_timeout"
     missing = timed.complete("copilot", history(), persona_guidance="Plain.")
     assert missing.status == "unavailable" and missing.code == "backend_not_installed"
+
+
+def test_authentication_failure_is_typed_and_marks_backend_unavailable(tmp_path: Path) -> None:
+    runner = Runner(
+        json.dumps(
+            {
+                "is_error": True,
+                "api_error_status": 403,
+                "result": "provider-specific detail must not travel",
+            }
+        ),
+        returncode=1,
+    )
+    backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
+    failed = backends.complete("claude_code", history(), persona_guidance="Plain.")
+    assert failed.status == "failed" and failed.code == "backend_authentication_failed"
+    status = {item.name: item for item in backends.statuses(gateway_available=False)}
+    assert status["claude_code"].available is False
+    assert "sign in" in status["claude_code"].detail.lower()

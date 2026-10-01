@@ -225,8 +225,7 @@ class AgentWeb:
     def readiness(self) -> dict[str, Any]:
         """Actionable local readiness without probing an external service."""
         assets = self.assets()
-        binding = self.runtime.config.models
-        gateway_ready = binding is not None and binding.routing_alias is not None
+        gateway_ready = self._gateway_ready()
         backends = self.backends.statuses(gateway_available=gateway_ready)
         ready_backends = [item.label for item in backends if item.available]
         natural_ready = bool(ready_backends)
@@ -237,8 +236,7 @@ class AgentWeb:
                     "Ready backends: " + ", ".join(ready_backends) + "."
                     if natural_ready
                     else (
-                        "Configure a Gateway model or install and sign in to a supported "
-                        "local CLI."
+                        "Configure a Gateway model or install and sign in to a supported local CLI."
                     )
                 ),
             },
@@ -255,6 +253,18 @@ class AgentWeb:
                 for name in ("profiles", "skills", "workflows", "knowledge", "extensions")
             },
         }
+
+    def _gateway_ready(self) -> bool:
+        binding = self.runtime.config.models
+        if binding is None or binding.routing_alias is None:
+            return False
+        endpoint = binding.catalog.endpoint(binding.routing_alias)
+        if endpoint is None:
+            return False
+        if endpoint.credential is None:
+            return True
+        environment = self.runtime.config.credential_environment().get(endpoint.credential.name)
+        return bool(environment and os.environ.get(environment))
 
     def settings(self) -> dict[str, Any]:
         """Current non-secret settings suitable for a local operator page."""
@@ -399,12 +409,10 @@ class AgentWeb:
         return {"conversation": json.loads(created.model_dump_json())}
 
     def conversation_backends(self) -> dict[str, Any]:
-        binding = self.runtime.config.models
-        gateway = binding is not None and binding.routing_alias is not None
         return {
             "backends": [
                 item.model_dump(mode="json")
-                for item in self.backends.statuses(gateway_available=gateway)
+                for item in self.backends.statuses(gateway_available=self._gateway_ready())
             ]
         }
 
@@ -414,12 +422,7 @@ class AgentWeb:
         item = ConversationBackendSelectRequest.model_validate(request)
         available = {
             row.name: row.available
-            for row in self.backends.statuses(
-                gateway_available=(
-                    self.runtime.config.models is not None
-                    and self.runtime.config.models.routing_alias is not None
-                )
-            )
+            for row in self.backends.statuses(gateway_available=self._gateway_ready())
         }
         if not available.get(item.backend, False):
             return {"ok": False, "code": "backend_unavailable"}

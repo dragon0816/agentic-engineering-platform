@@ -65,6 +65,24 @@ class BackendSpec(RegistryContract):
 
 SPECS = (
     BackendSpec(
+        name="codex",
+        label="Codex",
+        executable="codex",
+        arguments=(
+            "exec",
+            "--json",
+            "--ephemeral",
+            "--ignore-user-config",
+            "--ignore-rules",
+            "--sandbox",
+            "read-only",
+            "--skip-git-repo-check",
+            "--color",
+            "never",
+            "-",
+        ),
+    ),
+    BackendSpec(
         name="claude_code",
         label="Claude Code",
         executable="claude",
@@ -81,24 +99,6 @@ SPECS = (
             "--disable-slash-commands",
             "--permission-prompts",
             "none",
-        ),
-    ),
-    BackendSpec(
-        name="codex",
-        label="Codex",
-        executable="codex",
-        arguments=(
-            "exec",
-            "--json",
-            "--ephemeral",
-            "--ignore-user-config",
-            "--ignore-rules",
-            "--sandbox",
-            "read-only",
-            "--skip-git-repo-check",
-            "--color",
-            "never",
-            "-",
         ),
     ),
     BackendSpec(
@@ -186,6 +186,33 @@ def _answer(output: str) -> str:
     return stripped[:MAX_BACKEND_OUTPUT_CHARS] if stripped else ""
 
 
+def _error_code(output: str) -> str:
+    objects: list[object] = []
+    try:
+        objects.append(json.loads(output))
+    except json.JSONDecodeError:
+        for line in output.splitlines():
+            try:
+                objects.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+
+    def authentication_failure(value: object) -> bool:
+        if isinstance(value, dict):
+            if value.get("api_error_status") in (401, 403):
+                return True
+            return any(authentication_failure(item) for item in value.values())
+        if isinstance(value, list):
+            return any(authentication_failure(item) for item in value)
+        return False
+
+    return (
+        "backend_authentication_failed"
+        if any(authentication_failure(item) for item in objects)
+        else "backend_failed"
+    )
+
+
 class LocalConversationBackends:
     """Discover fixed CLI names and run them in a blank, bounded context."""
 
@@ -201,6 +228,7 @@ class LocalConversationBackends:
         self._which = which
         self._runner = runner
         self._specs = {item.name: item for item in SPECS}
+        self._unavailable: dict[ConversationBackendName, str] = {}
 
     def statuses(self, *, gateway_available: bool) -> tuple[ConversationBackendStatus, ...]:
         rows = [
@@ -212,7 +240,8 @@ class LocalConversationBackends:
             )
         ]
         for spec in SPECS:
-            available = self._which(spec.executable) is not None
+            failure = self._unavailable.get(spec.name)
+            available = self._which(spec.executable) is not None and failure is None
             rows.append(
                 ConversationBackendStatus(
                     name=spec.name,
@@ -221,7 +250,11 @@ class LocalConversationBackends:
                     detail=(
                         "Local CLI found; its existing sign-in will be used"
                         if available
-                        else f"{spec.executable} is not installed or not on PATH"
+                        else (
+                            "Authentication failed; sign in or ask the administrator to enable it"
+                            if failure == "backend_authentication_failed"
+                            else f"{spec.executable} is not installed or not on PATH"
+                        )
                     ),
                 )
             )
@@ -265,9 +298,10 @@ class LocalConversationBackends:
                 backend=backend, status="unavailable", code="backend_start_failed"
             )
         if completed.returncode != 0:
-            return ConversationBackendResult(
-                backend=backend, status="failed", code="backend_failed"
-            )
+            code = _error_code(completed.stdout)
+            if code == "backend_authentication_failed":
+                self._unavailable[backend] = code
+            return ConversationBackendResult(backend=backend, status="failed", code=code)
         answer = _answer(completed.stdout)
         if not answer:
             return ConversationBackendResult(

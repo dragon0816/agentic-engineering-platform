@@ -523,9 +523,7 @@ def build_gateway(
         script_tools = load_script_tools(layout.script_tools)
         for tool in script_tools:
             script_manifest = tool.manifest
-            if allowed is not None and not allowed(
-                "capability", script_manifest.metadata.identity
-            ):
+            if allowed is not None and not allowed("capability", script_manifest.metadata.identity):
                 continue
             installed.register(
                 script_manifest.capability,

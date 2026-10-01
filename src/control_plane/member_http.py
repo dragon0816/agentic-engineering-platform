@@ -203,9 +203,7 @@ class _Handler(BaseHTTPRequestHandler):
                     + timedelta(minutes=create.valid_for_minutes),
                 )
                 metadata = AdminInvitationMetadata(
-                    invitation=self.server.service.enrollment.invitation(
-                        proof.grant.invitation_id
-                    ),
+                    invitation=self.server.service.enrollment.invitation(proof.grant.invitation_id),
                     expires_at=proof.grant.expires_at,
                 )
                 self._json(
@@ -221,9 +219,7 @@ class _Handler(BaseHTTPRequestHandler):
                 sign_in = self.server.sign_in
                 if sign_in is None:
                     raise MemberError("invalid_request")
-                grants = {
-                    grant.invitation_id: grant for grant in sign_in.grants()
-                }
+                grants = {grant.invitation_id: grant for grant in sign_in.grants()}
                 reply = AdminInvitationListReply(
                     invitations=tuple(
                         AdminInvitationMetadata(
@@ -301,12 +297,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(401, {"code": "authentication_failed"})
             return
         try:
-            identity = self.server.logins.authenticate(
-                *credential, now=self.server.service.now()
-            )
-            session = self.server.service.sessions.issue(
-                identity, now=self.server.service.now()
-            )
+            identity = self.server.logins.authenticate(*credential, now=self.server.service.now())
+            session = self.server.service.sessions.issue(identity, now=self.server.service.now())
         except MemberError as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
             return

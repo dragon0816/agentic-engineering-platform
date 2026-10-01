@@ -400,6 +400,30 @@ def test_readiness_explains_why_natural_language_is_not_available(
     assert readiness["shared_platform"]["configured"] is False
 
 
+def test_gateway_backend_is_unavailable_until_its_mapped_secret_is_present(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("AEP_LLM_TOKEN", raising=False)
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "models": binding(),
+            "credentials": [
+                {
+                    "secret": "llm_gateway_token",
+                    "environment_variable": "AEP_LLM_TOKEN",
+                }
+            ],
+        },
+    )
+    backends = LocalConversationBackends(layout.workspace_root, which=lambda _name: None)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, conversation_backends=backends)
+        statuses = {row["name"]: row for row in web.conversation_backends()["backends"]}
+        assert statuses["gateway"]["available"] is False
+        assert web.readiness()["natural_language"]["status"] == "setup_required"
+
+
 def test_installed_skill_commands_include_a_clickable_manifest_derived_invocation(
     served: AgentWebServer,
 ) -> None:
@@ -616,9 +640,7 @@ def test_local_cli_backend_selection_answers_and_persists(tmp_path: Path) -> Non
         )
         assert selected["ok"] is True
         answered = web.conversation_turn(
-            ConversationTurnRequest(
-                session_id=created["session_id"], message="What can you do?"
-            )
+            ConversationTurnRequest(session_id=created["session_id"], message="What can you do?")
         )
         assert answered["answer"]["answer"] == "Answered by Claude."
         assert answered["conversation"]["backend"] == "claude_code"

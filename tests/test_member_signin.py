@@ -214,7 +214,13 @@ def test_invitation_link_redeems_over_real_http_without_identity_claims() -> Non
             page = answer.read().decode("utf-8")
         assert "/v1/member/sign-in" in page
         assert "#invitation=" not in page
-        for browser_store in ("localStorage", "sessionStorage", "indexedDB"):
+        # The durable login proof survives a browser restart and is exchanged
+        # for a short-lived bearer. The bearer itself remains in memory.
+        assert "localStorage" in page
+        assert 'const LOGIN_KEY="aep.marketplace.login.v1"' in page
+        assert 'fragment.get("login")' in page
+        assert "/v1/member/session" in page
+        for browser_store in ("sessionStorage", "indexedDB"):
             assert browser_store not in page
 
 

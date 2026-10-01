@@ -81,13 +81,9 @@ def test_only_admin_can_discover_extension_fixture_over_http() -> None:
         clock=lambda: NOW,
     )
     with MemberPortalServer(service) as server:
-        status, failure = post(
-            server.base_url + "/v1/member/admin/extensions", member.bearer, {}
-        )
+        status, failure = post(server.base_url + "/v1/member/admin/extensions", member.bearer, {})
         assert status == 403 and failure == {"code": "not_administrator"}
-        status, reply = post(
-            server.base_url + "/v1/member/admin/extensions", admin.bearer, {}
-        )
+        status, reply = post(server.base_url + "/v1/member/admin/extensions", admin.bearer, {})
     assert status == 200
     assert len(reply["entries"]) == 1
     assert reply["entries"][0]["package"]["kind"] == "bridge_extension"

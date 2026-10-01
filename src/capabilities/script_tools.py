@@ -234,9 +234,7 @@ class ScriptToolHandler:
 
     def _execute(self, inputs: ScriptToolInput) -> ScriptToolOutput:
         try:
-            entrypoint = _checked_entrypoint(
-                self.installed.package_root, self.installed.manifest
-            )
+            entrypoint = _checked_entrypoint(self.installed.package_root, self.installed.manifest)
         except (OSError, ValueError):
             raise CapabilityRefused("script_integrity_failed") from None
         try:
@@ -264,9 +262,7 @@ class ScriptToolHandler:
             raise CapabilityRefused("script_invalid_output") from None
         return ScriptToolOutput(result=value)
 
-    async def __call__(
-        self, context: RequestContext, inputs: Contract
-    ) -> ScriptToolOutput:
+    async def __call__(self, context: RequestContext, inputs: Contract) -> ScriptToolOutput:
         del context
         checked = ScriptToolInput.model_validate(inputs)
         return await asyncio.to_thread(self._execute, checked)

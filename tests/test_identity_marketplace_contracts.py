@@ -32,9 +32,7 @@ def test_existing_invitations_and_users_default_to_member() -> None:
     user = PlatformUser(actor="engineer", invitation_id=invitation.invitation_id)
     assert invitation.role == "member"
     assert user.role == "member"
-    promoted = Invitation.model_validate(
-        {**invitation.model_dump(), "role": "platform_admin"}
-    )
+    promoted = Invitation.model_validate({**invitation.model_dump(), "role": "platform_admin"})
     assert promoted.role == "platform_admin"
 
 

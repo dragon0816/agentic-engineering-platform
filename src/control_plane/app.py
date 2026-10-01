@@ -332,9 +332,7 @@ def application_from_config(
     try:
         for bootstrap in config.invitations:
             try:
-                application.state.enrollment.invitation(
-                    bootstrap.invitation.invitation_id
-                )
+                application.state.enrollment.invitation(bootstrap.invitation.invitation_id)
             except EnrollmentError as error:
                 if error.code != "invitation_missing":
                     raise
