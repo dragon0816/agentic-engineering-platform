@@ -943,6 +943,36 @@ def test_natural_language_conversation_runs_an_installed_workflow_through_policy
         assert transport.calls[1]["messages"][-1]["role"] == "tool"
 
 
+def test_gateway_turn_explains_missing_mapped_credential(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("AEP_LLM_TOKEN", raising=False)
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "credentials": [
+                {"secret": "llm_gateway_token", "environment_variable": "AEP_LLM_TOKEN"}
+            ],
+            "models": binding(),
+        },
+    )
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        result = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"], message="What can you help me with?"
+            )
+        )
+    assert result["ok"] is False
+    assert result["answer"]["outcome"]["conversation"]["failure"]["code"] == (
+        "credential_unavailable"
+    )
+    assert "AEP_LLM_TOKEN" in result["answer"]["answer"]
+    assert "restart the Agent" in result["answer"]["answer"]
+    assert result["conversation"]["messages"][-1]["text"] == result["answer"]["answer"]
+
+
 def test_it_lists_what_this_machine_has_without_naming_any_one_of_them(
     served: AgentWebServer,
 ) -> None:

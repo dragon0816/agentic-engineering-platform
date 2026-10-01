@@ -408,3 +408,6 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Refine Capabilities into installed list/detail panes with complete Skill Markdown.
 - [x] Add Share Platform Skills, Workflows, Extensions and Apps library tabs and actions.
 - [x] Verify the revised experience in the local preview and update handoff evidence.
+- [x] Diagnose Gateway chat failure caused by a missing credential in the Agent
+  process, show the mapped environment variable in failed turns, and verify a
+  live `gpt-5.5` conversation after fixing the local preview launch.

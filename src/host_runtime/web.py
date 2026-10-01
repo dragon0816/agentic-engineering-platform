@@ -48,6 +48,7 @@ from typing import Any, Literal, Self
 from urllib.parse import parse_qs, urlparse
 
 from agent.contracts import ActiveAgentProfile, AgentProfile
+from agent.gateway import GatewayConversationResult
 from agent.skills import SkillManifest
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from capabilities.script_tools import load_script_tools
@@ -266,6 +267,27 @@ class AgentWeb:
             return True
         environment = self.runtime.config.credential_environment().get(endpoint.credential.name)
         return bool(environment and os.environ.get(environment))
+
+    def _gateway_conversation_text(self, result: GatewayConversationResult) -> str:
+        if result.failure is None or result.failure.code != "credential_unavailable":
+            return result.text
+        binding = self.runtime.config.models
+        endpoint = (
+            None
+            if binding is None or binding.routing_alias is None
+            else binding.catalog.endpoint(binding.routing_alias)
+        )
+        variable = (
+            None
+            if endpoint is None or endpoint.credential is None
+            else self.runtime.config.credential_environment().get(endpoint.credential.name)
+        )
+        if variable:
+            return (
+                f"LLM Gateway credential is unavailable. Set {variable} in the Agent "
+                "process environment and restart the Agent."
+            )
+        return "LLM Gateway credential is unavailable. Check its mapping in Settings."
 
     def _gateway_configured(self) -> bool:
         binding = self.runtime.config.models
@@ -653,7 +675,7 @@ class AgentWeb:
                     answer = {
                         "ok": result is not None and result.status == "answered",
                         "answer": (
-                            result.text
+                            self._gateway_conversation_text(result)
                             if result is not None
                             else f"The request was refused ({conversational.refusal})."
                         ),
