@@ -345,6 +345,19 @@ fallback. Only compatible, valid packages reach an identity-derived version
 directory through an atomic staging write. This transition performs no package
 installation, import, activation, capability advertisement or authorization.
 
+Extension activation is a separate device-local transition. It requires an
+exact device/policy approval, prepares only previously verified wheels in an
+isolated environment with network package resolution disabled, and starts one
+fixed module in a dedicated subprocess. The versioned JSON-lines boundary has
+closed health/invoke messages, request correlation and manifest timeouts. A
+process advertises capabilities only after returning the exact declarations in
+its signed manifest; exit, timeout or mismatched health removes the complete
+set. A failed upgrade leaves the current healthy version active, and health
+failure can restart the retained prior approved version. This does not add a
+runtime `LocalPolicy` grant. Windows subprocess separation reduces coupling and
+secret exposure but is not treated as an OS sandbox, so signer trust, technical
+policy and device activation approval remain required.
+
 The invitation-only sign-in adapter keeps its bearer proof separate from the
 secret-free `Invitation` metadata. The platform stores only the proof
 fingerprint, an unknown proof and a wrong proof are indistinguishable, and a

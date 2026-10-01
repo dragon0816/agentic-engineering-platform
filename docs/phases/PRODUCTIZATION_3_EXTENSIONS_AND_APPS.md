@@ -66,6 +66,30 @@ package and atomically exposes the exact version. Staging does not create a
 virtual environment, install a wheel, import a module, start a process, approve
 activation, advertise a capability or grant execution permission.
 
+## Slice 3 implementation boundary
+
+Activation requires an exact `ExtensionActivationApproval` bound to the local
+device kind/id, extension identity and one approved manifest policy reference.
+Only after that check may the Windows preview prepare an isolated environment
+from the already verified wheel files with `--no-index --no-deps`. A digest
+marker makes preparation repeatable; partial environments are removed.
+
+The runner launches the manifest module with the prepared interpreter, `-I`, a
+fixed argument vector, no shell, a minimal non-secret environment and
+synchronized `aep-extension-jsonl/v1` requests on standard streams. Startup and
+request timeouts come from the manifest. Health must return the exact ordered
+capability identities declared by the manifest before any capability is
+advertised.
+
+An unhealthy or exited process immediately loses all advertisement. A failed
+upgrade leaves the prior healthy process active. A running upgrade that fails
+may restart the retained prior version under its existing approval; repeated
+crashes within the declared window disable reactivation. These state changes do
+not create a `LocalPolicy` capability grant. This Windows preview provides
+process separation and secret minimization, not an OS security-sandbox claim;
+trusted signature, technical policy and device activation approval remain
+mandatory.
+
 ## Decisions for slices 2 and 3
 
 - One exact extension version runs in one dedicated subprocess. The Bridge
@@ -75,8 +99,8 @@ activation, advertise a capability or grant execution permission.
   the local trust policy supplies trusted and revoked public keys. A missing,
   unknown or revoked key, invalid signature or unverifiable package is refused.
 - The first runtime is Windows, Python 3.12, ABI `cp312-win_amd64`. Packages are
-  offline wheelhouses installed into isolated exact-version directories. No
-  dependency download or package install occurs during activation.
+  offline wheelhouses installed into isolated exact-version environments after
+  activation approval and before process start. No dependency download occurs.
 - Company-workstation activation requires the registered device owner or
   delegated device administrator plus approved technical policy. Shared test
   computers require a device administrator/virtual member plus approved
