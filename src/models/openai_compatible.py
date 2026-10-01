@@ -16,7 +16,13 @@ from typing import Any, Literal
 from common.execution import Failure
 from models import wire
 from models.catalog import ModelEndpoint
-from models.contracts import ModelMessage, ModelRequest, ModelResponse, ModelStreamEvent
+from models.contracts import (
+    ModelMessage,
+    ModelRequest,
+    ModelResponse,
+    ModelStreamEvent,
+    ModelToolCall,
+)
 
 CHAT_PATH = "/chat/completions"
 
@@ -35,7 +41,47 @@ def _wire_message(message: ModelMessage) -> dict[str, Any]:
         body["content"] = message.text
     if message.tool_call_id is not None:
         body["tool_call_id"] = message.tool_call_id
+    if message.tool_calls:
+        body["tool_calls"] = [
+            {
+                "id": call.call_id,
+                "type": "function",
+                "function": {
+                    "name": call.name,
+                    "arguments": json.dumps(call.arguments),
+                },
+            }
+            for call in message.tool_calls
+        ]
     return body
+
+
+def _tool_calls(message: object) -> tuple[ModelToolCall, ...] | Failure:
+    if not isinstance(message, dict):
+        return ()
+    raw_calls = message.get("tool_calls")
+    if raw_calls is None:
+        return ()
+    if not isinstance(raw_calls, list):
+        return Failure(code="model_unparseable", message="tool_calls is not a list")
+    parsed: list[ModelToolCall] = []
+    try:
+        for raw in raw_calls:
+            function = raw["function"]
+            arguments = function["arguments"]
+            decoded = json.loads(arguments) if isinstance(arguments, str) else arguments
+            if not isinstance(decoded, dict):
+                raise ValueError
+            parsed.append(
+                ModelToolCall(
+                    call_id=raw["id"],
+                    name=function["name"],
+                    arguments=decoded,
+                )
+            )
+    except (KeyError, TypeError, ValueError):
+        return Failure(code="model_unparseable", message="a tool call is malformed")
+    return tuple(parsed)
 
 
 def _event_data(line: bytes) -> str | None:
@@ -100,12 +146,14 @@ class OpenAICompatible:
             # The contract names a platform shape the provider knows nothing
             # about; all it is asked for is JSON. The caller validates.
             payload["response_format"] = {"type": "json_object"}
+        if request.tools:
+            payload["tools"] = [wire.tool_schema(tool) for tool in request.tools]
         if stream:
             payload["stream"] = True
         return payload
 
     def generate(self, request: ModelRequest) -> ModelResponse:
-        refusal = wire.unsupported(request)
+        refusal = wire.unsupported(request, tool_calling=True)
         if refusal is not None:
             return wire.failed_response(request, refusal)
         headers = wire.authorized(self.credential)
@@ -154,11 +202,19 @@ class OpenAICompatible:
             )
         message = choices[0].get("message")
         content = message.get("content") if isinstance(message, dict) else None
+        calls = _tool_calls(message)
+        if isinstance(calls, Failure):
+            return refused(calls)
+        if not isinstance(content, str) and not calls:
+            return refused(
+                Failure(code="model_unparseable", message="the reply carries no content")
+            )
         usage = body.get("usage")
         usage = usage if isinstance(usage, dict) else {}
         return wire.answered(
             request,
             text=content if isinstance(content, str) else "",
+            tool_calls=calls,
             input_tokens=wire.token_count(usage.get("prompt_tokens")),
             output_tokens=wire.token_count(usage.get("completion_tokens")),
             duration_ms=duration_ms,

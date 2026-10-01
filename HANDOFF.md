@@ -1,68 +1,70 @@
 # Handoff
 
 Date: 2026-10-01 (Asia/Taipei)
-Branch: `codex/personal-agent-conversations`
-Base: `main` at `ac95c00eb3195e020c6cca62b1e475abb3a3e2ae`
+Branch: `codex/personal-agent-tool-loop`
+Base: `main` at `1f26f2e9f4b6b0bc7eedc0fbba60800420017d21`
 PR: pending
 
 ## Goal
 
-Complete Productization 4 slice 3: make the Personal Agent Web a durable local
-conversation workspace while preserving the existing Agent/Gateway/Bridge
-routing and authorization boundaries.
+Complete Productization 4 slice 4: make Personal Agent Web natural-language
+turns capable of bounded, policy-enforced tool use through the existing
+Agent/Gateway/Workflow/Bridge boundaries.
 
 ## Completed
 
-- Productization 4 slices 1–2 merged in PR #179 as `ac95c00e`. The main
-  verification succeeded and produced Windows preview artifact 11137482418.
-- Added closed, secret-rejecting conversation contracts for creation, turns,
-  messages and bounded records.
-- Migrated the Bridge SQLite local-state schema from v2 to v3 with an additive
-  conversations table; v1/v2 files migrate on writable open.
-- Conversation ownership is fixed to the running host actor. Updates preserve
-  the complete prior message prefix and monotonic timestamps.
-- Added authenticated Web APIs to create, list/select and submit turns.
-- Every turn passes the stable session id through the existing
-  `LocalAgentRequest`, then records human-readable result status and trace.
-- Updated Ask with a conversation selector, New action and restart-persistent
-  history. Listing, selecting and refreshing cause no execution.
-- Updated Productization 4 requirements, contracts, roadmap and task progress.
+- Added approved provider rendering for `platform.command-arguments.v1` and
+  OpenAI-compatible tool-call request, response and replay support.
+- Added a bounded Gateway conversation loop: five model turns, four tool calls,
+  twelve recent messages, 4,000 characters per message and 16,000 characters
+  per tool observation.
+- Projected tools only from commands in installed Skill manifests. Stable
+  `<skill alias>__<command>` names resolve back to one exact manifest target.
+- Unknown or invented tools never execute. Multiple simultaneous calls and
+  repeated calls stop with typed reasons.
+- Every accepted capability call uses `BridgeExecutor`; every Workflow call
+  uses `WorkflowEngine`; Local Agent admission and durable Workflow run records
+  remain in effect.
+- Preserved deterministic command bypass: known dot commands do not ask the
+  model to choose a route.
+- Personal Agent Web conversation turns now use the bounded tool loop for
+  ordinary language and retain final answer, trace and complete execution
+  evidence through the existing local conversation API.
+- Documented the fixed normal company Gateway URL
+  `http://127.0.0.1:4000/v1`; the served model id remains explicit setup.
 
 ## In Progress
 
-- Open, validate and merge the slice 3 PR.
+- Open, validate and merge the slice 4 PR.
 
 ## Remaining
 
-1. Productization 4 slice 4: provider-neutral bounded tool loop with explicit
-   maximum turns, installed-tool allowlist, Bridge policy on every call,
-   progress/evidence and structured stop reasons.
-2. Slice 5: standardized feedback and candidate Skill/Workflow generation with
-   validation, review and publishing gates.
+1. Productization 4 slice 5: standardized improvement feedback and candidate
+   Skill/Workflow creation with validation, review and publishing gates.
+2. Ollama tool-call wire support and streaming tool-call deltas remain outside
+   this OpenAI-compatible first path.
 3. The deployed Gateway's model id must be entered by its operator; the URL
    alone does not identify the served model.
 
 ## Architecture decisions made
 
-- Conversation history is local Bridge evidence, not shared-platform content.
-- Transcript text grants no authority and does not alter actor, namespace,
-  Bridge identity, model configuration or capability policy.
-- The durable record is bounded to 100 messages; list projection is bounded to
-  50 recent conversations.
-- Slice 3 records and displays history but does not yet feed arbitrary prior
-  transcript text to the routing model. Context use belongs to the bounded tool
-  loop contract in slice 4.
+- Tool visibility comes from installed Skill manifests, never shared catalog
+  publication or free-form prompt content.
+- Provider tool schemas transport arguments only. Installed capability and
+  Workflow contracts remain authoritative for validation.
+- A model-selected target grants no authority. Bridge policy runs on every
+  capability dispatch, including every step of a selected Workflow.
+- Conversation transcript and observations are bounded and cannot carry
+  identity, authorization or configuration changes.
+- This first loop executes one call at a time to keep ordering deterministic.
 
 ## Verification
 
 Supported target: Windows, Python 3.12 only. Browser automation was not run.
 
 ```text
-Focused Web/local-state suite:
-63 passed
-
 python -m pytest --ignore=tests/test_browser.py -q
-1457 passed, 4 skipped in 63.94s
+1461 passed, 4 skipped in 63.80s
 
 python -m ruff check .
 All checks passed!
@@ -76,7 +78,7 @@ Success: no issues found in 255 source files
 python -m pip check
 No broken requirements found.
 
-python -m build --no-isolation --outdir <scratch>/build-conversations
+python -m build --no-isolation --outdir <scratch>/build-tool-loop
 Successfully built sdist and wheel.
 
 git diff --check
@@ -85,15 +87,17 @@ PASS
 
 ## Known issues
 
-- The current model path makes one route-selection request. Durable conversation
-  history does not yet provide Hermes-style iterative tool use.
-- Conversations have no delete/archive UI yet; retrieval and each record are
-  bounded, but records remain in local state.
-- Bridge Extension activation remains behind the existing device-admin/policy
-  gate and outside Personal Agent Web.
+- Tool calling is implemented for the configured OpenAI-compatible company
+  Gateway. Ollama still returns the existing typed `tools_not_supported`.
+- Tool progress is returned as structured API evidence after the synchronous
+  turn; incremental browser streaming is not included.
+- The provider schema accepts a JSON object because current Skill commands name
+  symbolic contracts rather than carrying JSON Schema. The real target still
+  performs closed validation and may refuse model-supplied fields.
 
 ## Next Recommended Action
 
-Merge slice 3 after exact-head CI, then define the slice 4 tool-loop contract
-from existing `ModelRequest.tools`, installed capability contracts and Bridge
-policy. Do not encode workflow steps or permissions in the model prompt.
+Merge slice 4 after exact-head CI, then implement Productization 4 slice 5 as a
+separate review: conversation feedback becomes a standardized, reproducible
+improvement request or an unpublished candidate asset. It must not modify or
+publish a production capability directly.

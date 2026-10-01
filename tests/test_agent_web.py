@@ -28,6 +28,7 @@ from control_plane.http import ControlPlaneServer
 from extensions.package import stage_extension_package
 from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
 from host_runtime.contracts import CompanyHostConfiguration, KnowledgeAskRequest
+from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 
@@ -68,6 +69,47 @@ class KnowledgeGateway:
                     }
                 ],
                 "usage": {"prompt_tokens": 20, "completion_tokens": 8},
+            },
+        )
+
+
+class ToolCallingGateway:
+    """Select the one installed workflow, then explain its real result."""
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self.calls: list[dict[str, Any]] = []
+
+    def send(
+        self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
+    ) -> GatewayReply:
+        payload = json.loads(body)
+        self.calls.append(payload)
+        if not any(message["role"] == "tool" for message in payload["messages"]):
+            message: dict[str, Any] = {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call-read-notes",
+                        "type": "function",
+                        "function": {
+                            "name": "files__read",
+                            "arguments": json.dumps({"args": str(self.path)}),
+                        },
+                    }
+                ],
+            }
+        else:
+            message = {
+                "role": "assistant",
+                "content": "I read the installed workspace file. It starts with: first line.",
+            }
+        return GatewayReply(
+            200,
+            {
+                "choices": [{"index": 0, "message": message}],
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5},
             },
         )
 
@@ -405,6 +447,46 @@ def test_conversation_requests_are_closed_and_owned_by_the_host(served: AgentWeb
         },
     )
     assert turn.status == 400
+
+
+def test_natural_language_conversation_runs_an_installed_workflow_through_policy(
+    tmp_path: Path,
+) -> None:
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "models": binding(
+                catalog={
+                    "endpoints": [
+                        endpoint(
+                            credential=None,
+                            base_url="http://127.0.0.1:4000/v1",
+                            model="fixture-model",
+                        )
+                    ],
+                    "routes": [{"name": "default", "alias": "company"}],
+                }
+            )
+        },
+    )
+    transport = ToolCallingGateway(layout.workspace_root / "notes.txt")
+    with build_runtime(config, layout=layout, model_transport=transport) as runtime:
+        web = AgentWeb(runtime)
+        conversation = web.create_conversation()["conversation"]
+        result = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=conversation["session_id"],
+                message="Please read the notes in my workspace and tell me what they say.",
+            )
+        )
+        assert result["ok"] is True
+        assert result["answer"]["answer"].startswith("I read the installed workspace file")
+        agent = result["answer"]["outcome"]
+        assert agent["conversation"]["model_turns"] == 2
+        assert agent["conversation"]["tools"][0]["workflow"]["run"]["status"] == "succeeded"
+        assert len(runtime.state.runs()) == 1
+        assert transport.calls[0]["tools"][0]["function"]["name"] == "files__read"
+        assert transport.calls[1]["messages"][-1]["role"] == "tool"
 
 
 def test_it_lists_what_this_machine_has_without_naming_any_one_of_them(

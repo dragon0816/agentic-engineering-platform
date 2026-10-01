@@ -16,6 +16,7 @@ from common.assets import ExecutionDependencies, WorkflowManifest
 from common.base import Contract
 from common.evaluation import EvaluationCase
 from common.execution import RequestContext, TraceIdentifiers
+from models.contracts import ModelMessage, ModelRequest, ModelResponse, ModelToolCall
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
@@ -215,3 +216,112 @@ def test_route_arguments_pass_through_unchanged() -> None:
     no_args = asyncio.run(gateway(handler).handle(request("release.check")))
     assert no_args.capability is not None and no_args.capability.status == "succeeded"
     assert handler.seen[-1] == Probe()
+
+
+def test_bounded_conversation_uses_only_an_installed_tool_then_synthesizes() -> None:
+    class ConversationModel(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            if len(self.calls) == 1:
+                assert {tool.name for tool in item.tools} == {
+                    "release__check",
+                    "release__package",
+                }
+                return ModelResponse(
+                    trace=item.trace,
+                    model_alias=item.model_alias,
+                    tool_calls=(
+                        ModelToolCall(
+                            call_id="call-1",
+                            name="release__check",
+                            arguments={},
+                        ),
+                    ),
+                )
+            assert item.messages[-1].role == "tool"
+            assert '"status": "succeeded"' in item.messages[-1].text
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                text="The release check passed.",
+            )
+
+    handler = Handler()
+    model = ConversationModel()
+    result = asyncio.run(
+        gateway(handler, model).converse(
+            request("Can you check this release?"),
+            (ModelMessage(role="user", text="Can you check this release?"),),
+        )
+    )
+    assert result.status == "answered"
+    assert result.text == "The release check passed."
+    assert result.model_turns == 2
+    assert len(result.tools) == 1
+    assert result.tools[0].decision is not None
+    assert result.tools[0].decision.target == capability_spec().identity
+    assert handler.calls == 1
+
+
+def test_conversation_cannot_execute_an_invented_tool_and_stops() -> None:
+    class InventingModel(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                tool_calls=(
+                    ModelToolCall(
+                        call_id=f"call-{len(self.calls)}",
+                        name="admin__shell",
+                        arguments={},
+                    ),
+                ),
+            )
+
+    handler = Handler()
+    model = InventingModel()
+    result = asyncio.run(
+        gateway(handler, model).converse(
+            request("do something unsupported"),
+            (ModelMessage(role="user", text="do something unsupported"),),
+        )
+    )
+    assert result.status == "needs_input"
+    assert result.failure is not None and result.failure.code == "tool_loop_limit"
+    assert len(result.tools) == 4
+    assert all(item.failure and item.failure.code == "uninstalled_tool" for item in result.tools)
+    assert handler.calls == 0
+
+
+def test_conversation_tool_call_still_requires_bridge_policy() -> None:
+    class PolicyModel(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            if len(self.calls) == 1:
+                return ModelResponse(
+                    trace=item.trace,
+                    model_alias=item.model_alias,
+                    tool_calls=(
+                        ModelToolCall(call_id="call-policy", name="release__check", arguments={}),
+                    ),
+                )
+            assert '"code": "permission_denied"' in item.messages[-1].text
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                text="The Bridge policy did not authorize that check.",
+            )
+
+    handler = Handler()
+    result = asyncio.run(
+        gateway(handler, PolicyModel(), granted=False).converse(
+            request("check the release"),
+            (ModelMessage(role="user", text="check the release"),),
+        )
+    )
+    assert result.status == "answered"
+    assert result.tools[0].capability is not None
+    assert result.tools[0].capability.failure is not None
+    assert result.tools[0].capability.failure.code == "permission_denied"
+    assert handler.calls == 0

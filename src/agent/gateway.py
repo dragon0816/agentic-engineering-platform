@@ -1,4 +1,4 @@
-"""Platform entry point: one dispatch contract behind deterministic-first routing.
+"""Platform entry point: dispatch contracts behind deterministic-first routing.
 
 The Gateway adds no authority and holds no domain logic. Capability dispatch is
 authorized by LocalPolicy inside the Bridge; workflow pre-flights belong to the
@@ -7,11 +7,13 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
+import json
 from typing import Literal, Self
 
-from pydantic import JsonValue, TypeAdapter, model_validator
+from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
 from agent.routing import RequestRouter, RoutingOutcome
+from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
 from common.assets import AssetIdentity
 from common.base import Contract, Symbol
@@ -22,12 +24,25 @@ from common.execution import (
     RequestContext,
     ResumePlan,
     ResumePolicy,
+    RouteDecision,
     RunId,
+    TraceIdentifiers,
+)
+from models.contracts import (
+    ModelMessage,
+    ModelRequest,
+    ModelRequirements,
+    ModelTool,
+    ModelToolCall,
 )
 from workflow.checkpoints import CheckpointStoreError
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import ProgressStream, WorkflowEngine, WorkflowRunSnapshot
 from workflow.journal import SuspensionConfirmation
+
+MAX_CONVERSATION_HISTORY = 12
+MAX_CONVERSATION_MESSAGE_CHARS = 4_000
+MAX_TOOL_OBSERVATION_CHARS = 16_000
 
 
 class RunControlResult(Contract):
@@ -81,11 +96,260 @@ class GatewayResult(Contract):
         return self
 
 
+class ConversationToolExecution(Contract):
+    """Evidence for one model-proposed call after installed-target lookup."""
+
+    call_id: Symbol
+    name: Symbol
+    decision: RouteDecision | None = None
+    capability: CapabilityResult | None = None
+    workflow: WorkflowRunSnapshot | None = None
+    failure: Failure | None = None
+
+    @model_validator(mode="after")
+    def one_outcome(self) -> Self:
+        outcomes = (
+            self.capability is not None,
+            self.workflow is not None,
+            self.failure is not None,
+        )
+        if sum(outcomes) != 1:
+            raise ValueError("a tool call has exactly one execution outcome")
+        if self.failure is not None and self.decision is not None:
+            raise ValueError("a refused tool call selected no execution target")
+        if self.decision is None and self.failure is None:
+            raise ValueError("an executed tool call records its exact target")
+        return self
+
+
+class GatewayConversationResult(Contract):
+    """Bounded Agent loop result. The transcript itself grants no authority."""
+
+    trace: TraceIdentifiers
+    status: Literal["answered", "needs_input", "failed"]
+    text: str
+    model_turns: int = Field(ge=0, le=5, strict=True)
+    tools: tuple[ConversationToolExecution, ...] = Field(default=(), max_length=4)
+    failure: Failure | None = None
+
+    @model_validator(mode="after")
+    def terminal_state(self) -> Self:
+        if (self.status == "answered") == (self.failure is not None):
+            raise ValueError("only an answered conversation omits failure details")
+        return self
+
+
 class Gateway:
     def __init__(self, router: RequestRouter, bridge: BridgeExecutor, engine: WorkflowEngine):
         self.router = router
         self.bridge = bridge
         self.engine = engine
+
+    async def converse(
+        self,
+        request: RequestContext,
+        history: tuple[ModelMessage, ...],
+    ) -> GatewayConversationResult:
+        """Use installed commands as tools in a five-turn/four-call maximum loop.
+
+        The model receives aliases for installed commands, never raw capability
+        authority. Every accepted call is resolved back to its manifest target
+        and dispatched through the same Bridge/Workflow boundaries as any other
+        ingress. Unknown calls are observations for one bounded repair attempt;
+        they are never executed.
+        """
+        context = RequestContext.model_validate(request)
+        if any(
+            message.role not in {"user", "assistant"}
+            or message.images
+            or message.tool_calls
+            or message.tool_call_id is not None
+            for message in history
+        ):
+            return self._conversation_failure(context, "conversation_history_invalid", 0, ())
+        if self.router.model is None:
+            return self._conversation_failure(context, "model_not_configured", 0, ())
+        bindings: dict[str, CommandBinding] = {}
+        tools: list[ModelTool] = []
+        for skill in self.router.commands.skills.discover(context.namespace):
+            for command in skill.commands:
+                name = f"{skill.alias}__{command.name}"
+                bindings[name] = command
+                target = command.target
+                tools.append(
+                    ModelTool(
+                        name=name,
+                        description=(
+                            f"{skill.instructions} Executes installed {command.kind} "
+                            f"{target.namespace}/{target.name}@{target.version}."
+                        ),
+                        input_contract="platform.command-arguments.v1",
+                    )
+                )
+        if not tools:
+            return self._conversation_failure(context, "no_installed_tools", 0, ())
+
+        prompt = (
+            "You are the Personal Engineering Agent. Answer naturally and concisely. "
+            "Use only the supplied installed tools when work is required. Never invent a tool, "
+            "target, permission, result, or completed action. Ask for missing inputs. After a "
+            "tool result, explain what happened and what the user should do next."
+        )
+        bounded_history = tuple(
+            ModelMessage(
+                role=message.role,
+                text=message.text[:MAX_CONVERSATION_MESSAGE_CHARS],
+            )
+            for message in history[-MAX_CONVERSATION_HISTORY:]
+        )
+        messages = [ModelMessage(role="system", text=prompt), *bounded_history]
+        evidence: list[ConversationToolExecution] = []
+        for turn in range(1, 6):
+            model_request = ModelRequest(
+                trace=context.trace,
+                model_alias=self.router.model_alias,
+                messages=tuple(messages),
+                requirements=ModelRequirements(
+                    tool_calling=True,
+                    local_only=self.router.local_only,
+                ),
+                tools=tuple(tools),
+                max_output_tokens=1024,
+            )
+            try:
+                response = await asyncio.to_thread(self.router.model.generate, model_request)
+            except Exception:
+                return self._conversation_failure(
+                    context, "model_unavailable", turn, tuple(evidence)
+                )
+            if response.failure is not None:
+                return GatewayConversationResult(
+                    trace=context.trace,
+                    status="failed",
+                    text="The configured model could not answer this turn.",
+                    model_turns=turn,
+                    tools=tuple(evidence),
+                    failure=response.failure,
+                )
+            if response.trace != context.trace or response.model_alias != self.router.model_alias:
+                return self._conversation_failure(
+                    context, "model_context_mismatch", turn, tuple(evidence)
+                )
+            if not response.tool_calls:
+                if response.text.strip():
+                    return GatewayConversationResult(
+                        trace=context.trace,
+                        status="answered",
+                        text=response.text,
+                        model_turns=turn,
+                        tools=tuple(evidence),
+                    )
+                return self._conversation_failure(
+                    context, "empty_model_answer", turn, tuple(evidence)
+                )
+            if len(response.tool_calls) != 1:
+                return self._conversation_failure(
+                    context, "multiple_tool_calls_not_supported", turn, tuple(evidence)
+                )
+            call = response.tool_calls[0]
+            binding = bindings.get(call.name)
+            if binding is None:
+                item = ConversationToolExecution(
+                    call_id=call.call_id,
+                    name=call.name,
+                    failure=Failure(
+                        code="uninstalled_tool",
+                        message="The model named a tool that is not installed",
+                    ),
+                )
+            else:
+                item = await self._execute_conversation_tool(context, call, binding)
+            evidence.append(item)
+            messages.append(
+                ModelMessage(
+                    role="assistant",
+                    text=response.text,
+                    tool_calls=response.tool_calls,
+                )
+            )
+            observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
+            if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
+                observation = json.dumps(
+                    {
+                        "truncated": True,
+                        "preview": observation[:MAX_TOOL_OBSERVATION_CHARS],
+                    },
+                    ensure_ascii=False,
+                )
+            messages.append(
+                ModelMessage(
+                    role="tool",
+                    tool_call_id=call.call_id,
+                    text=observation,
+                )
+            )
+            if len(evidence) >= 4:
+                break
+        return self._conversation_failure(
+            context, "tool_loop_limit", min(5, len(evidence)), tuple(evidence)
+        )
+
+    async def _execute_conversation_tool(
+        self,
+        context: RequestContext,
+        call: ModelToolCall,
+        binding: CommandBinding,
+    ) -> ConversationToolExecution:
+        decision = RouteDecision(
+            kind=binding.kind,
+            target=binding.target,
+            reason="Model selected an installed conversation tool",
+        )
+        if binding.kind == "capability":
+            result = await self.bridge.execute(
+                CapabilityInvocation(
+                    context=context,
+                    target=binding.target,
+                    arguments=call.arguments,
+                )
+            )
+            return ConversationToolExecution(
+                call_id=call.call_id,
+                name=call.name,
+                decision=decision,
+                capability=result,
+            )
+        snapshot = await self.execute_workflow(context, binding.target, call.arguments)
+        return ConversationToolExecution(
+            call_id=call.call_id,
+            name=call.name,
+            decision=decision,
+            workflow=snapshot,
+        )
+
+    @staticmethod
+    def _conversation_failure(
+        context: RequestContext,
+        code: str,
+        turns: int,
+        tools: tuple[ConversationToolExecution, ...],
+    ) -> GatewayConversationResult:
+        return GatewayConversationResult(
+            trace=context.trace,
+            status=(
+                "needs_input"
+                if code in {"model_not_configured", "no_installed_tools", "tool_loop_limit"}
+                else "failed"
+            ),
+            text=(
+                "I need more information or a supported installed tool before I can continue."
+                if code in {"model_not_configured", "no_installed_tools", "tool_loop_limit"}
+                else "The Personal Agent could not complete this turn."
+            ),
+            model_turns=turns,
+            tools=tools,
+            failure=Failure(code=code, message="The bounded conversation loop stopped"),
+        )
 
     async def handle(
         self,

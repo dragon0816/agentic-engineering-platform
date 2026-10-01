@@ -17,7 +17,7 @@ from typing import Literal, Self
 
 from pydantic import model_validator
 
-from agent.gateway import Gateway
+from agent.gateway import Gateway, GatewayConversationResult
 from capabilities.runtime import CapabilityInvocation
 from common.base import Contract, Symbol
 from common.distribution import (
@@ -37,6 +37,7 @@ from common.local_agent import (
     LocalWorkflowRequest,
 )
 from host_runtime.state import SqliteLocalState
+from models.contracts import ModelMessage
 from workflow.engine import WorkflowRunSnapshot
 
 LocalRefusalCode = DeviceAdmissionCode | Literal["actor_not_bound", "delegation_not_allowed"]
@@ -77,6 +78,26 @@ class LocalAgentOutcome(Contract):
                 raise ValueError("a run is recorded or its record failed, not both")
         if self.unrecorded is not None and self.workflow is None:
             raise ValueError("only a workflow that ran can have gone unrecorded")
+        return self
+
+
+class LocalConversationOutcome(Contract):
+    """Admission, bounded Agent result and any durable Workflow run evidence."""
+
+    trace: TraceIdentifiers
+    ingress: Ingress
+    actor: Symbol
+    refusal: LocalRefusalCode | None = None
+    conversation: GatewayConversationResult | None = None
+    runs: tuple[LocalRunSummary, ...] = ()
+    unrecorded: tuple[LocalStateErrorCode, ...] = ()
+
+    @model_validator(mode="after")
+    def admitted_or_refused(self) -> Self:
+        if (self.refusal is None) != (self.conversation is not None):
+            raise ValueError("an admitted conversation has a result; a refusal does not")
+        if self.refusal is not None and (self.runs or self.unrecorded):
+            raise ValueError("a refused conversation ran nothing")
         return self
 
 
@@ -157,6 +178,47 @@ class LocalAgent:
             workflow=result.workflow,
             run=run,
             unrecorded=unrecorded,
+        )
+
+    async def converse(
+        self,
+        request: LocalAgentRequest,
+        history: tuple[ModelMessage, ...],
+    ) -> LocalConversationOutcome:
+        """Run the bounded conversation loop after normal device admission."""
+        item = LocalAgentRequest.model_validate(request)
+        refusal = self.admit(item.actor, item.bridge_id, item.on_behalf_of)
+        if refusal is not None:
+            return LocalConversationOutcome(
+                trace=item.trace,
+                ingress=item.ingress,
+                actor=item.actor,
+                refusal=refusal,
+            )
+        context = RequestContext(
+            trace=item.trace,
+            actor=item.actor,
+            namespace=item.namespace,
+            message=item.message,
+            channel=item.ingress,
+            session_id=item.session_id,
+        )
+        result = await self.gateway.converse(context, history)
+        runs: list[LocalRunSummary] = []
+        unrecorded: list[LocalStateErrorCode] = []
+        for tool in result.tools:
+            run, error = await self._record(item.actor, item.on_behalf_of, tool.workflow)
+            if run is not None:
+                runs.append(run)
+            if error is not None:
+                unrecorded.append(error)
+        return LocalConversationOutcome(
+            trace=item.trace,
+            ingress=item.ingress,
+            actor=item.actor,
+            conversation=result,
+            runs=tuple(runs),
+            unrecorded=tuple(unrecorded),
         )
 
     async def execute(

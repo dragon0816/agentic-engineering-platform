@@ -51,7 +51,7 @@ from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.skills import SkillManifest
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from common.assets import WorkflowManifest
-from common.execution import Failure, TraceIdentifiers
+from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
@@ -81,6 +81,7 @@ from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
+from models.contracts import ModelMessage
 
 #: Anything larger than this is not a request to an Agent.
 MAX_BODY_BYTES = 256 * 1024
@@ -366,16 +367,74 @@ class AgentWeb:
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
             started = datetime.now(UTC)
-            answer = self.ask(item.message, session_id=item.session_id)
+            namespace = self.namespace
+            if not namespace:
+                answer: dict[str, Any] = {
+                    "ok": False,
+                    "answer": "No namespace is configured. Set `namespace` in host.json.",
+                    "status": "needs_input",
+                }
+            else:
+                trace = _trace()
+                local = LocalAgentRequest(
+                    ingress="local",
+                    actor=self.runtime.actor,
+                    bridge_id=self.runtime.config.device.bridge_id,
+                    namespace=namespace,
+                    message=item.message,
+                    trace=trace,
+                    session_id=item.session_id,
+                )
+                context = RequestContext(
+                    trace=trace,
+                    actor=self.runtime.actor,
+                    namespace=namespace,
+                    message=item.message,
+                    channel="local",
+                    session_id=item.session_id,
+                )
+                import asyncio
+
+                # Known commands keep their deterministic path and never pay
+                # for model selection. Ordinary language enters the bounded
+                # tool loop with only recent local conversation text.
+                if self.runtime.agent.gateway.router.commands.match(context) is not None:
+                    direct = asyncio.run(self.runtime.agent.handle(local))
+                    answer = {
+                        "ok": direct.refusal is None,
+                        "answer": readable(direct),
+                        "status": (
+                            "needs_input"
+                            if direct.decision is not None and direct.decision.kind == "needs_input"
+                            else ("answered" if direct.refusal is None else "failed")
+                        ),
+                        "outcome": json.loads(direct.model_dump_json()),
+                    }
+                else:
+                    history = tuple(
+                        ModelMessage(role=message.role, text=message.text)
+                        for message in record.messages[-19:]
+                    ) + (ModelMessage(role="user", text=item.message),)
+                    conversational = asyncio.run(self.runtime.agent.converse(local, history))
+                    result = conversational.conversation
+                    answer = {
+                        "ok": result is not None and result.status == "answered",
+                        "answer": (
+                            result.text
+                            if result is not None
+                            else f"The request was refused ({conversational.refusal})."
+                        ),
+                        "status": result.status if result is not None else "failed",
+                        "outcome": json.loads(conversational.model_dump_json()),
+                    }
             finished = datetime.now(UTC)
             outcome = answer.get("outcome")
-            decision = outcome.get("decision") if isinstance(outcome, dict) else None
             status = (
-                "needs_input"
-                if isinstance(decision, dict) and decision.get("kind") == "needs_input"
+                answer.get("status")
+                if answer.get("status") in {"answered", "needs_input", "failed"}
                 else ("answered" if answer.get("ok") else "failed")
             )
-            trace = outcome.get("trace") if isinstance(outcome, dict) else None
+            trace_data = outcome.get("trace") if isinstance(outcome, dict) else None
             title = (
                 item.message[:72] + ("…" if len(item.message) > 72 else "")
                 if not record.messages
@@ -401,7 +460,9 @@ class AgentWeb:
                             created_at=finished,
                             status=status,
                             trace=(
-                                None if trace is None else TraceIdentifiers.model_validate(trace)
+                                None
+                                if trace_data is None
+                                else TraceIdentifiers.model_validate(trace_data)
                             ),
                         ),
                     ),

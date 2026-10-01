@@ -1825,6 +1825,37 @@ The conversation Web adapter passes the stable session id into the existing
 authorization, model configuration or execution permission. Listing, selecting
 and refreshing conversation history perform no Agent call.
 
+## Personal Agent bounded tool loop (Productization 4, slice 4)
+
+`Gateway.converse` projects each command from the current namespace's installed
+`SkillManifest` as one provider-neutral `ModelTool`. Its provider name is the
+stable `<skill alias>__<command>` pair and maps only to the command's exact
+manifest target. The approved `platform.command-arguments.v1` provider schema
+carries a JSON object; the installed capability or Workflow remains the source
+of truth for its real input validation.
+
+The OpenAI-compatible adapter renders those tools and round-trips assistant
+`ModelToolCall` plus `tool` result messages. Unknown symbolic input contracts
+fail before transport. Ollama continues to return `tools_not_supported` until
+its own wire format is implemented; provider behavior does not leak into the
+Agent contract.
+
+`GatewayConversationResult` contains terminal status, human-readable text,
+model-turn count, trace and a bounded tuple of `ConversationToolExecution`
+evidence. The loop permits five model turns and four tool calls, carries at
+most twelve prior user/assistant messages of 4,000 characters each, and limits
+one tool observation to 16,000 characters. Unknown tool names are returned to
+the model as a refusal without dispatch; repeated calls end as
+`tool_loop_limit`. Multiple simultaneous calls are refused because this first
+implementation preserves deterministic ordering.
+
+Every resolved capability call uses `BridgeExecutor.execute`; every resolved
+Workflow uses `WorkflowEngine.execute`. Local Agent admission occurs before the
+loop, Bridge policy is evaluated for every call, and Workflow results are
+written through the existing local-run evidence path. Installed/published
+status and model text grant no authority. A known deterministic command keeps
+the existing non-model route.
+
 ## Durable shared Registry (Productization 1, slice 6)
 
 `PackageRegistry` is the control-plane catalog boundary used by authorization,
