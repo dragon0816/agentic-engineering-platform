@@ -16,15 +16,22 @@ from common.assets import RegistryContract
 from models.contracts import ModelMessage
 
 ConversationBackendName = Literal["gateway", "claude_code", "codex", "copilot"]
+ConversationBackendAuthentication = Literal[
+    "ready", "required", "pending", "unavailable", "not_applicable"
+]
 MAX_BACKEND_OUTPUT_CHARS = 16_000
 MAX_BACKEND_PROMPT_CHARS = 48_000
 BACKEND_TIMEOUT_SECONDS = 90
+AUTH_STATUS_TIMEOUT_SECONDS = 10
 
 
 class ConversationBackendStatus(RegistryContract):
     name: ConversationBackendName
     label: str
     available: bool
+    selectable: bool
+    authentication: ConversationBackendAuthentication
+    action: Literal["none", "authenticate", "configure", "install"]
     detail: str
 
 
@@ -56,11 +63,27 @@ class ProcessRunner(Protocol):
     ) -> ProcessResult: ...
 
 
+class AuthenticationProcess(Protocol):
+    def poll(self) -> int | None: ...
+
+
+class AuthenticationLauncher(Protocol):
+    def __call__(
+        self,
+        argv: list[str],
+        *,
+        cwd: Path,
+        env: Mapping[str, str],
+    ) -> AuthenticationProcess: ...
+
+
 class BackendSpec(RegistryContract):
     name: ConversationBackendName
     label: str
     executable: str
     arguments: tuple[str, ...] = Field(min_length=1)
+    authentication_arguments: tuple[str, ...] = Field(min_length=1)
+    authentication_status_arguments: tuple[str, ...] = ()
 
 
 SPECS = (
@@ -81,6 +104,8 @@ SPECS = (
             "never",
             "-",
         ),
+        authentication_arguments=("login",),
+        authentication_status_arguments=("login", "status"),
     ),
     BackendSpec(
         name="claude_code",
@@ -100,6 +125,8 @@ SPECS = (
             "--permission-prompts",
             "none",
         ),
+        authentication_arguments=("auth", "login"),
+        authentication_status_arguments=("auth", "status"),
     ),
     BackendSpec(
         name="copilot",
@@ -111,6 +138,7 @@ SPECS = (
             "--available-tools=",
             "--disable-builtin-mcps",
         ),
+        authentication_arguments=("login",),
     ),
 )
 
@@ -135,6 +163,27 @@ def _run_process(
         timeout=timeout,
         check=check,
         env=env,
+    )
+
+
+def _launch_authentication(
+    argv: list[str],
+    *,
+    cwd: Path,
+    env: Mapping[str, str],
+) -> AuthenticationProcess:
+    """Launch only a fixed login command in a visible local console."""
+
+    creationflags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0) if os.name == "nt" else 0
+    return subprocess.Popen(  # noqa: S603 - argv comes only from fixed BackendSpec values
+        argv,
+        cwd=cwd,
+        env=env,
+        stdin=None,
+        stdout=None,
+        stderr=None,
+        start_new_session=os.name != "nt",
+        creationflags=creationflags,
     )
 
 
@@ -222,43 +271,143 @@ class LocalConversationBackends:
         *,
         which: Callable[[str], str | None] = shutil.which,
         runner: ProcessRunner = _run_process,
+        status_runner: ProcessRunner | None = None,
+        authentication_launcher: AuthenticationLauncher = _launch_authentication,
     ) -> None:
         self.root = workspace_root / ".conversation-backends"
         self.root.mkdir(parents=True, exist_ok=True)
         self._which = which
         self._runner = runner
+        self._status_runner = runner if status_runner is None else status_runner
+        self._authentication_launcher = authentication_launcher
         self._specs = {item.name: item for item in SPECS}
         self._unavailable: dict[ConversationBackendName, str] = {}
+        self._authentication_processes: dict[ConversationBackendName, AuthenticationProcess] = {}
+        self._authenticated_this_run: set[ConversationBackendName] = set()
 
-    def statuses(self, *, gateway_available: bool) -> tuple[ConversationBackendStatus, ...]:
+    def _authentication(
+        self, spec: BackendSpec, executable: str
+    ) -> ConversationBackendAuthentication:
+        process = self._authentication_processes.get(spec.name)
+        if process is not None:
+            finished = process.poll()
+            if finished is None:
+                return "pending"
+            del self._authentication_processes[spec.name]
+            if finished == 0:
+                self._authenticated_this_run.add(spec.name)
+                self._unavailable.pop(spec.name, None)
+                return "ready"
+            return "required"
+        if spec.name in self._authenticated_this_run:
+            return "ready"
+        if self._unavailable.get(spec.name) == "backend_authentication_failed":
+            return "required"
+        if not spec.authentication_status_arguments:
+            return "required"
+        try:
+            completed = self._status_runner(
+                [executable, *spec.authentication_status_arguments],
+                cwd=self.root,
+                input="",
+                capture_output=True,
+                text=True,
+                timeout=AUTH_STATUS_TIMEOUT_SECONDS,
+                check=False,
+                env=_environment(),
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return "required"
+        return "ready" if completed.returncode == 0 else "required"
+
+    def statuses(
+        self,
+        *,
+        gateway_available: bool,
+        gateway_configured: bool | None = None,
+    ) -> tuple[ConversationBackendStatus, ...]:
+        configured = gateway_available if gateway_configured is None else gateway_configured
         rows = [
             ConversationBackendStatus(
                 name="gateway",
                 label="Configured LLM Gateway",
                 available=gateway_available,
-                detail=("Configured" if gateway_available else "Configure it in Settings"),
+                selectable=configured,
+                authentication=(
+                    "ready" if gateway_available else ("required" if configured else "unavailable")
+                ),
+                action=("none" if gateway_available else "configure"),
+                detail=(
+                    "Configured and ready"
+                    if gateway_available
+                    else (
+                        "Configured; its mapped credential is unavailable"
+                        if configured
+                        else "Configure it in Settings"
+                    )
+                ),
             )
         ]
         for spec in SPECS:
             failure = self._unavailable.get(spec.name)
-            available = self._which(spec.executable) is not None and failure is None
+            executable = self._which(spec.executable)
+            authentication = (
+                "unavailable" if executable is None else self._authentication(spec, executable)
+            )
+            available = executable is not None and authentication == "ready" and failure is None
             rows.append(
                 ConversationBackendStatus(
                     name=spec.name,
                     label=spec.label,
                     available=available,
+                    selectable=executable is not None,
+                    authentication=authentication,
+                    action=(
+                        "install"
+                        if executable is None
+                        else ("none" if authentication == "ready" else "authenticate")
+                    ),
                     detail=(
-                        "Local CLI found; its existing sign-in will be used"
+                        "Local CLI found and signed in"
                         if available
                         else (
-                            "Authentication failed; sign in or ask the administrator to enable it"
-                            if failure == "backend_authentication_failed"
-                            else f"{spec.executable} is not installed or not on PATH"
+                            f"{spec.executable} authentication is in progress"
+                            if authentication == "pending"
+                            else (
+                                "Sign in to this local CLI"
+                                if executable is not None
+                                else f"{spec.executable} is not installed or not on PATH"
+                            )
                         )
                     ),
                 )
             )
         return tuple(rows)
+
+    def authenticate(self, backend: ConversationBackendName) -> dict[str, object]:
+        """Start one fixed official CLI login flow after an explicit UI action."""
+
+        spec = self._specs.get(backend)
+        if spec is None:
+            return {"ok": False, "backend": backend, "code": "backend_authentication_unsupported"}
+        executable = self._which(spec.executable)
+        if executable is None:
+            return {"ok": False, "backend": backend, "code": "backend_not_installed"}
+        authentication = self._authentication(spec, executable)
+        if authentication == "ready":
+            return {"ok": True, "backend": backend, "status": "ready"}
+        if authentication == "pending":
+            return {"ok": True, "backend": backend, "status": "pending"}
+        try:
+            process = self._authentication_launcher(
+                [executable, *spec.authentication_arguments],
+                cwd=self.root,
+                env=_environment(),
+            )
+        except OSError:
+            return {"ok": False, "backend": backend, "code": "backend_authentication_failed"}
+        self._authentication_processes[backend] = process
+        return {"ok": True, "backend": backend, "status": "started"}
 
     def complete(
         self,

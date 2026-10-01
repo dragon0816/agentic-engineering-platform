@@ -400,9 +400,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 
 # Productization 5 — Agent Web experience refinement
 
-- [ ] Remove Ask readiness cards and move backend selection into the composer footer.
-- [ ] Keep a configured Gateway selectable while showing credential readiness separately.
-- [ ] Add fixed, explicit Codex, Claude Code and Copilot authentication flows.
+- [x] Remove Ask readiness cards and move backend selection into the composer footer.
+- [x] Keep a configured Gateway selectable while showing credential readiness separately.
+- [x] Add fixed, explicit Codex, Claude Code and Copilot authentication flows.
 - [ ] Replace top page tabs with New session, Capabilities and Settings sidebar actions.
 - [ ] Move searchable multi-session management into the left sidebar.
 - [ ] Refine Capabilities into installed list/detail panes with complete Skill Markdown.

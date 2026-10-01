@@ -252,6 +252,16 @@ def test_capability_workspace_exposes_real_categories_and_actions(
     assert "/api/extensions/activate" not in page
 
 
+def test_ask_uses_compact_composer_backend_control(served: AgentWebServer) -> None:
+    page = served.page().decode("utf-8")
+    assert 'id="readiness"' not in page
+    assert 'class="composer-footer"' in page
+    assert page.index('id="message"') < page.index('id="conversation-backend"')
+    assert 'id="backend-auth-dialog"' in page
+    assert 'id="backend-auth-start"' in page
+    assert 'call("/api/backends/authenticate"' in page
+
+
 @pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
 def test_capability_workspace_is_interactive_in_a_real_browser(
     served: AgentWebServer, tmp_path: Path
@@ -347,6 +357,7 @@ def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     assert fetch(base(served) + "/api/conversations", body={}).status == 401
     assert fetch(base(served) + "/api/conversations/turn", body={}).status == 401
     assert fetch(base(served) + "/api/conversations/backend", body={}).status == 401
+    assert fetch(base(served) + "/api/backends/authenticate", body={}).status == 401
     assert fetch(base(served) + "/api/contributions", body={}).status == 401
 
 
@@ -421,7 +432,13 @@ def test_gateway_backend_is_unavailable_until_its_mapped_secret_is_present(
         web = AgentWeb(runtime, conversation_backends=backends)
         statuses = {row["name"]: row for row in web.conversation_backends()["backends"]}
         assert statuses["gateway"]["available"] is False
+        assert statuses["gateway"]["selectable"] is True
         assert web.readiness()["natural_language"]["status"] == "setup_required"
+        created = web.create_conversation()["conversation"]
+        selected = web.select_conversation_backend(
+            ConversationBackendSelectRequest(session_id=created["session_id"], backend="gateway")
+        )
+        assert selected["ok"] is True
 
 
 def test_installed_skill_commands_include_a_clickable_manifest_derived_invocation(
@@ -572,6 +589,7 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert 'id="command-palette"' in page
     assert '<textarea id="message" rows="3"' in page
     assert 'id="conversation-backend"' in page
+    assert 'id="backend-auth-dialog"' in page
     assert 'call("/api/backends")' in page
     assert "What can I ask?" not in page
     assert 'id="model-base-url"' in page

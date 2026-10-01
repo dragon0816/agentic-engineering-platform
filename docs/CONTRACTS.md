@@ -2626,6 +2626,18 @@ run in an isolated working directory with a fixed argument vector and reduced
 environment, and return text only. They do not register or dispatch a Bridge
 capability. Slash commands are parsed before any conversation backend.
 
+`ConversationBackendStatus` separates `selectable` from `available` and reports
+authentication as `ready`, `required`, `pending`, `unavailable` or
+`not_applicable`. A configured Gateway remains selectable when its external
+`SecretRef` mapping is not ready; the turn still fails closed until the
+credential resolves. Local CLI authentication is an explicit loopback Web
+action accepting only a closed backend name. It launches the corresponding
+fixed official login vector (`codex login`, `claude auth login` or
+`copilot login`) without a shell in the isolated backend directory and a
+reduced environment. Login output, account data and credentials are not
+returned to the Web API. Selecting or authenticating a backend grants no
+Bridge capability or tool permission.
+
 `ScriptToolManifest` binds one published and approved exact asset identity to a
 package-relative `.py` or `.ps1` entrypoint, SHA-256, timeout, dependencies,
 secret references and an `execute` `CapabilitySpec`. The metadata and runtime

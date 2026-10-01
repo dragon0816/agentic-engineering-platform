@@ -87,13 +87,25 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 }
 .said.bad { color: var(--bad); }
 .waiting { color: var(--dim); font-style: italic; }
-form.ask { display: flex; gap: 8px; margin: 12px 0 0; }
+form.ask { margin: 12px 0 0; border: 1px solid var(--line); border-radius: 12px;
+  overflow: hidden; background: var(--bg); }
 form.ask textarea {
-  flex: 1; font: inherit; padding: 9px 12px; color: var(--ink);
-  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
-  min-height: 76px;
+  display: block; font: inherit; padding: 12px 14px; color: var(--ink);
+  background: transparent; border: 0; border-radius: 0; min-height: 96px;
 }
-form.ask textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+form.ask:focus-within { outline: 2px solid var(--accent); outline-offset: -1px; }
+form.ask textarea:focus { outline: 0; }
+.composer-footer { display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; min-height: 52px; padding: 8px 10px; border-top: 1px solid var(--line);
+  background: var(--panel); }
+.backend-control { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }
+.backend-control select { width: auto; min-width: 190px; max-width: 330px;
+  border: 0; background: transparent; font: inherit; font-weight: 600; padding: 7px 28px 7px 8px; }
+.backend-state { min-width: 0; color: var(--dim); font-size: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.link-button { border: 0; background: transparent; color: var(--accent); padding: 5px;
+  cursor: pointer; font: inherit; font-size: 12px; }
+.send-button { min-width: 78px; }
 .command-menu { border: 1px solid var(--line); border-radius: 10px; padding: 6px;
   background: var(--panel); margin: 8px 0; }
 .command-menu button { display: grid; grid-template-columns: 180px 1fr; width: 100%;
@@ -128,8 +140,14 @@ button[aria-busy="true"] { cursor: wait; }
   width: 100%; font: 13px var(--mono); padding: 9px 10px;
   color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .settings .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.conversation-bar { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
+.conversation-bar { display: flex; gap: 8px; align-items: center; margin: 8px 0 10px; }
 .conversation-bar select { flex: 1; }
+dialog { width: min(500px, calc(100vw - 32px)); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 12px; padding: 0; box-shadow: 0 18px 60px #0005; }
+dialog::backdrop { background: #0008; }
+.dialog-body { padding: 20px; }
+.dialog-body h2 { margin-top: 0; font-size: 18px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; }
@@ -215,6 +233,9 @@ tr:last-child td { border-bottom: none; }
   .cap-list { max-height: 260px; }
   .market-tools { grid-template-columns: 1fr; }
   .workspace-head { align-items: start; flex-direction: column; }
+  .composer-footer, .backend-control { align-items: stretch; flex-direction: column; }
+  .backend-control select { width: 100%; max-width: none; }
+  .send-button { width: 100%; }
 }
 </style>
 </head>
@@ -231,12 +252,8 @@ tr:last-child td { border-bottom: none; }
 </nav>
 <main>
   <section id="panel-ask" data-open>
-    <div class="grid" id="readiness">
-      <div class="status-card">Reading Agent readiness&hellip;</div>
-    </div>
     <div class="conversation-bar">
       <select id="conversation" aria-label="Conversation"></select>
-      <select id="conversation-backend" aria-label="Conversation backend"></select>
       <button class="go" id="new-conversation" type="button">New</button>
     </div>
     <div id="log"></div>
@@ -244,12 +261,32 @@ tr:last-child td { border-bottom: none; }
     <form class="ask" id="ask">
       <textarea id="message" rows="3" autocomplete="off" spellcheck="true"
         placeholder="Ask naturally, or type / to choose a command"></textarea>
-      <button class="go" id="send" type="submit" disabled>Send</button>
+      <div class="composer-footer">
+        <div class="backend-control">
+          <select id="conversation-backend" aria-label="Conversation backend"></select>
+          <span id="backend-state" class="backend-state" role="status"></span>
+          <button id="backend-settings" class="link-button" type="button" hidden>
+            Open Settings</button>
+        </div>
+        <button class="go send-button" id="send" type="submit" disabled>Send</button>
+      </div>
     </form>
     <p class="hint">This is the Agent on this computer &mdash; the same one the
       command line and Telegram reach, with the same permissions and the same
       refusals. Nothing is written unless the command says so. One request runs
       at a time.</p>
+    <dialog id="backend-auth-dialog" aria-labelledby="backend-auth-title">
+      <div class="dialog-body">
+        <h2 id="backend-auth-title">Connect conversation backend</h2>
+        <p id="backend-auth-detail"></p>
+        <p id="backend-auth-result" class="note" role="status"></p>
+        <div class="dialog-actions">
+          <button id="backend-auth-cancel" type="button">Cancel</button>
+          <button id="backend-auth-check" type="button">Check again</button>
+          <button class="go" id="backend-auth-start" type="button">Authenticate</button>
+        </div>
+      </div>
+    </dialog>
   </section>
 
   <section id="panel-settings">
@@ -454,7 +491,8 @@ async function call(path, body) {
   const reply = await fetch(path, options);
   if (!reply.ok && reply.status !== 200) {
     const failed = await reply.json().catch(() => ({error: reply.statusText}));
-    throw new Error(failed.error || failed.code || ("the host answered " + reply.status));
+    const problem = new Error(failed.error || failed.code || ("the host answered " + reply.status));
+    problem.code = failed.code || "request_failed"; problem.payload = failed; throw problem;
   }
   return reply.json();
 }
@@ -491,6 +529,9 @@ function tag(on, yes, no) {
 
 const log = el("log"), form = el("ask"), field = el("message"), send = el("send");
 let activeConversation = "";
+let backendStatuses = new Map();
+let activeBackend = "gateway";
+let pendingBackend = "";
 
 function turn(asked) {
   const block = document.createElement("div");
@@ -541,29 +582,58 @@ async function loadConversations(selectId) {
   renderConversation(listed.selected);
   const backend = el("conversation-backend");
   const selectedBackend = listed.selected ? listed.selected.backend : "gateway";
-  const requested = [...backend.options].find(option =>
-    option.value === selectedBackend && !option.disabled);
-  if (requested) backend.value = selectedBackend;
-  else {
-    const fallback = [...backend.options].find(option => !option.disabled);
-    if (fallback) {
-      backend.value = fallback.value;
-      await call("/api/conversations/backend", {
-        session_id: activeConversation, backend: fallback.value,
-      });
-    }
-  }
+  const requested = [...backend.options].find(option => option.value === selectedBackend);
+  activeBackend = requested ? selectedBackend : (backend.options[0] || {}).value || "gateway";
+  backend.value = activeBackend; renderBackendState();
   send.disabled = false;
 }
 
 async function loadBackends() {
   const data = await call("/api/backends"), select = el("conversation-backend");
+  backendStatuses = new Map(data.backends.map(item => [item.name, item]));
   select.replaceChildren();
   for (const backend of data.backends) {
     const option = document.createElement("option"); option.value = backend.name;
-    option.textContent = backend.label + (backend.available ? "" : " — unavailable");
-    option.disabled = !backend.available; option.title = backend.detail; select.append(option);
+    const suffix = backend.available ? "" : (backend.selectable ? " · sign in" : " · install");
+    option.textContent = backend.label + suffix;
+    option.title = backend.detail; select.append(option);
   }
+  if ([...select.options].some(option => option.value === activeBackend)) {
+    select.value = activeBackend;
+  }
+  renderBackendState();
+}
+
+function renderBackendState() {
+  const status = backendStatuses.get(el("conversation-backend").value || activeBackend);
+  el("backend-state").textContent = status ? status.detail : "Reading backend status…";
+  el("backend-settings").hidden = !(status && status.name === "gateway" && !status.available);
+}
+
+function showBackendAuthentication(status) {
+  pendingBackend = status.name;
+  el("backend-auth-title").textContent = "Connect " + status.label;
+  el("backend-auth-detail").textContent = status.selectable
+    ? "Authentication runs in a separate local window. "
+      + "Complete the provider sign-in, then return here."
+    : status.detail + ". Install the official CLI, then refresh this page.";
+  el("backend-auth-result").textContent = status.detail;
+  el("backend-auth-start").hidden = status.action !== "authenticate";
+  el("backend-auth-check").hidden = !status.selectable;
+  el("backend-auth-dialog").showModal();
+}
+
+async function chooseBackend(name) {
+  const status = backendStatuses.get(name);
+  if (!status) return;
+  if (!status.selectable) {
+    el("conversation-backend").value = activeBackend; showBackendAuthentication(status); return;
+  }
+  if (name !== "gateway" && status.authentication !== "ready") {
+    el("conversation-backend").value = activeBackend; showBackendAuthentication(status); return;
+  }
+  await call("/api/conversations/backend", {session_id: activeConversation, backend: name});
+  activeBackend = name; el("conversation-backend").value = name; renderBackendState();
 }
 
 async function loadChat(selectId) {
@@ -575,9 +645,31 @@ el("conversation").addEventListener("change", async () => {
   await loadConversations(el("conversation").value);
 });
 el("conversation-backend").addEventListener("change", async () => {
-  await call("/api/conversations/backend", {
-    session_id: activeConversation, backend: el("conversation-backend").value,
-  });
+  try { await chooseBackend(el("conversation-backend").value); }
+  catch (failure) { el("conversation-backend").value = activeBackend; showBootError(failure); }
+});
+el("backend-settings").addEventListener("click", () => selectPrimaryTab("settings"));
+el("backend-auth-cancel").addEventListener("click", () => {
+  pendingBackend = ""; el("backend-auth-dialog").close();
+});
+el("backend-auth-start").addEventListener("click", async () => {
+  const button = el("backend-auth-start"); button.disabled = true;
+  try {
+    const started = await call("/api/backends/authenticate", {backend: pendingBackend});
+    el("backend-auth-result").textContent = started.status === "ready"
+      ? "This backend is already authenticated." : "Sign-in opened. Complete it, then check again.";
+  } catch (failure) {
+    el("backend-auth-result").textContent = "Authentication did not start: " + failure.message;
+  } finally { button.disabled = false; }
+});
+el("backend-auth-check").addEventListener("click", async () => {
+  await loadBackends();
+  const status = backendStatuses.get(pendingBackend);
+  if (status && status.available) {
+    await chooseBackend(pendingBackend); pendingBackend = ""; el("backend-auth-dialog").close();
+  } else {
+    el("backend-auth-result").textContent = status ? status.detail : "Backend status unavailable.";
+  }
 });
 el("new-conversation").addEventListener("click", async () => {
   const created = await call("/api/conversations", {});
@@ -600,6 +692,9 @@ form.addEventListener("submit", async (event) => {
     said.className = "said" + (answer.ok ? "" : " bad");
     said.textContent = answer.answer;
     await loadConversations(activeConversation);
+    if (answer.backend && answer.backend.code === "backend_authentication_failed") {
+      await loadBackends();
+    }
   } catch (failure) {
     said.className = "said bad";
     said.textContent = "The request did not finish: " + failure.message;
@@ -623,28 +718,6 @@ async function loadAbout() {
   if (!about.namespace) {
     field.placeholder = "no namespace is configured; set it in host.json";
   }
-}
-
-async function loadReadiness() {
-  const ready = await call("/api/readiness");
-  const cards = [];
-  const natural = document.createElement("div"); natural.className = "status-card";
-  const naturalTitle = document.createElement("strong");
-  naturalTitle.append(text(ready.natural_language.status === "ready"
-    ? "Natural language ready" : "Natural language needs setup"));
-  natural.append(naturalTitle, text(ready.natural_language.action)); cards.push(natural);
-  const installed = document.createElement("div"); installed.className = "status-card";
-  const installedTitle = document.createElement("strong");
-  installedTitle.append(text("Installed here"));
-  installed.append(installedTitle, text(ready.installed.skills + " Skills · "
-    + ready.installed.workflows + " Workflows · " + ready.installed.knowledge + " Knowledge"));
-  cards.push(installed);
-  const shared = document.createElement("div"); shared.className = "status-card";
-  const sharedTitle = document.createElement("strong"); sharedTitle.append(text(
-    ready.shared_platform.configured
-      ? "Shared platform connected" : "Shared platform not configured"));
-  shared.append(sharedTitle, text(ready.shared_platform.action)); cards.push(shared);
-  el("readiness").replaceChildren(...cards);
 }
 
 let slashCommands = [];
@@ -1230,7 +1303,7 @@ for (const name of Object.keys(panels)) {
   el("tab-" + name).addEventListener("click", () => selectPrimaryTab(name));
 }
 
-Promise.all([loadAbout(), loadReadiness(), loadAssets(), loadChat(), loadSlashCommands()])
+Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands()])
   .catch(showBootError);
 field.focus();
 </script>

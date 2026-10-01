@@ -79,6 +79,7 @@ from host_runtime.contributions import (
 )
 from host_runtime.conversation_backends import LocalConversationBackends
 from host_runtime.conversations import (
+    ConversationBackendAuthenticationRequest,
     ConversationBackendSelectRequest,
     ConversationCreateRequest,
     ConversationMessage,
@@ -266,6 +267,14 @@ class AgentWeb:
         environment = self.runtime.config.credential_environment().get(endpoint.credential.name)
         return bool(environment and os.environ.get(environment))
 
+    def _gateway_configured(self) -> bool:
+        binding = self.runtime.config.models
+        return bool(
+            binding is not None
+            and binding.routing_alias is not None
+            and binding.catalog.endpoint(binding.routing_alias) is not None
+        )
+
     def settings(self) -> dict[str, Any]:
         """Current non-secret settings suitable for a local operator page."""
         binding = self.runtime.config.models
@@ -412,7 +421,10 @@ class AgentWeb:
         return {
             "backends": [
                 item.model_dump(mode="json")
-                for item in self.backends.statuses(gateway_available=self._gateway_ready())
+                for item in self.backends.statuses(
+                    gateway_available=self._gateway_ready(),
+                    gateway_configured=self._gateway_configured(),
+                )
             ]
         }
 
@@ -420,12 +432,18 @@ class AgentWeb:
         self, request: ConversationBackendSelectRequest
     ) -> dict[str, Any]:
         item = ConversationBackendSelectRequest.model_validate(request)
-        available = {
-            row.name: row.available
-            for row in self.backends.statuses(gateway_available=self._gateway_ready())
+        statuses = {
+            row.name: row
+            for row in self.backends.statuses(
+                gateway_available=self._gateway_ready(),
+                gateway_configured=self._gateway_configured(),
+            )
         }
-        if not available.get(item.backend, False):
-            return {"ok": False, "code": "backend_unavailable"}
+        status = statuses[item.backend]
+        if not status.selectable:
+            return {"ok": False, "code": "backend_not_installed"}
+        if item.backend != "gateway" and status.authentication != "ready":
+            return {"ok": False, "code": "backend_authentication_required"}
         with self._one_at_a_time:
             record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if record is None:
@@ -435,6 +453,12 @@ class AgentWeb:
             )
             saved = self.runtime.state.save_conversation(updated)
         return {"ok": True, "conversation": json.loads(saved.model_dump_json())}
+
+    def authenticate_conversation_backend(
+        self, request: ConversationBackendAuthenticationRequest
+    ) -> dict[str, object]:
+        item = ConversationBackendAuthenticationRequest.model_validate(request)
+        return self.backends.authenticate(item.backend)
 
     def slash_commands(self) -> dict[str, Any]:
         return {"commands": [item.model_dump(mode="json") for item in COMMANDS]}
@@ -1319,6 +1343,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/conversations",
             "/api/conversations/turn",
             "/api/conversations/backend",
+            "/api/backends/authenticate",
             "/api/contributions",
         ):
             self._json(404, {"error": "no such page"})
@@ -1378,6 +1403,15 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not a valid backend selection"})
                 return
             result = self.server.web.select_conversation_backend(selection)
+            self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/backends/authenticate":
+            try:
+                authentication = ConversationBackendAuthenticationRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid backend authentication"})
+                return
+            result = self.server.web.authenticate_conversation_backend(authentication)
             self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/contributions":

@@ -67,3 +67,13 @@ class ConversationTurnRequest(Contract):
 class ConversationBackendSelectRequest(Contract):
     session_id: Symbol
     backend: ConversationBackendName
+
+
+class ConversationBackendAuthenticationRequest(Contract):
+    backend: ConversationBackendName
+
+    @model_validator(mode="after")
+    def local_cli_only(self) -> Self:
+        if self.backend == "gateway":
+            raise ValueError("Gateway credentials are configured through Settings")
+        return self
