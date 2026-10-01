@@ -454,6 +454,7 @@ class HostLayout(Contract):
     knowledge_vaults: Path
     agents: Path
     extensions: Path
+    script_tools: Path
     extension_lifecycle: Path
     active_profile: Path
     telegram: Path
@@ -473,6 +474,7 @@ class HostLayout(Contract):
             knowledge_vaults=root / "assets" / "knowledge-vaults",
             agents=root / "assets" / "agents",
             extensions=root / "assets" / "extensions",
+            script_tools=root / "assets" / "script-tools",
             extension_lifecycle=root / "extension-lifecycle.json",
             active_profile=root / "active-agent-profile.json",
             telegram=root / "telegram.json",

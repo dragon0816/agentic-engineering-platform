@@ -785,7 +785,8 @@ function showCapabilityDetail(item, kind) {
     appendMeta(content, [["Alias", item.alias], ["Default command", item.default_command],
       ["Commands", item.commands.map((command) => command.invocation.trim()).join(", ")],
       ["Script tools", item.script_tools.length
-        ? item.script_tools.map((script) => script.runtime + ": " + script.path).join(", ")
+        ? item.script_tools.map((script) => script.status
+          + (script.runtime ? " · " + script.runtime + ": " + script.path : "")).join(", ")
         : "None declared"]]);
     const procedureTitle = document.createElement("h4");
     procedureTitle.append(text("Procedure Markdown"));

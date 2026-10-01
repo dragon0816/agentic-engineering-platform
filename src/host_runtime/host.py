@@ -32,6 +32,12 @@ from capabilities.dut_engineering.handlers import (
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, KnowledgeQueryHandler
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+from capabilities.script_tools import (
+    ScriptToolHandler,
+    ScriptToolInput,
+    ScriptToolOutput,
+    load_script_tools,
+)
 from capabilities.weekly_report.contracts import (
     ReportingWindow,
     SheetState,
@@ -513,6 +519,24 @@ def build_gateway(
         ReadFileOutput,
         ExecutionDependencies(central_required=False),
     )
+    try:
+        script_tools = load_script_tools(layout.script_tools)
+        for tool in script_tools:
+            script_manifest = tool.manifest
+            if allowed is not None and not allowed(
+                "capability", script_manifest.metadata.identity
+            ):
+                continue
+            installed.register(
+                script_manifest.capability,
+                ScriptToolHandler(tool),
+                ScriptToolInput,
+                ScriptToolOutput,
+                script_manifest.dependencies,
+                script_manifest.secrets,
+            )
+    except (OSError, ValidationError, ValueError) as error:
+        raise HostError("asset_invalid", layout.script_tools) from error
     build_integrations(
         config,
         installed,

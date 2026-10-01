@@ -40,6 +40,8 @@ class SkillManifest(RegistryContract):
     commands: tuple[CommandBinding, ...] = ()
     rules: tuple[KeywordRule, ...] = ()
     default_command: CommandName | None = None
+    # Supporting executable resources remain separately governed capabilities.
+    script_tools: tuple[AssetIdentity, ...] = ()
 
     @model_validator(mode="after")
     def explicit_bindings(self) -> Self:
@@ -50,6 +52,8 @@ class SkillManifest(RegistryContract):
             raise ValueError("default_command must reference a declared command")
         if any(rule.command not in names for rule in self.rules):
             raise ValueError("keyword rules must reference declared commands")
+        if len({item.key for item in self.script_tools}) != len(self.script_tools):
+            raise ValueError("script tool references must be unique")
         return self
 
 

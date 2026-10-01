@@ -50,6 +50,7 @@ from urllib.parse import parse_qs, urlparse
 from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.skills import SkillManifest
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from capabilities.script_tools import load_script_tools
 from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
@@ -235,7 +236,10 @@ class AgentWeb:
                 "action": (
                     "Ready backends: " + ", ".join(ready_backends) + "."
                     if natural_ready
-                    else "Configure a Gateway model or install and sign in to a supported local CLI."
+                    else (
+                        "Configure a Gateway model or install and sign in to a supported "
+                        "local CLI."
+                    )
                 ),
             },
             "shared_platform": {
@@ -806,6 +810,34 @@ class AgentWeb:
         a line being written for it.
         """
         layout = self.runtime.layout
+        authorization = load_authorization(self.runtime.config, layout)
+        try:
+            installed_script_tools = {
+                item.manifest.metadata.identity.key: item
+                for item in load_script_tools(layout.script_tools)
+            }
+        except (OSError, ValueError):
+            installed_script_tools = {}
+
+        def script_tool_projection(identity: AssetIdentity) -> dict[str, Any]:
+            installed = installed_script_tools.get(identity.key)
+            authorized = authorization is None or authorization.allows("capability", identity)
+            if installed is None:
+                return {
+                    "identity": identity.model_dump(mode="json"),
+                    "status": "not_installed",
+                }
+            manifest = installed.manifest
+            return {
+                "identity": identity.model_dump(mode="json"),
+                "description": manifest.description,
+                "runtime": manifest.runtime,
+                "path": manifest.entrypoint,
+                "side_effect": manifest.capability.side_effect,
+                "approval_required": manifest.capability.policy.approval_required,
+                "status": "installed" if authorized else "not_authorized",
+            }
+
         skills = [
             {
                 "namespace": item.metadata.identity.namespace,
@@ -814,8 +846,9 @@ class AgentWeb:
                 "alias": item.alias,
                 "description": item.instructions,
                 "procedure_markdown": item.instructions,
-                # Executable scripts are declared separately from Skill guidance.
-                "script_tools": [],
+                "script_tools": [
+                    script_tool_projection(identity) for identity in item.script_tools
+                ],
                 "commands": [
                     {
                         "name": command.name,
@@ -853,7 +886,6 @@ class AgentWeb:
             binding.asset.key: binding.vault_root for binding in self.runtime.config.knowledge
         }
         configured_knowledge = set(knowledge_locations)
-        authorization = load_authorization(self.runtime.config, layout)
         if authorization is not None:
             configured_knowledge.update(
                 selection.asset.key

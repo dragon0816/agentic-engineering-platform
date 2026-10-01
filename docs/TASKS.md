@@ -390,5 +390,5 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Add restricted local Claude Code, Codex and Copilot conversation backends.
 - [x] Replace Ask hints with a deterministic slash-command palette and multiline input.
 - [x] Add kind-specific Skill, Workflow, Knowledge, Extension and App detail sections.
-- [ ] Add governed Python/PowerShell script tool contracts and Bridge execution.
+- [x] Add governed Python/PowerShell script tool contracts and Bridge execution.
 - [x] Move new Skill/Workflow draft creation into Capabilities and remove Improve.
