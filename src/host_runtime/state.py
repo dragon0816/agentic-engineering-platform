@@ -31,11 +31,12 @@ from common.distribution import (
     verify_installation,
 )
 from common.enrollment import BridgeDevice
+from host_runtime.conversations import ConversationRecord
 
-# Version 2 adds the channel cursor. The table is additive and every open
-# creates it, so a version-1 file is migrated rather than refused.
-SCHEMA_VERSION = "2"
-_MIGRATABLE = frozenset({"1"})
+# Version 3 adds local Personal Agent conversations. Tables are additive and
+# every open creates them, so older files migrate rather than being refused.
+SCHEMA_VERSION = "3"
+_MIGRATABLE = frozenset({"1", "2"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS installed ("
@@ -48,6 +49,9 @@ _SCHEMA = (
     # restart resumes where the last confirmed batch ended.
     "CREATE TABLE IF NOT EXISTS channel_cursor ("
     " channel TEXT PRIMARY KEY, position INTEGER NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS conversations ("
+    " session_id TEXT PRIMARY KEY, actor TEXT NOT NULL, updated_at TEXT NOT NULL,"
+    " record TEXT NOT NULL)",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
@@ -274,6 +278,69 @@ class SqliteLocalState:
         with self._read() as conn:
             rows = conn.execute("SELECT record FROM runs ORDER BY updated_at, run_id").fetchall()
             return tuple(LocalRunSummary.model_validate_json(row[0]) for row in rows)
+
+    def create_conversation(self, record: ConversationRecord) -> ConversationRecord:
+        item = ConversationRecord.model_validate(record)
+        with self._write() as conn:
+            if conn.execute(
+                "SELECT 1 FROM conversations WHERE session_id = ?", (item.session_id,)
+            ).fetchone():
+                raise LocalStateError("conversation_exists")
+            conn.execute(
+                "INSERT INTO conversations (session_id, actor, updated_at, record)"
+                " VALUES (?, ?, ?, ?)",
+                (
+                    item.session_id,
+                    item.actor,
+                    item.updated_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                ),
+            )
+        return item
+
+    def save_conversation(self, record: ConversationRecord) -> ConversationRecord:
+        item = ConversationRecord.model_validate(record)
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM conversations WHERE session_id = ?", (item.session_id,)
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("conversation_unknown")
+            stored = ConversationRecord.model_validate_json(row[0])
+            if stored.actor != item.actor:
+                raise LocalStateError("conversation_owner_fixed")
+            if item.updated_at < stored.updated_at or item.messages[: len(stored.messages)] != (
+                stored.messages
+            ):
+                raise LocalStateError("conversation_update_stale")
+            conn.execute(
+                "UPDATE conversations SET updated_at = ?, record = ? WHERE session_id = ?",
+                (
+                    item.updated_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                    item.session_id,
+                ),
+            )
+        return item
+
+    def conversation(self, session_id: Symbol, actor: Symbol) -> ConversationRecord | None:
+        with self._read() as conn:
+            row = conn.execute(
+                "SELECT record FROM conversations WHERE session_id = ? AND actor = ?",
+                (session_id, actor),
+            ).fetchone()
+            return None if row is None else ConversationRecord.model_validate_json(row[0])
+
+    def conversations(self, actor: Symbol, *, limit: int = 50) -> tuple[ConversationRecord, ...]:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1 or limit > 100:
+            raise ValueError("conversation limit is between 1 and 100")
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT record FROM conversations WHERE actor = ?"
+                " ORDER BY updated_at DESC, session_id LIMIT ?",
+                (actor, limit),
+            ).fetchall()
+            return tuple(ConversationRecord.model_validate_json(row[0]) for row in rows)
 
     def cursor(self, channel: Symbol) -> int | None:
         """How far this ingress has consumed its channel, or None if it never

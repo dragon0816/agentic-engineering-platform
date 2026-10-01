@@ -350,7 +350,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Derive clickable command hints from installed Skill manifests.
 - [x] Add a local Settings page for the existing OpenAI-compatible Gateway,
   with full configuration validation, atomic save and restart semantics.
-- [ ] Add durable local conversation sessions and clarification UX.
+- [x] Add durable local conversation sessions and clarification UX, with
+  host-owned identity, bounded message history, result status and trace evidence.
 - [ ] Add a provider-neutral bounded tool loop with progress and evidence.
 - [ ] Add standardized feedback/candidate-asset creation from the conversation
   workspace without bypassing review or publication governance.

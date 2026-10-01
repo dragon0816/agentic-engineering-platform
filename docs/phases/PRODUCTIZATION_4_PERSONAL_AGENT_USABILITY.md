@@ -1,6 +1,6 @@
 # Productization 4 — Personal Agent Usability
 
-Status: active
+Status: active; slices 1–3 complete
 
 ## User outcome
 
@@ -42,6 +42,18 @@ the runtime must not guess one.
 
 Each slice requires a reproducible Windows/Python 3.12 green path before the
 next slice is declared complete.
+
+## Slice 3 acceptance criteria
+
+- A first Web visit creates a host-owned local conversation and cannot claim a
+  different actor, namespace, Bridge or permission.
+- User and assistant messages, result status and trace identifiers survive a
+  runtime restart in the Bridge's existing SQLite state.
+- A bounded recent-conversation list and bounded message history prevent the
+  page from treating an unbounded transcript as runtime context.
+- Every submitted turn carries its stable session id through the existing
+  `LocalAgentRequest`; routing and Bridge policy remain unchanged.
+- Refreshing or switching conversations causes no execution.
 
 ## Slice 1–2 acceptance criteria
 
