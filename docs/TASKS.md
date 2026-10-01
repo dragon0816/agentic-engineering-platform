@@ -374,3 +374,21 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Hermes company-agent validation pinned to the Agent + Bridge artifact.
 - [x] Put the exact Agent + Bridge artifact name, workflow-run link and bundled
   manual instruction in every automated deployment-validation Issue.
+
+# Shared Platform identity and marketplace usability
+
+- [ ] Persist invitation-only users, roles, groups, invitation proofs and member sessions.
+- [ ] Make the first accepted bootstrap invitation recipient a platform administrator.
+- [ ] Add authenticated account and administrator invitation management to Marketplace.
+- [ ] Add backward-compatible asset categories and entitled category filtering.
+- [ ] Publish harmless test Skills, Workflows and one governed Bridge Extension.
+- [ ] Verify member Add-on selection/sync separately from administrator Extension staging.
+
+# Agent persona, chat backends and capability authoring
+
+- [ ] Add local Agent name, introduction and bounded `soul.md` settings.
+- [ ] Add restricted local Claude Code, Codex and Copilot conversation backends.
+- [ ] Replace Ask hints with a deterministic slash-command palette and multiline input.
+- [ ] Add kind-specific Skill, Workflow, Knowledge, Extension and App detail sections.
+- [ ] Add governed Python/PowerShell script tool contracts and Bridge execution.
+- [ ] Move new Skill/Workflow draft creation into Capabilities and remove Improve.
