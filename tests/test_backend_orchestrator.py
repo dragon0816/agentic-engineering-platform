@@ -105,4 +105,6 @@ def test_gateway_adapter_forwards_full_request_and_preserves_failure_evidence() 
     with patch.object(gateway, "converse", new=AsyncMock(return_value=result)) as converse:
         observed = asyncio.run(adapter.execute(request))
     assert observed is result
-    converse.assert_awaited_once_with(context(), history, persona_guidance="Speak briefly.")
+    converse.assert_awaited_once_with(
+        context(), history, persona_guidance="Speak briefly.", allowed_tools=None, max_turns=5
+    )

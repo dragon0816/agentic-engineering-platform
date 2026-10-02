@@ -203,6 +203,8 @@ class Gateway:
         history: tuple[ModelMessage, ...],
         *,
         persona_guidance: str | None = None,
+        allowed_tools: frozenset[str] | None = None,
+        max_turns: int = 5,
     ) -> GatewayConversationResult:
         """Use installed commands as tools in a five-turn/four-call maximum loop.
 
@@ -213,6 +215,8 @@ class Gateway:
         they are never executed.
         """
         context = RequestContext.model_validate(request)
+        if isinstance(max_turns, bool) or not 1 <= max_turns <= 5:
+            raise ValueError("Gateway conversation supports one to five turns")
         if any(
             message.role not in {"user", "assistant"}
             or message.images
@@ -240,15 +244,23 @@ class Gateway:
                         input_contract="platform.command-arguments.v1",
                     )
                 )
-        if not tools:
+        if allowed_tools is not None:
+            tools = [tool for tool in tools if tool.name in allowed_tools]
+            bindings = {
+                name: binding for name, binding in bindings.items() if name in allowed_tools
+            }
+        if not tools and allowed_tools is None:
             return self._conversation_failure(context, "no_installed_tools", 0, ())
-        candidate_request = SkillCandidateRequest(context=context, tools=tuple(tools))
-        selected_names = set(
-            self.skill_decisions.decide(candidate_request, decision_type="skill_selection")
-            .result.value
-        )
-        tools = [tool for tool in tools if tool.name in selected_names]
-        bindings = {name: binding for name, binding in bindings.items() if name in selected_names}
+        if tools:
+            candidate_request = SkillCandidateRequest(context=context, tools=tuple(tools))
+            selected_names = set(
+                self.skill_decisions.decide(candidate_request, decision_type="skill_selection")
+                .result.value
+            )
+            tools = [tool for tool in tools if tool.name in selected_names]
+            bindings = {
+                name: binding for name, binding in bindings.items() if name in selected_names
+            }
 
         prompt = (
             "You are the Personal Engineering Agent. Answer naturally and concisely. "
@@ -271,13 +283,13 @@ class Gateway:
         )
         messages = [ModelMessage(role="system", text=prompt), *bounded_history]
         evidence: list[ConversationToolExecution] = []
-        for turn in range(1, 6):
+        for turn in range(1, max_turns + 1):
             model_request = ModelRequest(
                 trace=context.trace,
                 model_alias=self.router.model_alias,
                 messages=tuple(messages),
                 requirements=ModelRequirements(
-                    tool_calling=True,
+                    tool_calling=bool(tools),
                     local_only=self.router.local_only,
                 ),
                 tools=tuple(tools),

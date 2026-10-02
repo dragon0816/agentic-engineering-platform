@@ -467,9 +467,16 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   capability scope, execution constraints, normalized candidate backend
   results, backend use history and evidence-backed monotonic classification.
   Keep backend transitions disabled until re-authorization is implemented.
-- [ ] Complete portable state semantics for actual tasks: record bounded
-  completed steps, unresolved requirements and errors from trusted run events;
-  require fresh complete-context policy checks for any backend transition.
+- [x] Add an executable explicit Gateway task path through `aep-host run-task`:
+  enforce local admission, exact Gateway approval and installed read-only
+  capability scope; persist bounded completed steps and issue codes; write a
+  local answer artifact and validate its bytes before reporting success.
+  Ordinary Web chat and Workflow routing remain unchanged in this slice.
+  Full local selection: 1,560 passed, 4 skipped, 2 machine-specific
+  deselected; ruff, mypy and offline sdist/wheel build passed on 2026-10-02.
+- [ ] Complete portable state semantics for backend transitions: enumerate
+  every transferable material and require a fresh full-context policy decision
+  before changing backend. No transition or native task fallback is enabled.
 - [ ] Attach portable task state and independent validation to ordinary Agent
   ingress, then add governed native task adapters with containment tests.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter

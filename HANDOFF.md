@@ -1,196 +1,39 @@
 # Handoff
 
 Date: 2026-10-02 (Asia/Taipei)
+Branch: main. This is a local source change; no push or preview installation was performed.
 
-Branch: `main`; local-only work, no push. Backend boundary is commit
-`4f5b92c`; data trust is `c15d8d0`; portable state is `c7c33d6` and
-`222e851`. This handoff also covers the workstation Gateway default.
+## Current objective and scope
 
-Status: multi-backend Agent Orchestrator slices 1–2 and the portable task/state
-contract subset of slice 3 are complete in source. The owner-approved
-`company` Gateway route is recorded in the installed preview configuration.
-The owner-supplied JEV-ready update is mapped in
-`docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md`; Phase 1A adds a provider-neutral
-Decision Service to the existing rule-first route and ordinary conversation
-Skill candidates, defaulting to `NONE` with no JEV adapter or runtime dependency.
-Normal Agent ingress is not yet connected to portable task state; backend
-re-authorization, native task adapters, Workflow migration, Marketplace
-defaults and product E2E remain.
-
-## Goal and decisions
-
-The owner approved the incremental sequence in
-`docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and
-`docs/superpowers/specs/2026-10-02-multi-backend-orchestrator-design.md`.
-Strengthen the Agent first, then migrate pinned source Workflows with static
-and runtime parameter UI, publish reviewed default assets and prove SOP,
-Knowledge and ordinary Skill scenarios. `docs/DECISIONS.md` records the
-owner's data boundary: UNCLASSIFIED data may use only a host-admin-approved
-internal Gateway. Codex/Claude may receive only complete explicitly PUBLIC
-context; availability never causes an ineligible fallback. The owner chose
-explicit host-admin Gateway approval over trusting localhost. On 2026-10-02
-the owner specifically approved this workstation's LiteLLM route
-`http://127.0.0.1:4000/v1` for `UNCLASSIFIED` model requests and asked for an
-editable configuration, so that decision is now recorded in `host.json`.
+The owner approved continuing beyond the completed Phase 0 audit to the next executable Agent/Orchestrator checkpoint, then validating it. The approved sequence and data policy remain in docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md, docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md and docs/DECISIONS.md. This checkpoint is an explicit Gateway task run through the Host CLI. It does not replace ordinary Agent Web chat or Workflow launching.
 
 ## Completed
 
-- Slice 1 added typed backend profiles/health, exact selection and a Gateway
-  conversation adapter. Local Agent admission, deterministic routes, Bridge
-  policy, result formats and durable Workflow evidence remain unchanged.
-- Slice 2 added classified text/provenance contracts and a fail-closed data
-  decision. `models.data_approval` names the exact routed Gateway alias and
-  URL, allowed classes and approval reference. A host-built model client
-  treats the entire request as UNCLASSIFIED and does not call provider generate
-  or stream without matching approval. The doctor and Web Settings/Backend
-  status show missing approval.
-- Existing restricted Codex/Claude/Copilot CLI text chat now requires a new
-  PUBLIC session declared before messages. The CLI adapter checks labels
-  against every message actually sent; Web sends no local persona text and
-  blocks slash commands in PUBLIC sessions. An old conversation cannot be
-  relabeled PUBLIC; switching it to Gateway removes the PUBLIC declaration.
-  This restricted text chat is still not governed native task execution.
-- Added API, policy, host-wire and regression tests. The browser page has a
-  confirmation dialog that creates a new PUBLIC session when needed. Source
-  decisions, requirements and acceptance prerequisites were updated.
-- Slice 3 added a serializable `TaskContract` with task type, initial data
-  class, exact Skill/resource refs, requested capability scope, bounded
-  constraints, expected outputs and repeatable checks. Durable `TaskRunState`
-  keeps a canonical task digest, backend history, effective class and compact
-  evidence, not objective or source text. Backend `completed` is only a
-  candidate result; an evidence-backed classification can rise but never
-  silently decrease.
-  SQLite schema v5 adds an independent task-run table and migrates v4 and
-  earlier files additively. The host-side validator reads actual artifact
-  bytes and rejects absent, empty or wrong-digest artifacts. Restart, stale
-  transition, ownership and migration tests are included. This is not yet
-  wired into ordinary Agent execution.
-- Added `deploy/windows-preview/gateway-default.json`, a secret-value-free
-  fragment with the exact approved `company` route, `gpt-5.5`,
-  `LITELLM_MASTER_KEY` environment-variable mapping and `UNCLASSIFIED`
-  approval. The installed preview at
-  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0` has been upgraded
-  with the local wheel and its `host.json` now records that approval. Settings
-  edits keep it only when the URL, alias, provider and credential mapping are
-  unchanged; another route clears it. No token value was written to JSON.
-- Phase 1A adds typed `DecisionResult`, `DecisionTrace`, `DecisionProvider` and
-  local `DecisionAcceleratorConfig`. `RequestRouter` now passes its established
-  rule-first/Gateway route through `DecisionService`; the default `NONE` path
-  never constructs, authorizes or calls an accelerator. The host config accepts
-  a non-secret optional accelerator binding. Final route selection, security
-  classification, completion validation and planning cannot be enabled for
-  acceleration. The service exposes payload-free traces and an optional
-  observer hook; normal ingress does not yet persist them. There is no JEV
-  provider implementation or external JEV request in this slice.
-- The follow-up applies that same service to `Gateway.converse` Skill candidate
-  selection. With `NONE`, every installed command is exposed in its original
-  order. A future accelerated selection must be a nonempty subset of installed
-  names; omitted names are also removed from Gateway dispatch bindings, so a
-  model cannot execute a hidden command. Candidate requests hold the full user
-  context and tool descriptions for a future pre-egress policy decision. This
-  follow-up does not install an accelerator or permit data egress to JEV.
-
-## JEV-ready Phase 1A verification
-
-- Baseline before the slice: 43 focused routing/Gateway/backend tests passed.
-- Final focused decision/routing/Gateway/host selection: 80 passed.
-- Final full local selection with a fresh `.scratch` test directory,
-  `PYTHONUTF8=1`, no pytest cache, `--ignore=tests/test_browser.py` and two
-  established machine-specific exclusions: **1,548 passed, 4 skipped,
-  2 deselected**.
-- Ruff passed for `src` and `tests`; mypy passed for 285 source files; sdist
-  and wheel built in `.scratch/dist-jev-phase1a-final-20261002`. The wheel
-  contains `agent/decisions.py`.
-- No JEV endpoint, account, credential value or provider package was installed
-  or called. The installed local preview was not upgraded for this source
-  slice; review source tests before a preview rollout.
-- Conversation Skill-candidate follow-up: 25 focused tests passed; the full
-  local selection passed with **1,550 passed, 4 skipped, 2 deselected** using
-  `PYTHONUTF8=1`, fresh `.scratch/pytest-jev-chat-final-full-20261002`, no
-  pytest cache, `--ignore=tests/test_browser.py` and exclusions for the known
-  CDP and locally installed Excel cases. An unfiltered run confirmed those two
-  environment-specific failures and passed its other 1,550 tests. Ruff passed
-  for `src` and `tests`; mypy passed for 285 files. Offline sdist/wheel build
-  passed in `.scratch/dist-jev-chat-final-20261002`; isolated build could not
-  fetch setuptools because this shell has restricted network access.
-  Reproduce the passing selection from the repository root with:
-
-  ```powershell
-  $env:PYTHONUTF8='1'
-  .\.venv\Scripts\python.exe -m pytest tests --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch/pytest-jev-chat-final-full-20261002 -k 'not test_capability_workspace_is_interactive_in_a_real_browser and not test_a_machine_with_the_bridge_and_no_excel_says_which' -q
-  .\.venv\Scripts\python.exe -m ruff check src tests
-  .\.venv\Scripts\python.exe -m mypy src tests
-  .\.venv\Scripts\python.exe -m build --no-isolation --sdist --wheel --outdir .scratch/dist-jev-chat-final-20261002
-  ```
+- Added an optional exact tool-name allowlist and one-to-five-turn bound to Gateway conversation requests. An explicit empty allowlist exposes no tools. Both model-visible tools and Gateway dispatch bindings are filtered; the default ordinary conversation catalog is unchanged.
+- Added GatewayTaskExecutor and LocalAgent.run_task. Local actor/device admission runs first. The task executor checks supported TaskContract shape and installed read-only capability scope, then requires the exact host-approved Gateway for UNCLASSIFIED context. ApprovedModelClient remains the final policy check on every complete provider request. There is no native-backend fallback.
+- Added aep-host run-task --config <host.json> --prompt <question> for a text-only task and --task <task.json> for an explicit TaskContract. A validated answer is written to the Host workspace's task-artifacts directory.
+- Persisted append-only completed steps, unresolved requirements and error codes in TaskRunState. No objective, answer bytes or model reasoning are stored in the SQLite run record. Host-owned CompletionValidator rereads actual answer bytes before a task can become validated.
+- Updated docs/ARCHITECTURE.md, docs/REQUIREMENTS.md, docs/ROADMAP.md, docs/DECISIONS.md and docs/TASKS.md. The slice design is docs/ORCHESTRATOR_GATEWAY_TASK_SLICE.md.
 
 ## Verification
 
-- The final full local selection, using `PYTHONUTF8=1`, fresh
-  `.scratch/pytest-gateway-default-final-full-20261002`, no pytest cache,
-  `--ignore=tests/test_browser.py` and two existing machine-specific
-  exclusions: **1,534 passed, 4 skipped, 2 deselected**. The first run had
-  one transient Windows `os.replace` access denial in extension staging; it
-  passed both alone and in the final full run. Focused Gateway tests passed
-  **16 tests**.
-- `.venv/Scripts/python -m ruff check src tests` passed. Mypy passed for 283
-  files. Final sdist and wheel built in
-  `.scratch/dist-gateway-default-final-20261002`; the inline Web JavaScript
-  passed `node --check` before the final Python-only edit.
-- The installed `aep-host doctor` successfully parses the approved route.
-  `models` reports that `LITELLM_MASTER_KEY` is absent in the Agent shell.
-  A host-permission check later found LiteLLM listening on port 4000; its
-  `/v1` root returns FastAPI's `{"detail":"Not Found"}`, as expected for an
-  API root. A live authenticated model round trip was not possible.
-- Agent Web itself was confirmed at the separate loopback Web port: an
-  authenticated GET of the freshly started page and `/api/backends` both
-  returned HTTP 200. On 2026-10-02 a fresh instance used port 53582 and its
-  temporary tokenized launch address was opened in the default browser.
-- The real-Chromium UI test still fails before navigation because this
-  machine closes its CDP WebSocket; no visual interaction result is claimed.
+- Full local selection: 1,560 passed, 4 skipped, 2 existing machine-specific tests deselected. Command: PYTHONUTF8=1; .\.venv\Scripts\python.exe -m pytest tests --ignore=tests/test_browser.py -q -p no:cacheprovider --basetemp .scratch/pytest-task-exec-full -k 'not test_capability_workspace_is_interactive_in_a_real_browser and not test_a_machine_with_the_bridge_and_no_excel_says_which'.
+- Ruff passed on src and tests; mypy passed on 288 source files.
+- Offline sdist and wheel build passed under .scratch/dist-gateway-task-20261002; both new runtime modules were included. The run-task CLI help loaded successfully.
+- Focused tests verify admission and policy refusal before model calls, read-only scope, no hidden Workflow execution, tool-progress evidence, restart persistence, artifact validation failure and ordinary conversation compatibility.
+- No live LiteLLM request was made: this shell does not have LITELLM_MASTER_KEY in the Agent process environment. The installed Windows preview was not upgraded with this source build.
 
-## Outstanding work and risks
+## Remaining work and risks
 
-- The approval gate is configured and LiteLLM was listening on port 4000 at
-  the latest host-permission check. The Agent Web instance started in this
-  shell still reports its mapped credential unavailable. Give the Agent
-  process `LITELLM_MASTER_KEY` and restart it before testing a real model
-  answer. The Web URL is the temporary address printed by `aep-host web`,
-  not the Gateway API's `http://127.0.0.1:4000/v1`. Do not copy this
-  workstation's approval to another host without its own approval decision.
-- Before enabling JEV, supply an approved egress boundary for the complete
-  accelerator request, implement an adapter with its own bounded timeout and
-  circuit breaker, and prove per-decision accuracy/latency on a golden set.
-  Merely setting `provider: JEV` without an installed provider keeps the
-  baseline and reports a fallback. Decision traces are available through the
-  service observer but are not yet persisted as ordinary task evidence.
-- The current classifier conservatively treats every AEP model request as
-  UNCLASSIFIED. Future per-source provenance must preserve Knowledge citation
-  and attachment labels before native task backends receive any content.
-  PUBLIC session declaration is an explicit operator statement, not a
-  guarantee that human-entered text is actually public.
-- `BackendRouter` currently registers only Gateway for governed conversation.
-  Native task adapters still need workspace, environment, credential and
-  side-effect containment. Portable task state and independent validation
-  exist as contracts but are not yet linked to Agent ingress or native adapters.
-- The portable task state does not yet record task-specific completed steps,
-  unresolved requirements or a re-authorized backend transition. These fields
-  should be added when an actual orchestration path can populate and verify
-  them; initial backend use history alone does not make failover safe.
-- The initial independent validator covers artifact presence, non-empty bytes
-  and an optional expected digest. Domain-specific content checks and
-  evidence-only answers require later validators. The selected backend must
-  never supply the host's trusted artifact reader.
-- The data-class vocabulary recognizes RESTRICTED, but ordinary Gateway
-  approvals cannot include it until a separately reviewed environment exists.
-  Backend switching is disabled in portable state until full-context
-  re-authorization is implemented.
-- The private source Workflow checkout is read-only at
-  `C:\Users\Chi_L\Documents\claude\n8n_workflow_system`, revision
-  `896046e8fe2170d21f9213e56e5ce2f93c05ba43`. Remote HEAD could not be
-  verified with available GitHub REST scope. Hermes Skills and migrated
-  Workflows require individual provenance/license/dependency/policy review.
+- The runnable checkpoint is CLI-only. Connect ordinary Agent Web ingress to the same task-state and completion path without changing deterministic slash-command or Workflow routes. Native Codex/Claude task adapters still need containment and complete-context policy tests.
+- Backend switching remains disabled. Before a transition, inventory every transferred material and re-authorize the complete context for the destination; a task's declared classification is not sufficient.
+- The first validator proves artifact presence, non-empty bytes or a specified digest. It does not prove factual or domain correctness.
+- The task executor supports one answer output and installed read-only capability commands; resource references, arbitrary workspace access, write tools and Workflow commands are intentionally outside this slice. Existing Bridge grants still decide every attempted read capability.
+- Workflow migration, static/runtime parameter UI, Marketplace defaults, SOP-to-Workflow, Knowledge and Skill integration evidence remain in docs/TASKS.md. The optional JEV adapter remains disabled pending egress authorization and a golden benchmark.
+- A local operator can validate the new path after installing this build and starting an Agent process with LITELLM_MASTER_KEY: aep-host run-task --config <host.json> --prompt "What can you do?" The configured Gateway must retain the owner-approved exact company route at http://127.0.0.1:4000/v1.
 
-Next action: connect ordinary Agent ingress to admission, data policy,
-portable run state and host-owned completion validation while preserving
-deterministic slash/Workflow routes. Do not enable native task backends until
-workspace, environment, credentials and side effects have denial tests.
+## Recommended next steps
+
+1. Review the CLI task run and durable state on the test host with a real Gateway credential.
+2. Connect the ordinary Ask page to a task-state path only for suitable natural-language turns, preserving slash/Workflow semantics and admission.
+3. Implement full-context transition authorization before any native task backend, then migrate and validate the pinned source Workflows.

@@ -45,6 +45,18 @@ class GatewayConversationRequest(Contract):
     context: RequestContext
     history: tuple[ModelMessage, ...]
     persona_guidance: str | None = None
+    allowed_tools: tuple[Symbol, ...] | None = None
+    max_turns: int = 5
+
+    @model_validator(mode="after")
+    def bounded_tool_scope(self) -> Self:
+        if self.allowed_tools is not None and len(set(self.allowed_tools)) != len(
+            self.allowed_tools
+        ):
+            raise ValueError("allowed tool names must be unique")
+        if isinstance(self.max_turns, bool) or not 1 <= self.max_turns <= 5:
+            raise ValueError("Gateway conversation supports one to five turns")
+        return self
 
 
 RequestT_contra = TypeVar("RequestT_contra", contravariant=True)

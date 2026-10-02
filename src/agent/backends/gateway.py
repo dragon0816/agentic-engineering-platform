@@ -21,5 +21,11 @@ class GatewayModelBackend:
 
     async def execute(self, request: GatewayConversationRequest) -> GatewayConversationResult:
         return await self.gateway.converse(
-            request.context, request.history, persona_guidance=request.persona_guidance
+            request.context,
+            request.history,
+            persona_guidance=request.persona_guidance,
+            allowed_tools=(
+                None if request.allowed_tools is None else frozenset(request.allowed_tools)
+            ),
+            max_turns=request.max_turns,
         )

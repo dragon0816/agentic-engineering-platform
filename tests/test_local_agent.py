@@ -175,7 +175,11 @@ def test_conversation_uses_gateway_backend_after_admission(tmp_path: Path) -> No
     sent_context, sent_history = called.await_args.args
     assert sent_context.message == "hello" and sent_context.actor == "engineer"
     assert sent_history == history
-    assert called.await_args.kwargs == {"persona_guidance": "Be concise."}
+    assert called.await_args.kwargs == {
+        "persona_guidance": "Be concise.",
+        "allowed_tools": None,
+        "max_turns": 5,
+    }
 
 
 def test_conversation_refusal_never_reaches_backend(tmp_path: Path) -> None:

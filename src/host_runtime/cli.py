@@ -1,11 +1,12 @@
 """Command line interface for the company-workstation host.
 
 What an operator does: inspect the machine, export an enrollment request, ask
-the resident Agent to do something, leave the Telegram ingress running, and,
-once this host holds a platform token, probe the shared platform, synchronize
-what its member decided, and leave the job loop running. Every command reads
-one `host.json` and the files beside it in the workspace; only the last three
-open a socket, and only to the platform named there.
+the resident Agent to do something, execute an explicit task, leave the Telegram
+ingress running, and, once this host holds a platform token, probe the shared
+platform, synchronize what its member decided, and leave the job loop running.
+Every runtime command reads one `host.json` and the files beside it in the
+workspace. Model requests use the configured Gateway; platform operations use
+the separately configured platform endpoint.
 """
 
 import argparse
@@ -21,10 +22,13 @@ from typing import TypeVar
 from pydantic import ValidationError
 
 from agent.skills import SkillManifest
+from agent.task_contract import CompletionCheck, ExpectedOutput, TaskContract
+from agent.task_execution import TaskScopeError
 from capabilities.dut_engineering.handlers import DUT_PHYSICAL_VALIDATE_SPEC
 from channels.telegram import TelegramIngress
 from common.assets import WorkflowManifest
 from common.base import Contract
+from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
@@ -59,6 +63,13 @@ def _parser() -> argparse.ArgumentParser:
         help="write the answer to this file as UTF-8, rather than to the screen",
     )
     ask.add_argument("message", help="a skill command such as release.package, or a description")
+    task = commands.add_parser("run-task", help="execute one explicit Gateway TaskContract")
+    task.add_argument("--config", required=True, type=Path)
+    task_input = task.add_mutually_exclusive_group(required=True)
+    task_input.add_argument("--task", type=Path, help="an exact TaskContract JSON file")
+    task_input.add_argument("--prompt", help="create a text-only answer task from this question")
+    task.add_argument("--namespace", help="the namespace for --prompt; this host's by default")
+    task.add_argument("--json", action="store_true")
     chat = commands.add_parser("chat", help="open a window and talk to the resident Agent")
     chat.add_argument("--config", required=True, type=Path)
     chat.add_argument("--actor", help="the platform actor to act as; the device owner by default")
@@ -273,6 +284,82 @@ def _ask(
     else:
         print(rendered)
     return 0 if outcome.refusal is None else 1
+
+
+def _prompt_task(runtime: HostRuntime, prompt: str, namespace: str | None) -> TaskContract | None:
+    chosen = _namespace(runtime, namespace)
+    if chosen is None:
+        return None
+    value = uuid.uuid4().hex
+    try:
+        return TaskContract(
+            task_id=f"task-{value}",
+            trace=_trace(),
+            actor=runtime.actor,
+            namespace=chosen,
+            objective=prompt,
+            expected_outputs=(
+                ExpectedOutput(output_id="answer", artifact_ref=f"answer-{value}"),
+            ),
+            checks=(
+                CompletionCheck(check_id="answer-present", output_id="answer", kind="nonempty"),
+            ),
+        )
+    except (ValidationError, ValueError):
+        print("the prompt is invalid, so nothing ran", file=sys.stderr)
+        return None
+
+
+def _run_task(
+    runtime: HostRuntime,
+    task_path: Path | None,
+    prompt: str | None,
+    namespace: str | None,
+    as_json: bool,
+) -> int:
+    if prompt is not None:
+        task = _prompt_task(runtime, prompt, namespace)
+        if task is None:
+            return 2
+    else:
+        if task_path is None:
+            raise ValueError("run-task requires a prompt or task file")
+        try:
+            task = TaskContract.model_validate_json(task_path.read_text(encoding="utf-8-sig"))
+        except OSError:
+            print(f"cannot read {task_path}", file=sys.stderr)
+            return 2
+        except (ValidationError, ValueError):
+            print("the task contract is invalid, so nothing ran", file=sys.stderr)
+            return 2
+    try:
+        outcome = asyncio.run(
+            runtime.agent.run_task(task, bridge_id=runtime.config.device.bridge_id)
+        )
+    except TaskScopeError as error:
+        print(f"task scope refused: {error.code}; nothing ran", file=sys.stderr)
+        return 2
+    except LocalStateError as error:
+        print(f"task state refused: {error.code}", file=sys.stderr)
+        return 1
+    if as_json:
+        print(outcome.model_dump_json(indent=2))
+    elif outcome.refusal is not None:
+        print(f"task refused: {outcome.refusal}")
+    elif outcome.execution is not None:
+        execution = outcome.execution
+        print(f"task {outcome.task_id}: {execution.status}")
+        if execution.code is not None:
+            print(f"reason: {execution.code}")
+        if execution.status == "validated" and execution.conversation is not None:
+            print(execution.conversation.text)
+            artifact = (
+                runtime.layout.workspace_root
+                / "task-artifacts"
+                / task.expected_outputs[0].artifact_ref
+            )
+            print(f"answer artifact: {artifact}")
+    return 0 if outcome.execution is not None and outcome.execution.status == "validated" else 1
 
 
 def _chat(runtime: HostRuntime, actor: str | None, namespace: str | None) -> int:
@@ -580,6 +667,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     with runtime:
         if args.command == "ask":
             return _ask(runtime, args.message, args.actor, args.namespace, args.json, args.output)
+        if args.command == "run-task":
+            return _run_task(runtime, args.task, args.prompt, args.namespace, args.json)
         if args.command == "chat":
             return _chat(runtime, args.actor, args.namespace)
         if args.command == "web":

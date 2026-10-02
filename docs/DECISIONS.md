@@ -142,3 +142,23 @@ cover the primary Agent interaction. Accepting arbitrary accelerator tool
 names or filtering only the display catalog was rejected because a model could
 then trigger a hidden or uninstalled command. No JEV provider is enabled by
 this decision.
+
+## 2026-10-02 — Execute explicit tasks through the approved Gateway first
+
+Decision: Add a Host-owned executor for an explicit `TaskContract` submitted by
+`aep-host run-task`. The first task output is one local answer artifact. It
+admits the actor and device, requires the exact host-approved internal Gateway
+for UNCLASSIFIED task material, and exposes only task-scoped installed
+read-only capability commands through the existing Bridge. A task with no
+allowed capabilities is tool-free. The existing model-client check still
+authorizes each complete provider request. Durable progress stores bounded
+step and issue references without objective or answer text. The Host rereads
+the answer bytes for independent completion validation. Ordinary Web chat,
+Workflow routing, native task backends and backend switching are unchanged.
+
+Reason: This creates a runnable checkpoint for the portable contracts while
+retaining the already proven execution and policy boundaries. Automatically
+converting every Web turn into a task was deferred because those turns include
+slash commands and Workflows with different completion evidence. Enabling a
+native backend or implicit fallback was rejected until complete transfer
+materials can be classified and re-authorized at the new destination.

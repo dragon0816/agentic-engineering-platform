@@ -21,6 +21,8 @@ from agent.backend_contracts import GatewayConversationRequest
 from agent.backends.gateway import GatewayModelBackend
 from agent.gateway import Gateway, GatewayConversationResult
 from agent.orchestrator import BackendRouter
+from agent.task_contract import TaskContract
+from agent.task_execution import GatewayTaskExecutor, TaskExecutionOutcome
 from capabilities.runtime import CapabilityInvocation
 from common.base import Contract, Symbol
 from common.distribution import (
@@ -104,6 +106,20 @@ class LocalConversationOutcome(Contract):
         return self
 
 
+class LocalTaskOutcome(Contract):
+    """One explicitly submitted task after the same device admission rule."""
+
+    task_id: Symbol
+    refusal: LocalRefusalCode | None = None
+    execution: TaskExecutionOutcome | None = None
+
+    @model_validator(mode="after")
+    def one_outcome(self) -> Self:
+        if (self.refusal is None) == (self.execution is None):
+            raise ValueError("a task is either refused or executed")
+        return self
+
+
 class LocalAgent:
     def __init__(
         self,
@@ -113,6 +129,7 @@ class LocalAgent:
         *,
         clock: Callable[[], datetime] | None = None,
         workflow_wait_seconds: float | None = None,
+        task_executor: GatewayTaskExecutor | None = None,
     ) -> None:
         self.membership = BridgeMembership.model_validate(membership)
         self.gateway = gateway
@@ -126,6 +143,7 @@ class LocalAgent:
         # still settled in the background.
         self.workflow_wait_seconds = workflow_wait_seconds
         self._settling: set[asyncio.Task[None]] = set()
+        self._task_executor = task_executor
 
     def admit(
         self, actor: str, bridge_id: str, on_behalf_of: str | None = None
@@ -233,6 +251,17 @@ class LocalAgent:
             runs=tuple(runs),
             unrecorded=tuple(unrecorded),
         )
+
+    async def run_task(self, task: TaskContract, *, bridge_id: str) -> LocalTaskOutcome:
+        """Execute an explicit portable task; never infer permission from the task."""
+        item = TaskContract.model_validate(task)
+        refusal = self.admit(item.actor, bridge_id)
+        if refusal is not None:
+            return LocalTaskOutcome(task_id=item.task_id, refusal=refusal)
+        if self._task_executor is None:
+            raise RuntimeError("task execution is not configured on this host")
+        execution = await self._task_executor.run(item)
+        return LocalTaskOutcome(task_id=item.task_id, execution=execution)
 
     async def execute(
         self, job: RemoteWorkflowJob, *, workflow_timeout_seconds: float | None = None

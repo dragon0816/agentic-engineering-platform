@@ -348,17 +348,28 @@ initial data class, exact Skill and resource references, requested capability
 scope, bounded execution constraints, expected output artifacts and independent
 completion checks. `TaskBackendResult` is only a candidate outcome.
 `TaskRunState` records only the task digest, selected backend and use history,
-effective data class, monotonic transitions, compact observation/artifact
-references and validation outcomes. Classification can rise with an evidence
+effective data class, monotonic transitions, compact observation, completed-step,
+unresolved-requirement, error and artifact references, plus validation outcomes.
+Classification can rise with an evidence
 reference but cannot silently fall. Backend switching stays disabled until a
 separate re-authorization path exists. The local SQLite store persists that state in an additive
 version-5 table; resumption must resupply the exact task contract whose digest
 matches. The host-side `CompletionValidator` reads actual artifact bytes through
 a trusted resolver and checks existence, non-empty content or an expected
 SHA-256 before marking a task validated. Backend statements and artifact
-references alone cannot pass that validator. This is a contract/persistence
-slice: ordinary conversation and deterministic Workflow execution are not yet
-driven by this task state, and native Agent task backends remain disabled.
+references alone cannot pass that validator. The first executable task path is
+`LocalAgent.run_task` through `aep-host run-task`: local admission precedes
+`GatewayTaskExecutor` scope checks and host-approved UNCLASSIFIED data policy.
+The exact Gateway backend receives a text-only task or explicitly scoped,
+installed read-only Skill capability commands. `Gateway.converse` filters both
+model-visible tools and executable bindings to that allowlist, retains Bridge
+authorization for each call and remains bounded to at most five model turns.
+The host writes the response to an exclusive local answer artifact, then
+validates its actual bytes before declaring the task `validated`. The full
+model request, including Skill descriptions and later tool observations, still
+crosses `ApprovedModelClient` before provider transport. The CLI path does not
+change ordinary Web conversation or deterministic Workflow execution; native
+task backends and backend switching remain disabled.
 
 Conversation feedback uses a separate local contribution boundary. The Host
 copies a bounded excerpt of the selected actor-owned conversation into an

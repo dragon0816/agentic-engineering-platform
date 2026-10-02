@@ -266,6 +266,14 @@ classifications. It cannot decide confidentiality, execution authority or
 completion. See `MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the repository
 mapping, acceptance tests and later adapter gate.
 
+The next executable checkpoint is an explicit local `aep-host run-task` path
+through Agent admission, approved Gateway execution, bounded read-only tool
+scope, durable task state and independent local answer-artifact validation.
+`docs/ORCHESTRATOR_GATEWAY_TASK_SLICE.md` records its contract and tests.
+Ordinary Web chat and deterministic Workflow launches retain their existing
+routes. A later slice will connect ordinary Agent ingress to task state;
+native task backends require full-context re-authorization and containment.
+
 ## First implementation slice after Phase 0
 
 The recommended Phase 1 PR is intentionally small:

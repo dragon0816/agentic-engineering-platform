@@ -11,6 +11,8 @@ from agent.run_state import (
     BackendUse,
     CompletionValidator,
     TaskBackendResult,
+    TaskCompletedStep,
+    TaskIssue,
     TaskObservation,
     TaskRunState,
     advance_task_run,
@@ -253,6 +255,34 @@ def test_local_task_state_survives_restart_and_rejects_stale_or_forged_updates(
         reopened.save_task_run(validated)
         assert reopened.task_run("task-1", "engineer") == validated
     assert b"Create the reviewed report" not in path.read_bytes()
+
+
+def test_task_progress_survives_restart_and_rejects_rewritten_evidence(tmp_path: Path) -> None:
+    path = tmp_path / "progress.sqlite"
+    pending = begin_task_run(task(), "gateway", now=NOW)
+    with SqliteLocalState(path, bridge_id="bridge-company") as state:
+        state.create_task_run(pending)
+        running = advance_task_run(pending, "running", now=NOW)
+        state.save_task_run(running)
+        waiting = advance_task_run(
+            running,
+            "needs_input",
+            now=NOW,
+            completed_steps=(TaskCompletedStep(step_id="step-1", evidence_ref="call-1"),),
+            unresolved_requirements=(TaskIssue(code="missing_input"),),
+        )
+        state.save_task_run(waiting)
+    with SqliteLocalState(path, bridge_id="bridge-company") as reopened:
+        restored = reopened.task_run("task-1", "engineer")
+        assert restored == waiting
+        resumed = advance_task_run(waiting, "running", now=NOW)
+        reopened.save_task_run(resumed)
+        forged = advance_task_run(
+            resumed, "failed", now=NOW, errors=(TaskIssue(code="backend_failed"),)
+        ).model_copy(update={"completed_steps": ()})
+        with pytest.raises(LocalStateError, match="task_update_stale"):
+            reopened.save_task_run(forged)
+        assert reopened.task_run("task-1", "engineer") == resumed
 
 
 def test_version_four_local_state_migrates_additively(tmp_path: Path) -> None:

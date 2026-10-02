@@ -20,10 +20,13 @@ from typing import Literal, Self, TypeVar
 
 from pydantic import ValidationError
 
+from agent.backends.gateway import GatewayModelBackend
 from agent.contracts import AgentProfile
+from agent.data_policy import DataPolicy
 from agent.gateway import Gateway
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
+from agent.task_execution import GatewayTaskExecutor
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
 from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
@@ -93,6 +96,7 @@ from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
+from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.workspace import documents
 from integrations import excel
 from integrations.excel_writer import (
@@ -1144,7 +1148,20 @@ def build_runtime(
         raise HostError("state_unavailable", place.state) from error
     try:
         agent = LocalAgent(
-            membership, gateway, state, workflow_wait_seconds=checked.workflow_wait_seconds
+            membership,
+            gateway,
+            state,
+            workflow_wait_seconds=checked.workflow_wait_seconds,
+            task_executor=GatewayTaskExecutor(
+                GatewayModelBackend(gateway),
+                DataPolicy(
+                    ()
+                    if checked.models is None or checked.models.data_approval is None
+                    else (checked.models.data_approval,)
+                ),
+                state,
+                LocalTaskArtifacts(place.workspace_root),
+            ),
         )
         telegram = build_telegram(checked, place, agent, resolver)
         platform = build_platform(checked, resolver)

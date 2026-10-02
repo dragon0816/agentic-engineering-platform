@@ -292,7 +292,11 @@ class SqliteLocalState:
         """Persist only portable progress; the task objective stays with its caller."""
         item = TaskRunState.model_validate(record)
         if item.status != "pending" or item.revision != 0 or item.observations or (
-            item.artifact_refs or item.validation is not None
+            item.completed_steps
+            or item.unresolved_requirements
+            or item.errors
+            or item.artifact_refs
+            or item.validation is not None
         ):
             raise LocalStateError("task_update_stale")
         with self._write() as conn:

@@ -69,6 +69,19 @@ the host must inspect the actual artifact and record a passing independent
 validation report. This contract slice does not enable native task execution
 or change existing Workflow routing.
 
+The first runnable task slice accepts an explicit `TaskContract` via
+`aep-host run-task --task <file>` or constructs a text-only answer task from
+`--prompt`. Local member/device admission, exact Gateway approval for
+UNCLASSIFIED data and installed read-only capability scope are required before
+backend execution. A task with no allowed capabilities exposes no tools.
+Only Skill commands for explicitly allowed capabilities may be exposed;
+Workflow commands and invented tool names cannot execute through this path.
+The Host persists task progress, writes the answer to an exclusive local
+artifact and validates its actual bytes. Model success alone cannot mark the
+task complete. Ordinary Agent Web chat remains on its existing route until a
+later integration slice; no native task backend or automatic backend switch is
+enabled here.
+
 Bounded Agent decisions require a provider-neutral Decision Service. Without
 an explicitly configured accelerator, the service must execute the existing
 rule-first/Gateway path with the same result and number of provider calls;

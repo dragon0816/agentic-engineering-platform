@@ -33,6 +33,20 @@ class TaskObservation(Contract):
     evidence_ref: Symbol | None = None
 
 
+class TaskCompletedStep(Contract):
+    """A Host-confirmed step, referenced without raw tool output."""
+
+    step_id: Symbol
+    evidence_ref: Symbol
+
+
+class TaskIssue(Contract):
+    """A bounded unresolved requirement or error code, never provider prose."""
+
+    code: Symbol
+    evidence_ref: Symbol | None = None
+
+
 class BackendUse(Contract):
     """Selected backend at one authorized transition; no transferred payload."""
 
@@ -55,6 +69,7 @@ class TaskBackendResult(Contract):
     backend_id: Symbol
     status: Literal["completed", "needs_input", "failed"]
     observations: tuple[TaskObservation, ...] = Field(default=(), max_length=100)
+    completed_steps: tuple[TaskCompletedStep, ...] = Field(default=(), max_length=100)
     artifact_refs: tuple[Symbol, ...] = Field(default=(), max_length=50)
     failure_code: Symbol | None = None
 
@@ -115,6 +130,9 @@ class TaskRunState(Contract):
     created_at: AwareDatetime
     updated_at: AwareDatetime
     observations: tuple[TaskObservation, ...] = Field(default=(), max_length=100)
+    completed_steps: tuple[TaskCompletedStep, ...] = Field(default=(), max_length=100)
+    unresolved_requirements: tuple[TaskIssue, ...] = Field(default=(), max_length=30)
+    errors: tuple[TaskIssue, ...] = Field(default=(), max_length=30)
     artifact_refs: tuple[Symbol, ...] = Field(default=(), max_length=50)
     validation: TaskValidationReport | None = None
 
@@ -126,6 +144,8 @@ class TaskRunState(Contract):
             raise ValueError("task observations must be contiguous")
         if len(self.artifact_refs) != len(set(self.artifact_refs)):
             raise ValueError("task artifact references must be unique")
+        if len({item.step_id for item in self.completed_steps}) != len(self.completed_steps):
+            raise ValueError("completed task steps must be unique")
         if self.backend_history[0].started_revision != 0 or (
             self.backend_history[-1].backend_id != self.backend_id
         ):
@@ -158,20 +178,35 @@ class TaskRunState(Contract):
         return self
 
 
-def begin_task_run(task: TaskContract, backend_id: Symbol, *, now: datetime) -> TaskRunState:
+def begin_task_run(
+    task: TaskContract,
+    backend_id: Symbol,
+    *,
+    now: datetime,
+    effective_classification: DataClass | None = None,
+    approval_ref: Text | None = None,
+) -> TaskRunState:
     """Begin with a digest, not a copy of the objective or input resources."""
+    classification = (
+        task.declared_classification
+        if effective_classification is None
+        else effective_classification
+    )
+    if classification_rank(classification) < classification_rank(task.declared_classification):
+        raise ValueError("initial task classification cannot be lowered")
     return TaskRunState(
         task_id=task.task_id,
         trace=task.trace,
         actor=task.actor,
         task_sha256=task.digest,
         backend_id=backend_id,
-        effective_classification=task.declared_classification,
+        effective_classification=classification,
         backend_history=(
             BackendUse(
                 backend_id=backend_id,
                 started_revision=0,
-                classification=task.declared_classification,
+                classification=classification,
+                approval_ref=approval_ref,
             ),
         ),
         created_at=now,
@@ -185,6 +220,9 @@ def advance_task_run(
     *,
     now: datetime,
     observations: tuple[TaskObservation, ...] = (),
+    completed_steps: tuple[TaskCompletedStep, ...] = (),
+    unresolved_requirements: tuple[TaskIssue, ...] = (),
+    errors: tuple[TaskIssue, ...] = (),
     artifact_refs: tuple[Symbol, ...] = (),
     validation: TaskValidationReport | None = None,
     effective_classification: DataClass | None = None,
@@ -202,6 +240,10 @@ def advance_task_run(
         state.artifact_refs
     ):
         raise ValueError("task artifact references must append uniquely")
+    existing_steps = {item.step_id for item in state.completed_steps}
+    new_steps = [item.step_id for item in completed_steps]
+    if len(new_steps) != len(set(new_steps)) or existing_steps.intersection(new_steps):
+        raise ValueError("completed task steps must append uniquely")
     if validation is not None and state.status != "awaiting_validation":
         raise ValueError("validation follows only an awaiting task")
     if status == "validated" and (validation is None or validation.status != "passed"):
@@ -231,6 +273,12 @@ def advance_task_run(
             "revision": state.revision + 1,
             "updated_at": now,
             "observations": (*state.observations, *observations),
+            "completed_steps": (*state.completed_steps, *completed_steps),
+            "unresolved_requirements": (
+                *state.unresolved_requirements,
+                *unresolved_requirements,
+            ),
+            "errors": (*state.errors, *errors),
             "artifact_refs": (*state.artifact_refs, *artifact_refs),
             "validation": validation,
             "effective_classification": classification,
@@ -250,6 +298,10 @@ def task_run_follows(previous: TaskRunState, candidate: TaskRunState) -> bool:
         or candidate.created_at != previous.created_at
         or candidate.revision != previous.revision + 1
         or candidate.observations[: len(previous.observations)] != previous.observations
+        or candidate.completed_steps[: len(previous.completed_steps)] != previous.completed_steps
+        or candidate.unresolved_requirements[: len(previous.unresolved_requirements)]
+        != previous.unresolved_requirements
+        or candidate.errors[: len(previous.errors)] != previous.errors
         or candidate.artifact_refs[: len(previous.artifact_refs)] != previous.artifact_refs
     ):
         return False
@@ -259,6 +311,11 @@ def task_run_follows(previous: TaskRunState, candidate: TaskRunState) -> bool:
             candidate.status,
             now=candidate.updated_at,
             observations=candidate.observations[len(previous.observations) :],
+            completed_steps=candidate.completed_steps[len(previous.completed_steps) :],
+            unresolved_requirements=candidate.unresolved_requirements[
+                len(previous.unresolved_requirements) :
+            ],
+            errors=candidate.errors[len(previous.errors) :],
             artifact_refs=candidate.artifact_refs[len(previous.artifact_refs) :],
             validation=candidate.validation,
             effective_classification=candidate.effective_classification,
@@ -291,6 +348,17 @@ def apply_backend_result(
         target,
         now=now,
         observations=result.observations,
+        completed_steps=result.completed_steps,
+        unresolved_requirements=(
+            (TaskIssue(code=result.failure_code),)
+            if result.status == "needs_input" and result.failure_code is not None
+            else ()
+        ),
+        errors=(
+            (TaskIssue(code=result.failure_code),)
+            if result.status == "failed" and result.failure_code is not None
+            else ()
+        ),
         artifact_refs=result.artifact_refs,
     )
 
