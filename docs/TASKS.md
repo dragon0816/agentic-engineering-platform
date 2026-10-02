@@ -435,8 +435,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   JavaScript syntax and sdist/wheel build passed on 2026-10-02.
 - [ ] Apply an actual host-admin Gateway approval to the deployed preview only
   after the administrator confirms the exact URL and accepted data class.
-- [ ] Add portable task state, independent completion validation and governed
-  native task adapters in later tested slices.
+- [x] Add a backend-neutral Task contract, digest-only portable run state,
+  additive SQLite persistence and independent artifact-byte validation with
+  restart, transition and negative tests. This contract slice does not yet
+  drive normal ingress or native Agent task execution.
+- [ ] Attach portable task state and independent validation to ordinary Agent
+  ingress, then add governed native task adapters with containment tests.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter
   contracts, generated Web/Telegram forms, flexible `/run` aliases and parity.
 - [ ] Review and publish the active Hermes Skills and validated Workflows as

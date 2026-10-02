@@ -50,6 +50,16 @@ conversation without changing its observable answer, failure or tool evidence.
 No data classification, native CLI task execution or automatic fallback is
 enabled by the first slice.
 
+The portable-task slice defines a backend-neutral objective with exact Skill
+and resource references, expected artifact outputs and host-repeatable checks.
+Its durable run record carries a digest of that contract, trace, selected
+backend, status, bounded observations and artifact references, but not the
+objective text, source contents or model reasoning. Resume requires the same
+task contract. A backend's claim of success does not establish completion:
+the host must inspect the actual artifact and record a passing independent
+validation report. This contract slice does not enable native task execution
+or change existing Workflow routing.
+
 After the harness, migrate the pinned `rs_workflow_system` behaviors through
 typed adapters and parity tests. Distinguish per-install/user static settings
 from per-run parameters and generate matching Web/chat/Telegram controls from

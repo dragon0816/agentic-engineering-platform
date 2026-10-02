@@ -195,6 +195,10 @@ LocalStateErrorCode = Literal[
     "conversation_owner_fixed",
     "conversation_update_stale",
     "contribution_exists",
+    "task_exists",
+    "task_unknown",
+    "task_owner_fixed",
+    "task_update_stale",
     "unavailable",
     "commit_unknown",
 ]

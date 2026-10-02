@@ -22,6 +22,7 @@ from urllib.request import pathname2url
 
 from pydantic import TypeAdapter, ValidationError
 
+from agent.run_state import TaskRunState, task_run_follows
 from common.base import Symbol
 from common.distribution import (
     BridgeStateSnapshot,
@@ -35,10 +36,10 @@ from common.enrollment import BridgeDevice
 from host_runtime.contributions import ContributionDraft
 from host_runtime.conversations import ConversationRecord
 
-# Version 4 adds local contribution drafts. Tables are additive and
+# Version 5 adds portable task-run evidence. Tables are additive and
 # every open creates them, so older files migrate rather than being refused.
-SCHEMA_VERSION = "4"
-_MIGRATABLE = frozenset({"1", "2", "3"})
+SCHEMA_VERSION = "5"
+_MIGRATABLE = frozenset({"1", "2", "3", "4"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS installed ("
@@ -56,6 +57,9 @@ _SCHEMA = (
     " record TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS contribution_drafts ("
     " draft_id TEXT PRIMARY KEY, actor TEXT NOT NULL, created_at TEXT NOT NULL,"
+    " record TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS task_runs ("
+    " task_id TEXT PRIMARY KEY, actor TEXT NOT NULL, updated_at TEXT NOT NULL,"
     " record TEXT NOT NULL)",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
@@ -283,6 +287,77 @@ class SqliteLocalState:
         with self._read() as conn:
             rows = conn.execute("SELECT record FROM runs ORDER BY updated_at, run_id").fetchall()
             return tuple(LocalRunSummary.model_validate_json(row[0]) for row in rows)
+
+    def create_task_run(self, record: TaskRunState) -> TaskRunState:
+        """Persist only portable progress; the task objective stays with its caller."""
+        item = TaskRunState.model_validate(record)
+        if item.status != "pending" or item.revision != 0 or item.observations or (
+            item.artifact_refs or item.validation is not None
+        ):
+            raise LocalStateError("task_update_stale")
+        with self._write() as conn:
+            if conn.execute(
+                "SELECT 1 FROM task_runs WHERE task_id = ?", (item.task_id,)
+            ).fetchone():
+                raise LocalStateError("task_exists")
+            conn.execute(
+                "INSERT INTO task_runs (task_id, actor, updated_at, record) VALUES (?, ?, ?, ?)",
+                (
+                    item.task_id,
+                    item.actor,
+                    item.updated_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                ),
+            )
+        return item
+
+    def save_task_run(self, record: TaskRunState) -> TaskRunState:
+        item = TaskRunState.model_validate(record)
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM task_runs WHERE task_id = ?", (item.task_id,)
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("task_unknown")
+            stored = TaskRunState.model_validate_json(row[0])
+            if (
+                item.actor != stored.actor
+                or item.trace != stored.trace
+                or item.task_sha256 != stored.task_sha256
+                or item.backend_id != stored.backend_id
+                or item.created_at != stored.created_at
+            ):
+                raise LocalStateError("task_owner_fixed")
+            if not task_run_follows(stored, item):
+                raise LocalStateError("task_update_stale")
+            conn.execute(
+                "UPDATE task_runs SET updated_at = ?, record = ? WHERE task_id = ?",
+                (
+                    item.updated_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                    item.task_id,
+                ),
+            )
+        return item
+
+    def task_run(self, task_id: Symbol, actor: Symbol) -> TaskRunState | None:
+        with self._read() as conn:
+            row = conn.execute(
+                "SELECT record FROM task_runs WHERE task_id = ? AND actor = ?",
+                (task_id, actor),
+            ).fetchone()
+            return None if row is None else TaskRunState.model_validate_json(row[0])
+
+    def task_runs(self, actor: Symbol, *, limit: int = 50) -> tuple[TaskRunState, ...]:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1 or limit > 100:
+            raise ValueError("task-run limit is between 1 and 100")
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT record FROM task_runs WHERE actor = ?"
+                " ORDER BY updated_at DESC, task_id LIMIT ?",
+                (actor, limit),
+            ).fetchall()
+            return tuple(TaskRunState.model_validate_json(row[0]) for row in rows)
 
     def create_conversation(self, record: ConversationRecord) -> ConversationRecord:
         item = ConversationRecord.model_validate(record)

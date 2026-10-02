@@ -424,17 +424,21 @@ def test_reporting_on_a_state_file_changes_nothing_about_it(tmp_path: Path) -> N
         assert runtime.state.cursor(TELEGRAM_CHANNEL) is None
 
 
-def test_a_version_three_local_state_adds_inert_contribution_storage(tmp_path: Path) -> None:
+def test_a_version_three_local_state_adds_inert_contribution_and_task_storage(
+    tmp_path: Path,
+) -> None:
     config, layout = ready(tmp_path)
     with build_runtime(config):
         pass
     with sqlite3.connect(layout.state) as editor:
         editor.execute("UPDATE local_meta SET value = '3' WHERE key = 'schema_version'")
         editor.execute("DROP TABLE contribution_drafts")
+        editor.execute("DROP TABLE task_runs")
         editor.commit()
 
     with build_runtime(config) as runtime:
         assert runtime.state.contribution_drafts("engineer") == ()
+        assert runtime.state.task_runs("engineer") == ()
 
     with sqlite3.connect(layout.state) as reader:
         version = reader.execute(
@@ -443,8 +447,12 @@ def test_a_version_three_local_state_adds_inert_contribution_storage(tmp_path: P
         table = reader.execute(
             "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'contribution_drafts'"
         ).fetchone()
-    assert version == "4"
+        task_table = reader.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'task_runs'"
+        ).fetchone()
+    assert version == "5"
     assert table == ("contribution_drafts",)
+    assert task_table == ("task_runs",)
 
 
 def authorization(*kinds: str, actor: str = "engineer") -> dict[str, Any]:

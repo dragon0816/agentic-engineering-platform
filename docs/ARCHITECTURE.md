@@ -311,7 +311,7 @@ harness or a future agent using its native harness; it never grants access.
 does not fall back. The sole task-capable entry in this slice is the Gateway
 adapter, which forwards context, history and persona to `Gateway.converse` and
 returns its existing typed result. Health is reported as unknown until a real
-Gateway request proves reachability. The next data-trust slice requires an
+Gateway request proves reachability. The data-trust boundary requires an
 administrator approval tied to the exact routed Gateway alias and URL before
 the host's model client sends a request. A complete model request is treated as
 UNCLASSIFIED; an approval must include that class. Existing restricted native
@@ -320,6 +320,19 @@ history and sends no local persona or command results. This is a text-chat
 safety boundary, not native Agent task execution. Field-level provenance and
 native Agent task adapters remain later slices; see `REQUIREMENTS.md` and the
 approved design under `superpowers/specs/`.
+
+A portable `TaskContract` now names the actor, trace, objective, exact Skill
+versions, resource references, expected output artifacts and independent
+completion checks. `TaskRunState` records only the task digest, selected
+backend, monotonic transitions, compact observation/artifact references and
+validation outcomes. The local SQLite store persists that state in an additive
+version-5 table; resumption must resupply the exact task contract whose digest
+matches. The host-side `CompletionValidator` reads actual artifact bytes through
+a trusted resolver and checks existence, non-empty content or an expected
+SHA-256 before marking a task validated. Backend statements and artifact
+references alone cannot pass that validator. This is a contract/persistence
+slice: ordinary conversation and deterministic Workflow execution are not yet
+driven by this task state, and native Agent task backends remain disabled.
 
 Conversation feedback uses a separate local contribution boundary. The Host
 copies a bounded excerpt of the selected actor-owned conversation into an

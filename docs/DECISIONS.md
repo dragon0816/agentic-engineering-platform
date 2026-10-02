@@ -50,3 +50,22 @@ The alternative of trusting any configured/localhost Gateway was rejected:
 LiteLLM may forward elsewhere, and a URL/credential cannot prove the upstream
 data boundary. Retaining unrestricted CLI chat was rejected because signed-in
 status does not classify the user's history or local persona.
+
+## 2026-10-02 — Portable task state stores a digest, not task content
+
+Decision: Keep the complete backend-neutral task objective in a caller-held
+`TaskContract` and persist only its canonical SHA-256 digest with trace,
+backend, state, observation codes, artifact references and validation metadata
+in the local state store. Resumption requires the same contract. A separate
+host-owned validator reads the actual artifact through a trusted resolver and
+checks it against declared completion criteria; an Agent or model statement
+cannot by itself mark the task complete. The SQLite change is an additive
+version-5 table, leaving existing Workflow run/checkpoint semantics intact.
+
+Reason: Copying prompts and source content into every durable run row would
+expand the data exposure surface and mix task orchestration with conversation
+storage. Treating a backend's success report as completion was rejected because
+it would bypass the product requirement for observable independent evidence.
+The initial validator is deliberately limited to artifact presence, non-empty
+content and an optional known digest; richer domain validators belong to
+later task adapters and product E2E cases.
