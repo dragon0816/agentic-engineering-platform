@@ -169,11 +169,15 @@ def _corpus(vault: Vault) -> list[_Doc]:
     return docs
 
 
-def retrieve(vault: Vault, question: str, *, k: int = 5) -> tuple[Passage, ...]:
+def retrieve(
+    vault: Vault, question: str, *, k: int = 5, min_raw: int = 0
+) -> tuple[Passage, ...]:
     """BM25 over every current Raw section and Wiki paragraph; ties break by
     corpus order, so the same question always returns the same passages."""
     if k < 1:
         raise ValueError("k is positive")
+    if not 0 <= min_raw <= k:
+        raise ValueError("min_raw must be between zero and k")
     query = tokens(question)
     if not query:
         return ()
@@ -197,9 +201,16 @@ def retrieve(vault: Vault, question: str, *, k: int = 5) -> tuple[Passage, ...]:
         if score > 0:
             scored.append((score, position, doc))
     scored.sort(key=lambda item: (-item[0], item[1]))
+    selected = [item for item in scored if item[2].citation.kind == "raw"][:min_raw]
+    selected_positions = {position for _, position, _ in selected}
+    for item in scored:
+        if len(selected) >= k:
+            break
+        if item[1] not in selected_positions:
+            selected.append(item)
     return tuple(
         Passage(text=doc.text, citation=doc.citation, score=round(score, 6))
-        for score, _, doc in scored[:k]
+        for score, _, doc in sorted(selected, key=lambda item: (-item[0], item[1]))
     )
 
 
@@ -235,7 +246,12 @@ class QueryEngine:
         trace: TraceIdentifiers | None = None,
         raw_citations_only: bool = False,
     ) -> Answer:
-        passages = retrieve(self.vault, question, k=k)
+        passages = retrieve(
+            self.vault,
+            question,
+            k=k,
+            min_raw=min(k, 4) if raw_citations_only else 0,
+        )
         if not passages:
             return Answer(question=question, status="no_match")
         if self.model is None or self.alias is None:

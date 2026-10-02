@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 from test_raw import drop, make_vault
 
+from common.assets import AssetIdentity
 from common.execution import Failure, TraceIdentifiers
+from knowledge.evolution import grounded_record
 from knowledge.query import Answer, Citation, QueryEngine, cited_numbers, retrieve, tokens
 from knowledge.raw import (
     DropIntake,
@@ -123,6 +125,8 @@ def test_retrieval_is_ranked_deterministic_and_cites_provenance(tmp_path: Path) 
     assert all("source_id" not in p.text for p in retrieve(vault, "source_id src", k=9))
     assert retrieve(vault, "GaN power amplifier", k=4) == passages
     assert [p.score for p in passages] == sorted((p.score for p in passages), reverse=True)
+    raw_grounded = retrieve(vault, "GaN power amplifier", k=2, min_raw=2)
+    assert [p.citation.kind for p in raw_grounded] == ["raw", "raw"]
 
     # A Latin term glued to CJK is found, as is a one-character CJK question.
     glued = retrieve(vault, "gan", k=9)
@@ -139,6 +143,31 @@ def test_retrieval_is_ranked_deterministic_and_cites_provenance(tmp_path: Path) 
     assert retrieve(vault, "", k=5) == ()
     with pytest.raises(ValueError, match="positive"):
         retrieve(vault, "x", k=0)
+    with pytest.raises(ValueError, match="min_raw"):
+        retrieve(vault, "x", k=2, min_raw=3)
+
+
+def test_grounding_accepts_a_citation_after_punctuation_but_not_an_uncited_followup(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    passages = retrieve(vault, "GaN power amplifier", k=1)
+    identity = AssetIdentity(namespace="engineering", name="guide", version="1.0.0")
+    trace = TraceIdentifiers(trace_id="grounding", request_id="grounding", span_id="grounding")
+    answer = Answer(
+        question="Which amplifier?",
+        status="answered",
+        passages=passages,
+        text="The RF front end uses a GaN power amplifier. [1]",
+    )
+    assert grounded_record(identity, trace, answer).cited_passages == passages
+    with pytest.raises(ValueError, match="every answer sentence"):
+        grounded_record(
+            identity,
+            trace,
+            answer.model_copy(update={"text": answer.text + " This claim has no citation."}),
+        )
 
 
 def test_only_the_current_version_of_an_original_is_cited(tmp_path: Path) -> None:

@@ -483,6 +483,40 @@ def test_e2e_05_unsupported_wiki_only_content_is_not_grounded(tmp_path: Path) ->
     assert outcome.capability.failure.code == "knowledge_not_grounded"
 
 
+def test_e2e_05_honest_no_raw_answer_reports_insufficient_evidence(tmp_path: Path) -> None:
+    vault = copy_vault(tmp_path)
+    catalog = KnowledgeCatalog()
+    catalog.register(manifest(vault), vault)
+
+    class HonestModel(ProductKnowledgeModel):
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            if request.output_contract == "platform.route-proposal.v1":
+                return super().generate(request)
+            return ModelResponse(
+                trace=request.trace,
+                model_alias=request.model_alias,
+                text="No Raw passage supports that claim.",
+            )
+
+    model = HonestModel(KnowledgeQueryRequest(asset=V1, question="Is it blue?"))
+    agent, _bridge = resident(tmp_path, catalog, model)
+    outcome = asyncio.run(
+        agent.handle(
+            LocalAgentRequest(
+                ingress="local",
+                actor="engineer",
+                bridge_id="bridge-company",
+                namespace="engineering",
+                message="Is it blue?",
+                trace=QUERY_TRACE,
+            )
+        )
+    )
+    agent.state.close()
+    assert outcome.capability is not None and outcome.capability.failure is not None
+    assert outcome.capability.failure.code == "knowledge_insufficient_evidence"
+
+
 def test_e2e_05_regression_failure_blocks_domain_approval(tmp_path: Path) -> None:
     vault = copy_vault(tmp_path)
     base = manifest(vault)

@@ -32,6 +32,8 @@ def readable(outcome: LocalAgentOutcome) -> str:
         lines.append(f"{decision.kind}: {target.namespace}/{target.name}@{target.version}")
     if outcome.capability is not None:
         lines.append(f"capability: {outcome.capability.status}")
+        if outcome.capability.failure is not None:
+            lines.append(f"failure: {outcome.capability.failure.code}")
     if outcome.workflow is not None:
         run = outcome.workflow.run
         lines.append(f"{run.status}, {run.completed_steps} step(s)")

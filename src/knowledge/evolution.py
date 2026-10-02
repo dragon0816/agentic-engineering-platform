@@ -116,9 +116,20 @@ class KnowledgeAnswerRecord(Contract):
         )
         if self.cited_passages != expected:
             raise ValueError("grounding must contain the exact cited passages")
+        # Models often place a citation after the final period ("fact. [2]").
+        # Attach that citation before splitting; otherwise a valid citation
+        # becomes a spurious sentence of its own. CJK punctuation can end a
+        # sentence without a following space.
+        with_attached_citations = re.sub(
+            r"([.!?。！？])\s*(\[[0-9][0-9,\s-]*\])",
+            r" \2\1",
+            self.answer.text,
+        )
         sentences = [
             sentence.strip()
-            for sentence in re.split(r"(?<=[.!?])\s+", self.answer.text)
+            for sentence in re.split(
+                r"(?<=[.!?])\s+|(?<=[。！？])\s*", with_attached_citations
+            )
             if sentence.strip()
         ]
         if any(not cited_numbers(sentence) for sentence in sentences):

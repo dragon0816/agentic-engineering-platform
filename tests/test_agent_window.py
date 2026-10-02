@@ -113,6 +113,26 @@ def test_a_failed_run_names_its_failure() -> None:
     assert "failure: workbook_locked" in shown
 
 
+def test_a_failed_capability_names_its_safe_failure_code() -> None:
+    shown = readable(
+        outcome(
+            decision=RouteDecision(
+                kind="capability",
+                target=AssetIdentity(namespace="knowledge-query", name="ask", version="1.0.0"),
+                reason="matched",
+            ),
+            capability=CapabilityResult(
+                trace=trace(),
+                status="failed",
+                failure=Failure(code="knowledge_insufficient_evidence", message="No Raw match"),
+                handler_invoked=True,
+            ),
+        )
+    )
+    assert "failure: knowledge_insufficient_evidence" in shown
+    assert "No Raw match" not in shown
+
+
 def test_a_refusal_is_the_whole_answer() -> None:
     shown = readable(outcome(refusal="actor_not_bound"))
     assert shown == "Refused: actor_not_bound"

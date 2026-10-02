@@ -55,9 +55,14 @@ class KnowledgeQueryHandler:
                 ),
             ).ask,
             request.question,
+            k=8,
             trace=context.trace,
             raw_citations_only=True,
         )
+        if answer.status in ("no_match", "unanswered"):
+            raise CapabilityRefused("knowledge_insufficient_evidence")
+        if answer.status == "model_failed":
+            raise CapabilityRefused("knowledge_model_failed")
         try:
             return grounded_record(request.asset, context.trace, answer)
         except ValueError:
