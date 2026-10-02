@@ -252,7 +252,7 @@ def test_without_a_grant_the_policy_refuses_the_step(
     the run is recorded, and the dispatch is refused."""
     config, layout = workspace(tmp_path, membership=membership_record())
     target = layout.workspace_root / "notes.txt"
-    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 0
+    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 1
     assert "failure: permission_denied" in capsys.readouterr().out
     with build_runtime(config) as runtime:
         run = runtime.agent.runs()[0]
@@ -262,7 +262,7 @@ def test_without_a_grant_the_policy_refuses_the_step(
     without_approval = grant_record()
     without_approval[0].pop("approval_ref")
     layout.grants.write_text(json.dumps(without_approval), encoding="utf-8")
-    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 0
+    assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 1
     assert "failure: permission_denied" in capsys.readouterr().out
 
 
@@ -520,10 +520,10 @@ def test_an_asset_nobody_chose_is_not_installed(
     layout.authorization.write_text(
         json.dumps(authorization("skill", "capability")), encoding="utf-8"
     )
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
     assert "workflow_not_installed" in capsys.readouterr().out
     layout.authorization.write_text(json.dumps(authorization("capability")), encoding="utf-8")
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
     assert "needs_input (unknown_skill)" in capsys.readouterr().out
     with build_runtime(config) as runtime:
         assert runtime.agent.runs() == ()
@@ -544,14 +544,14 @@ def test_a_revoked_tool_stops_authorizing_the_same_run(
     layout.authorization.write_text(
         json.dumps(authorization("skill", "workflow")), encoding="utf-8"
     )
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
     assert "failure: permission_denied" in capsys.readouterr().out
     # Another member's decision authorizes nothing for this one.
     layout.authorization.write_text(
         json.dumps(authorization("skill", "workflow", "capability", actor="tester")),
         encoding="utf-8",
     )
-    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 0
+    assert main(["ask", "--config", str(path), f"files.read {target}"]) == 1
     assert "failure: permission_denied" in capsys.readouterr().out
 
 

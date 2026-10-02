@@ -42,7 +42,7 @@ from capabilities.weekly_report.manifest import (
 from common.execution import RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest
 from host_runtime.assets import export_assets
-from host_runtime.cli import main
+from host_runtime.cli import _ask, main
 from host_runtime.host import build_runtime, host_report
 from integrations import excel
 from integrations.excel import digest_rows
@@ -387,6 +387,24 @@ def test_a_jira_refusal_fails_the_run_and_claims_nothing(tmp_path: Path) -> None
         assert impossible.workflow is not None and impossible.workflow.run.status == "failed"
         first = impossible.workflow.step_results[0]
         assert first.failure is not None and first.failure.code == "invalid_input"
+    assert len(transport.calls) == 1
+
+
+def test_cli_exits_nonzero_and_preserves_failed_preview_evidence(tmp_path: Path) -> None:
+    config, layout, _ = host(tmp_path)
+    output = tmp_path / "failed-preview.json"
+    transport = ScriptedTransport([Reply(401, {"message": "nope"})])
+    with build_runtime(
+        config,
+        layout=layout,
+        resolver=StaticCredentials({"board_token": TOKEN}),
+        jira_transport=transport,
+    ) as runtime:
+        assert _ask(runtime, "weekly.preview 2026_31W", None, None, True, output) == 1
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert result["workflow"]["run"]["status"] == "failed"
+    assert result["workflow"]["run"]["failure"]["code"] == "github_auth"
+    assert TOKEN not in output.read_text(encoding="utf-8")
     assert len(transport.calls) == 1
 
 

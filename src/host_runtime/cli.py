@@ -283,7 +283,13 @@ def _ask(
         print(f"wrote {output}")
     else:
         print(rendered)
-    return 0 if outcome.refusal is None else 1
+    if outcome.refusal is not None or outcome.unrecorded is not None:
+        return 1
+    if outcome.capability is not None:
+        return 0 if outcome.capability.status == "succeeded" else 1
+    if outcome.workflow is not None:
+        return 0 if outcome.workflow.run.status == "succeeded" else 1
+    return 1 if outcome.decision is not None and outcome.decision.kind == "needs_input" else 0
 
 
 def _prompt_task(runtime: HostRuntime, prompt: str, namespace: str | None) -> TaskContract | None:
