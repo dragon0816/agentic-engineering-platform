@@ -2647,3 +2647,14 @@ and again before each invocation, uses a fixed noninteractive interpreter with
 no shell, exchanges JSON through stdin/stdout and still applies normal local
 policy and approval checks. `SkillManifest.script_tools` contains references
 for documentation only and grants no execution authority.
+
+# Numeric Workflow command aliases (2026-10-02)
+
+`WorkflowManifest.run_alias` is an optional integer from 1 through 9999.
+Older manifests omit it. Agent Web resolves `/run <number>` and
+`/run workflow <number>` only when exactly one installed manifest in the
+current namespace declares the number. A zero or multiple-match result
+returns `needs_input`; no version is guessed. Resolution produces the exact
+`AssetIdentity`, which is then submitted through normal resident-Agent
+admission and Bridge authorization. The shipped weekly-report preview alone
+declares alias 11; its workbook apply and mail Workflows do not.

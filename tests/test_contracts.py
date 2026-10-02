@@ -155,6 +155,11 @@ def test_workflow_and_secret_requirements_round_trip() -> None:
     workflow = WorkflowManifest.model_validate(data)
     assert WorkflowManifest.model_validate_json(workflow.model_dump_json()) == workflow
     assert workflow.secrets[0].name == "github_token"
+    numbered = WorkflowManifest.model_validate({**data, "run_alias": 11})
+    assert WorkflowManifest.model_validate_json(numbered.model_dump_json()).run_alias == 11
+    for alias in (0, -1, "11"):
+        with pytest.raises(ValidationError):
+            WorkflowManifest.model_validate({**data, "run_alias": alias})
     data["steps"] = []
     with pytest.raises(ValidationError):
         WorkflowManifest.model_validate(data)

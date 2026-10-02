@@ -162,3 +162,21 @@ converting every Web turn into a task was deferred because those turns include
 slash commands and Workflows with different completion evidence. Enabling a
 native backend or implicit fallback was rejected until complete transfer
 materials can be classified and re-authorized at the new destination.
+
+## 2026-10-02 — Resolve numeric Workflow commands from installed manifests
+
+Decision: A Workflow manifest may declare one optional positive `run_alias`.
+`/run 11` and `/run workflow 11` resolve that number within the Agent Web
+session namespace only when exactly one local manifest matches. The resolved
+exact identity still goes through resident-Agent admission and Bridge policy.
+The shipped Workflow 11 assigns `11` only to its read-only preview; apply and
+mail have no numeric shortcut. Missing or ambiguous aliases require an exact
+`namespace/name@version`. Older manifests remain valid with no alias.
+
+Reason: The source Workflow number is useful at the keyboard, but mapping a
+number in the Web implementation or choosing the latest matching version
+would make the UI decide which execution asset to run. The manifest-based
+shortcut remains declarative and fails closed when installation is ambiguous.
+The CLI now returns a nonzero exit status for failed, unavailable, unresolved
+or unrecorded runs, so shell validation cannot mistake a rendered failure for
+success.

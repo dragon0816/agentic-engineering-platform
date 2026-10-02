@@ -250,6 +250,9 @@ class WorkflowStep(RegistryContract):
 
 class WorkflowManifest(ExecutableManifest):
     kind: Literal["workflow"] = "workflow"
+    # Optional numeric shortcut for a single installed workflow version.
+    # Resolution refuses ambiguity; a shortcut never grants execution rights.
+    run_alias: int | None = Field(default=None, ge=1, le=9999, strict=True)
     steps: tuple[AssetIdentity | WorkflowStep, ...]
 
     @field_validator("steps")

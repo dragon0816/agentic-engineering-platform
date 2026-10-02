@@ -902,15 +902,29 @@ class AgentWeb:
         if command.name == "run_workflow":
             target_text, _, raw_arguments = command.argument.partition(" ")
             try:
-                path, separator, version = target_text.rpartition("@")
-                namespace, slash, name = path.partition("/")
-                if not separator or not slash:
-                    raise ValueError("missing exact workflow version")
-                target = AssetIdentity(namespace=namespace, name=name, version=version)
+                if target_text.isascii() and target_text.isdecimal() and int(target_text) > 0:
+                    matches = [
+                        manifest.metadata.identity
+                        for manifest in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                        if manifest.run_alias == int(target_text)
+                        and manifest.metadata.identity.namespace == self.namespace
+                    ]
+                    if len(matches) != 1:
+                        return self._command_needs_input(
+                            "Install exactly one Workflow with that number, or use its exact "
+                            "<namespace>/<name>@<version> identity."
+                        )
+                    target = matches[0]
+                else:
+                    path, separator, version = target_text.rpartition("@")
+                    namespace, slash, name = path.partition("/")
+                    if not separator or not slash:
+                        raise ValueError("missing exact workflow version")
+                    target = AssetIdentity(namespace=namespace, name=name, version=version)
                 arguments = self._command_arguments(raw_arguments)
             except (ValueError, TypeError, json.JSONDecodeError):
                 return self._command_needs_input(
-                    "Usage: /run workflow <namespace>/<name>@<version> {JSON arguments}"
+                    "Usage: /run [workflow] <number|namespace/name@version> {JSON arguments}"
                 )
         else:
             workflow_name = {

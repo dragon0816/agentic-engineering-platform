@@ -31,6 +31,7 @@ def preview_workflow() -> WorkflowManifest:
         {
             "metadata": {"identity": PREVIEW_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
+            "run_alias": 11,
             "description": (
                 "Preview the GTM weekly report: the week's tracked items planned against the "
                 "workbook's scratch sheet, with nothing written"

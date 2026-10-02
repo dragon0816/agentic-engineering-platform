@@ -874,6 +874,36 @@ def test_run_workflow_slash_command_uses_exact_installed_workflow(tmp_path: Path
     assert "succeeded" in result["answer"]["answer"]
 
 
+def test_run_number_resolves_only_one_installed_workflow_in_the_session_namespace(
+    tmp_path: Path,
+) -> None:
+    config, layout = ready(tmp_path)
+    path = layout.workflows / "read.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["run_alias"] = 11
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    with build_runtime(config) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        for prefix in ("/run 11 ", "/run workflow 11 "):
+            result = web.conversation_turn(
+                ConversationTurnRequest(
+                    session_id=created["session_id"],
+                    message=prefix + json.dumps({"args": str(layout.workspace_root / "notes.txt")}),
+                )
+            )
+            assert result["answer"]["status"] == "answered"
+            assert result["answer"]["ok"] is True
+        second = json.loads(path.read_text(encoding="utf-8"))
+        second["metadata"]["identity"]["name"] = "another-read-local-file"
+        (layout.workflows / "second.json").write_text(json.dumps(second), encoding="utf-8")
+        ambiguous = web.conversation_turn(
+            ConversationTurnRequest(session_id=created["session_id"], message="/run 11")
+        )
+        assert ambiguous["answer"]["status"] == "needs_input"
+        assert "exact" in ambiguous["answer"]["answer"]
+
+
 def test_new_capability_draft_cannot_claim_governance_or_publish_itself(
     served: AgentWebServer,
 ) -> None:

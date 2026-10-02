@@ -36,6 +36,11 @@ COMMANDS = (
         description="Run an exact installed Workflow with optional JSON arguments.",
     ),
     SlashCommandSpec(
+        name="run_workflow",
+        invocation="/run ",
+        description="Run an installed Workflow by its unique number, such as /run 11.",
+    ),
+    SlashCommandSpec(
         name="wiki_convert",
         invocation="/wiki-convert ",
         description="Run the installed wiki-convert Workflow.",
@@ -85,9 +90,11 @@ def parse_slash_command(message: str) -> SlashCommandInvocation | None:
     }
     if command == "/run":
         noun, _, remainder = argument.partition(" ")
-        if noun != "workflow":
+        if noun == "workflow":
+            argument = remainder.strip()
+        elif not noun.isascii() or not noun.isdecimal():
             raise SlashCommandError("run_requires_workflow")
-        return SlashCommandInvocation(name="run_workflow", argument=remainder.strip())
+        return SlashCommandInvocation(name="run_workflow", argument=argument)
     name = names.get(command)
     if name is None:
         raise SlashCommandError("unknown_slash_command")

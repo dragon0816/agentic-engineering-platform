@@ -10,6 +10,10 @@ def test_parser_recognizes_the_closed_command_set() -> None:
     assert run is not None
     assert run.name == "run_workflow"
     assert run.argument.startswith("engineering/check@1.0.0")
+    for shorthand in ('/run 11 {"week":"2026_40W"}', '/run workflow 11 {"week":"2026_40W"}'):
+        selected = parse_slash_command(shorthand)
+        assert selected is not None and selected.name == "run_workflow"
+        assert selected.argument == '11 {"week":"2026_40W"}'
     query = parse_slash_command("/wiki-query where is the evidence?")
     assert query is not None and query.name == "wiki_query"
     assert query.argument == "where is the evidence?"
