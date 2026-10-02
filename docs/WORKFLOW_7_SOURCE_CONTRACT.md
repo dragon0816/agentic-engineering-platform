@@ -41,7 +41,7 @@ issue cap and preview choice. The source puts a Jira PAT in its config; a
 platform asset must carry only a `SecretRef`, never that value. The exact split
 requires a typed parameter contract and owner review before implementation.
 
-## Migration gate
+## Earlier GitHub preview direction (superseded on 2026-10-03)
 
 Jira is retired on the target Host, so the source's Jira JQL and ticket URLs
 cannot be copied as an executable platform Workflow. On 2026-10-02 the owner
@@ -101,3 +101,35 @@ error status). The installed Host workspace also has no Workflow 7 manifest yet.
 This does not establish that a separately running Agent has the same token;
 refreshing the installed manifest and a successful real Project read remain
 required before claiming live validation.
+
+## Current Jira read-only slice (owner correction, 2026-10-03)
+
+The owner clarified that Workflow 7 must continue to read company Jira at
+`https://jira.rsint.net/`; the prior GitHub Project substitution above was an
+incorrect assumption for this Workflow. Workflow 11's GitHub Project remains
+separate. The pinned source revision and files at the top of this document are
+the behavioral baseline. The AEP Jira preview uses the existing
+`integrations.jira.JiraClient` with Server Bearer PAT authentication, obtained
+from a Host `SecretRef`. No PAT is stored in a shared asset or repository file.
+
+The source's non-secret local `config/workflow-07.json` has project `MRT1CV`,
+reporter usernames `CHI_L`, `peng_k`, `fang_ke`, `chen_jen`, `teng_je`, comment
+count `2`, comment concurrency `5`, and maximum results `2000`. These values
+are candidates for this Host's `integrations.team_tickets` static project,
+reporters and comment-concurrency settings; the
+original workbook path is intentionally absent from the read-only slice.
+Runtime fields are `max_items`, `comment_count`, and optional `extra_jql`.
+The original JQL shape (`project = ... AND reporter in (...) [AND (...)] ORDER
+BY created DESC`), eleven managed column values, Jira browse URLs,
+Task/Sub-task routing, newest-N comment formatting, `Unresolved` fallback,
+and per-ticket comment-error degradation are pinned by offline tests.
+
+The new asset is `engineering/jira-team-tickets-preview@1.0.0` with alias `7`,
+and its Skill is `engineering/team-tickets@2.0.0`. The Jira capability is
+`team-tickets/jira-preview@1.0.0`, classified `read`; it requires a separate
+`jira.read` grant under `jira-read-policy`. Exported defaults no longer include
+the old GitHub Workflow 7 asset. This is a read-only preview: no Excel writer,
+workbook path, schedule, or mail action is installed. Parity for the original
+Excel upsert, hidden-row behavior, backup and lock handling remains open.
+The configured PAT did not authenticate in the separate read-only `myself`
+probe (HTTP 401). No live Jira data validation is claimed.

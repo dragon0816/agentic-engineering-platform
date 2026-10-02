@@ -1,121 +1,122 @@
-"""Workflow 7's GitHub read-only adapter, characterized against source W3-07."""
+"""Workflow 7's Jira read-only preview against source W3-07 behavior."""
 
 from __future__ import annotations
 
 import asyncio
+import json
+from collections.abc import Mapping
 from pathlib import Path
+from threading import Barrier
 from typing import Any
 
-from test_github_project_client import Reply, ScriptedTransport
+import pytest
+from pydantic import ValidationError
 from test_host_wiring import membership_record, workspace
+from test_jira_client import Reply, ScriptedTransport
 
-from capabilities.team_tickets.contracts import TeamTicketsPreview, TeamTicketsRequest
-from capabilities.team_tickets.handlers import PREVIEW_SPEC, preview_items
+from capabilities.team_tickets.contracts import (
+    TeamTicketsPreview,
+    TeamTicketsRequest,
+    TeamTicketsSettings,
+)
+from capabilities.team_tickets.handlers import (
+    MANAGED_HEADERS,
+    PREVIEW_SPEC,
+    build_jql,
+    format_activity,
+    issue_to_record,
+    preview_items,
+)
 from capabilities.team_tickets.manifest import preview_workflow
 from common.execution import TraceIdentifiers
 from common.local_agent import LocalWorkflowRequest
 from host_runtime.assets import export_assets
-from host_runtime.host import build_runtime
-from integrations.github_project import ProjectComment, ProjectItem
+from host_runtime.host import build_runtime, host_report
 from models.credentials import StaticCredentials
 
 
-def item(
-    number: int,
-    *,
-    kind: str = "Task",
-    created: str = "2026-10-01T09:15:00Z",
-    comments: tuple[ProjectComment, ...] = (),
-    truncated: bool = False,
-) -> ProjectItem:
-    return ProjectItem(
-        item_id=f"PVTI_{number}",
-        key=f"owner/repo#{number}",
-        title=f"Ticket {number}",
-        url=f"https://github.com/owner/repo/issues/{number}",
-        state="OPEN",
-        created=created,
-        updated="2026-10-02T11:30:00Z",
-        author="engineer",
-        fields={
-            "Type": kind,
-            "Status": "In Progress",
-            "Priority": "Major",
-            "Assignee": "Colleague",
+def issue(number: int, *, kind: str = "Task") -> dict[str, Any]:
+    return {
+        "key": f"MRT1CV-{number}",
+        "fields": {
+            "summary": f"Ticket {number}",
+            "issuetype": {"name": kind},
+            "status": {"name": "In Progress"},
+            "priority": {"name": "Major"},
+            "reporter": {"displayName": "Leo"},
+            "assignee": {"name": "jerry"},
+            "created": "2026-10-02T09:15:00.000+0800",
+            "updated": "2026-10-03T11:30:00.000+0800",
+            "resolution": None,
         },
-        comments=comments,
-        comments_truncated=truncated,
-    )
+    }
 
 
-def test_source_columns_route_and_latest_comment_format_are_preserved() -> None:
-    comments = (
-        ProjectComment(created="2026-10-01T08:00:00Z", author="old", body="earlier"),
-        ProjectComment(created="2026-10-02T08:00:00Z", author="new", body="latest\r\nline"),
+def settings() -> TeamTicketsSettings:
+    return TeamTicketsSettings(project="MRT1CV", reporters=("CHI_L", "peng_k"))
+
+
+def test_source_jql_and_managed_column_mapping_are_preserved() -> None:
+    assert build_jql(settings(), "statusCategory != Done") == (
+        'project = MRT1CV AND reporter in ("CHI_L", "peng_k") '
+        'AND (statusCategory != Done) ORDER BY created DESC'
     )
-    result = preview_items(
-        (item(1, comments=comments), item(2, kind="Bug")),
-        TeamTicketsRequest(comment_count=2),
+    activity = format_activity(
+        [
+            {
+                "created": "2026-10-03T08:00:00.000+0800",
+                "author": {"displayName": "Leo"},
+                "body": "latest\r\nline",
+            },
+            {
+                "created": "2026-10-02T08:00:00.000+0800",
+                "author": {"name": "jerry"},
+                "body": "older",
+            },
+        ]
     )
-    assert isinstance(result, TeamTicketsPreview)
-    assert result.task_count == 1 and result.issues_count == 1
-    assert result.records[0].sheet == "Task" and result.records[1].sheet == "Issues"
-    values = result.records[0].values
-    assert list(values) == [
-        "Key",
-        "Summary",
-        "Type",
-        "Status",
-        "Priority",
-        "Reporter",
-        "Assignee",
-        "Created",
-        "Updated",
-        "Resolution",
-        "Jira activity",
-    ]
-    assert values["Key"] == "owner/repo#1"
-    assert values["Reporter"] == "engineer"
-    assert values["Created"] == "2026-10-01 09:15"
-    assert values["Resolution"] == ""
-    assert result.unmapped_fields == ("Resolution",)
+    values = issue_to_record(issue(1), activity)
+    assert tuple(values) == MANAGED_HEADERS
+    assert values["Reporter"] == "Leo"
+    assert values["Assignee"] == "jerry"
+    assert values["Created"] == "2026-10-02 09:15"
+    assert values["Resolution"] == "Unresolved"
     assert values["Jira activity"] == (
-        "[2026-10-02 08:00 new]\nlatest\nline\n\n[2026-10-01 08:00 old]\nearlier"
+        "[2026-10-03 08:00 Leo]\nlatest\nline\n\n"
+        "[2026-10-02 08:00 jerry]\nolder"
     )
 
 
-def test_truncated_thread_and_cap_are_visible_in_preview() -> None:
+def test_source_task_routing_and_issue_cap_are_visible_without_excel() -> None:
     result = preview_items(
-        (item(1, comments=(ProjectComment(body="old"),), truncated=True), item(2)),
-        TeamTicketsRequest(max_items=1),
+        (issue(3, kind="Bug"), issue(2, kind="Sub-task"), issue(1)),
+        TeamTicketsRequest(max_items=2, comment_count=0),
+        "https://jira.rsint.net",
     )
-    assert result.capped is True
-    assert result.truncated_threads == ("owner/repo#1",)
-    assert result.records[0].values["Jira activity"] == ""
-    assert "Jira activity" in result.unmapped_fields
-    assert result.records[0].url.endswith("/issues/1")
-
-
-def test_source_newest_created_order_is_applied_before_the_limit() -> None:
-    result = preview_items(
-        (
-            item(1, created="2026-09-29T09:00:00Z"),
-            item(2, created="2026-10-02T09:00:00Z"),
-            item(3, created="2026-10-01T09:00:00Z"),
-        ),
-        TeamTicketsRequest(max_items=2),
-    )
-    assert [record.key for record in result.records] == ["owner/repo#2", "owner/repo#3"]
+    assert result.source == "jira"
+    assert [row.key for row in result.records] == ["MRT1CV-3", "MRT1CV-2"]
+    assert [row.sheet for row in result.records] == ["Issues", "Task"]
+    assert result.records[0].url == "https://jira.rsint.net/browse/MRT1CV-3"
     assert result.capped is True
 
 
-def test_workflow_7_runs_through_agent_policy_without_a_workbook(tmp_path: Path) -> None:
+def test_host_static_scope_rejects_invalid_project_or_missing_reporters() -> None:
+    with pytest.raises(ValidationError):
+        TeamTicketsSettings(project="MRT1CV OR 1=1", reporters=("CHI_L",))
+    with pytest.raises(ValidationError):
+        TeamTicketsSettings(project="MRT1CV", reporters=())
+    exported = json.dumps(preview_workflow().model_dump(mode="json"))
+    assert "MRT1CV" not in exported and "CHI_L" not in exported
+    assert "jira_pat" not in exported
+
+
+def test_workflow_7_uses_jira_bearer_and_policy_without_a_workbook(tmp_path: Path) -> None:
     grant = {
         "actor": "engineer",
         "asset": PREVIEW_SPEC.identity.model_dump(mode="json"),
         "permissions": list(PREVIEW_SPEC.policy.required_permissions),
         "policy_refs": list(PREVIEW_SPEC.policy.policy_refs),
-        "approval_ref": "team-tickets-read-approval",
+        "approval_ref": "workflow-7-jira-read-approval",
     }
     config, layout = workspace(
         tmp_path,
@@ -124,72 +125,61 @@ def test_workflow_7_runs_through_agent_policy_without_a_workbook(tmp_path: Path)
         assets=False,
         config_changes={
             "integrations": {
-                "github_project": {
-                    "owner": "owner",
-                    "project_number": 1,
-                    "credential": {"name": "board_token"},
+                "jira": {
+                    "base_url": "https://jira.rsint.net/",
+                    "auth_mode": "server",
+                    "credential": {"name": "jira_pat"},
                 },
+                "team_tickets": {"project": "MRT1CV", "reporters": ["CHI_L", "peng_k"]},
             },
-            "credentials": [{"secret": "board_token", "environment_variable": "AEP_GITHUB_TOKEN"}],
+            "credentials": [{"secret": "jira_pat", "environment_variable": "AEP_JIRA_TOKEN"}],
         },
     )
     export_assets(layout.workspace_root / "assets")
-    payload: dict[str, Any] = {
-        "data": {
-            "user": {
-                "projectV2": {
-                    "title": "board",
-                    "items": {
-                        "pageInfo": {"hasNextPage": False, "endCursor": None},
-                        "nodes": [
-                            {
-                                "id": "PVTI_1",
-                                "type": "ISSUE",
-                                "fieldValues": {
-                                    "nodes": [{"name": "Task", "field": {"name": "Type"}}]
-                                },
-                                "content": {
-                                    "__typename": "Issue",
-                                    "number": 1,
-                                    "title": "A ticket",
-                                    "url": "https://github.com/owner/repo/issues/1",
-                                    "state": "OPEN",
-                                    "createdAt": "2026-10-01T09:15:00Z",
-                                    "updatedAt": "2026-10-02T11:30:00Z",
-                                    "author": {"login": "engineer"},
-                                    "repository": {"nameWithOwner": "owner/repo"},
-                                    "comments": {"totalCount": 0, "nodes": []},
-                                },
-                            }
-                        ],
-                    },
-                }
-            }
-        },
-    }
-    transport = ScriptedTransport([Reply(200, payload)])
+    transport = ScriptedTransport(
+        [
+            Reply(200, {"issues": [issue(1)], "total": 1}),
+            Reply(
+                200,
+                {
+                    "comments": [
+                        {
+                            "created": "2026-10-03T08:00:00.000+0800",
+                            "author": {"displayName": "Leo"},
+                            "body": "progress",
+                        }
+                    ]
+                },
+            ),
+        ]
+    )
     request = LocalWorkflowRequest(
         actor="engineer",
         bridge_id=config.device.bridge_id,
         workflow=preview_workflow().metadata.identity,
-        arguments={"max_items": 10},
-        idempotency_key="workflow-7-preview-1",
+        arguments={"max_items": 10, "comment_count": 2},
+        idempotency_key="workflow-7-jira-preview-1",
         trace=TraceIdentifiers(trace_id="trace-w7", request_id="request-w7", span_id="span-w7"),
     )
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"board_token": "fixture-token"}),
+        resolver=StaticCredentials({"jira_pat": "fixture-token"}),
         jira_transport=transport,
     ) as runtime:
         outcome = asyncio.run(runtime.agent.execute_workflow(request))
         assert outcome.refusal is None and outcome.workflow is not None
         assert outcome.workflow.run.status == "succeeded", outcome.workflow.run.failure
         preview = TeamTicketsPreview.model_validate(outcome.workflow.step_results[-1].data)
-        assert preview.records[0].values["Reporter"] == "engineer"
-        assert preview.unmapped_fields == ("Priority", "Assignee", "Resolution")
-    assert transport.calls[0]["body"]["variables"]["number"] == 1
-    assert "createdAt" in transport.calls[0]["body"]["query"]
+        assert preview.records[0].values["Reporter"] == "Leo"
+        assert preview.records[0].values["Jira activity"].endswith("progress")
+        assert preview.comment_failures == ()
+    assert transport.calls[0]["method"] == "POST"
+    assert transport.calls[0]["url"] == "https://jira.rsint.net/rest/api/2/search"
+    assert "ORDER BY created DESC" in transport.calls[0]["json"]["jql"]
+    assert transport.calls[1]["json"] is None
+    assert "orderBy=-created" in transport.calls[1]["url"]
+    assert transport.calls[0]["headers"]["Authorization"] == "Bearer fixture-token"
     assert not any(tmp_path.rglob("*.xlsx"))
 
     layout.grants.write_text("[]", encoding="utf-8")
@@ -197,13 +187,88 @@ def test_workflow_7_runs_through_agent_policy_without_a_workbook(tmp_path: Path)
     with build_runtime(
         config,
         layout=layout,
-        resolver=StaticCredentials({"board_token": "fixture-token"}),
+        resolver=StaticCredentials({"jira_pat": "fixture-token"}),
         jira_transport=denied_transport,
     ) as runtime:
         denied = asyncio.run(
             runtime.agent.execute_workflow(
-                request.model_copy(update={"idempotency_key": "workflow-7-denied-1"})
+                request.model_copy(update={"idempotency_key": "workflow-7-jira-denied-1"})
             )
         )
         assert denied.workflow is not None and denied.workflow.run.status != "succeeded"
     assert denied_transport.calls == []
+
+
+def test_comment_failure_is_visible_without_losing_other_issue_rows() -> None:
+    from capabilities.team_tickets.handlers import TeamTicketsPreviewHandler
+    from integrations.jira import JiraClient, JiraConnection
+
+    transport = ScriptedTransport(
+        [
+            Reply(200, {"issues": [issue(2), issue(1)], "total": 2}),
+            Reply(403, {}),
+            Reply(200, {"comments": []}),
+        ]
+    )
+    client = JiraClient(
+        JiraConnection(
+            base_url="https://jira.rsint.net",
+            auth_mode="server",
+            credential={"name": "jira_pat"},
+        ),
+        StaticCredentials({"jira_pat": "fixture-token"}),
+        transport=transport,
+    )
+    serial_settings = settings().model_copy(update={"comment_concurrency": 1})
+    result = TeamTicketsPreviewHandler(client, serial_settings)._preview(TeamTicketsRequest())
+    assert [row.key for row in result.records] == ["MRT1CV-2", "MRT1CV-1"]
+    assert result.comment_failures == ("MRT1CV-2",)
+    assert result.records[0].values["Jira activity"] == "(comment fetch failed: jira_auth)"
+    assert result.records[1].values["Jira activity"] == ""
+
+
+def test_source_bounded_comment_parallelism_is_preserved() -> None:
+    from capabilities.team_tickets.handlers import TeamTicketsPreviewHandler
+    from integrations.jira import JiraClient, JiraConnection
+
+    class ConcurrentTransport:
+        def __init__(self) -> None:
+            self.comments_started = Barrier(2)
+
+        def request(
+            self,
+            method: str,
+            url: str,
+            body: bytes | None,
+            headers: Mapping[str, str],
+            timeout_s: float,
+        ) -> Reply:
+            if method == "POST":
+                return Reply(200, {"issues": [issue(2), issue(1)], "total": 2})
+            self.comments_started.wait(timeout=5)
+            return Reply(200, {"comments": []})
+
+    transport = ConcurrentTransport()
+    client = JiraClient(
+        JiraConnection(
+            base_url="https://jira.rsint.net",
+            auth_mode="server",
+            credential={"name": "jira_pat"},
+            max_retries=0,
+        ),
+        StaticCredentials({"jira_pat": "fixture-token"}),
+        transport=transport,
+    )
+    parallel_settings = settings().model_copy(update={"comment_concurrency": 2})
+    result = TeamTicketsPreviewHandler(client, parallel_settings)._preview(TeamTicketsRequest())
+    assert len(result.records) == 2
+    assert result.comment_failures == ()
+
+
+def test_missing_jira_connection_is_reported_in_doctor(tmp_path: Path) -> None:
+    config, layout = workspace(
+        tmp_path,
+        config_changes={"integrations": {"team_tickets": settings().model_dump(mode="json")}},
+    )
+    checks = {check.name: check for check in host_report(config, layout).checks}
+    assert "needs a Jira connection" in checks["integrations"].detail

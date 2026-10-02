@@ -111,6 +111,7 @@ from integrations.excel_writer import (
     require_com,
 )
 from integrations.github_project import GitHubProjectClient
+from integrations.jira import JiraClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
 from knowledge.evolution import (
@@ -326,13 +327,6 @@ def build_integrations(
         client = GitHubProjectClient(
             integrations.github_project, resolver, transport=jira_transport
         )
-        installed.register(
-            TEAM_TICKETS_PREVIEW_SPEC,
-            TeamTicketsPreviewHandler(client),
-            TeamTicketsPreviewInput,
-            TeamTicketsPreview,
-            ExecutionDependencies(central_required=False),
-        )
         if settings is not None:
             installed.register(
                 PROJECT_SEARCH_SPEC,
@@ -341,6 +335,20 @@ def build_integrations(
                 ProjectSearchOutput,
                 ExecutionDependencies(central_required=False),
             )
+    if integrations.team_tickets is not None and integrations.jira is not None:
+        if resolver is None:
+            mapped = config.credential_environment()
+            if integrations.jira.credential.name not in mapped:
+                raise HostError("credential_unmapped")
+            resolver = EnvironmentCredentials(mapped)
+        jira_client = JiraClient(integrations.jira, resolver, transport=jira_transport)
+        installed.register(
+            TEAM_TICKETS_PREVIEW_SPEC,
+            TeamTicketsPreviewHandler(jira_client, integrations.team_tickets),
+            TeamTicketsPreviewInput,
+            TeamTicketsPreview,
+            ExecutionDependencies(central_required=False),
+        )
     if settings is not None:
         installed.register(
             RESOLVE_WINDOW_SPEC,
@@ -808,7 +816,9 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
     and no workbook is opened."""
     integrations = config.integrations
     if integrations is None or (
-        integrations.github_project is None and integrations.weekly_report is None
+        integrations.github_project is None
+        and integrations.weekly_report is None
+        and integrations.team_tickets is None
     ):
         return DoctorCheck(
             name="integrations",
@@ -831,6 +841,17 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
             pending.append(
                 f"the board token's environment variable {variable} is not set in this session"
             )
+    if integrations.team_tickets is not None:
+        if integrations.jira is None:
+            problems.append("Workflow 7 needs a Jira connection; none is configured")
+        else:
+            variable = config.credential_environment().get(integrations.jira.credential.name)
+            if variable is None:
+                problems.append("the Jira PAT's secret is not mapped to an environment variable")
+            elif not os.environ.get(variable):
+                pending.append(
+                    f"the Jira PAT's environment variable {variable} is not set in this session"
+                )
     settings = integrations.weekly_report
     if settings is not None:
         if integrations.github_project is None:
@@ -854,6 +875,8 @@ def inspect_integrations(config: CompanyHostConfiguration) -> DoctorCheck:
     board = integrations.github_project
     if board is not None:
         parts.append(f"project {board.owner}/{board.project_number}")
+    if integrations.team_tickets is not None:
+        parts.append(f"Jira project {integrations.team_tickets.project}")
     if settings is not None:
         try:
             require_com()

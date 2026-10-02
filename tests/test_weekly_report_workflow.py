@@ -522,9 +522,9 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
         path for path in written if path.startswith(("skills/engineering", "workflows/engineering"))
     ]
     assert weekly == [
-        "skills/engineering__team-tickets__1.0.0.json",
+        "skills/engineering__team-tickets__2.0.0.json",
         "skills/engineering__weekly-report__1.0.0.json",
-        "workflows/engineering__github-team-tickets-preview__1.0.0.json",
+        "workflows/engineering__jira-team-tickets-preview__1.0.0.json",
         "workflows/engineering__jira-weekly-report-mail__1.0.0.json",
         "workflows/engineering__jira-weekly-report-preview__1.0.0.json",
         "workflows/engineering__jira-weekly-report__1.0.0.json",

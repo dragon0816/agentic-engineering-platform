@@ -15,6 +15,7 @@ from pydantic import (
 
 from agent.data_policy import BackendDataApproval
 from agent.decisions import DecisionAcceleratorConfig
+from capabilities.team_tickets.contracts import TeamTicketsSettings
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
@@ -23,6 +24,7 @@ from common.execution import Failure, IdempotencyKey
 from dut.adapters import PhysicalDriverConfiguration
 from dut.contracts import DutTarget, InstrumentTarget
 from integrations.github_project import GitHubProjectConnection
+from integrations.jira import JiraConnection
 from models.catalog import ModelCatalog
 from workflow.host_bridge import BridgeRegistration
 
@@ -260,8 +262,8 @@ class KnowledgeAskRequest(Contract):
 
 class HostIntegrations(Contract):
     """The external systems this host reaches and the workflows' settings,
-    none of it secret: the project board whose token is a `SecretRef`, and
-    the weekly report's workbook and rules.
+    none of it secret: the GitHub board, the company Jira site, and the
+    separate weekly-report and team-ticket settings. Tokens are `SecretRef`s.
 
     A host installed before the report's source moved will refuse a
     configuration naming `github_project`, because the field did not exist
@@ -270,6 +272,8 @@ class HostIntegrations(Contract):
     """
 
     github_project: GitHubProjectConnection | None = None
+    jira: JiraConnection | None = None
+    team_tickets: TeamTicketsSettings | None = None
     weekly_report: WeeklyReportSettings | None = None
 
 
