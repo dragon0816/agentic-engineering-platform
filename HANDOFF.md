@@ -1,39 +1,29 @@
 # Handoff
 
 Date: 2026-10-02 (Asia/Taipei)
-Branch: main. This is a local source change; no push or preview installation was performed.
+Branch: main. The last implementation commit is 43dc5bc (approved Gateway task path). This handoff covers the owner's first live capability and Workflow 11 validation; no push, source Vault edit, Excel write or mail action occurred.
 
-## Current objective and scope
+## Current objective
 
-The owner approved continuing beyond the completed Phase 0 audit to the next executable Agent/Orchestrator checkpoint, then validating it. The approved sequence and data policy remain in docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md, docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md and docs/DECISIONS.md. This checkpoint is an explicit Gateway task run through the Host CLI. It does not replace ordinary Agent Web chat or Workflow launching.
+The owner wants Knowledge connected from an existing OneDrive Vault, Workflow 11 or 7 validated, and a clear inventory of remaining development. Workflow 11 read-only preview was selected as the first run. The detailed readiness and gap inventory is docs/VALIDATION_GAPS_2026-10-02.md. The active checklist is docs/TASKS.md.
 
-## Completed
+## Completed and observed
 
-- Added an optional exact tool-name allowlist and one-to-five-turn bound to Gateway conversation requests. An explicit empty allowlist exposes no tools. Both model-visible tools and Gateway dispatch bindings are filtered; the default ordinary conversation catalog is unchanged.
-- Added GatewayTaskExecutor and LocalAgent.run_task. Local actor/device admission runs first. The task executor checks supported TaskContract shape and installed read-only capability scope, then requires the exact host-approved Gateway for UNCLASSIFIED context. ApprovedModelClient remains the final policy check on every complete provider request. There is no native-backend fallback.
-- Added aep-host run-task --config <host.json> --prompt <question> for a text-only task and --task <task.json> for an explicit TaskContract. A validated answer is written to the Host workspace's task-artifacts directory.
-- Persisted append-only completed steps, unresolved requirements and error codes in TaskRunState. No objective, answer bytes or model reasoning are stored in the SQLite run record. Host-owned CompletionValidator rereads actual answer bytes before a task can become validated.
-- Updated docs/ARCHITECTURE.md, docs/REQUIREMENTS.md, docs/ROADMAP.md, docs/DECISIONS.md and docs/TASKS.md. The slice design is docs/ORCHESTRATOR_GATEWAY_TASK_SLICE.md.
+- The prior explicit aep-host run-task Gateway slice was built and tested: 1,560 passed, 4 skipped, 2 machine-specific deselected; ruff, mypy, offline sdist and wheel passed. It is CLI-only and --prompt exposes no capabilities. The owner ran it live through the approved Gateway and received a nonempty answer; that validation does not prove a grounded inventory or Knowledge/Workflow use.
+- Installed Host workspace: five Skill manifests, five Workflow manifests and one published Knowledge manifest. The knowledge Skill has an ask capability command; the weekly Skill exposes preview/apply/mail Workflow commands. Installation does not grant execution.
+- The owner-supplied external Knowledge Vault exists and has drop/raw/wiki; listed content is 6,928 files and about 1.1 GB. The Host has no Knowledge binding. Its installed validation/company-agent-guide manifest refers to an unrelated proof Vault and pinned digests. Do not bind it directly to the owner Vault or ingest into the original. Stage a full copy, characterize it and publish/bind a matching exact asset before query/convert/ingest/lint parity.
+- A read-only weekly.preview 2026_40W run was attempted through the actual Host and Bridge. It completed the reporting-window step and failed at GitHub Project with github_auth before workbook reading or planning. The JSON result is in the ignored .scratch directory. The CLI process exit code was zero even though the nested Workflow status was failed; do not infer Workflow success from CLI exit code.
+- A status-only GitHub /user check returned HTTP 200 for the configured AEP_GITHUB_TOKEN, but the configured Project V2 lookup returned GraphQL FORBIDDEN. The token exists and is accepted by GitHub; the configured Project is not readable with it. No token value or Project payload was printed or saved in tracked artifacts.
+- The Host doctor reports Workflow 11 preview support but no Excel COM bridge for apply and no Outlook bridge for mail. Workflow 7 is the distinct source jira_team_tickets job; it is not characterized or migrated, and Jira has been retired.
+- Docs/TASKS.md and docs/VALIDATION_GAPS_2026-10-02.md now record these findings. No implementation code changed in this validation turn.
 
-## Verification
+## Next actions in order
 
-- Full local selection: 1,560 passed, 4 skipped, 2 existing machine-specific tests deselected. Command: PYTHONUTF8=1; .\.venv\Scripts\python.exe -m pytest tests --ignore=tests/test_browser.py -q -p no:cacheprovider --basetemp .scratch/pytest-task-exec-full -k 'not test_capability_workspace_is_interactive_in_a_real_browser and not test_a_machine_with_the_bridge_and_no_excel_says_which'.
-- Ruff passed on src and tests; mypy passed on 288 source files.
-- Offline sdist and wheel build passed under .scratch/dist-gateway-task-20261002; both new runtime modules were included. The run-task CLI help loaded successfully.
-- Focused tests verify admission and policy refusal before model calls, read-only scope, no hidden Workflow execution, tool-progress evidence, restart persistence, artifact validation failure and ordinary conversation compatibility.
-- No live LiteLLM request was made: this shell does not have LITELLM_MASTER_KEY in the Agent process environment. The installed Windows preview was not upgraded with this source build.
+1. Restore read access to the configured GitHub Project for AEP_GITHUB_TOKEN, rerun Workflow 11 read-only preview for the intended reporting week, and inspect the plan and workbook-read evidence. Use a workbook copy for any later Excel apply/parity run.
+2. Stage a controlled full copy of the Knowledge Vault, build an exact published manifest and Host binding for the copy, then validate grounded query and source-preserving convert/ingest/lint/restore.
+3. If Workflow 7 is still required, inspect its pinned source contract and choose a replacement data source for retired Jira before implementation.
+4. Continue ordinary Agent ingress integration, static/runtime Workflow parameter UI and aliases, default Marketplace packages, native backend transition gates, product E2E evidence and the optional benchmark-gated JEV adapter.
 
-## Remaining work and risks
+## Constraints
 
-- The runnable checkpoint is CLI-only. Connect ordinary Agent Web ingress to the same task-state and completion path without changing deterministic slash-command or Workflow routes. Native Codex/Claude task adapters still need containment and complete-context policy tests.
-- Backend switching remains disabled. Before a transition, inventory every transferred material and re-authorize the complete context for the destination; a task's declared classification is not sufficient.
-- The first validator proves artifact presence, non-empty bytes or a specified digest. It does not prove factual or domain correctness.
-- The task executor supports one answer output and installed read-only capability commands; resource references, arbitrary workspace access, write tools and Workflow commands are intentionally outside this slice. Existing Bridge grants still decide every attempted read capability.
-- Workflow migration, static/runtime parameter UI, Marketplace defaults, SOP-to-Workflow, Knowledge and Skill integration evidence remain in docs/TASKS.md. The optional JEV adapter remains disabled pending egress authorization and a golden benchmark.
-- A local operator can validate the new path after installing this build and starting an Agent process with LITELLM_MASTER_KEY: aep-host run-task --config <host.json> --prompt "What can you do?" The configured Gateway must retain the owner-approved exact company route at http://127.0.0.1:4000/v1.
-
-## Recommended next steps
-
-1. Review the CLI task run and durable state on the test host with a real Gateway credential.
-2. Connect the ordinary Ask page to a task-state path only for suitable natural-language turns, preserving slash/Workflow semantics and admission.
-3. Implement full-context transition authorization before any native task backend, then migrate and validate the pinned source Workflows.
+The previous owner-approved policy remains: UNCLASSIFIED material uses only the exact host-approved internal Gateway; native Codex/Claude tasks require complete explicitly PUBLIC context. Do not infer permission from a published/installed asset. The OneDrive Vault is source evidence and must not be modified by validation. The Workflow 11 preview performs reads only; apply and mail are separate commands.

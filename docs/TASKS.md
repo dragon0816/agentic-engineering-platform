@@ -481,6 +481,19 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   ingress, then add governed native task adapters with containment tests.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter
   contracts, generated Web/Telegram forms, flexible `/run` aliases and parity.
+- [ ] Validate the installed Workflow 11 read-only preview on this Host. The
+  2026-10-02 run reached GitHub Project and stopped at `github_auth` after its
+  window step; the configured token is valid for `/user` but Project V2 returns
+  GraphQL `FORBIDDEN`. Restore Project read access, rerun preview, then compare
+  the plan with the source against a workbook copy. See
+  `docs/VALIDATION_GAPS_2026-10-02.md`.
+- [ ] Stage a full copy of the owner-supplied Knowledge Vault and create an
+  exact published manifest and Host binding for that copy. The original
+  OneDrive Vault is not the first query/ingest test target; the currently
+  installed Knowledge manifest points to a different proof Vault.
+- [ ] Characterize and migrate source Workflow 7 (`jira_team_tickets`) if it
+  remains needed; Jira has been retired, so first decide its replacement data
+  source. Workflow 11 is the first validation target.
 - [ ] Review and publish the active Hermes Skills and validated Workflows as
   governed default Marketplace assets.
 - [ ] Prove SOP-to-Workflow, Knowledge and natural-language Skill integration
