@@ -69,3 +69,21 @@ it would bypass the product requirement for observable independent evidence.
 The initial validator is deliberately limited to artifact presence, non-empty
 content and an optional known digest; richer domain validators belong to
 later task adapters and product E2E cases.
+
+## 2026-10-02 — Backend results are candidates and classification only rises
+
+Decision: A normalized backend `completed` result moves a task only to
+`awaiting_validation`. Its artifact references must be checked by the host's
+independent validator before the task can be `validated`. The portable state
+records backend use and effective classification; an increase requires an
+evidence reference and cannot be silently lowered. Switching to another
+backend is disabled until a fresh, complete-context policy decision and
+explicit transition contract are implemented. `RESTRICTED` is recognized as
+more sensitive than CONFIDENTIAL, but the current internal-Gateway approval
+cannot include it without a separate approved restricted environment.
+
+Reason: A native Agent's own success claim and history are not independent
+evidence. Carrying a classification that can silently decrease would let
+later backend selection expose newly discovered sensitive context. Allowing
+`RESTRICTED` under an ordinary internal-Gateway flag was rejected because
+that flag does not attest a restricted execution environment.

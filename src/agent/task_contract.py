@@ -6,6 +6,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
+from agent.data_policy import DataClass
 from common.assets import AssetIdentity, reject_embedded_secrets
 from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.execution import TraceIdentifiers
@@ -33,6 +34,15 @@ class CompletionCheck(Contract):
         return self
 
 
+class TaskExecutionConstraints(Contract):
+    """Budget and scope hints, never a permission grant to a native backend."""
+
+    max_backend_turns: int = Field(default=5, ge=1, le=20, strict=True)
+    max_retries: int = Field(default=0, ge=0, le=3, strict=True)
+    workspace_ref: Symbol | None = None
+    network: Literal["none", "approved"] = "none"
+
+
 class TaskContract(Contract):
     """A portable task definition. Its objective is kept out of durable run state.
 
@@ -44,18 +54,32 @@ class TaskContract(Contract):
     trace: TraceIdentifiers
     actor: Symbol
     namespace: Slug
+    task_type: Symbol = "general"
     objective: Text = Field(max_length=20000, repr=False)
+    declared_classification: DataClass = "UNCLASSIFIED"
+    classified_by: Symbol | None = None
     skills: tuple[AssetIdentity, ...] = Field(default=(), max_length=20)
     resource_refs: tuple[Symbol, ...] = Field(default=(), max_length=50)
+    allowed_capabilities: tuple[AssetIdentity, ...] = Field(default=(), max_length=30)
+    prohibited_capabilities: tuple[AssetIdentity, ...] = Field(default=(), max_length=30)
     expected_outputs: tuple[ExpectedOutput, ...] = Field(min_length=1, max_length=20)
     checks: tuple[CompletionCheck, ...] = Field(min_length=1, max_length=40)
+    constraints: TaskExecutionConstraints = TaskExecutionConstraints()
 
     @model_validator(mode="after")
     def bounded_and_checkable(self) -> Self:
+        if (self.declared_classification == "UNCLASSIFIED") != (self.classified_by is None):
+            raise ValueError("explicit task classification requires a classifier")
         if len(self.skills) != len({skill.key for skill in self.skills}):
             raise ValueError("skill references must be unique")
         if len(self.resource_refs) != len(set(self.resource_refs)):
             raise ValueError("resource references must be unique")
+        allowed = [item.key for item in self.allowed_capabilities]
+        prohibited = [item.key for item in self.prohibited_capabilities]
+        if len(allowed) != len(set(allowed)) or len(prohibited) != len(set(prohibited)):
+            raise ValueError("capability references must be unique")
+        if set(allowed).intersection(prohibited):
+            raise ValueError("one capability cannot be allowed and prohibited")
         outputs = {output.output_id: output for output in self.expected_outputs}
         if len(outputs) != len(self.expected_outputs) or len(
             {output.artifact_ref for output in self.expected_outputs}

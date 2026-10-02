@@ -439,6 +439,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   additive SQLite persistence and independent artifact-byte validation with
   restart, transition and negative tests. This contract slice does not yet
   drive normal ingress or native Agent task execution.
+- [x] Extend the portable contract with task type, initial classification,
+  capability scope, execution constraints, normalized candidate backend
+  results, backend use history and evidence-backed monotonic classification.
+  Keep backend transitions disabled until re-authorization is implemented.
+- [ ] Complete portable state semantics for actual tasks: record bounded
+  completed steps, unresolved requirements and errors from trusted run events;
+  require fresh complete-context policy checks for any backend transition.
 - [ ] Attach portable task state and independent validation to ordinary Agent
   ingress, then add governed native task adapters with containment tests.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter

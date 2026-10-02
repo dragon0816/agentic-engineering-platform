@@ -8,10 +8,13 @@ import pytest
 from pydantic import ValidationError
 
 from agent.run_state import (
+    BackendUse,
     CompletionValidator,
+    TaskBackendResult,
     TaskObservation,
     TaskRunState,
     advance_task_run,
+    apply_backend_result,
     begin_task_run,
 )
 from agent.task_contract import CompletionCheck, ExpectedOutput, TaskContract
@@ -55,6 +58,16 @@ def test_task_contract_requires_exact_outputs_and_checks() -> None:
     with pytest.raises(ValidationError, match="unique"):
         TaskContract.model_validate(
             original.model_dump() | {"resource_refs": ("source-document", "source-document")}
+        )
+    with pytest.raises(ValidationError, match="requires a classifier"):
+        TaskContract.model_validate(
+            original.model_dump() | {"declared_classification": "PUBLIC"}
+        )
+    capability = AssetIdentity(namespace="engineering", name="read", version="1.0.0")
+    with pytest.raises(ValidationError, match="allowed and prohibited"):
+        TaskContract.model_validate(
+            original.model_dump()
+            | {"allowed_capabilities": (capability,), "prohibited_capabilities": (capability,)}
         )
 
 
@@ -144,6 +157,59 @@ def test_validator_checks_bytes_and_stale_results_cannot_finalize() -> None:
     assert CompletionValidator(reader).validate(wrong, wrong_waiting).checks[0].code == (
         "artifact_digest_mismatch"
     )
+
+
+def test_backend_result_is_candidate_only_and_classification_can_only_rise() -> None:
+    original = task().model_copy(
+        update={"declared_classification": "PUBLIC", "classified_by": "engineer"}
+    )
+    pending = begin_task_run(original, "codex", now=NOW)
+    assert pending.effective_classification == "PUBLIC"
+    assert len(pending.backend_history) == 1
+    running = advance_task_run(pending, "running", now=NOW)
+    result = TaskBackendResult(
+        task_id="task-1",
+        trace=original.trace,
+        backend_id="codex",
+        status="completed",
+        observations=(TaskObservation(sequence=0, code="backend_finished"),),
+        artifact_refs=("report-artifact",),
+    )
+    candidate = apply_backend_result(running, result, now=NOW)
+    assert candidate.status == "awaiting_validation" and candidate.validation is None
+    with pytest.raises(ValueError, match="does not match"):
+        apply_backend_result(running, result.model_copy(update={"backend_id": "claude"}), now=NOW)
+    with pytest.raises(ValidationError, match="failure code"):
+        TaskBackendResult(
+            task_id="task-1", trace=original.trace, backend_id="codex", status="failed"
+        )
+    raised = advance_task_run(
+        running,
+        "needs_input",
+        now=NOW,
+        observations=(
+            TaskObservation(
+                sequence=0,
+                code="classification_raised",
+                evidence_ref="classified-resource",
+            ),
+        ),
+        effective_classification="CONFIDENTIAL",
+    )
+    assert raised.effective_classification == "CONFIDENTIAL"
+    with pytest.raises(ValidationError, match="backend history"):
+        TaskRunState.model_validate(raised.model_dump() | {"backend_id": "gateway"})
+    with pytest.raises(ValueError, match="cannot be lowered"):
+        advance_task_run(raised, "running", now=NOW, effective_classification="PUBLIC")
+    with pytest.raises(ValueError, match="evidence reference"):
+        advance_task_run(running, "needs_input", now=NOW, effective_classification="INTERNAL")
+    with pytest.raises(ValidationError, match="credentials"):
+        BackendUse(
+            backend_id="gateway",
+            started_revision=0,
+            classification="PUBLIC",
+            approval_ref="api_key=should-not-be-stored",
+        )
 
 
 def test_local_task_state_survives_restart_and_rejects_stale_or_forged_updates(

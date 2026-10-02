@@ -6,8 +6,10 @@ from typing import Literal, Protocol, Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
+from agent.data_policy import DataClass, classification_rank
 from agent.task_contract import TaskContract
-from common.base import Contract, Sha256, Symbol
+from common.assets import reject_embedded_secrets
+from common.base import Contract, Sha256, Symbol, Text
 from common.execution import TraceIdentifiers
 
 TaskStatus = Literal[
@@ -29,6 +31,40 @@ class TaskObservation(Contract):
     sequence: int = Field(ge=0, strict=True)
     code: Symbol
     evidence_ref: Symbol | None = None
+
+
+class BackendUse(Contract):
+    """Selected backend at one authorized transition; no transferred payload."""
+
+    backend_id: Symbol
+    started_revision: int = Field(ge=0, strict=True)
+    classification: DataClass
+    approval_ref: Text | None = None
+
+    @model_validator(mode="after")
+    def reference_is_not_a_credential(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class TaskBackendResult(Contract):
+    """A candidate outcome. Completion still requires host validation."""
+
+    task_id: Symbol
+    trace: TraceIdentifiers
+    backend_id: Symbol
+    status: Literal["completed", "needs_input", "failed"]
+    observations: tuple[TaskObservation, ...] = Field(default=(), max_length=100)
+    artifact_refs: tuple[Symbol, ...] = Field(default=(), max_length=50)
+    failure_code: Symbol | None = None
+
+    @model_validator(mode="after")
+    def result_shape(self) -> Self:
+        if (self.status == "completed") != (self.failure_code is None):
+            raise ValueError("non-completed backend result requires a failure code")
+        if len(self.artifact_refs) != len(set(self.artifact_refs)):
+            raise ValueError("backend artifact references must be unique")
+        return self
 
 
 class CompletionCheckResult(Contract):
@@ -72,6 +108,8 @@ class TaskRunState(Contract):
     actor: Symbol
     task_sha256: Sha256
     backend_id: Symbol
+    effective_classification: DataClass
+    backend_history: tuple[BackendUse, ...] = Field(min_length=1, max_length=8)
     status: TaskStatus = "pending"
     revision: int = Field(default=0, ge=0, strict=True)
     created_at: AwareDatetime
@@ -88,6 +126,20 @@ class TaskRunState(Contract):
             raise ValueError("task observations must be contiguous")
         if len(self.artifact_refs) != len(set(self.artifact_refs)):
             raise ValueError("task artifact references must be unique")
+        if self.backend_history[0].started_revision != 0 or (
+            self.backend_history[-1].backend_id != self.backend_id
+        ):
+            raise ValueError("task backend history must begin at revision zero and end at current")
+        if [item.started_revision for item in self.backend_history] != sorted(
+            {item.started_revision for item in self.backend_history}
+        ):
+            raise ValueError("backend history revisions must be unique and ordered")
+        if self.backend_history[-1].started_revision > self.revision:
+            raise ValueError("backend transition cannot follow the current revision")
+        if classification_rank(self.effective_classification) < classification_rank(
+            self.backend_history[-1].classification
+        ):
+            raise ValueError("run classification cannot be lower than backend selection")
         if self.status == "validated" and (
             self.validation is None or self.validation.status != "passed"
         ):
@@ -114,6 +166,14 @@ def begin_task_run(task: TaskContract, backend_id: Symbol, *, now: datetime) -> 
         actor=task.actor,
         task_sha256=task.digest,
         backend_id=backend_id,
+        effective_classification=task.declared_classification,
+        backend_history=(
+            BackendUse(
+                backend_id=backend_id,
+                started_revision=0,
+                classification=task.declared_classification,
+            ),
+        ),
         created_at=now,
         updated_at=now,
     )
@@ -127,6 +187,7 @@ def advance_task_run(
     observations: tuple[TaskObservation, ...] = (),
     artifact_refs: tuple[Symbol, ...] = (),
     validation: TaskValidationReport | None = None,
+    effective_classification: DataClass | None = None,
 ) -> TaskRunState:
     """One append-only transition. A completed run cannot be reopened."""
     if status not in _NEXT[state.status]:
@@ -151,6 +212,18 @@ def advance_task_run(
         or validation.run_revision != state.revision
     ):
         raise ValueError("validation does not match task revision")
+    classification = (
+        state.effective_classification
+        if effective_classification is None
+        else effective_classification
+    )
+    if classification_rank(classification) < classification_rank(state.effective_classification):
+        raise ValueError("task classification cannot be lowered")
+    if classification != state.effective_classification and not any(
+        observation.code == "classification_raised" and observation.evidence_ref is not None
+        for observation in observations
+    ):
+        raise ValueError("classification increase requires an evidence reference")
     return TaskRunState.model_validate(
         {
             **state.model_dump(mode="python"),
@@ -160,6 +233,7 @@ def advance_task_run(
             "observations": (*state.observations, *observations),
             "artifact_refs": (*state.artifact_refs, *artifact_refs),
             "validation": validation,
+            "effective_classification": classification,
         }
     )
 
@@ -172,6 +246,7 @@ def task_run_follows(previous: TaskRunState, candidate: TaskRunState) -> bool:
         or candidate.actor != previous.actor
         or candidate.task_sha256 != previous.task_sha256
         or candidate.backend_id != previous.backend_id
+        or candidate.backend_history != previous.backend_history
         or candidate.created_at != previous.created_at
         or candidate.revision != previous.revision + 1
         or candidate.observations[: len(previous.observations)] != previous.observations
@@ -186,10 +261,38 @@ def task_run_follows(previous: TaskRunState, candidate: TaskRunState) -> bool:
             observations=candidate.observations[len(previous.observations) :],
             artifact_refs=candidate.artifact_refs[len(previous.artifact_refs) :],
             validation=candidate.validation,
+            effective_classification=candidate.effective_classification,
         )
     except ValueError:
         return False
     return expected == candidate
+
+
+def apply_backend_result(
+    state: TaskRunState, result: TaskBackendResult, *, now: datetime
+) -> TaskRunState:
+    """Normalize a backend claim into pending validation or a stopped run."""
+    if state.status != "running":
+        raise ValueError("backend result requires a running task")
+    if (
+        result.task_id != state.task_id
+        or result.trace != state.trace
+        or result.backend_id != state.backend_id
+    ):
+        raise ValueError("backend result does not match selected task and backend")
+    if result.status == "completed":
+        target: TaskStatus = "awaiting_validation"
+    elif result.status == "needs_input":
+        target = "needs_input"
+    else:
+        target = "failed"
+    return advance_task_run(
+        state,
+        target,
+        now=now,
+        observations=result.observations,
+        artifact_refs=result.artifact_refs,
+    )
 
 
 class ArtifactReader(Protocol):

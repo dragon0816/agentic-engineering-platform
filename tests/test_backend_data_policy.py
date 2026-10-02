@@ -94,3 +94,13 @@ def test_missing_context_is_denied_without_content_in_the_decision() -> None:
     decision = DataPolicy(()).decide(profile(), None)
     assert not decision.allowed and decision.code == "context_missing"
     assert decision.material_ids == ()
+
+
+def test_restricted_data_requires_a_separate_environment_and_never_reaches_native() -> None:
+    restricted = OutboundContext(materials=(material("secret-design", "RESTRICTED"),))
+    assert DataPolicy(()).decide(profile(), restricted).code == "native_requires_public"
+    assert DataPolicy((approval("UNCLASSIFIED"),)).decide(
+        profile("model", "gateway"), restricted
+    ).code == "class_not_approved"
+    with pytest.raises(ValidationError, match="separate approved environment"):
+        approval("RESTRICTED")

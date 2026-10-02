@@ -6,8 +6,9 @@ Branch: `main`; local-only work, no push. Backend boundary is commit
 `4f5b92c`; data trust is commit `c15d8d0`. The portable task/state slice
 described below is the current handoff.
 
-Status: multi-backend Agent Orchestrator slices 1–3 complete in source. Normal
-Agent ingress is not yet connected to the portable task state; native task
+Status: multi-backend Agent Orchestrator slices 1–2 and the portable task/state
+contract subset of slice 3 are complete in source. Normal Agent ingress is not
+yet connected to portable task state; backend re-authorization, native task
 adapters, Workflow migration, Marketplace defaults and product E2E remain.
 
 ## Goal and decisions
@@ -43,9 +44,13 @@ explicit host-admin Gateway approval over trusting localhost.
 - Added API, policy, host-wire and regression tests. The browser page has a
   confirmation dialog that creates a new PUBLIC session when needed. Source
   decisions, requirements and acceptance prerequisites were updated.
-- Slice 3 added a serializable `TaskContract` with exact Skill/resource refs,
-  expected outputs and repeatable checks. Durable `TaskRunState` keeps a
-  canonical task digest and compact evidence, not objective or source text.
+- Slice 3 added a serializable `TaskContract` with task type, initial data
+  class, exact Skill/resource refs, requested capability scope, bounded
+  constraints, expected outputs and repeatable checks. Durable `TaskRunState`
+  keeps a canonical task digest, backend history, effective class and compact
+  evidence, not objective or source text. Backend `completed` is only a
+  candidate result; an evidence-backed classification can rise but never
+  silently decrease.
   SQLite schema v5 adds an independent task-run table and migrates v4 and
   earlier files additively. The host-side validator reads actual artifact
   bytes and rejects absent, empty or wrong-digest artifacts. Restart, stale
@@ -54,14 +59,14 @@ explicit host-admin Gateway approval over trusting localhost.
 
 ## Verification
 
-- Full local selection on the final bounded contract, using
-  `PYTHONUTF8=1`, fresh `.scratch/pytest-portable-verified-20261002`, no
+- Full local selection on the final task result and classification contract,
+  using `PYTHONUTF8=1`, fresh `.scratch/pytest-task-3b-full-20261002`, no
   pytest cache, `--ignore=tests/test_browser.py` and two existing
-  machine-specific exclusions: **1,529 passed, 4 skipped, 2 deselected**.
+  machine-specific exclusions: **1,531 passed, 4 skipped, 2 deselected**.
 - `.venv/Scripts/python -m ruff check src tests`: passed.
 - `.venv/Scripts/python -m mypy src tests`: passed, 283 source files.
 - `.venv/Scripts/python -m build --no-isolation --outdir
-  .scratch/dist-portable-final-20261002`: sdist and wheel built.
+  .scratch/dist-task-3b-20261002`: sdist and wheel built.
 - The earlier slice-2 inline Web JavaScript passed `node --check`.
 - The real-Chromium UI test still fails before navigation because this
   machine closes its CDP WebSocket; no visual interaction result is claimed.
@@ -83,10 +88,18 @@ explicit host-admin Gateway approval over trusting localhost.
   Native task adapters still need workspace, environment, credential and
   side-effect containment. Portable task state and independent validation
   exist as contracts but are not yet linked to Agent ingress or native adapters.
+- The portable task state does not yet record task-specific completed steps,
+  unresolved requirements or a re-authorized backend transition. These fields
+  should be added when an actual orchestration path can populate and verify
+  them; initial backend use history alone does not make failover safe.
 - The initial independent validator covers artifact presence, non-empty bytes
   and an optional expected digest. Domain-specific content checks and
   evidence-only answers require later validators. The selected backend must
   never supply the host's trusted artifact reader.
+- The data-class vocabulary recognizes RESTRICTED, but ordinary Gateway
+  approvals cannot include it until a separately reviewed environment exists.
+  Backend switching is disabled in portable state until full-context
+  re-authorization is implemented.
 - The private source Workflow checkout is read-only at
   `C:\Users\Chi_L\Documents\claude\n8n_workflow_system`, revision
   `896046e8fe2170d21f9213e56e5ce2f93c05ba43`. Remote HEAD could not be

@@ -321,11 +321,15 @@ safety boundary, not native Agent task execution. Field-level provenance and
 native Agent task adapters remain later slices; see `REQUIREMENTS.md` and the
 approved design under `superpowers/specs/`.
 
-A portable `TaskContract` now names the actor, trace, objective, exact Skill
-versions, resource references, expected output artifacts and independent
-completion checks. `TaskRunState` records only the task digest, selected
-backend, monotonic transitions, compact observation/artifact references and
-validation outcomes. The local SQLite store persists that state in an additive
+A portable `TaskContract` now names the actor, trace, objective, task type,
+initial data class, exact Skill and resource references, requested capability
+scope, bounded execution constraints, expected output artifacts and independent
+completion checks. `TaskBackendResult` is only a candidate outcome.
+`TaskRunState` records only the task digest, selected backend and use history,
+effective data class, monotonic transitions, compact observation/artifact
+references and validation outcomes. Classification can rise with an evidence
+reference but cannot silently fall. Backend switching stays disabled until a
+separate re-authorization path exists. The local SQLite store persists that state in an additive
 version-5 table; resumption must resupply the exact task contract whose digest
 matches. The host-side `CompletionValidator` reads actual artifact bytes through
 a trusted resolver and checks existence, non-empty content or an expected

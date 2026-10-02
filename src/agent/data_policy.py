@@ -8,7 +8,7 @@ from pydantic import Field, StrictBool, model_validator
 from agent.backend_contracts import BackendProfile
 from common.base import Contract, Symbol, Text
 
-DataClass = Literal["PUBLIC", "INTERNAL", "CONFIDENTIAL", "UNCLASSIFIED"]
+DataClass = Literal["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED", "UNCLASSIFIED"]
 MaterialOrigin = Literal[
     "user", "history", "persona", "skill", "knowledge", "tool", "attachment", "system"
 ]
@@ -18,8 +18,13 @@ _PRECEDENCE: dict[DataClass, int] = {
     "PUBLIC": 0,
     "INTERNAL": 1,
     "CONFIDENTIAL": 2,
-    "UNCLASSIFIED": 3,
+    "RESTRICTED": 3,
+    "UNCLASSIFIED": 4,
 }
+
+
+def classification_rank(value: DataClass) -> int:
+    return _PRECEDENCE[value]
 
 
 class ContextMaterial(Contract):
@@ -35,7 +40,9 @@ class ContextMaterial(Contract):
     def explicit_classification_has_provenance(self) -> Self:
         if self.classification == "PUBLIC" and self.classified_by is None:
             raise ValueError("PUBLIC requires an explicit classifier")
-        if self.classification in {"INTERNAL", "CONFIDENTIAL"} and self.classified_by is None:
+        if self.classification in {"INTERNAL", "CONFIDENTIAL", "RESTRICTED"} and (
+            self.classified_by is None
+        ):
             raise ValueError("classified material requires an explicit classifier")
         if self.classification == "UNCLASSIFIED" and self.classified_by is not None:
             raise ValueError("unclassified material has no classifier")
@@ -73,6 +80,8 @@ class BackendDataApproval(Contract):
             raise ValueError("internal Gateway approval requires an internal Gateway")
         if len(self.approved_classes) != len(set(self.approved_classes)):
             raise ValueError("approved classes must be unique")
+        if "RESTRICTED" in self.approved_classes:
+            raise ValueError("RESTRICTED requires a separate approved environment")
         return self
 
 

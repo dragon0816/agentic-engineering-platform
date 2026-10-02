@@ -50,15 +50,24 @@ conversation without changing its observable answer, failure or tool evidence.
 No data classification, native CLI task execution or automatic fallback is
 enabled by the first slice.
 
-The portable-task slice defines a backend-neutral objective with exact Skill
-and resource references, expected artifact outputs and host-repeatable checks.
+The portable-task slice defines a backend-neutral objective, task type,
+initial classification, exact Skill/resource and allowed/prohibited capability
+references, bounded execution constraints, expected artifact outputs and
+host-repeatable checks. Allowed capability references are a requested scope,
+not execution grants. The backend's normalized result remains a candidate.
 Its durable run record carries a digest of that contract, trace, selected
-backend, status, bounded observations and artifact references, but not the
+backend and use history, effective data class, status, bounded observations
+and artifact references, but not the
 objective text, source contents or model reasoning. Resume requires the same
 task contract. A backend's claim of success does not establish completion:
 the host must inspect the actual artifact and record a passing independent
 validation report. This contract slice does not enable native task execution
 or change existing Workflow routing.
+
+The initial data-class vocabulary includes `RESTRICTED`, but no existing
+Gateway approval may list that class until a separately reviewed restricted
+execution environment exists. PUBLIC native tasks remain subject to a fresh
+whole-context policy decision; task metadata alone is never authorization.
 
 After the harness, migrate the pinned `rs_workflow_system` behaviors through
 typed adapters and parity tests. Distinguish per-install/user static settings
