@@ -27,6 +27,7 @@ from test_platform_transport import Platform, host
 from test_product_e2e_05 import V1, copy_vault, manifest
 
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from capabilities.weekly_report.manifest import preview_workflow
 from control_plane.http import ControlPlaneServer
 from extensions.package import stage_extension_package
 from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
@@ -1282,6 +1283,41 @@ def test_page_launches_exact_installed_workflows_and_shows_trace_identifiers(
     assert 'call("/api/workflows/run"' in page
     assert "outcome.trace.trace_id" in page
     assert "workflow.run.run_id" in page
+
+
+def test_typed_workflow_fields_render_and_reject_invalid_run_before_agent(
+    served: AgentWebServer,
+) -> None:
+    workflow = preview_workflow()
+    layout = served.web.runtime.layout
+    (layout.workflows / "weekly-preview-form.json").write_text(
+        workflow.model_dump_json(), encoding="utf-8"
+    )
+    projection = fetch(base(served) + "/api/assets", token=served.token).json()
+    preview = next(
+        item for item in projection["workflows"] if item["name"] == workflow.metadata.identity.name
+    )
+    fields = preview["parameters"]
+    assert fields["editor"] == "fields"
+    assert [field["name"] for field in fields["fields"]] == [
+        "week",
+        "since",
+        "until",
+        "max_issues",
+        "args",
+    ]
+    page = served.page().decode("utf-8")
+    assert 'id="workflow-fields"' in page
+    assert 'field.kind === "date" ? "date"' in page
+    request = {
+        "workflow": workflow.metadata.identity.model_dump(mode="json"),
+        "arguments": {"max_issues": "ten"},
+        "idempotency_key": "web-invalid-parameter-1",
+    }
+    response = fetch(base(served) + "/api/workflows/run", token=served.token, body=request)
+    assert response.status == 400
+    assert response.json()["code"] == "workflow_parameters_invalid"
+    assert served.web.runtime.state.runs() == ()
 
 
 def test_it_lists_exact_installed_knowledge_with_its_local_configuration(

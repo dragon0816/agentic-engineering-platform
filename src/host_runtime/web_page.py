@@ -229,6 +229,13 @@ tr:last-child td { border-bottom: none; }
 .action-box { margin-top: 16px; padding: 14px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--bg); }
 .action-box label { display: block; margin: 9px 0 4px; font-size: 12px; color: var(--dim); }
+.workflow-field { margin: 12px 0; }
+.workflow-field input, .workflow-field select { width: 100%; min-height: 44px; padding: 9px 10px;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; font: inherit; }
+.workflow-field input[type="checkbox"] { width: 22px; min-height: 22px; }
+.workflow-field .field-error { color: var(--bad); margin: 4px 0; font-size: 12px; }
+.workflow-field [aria-invalid="true"] { border-color: var(--bad); }
 .markdown-panel { max-height: 330px; margin: 8px 0 16px; padding: 16px;
   overflow: auto; white-space: pre-wrap; word-break: break-word; color: var(--ink);
   border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
@@ -451,8 +458,11 @@ tr:last-child td { border-bottom: none; }
         <div id="workflow-action" class="action-box" hidden>
           <strong>Run this Workflow</strong>
           <p class="note" id="workflow-contract">No installed Workflow.</p>
-          <label for="workflow-arguments">JSON arguments</label>
-          <textarea id="workflow-arguments" spellcheck="false">{}</textarea>
+          <div id="workflow-fields" hidden></div>
+          <div id="workflow-legacy">
+            <label for="workflow-arguments">JSON arguments</label>
+            <textarea id="workflow-arguments" spellcheck="false">{}</textarea>
+          </div>
           <p><button class="go" id="workflow-run" type="button" disabled>Run Workflow</button></p>
           <pre id="workflow-result" class="section-status">Nothing has run.</pre>
         </div>
@@ -938,6 +948,7 @@ async function loadAssets() {
   }
   target.disabled = assets.workflows.length === 0;
   el("workflow-run").disabled = assets.workflows.length === 0;
+  installedAssets = Object.assign({applications: []}, assets);
   showWorkflowContract();
   const knowledgeTarget = el("knowledge-target");
   knowledgeTarget.replaceChildren();
@@ -952,7 +963,6 @@ async function loadAssets() {
   knowledgeTarget.disabled = assets.knowledge.length === 0;
   el("knowledge-ask").disabled = assets.knowledge.length === 0;
   showKnowledgeDomain();
-  installedAssets = Object.assign({applications: []}, assets);
   renderCapabilityBrowser();
   return assets;
 }
@@ -1031,7 +1041,8 @@ function showCapabilityDetail(item, kind) {
     appendMeta(content, [["Steps", item.steps], ["Input contract", item.input_contract],
       ["Output contract", item.output_contract],
       ["Capabilities", item.capabilities.join(", ")],
-      ["Parameter editor", "JSON object validated as " + item.parameters.input_contract]]);
+      ["Parameter editor", item.parameters.editor === "fields"
+        ? "Typed run fields" : "JSON object validated as " + item.parameters.input_contract]]);
     el("workflow-target").value = JSON.stringify({namespace: item.namespace, name: item.name,
       version: item.version});
     showWorkflowContract(); el("workflow-action").hidden = false;
@@ -1223,6 +1234,77 @@ function showWorkflowContract() {
   const chosen = el("workflow-target").selectedOptions[0];
   el("workflow-contract").textContent = chosen
     ? "Input contract: " + chosen.dataset.inputContract : "No installed Workflow.";
+  const workflow = chosen && installedAssets.workflows.find((item) =>
+    JSON.stringify({namespace: item.namespace, name: item.name, version: item.version})
+    === chosen.value);
+  const typed = workflow && workflow.parameters.editor === "fields";
+  el("workflow-fields").hidden = !typed;
+  el("workflow-legacy").hidden = !!typed;
+  const container = el("workflow-fields"); container.replaceChildren();
+  if (!typed) return;
+  for (const field of workflow.parameters.fields) {
+    const row = document.createElement("div"); row.className = "workflow-field";
+    const id = "workflow-field-" + field.name;
+    const label = document.createElement("label"); label.htmlFor = id;
+    label.append(text(field.label + (field.required ? " *" : "")));
+    const input = field.kind === "select" ? document.createElement("select")
+      : document.createElement("input");
+    input.id = id; input.dataset.name = field.name; input.dataset.kind = field.kind;
+    if (field.kind === "select") {
+      const empty = document.createElement("option"); empty.value = "";
+      empty.append(text("Select " + field.label)); input.append(empty);
+      for (const value of field.options) {
+        const option = document.createElement("option"); option.value = value;
+        option.append(text(value)); input.append(option);
+      }
+    } else {
+      input.type = field.kind === "integer" ? "number"
+        : field.kind === "date" ? "date"
+        : field.kind === "boolean" ? "checkbox" : "text";
+    }
+    if (field.kind === "integer") {
+      input.step = "1";
+      if (field.minimum !== null) input.min = field.minimum;
+      if (field.maximum !== null) input.max = field.maximum;
+    }
+    input.required = field.required;
+    input.setAttribute("aria-describedby", id + "-help " + id + "-error");
+    const help = document.createElement("p"); help.id = id + "-help";
+    help.className = "hint"; help.append(text(field.description || ""));
+    const error = document.createElement("p"); error.id = id + "-error";
+    error.className = "field-error"; error.setAttribute("aria-live", "polite");
+    input.addEventListener("input", () => {
+      error.textContent = ""; input.removeAttribute("aria-invalid");
+    });
+    row.append(label, input, help, error); container.append(row);
+  }
+}
+
+function workflowArguments() {
+  if (el("workflow-fields").hidden) {
+    const value = JSON.parse(el("workflow-arguments").value);
+    if (!value || Array.isArray(value) || typeof value !== "object") {
+      throw new Error("arguments must be one JSON object");
+    }
+    return value;
+  }
+  const value = {};
+  for (const input of el("workflow-fields").querySelectorAll("input, select")) {
+    const name = input.dataset.name, kind = input.dataset.kind;
+    const raw = kind === "boolean" ? input.checked : input.value.trim();
+    const invalid = kind === "integer" && raw !== ""
+      && (!/^-?\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)));
+    if ((input.required && raw === "") || invalid || !input.checkValidity()) {
+      const message = invalid ? "Enter a whole number."
+        : input.validationMessage || "This field is required.";
+      el(input.id + "-error").textContent = message;
+      input.setAttribute("aria-invalid", "true"); input.focus();
+      throw new Error(name + ": " + message);
+    }
+    if (kind !== "boolean" && raw === "") continue;
+    value[name] = kind === "integer" ? Number(raw) : raw;
+  }
+  return value;
 }
 
 el("workflow-target").addEventListener("change", showWorkflowContract);
@@ -1230,10 +1312,7 @@ el("workflow-run").addEventListener("click", async () => {
   const button = el("workflow-run"), result = el("workflow-result");
   let argumentsValue;
   try {
-    argumentsValue = JSON.parse(el("workflow-arguments").value);
-    if (!argumentsValue || Array.isArray(argumentsValue) || typeof argumentsValue !== "object") {
-      throw new Error("arguments must be one JSON object");
-    }
+    argumentsValue = workflowArguments();
   } catch (failure) {
     result.textContent = "Cannot run: " + failure.message;
     return;

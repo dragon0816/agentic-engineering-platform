@@ -32,6 +32,13 @@ Jira with the same GitHub Project, starting with a read-only preview.
   preview, Excel invariants and parity gate. Existing `GitHubProjectClient`
   lacks source-equivalent creation-time and reporter fields; mapping must be
   explicit before claiming parity.
+- Typed `WorkflowManifest.parameters` now distinguishes static declarations
+  from runtime fields. Agent Web renders labeled runtime controls and validates
+  the exact installed Workflow's arguments before execution; older manifests
+  retain JSON input. Workflow 11's shipped preview, apply and mail manifests
+  declare week, date-window and issue-cap fields. Static persistence, dynamic
+  option providers and Telegram controls are not yet implemented. See
+  `docs/CONTRACTS.md` and `docs/DECISIONS.md`.
 - A synthetic Knowledge Vault, exact matching manifest and isolated Host
   configuration were staged under `.scratch/knowledge-validation/`. They are
   ignored local test artifacts, not the enterprise Vault. Catalog registration
@@ -52,6 +59,13 @@ Jira with the same GitHub Project, starting with a read-only preview.
   --sdist --wheel --outdir .scratch/dist-20261002-next` produced both artifacts.
 - Knowledge-focused tests: 4 passed. No live Gateway answer was run in this
   Codex process because `LITELLM_MASTER_KEY` is absent from its environment.
+- After the runtime-field change, focused contract/Web tests passed (91 passed,
+  1 machine-specific browser test deselected). The full repository selection
+  passed **1,564 tests, 4 skipped, 2 deselected** in a clean rerun. A first
+  full attempt had one intermittent Windows workspace-write refusal in an
+  unrelated Knowledge Marketplace test; that case passed alone and in the
+  clean full rerun. `ruff check src tests`, `mypy src tests`, Node syntax check
+  of the inline Agent Web script and offline sdist/wheel build passed.
 
 ## Open work and known limits
 
@@ -59,6 +73,9 @@ Jira with the same GitHub Project, starting with a read-only preview.
    permissions, then rerun `weekly.preview` on the installed Host for the
    chosen week. Inspect the nested plan and workbook-read evidence. Do not run
    apply/mail against a real workbook or recipient list during this preview.
+   A 2026-10-02 read-only recheck outside the network-restricted command
+   sandbox still returned `github_auth`, so Project V2 access was not available
+   yet. The sandboxed CLI reported `transient_failure` and exited nonzero.
 2. Use `.scratch/knowledge-validation/host.json` for a live Gateway question
    once the launching Agent has the existing key in its environment. The
    isolated Host has no Shared Platform binding and is only for Knowledge

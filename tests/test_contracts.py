@@ -14,6 +14,7 @@ from common.assets import (
     WorkflowManifest,
 )
 from common.execution import ExecutionAuthorization, RouteDecision
+from common.workflow_parameters import validate_run_parameters
 
 
 def task_data() -> dict[str, object]:
@@ -163,6 +164,59 @@ def test_workflow_and_secret_requirements_round_trip() -> None:
     data["steps"] = []
     with pytest.raises(ValidationError):
         WorkflowManifest.model_validate(data)
+
+
+def test_workflow_run_fields_are_closed_typed_and_round_trip() -> None:
+    data = task_data()
+    data.pop("capability")
+    data["steps"] = [{"namespace": "sample", "name": "inspect", "version": "1.0.0"}]
+    parameters = [
+        {"name": "week", "label": "Week", "kind": "text", "scope": "runtime"},
+        {"name": "count", "label": "Limit", "kind": "integer", "minimum": 1},
+        {"name": "mode", "label": "Mode", "kind": "select", "options": ["brief", "full"]},
+        {"name": "dry_run", "label": "Preview", "kind": "boolean"},
+        {"name": "cutoff", "label": "Cutoff", "kind": "date"},
+        {"name": "source", "label": "Source", "kind": "text", "scope": "static"},
+    ]
+    data["parameters"] = parameters
+    manifest = WorkflowManifest.model_validate(data)
+    assert WorkflowManifest.model_validate_json(manifest.model_dump_json()) == manifest
+    assert (
+        validate_run_parameters(
+            manifest,
+            {
+                "week": "2026_40W",
+                "count": 10,
+                "mode": "brief",
+                "dry_run": True,
+                "cutoff": "2026-10-02",
+            },
+        )["count"]
+        == 10
+    )
+    for invalid in (
+        {"count": "10"},
+        {"count": 0},
+        {"dry_run": "true"},
+        {"mode": "unknown"},
+        {"cutoff": "tomorrow"},
+        {"source": "private"},
+        {"unlisted": "value"},
+    ):
+        with pytest.raises(ValueError):
+            validate_run_parameters(manifest, invalid)
+    with pytest.raises(ValidationError):
+        WorkflowManifest.model_validate(
+            {**data, "parameters": [*parameters, parameters[0]]}
+        )
+    with pytest.raises(ValidationError):
+        WorkflowManifest.model_validate(
+            {**data, "parameters": [{"name": "broken", "label": "Broken", "kind": "select"}]}
+        )
+    with pytest.raises(ValidationError):
+        WorkflowManifest.model_validate(
+            {**data, "parameters": [{"name": "api_key", "label": "Key", "kind": "text"}]}
+        )
 
 
 def test_central_mode_cannot_claim_offline_execution() -> None:

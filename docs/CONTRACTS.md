@@ -2658,3 +2658,26 @@ returns `needs_input`; no version is guessed. Resolution produces the exact
 `AssetIdentity`, which is then submitted through normal resident-Agent
 admission and Bridge authorization. The shipped weekly-report preview alone
 declares alias 11; its workbook apply and mail Workflows do not.
+
+# Workflow runtime form fields (2026-10-02)
+
+`WorkflowManifest.parameters` is optional so older installed Workflows retain
+their JSON argument editor. Each declared field has a unique name, visible
+label, `runtime` or `static` scope, and one of `text`, `date`, `integer`,
+`boolean` or `select` kinds. A select declares distinct options; integer
+bounds apply only to integers. Credential-shaped names are invalid: secrets
+remain `SecretRef` requirements, never form values or shared asset content.
+
+Agent Web projects only runtime fields into its Workflow run form. It validates
+the submitted object against the exact installed manifest before resident
+Agent dispatch: undeclared names, static settings, missing required values,
+wrong JSON types, invalid dates, select values and out-of-bound integers are
+rejected. This is input validation, not an execution grant; the exact
+Workflow still passes local admission and Bridge policy. The shipped weekly
+report Workflows declare optional week, start/end date, issue cap and advanced
+command text fields. Their deterministic capability request contract remains
+the final domain validator, including week-name and date-window rules.
+
+Static field definitions are reserved in the manifest contract for a later
+per-install settings slice. This change does not edit `host.json`, create a
+static settings editor, or generate Telegram controls.

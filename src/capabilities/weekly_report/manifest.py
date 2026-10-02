@@ -23,6 +23,40 @@ _METADATA = {
     "lifecycle": "published",
 }
 
+_RUN_PARAMETERS = [
+    {
+        "name": "week",
+        "label": "Report week",
+        "kind": "text",
+        "description": "Weekly sheet name, for example 2026_40W.",
+    },
+    {
+        "name": "since",
+        "label": "From date",
+        "kind": "date",
+        "description": "Optional start of the reporting window.",
+    },
+    {
+        "name": "until",
+        "label": "Through date",
+        "kind": "date",
+        "description": "Optional end of the reporting window.",
+    },
+    {
+        "name": "max_issues",
+        "label": "Maximum issues",
+        "kind": "integer",
+        "minimum": 1,
+        "description": "Limit the number of Project items read.",
+    },
+    {
+        "name": "args",
+        "label": "Advanced arguments",
+        "kind": "text",
+        "description": "Optional command-style fields, such as since=2026-09-28 max=50.",
+    },
+]
+
 
 def preview_workflow() -> WorkflowManifest:
     """Resolve the week, fetch the week's issues, read the scratch sheet,
@@ -32,6 +66,7 @@ def preview_workflow() -> WorkflowManifest:
             "metadata": {"identity": PREVIEW_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
             "run_alias": 11,
+            "parameters": _RUN_PARAMETERS,
             "description": (
                 "Preview the GTM weekly report: the week's tracked items planned against the "
                 "workbook's scratch sheet, with nothing written"
@@ -103,6 +138,7 @@ def report_workflow() -> WorkflowManifest:
         {
             "metadata": {"identity": REPORT_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
+            "parameters": _RUN_PARAMETERS,
             "description": (
                 "The GTM weekly report: the week's tracked items planned against the workbook's "
                 "scratch sheet and written into it"
@@ -141,6 +177,7 @@ def mail_workflow() -> WorkflowManifest:
         {
             "metadata": {"identity": MAIL_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
+            "parameters": _RUN_PARAMETERS,
             "description": (
                 "Draft the GTM weekly mail: the week's effort counted per member, instrument "
                 "and account, charted, and saved as a draft nobody has sent"

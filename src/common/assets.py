@@ -248,12 +248,52 @@ class WorkflowStep(RegistryContract):
     retry: RetryPolicy = RetryPolicy()
 
 
+class WorkflowParameter(RegistryContract):
+    """Declarative field shared by host controls and a Workflow's run contract."""
+
+    name: Symbol
+    label: Text
+    kind: Literal["text", "integer", "date", "boolean", "select"]
+    scope: Literal["static", "runtime"] = "runtime"
+    description: Text | None = None
+    required: StrictBool = False
+    options: tuple[Text, ...] = ()
+    minimum: int | None = Field(default=None, strict=True)
+    maximum: int | None = Field(default=None, strict=True)
+
+    @model_validator(mode="after")
+    def kind_constraints(self) -> Self:
+        if SECRET_FIELD.fullmatch(self.name):
+            raise ValueError("credentials must be declared as SecretRef, not a parameter")
+        if self.kind == "select" and (
+            not self.options or len(set(self.options)) != len(self.options)
+        ):
+            raise ValueError("select parameters require distinct options")
+        if self.kind != "select" and self.options:
+            raise ValueError("only select parameters may declare options")
+        if self.kind != "integer" and (self.minimum is not None or self.maximum is not None):
+            raise ValueError("only integer parameters may declare bounds")
+        if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
+            raise ValueError("parameter minimum must not exceed maximum")
+        return self
+
+
 class WorkflowManifest(ExecutableManifest):
     kind: Literal["workflow"] = "workflow"
     # Optional numeric shortcut for a single installed workflow version.
     # Resolution refuses ambiguity; a shortcut never grants execution rights.
     run_alias: int | None = Field(default=None, ge=1, le=9999, strict=True)
+    parameters: tuple[WorkflowParameter, ...] = ()
     steps: tuple[AssetIdentity | WorkflowStep, ...]
+
+    @field_validator("parameters")
+    @classmethod
+    def unique_parameters(
+        cls, value: tuple[WorkflowParameter, ...]
+    ) -> tuple[WorkflowParameter, ...]:
+        if len({item.name for item in value}) != len(value):
+            raise ValueError("workflow parameter names must be unique")
+        return value
 
     @field_validator("steps")
     @classmethod

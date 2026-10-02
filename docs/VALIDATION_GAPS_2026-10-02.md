@@ -20,6 +20,12 @@ the source for a later controlled copy. No source Vault files were changed.
   slice corrected `aep-host ask` to return nonzero for a failed run; the
   nested Workflow result remains the detailed evidence. The credential value
   and Project response content were not recorded in this document.
+- A fresh `weekly.preview 2026_40W` attempt on 2026-10-02 again stopped after
+  the window step; the CLI now exited nonzero. A separate direct read with
+  outbound access returned `github_auth`, so the Project permission update has
+  not yet reached this Host credential. The restricted command environment
+  returned `github_unavailable`; that sandbox result is not evidence of a
+  changed Project permission. No workbook write or mail action occurred.
 - The Host doctor reports Workflow 11 preview support, but no Excel COM bridge
   for the write phase and no Outlook bridge for mail. The source of Workflow 11
   is now GitHub Project; its legacy `jira-` asset identity has not been renamed.
@@ -44,7 +50,7 @@ the source for a later controlled copy. No source Vault files were changed.
 | Workflow 7 | Source contract is characterized in `docs/WORKFLOW_7_SOURCE_CONTRACT.md`; no migration | The owner chose the same GitHub Project as Workflow 11; map its fields and implement a read-only preview before any Excel path |
 | Knowledge source Vault | The owner tree does not satisfy the Vault layout. A separate synthetic Vault is staged, pinned, bound and listed in isolated Agent Web; see `docs/KNOWLEDGE_VALIDATION_2026-10-02.md` | Run live Gateway query when the launching Agent has its existing key; integrate convert/ingest/lint Workflows separately; later plan source conversion and select the model-queryable subset |
 | Natural-language Agent | Explicit CLI Gateway task path exists; ordinary Ask and task state are separate; `--prompt` is tool-free | Ground capability descriptions in installed and authorized inventory, then route suitable natural-language requests through policy and independent validation |
-| Workflow UX | Exact names and manifest-declared `/run workflow 11` / `/run 11` shortcuts work in Agent Web; static/runtime parameter schema and generated Web/Telegram controls are missing | Define one parameter contract and render forms for Workflow 11, then extend the same resolver to Telegram |
+| Workflow UX | Exact names and manifest-declared `/run workflow 11` / `/run 11` shortcuts work in Agent Web. Optional typed runtime fields now render for the weekly-report Workflows and are checked before Agent dispatch; older manifests retain JSON input | Add per-install static settings, dynamic options and Telegram controls using the same contract |
 | Native backend orchestration | Restricted Codex/Claude/Copilot text chat exists; native task execution and backend transitions do not | Inventory transferred material, re-authorize full context, and add containment/denial tests before a PUBLIC native task adapter |
 | Shared Marketplace defaults | Catalog, selection and sync paths exist; owner-requested Hermes Skills and validated Workflows are not all governed default packages | Review provenance, license, dependencies and policy; publish only reviewed exact versions |
 | Product evidence and JEV | SOP-to-Workflow, Knowledge and Skill end-to-end cases remain unproven; JEV provider is not installed | Collect enrolled-Bridge evidence, then benchmark bounded decisions before enabling an optional JEV provider |

@@ -481,6 +481,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   ingress, then add governed native task adapters with containment tests.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter
   contracts, generated Web/Telegram forms, flexible `/run` aliases and parity.
+- [x] Add optional typed Workflow runtime parameters to manifests, validate
+  them against the exact installed Workflow on Agent Web launch, and render
+  labeled Web controls for the three weekly-report Workflows. Older manifests
+  retain the JSON editor. Static setting persistence, dynamic options and
+  Telegram controls are still open under the parent task.
 - [x] Add a manifest-declared numeric Workflow alias and deterministic Web
   parsing for `/run 11` and `/run workflow 11`. Workflow 11's alias selects
   only the read-only preview; missing/ambiguous aliases require an exact

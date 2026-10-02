@@ -195,3 +195,20 @@ required root index and log, so treating it as already publishable would lose
 provenance or fail exact digest checks. The source Workflow 7 uses retired Jira
 and writes an Excel workbook; a read-only GitHub preview permits source field
 mapping and parity inspection without assuming write approval.
+
+## 2026-10-02 — Declare Workflow run fields in the installed manifest
+
+Decision: Add optional typed parameter definitions to Workflow manifests and
+render runtime fields in Agent Web. Validate a submitted run against the exact
+installed manifest before passing it to the resident Agent; older manifests
+keep their JSON object editor. Scope static fields separately so a run cannot
+submit them. Weekly-report preview, apply and mail share the same runtime
+request fields, while the `11` alias still selects only read-only preview.
+
+Reason: A developer should be able to define a Workflow's input once and
+obtain the basic controls without editing Agent Web for each Workflow. This
+incremental contract preserves installed-only routing and Bridge policy.
+The alternatives of accepting untyped browser values or persisting static
+settings through run arguments were rejected: both blur the boundary between
+one run's input and trusted machine configuration. Static persistence,
+dynamic options and Telegram controls remain separate migration steps.

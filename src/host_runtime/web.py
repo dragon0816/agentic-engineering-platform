@@ -56,6 +56,7 @@ from capabilities.script_tools import load_script_tools
 from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
+from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
@@ -1050,8 +1051,19 @@ class AgentWeb:
                 "input_contract": item.input_contract,
                 "output_contract": item.output_contract,
                 "parameters": {
-                    "editor": "json_object",
+                    "editor": "fields" if item.parameters else "json_object",
                     "input_contract": item.input_contract,
+                    **(
+                        {
+                            "fields": [
+                                field.model_dump(mode="json")
+                                for field in item.parameters
+                                if field.scope == "runtime"
+                            ]
+                        }
+                        if item.parameters
+                        else {}
+                    ),
                 },
             }
             for item in manifests(layout.workflows, WorkflowManifest)
@@ -1333,12 +1345,25 @@ class AgentWeb:
     def launch_workflow(self, request: WorkflowLaunchRequest) -> dict[str, Any]:
         """Run one exact installed Workflow through the resident Agent."""
         item = WorkflowLaunchRequest.model_validate(request)
+        manifest = next(
+            (
+                installed
+                for installed in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if installed.metadata.identity == item.workflow
+            ),
+            None,
+        )
+        arguments = (
+            validate_run_parameters(manifest, item.arguments)
+            if manifest is not None
+            else item.arguments
+        )
         device = self.runtime.config.device
         local = LocalWorkflowRequest(
             actor=self.runtime.actor,
             bridge_id=device.bridge_id,
             workflow=item.workflow,
-            arguments=item.arguments,
+            arguments=arguments,
             idempotency_key=item.idempotency_key,
             trace=_trace(),
         )
@@ -1610,6 +1635,8 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             try:
                 self._json(200, self.server.web.launch_workflow(launch))
+            except WorkflowParameterError as failure:
+                self._json(400, {"code": "workflow_parameters_invalid", "error": str(failure)})
             except Exception as failure:  # noqa: BLE001 - a page shows everything
                 self._json(
                     500,
