@@ -501,16 +501,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   the source against a workbook copy. A successful run proves the installed
   route and read-only execution, not report parity. See
   `docs/VALIDATION_GAPS_2026-10-02.md`.
-- [ ] Resolve Workflow 11's Outlook draft authorization on this Host. The
-  installed Agent recorded a successful five-step apply run followed by a
-  three-step mail Workflow that stopped after step two with
-  `permission_denied`. `grants.json` has the Excel write grant but lacks
-  `weekly-report/mail@1.0.0` with `outlook.draft` and an approval reference.
-  The installed AEP environment has the Outlook COM bridge and registered
-  Outlook; mail recipients are intentionally empty in `host.json`. Add the
-  persistent mail grant only after the owner explicitly approves its scope,
-  then create one draft for the selected week and verify its receipt. Apply
-  and mail remain separate Workflows; do not imply apply creates a draft.
+- [x] Resolve Workflow 11's Outlook draft authorization on this Host. After
+  the owner asked to make the change, added exactly one persistent grant for
+  `leo.chi` / `weekly-report/mail@1.0.0` / `outlook.draft` with
+  `weekly-report-mail-policy`; preserved the other eight grants and backed up the
+  original under `.scratch/workflow11-mail-grant-20261002/`. The installed
+  `0.1.0` runtime was older than the installed manifest and rejected its
+  `run_alias` and `parameters`; installed the current local wheel in the Host
+  environment so all five Workflows load. One `weekly.mail 2026_40W` run
+  succeeded in three steps. Outlook read-back found the item in Drafts, unsent,
+  with empty To/CC. The Agent Web was restarted on port 53582 with `--open`;
+  apply and mail remain separate Workflows.
 - [ ] Validate Knowledge query, convert, ingest and lint with a small
   independent local test Vault before using the owner-supplied OneDrive tree.
   The existing Host manifest points to a different proof Vault and has no

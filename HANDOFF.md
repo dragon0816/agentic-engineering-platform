@@ -2,9 +2,10 @@
 
 Date: 2026-10-02 (Asia/Taipei). Branch: `main`. This is an incremental
 checkpoint for the owner's Agent/Knowledge/Workflow program, not completion of
-all remaining Phase 7 and Orchestrator work. This coding session did not push,
-edit the source Vault, write an Excel workbook, create a mail draft or publish
-to the Marketplace. A later user-run Agent apply did write the report workbook.
+all remaining Phase 7 and Orchestrator work. This session did not push, edit
+the source Vault, write an Excel workbook or publish to the Marketplace. A
+user-run Agent apply previously wrote the report workbook; this session saved
+one separate Outlook draft for `2026_40W` after the owner requested the fix.
 
 ## Goal and decisions
 
@@ -54,7 +55,7 @@ Jira with the same GitHub Project, starting with a read-only preview.
   `run_alias: 11` and typed parameters. Its exact old file was backed up under
   `.scratch/workflow11-refresh/backup/`, then only that local installed asset
   was replaced by the current shipped preview manifest. No repository runtime
-  code, Host grants, report workbook or mail action was changed.
+  code, Host grants, report workbook or mail action was changed at that point.
 - A synthetic Knowledge Vault, exact matching manifest and isolated Host
   configuration were staged under `.scratch/knowledge-validation/`. They are
   ignored local test artifacts, not the enterprise Vault. Catalog registration
@@ -62,6 +63,19 @@ Jira with the same GitHub Project, starting with a read-only preview.
   temporary loopback Agent Web returned HTTP 200 with the exact bound Knowledge
   identity. Four focused grounded-answer/policy tests passed with a scripted
   model. See `docs/KNOWLEDGE_VALIDATION_2026-10-02.md`.
+- The owner requested the Outlook draft permission fix. The installed Host's
+  `grants.json` now has one `leo.chi` grant for
+  `weekly-report/mail@1.0.0` / `outlook.draft` /
+  `weekly-report-mail-policy`, with an approval reference tied to this request.
+  The original eight grants are preserved, and the prior file is backed up in
+  `.scratch/workflow11-mail-grant-20261002/`.
+- The installed Host runtime was stale: it rejected `run_alias` and
+  `parameters` in the already-installed Workflow 11 preview manifest. The
+  current repository wheel was built locally and installed into the existing
+  preview virtual environment. `host.json`, the workspace and run history
+  were retained. The old package was archived in the same `.scratch` folder.
+  One Agent Web instance was restarted on port 53582 with `--open`; older
+  53580/53581 processes were stopped.
 
 ## Verification
 
@@ -103,10 +117,19 @@ Jira with the same GitHub Project, starting with a read-only preview.
   `weekly-report/mail@1.0.0`, before Outlook was invoked. The installed AEP
   virtual environment's doctor reports Excel and Outlook COM available; the
   source checkout's virtual environment lacks those optional bridges and must
-  not be used to assess the running Agent. This Host's `grants.json` has no
-  `outlook.draft` grant for the mail capability. Empty mail recipients are the
-  configured safe default. Three focused tests covering successful draft,
-  missing approval and missing Outlook all passed without external effects.
+  not be used to assess the running Agent. At the time of that failure, this
+  Host's `grants.json` had no `outlook.draft` grant for the mail capability.
+  Empty mail recipients are the configured safe default. Three focused tests
+  covering successful draft, missing approval and missing Outlook passed
+  without external effects.
+- With the new grant and current runtime, one installed CLI
+  `weekly.mail 2026_40W` run succeeded in three steps. The final Outlook
+  receipt named Drafts and carried an EntryID. A read-only COM lookup found
+  that exact item in Drafts with `Sent=False` and empty To/CC. No send was
+  attempted. The installed Host doctor returned `host status: ready`,
+  `resident agent: ready`, and passed assets, integrations and models when
+  launched with the existing Windows user credentials. The bare Web root
+  returns 401 by design; `--open` launches the fresh token-bearing address.
 
 ## Open work and known limits
 
@@ -133,12 +156,13 @@ Jira with the same GitHub Project, starting with a read-only preview.
    Telegram controls, ordinary Agent/task state integration, backend transfer
    authorization, governed native adapters, default Marketplace packages,
    SOP/Knowledge/Skill end-to-end evidence, and optional benchmark-gated JEV.
-5. Await the owner's explicit decision on a persistent local
-   `weekly-report/mail@1.0.0` / `outlook.draft` grant for `leo.chi`. Do not
-   reuse the report apply grant's approval reference or create a draft before
-   that decision. If approved, back up `grants.json`, add only that grant,
-   validate the installed Host, and create one `2026_40W` Outlook draft with
-   no recipients or send action. Report apply and mail are separate Workflows.
+5. The owner should use the fresh address opened by `aep-host web --open` for
+   further Agent Web tests; an old token or the bare `53582/` address returns
+   401. Keep only one resident Web process for this Host during validation.
+   Report apply and mail are separate Workflows; do not infer that apply
+   creates another draft. The locally installed wheel still reports version
+   `0.1.0`; a later reinstall from an older bundle could reintroduce the
+   manifest/runtime mismatch unless the bundle is rebuilt from current source.
 
 The active checklist is `docs/TASKS.md`; observed readiness is in
 `docs/VALIDATION_GAPS_2026-10-02.md`. Prior Gateway policy still applies:

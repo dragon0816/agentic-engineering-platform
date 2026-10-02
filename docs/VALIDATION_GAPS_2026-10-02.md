@@ -50,6 +50,16 @@ the source for a later controlled copy. No source Vault files were changed.
   current `mail_to` and `mail_cc` arrays are empty by design, so a future
   authorized draft would have no prefilled recipients. No Outlook draft was
   created during this diagnostic check.
+- After the owner requested the fix, the Host received one scoped
+  `outlook.draft` grant for `leo.chi`; the original eight grants were backed
+  up and left intact. The previously installed runtime rejected the newer
+  Workflow 11 preview manifest's `run_alias` and `parameters`, so the current
+  repository wheel was installed into the existing Host environment without
+  replacing `host.json` or the workspace. The updated Host doctor passed assets,
+  integrations and models with the existing user credentials. A single
+  `weekly.mail 2026_40W` command succeeded in all three steps. Outlook COM
+  read the receipt's item back from Drafts: it exists, is unsent and has empty
+  To/CC. Agent Web was restarted on `127.0.0.1:53582` with `--open`.
 - The owner-supplied external Knowledge Vault has `drop`, `raw` and `wiki`
   directories, 6,928 files and approximately 1.1 GB of listed content. The
   supplied root lacks `index.md` and `log.md`, which the platform Vault
@@ -67,7 +77,7 @@ the source for a later controlled copy. No source Vault files were changed.
 | Area | Current state | Next concrete checkpoint |
 | --- | --- | --- |
 | Workflow 11 preview | Installed alias and Project/Issue access verified; explicit-week and both bare Web commands succeed | Inspect the live plan and workbook-read evidence against the source using a workbook copy; keep apply/mail out of this parity check |
-| Workflow 11 apply/mail | Installed Agent has Excel and Outlook COM; apply succeeded once, while mail stopped at its ungranted draft step. Live report parity is still unproven | Obtain an explicit approval reference for this actor's `outlook.draft` grant, then test one draft without sending; inspect report parity separately on a workbook copy |
+| Workflow 11 apply/mail | Installed Agent has Excel and Outlook COM; apply succeeded once, and one authorized mail run saved an unsent `2026_40W` Outlook draft with no recipients. Live report parity is still unproven | Inspect report parity separately on a workbook copy; do not infer that report apply creates a mail draft |
 | Workflow 7 | Read-only GitHub Project preview and offline policy/field-mapping proof exist; Project access is now available, but this Host's installed assets have not been refreshed for Workflow 7 | Install the reviewed preview asset, run a live read-only check, then compare to source fixtures and a workbook copy before any write approval |
 | Knowledge source Vault | The owner tree does not satisfy the Vault layout. A separate synthetic Vault is staged, pinned, bound and listed in isolated Agent Web; see `docs/KNOWLEDGE_VALIDATION_2026-10-02.md` | Run live Gateway query when the launching Agent has its existing key; integrate convert/ingest/lint Workflows separately; later plan source conversion and select the model-queryable subset |
 | Natural-language Agent | Explicit CLI Gateway task path exists; ordinary Ask and task state are separate; `--prompt` is tool-free | Ground capability descriptions in installed and authorized inventory, then route suitable natural-language requests through policy and independent validation |
