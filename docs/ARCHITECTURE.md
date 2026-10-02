@@ -325,6 +325,12 @@ Bounded decisions now cross a provider-neutral `DecisionService`. The first
 integration is `RequestRouter`: its baseline provider retains the same
 deterministic command match and approved Gateway model selection, while
 returning a normalized decision and payload-free trace. The local host's
+`Gateway.converse` also passes its installed Skill command catalog through a
+`skill_selection` decision. Its baseline returns the entire catalog in order;
+any future accelerated result must be a nonempty subset of installed names,
+and omitted commands are removed from both model-visible tools and dispatch
+bindings. The complete candidate request must pass egress authorization before
+any provider receives its message or tool descriptions. The local host's
 `decision_accelerator` defaults to `NONE`; that path constructs no accelerator,
 performs no authorization callback or probe and makes no additional model or
 network call. A future JEV provider is an optional accelerator for specifically

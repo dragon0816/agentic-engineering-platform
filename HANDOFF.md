@@ -11,8 +11,8 @@ contract subset of slice 3 are complete in source. The owner-approved
 `company` Gateway route is recorded in the installed preview configuration.
 The owner-supplied JEV-ready update is mapped in
 `docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md`; Phase 1A adds a provider-neutral
-Decision Service to the existing rule-first route, defaulting to `NONE` with
-no JEV adapter or runtime dependency.
+Decision Service to the existing rule-first route and ordinary conversation
+Skill candidates, defaulting to `NONE` with no JEV adapter or runtime dependency.
 Normal Agent ingress is not yet connected to portable task state; backend
 re-authorization, native task adapters, Workflow migration, Marketplace
 defaults and product E2E remain.
@@ -82,6 +82,13 @@ editable configuration, so that decision is now recorded in `host.json`.
   acceleration. The service exposes payload-free traces and an optional
   observer hook; normal ingress does not yet persist them. There is no JEV
   provider implementation or external JEV request in this slice.
+- The follow-up applies that same service to `Gateway.converse` Skill candidate
+  selection. With `NONE`, every installed command is exposed in its original
+  order. A future accelerated selection must be a nonempty subset of installed
+  names; omitted names are also removed from Gateway dispatch bindings, so a
+  model cannot execute a hidden command. Candidate requests hold the full user
+  context and tool descriptions for a future pre-egress policy decision. This
+  follow-up does not install an accelerator or permit data egress to JEV.
 
 ## JEV-ready Phase 1A verification
 
@@ -97,6 +104,24 @@ editable configuration, so that decision is now recorded in `host.json`.
 - No JEV endpoint, account, credential value or provider package was installed
   or called. The installed local preview was not upgraded for this source
   slice; review source tests before a preview rollout.
+- Conversation Skill-candidate follow-up: 25 focused tests passed; the full
+  local selection passed with **1,550 passed, 4 skipped, 2 deselected** using
+  `PYTHONUTF8=1`, fresh `.scratch/pytest-jev-chat-final-full-20261002`, no
+  pytest cache, `--ignore=tests/test_browser.py` and exclusions for the known
+  CDP and locally installed Excel cases. An unfiltered run confirmed those two
+  environment-specific failures and passed its other 1,550 tests. Ruff passed
+  for `src` and `tests`; mypy passed for 285 files. Offline sdist/wheel build
+  passed in `.scratch/dist-jev-chat-final-20261002`; isolated build could not
+  fetch setuptools because this shell has restricted network access.
+  Reproduce the passing selection from the repository root with:
+
+  ```powershell
+  $env:PYTHONUTF8='1'
+  .\.venv\Scripts\python.exe -m pytest tests --ignore=tests/test_browser.py -p no:cacheprovider --basetemp .scratch/pytest-jev-chat-final-full-20261002 -k 'not test_capability_workspace_is_interactive_in_a_real_browser and not test_a_machine_with_the_bridge_and_no_excel_says_which' -q
+  .\.venv\Scripts\python.exe -m ruff check src tests
+  .\.venv\Scripts\python.exe -m mypy src tests
+  .\.venv\Scripts\python.exe -m build --no-isolation --sdist --wheel --outdir .scratch/dist-jev-chat-final-20261002
+  ```
 
 ## Verification
 

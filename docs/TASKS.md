@@ -441,6 +441,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` are met. Full local selection:
   1,548 passed, 4 skipped, 2 environment-specific deselected; ruff, mypy and
   sdist/wheel build passed on 2026-10-02.
+- [x] Extend the same Decision Service to `Gateway.converse` Skill candidates:
+  preserve the full installed catalog with `NONE`, reject invalid accelerated
+  subsets, and remove omitted commands from both tool exposure and dispatch.
+  A real JEV provider remains behind egress authorization and benchmarks.
+  Full local selection: 1,550 passed, 4 skipped, 2 machine-specific
+  deselected; ruff, mypy and offline sdist/wheel build passed on 2026-10-02.
 - [x] Record the owner's explicit approval of this workstation's
   `company` Gateway at `http://127.0.0.1:4000/v1` for `UNCLASSIFIED` data in
   the installed preview `host.json`; provide an editable, secret-value-free

@@ -1,5 +1,6 @@
 import asyncio
 import json
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -7,7 +8,18 @@ import pytest
 from pydantic import ValidationError
 from test_routing import FakeModel
 
-from agent.gateway import Gateway, GatewayResult
+from agent.decisions import (
+    DecisionAcceleratorConfig,
+    DecisionResult,
+    DecisionService,
+    DecisionTrace,
+)
+from agent.gateway import (
+    Gateway,
+    GatewayResult,
+    SkillCandidateRequest,
+    _valid_skill_subset,
+)
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from capabilities.contracts import CapabilitySpec
@@ -97,7 +109,13 @@ def request(message: str) -> RequestContext:
     )
 
 
-def gateway(handler: Handler, model: FakeModel | None = None, *, granted: bool = True) -> Gateway:
+def gateway(
+    handler: Handler,
+    model: FakeModel | None = None,
+    *,
+    granted: bool = True,
+    decision_observer: Callable[[DecisionTrace], None] | None = None,
+) -> Gateway:
     skills = SkillRegistry()
     for data in json.loads((ROOT / "skills/release-workflow.json").read_text(encoding="utf-8")):
         skills.register(SkillManifest.model_validate(data))
@@ -124,7 +142,9 @@ def gateway(handler: Handler, model: FakeModel | None = None, *, granted: bool =
     workflows = InstalledWorkflows()
     workflows.register(workflow_manifest())
     router = RequestRouter(CommandRouter(skills), model=model)
-    return Gateway(router, bridge, WorkflowEngine(workflows, bridge))
+    return Gateway(
+        router, bridge, WorkflowEngine(workflows, bridge), decision_observer=decision_observer
+    )
 
 
 def test_phase3_evaluation_cases_trigger_workflows_without_model() -> None:
@@ -264,8 +284,9 @@ def test_bounded_conversation_uses_only_an_installed_tool_then_synthesizes() -> 
 
     handler = Handler()
     model = ConversationModel()
+    decisions: list[DecisionTrace] = []
     result = asyncio.run(
-        gateway(handler, model).converse(
+        gateway(handler, model, decision_observer=decisions.append).converse(
             request("Can you check this release?"),
             (ModelMessage(role="user", text="Can you check this release?"),),
         )
@@ -277,6 +298,67 @@ def test_bounded_conversation_uses_only_an_installed_tool_then_synthesizes() -> 
     assert result.tools[0].decision is not None
     assert result.tools[0].decision.target == capability_spec().identity
     assert handler.calls == 1
+    assert len(decisions) == 1
+    assert decisions[0].decision_type == "skill_selection"
+    assert decisions[0].provider_id == "rule"
+    assert not decisions[0].fallback
+    assert "Can you check this release?" not in decisions[0].model_dump_json()
+
+
+def test_accelerated_skill_subset_cannot_execute_a_hidden_tool() -> None:
+    class CandidateProvider:
+        provider_id = "jev"
+
+        def decide(self, item: SkillCandidateRequest) -> DecisionResult[tuple[str, ...]]:
+            assert item.context.message == "Check release"
+            return DecisionResult(
+                decision_type="skill_selection",
+                value=("release__check",),
+                confidence=0.99,
+                reason_code="candidate_subset",
+                provider_id=self.provider_id,
+            )
+
+    class HiddenToolModel(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            assert [tool.name for tool in item.tools] == ["release__check"]
+            if len(self.calls) == 1:
+                return ModelResponse(
+                    trace=item.trace,
+                    model_alias=item.model_alias,
+                    tool_calls=(
+                        ModelToolCall(
+                            call_id="hidden-call", name="release__package", arguments={}
+                        ),
+                    ),
+                )
+            return ModelResponse(
+                trace=item.trace, model_alias=item.model_alias, text="No action taken."
+            )
+
+    handler = Handler()
+    model = HiddenToolModel()
+    app = gateway(handler, model)
+    app.skill_decisions = DecisionService[SkillCandidateRequest, tuple[str, ...]](
+        baseline=app.skill_decisions.baseline,
+        config=DecisionAcceleratorConfig(
+            provider="JEV",
+            endpoint="http://127.0.0.1:9797/v1",
+            credential={"name": "jev_token"},
+            enabled_decision_types=("skill_selection",),
+        ),
+        authorize_accelerator=lambda _: True,
+        accelerator_factory=CandidateProvider,
+        accept_accelerator=_valid_skill_subset,
+    )
+    result = asyncio.run(
+        app.converse(request("Check release"), (ModelMessage(role="user", text="Check release"),))
+    )
+    assert result.status == "answered"
+    assert result.tools[0].failure is not None
+    assert result.tools[0].failure.code == "uninstalled_tool"
+    assert handler.calls == 0
 
 
 def test_conversation_cannot_execute_an_invented_tool_and_stops() -> None:

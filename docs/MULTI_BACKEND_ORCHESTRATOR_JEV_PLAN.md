@@ -1,6 +1,7 @@
 # JEV-ready Decision Service integration
 
-Status: Phase 1A implemented in source on 2026-10-02; the later JEV adapter
+Status: Phase 1A and its conversation Skill-candidate follow-up are implemented
+in source on 2026-10-02; the later JEV adapter
 remains gated. Based on the owner-supplied
 `CODEX_AEP_MULTI_BACKEND_ORCHESTRATOR_HANDOFF_JEV_READY.md` and the current
 repository, not on a requirement to run JEV today.
@@ -37,12 +38,21 @@ provider/policy/trace contract, not a second execution harness.
 4. Expose the configuration in the local host contract without a secret value.
    Existing `host.json` files deserialize to `NONE`. The service contract is
    ready for a JEV adapter, but Phase 1A does not ship one.
+5. Pass the ordinary `Gateway.converse` installed-tool catalog through the
+   same Decision Service as a `skill_selection` decision. The `NONE` baseline
+   preserves every installed command and its order. A future authorized
+   accelerator may only propose a nonempty subset of installed names; both
+   the model-visible tool catalog and dispatch bindings use that subset.
+   Candidate request text and tool descriptions are available to a future
+   whole-payload egress authorizer, but no JEV transport is installed here.
 
 Acceptance: deterministic commands never call a model; ambiguous routing
 makes the same one approved-model call and yields the same result; with `NONE`,
 no accelerator factory, authorization callback, probe, retry or network call
 occurs. Negative tests prove the optional path cannot construct an accelerator
-before authorization and never blocks an otherwise available baseline.
+before authorization and never blocks an otherwise available baseline. Web
+conversation tests prove the default catalog is unchanged and a candidate
+subset cannot expose or dispatch an omitted tool.
 
 ## Later slices from the updated plan
 

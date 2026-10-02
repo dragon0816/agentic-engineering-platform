@@ -135,6 +135,7 @@ class DecisionService(Generic[RequestT, ValueT]):
         config: DecisionAcceleratorConfig | None = None,
         accelerator_factory: Callable[[], DecisionProvider[RequestT, ValueT]] | None = None,
         authorize_accelerator: Callable[[RequestT], bool] | None = None,
+        accept_accelerator: Callable[[RequestT, DecisionResult[ValueT]], bool] | None = None,
         observer: Callable[[DecisionTrace], None] | None = None,
         clock: Callable[[], float] = perf_counter,
     ) -> None:
@@ -142,6 +143,7 @@ class DecisionService(Generic[RequestT, ValueT]):
         self.config = config if config is not None else DecisionAcceleratorConfig()
         self._accelerator_factory = accelerator_factory
         self._authorize_accelerator = authorize_accelerator
+        self._accept_accelerator = accept_accelerator
         self._observer = observer
         self._clock = clock
 
@@ -169,6 +171,10 @@ class DecisionService(Generic[RequestT, ValueT]):
                         candidate.decision_type != decision_type
                         or candidate.provider_id != provider.provider_id
                         or not candidate.accepted
+                        or (
+                            self._accept_accelerator is not None
+                            and not self._accept_accelerator(request, candidate)
+                        )
                     ):
                         fallback_reason = "accelerator_unsupported"
                     elif (

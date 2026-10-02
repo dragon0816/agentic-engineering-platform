@@ -152,6 +152,22 @@ def test_unsupported_accelerator_decision_falls_back() -> None:
     assert outcome.trace.fallback_reason == "accelerator_unsupported"
 
 
+def test_invalid_accelerator_value_falls_back_before_use() -> None:
+    baseline = Provider("gateway_llm")
+    accelerator = Provider("jev", 0.99)
+    service = DecisionService[str, str](
+        config=configured(),
+        baseline=baseline,
+        accelerator_factory=lambda: accelerator,
+        authorize_accelerator=lambda _: True,
+        accept_accelerator=lambda _request, result: result.value == "installed",
+    )
+    outcome = service.decide("public", decision_type="intent_classification")
+    assert outcome.result.value == "gateway_llm"
+    assert outcome.trace.fallback_reason == "accelerator_unsupported"
+    assert baseline.calls == ["public"] and accelerator.calls == ["public"]
+
+
 def test_accelerator_exception_is_sanitized_and_baseline_continues() -> None:
     baseline = Provider("gateway_llm")
 

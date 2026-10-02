@@ -8,10 +8,12 @@ deterministic ones, so a trigger's origin never changes what may execute.
 
 import asyncio
 import json
+from collections.abc import Callable
 from typing import Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
+from agent.decisions import DecisionResult, DecisionService, DecisionTrace
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
@@ -139,11 +141,61 @@ class GatewayConversationResult(Contract):
         return self
 
 
+class SkillCandidateRequest(Contract):
+    """The complete context that must be authorized before candidate egress."""
+
+    context: RequestContext
+    tools: tuple[ModelTool, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def unique_tool_names(self) -> Self:
+        names = [tool.name for tool in self.tools]
+        if len(set(names)) != len(names):
+            raise ValueError("installed tool names must be unique")
+        return self
+
+
+class _InstalledSkillCandidates:
+    """Preserve the full installed catalog and its original order by default."""
+
+    provider_id = "rule"
+
+    def decide(self, request: SkillCandidateRequest) -> DecisionResult[tuple[str, ...]]:
+        return DecisionResult(
+            decision_type="skill_selection",
+            value=tuple(tool.name for tool in request.tools),
+            confidence=1.0,
+            reason_code="all_installed",
+            provider_id=self.provider_id,
+        )
+
+
+def _valid_skill_subset(
+    request: SkillCandidateRequest, candidate: DecisionResult[tuple[str, ...]]
+) -> bool:
+    names = candidate.value
+    installed = {tool.name for tool in request.tools}
+    return bool(names) and len(set(names)) == len(names) and set(names) <= installed
+
+
 class Gateway:
-    def __init__(self, router: RequestRouter, bridge: BridgeExecutor, engine: WorkflowEngine):
+    def __init__(
+        self,
+        router: RequestRouter,
+        bridge: BridgeExecutor,
+        engine: WorkflowEngine,
+        *,
+        decision_observer: Callable[[DecisionTrace], None] | None = None,
+    ):
         self.router = router
         self.bridge = bridge
         self.engine = engine
+        self.skill_decisions = DecisionService[SkillCandidateRequest, tuple[str, ...]](
+            baseline=_InstalledSkillCandidates(),
+            config=router.decisions.config,
+            accept_accelerator=_valid_skill_subset,
+            observer=decision_observer,
+        )
 
     async def converse(
         self,
@@ -190,6 +242,13 @@ class Gateway:
                 )
         if not tools:
             return self._conversation_failure(context, "no_installed_tools", 0, ())
+        candidate_request = SkillCandidateRequest(context=context, tools=tuple(tools))
+        selected_names = set(
+            self.skill_decisions.decide(candidate_request, decision_type="skill_selection")
+            .result.value
+        )
+        tools = [tool for tool in tools if tool.name in selected_names]
+        bindings = {name: binding for name, binding in bindings.items() if name in selected_names}
 
         prompt = (
             "You are the Personal Engineering Agent. Answer naturally and concisely. "

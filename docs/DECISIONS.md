@@ -125,3 +125,20 @@ strong-model path would make the baseline depend on an unavailable service
 and could create an unreviewed data-egress path. The alternative of a separate
 JEV Harness was rejected because decisions are orchestration inputs, not an
 execution plane.
+
+## 2026-10-02 — Keep conversation Skill acceleration to installed candidates
+
+Decision: Route the ordinary Agent conversation's installed Skill command
+catalog through `DecisionService` as a `skill_selection` decision. With `NONE`,
+return the original full catalog in order. A future accelerated result may
+only narrow it to a nonempty subset of installed names. Apply the same subset
+to the model's visible tools and the Gateway's dispatch bindings. The complete
+request, including user message and command descriptions, requires trusted
+egress authorization before any provider is constructed or called.
+
+Reason: Normal Web conversation uses `Gateway.converse`, not `RequestRouter`'s
+one-shot route; without this boundary a JEV-ready decision contract would not
+cover the primary Agent interaction. Accepting arbitrary accelerator tool
+names or filtering only the display catalog was rejected because a model could
+then trigger a hidden or uninstalled command. No JEV provider is enabled by
+this decision.

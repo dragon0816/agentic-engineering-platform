@@ -80,6 +80,10 @@ latency, confidence and fallback evidence. Data classification, access-control
 decisions, complex next-action planning and strict completion validation stay
 outside accelerator authority. A JEV adapter is a later, benchmark-gated
 slice; Phase 1A adds no JEV dependency or account requirement.
+Ordinary Agent conversations must preserve the entire installed Skill command
+catalog when acceleration is `NONE`. Any accelerated Skill candidate set must
+be a nonempty subset of installed commands, and omitted commands must be
+absent from both model-visible tools and executable dispatch bindings.
 
 The initial data-class vocabulary includes `RESTRICTED`, but no existing
 Gateway approval may list that class until a separately reviewed restricted
