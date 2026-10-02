@@ -106,7 +106,9 @@ class ProjectItem(Contract):
     title: str = ""
     url: str = ""
     state: str = ""
+    created: str = ""
     updated: str = ""
+    author: str = ""
     fields: Mapping[str, str] = {}
     comments: tuple[ProjectComment, ...] = ()
     #: True when the thread was longer than this client asked for.
@@ -160,7 +162,9 @@ query($owner: String!, $number: Int!, $size: Int!, $comments: Int!, $after: Stri
               title
               url
               state
+              createdAt
               updatedAt
+              author { login }
               repository { nameWithOwner }
               comments(first: $comments) {
                 totalCount
@@ -354,7 +358,9 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
         title=str(content.get("title") or ""),
         url=str(content.get("url") or ""),
         state=str(content.get("state") or ""),
+        created=str(content.get("createdAt") or ""),
         updated=str(content.get("updatedAt") or ""),
+        author=str(((content.get("author") or {}) or {}).get("login") or ""),
         fields=fields,
         comments=comments,
         comments_truncated=int(thread.get("totalCount") or 0) > len(comments),

@@ -2681,3 +2681,16 @@ the final domain validator, including week-name and date-window rules.
 Static field definitions are reserved in the manifest contract for a later
 per-install settings slice. This change does not edit `host.json`, create a
 static settings editor, or generate Telegram controls.
+
+# Workflow 7 read-only Project preview (2026-10-02)
+
+`engineering/github-team-tickets-preview@1.0.0` has numeric alias `7` and
+one `team_tickets.preview` read step. Its request has bounded `max_items` and
+`comment_count` runtime fields. The Host uses its existing configured GitHub
+Project credential reference; the Workflow contains no token or workbook
+path. `TeamTicketsPreview` returns source-order managed column values for
+Task and Issues, a `capped` indicator, exact keys with incomplete comment
+threads, and names of fields the GitHub source could not supply. Jira
+Resolution is always absent. The capability still requires local
+`github.read` permission and `github-read-policy`; manifest installation,
+numeric resolution and Skill routing do not grant either.

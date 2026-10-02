@@ -212,3 +212,19 @@ The alternatives of accepting untyped browser values or persisting static
 settings through run arguments were rejected: both blur the boundary between
 one run's input and trusted machine configuration. Static persistence,
 dynamic options and Telegram controls remain separate migration steps.
+
+## 2026-10-02 — Adapt Workflow 7 as a separate GitHub read preview
+
+Decision: Use `ADAPT` for source W3-07's managed record order, Task/Issues
+routing and comment formatting. Replace retired Jira reads with the Host's
+existing configured GitHub Project client and one read-only capability. Keep
+the source Excel writer out of this first Workflow. Add Issue creation time
+and author login to the common Project read shape; mark any still-unavailable
+source fields and incomplete comment threads in the output.
+
+Reason: The user selected the same GitHub Project as Workflow 11 and a
+read-only first validation. Copying Jira JQL or the source writer would use a
+retired system or enable unverified writes. Folding Workflow 7 into Workflow
+11 was rejected because they answer different questions and have different
+workbook contracts. A typed preview can be tested and rolled back on its own,
+then compared with source fixtures before any Excel parity claim.

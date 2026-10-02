@@ -41,6 +41,11 @@ from capabilities.script_tools import (
     ScriptToolOutput,
     load_script_tools,
 )
+from capabilities.team_tickets.contracts import TeamTicketsPreview
+from capabilities.team_tickets.handlers import (
+    PREVIEW_SPEC as TEAM_TICKETS_PREVIEW_SPEC,
+)
+from capabilities.team_tickets.handlers import TeamTicketsPreviewHandler, TeamTicketsPreviewInput
 from capabilities.weekly_report.contracts import (
     ReportingWindow,
     SheetState,
@@ -312,7 +317,7 @@ def build_integrations(
     if integrations is None:
         return
     settings = integrations.weekly_report
-    if integrations.github_project is not None and settings is not None:
+    if integrations.github_project is not None:
         if resolver is None:
             mapped = config.credential_environment()
             if integrations.github_project.credential.name not in mapped:
@@ -322,12 +327,20 @@ def build_integrations(
             integrations.github_project, resolver, transport=jira_transport
         )
         installed.register(
-            PROJECT_SEARCH_SPEC,
-            ProjectSearchHandler(client, settings),
-            ProjectSearchInput,
-            ProjectSearchOutput,
+            TEAM_TICKETS_PREVIEW_SPEC,
+            TeamTicketsPreviewHandler(client),
+            TeamTicketsPreviewInput,
+            TeamTicketsPreview,
             ExecutionDependencies(central_required=False),
         )
+        if settings is not None:
+            installed.register(
+                PROJECT_SEARCH_SPEC,
+                ProjectSearchHandler(client, settings),
+                ProjectSearchInput,
+                ProjectSearchOutput,
+                ExecutionDependencies(central_required=False),
+            )
     if settings is not None:
         installed.register(
             RESOLVE_WINDOW_SPEC,
@@ -921,9 +934,7 @@ def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
         return DoctorCheck(
             name="models",
             status="failed",
-            detail=(
-                "The routed Gateway has no host-administrator approval for UNCLASSIFIED data"
-            ),
+            detail=("The routed Gateway has no host-administrator approval for UNCLASSIFIED data"),
         )
     here = " (a model on this machine only)" if binding.require_local_model else ""
     return DoctorCheck(

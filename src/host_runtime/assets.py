@@ -14,6 +14,8 @@ from capabilities.company_agent.manifest import (
     personal_proof_workflow,
     workflow_author_skill,
 )
+from capabilities.team_tickets.manifest import preview_skill as team_tickets_preview_skill
+from capabilities.team_tickets.manifest import preview_workflow as team_tickets_preview_workflow
 from capabilities.weekly_report.manifest import (
     mail_workflow,
     preview_workflow,
@@ -28,10 +30,12 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
     """Every manifest this package ships, Skills and Workflows alike."""
     return (
         weekly_skill(),
+        team_tickets_preview_skill(),
         workflow_author_skill(),
         knowledge_skill(),
         personal_proof_skill(),
         preview_workflow(),
+        team_tickets_preview_workflow(),
         report_workflow(),
         mail_workflow(),
         personal_proof_workflow(),

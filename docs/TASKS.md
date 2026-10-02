@@ -520,6 +520,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   behavior, Excel invariants and source tests in
   `docs/WORKFLOW_7_SOURCE_CONTRACT.md`. Migration and parity against a workbook
   copy remain pending.
+- [x] Add Workflow 7's first installed GitHub Project read-only preview with
+  `/run 7` manifest alias, `tickets.preview` Skill route, source managed-column
+  mapping, explicit missing-field/truncated-thread evidence and a denial-before-
+  network test. Focused Project/Workflow tests: 39 passed; clean full
+  repository selection: 1,567 passed, 4 skipped, 2 machine-specific
+  deselected. The real Project run and all Excel parity remain open.
 - [ ] Review and publish the active Hermes Skills and validated Workflows as
   governed default Marketplace assets.
 - [ ] Prove SOP-to-Workflow, Knowledge and natural-language Skill integration

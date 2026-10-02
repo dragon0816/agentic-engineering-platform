@@ -55,8 +55,39 @@ columns and hidden rows, backup/lock behavior, and run against a workbook copy
 on an enrolled company Bridge. The source tests provide the initial parity
 oracle; no platform parity or live Excel validation has been claimed.
 
-The existing `GitHubProjectClient` exposes project field values, issue title,
-state, update time, URL and comments. It does not currently query issue
-creation time or reporter. A Workflow 7 adapter must either extend that
-read-only query under the same credential policy or explicitly mark those
-source columns unavailable; it must not invent source-equivalent values.
+Before the first migrated slice, `GitHubProjectClient` exposed project field
+values, issue title, state, update time, URL and comments, but not issue
+creation time or author. The read-only query was extended to request both
+under the same credential policy. Author login is the available reporter
+substitute; it is not Jira's display-name field.
+
+## First migrated slice: GitHub read-only preview (2026-10-02)
+
+Strategy: **ADAPT** the source's managed-column order, Task/Sub-task routing,
+date-cell format and latest-comment formatting behind the existing GitHub
+Project client. The read-only query now asks for Issue `createdAt` and author
+login. The installed `engineering/github-team-tickets-preview@1.0.0`
+Workflow has alias `7` and one `team_tickets.preview` read capability; the
+`tickets.preview` Skill routes deterministically to it. Installation and
+publication still do not grant execution. A local `github.read` grant with
+`github-read-policy` is required before the Bridge calls GitHub.
+
+The preview uses Issue `owner/repo#number` as Key, Project `Type` or `Issue
+Type` to choose Task versus Issues, Project Status with Issue state fallback,
+Project Priority and Assignee fields, Issue author login for Reporter, and
+Issue created/updated timestamps. GitHub has no Jira Resolution equivalent:
+that cell is empty and `unmapped_fields` names it. Any other absent mapped
+field is also named. The legacy `Jira activity` column contains the latest
+available GitHub comments in source format; when the client reports a
+truncated thread, that cell is left empty and the key appears in
+`truncated_threads`, so an incomplete first page cannot be mistaken for the
+latest comments. `capped` distinguishes an intentional issue limit from a
+complete board read. No workbook path, file write, Excel Bridge or email
+handler is part of this Workflow.
+
+This is a preview migration, not parity or source deprecation. The source's
+reporter/JQL filters, static workbook configuration, Excel upsert, row
+visibility, manual-column preservation and backups remain open. The real
+Project preview is blocked until the Host's GitHub credential can read
+Project V2. Offline Agent/Bridge tests cover mapping, no workbook creation and
+denial before network access.

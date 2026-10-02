@@ -29,9 +29,9 @@ Jira with the same GitHub Project, starting with a read-only preview.
   Bridge policy. Installed preview assets and package will need updating
   before the owner sees this command on the existing Agent Web process.
 - `docs/WORKFLOW_7_SOURCE_CONTRACT.md` records the pinned source job's input,
-  preview, Excel invariants and parity gate. Existing `GitHubProjectClient`
-  lacks source-equivalent creation-time and reporter fields; mapping must be
-  explicit before claiming parity.
+  preview, Excel invariants and parity gate. The Project client now requests
+  creation time and author login, while the Jira/GitHub semantic differences
+  remain explicit before any parity claim.
 - Typed `WorkflowManifest.parameters` now distinguishes static declarations
   from runtime fields. Agent Web renders labeled runtime controls and validates
   the exact installed Workflow's arguments before execution; older manifests
@@ -39,6 +39,13 @@ Jira with the same GitHub Project, starting with a read-only preview.
   declare week, date-window and issue-cap fields. Static persistence, dynamic
   option providers and Telegram controls are not yet implemented. See
   `docs/CONTRACTS.md` and `docs/DECISIONS.md`.
+- Workflow 7's first read-only GitHub Project adapter now has a shipped
+  exact Workflow and `tickets.preview` Skill. It preserves the source managed
+  column order, routes Task/Sub-task to Task, leaves Jira Resolution explicitly
+  unavailable, names missing GitHub fields and refuses to treat truncated
+  comments as complete. An offline installed-Agent/Bridge run passed, and a
+  missing local grant prevented GitHub transport use. No Excel code is wired
+  into this Workflow. See `docs/WORKFLOW_7_SOURCE_CONTRACT.md`.
 - A synthetic Knowledge Vault, exact matching manifest and isolated Host
   configuration were staged under `.scratch/knowledge-validation/`. They are
   ignored local test artifacts, not the enterprise Vault. Catalog registration
@@ -66,6 +73,16 @@ Jira with the same GitHub Project, starting with a read-only preview.
   unrelated Knowledge Marketplace test; that case passed alone and in the
   clean full rerun. `ruff check src tests`, `mypy src tests`, Node syntax check
   of the inline Agent Web script and offline sdist/wheel build passed.
+- After the Workflow 7 preview slice, 39 focused Project/Workflow tests passed.
+  The full repository selection passed **1,567 tests, 4 skipped, 2 deselected**
+  in a clean rerun; the two deselections remain the machine-specific browser
+  WebSocket and Excel COM cases. `ruff check src tests`, `mypy src tests` and
+  `git diff --check` passed. An initial full attempt had one Windows loopback
+  connection abort in the existing Host-header security test; that unchanged
+  test passed alone and in the clean full rerun. No live Project preview was
+  possible because direct Project V2 read still returned `github_auth`. An
+  offline sdist/wheel build passed, and the wheel contains all four new
+  `capabilities.team_tickets` modules.
 
 ## Open work and known limits
 
@@ -85,9 +102,10 @@ Jira with the same GitHub Project, starting with a read-only preview.
    lacks the required root `index.md` and `log.md`; no nested directory has
    all four. Many entries are OneDrive cloud reparse points.
 3. Build Workflow 7's GitHub-to-source field mapping and read-only preview.
-   The same Project credential gate applies. Source tests are in the pinned
-   `rs_workflow_system` checkout and must remain read-only. Later Excel parity
-   uses a workbook copy and explicit write approval.
+   The offline first stage is implemented; rerun it against the real Project
+   after its credential gate is fixed. Source tests are in the pinned
+   `rs_workflow_system` checkout and remain read-only. Later Excel parity uses
+   a workbook copy and explicit write approval.
 4. Complete generic static/runtime parameter contracts and generated Web and
    Telegram controls, ordinary Agent/task state integration, backend transfer
    authorization, governed native adapters, default Marketplace packages,
