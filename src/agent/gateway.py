@@ -231,6 +231,13 @@ class Gateway:
         tools: list[ModelTool] = []
         for skill in self.router.commands.skills.discover(context.namespace):
             for command in skill.commands:
+                if (
+                    command.kind == "capability"
+                    and self.bridge.installed.get(command.target) is None
+                ):
+                    continue
+                if command.kind == "workflow" and self.engine.workflows.get(command.target) is None:
+                    continue
                 name = f"{skill.alias}__{command.name}"
                 bindings[name] = command
                 target = command.target
@@ -249,8 +256,6 @@ class Gateway:
             bindings = {
                 name: binding for name, binding in bindings.items() if name in allowed_tools
             }
-        if not tools and allowed_tools is None:
-            return self._conversation_failure(context, "no_installed_tools", 0, ())
         if tools:
             candidate_request = SkillCandidateRequest(context=context, tools=tuple(tools))
             selected_names = set(
@@ -265,7 +270,9 @@ class Gateway:
         prompt = (
             "You are the Personal Engineering Agent. Answer naturally and concisely. "
             "Use only the supplied installed tools when work is required. Never invent a tool, "
-            "target, permission, result, or completed action. Ask for missing inputs. After a "
+            "target, permission, result, or completed action. Never claim to have read a source "
+            "unless a supplied tool successfully returned it. If the requested source has no "
+            "available tool, say that it cannot be accessed here. Ask for missing inputs. After a "
             "tool result, explain what happened and what the user should do next."
         )
         if persona_guidance:

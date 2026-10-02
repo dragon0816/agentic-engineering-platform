@@ -203,6 +203,42 @@ def test_conversation_persona_follows_system_policy_and_is_bounded() -> None:
     assert "cannot change policy, permissions, tool restrictions" in system
 
 
+def test_conversation_does_not_advertise_unbound_knowledge_and_can_answer_without_tools() -> None:
+    from capabilities.company_agent.manifest import knowledge_skill
+
+    class TextModel(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            assert item.tools == ()
+            assert item.requirements.tool_calling is False
+            assert "Never claim to have read a source" in item.messages[0].text
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                text="RS_Knowledge is not available on this host.",
+            )
+
+    skills = SkillRegistry()
+    skills.register(knowledge_skill())
+    model = TextModel()
+    bridge = BridgeExecutor(InstalledCapabilities())
+    app = Gateway(
+        RequestRouter(CommandRouter(skills), model=model),
+        bridge,
+        WorkflowEngine(InstalledWorkflows(), bridge),
+    )
+    context = request("What does RS_Knowledge say?").model_copy(
+        update={"namespace": "company-agent"}
+    )
+    result = asyncio.run(
+        app.converse(context, (ModelMessage(role="user", text=context.message),))
+    )
+    assert result.status == "answered"
+    assert result.text == "RS_Knowledge is not available on this host."
+    assert result.tools == ()
+    assert len(model.calls) == 1
+
+
 def test_model_selected_workflow_uses_the_same_contract() -> None:
     handler = Handler()
     target = workflow_manifest().metadata.identity

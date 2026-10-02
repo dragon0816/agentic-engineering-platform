@@ -26,8 +26,10 @@ from test_host_wiring import grant_record, host_json, membership_record, ready, 
 from test_platform_transport import Platform, host
 from test_product_e2e_05 import V1, copy_vault, manifest
 
+from agent.gateway import GatewayConversationResult
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from capabilities.weekly_report.manifest import preview_workflow
+from common.execution import Failure, TraceIdentifiers
 from control_plane.http import ControlPlaneServer
 from extensions.package import stage_extension_package
 from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
@@ -1337,6 +1339,19 @@ def test_it_lists_exact_installed_knowledge_with_its_local_configuration(
             "vault_ref": location,
         }
     ]
+
+
+def test_failed_gateway_turn_shows_a_safe_reason_code(served: AgentWebServer) -> None:
+    result = GatewayConversationResult(
+        trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
+        status="failed",
+        text="The Personal Agent could not complete this turn.",
+        model_turns=1,
+        failure=Failure(code="empty_model_answer", message="The bounded conversation loop stopped"),
+    )
+    text = served.web._gateway_conversation_text(result)
+    assert "empty_model_answer" in text
+    assert "LLM Gateway" in text
 
 
 def test_grounded_knowledge_asking_runs_the_exact_capability_and_keeps_citations(

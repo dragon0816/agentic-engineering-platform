@@ -276,6 +276,16 @@ class AgentWeb:
         return bool(environment and os.environ.get(environment))
 
     def _gateway_conversation_text(self, result: GatewayConversationResult) -> str:
+        if result.failure is not None and result.failure.code == "empty_model_answer":
+            return (
+                "The LLM Gateway returned an empty answer (empty_model_answer). "
+                "Retry the turn; if it repeats, inspect the Gateway model logs."
+            )
+        if result.failure is not None and result.failure.code == "model_unavailable":
+            return (
+                "The LLM Gateway request failed (model_unavailable). "
+                "Check the configured model and Gateway status."
+            )
         if result.failure is not None and result.failure.code in {
             "gateway_not_approved",
             "class_not_approved",
@@ -285,6 +295,10 @@ class AgentWeb:
                 "Ask the host administrator to approve this exact Gateway and data class."
             )
         if result.failure is None or result.failure.code != "credential_unavailable":
+            if result.failure is not None and result.text == (
+                "The Personal Agent could not complete this turn."
+            ):
+                return f"{result.text} Reason: {result.failure.code}."
             return result.text
         binding = self.runtime.config.models
         endpoint = (
