@@ -180,3 +180,18 @@ shortcut remains declarative and fails closed when installation is ambiguous.
 The CLI now returns a nonzero exit status for failed, unavailable, unresolved
 or unrecorded runs, so shell validation cannot mistake a rendered failure for
 success.
+
+## 2026-10-02 — Validate Knowledge locally and replace Workflow 7 Jira reads
+
+Decision: First validate Knowledge against a small independent test Vault.
+Leave the supplied `RS_Knowledge` tree unchanged, and select an explicit
+queryable subset before any of its content is sent to a model. Workflow 7's
+replacement source is the same GitHub Project used by Workflow 11, with a
+read-only preview as the first executable stage. The owner will update the
+Project read permission for the configured Host credential.
+
+Reason: The supplied tree has `drop/raw/wiki` but lacks the platform Vault's
+required root index and log, so treating it as already publishable would lose
+provenance or fail exact digest checks. The source Workflow 7 uses retired Jira
+and writes an Excel workbook; a read-only GitHub preview permits source field
+mapping and parity inspection without assuming write approval.

@@ -481,19 +481,40 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   ingress, then add governed native task adapters with containment tests.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter
   contracts, generated Web/Telegram forms, flexible `/run` aliases and parity.
+- [x] Add a manifest-declared numeric Workflow alias and deterministic Web
+  parsing for `/run 11` and `/run workflow 11`. Workflow 11's alias selects
+  only the read-only preview; missing/ambiguous aliases require an exact
+  identity. CLI `ask` returns nonzero when the routed Workflow fails or is
+  unavailable. Verification is recorded in `HANDOFF.md`.
 - [ ] Validate the installed Workflow 11 read-only preview on this Host. The
   2026-10-02 run reached GitHub Project and stopped at `github_auth` after its
   window step; the configured token is valid for `/user` but Project V2 returns
   GraphQL `FORBIDDEN`. Restore Project read access, rerun preview, then compare
   the plan with the source against a workbook copy. See
   `docs/VALIDATION_GAPS_2026-10-02.md`.
-- [ ] Stage a full copy of the owner-supplied Knowledge Vault and create an
-  exact published manifest and Host binding for that copy. The original
-  OneDrive Vault is not the first query/ingest test target; the currently
-  installed Knowledge manifest points to a different proof Vault.
-- [ ] Characterize and migrate source Workflow 7 (`jira_team_tickets`) if it
-  remains needed; Jira has been retired, so first decide its replacement data
-  source. Workflow 11 is the first validation target.
+- [ ] Validate Knowledge query, convert, ingest and lint with a small
+  independent local test Vault before using the owner-supplied OneDrive tree.
+  The existing Host manifest points to a different proof Vault and has no
+  binding. Keep this test Vault separate from the source tree.
+- [x] Stage the synthetic fixture Vault in an isolated local Host workspace,
+  verify exact manifest digests and clean static lint, and confirm Agent Web
+  lists the bound Knowledge identity over loopback HTTP. Focused grounded
+  asking/policy tests passed with a scripted model. The Codex process has no
+  `LITELLM_MASTER_KEY`, so live Gateway asking and installed convert/ingest/lint
+  remain open. See `docs/KNOWLEDGE_VALIDATION_2026-10-02.md`.
+- [ ] Plan a provenance-preserving conversion of `RS_Knowledge` into a valid
+  platform Vault, then stage a verified copy and exact manifest/binding.
+  The source root lacks required index/log files; the owner will later specify
+  which subset may be queried through the internal Gateway.
+- [ ] Migrate source Workflow 7 (`jira_team_tickets`) using the same GitHub
+  Project as Workflow 11, beginning with a read-only preview. Map GitHub
+  identity, type/status, comments and fields to the source contract before
+  touching Excel. Workflow 11 is the first live validation target; its
+  Project read permission is being updated by the owner.
+- [x] Characterize source Workflow 7's input schema, read/preview/write
+  behavior, Excel invariants and source tests in
+  `docs/WORKFLOW_7_SOURCE_CONTRACT.md`. Migration and parity against a workbook
+  copy remain pending.
 - [ ] Review and publish the active Hermes Skills and validated Workflows as
   governed default Marketplace assets.
 - [ ] Prove SOP-to-Workflow, Knowledge and natural-language Skill integration
