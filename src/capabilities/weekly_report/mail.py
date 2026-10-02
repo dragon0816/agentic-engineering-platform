@@ -154,29 +154,43 @@ def totals_section(
 
 
 def _share_table(title: str, totals: Mapping[str, int]) -> str:
+    """Use the source draft's 808px table and aligned 96px numeric columns."""
     denominator = sum(totals.values())
     rows = []
     for label, count in totals.items():
         share = round(count * 100 / denominator) if denominator else 0
         rows.append(
             "<tr>"
-            f"<td style='padding:6px 10px;border-bottom:1px solid #e1e0d9'>{escape(label)}</td>"
-            "<td align='right' style='padding:6px 10px;border-bottom:1px solid #e1e0d9'>"
+            "<td style='padding:6px 10px;border-bottom:1px solid #e1e0d9;"
+            f"vertical-align:top'>{escape(label)}</td>"
+            "<td align='right' style='padding:6px 10px;border-bottom:1px solid #e1e0d9;"
+            "vertical-align:top'>"
             f"{count}</td>"
             "<td align='right' style='padding:6px 10px;border-bottom:1px solid #e1e0d9;"
-            f"color:#898781'>{share}%</td></tr>"
+            f"color:#898781;vertical-align:top'>{share}%</td></tr>"
         )
     rows.append(
         "<tr style='font-weight:600'><td style='padding:8px 10px;border-top:2px solid #52514e'>"
-        f"Total</td><td align='right' style='border-top:2px solid #52514e'>{denominator}</td>"
-        f"<td align='right' style='border-top:2px solid #52514e'>"
+        "合計 (total)</td><td align='right' style='border-top:2px solid #52514e'>"
+        f"{denominator}</td>"
+        "<td align='right' style='border-top:2px solid #52514e'>"
         f"{'100%' if denominator else '0%'}</td></tr>"
     )
+    first = "Instrument" if title == "Instrument totals" else "帳號 (account)"
+    count_heading = "Tickets" if title == "Instrument totals" else "張數"
+    share_heading = "Share" if title == "Instrument totals" else "佔比"
+    th_left = (
+        "padding:7px 10px;border-bottom:2px solid #52514e;"
+        "font-size:12px;text-align:left;color:#52514e;font-weight:600"
+    )
+    th_right = th_left.replace("text-align:left", "text-align:right")
     return (
         f"<h3 style='font-size:12px;text-transform:uppercase;color:#52514e'>{escape(title)}</h3>"
-        "<table role='presentation' width='100%' cellspacing='0' style='border-collapse:collapse'>"
-        "<tr style='text-align:left;color:#52514e'><th>" + escape(title.split()[0]) + "</th>"
-        "<th align='right'>Tickets</th><th align='right'>Share</th></tr>"
+        "<table role='presentation' width='808' cellspacing='0' "
+        "style='width:808px;max-width:100%;border-collapse:collapse'>"
+        f"<tr><th style='{th_left}'>{first}</th>"
+        f"<th width='96' style='{th_right}'>{count_heading}</th>"
+        f"<th width='96' style='{th_right}'>{share_heading}</th></tr>"
         + "".join(rows) + "</table>"
     )
 
@@ -184,7 +198,9 @@ def _share_table(title: str, totals: Mapping[str, int]) -> str:
 def _member_split(items: Sequence[ReportItem], instruments: Sequence[str] | None) -> str:
     buckets = effort.buckets(items, instruments=instruments)
     totals = effort.instrument_totals(items, instruments)
-    colours = chart.colours_for(tuple(totals))
+    slices = chart.slices_for(totals)
+    colours = {name: colour for name, _, colour in slices}
+    kept = {name for name in colours if name != "Unassigned" and not name.startswith("Other (")}
     maximum = max(
         (sum(len(keys) for keys in groups.values()) for groups in buckets.values()),
         default=1,
@@ -193,12 +209,23 @@ def _member_split(items: Sequence[ReportItem], instruments: Sequence[str] | None
     for member in effort.member_totals(items):
         groups = buckets.get(member, {})
         segments = []
-        for name, keys in groups.items():
-            width = max(8, round(300 * len(keys) / maximum))
+        for name, _, colour in slices:
+            if name == "Unassigned":
+                count = len(groups.get(name, []))
+            elif name.startswith("Other ("):
+                count = sum(
+                    len(keys) for label, keys in groups.items()
+                    if label not in kept and label != "Unassigned"
+                )
+            else:
+                count = len(groups.get(name, []))
+            if not count:
+                continue
+            width = max(8, round(300 * count / maximum))
             segments.append(
-                f"<td width='{width}' bgcolor='{colours[name]}' title='{escape(name, quote=True)}'"
+                f"<td width='{width}' bgcolor='{colour}' title='{escape(name, quote=True)}'"
                 " style='height:22px;color:white;text-align:center;font-size:11px'>"
-                f"{len(keys)}</td>"
+                f"{count if count >= 2 else '&nbsp;'}</td>"
             )
         rows.append(
             "<tr><td style='padding:5px 8px;text-align:right;white-space:nowrap'>"
@@ -229,8 +256,11 @@ def build_html(
     activity_required: bool = True,
 ) -> str:
     """Render the approved Outlook layout from the current week's data."""
-    total_matched = len(items) if matched is None else matched
+    total_matched = len(items) if matched is None else max(matched, len(items))
     instrument_totals = effort.instrument_totals(items, instruments)
+    slices = chart.slices_for(instrument_totals)
+    displayed_instruments = {name: count for name, count, _ in slices}
+    instrument_count = sum(instrument_totals.values())
     account_totals = effort.account_totals(items)
     members = effort.member_totals(items)
     summary = "".join(
@@ -239,12 +269,45 @@ def build_html(
         for name, count in members.items()
     )
     activity_label = "本週有留言的" if activity_required else "本週符合條件的"
+    excluded = total_matched - len(items)
+    if activity_required:
+        scope_note = (
+            f"一張 ticket 要計入本週，必須在 {window.since:%Y-%m-%d}～"
+            f"{window.until:%Y-%m-%d} 之間有新的留言；另有 {excluded} 張"
+            "符合查詢但未通過留言條件，因此未計入。"
+        )
+    else:
+        scope_note = "未啟用本週留言篩選；符合查詢條件的 ticket 均計入。"
+    empty_note = ""
+    if not items:
+        reason = (
+            f"沒有任何 ticket 在 {window.since:%Y-%m-%d}～{window.until:%Y-%m-%d} "
+            f"之間有新的留言；{total_matched} 張符合查詢但未計入。"
+            if activity_required else
+            f"{window.since:%Y-%m-%d}～{window.until:%Y-%m-%d} 沒有符合條件的 ticket。"
+        )
+        empty_note = (
+            "<tr><td style='padding:16px 26px 0'><div style='background:#fdf6e3;"
+            f"border-left:3px solid #d9a441;padding:11px 13px'>{reason}</div></td></tr>"
+        )
+    instrument_title = (
+        f"Tickets by instrument ({instrument_count} total)"
+        if instrument_count == len(items) else
+        f"Tickets by instrument ({instrument_count} instrument-tickets "
+        f"from {len(items)} tickets)"
+    )
     image = (
         f"<img src='cid:{escape(chart_cid, quote=True)}' width='300' "
         "alt='Tickets by instrument' style='display:block;max-width:100%;height:auto'>"
         if chart_cid else "<p>No instrument chart this week.</p>"
     )
     project_line = f" &middot; GitHub Project {escape(project)}" if project else ""
+    multi_note = (
+        "<p style='font-size:11px;color:#898781'>"
+        + escape(MULTI_INSTRUMENT_NOTE)
+        + f" Share uses {instrument_count} instrument-tickets as its denominator.</p>"
+        if instrument_count != len(items) else ""
+    )
     return (
         "<html><head><meta http-equiv='Content-Type' "
         "content='text/html; charset=utf-8'></head>"
@@ -265,6 +328,7 @@ def build_html(
         "Effort below is a <b>ticket count</b>, not hours: this GitHub project "
         "records no worklog, no time-spent and no story points, so there is no hour data "
         "to report.</div></td></tr>"
+        f"{empty_note}"
         "<tr><td style='padding:18px 26px 4px'><b style='font-size:12px;"
         "text-transform:uppercase;color:#52514e'>Tickets per team member</b>"
         "<table role='presentation' cellspacing='0' style='padding-top:8px'>"
@@ -272,18 +336,21 @@ def build_html(
         "</td></tr>"
         "<tr><td style='padding:16px 26px 0'><table role='presentation' width='100%' "
         "cellspacing='0'><tr><td width='45%' valign='top'>"
-        "<div style='font-size:12px;color:#52514e'>Tickets by instrument</div>"
+        f"<div style='font-size:12px;color:#52514e'>{instrument_title}</div>"
         f"{image}</td><td valign='top'>{_member_split(items, instruments)}</td>"
         "</tr></table></td></tr>"
         "<tr><td style='padding:20px 26px 0'>"
-        f"{_share_table('Instrument totals', instrument_totals)}"
-        "<p style='font-size:11px;color:#898781'>" + escape(MULTI_INSTRUMENT_NOTE) + "</p>"
+        f"{_share_table('Instrument totals', displayed_instruments)}"
+        f"{multi_note}"
         "</td></tr><tr><td style='padding:20px 26px 0'>"
         f"{_share_table('Account totals', account_totals)}"
         "</td></tr>"
-        "<tr><td style='padding:20px 26px 24px;font-size:11px;color:#898781'>"
-        f"{escape(EFFORT_NOTE)} "
-        f"{total_matched - len(items)} matching ticket(s) excluded by the activity rule."
+        "<tr><td style='padding:20px 26px 24px;font-size:11px;color:#898781;"
+        "line-height:1.6;border-top:1px solid #e1e0d9'>"
+        "Instrument and Account come from the configured GitHub Project fields. "
+        "Unknown instrument, member or account values are shown as Unassigned and counted. "
+        f"{escape(scope_note)} "
+        f"{escape(EFFORT_NOTE)}"
         "</td></tr></table></td></tr></table></body></html>"
     )
 

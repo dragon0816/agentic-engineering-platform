@@ -1,6 +1,6 @@
 """The pie chart the weekly mail carries, drawn with the standard library.
 
-The source drew this with matplotlib. Carrying matplotlib would mean carrying
+The source drew a composite chart with matplotlib. Carrying matplotlib would mean carrying
 numpy, Pillow, fonttools, kiwisolver and contourpy into an offline bundle that
 is installed with `--no-index` on a company machine -- tens of megabytes of
 wheels, and the bundle has already had one install fail because a wheel's path
@@ -8,11 +8,9 @@ was too long for Windows. A pie chart is arithmetic and a circle, so this
 draws one and writes the PNG itself: `zlib` and `struct` are both stdlib, and
 the bundle does not grow by a byte.
 
-Nothing here draws text. Rendering a legend inside the image would need a
-font, and the mail is HTML anyway, so the labels live in an HTML table beside
-the picture with a colour swatch per row. That is better than a drawn legend
-and not a compromise: the labels stay selectable text, they wrap on a phone,
-and a reader whose mail client blocks images still has every number.
+Nothing here draws text. The source's direct slice labels and stacked bars
+remain a visible parity gap; the mail keeps the bar breakdown and all numeric
+shares as HTML so blocked images still leave usable figures.
 """
 
 from __future__ import annotations
@@ -22,39 +20,68 @@ import struct
 import zlib
 from collections.abc import Mapping, Sequence
 
-#: One colour per slice, taken in order and repeated only if a week somehow
-#: names more instruments than this. Chosen to stay distinguishable next to
-#: each other and to survive the red/green confusions: no two adjacent entries
-#: differ only in hue.
+#: Source W2's seven-step blue ramp. A week with more named instruments folds
+#: the tail into Other instead of cycling colours and implying false identity.
 PALETTE: tuple[str, ...] = (
-    "#4e79a7",
-    "#f28e2b",
-    "#59a14f",
-    "#e15759",
-    "#b07aa1",
-    "#76b7b2",
-    "#edc948",
-    "#9c755f",
-    "#8cd17d",
-    "#d37295",
-    "#a0cbe8",
-    "#ffbe7d",
-    "#86bcb6",
-    "#f1ce63",
-    "#b6992d",
-    "#499894",
+    "#12325b", "#18447b", "#1f579d", "#256bc0", "#377fd8", "#5a95df", "#7cabe6",
 )
+OTHER = "#c3c2b7"
+UNASSIGNED = "#898781"
 #: What sits behind the circle. White, because a mail body is white and a
 #: transparent PNG in Outlook renders black often enough to matter.
-BACKGROUND = "#ffffff"
+BACKGROUND = "#fcfcfb"
 #: The grey a slice is outlined in, so two similar colours still part.
-EDGE = "#ffffff"
+EDGE = BACKGROUND
 
 
 def colours_for(labels: Sequence[str]) -> dict[str, str]:
     """Which colour each label is drawn in, and the same mapping the HTML
     legend uses. Positional, so the same week always reads the same."""
-    return {label: PALETTE[index % len(PALETTE)] for index, label in enumerate(labels)}
+    named = 0
+    colours: dict[str, str] = {}
+    for label in labels:
+        if label == "Unassigned":
+            colours[label] = UNASSIGNED
+        elif label.startswith("Other ("):
+            colours[label] = OTHER
+        else:
+            colours[label] = PALETTE[named % len(PALETTE)]
+            named += 1
+    return colours
+
+
+def slices_for(
+    totals: Mapping[str, int], *, min_share: float = 0.05
+) -> tuple[tuple[str, int, str], ...]:
+    """Source W2 chart grouping: seven named slices, then Other, then Unassigned.
+
+    The source's default five-percent threshold is retained here. This one
+    series drives the picture, member bars and totals table, so folding cannot
+    make any one of them disagree with the others.
+    """
+    if not 0 <= min_share < 1:
+        raise ValueError("min_share must be between zero and one")
+    if any(count < 0 for count in totals.values()):
+        raise ValueError("a slice cannot be a negative number of tickets")
+    named = sorted(
+        ((name, count) for name, count in totals.items() if name != "Unassigned" and count),
+        key=lambda entry: (-entry[1], entry[0]),
+    )
+    unassigned = totals.get("Unassigned", 0)
+    grand = sum(count for _, count in named) + unassigned
+    kept: list[tuple[str, int]] = []
+    folded: list[tuple[str, int]] = []
+    for name, count in named:
+        if len(kept) >= len(PALETTE) or (grand and count / grand < min_share):
+            folded.append((name, count))
+        else:
+            kept.append((name, count))
+    slices = [(name, count, PALETTE[index]) for index, (name, count) in enumerate(kept)]
+    if folded:
+        slices.append((f"Other ({len(folded)})", sum(count for _, count in folded), OTHER))
+    if unassigned:
+        slices.append(("Unassigned", unassigned, UNASSIGNED))
+    return tuple(slices)
 
 
 def _rgb(value: str) -> tuple[int, int, int]:
@@ -176,5 +203,10 @@ def pie_png(
 
 
 def pie_for(totals: Mapping[str, int], **options: int) -> bytes | None:
-    """The chart for a `totals` mapping, drawn in its own order."""
-    return pie_png(tuple(totals), tuple(totals.values()), **options)
+    """The chart for a `totals` mapping, using the source's folded series."""
+    slices = slices_for(totals)
+    return pie_png(
+        tuple(label for label, _, _ in slices),
+        tuple(count for _, count, _ in slices),
+        **options,
+    )
