@@ -2,8 +2,9 @@
 
 Date: 2026-10-02 (Asia/Taipei). Branch: `main`. This is an incremental
 checkpoint for the owner's Agent/Knowledge/Workflow program, not completion of
-all remaining Phase 7 and Orchestrator work. No push, source Vault edit, Excel
-write, mail action or Marketplace publication occurred.
+all remaining Phase 7 and Orchestrator work. This coding session did not push,
+edit the source Vault, write an Excel workbook, create a mail draft or publish
+to the Marketplace. A later user-run Agent apply did write the report workbook.
 
 ## Goal and decisions
 
@@ -97,6 +98,15 @@ Jira with the same GitHub Project, starting with a read-only preview.
   exact bare commands `/run 11` and `/run workflow 11` then returned
   `succeeded` with no Agent refusal or Workflow failure. These runs used the
   same four-step read-only preview asset; report parity was not inspected.
+- A later user-run Agent applied Workflow 11 successfully in five steps. Its
+  separate mail Workflow failed after two steps with `permission_denied` at
+  `weekly-report/mail@1.0.0`, before Outlook was invoked. The installed AEP
+  virtual environment's doctor reports Excel and Outlook COM available; the
+  source checkout's virtual environment lacks those optional bridges and must
+  not be used to assess the running Agent. This Host's `grants.json` has no
+  `outlook.draft` grant for the mail capability. Empty mail recipients are the
+  configured safe default. Three focused tests covering successful draft,
+  missing approval and missing Outlook all passed without external effects.
 
 ## Open work and known limits
 
@@ -123,6 +133,12 @@ Jira with the same GitHub Project, starting with a read-only preview.
    Telegram controls, ordinary Agent/task state integration, backend transfer
    authorization, governed native adapters, default Marketplace packages,
    SOP/Knowledge/Skill end-to-end evidence, and optional benchmark-gated JEV.
+5. Await the owner's explicit decision on a persistent local
+   `weekly-report/mail@1.0.0` / `outlook.draft` grant for `leo.chi`. Do not
+   reuse the report apply grant's approval reference or create a draft before
+   that decision. If approved, back up `grants.json`, add only that grant,
+   validate the installed Host, and create one `2026_40W` Outlook draft with
+   no recipients or send action. Report apply and mail are separate Workflows.
 
 The active checklist is `docs/TASKS.md`; observed readiness is in
 `docs/VALIDATION_GAPS_2026-10-02.md`. Prior Gateway policy still applies:

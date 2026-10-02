@@ -36,9 +36,20 @@ the source for a later controlled copy. No source Vault files were changed.
   run and both bare `/run 11` and `/run workflow 11` commands returned
   `succeeded` without refusal. They exercised the four-step read-only preview;
   the plan has not yet been compared with the source or a workbook copy.
-- The Host doctor reports Workflow 11 preview support, but no Excel COM bridge
-  for the write phase and no Outlook bridge for mail. The source of Workflow 11
-  is now GitHub Project; its legacy `jira-` asset identity has not been renamed.
+- An earlier doctor run from the **source checkout's virtual environment**
+  reported no Excel COM or Outlook bridge. That check did not represent the
+  installed AEP environment used by Agent Web. The source of Workflow 11 is
+  now GitHub Project; its legacy `jira-` asset identity has not been renamed.
+- A later check used the **installed AEP virtual environment**, rather than
+  the source checkout's virtual environment: its doctor reports that both
+  Excel writing and Outlook drafting are available. The durable Host run
+  history confirms one five-step report apply `succeeded` and a following
+  mail Workflow `failed` after two steps. The configured actor's `grants.json`
+  has no `weekly-report/mail@1.0.0` grant; the draft capability requires
+  `outlook.draft`, `weekly-report-mail-policy` and an approval reference. The
+  current `mail_to` and `mail_cc` arrays are empty by design, so a future
+  authorized draft would have no prefilled recipients. No Outlook draft was
+  created during this diagnostic check.
 - The owner-supplied external Knowledge Vault has `drop`, `raw` and `wiki`
   directories, 6,928 files and approximately 1.1 GB of listed content. The
   supplied root lacks `index.md` and `log.md`, which the platform Vault
@@ -56,7 +67,7 @@ the source for a later controlled copy. No source Vault files were changed.
 | Area | Current state | Next concrete checkpoint |
 | --- | --- | --- |
 | Workflow 11 preview | Installed alias and Project/Issue access verified; explicit-week and both bare Web commands succeed | Inspect the live plan and workbook-read evidence against the source using a workbook copy; keep apply/mail out of this parity check |
-| Workflow 11 apply/mail | Code exists; this Host lacks Excel COM and Outlook bridges; live parity is unproven | On a suitable company workstation, use a workbook copy and source/platform parity evidence before any real write or mail action |
+| Workflow 11 apply/mail | Installed Agent has Excel and Outlook COM; apply succeeded once, while mail stopped at its ungranted draft step. Live report parity is still unproven | Obtain an explicit approval reference for this actor's `outlook.draft` grant, then test one draft without sending; inspect report parity separately on a workbook copy |
 | Workflow 7 | Read-only GitHub Project preview and offline policy/field-mapping proof exist; Project access is now available, but this Host's installed assets have not been refreshed for Workflow 7 | Install the reviewed preview asset, run a live read-only check, then compare to source fixtures and a workbook copy before any write approval |
 | Knowledge source Vault | The owner tree does not satisfy the Vault layout. A separate synthetic Vault is staged, pinned, bound and listed in isolated Agent Web; see `docs/KNOWLEDGE_VALIDATION_2026-10-02.md` | Run live Gateway query when the launching Agent has its existing key; integrate convert/ingest/lint Workflows separately; later plan source conversion and select the model-queryable subset |
 | Natural-language Agent | Explicit CLI Gateway task path exists; ordinary Ask and task state are separate; `--prompt` is tool-free | Ground capability descriptions in installed and authorized inventory, then route suitable natural-language requests through policy and independent validation |
