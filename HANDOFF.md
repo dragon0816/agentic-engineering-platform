@@ -84,17 +84,25 @@ editable configuration, so that decision is now recorded in `host.json`.
   `.scratch/dist-gateway-default-final-20261002`; the inline Web JavaScript
   passed `node --check` before the final Python-only edit.
 - The installed `aep-host doctor` successfully parses the approved route.
-  `models` reports only that `LITELLM_MASTER_KEY` is absent in this shell;
-  port 4000 also had no listener. A live Gateway round trip was not possible.
+  `models` reports that `LITELLM_MASTER_KEY` is absent in the Agent shell.
+  A host-permission check later found LiteLLM listening on port 4000; its
+  `/v1` root returns FastAPI's `{"detail":"Not Found"}`, as expected for an
+  API root. A live authenticated model round trip was not possible.
+- Agent Web itself was confirmed at the separate loopback Web port: an
+  authenticated GET of the freshly started page and `/api/backends` both
+  returned HTTP 200. On 2026-10-02 a fresh instance used port 53582 and its
+  temporary tokenized launch address was opened in the default browser.
 - The real-Chromium UI test still fails before navigation because this
   machine closes its CDP WebSocket; no visual interaction result is claimed.
 
 ## Outstanding work and risks
 
-- The approval gate is configured on this host, but the current shell lacks
-  `LITELLM_MASTER_KEY` and no service was listening on port 4000 during this
-  handoff. Set the key in the Agent process environment, start LiteLLM and
-  restart the Agent Web before testing a real model answer. Do not copy this
+- The approval gate is configured and LiteLLM was listening on port 4000 at
+  the latest host-permission check. The Agent Web instance started in this
+  shell still reports its mapped credential unavailable. Give the Agent
+  process `LITELLM_MASTER_KEY` and restart it before testing a real model
+  answer. The Web URL is the temporary address printed by `aep-host web`,
+  not the Gateway API's `http://127.0.0.1:4000/v1`. Do not copy this
   workstation's approval to another host without its own approval decision.
 - The current classifier conservatively treats every AEP model request as
   UNCLASSIFIED. Future per-source provenance must preserve Knowledge citation

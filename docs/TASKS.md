@@ -438,8 +438,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   the installed preview `host.json`; provide an editable, secret-value-free
   `deploy/windows-preview/gateway-default.json`. Preserve approval when only
   the model ID changes and clear it when the route or credential changes.
-  The local doctor parses the approval; live chat still needs the LiteLLM
-  listener and `LITELLM_MASTER_KEY` in the Agent process environment.
+  The local doctor parses the approval. A host-permission check confirmed
+  LiteLLM listening on port 4000; live chat still needs `LITELLM_MASTER_KEY`
+  in the Agent process environment.
+- [x] Diagnose the Agent Web `{"detail":"Not Found"}` report: the browser had
+  opened LiteLLM's `http://127.0.0.1:4000/v1` API root, not the Agent Web.
+  Start a fresh Agent Web on a separate loopback port and verify its page and
+  backend API return HTTP 200; use the temporary address printed at launch.
 - [x] Add a backend-neutral Task contract, digest-only portable run state,
   additive SQLite persistence and independent artifact-byte validation with
   restart, transition and negative tests. This contract slice does not yet
