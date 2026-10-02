@@ -24,6 +24,7 @@ def item(
     number: int,
     *,
     kind: str = "Task",
+    created: str = "2026-10-01T09:15:00Z",
     comments: tuple[ProjectComment, ...] = (),
     truncated: bool = False,
 ) -> ProjectItem:
@@ -33,7 +34,7 @@ def item(
         title=f"Ticket {number}",
         url=f"https://github.com/owner/repo/issues/{number}",
         state="OPEN",
-        created="2026-10-01T09:15:00Z",
+        created=created,
         updated="2026-10-02T11:30:00Z",
         author="engineer",
         fields={
@@ -93,6 +94,19 @@ def test_truncated_thread_and_cap_are_visible_in_preview() -> None:
     assert result.records[0].values["Jira activity"] == ""
     assert "Jira activity" in result.unmapped_fields
     assert result.records[0].url.endswith("/issues/1")
+
+
+def test_source_newest_created_order_is_applied_before_the_limit() -> None:
+    result = preview_items(
+        (
+            item(1, created="2026-09-29T09:00:00Z"),
+            item(2, created="2026-10-02T09:00:00Z"),
+            item(3, created="2026-10-01T09:00:00Z"),
+        ),
+        TeamTicketsRequest(max_items=2),
+    )
+    assert [record.key for record in result.records] == ["owner/repo#2", "owner/repo#3"]
+    assert result.capped is True
 
 
 def test_workflow_7_runs_through_agent_policy_without_a_workbook(tmp_path: Path) -> None:

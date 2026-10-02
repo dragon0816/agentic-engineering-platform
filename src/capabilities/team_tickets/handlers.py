@@ -74,7 +74,10 @@ def preview_items(rows: Sequence[ProjectItem], request: TeamTicketsRequest) -> T
     values and `unmapped_fields` are preferable to invented source data.
     """
     checked = TeamTicketsRequest.model_validate(request)
-    tracked = [row for row in rows if row.key]
+    # Source W3-07 searches with ORDER BY created DESC. Project V2's item
+    # ordering is unrelated to issue creation time, so normalize before the
+    # cap; otherwise a limited preview can omit the newest tickets.
+    tracked = sorted((row for row in rows if row.key), key=lambda row: row.created, reverse=True)
     capped = len(tracked) > checked.max_items
     selected = tracked[: checked.max_items]
     records: list[TicketPreviewRecord] = []

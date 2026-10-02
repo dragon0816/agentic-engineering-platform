@@ -75,8 +75,11 @@ publication still do not grant execution. A local `github.read` grant with
 The preview uses Issue `owner/repo#number` as Key, Project `Type` or `Issue
 Type` to choose Task versus Issues, Project Status with Issue state fallback,
 Project Priority and Assignee fields, Issue author login for Reporter, and
-Issue created/updated timestamps. GitHub has no Jira Resolution equivalent:
-that cell is empty and `unmapped_fields` names it. Any other absent mapped
+Issue created/updated timestamps. The source searches `ORDER BY created DESC`,
+so the adapter sorts Issue creation timestamps newest first before applying
+`max_items`; GitHub Project board order is not the source order. GitHub has no
+Jira Resolution equivalent: that cell is empty and `unmapped_fields` names it.
+Any other absent mapped
 field is also named. The legacy `Jira activity` column contains the latest
 available GitHub comments in source format; when the client reports a
 truncated thread, that cell is left empty and the key appears in
@@ -91,3 +94,10 @@ visibility, manual-column preservation and backups remain open. The real
 Project preview is blocked until the Host's GitHub credential can read
 Project V2. Offline Agent/Bridge tests cover mapping, no workbook creation and
 denial before network access.
+
+On 2026-10-03, a read-only Project query using this Codex process's mapped
+`AEP_GITHUB_TOKEN` returned `github_auth` from GraphQL (`FORBIDDEN`, with no HTTP
+error status). The installed Host workspace also has no Workflow 7 manifest yet.
+This does not establish that a separately running Agent has the same token;
+refreshing the installed manifest and a successful real Project read remain
+required before claiming live validation.
