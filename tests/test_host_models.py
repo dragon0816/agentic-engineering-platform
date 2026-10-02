@@ -27,6 +27,7 @@ from host_runtime.contracts import (
 )
 from host_runtime.host import HostError, build_router, build_runtime, host_report
 from host_runtime.web import AgentWeb
+from knowledge.evolution import KnowledgeCatalog
 from models.wire import Transport
 
 GATEWAY = "https://gateway.example.invalid/api"
@@ -156,6 +157,31 @@ def test_a_configured_gateway_reaches_the_router(
         assert router.model is not None, "the host was given a gateway and did not use it"
         assert router.model_alias == "company"
         assert router.local_only is False, "nothing asked for a model on this machine"
+
+
+def test_configured_knowledge_uses_the_default_host_credential_mapping(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A configured Gateway must install Knowledge without an injected resolver."""
+    monkeypatch.setenv("AEP_LLM_TOKEN", "fixture-token")
+    config, layout = configured(tmp_path)
+    config = CompanyHostConfiguration.model_validate(
+        {
+            **config.model_dump(mode="json"),
+            "knowledge": [
+                {
+                    "asset": {"namespace": "engineering", "name": "guide", "version": "1.0.0"},
+                    "vault_root": str(tmp_path / "vault"),
+                }
+            ],
+        }
+    )
+    monkeypatch.setattr(
+        "host_runtime.host.build_knowledge_catalog",
+        lambda *_args, **_kwargs: KnowledgeCatalog(),
+    )
+    with build_runtime(config, layout=layout) as runtime:
+        assert runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
 
 
 def test_gateway_configuration_and_admin_data_approval_are_separate(tmp_path: Path) -> None:

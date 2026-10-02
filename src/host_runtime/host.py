@@ -582,8 +582,15 @@ def build_gateway(
     binding = config.models
     drafting_model: ModelClient | None = None
     if binding is not None and binding.routing_alias is not None:
+        # The router creates a default environment resolver inside
+        # build_router, but Knowledge and Workflow drafting are assembled
+        # earlier. They must see the same host-owned credential mapping.
+        model_resolver = resolver or EnvironmentCredentials(config.credential_environment())
         chosen = ModelClients(
-            binding.catalog, resolver=resolver, transport=model_transport, options=binding.options
+            binding.catalog,
+            resolver=model_resolver,
+            transport=model_transport,
+            options=binding.options,
         ).for_alias(binding.routing_alias)
         drafting_model = (
             None
