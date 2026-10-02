@@ -23,9 +23,19 @@ the source for a later controlled copy. No source Vault files were changed.
 - A fresh `weekly.preview 2026_40W` attempt on 2026-10-02 again stopped after
   the window step; the CLI now exited nonzero. A separate direct read with
   outbound access returned `github_auth`, so the Project permission update has
-  not yet reached this Host credential. The restricted command environment
+  not yet reached that Host credential. The restricted command environment
   returned `github_unavailable`; that sandbox result is not evidence of a
   changed Project permission. No workbook write or mail action occurred.
+- Later on 2026-10-02, the owner saved a new token in the Windows user
+  `AEP_GITHUB_TOKEN` variable. A read-only GraphQL query confirmed authenticated
+  Project and Issue access. The already-running Codex process still held the
+  earlier token, so subsequent live checks explicitly loaded the user value.
+  The installed `jira-weekly-report-preview@1.0.0` manifest had no numeric
+  alias or typed runtime fields; the current shipped manifest was installed
+  for that exact Workflow after backing up the old file. An explicit-week Web
+  run and both bare `/run 11` and `/run workflow 11` commands returned
+  `succeeded` without refusal. They exercised the four-step read-only preview;
+  the plan has not yet been compared with the source or a workbook copy.
 - The Host doctor reports Workflow 11 preview support, but no Excel COM bridge
   for the write phase and no Outlook bridge for mail. The source of Workflow 11
   is now GitHub Project; its legacy `jira-` asset identity has not been renamed.
@@ -45,9 +55,9 @@ the source for a later controlled copy. No source Vault files were changed.
 
 | Area | Current state | Next concrete checkpoint |
 | --- | --- | --- |
-| Workflow 11 preview | Implemented, installed, blocked by Project authorization | Restore read access for the configured token, rerun `weekly.preview` for a chosen week, inspect plan and workbook-read evidence without applying changes |
+| Workflow 11 preview | Installed alias and Project/Issue access verified; explicit-week and both bare Web commands succeed | Inspect the live plan and workbook-read evidence against the source using a workbook copy; keep apply/mail out of this parity check |
 | Workflow 11 apply/mail | Code exists; this Host lacks Excel COM and Outlook bridges; live parity is unproven | On a suitable company workstation, use a workbook copy and source/platform parity evidence before any real write or mail action |
-| Workflow 7 | Installed read-only GitHub Project preview, numeric alias 7 and offline policy/field-mapping proof exist; no live Project result or Excel migration | Restore Project access, compare the read-only preview to source fixtures and a workbook copy, then address missing fields and Excel invariants before write approval |
+| Workflow 7 | Read-only GitHub Project preview and offline policy/field-mapping proof exist; Project access is now available, but this Host's installed assets have not been refreshed for Workflow 7 | Install the reviewed preview asset, run a live read-only check, then compare to source fixtures and a workbook copy before any write approval |
 | Knowledge source Vault | The owner tree does not satisfy the Vault layout. A separate synthetic Vault is staged, pinned, bound and listed in isolated Agent Web; see `docs/KNOWLEDGE_VALIDATION_2026-10-02.md` | Run live Gateway query when the launching Agent has its existing key; integrate convert/ingest/lint Workflows separately; later plan source conversion and select the model-queryable subset |
 | Natural-language Agent | Explicit CLI Gateway task path exists; ordinary Ask and task state are separate; `--prompt` is tool-free | Ground capability descriptions in installed and authorized inventory, then route suitable natural-language requests through policy and independent validation |
 | Workflow UX | Exact names and manifest-declared `/run workflow 11` / `/run 11` shortcuts work in Agent Web. Optional typed runtime fields now render for the weekly-report Workflows and are checked before Agent dispatch; older manifests retain JSON input | Add per-install static settings, dynamic options and Telegram controls using the same contract |

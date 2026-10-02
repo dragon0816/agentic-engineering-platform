@@ -491,11 +491,15 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   only the read-only preview; missing/ambiguous aliases require an exact
   identity. CLI `ask` returns nonzero when the routed Workflow fails or is
   unavailable. Verification is recorded in `HANDOFF.md`.
-- [ ] Validate the installed Workflow 11 read-only preview on this Host. The
-  2026-10-02 run reached GitHub Project and stopped at `github_auth` after its
-  window step; the configured token is valid for `/user` but Project V2 returns
-  GraphQL `FORBIDDEN`. Restore Project read access, rerun preview, then compare
-  the plan with the source against a workbook copy. See
+- [x] Validate the installed Workflow 11 read-only preview on this Host. The
+  owner updated the Windows user `AEP_GITHUB_TOKEN`; Project and Issue reads now
+  succeed. The installed preview manifest lacked `run_alias: 11`, so the
+  current shipped manifest was backed up and installed for that one Workflow.
+  An explicit-week Web run and both bare `/run 11` / `/run workflow 11` runs
+  returned `succeeded` with no refusal. No report write or mail action ran.
+- [ ] Compare Workflow 11's live preview plan and workbook-read evidence with
+  the source against a workbook copy. A successful run proves the installed
+  route and read-only execution, not report parity. See
   `docs/VALIDATION_GAPS_2026-10-02.md`.
 - [ ] Validate Knowledge query, convert, ingest and lint with a small
   independent local test Vault before using the owner-supplied OneDrive tree.

@@ -9,9 +9,9 @@ write, mail action or Marketplace publication occurred.
 
 The owner wants the multi-backend Harness, executable Workflows, Knowledge,
 default Marketplace assets and user-level Agent validation completed. The
-first live target is Workflow 11's read-only preview. The owner will update
-the configured GitHub Project permission; the current token authenticates to
-`/user` but Project V2 returned `FORBIDDEN`. Knowledge begins with a separate
+first live target, Workflow 11's read-only preview, now executes on this Host
+after the owner updated the token and the installed preview manifest was
+refreshed. Source/workbook parity remains open. Knowledge begins with a separate
 small local test Vault; only a later owner-selected subset of the supplied
 `RS_Knowledge` tree may be used for model queries. Workflow 7 replaces retired
 Jira with the same GitHub Project, starting with a read-only preview.
@@ -46,6 +46,14 @@ Jira with the same GitHub Project, starting with a read-only preview.
   comments as complete. An offline installed-Agent/Bridge run passed, and a
   missing local grant prevented GitHub transport use. No Excel code is wired
   into this Workflow. See `docs/WORKFLOW_7_SOURCE_CONTRACT.md`.
+- The owner saved a new Windows user `AEP_GITHUB_TOKEN`. Read-only GraphQL
+  checks confirmed authentication, Project #1 access and Issue content access.
+  The older process token still returned `FORBIDDEN`; it must not be mistaken
+  for the new user value. The installed Workflow 11 preview manifest lacked
+  `run_alias: 11` and typed parameters. Its exact old file was backed up under
+  `.scratch/workflow11-refresh/backup/`, then only that local installed asset
+  was replaced by the current shipped preview manifest. No repository runtime
+  code, Host grants, report workbook or mail action was changed.
 - A synthetic Knowledge Vault, exact matching manifest and isolated Host
   configuration were staged under `.scratch/knowledge-validation/`. They are
   ignored local test artifacts, not the enterprise Vault. Catalog registration
@@ -83,16 +91,21 @@ Jira with the same GitHub Project, starting with a read-only preview.
   possible because direct Project V2 read still returned `github_auth`. An
   offline sdist/wheel build passed, and the wheel contains all four new
   `capabilities.team_tickets` modules.
+- After refreshing the installed Workflow 11 preview manifest, the focused
+  numeric-alias Agent Web regression passed (1 passed). A live Web-command run
+  with explicit `2026_39W` and the new user token returned `succeeded`. Both
+  exact bare commands `/run 11` and `/run workflow 11` then returned
+  `succeeded` with no Agent refusal or Workflow failure. These runs used the
+  same four-step read-only preview asset; report parity was not inspected.
 
 ## Open work and known limits
 
-1. Recheck Project access after the owner updates `AEP_GITHUB_TOKEN`
-   permissions, then rerun `weekly.preview` on the installed Host for the
-   chosen week. Inspect the nested plan and workbook-read evidence. Do not run
-   apply/mail against a real workbook or recipient list during this preview.
-   A 2026-10-02 read-only recheck outside the network-restricted command
-   sandbox still returned `github_auth`, so Project V2 access was not available
-   yet. The sandboxed CLI reported `transient_failure` and exited nonzero.
+1. Inspect Workflow 11's successful live preview plan and workbook-read
+   evidence against the source on a workbook copy. Do not run apply/mail
+   against a real workbook or recipient list during this preview. The installed
+   manifest fix is local to this Host; rebuild/re-export assets when updating
+   other Hosts, and start a new Agent process after changing environment
+   variables so it receives the current token.
 2. Use `.scratch/knowledge-validation/host.json` for a live Gateway question
    once the launching Agent has the existing key in its environment. The
    isolated Host has no Shared Platform binding and is only for Knowledge
@@ -101,9 +114,9 @@ Jira with the same GitHub Project, starting with a read-only preview.
    conversion of the supplied OneDrive tree: its root has `drop/raw/wiki` but
    lacks the required root `index.md` and `log.md`; no nested directory has
    all four. Many entries are OneDrive cloud reparse points.
-3. Build Workflow 7's GitHub-to-source field mapping and read-only preview.
-   The offline first stage is implemented; rerun it against the real Project
-   after its credential gate is fixed. Source tests are in the pinned
+3. Refresh the installed Workflow 7 preview asset and run it against the real
+   Project with the new token. The offline first stage is implemented; the
+   credential gate is now clear. Source tests are in the pinned
    `rs_workflow_system` checkout and remain read-only. Later Excel parity uses
    a workbook copy and explicit write approval.
 4. Complete generic static/runtime parameter contracts and generated Web and
