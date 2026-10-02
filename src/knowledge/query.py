@@ -227,15 +227,28 @@ class QueryEngine:
         self.max_output_tokens = max_output_tokens
         self._asked = 0
 
-    def ask(self, question: str, *, k: int = 5, trace: TraceIdentifiers | None = None) -> Answer:
+    def ask(
+        self,
+        question: str,
+        *,
+        k: int = 5,
+        trace: TraceIdentifiers | None = None,
+        raw_citations_only: bool = False,
+    ) -> Answer:
         passages = retrieve(self.vault, question, k=k)
         if not passages:
             return Answer(question=question, status="no_match")
         if self.model is None or self.alias is None:
             return Answer(question=question, status="retrieved", passages=passages)
-        numbered = "\n\n".join(
-            f"[{number}] {passage.text}" for number, passage in enumerate(passages, 1)
-        )
+        if raw_citations_only:
+            numbered = "\n\n".join(
+                f"[{number}] {passage.citation.kind.upper()}: {passage.text}"
+                for number, passage in enumerate(passages, 1)
+            )
+        else:
+            numbered = "\n\n".join(
+                f"[{number}] {passage.text}" for number, passage in enumerate(passages, 1)
+            )
         self._asked += 1
         if trace is None:
             digest = hashlib.sha256(question.encode("utf-8")).hexdigest()[:16]

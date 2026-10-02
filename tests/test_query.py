@@ -165,6 +165,13 @@ def test_synthesis_may_cite_only_what_was_retrieved(tmp_path: Path) -> None:
     assert "[1] The RF front end uses a GaN power amplifier." in request.messages[0].text
     assert request.model_alias == "answerer" and request.max_output_tokens == 800
     assert request.trace.trace_id.startswith("query-") and request.trace.request_id == "ask-1"
+    guarded = Synth("The RF front end uses a GaN amplifier [1].")
+    QueryEngine(vault, guarded, alias="answerer").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    guarded_prompt = guarded.requests[0].messages[0].text
+    assert "[1] RAW: The RF front end uses a GaN power amplifier." in guarded_prompt
+    assert "WIKI:" in guarded_prompt
     engine.ask("GaN amplifier?", k=2)
     assert good.requests[1].trace.request_id == "ask-2"
     given = TraceIdentifiers(trace_id="t", request_id="r", span_id="s")

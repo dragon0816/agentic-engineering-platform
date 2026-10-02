@@ -40,9 +40,23 @@ class KnowledgeQueryHandler:
             raise CapabilityRefused("knowledge_version_not_found")
         _manifest, vault = found
         answer = await asyncio.to_thread(
-            QueryEngine(vault, self.model, alias=self.alias).ask,
+            QueryEngine(
+                vault,
+                self.model,
+                alias=self.alias,
+                prompt=(
+                    "Answer the question from the passages below and nothing else. "
+                    "RAW passages are the only citable evidence. WIKI passages may "
+                    "provide context but do not cite them or make a claim supported "
+                    "only by them. Cite every supported claim with RAW passage numbers "
+                    "in square brackets, like [2]. If no RAW passage supports an "
+                    "answer, say so in one sentence and cite nothing.\n\n"
+                    "Question: {question}\n\n{passages}"
+                ),
+            ).ask,
             request.question,
             trace=context.trace,
+            raw_citations_only=True,
         )
         try:
             return grounded_record(request.asset, context.trace, answer)
