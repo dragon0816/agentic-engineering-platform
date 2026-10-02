@@ -334,6 +334,21 @@ tr:last-child td { border-bottom: none; }
         </div>
       </div>
     </dialog>
+    <dialog id="backend-public-dialog" aria-labelledby="backend-public-title">
+      <div class="dialog-body">
+        <h2 id="backend-public-title">Start a PUBLIC conversation</h2>
+        <p>Only send information you are allowed to share with this external
+          backend. Existing conversation history stays here; a new session is
+          created if this one already has messages. Commands and local tools
+          are unavailable in a PUBLIC conversation.</p>
+        <p id="backend-public-result" class="note" role="status"></p>
+        <div class="dialog-actions">
+          <button id="backend-public-cancel" type="button">Cancel</button>
+          <button class="go" id="backend-public-start" type="button">
+            Start PUBLIC session</button>
+        </div>
+      </div>
+    </dialog>
   </section>
 
   <section id="panel-settings">
@@ -381,7 +396,10 @@ tr:last-child td { border-bottom: none; }
             <input id="model-environment" placeholder="AEP_LLM_TOKEN"></div>
         </div>
         <p class="note">If the Gateway requires a token, set the token value in the named
-          Windows environment variable before restarting the Agent.</p>
+          Windows environment variable before restarting the Agent. An administrator
+          must separately approve the exact Gateway URL and permitted data classes
+          in host.json; changing model settings clears that approval.</p>
+        <p id="model-data-approval" class="note" role="status"></p>
         <p><button class="go" id="model-save" type="submit">Save model settings</button></p>
         <pre id="model-result" class="note">Reading current settings&hellip;</pre>
       </form>
@@ -595,6 +613,9 @@ let conversationRows = [];
 let backendStatuses = new Map();
 let activeBackend = "gateway";
 let pendingBackend = "";
+let pendingPublicBackend = "";
+let activeConversationPublic = false;
+let activeConversationMessages = 0;
 
 function turn(asked) {
   const block = document.createElement("div");
@@ -667,6 +688,9 @@ async function loadConversations(selectId) {
   }
   renderSessionList();
   renderConversation(listed.selected);
+  activeConversationPublic = !!(listed.selected
+    && listed.selected.data_classification === "PUBLIC");
+  activeConversationMessages = listed.selected ? listed.selected.messages.length : 0;
   const backend = el("conversation-backend");
   const selectedBackend = listed.selected ? listed.selected.backend : "gateway";
   const requested = [...backend.options].find(option => option.value === selectedBackend);
@@ -693,7 +717,9 @@ async function loadBackends() {
 
 function renderBackendState() {
   const status = backendStatuses.get(el("conversation-backend").value || activeBackend);
-  el("backend-state").textContent = status ? status.detail : "Reading backend status…";
+  el("backend-state").textContent = status
+    ? (activeConversationPublic ? "PUBLIC session · " : "") + status.detail
+    : "Reading backend status…";
   el("backend-settings").hidden = !(status && status.name === "gateway" && !status.available);
 }
 
@@ -719,8 +745,20 @@ async function chooseBackend(name) {
   if (name !== "gateway" && status.authentication !== "ready") {
     el("conversation-backend").value = activeBackend; showBackendAuthentication(status); return;
   }
-  await call("/api/conversations/backend", {session_id: activeConversation, backend: name});
-  activeBackend = name; el("conversation-backend").value = name; renderBackendState();
+  if (name !== "gateway" && !activeConversationPublic) {
+    pendingPublicBackend = name;
+    el("backend-public-result").textContent = "";
+    el("conversation-backend").value = activeBackend;
+    el("backend-public-dialog").showModal();
+    return;
+  }
+  const selected = await call("/api/conversations/backend", {
+    session_id: activeConversation, backend: name,
+  });
+  if (!selected.ok) throw new Error(selected.code);
+  activeBackend = name;
+  activeConversationPublic = selected.conversation.data_classification === "PUBLIC";
+  el("conversation-backend").value = name; renderBackendState();
 }
 
 async function loadChat(selectId) {
@@ -734,6 +772,30 @@ el("conversation-backend").addEventListener("change", async () => {
   catch (failure) { el("conversation-backend").value = activeBackend; showBootError(failure); }
 });
 el("backend-settings").addEventListener("click", () => selectPrimaryTab("settings"));
+el("backend-public-cancel").addEventListener("click", () => {
+  pendingPublicBackend = ""; el("backend-public-dialog").close();
+});
+el("backend-public-start").addEventListener("click", async () => {
+  const button = el("backend-public-start"); button.disabled = true;
+  el("backend-public-result").textContent = "Preparing PUBLIC session…";
+  try {
+    if (activeConversationMessages) {
+      const created = await call("/api/conversations", {});
+      await loadChat(created.conversation.session_id);
+    }
+    const selected = await call("/api/conversations/backend", {
+      session_id: activeConversation, backend: pendingPublicBackend, public_context: true,
+    });
+    if (!selected.ok) throw new Error(selected.code);
+    activeBackend = pendingPublicBackend;
+    activeConversationPublic = true;
+    pendingPublicBackend = "";
+    el("backend-public-dialog").close();
+    await loadChat(activeConversation); field.focus();
+  } catch (failure) {
+    el("backend-public-result").textContent = "Cannot start: " + failure.message;
+  } finally { button.disabled = false; }
+});
 el("backend-auth-cancel").addEventListener("click", () => {
   pendingBackend = ""; el("backend-auth-dialog").close();
 });
@@ -1108,6 +1170,10 @@ async function loadSettings() {
       + (model.credential_secret ? "\nCredential value present: " + model.credential_present : "")
     : (settings.writable
       ? "No routing model is configured." : "Settings are read-only in this launch mode.");
+  el("model-data-approval").textContent = model.data_approval
+    ? "Administrator approval: " + model.data_approval.approval_ref
+      + " · Classes: " + model.data_approval.approved_classes.join(", ")
+    : "No administrator data-transfer approval is recorded for this Gateway.";
 }
 
 el("persona-settings").addEventListener("submit", async (event) => {
@@ -1143,7 +1209,8 @@ el("model-settings").addEventListener("submit", async (event) => {
   }
   try {
     const saved = await call("/api/settings/model", body);
-    result.textContent = "Saved. Restart the Agent to use this model configuration."
+    result.textContent = "Saved. Restart the Agent to use this model configuration. "
+      + "An administrator must approve the routed Gateway and data classes in host.json."
       + (environment
         ? "\nSet the token value in Windows environment variable " + environment + "."
         : "");

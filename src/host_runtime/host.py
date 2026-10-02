@@ -111,6 +111,7 @@ from knowledge.evolution import (
     KnowledgeQueryRequest,
 )
 from knowledge.vault import Vault
+from models.approved import ApprovedModelClient
 from models.clients import ModelClients
 from models.contracts import ModelClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
@@ -559,7 +560,11 @@ def build_gateway(
         chosen = ModelClients(
             binding.catalog, resolver=resolver, transport=model_transport, options=binding.options
         ).for_alias(binding.routing_alias)
-        drafting_model = None if isinstance(chosen, Failure) else chosen
+        drafting_model = (
+            None
+            if isinstance(chosen, Failure)
+            else ApprovedModelClient(chosen, binding.data_approval)
+        )
     installed.register(
         DRAFT_SPEC,
         DraftWorkflowHandler(
@@ -710,7 +715,7 @@ def build_router(
         raise HostError("models_invalid")
     return RequestRouter(
         commands,
-        client,
+        ApprovedModelClient(client, binding.data_approval),
         binding.routing_alias,
         # Off unless this host asked for a model running on its own hardware.
         # The contract already refused the pair that cannot both be true.
@@ -902,6 +907,17 @@ def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
             detail=(
                 f"{aliases}; no routing alias, so an unrecognized message is still "
                 "answered with `needs_input` rather than a guess"
+            ),
+        )
+    if (
+        binding.data_approval is None
+        or "UNCLASSIFIED" not in binding.data_approval.approved_classes
+    ):
+        return DoctorCheck(
+            name="models",
+            status="failed",
+            detail=(
+                "The routed Gateway has no host-administrator approval for UNCLASSIFIED data"
             ),
         )
     here = " (a model on this machine only)" if binding.require_local_model else ""

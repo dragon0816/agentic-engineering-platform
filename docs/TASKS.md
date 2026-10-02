@@ -426,8 +426,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Gateway conversation adapter, equivalence and denial tests. Full local
   selection: 1,516 passed, 4 skipped, 2 environment-specific deselected;
   ruff, mypy and sdist/wheel build passed on 2026-10-02.
-- [ ] Add a backend-neutral orchestrator, data classification, portable task
-  state and independent completion validation in tested slices.
+- [x] Implement slice 2 data trust: host-admin Gateway approval tied to the
+  exact routed endpoint and allowed classes; treat full model requests as
+  UNCLASSIFIED and block provider transport without approval. External CLI
+  text chat requires a new explicitly PUBLIC session, complete-history label
+  matching and no local persona or slash-command results. Full local selection:
+  1,523 passed, 4 skipped, 2 environment-specific deselected; ruff, mypy,
+  JavaScript syntax and sdist/wheel build passed on 2026-10-02.
+- [ ] Apply an actual host-admin Gateway approval to the deployed preview only
+  after the administrator confirms the exact URL and accepted data class.
+- [ ] Add portable task state, independent completion validation and governed
+  native task adapters in later tested slices.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter
   contracts, generated Web/Telegram forms, flexible `/run` aliases and parity.
 - [ ] Review and publish the active Hermes Skills and validated Workflows as

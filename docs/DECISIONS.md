@@ -28,3 +28,25 @@ Reason: The existing local CLI text-chat path has no classification or
 governed tool boundary. Treating it as a native AEP task backend would expose
 unreviewed context and side effects. Pausing all unclassified work was
 considered but rejected by the owner in favor of the approved internal Gateway.
+
+## 2026-10-02 — Host-admin Gateway approval and PUBLIC session boundary
+
+Decision: A host administrator must record the exact routed Gateway alias and
+URL, approval reference, and accepted data classes in `models.data_approval`.
+The host treats a complete model request as UNCLASSIFIED until field-level
+source provenance exists. No approval means the provider transport is not
+called. A localhost URL alone is not evidence of approval. This implements
+the owner's explicit choice of host-admin approval over localhost inference.
+
+The existing restricted external CLI text-chat path requires an explicitly
+PUBLIC, empty conversation at selection time. It compares labels with every
+message actually sent, omits local persona text and prevents slash commands
+from bringing local data into the PUBLIC session. Existing conversation
+history cannot be relabeled PUBLIC retroactively. A generic API that accepts
+payload and classifications as unrelated arguments was rejected because a
+caller could omit a material item while still sending it.
+
+The alternative of trusting any configured/localhost Gateway was rejected:
+LiteLLM may forward elsewhere, and a URL/credential cannot prove the upstream
+data boundary. Retaining unrestricted CLI chat was rejected because signed-in
+status does not classify the user's history or local persona.

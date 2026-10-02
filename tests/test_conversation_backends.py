@@ -6,6 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+from agent.data_policy import ContextMaterial, OutboundContext
 from host_runtime.conversation_backends import (
     AUTH_STATUS_TIMEOUT_SECONDS,
     BACKEND_TIMEOUT_SECONDS,
@@ -53,6 +54,32 @@ def installed(name: str) -> str | None:
 
 def history() -> tuple[ModelMessage, ...]:
     return (ModelMessage(role="user", text="What can you help with?"),)
+
+
+def public_context(
+    messages: tuple[ModelMessage, ...], persona_guidance: str
+) -> OutboundContext:
+    materials = [
+        ContextMaterial(
+            material_id=f"message-{index}",
+            origin="history",
+            classification="PUBLIC",
+            classified_by="engineer",
+            text=message.text,
+        )
+        for index, message in enumerate(messages)
+    ]
+    if persona_guidance:
+        materials.append(
+            ContextMaterial(
+                material_id="persona-1",
+                origin="persona",
+                classification="PUBLIC",
+                classified_by="engineer",
+                text=persona_guidance,
+            )
+        )
+    return OutboundContext(materials=tuple(materials))
 
 
 def test_status_reports_only_fixed_local_cli_names(tmp_path: Path) -> None:
@@ -113,7 +140,12 @@ def test_gateway_configuration_and_credential_readiness_are_separate(tmp_path: P
 def test_claude_uses_stdin_fixed_restrictions_and_blank_working_root(tmp_path: Path) -> None:
     runner = Runner(json.dumps({"result": "A bounded answer."}))
     backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
-    result = backends.complete("claude_code", history(), persona_guidance="Speak plainly.")
+    result = backends.complete(
+        "claude_code",
+        history(),
+        persona_guidance="Speak plainly.",
+        outbound=public_context(history(), "Speak plainly."),
+    )
     argv, call = runner.calls[0]
     assert result.status == "answered" and result.text == "A bounded answer."
     assert argv[0] == "C:/fixed/claude.exe"
@@ -139,7 +171,10 @@ def test_codex_jsonl_is_reduced_to_final_text_and_output_is_bounded(tmp_path: Pa
     )
     runner = Runner(stdout)
     result = LocalConversationBackends(tmp_path, which=installed, runner=runner).complete(
-        "codex", history(), persona_guidance="Be concise."
+        "codex",
+        history(),
+        persona_guidance="Be concise.",
+        outbound=public_context(history(), "Be concise."),
     )
     argv, _call = runner.calls[0]
     assert result.status == "answered" and len(result.text) == MAX_BACKEND_OUTPUT_CHARS
@@ -150,9 +185,19 @@ def test_codex_jsonl_is_reduced_to_final_text_and_output_is_bounded(tmp_path: Pa
 
 def test_timeout_and_missing_cli_are_typed_without_stderr_leaks(tmp_path: Path) -> None:
     timed = LocalConversationBackends(tmp_path, which=installed, runner=Runner(timeout=True))
-    timeout = timed.complete("claude_code", history(), persona_guidance="Plain.")
+    timeout = timed.complete(
+        "claude_code",
+        history(),
+        persona_guidance="Plain.",
+        outbound=public_context(history(), "Plain."),
+    )
     assert timeout.status == "timeout" and timeout.code == "backend_timeout"
-    missing = timed.complete("copilot", history(), persona_guidance="Plain.")
+    missing = timed.complete(
+        "copilot",
+        history(),
+        persona_guidance="Plain.",
+        outbound=public_context(history(), "Plain."),
+    )
     assert missing.status == "unavailable" and missing.code == "backend_not_installed"
 
 
@@ -168,8 +213,46 @@ def test_authentication_failure_is_typed_and_marks_backend_unavailable(tmp_path:
         returncode=1,
     )
     backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
-    failed = backends.complete("claude_code", history(), persona_guidance="Plain.")
+    failed = backends.complete(
+        "claude_code",
+        history(),
+        persona_guidance="Plain.",
+        outbound=public_context(history(), "Plain."),
+    )
     assert failed.status == "failed" and failed.code == "backend_authentication_failed"
     status = {item.name: item for item in backends.statuses(gateway_available=False)}
     assert status["claude_code"].available is False
     assert "sign in" in status["claude_code"].detail.lower()
+
+
+def test_unclassified_or_incomplete_context_never_reaches_cli(tmp_path: Path) -> None:
+    runner = Runner(json.dumps({"result": "Should never be returned."}))
+    backends = LocalConversationBackends(tmp_path, which=installed, runner=runner)
+    missing = backends.complete("claude_code", history(), persona_guidance="Private persona")
+    assert missing.status == "unavailable" and missing.code == "context_missing"
+    incomplete = OutboundContext(
+        materials=(
+            ContextMaterial(
+                material_id="message-1",
+                origin="history",
+                classification="PUBLIC",
+                classified_by="engineer",
+                text=history()[0].text,
+            ),
+        )
+    )
+    mismatch = backends.complete(
+        "claude_code", history(), persona_guidance="Private persona", outbound=incomplete
+    )
+    assert mismatch.code == "context_mismatch"
+    unclassified = OutboundContext(
+        materials=(
+            ContextMaterial(material_id="message-1", origin="history", text=history()[0].text),
+            ContextMaterial(material_id="persona-1", origin="persona", text="Private persona"),
+        )
+    )
+    denied = backends.complete(
+        "claude_code", history(), persona_guidance="Private persona", outbound=unclassified
+    )
+    assert denied.code == "native_requires_public"
+    assert runner.calls == []

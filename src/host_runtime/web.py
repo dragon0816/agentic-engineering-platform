@@ -48,6 +48,7 @@ from typing import Any, Literal, Self
 from urllib.parse import parse_qs, urlparse
 
 from agent.contracts import ActiveAgentProfile, AgentProfile
+from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
 from agent.skills import SkillManifest
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
@@ -263,12 +264,25 @@ class AgentWeb:
         endpoint = binding.catalog.endpoint(binding.routing_alias)
         if endpoint is None:
             return False
+        if (
+            binding.data_approval is None
+            or "UNCLASSIFIED" not in binding.data_approval.approved_classes
+        ):
+            return False
         if endpoint.credential is None:
             return True
         environment = self.runtime.config.credential_environment().get(endpoint.credential.name)
         return bool(environment and os.environ.get(environment))
 
     def _gateway_conversation_text(self, result: GatewayConversationResult) -> str:
+        if result.failure is not None and result.failure.code in {
+            "gateway_not_approved",
+            "class_not_approved",
+        }:
+            return (
+                "LLM Gateway data transfer is not approved for this request. "
+                "Ask the host administrator to approve this exact Gateway and data class."
+            )
         if result.failure is None or result.failure.code != "credential_unavailable":
             return result.text
         binding = self.runtime.config.models
@@ -311,6 +325,14 @@ class AgentWeb:
             "persona": self.persona.load().model_dump(mode="json"),
             "model": {
                 "configured": endpoint is not None,
+                "data_approval": (
+                    None
+                    if binding is None or binding.data_approval is None
+                    else {
+                        "approval_ref": binding.data_approval.approval_ref,
+                        "approved_classes": binding.data_approval.approved_classes,
+                    }
+                ),
                 "alias": "" if endpoint is None else endpoint.alias,
                 "provider": "" if endpoint is None else endpoint.provider,
                 "model": "" if endpoint is None else endpoint.model,
@@ -440,12 +462,20 @@ class AgentWeb:
         return {"conversation": json.loads(created.model_dump_json())}
 
     def conversation_backends(self) -> dict[str, Any]:
+        binding = self.runtime.config.models
+        approval = None if binding is None else binding.data_approval
+        issue = (
+            "Host administrator approval for UNCLASSIFIED data is required"
+            if approval is None or "UNCLASSIFIED" not in approval.approved_classes
+            else None
+        )
         return {
             "backends": [
                 item.model_dump(mode="json")
                 for item in self.backends.statuses(
                     gateway_available=self._gateway_ready(),
                     gateway_configured=self._gateway_configured(),
+                    gateway_issue=issue,
                 )
             ]
         }
@@ -470,8 +500,25 @@ class AgentWeb:
             record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
+            classification = record.data_classification
+            classified_by = record.classified_by
+            if item.backend == "gateway":
+                classification = "UNCLASSIFIED"
+                classified_by = None
+            elif classification != "PUBLIC":
+                if not item.public_context:
+                    return {"ok": False, "code": "public_context_required"}
+                if record.messages:
+                    return {"ok": False, "code": "public_context_requires_empty_session"}
+                classification = "PUBLIC"
+                classified_by = self.runtime.actor
             updated = record.model_copy(
-                update={"backend": item.backend, "updated_at": datetime.now(UTC)}
+                update={
+                    "backend": item.backend,
+                    "data_classification": classification,
+                    "classified_by": classified_by,
+                    "updated_at": datetime.now(UTC),
+                }
             )
             saved = self.runtime.state.save_conversation(updated)
         return {"ok": True, "conversation": json.loads(saved.model_dump_json())}
@@ -583,17 +630,28 @@ class AgentWeb:
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
             started = datetime.now(UTC)
-            try:
-                slash = parse_slash_command(item.message)
-            except SlashCommandError as error:
-                answer: dict[str, Any] = {
+            if record.data_classification == "PUBLIC" and item.message.lstrip().startswith("/"):
+                answer = {
                     "ok": False,
-                    "answer": f"Unsupported command ({error.code}). Type /help for commands.",
+                    "answer": (
+                        "Commands are unavailable in a PUBLIC conversation. "
+                        "Start a Gateway session."
+                    ),
                     "status": "needs_input",
                 }
                 slash = None
             else:
-                answer = self._slash_command(slash) if slash is not None else {}
+                try:
+                    slash = parse_slash_command(item.message)
+                except SlashCommandError as error:
+                    answer = {
+                        "ok": False,
+                        "answer": f"Unsupported command ({error.code}). Type /help for commands.",
+                        "status": "needs_input",
+                    }
+                    slash = None
+                else:
+                    answer = self._slash_command(slash) if slash is not None else {}
             namespace = self.namespace
             if answer:
                 pass
@@ -602,10 +660,29 @@ class AgentWeb:
                     ModelMessage(role=message.role, text=message.text)
                     for message in record.messages[-19:]
                 ) + (ModelMessage(role="user", text=item.message),)
+                outbound = (
+                    OutboundContext(
+                        materials=tuple(
+                            ContextMaterial(
+                                material_id=f"message-{index}",
+                                origin="history",
+                                classification="PUBLIC",
+                                classified_by=record.classified_by,
+                                text=message.text,
+                            )
+                            for index, message in enumerate(history)
+                        )
+                    )
+                    if record.data_classification == "PUBLIC"
+                    else None
+                )
                 completed = self.backends.complete(
                     record.backend,
                     history,
-                    persona_guidance=self.persona.load().prompt_guidance(),
+                    # Local persona may contain private text; a PUBLIC session
+                    # sends only explicitly declared conversation messages.
+                    persona_guidance="",
+                    outbound=outbound,
                 )
                 answer = {
                     "ok": completed.status == "answered",

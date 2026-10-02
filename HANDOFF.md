@@ -2,68 +2,84 @@
 
 Date: 2026-10-02 (Asia/Taipei)
 
-Branch: `main`; local-only work, no push.
+Branch: `main`; local-only work, no push. The prior backend-boundary slice is
+commit `4f5b92c`; the data-trust slice described below is the current handoff.
 
-Status: multi-backend Agent Orchestrator slice 1 complete. The overall harness,
-Workflow migration, Marketplace and E2E program is still active.
+Status: multi-backend Agent Orchestrator slices 1 and 2 complete in source.
+Portable task state, native task adapters, Workflow migration, Marketplace
+defaults and product E2E remain outstanding.
 
-## Goal and approved boundary
+## Goal and decisions
 
-The owner approved the incremental design in
+The owner approved the incremental sequence in
 `docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and
 `docs/superpowers/specs/2026-10-02-multi-backend-orchestrator-design.md`.
-Strengthen the Agent first, then migrate the pinned source Workflows with
-standardized parameter UI, publish reviewed defaults and prove user-level
-SOP/Knowledge/Skill scenarios. Unclassified data may use only a suitably
-approved internal Gateway; native Codex/Claude task backends require the full
-transferred context to be explicitly PUBLIC. No availability fallback may
-override eligibility. `docs/DECISIONS.md` records this choice.
+Strengthen the Agent first, then migrate pinned source Workflows with static
+and runtime parameter UI, publish reviewed default assets and prove SOP,
+Knowledge and ordinary Skill scenarios. `docs/DECISIONS.md` records the
+owner's data boundary: UNCLASSIFIED data may use only a host-admin-approved
+internal Gateway. Codex/Claude may receive only complete explicitly PUBLIC
+context; availability never causes an ineligible fallback. The owner chose
+explicit host-admin Gateway approval over trusting localhost.
 
-## Completed in slice 1
+## Completed
 
-- Added closed backend profile and health contracts, a generic execution
-  protocol and exact-selection router. Inconsistent model/native harness pairs,
-  duplicate IDs, ineligible/unavailable/mismatched selections are rejected.
-- Wrapped existing `Gateway.converse` in `GatewayModelBackend` and routed
-  admitted `LocalAgent.converse` requests through it. Gateway remains the sole
-  eligible registered backend. Existing response, tool evidence, durable run
-  recording and Bridge policy continue unchanged. Deterministic paths were not
-  modified.
-- Added contract, adapter and admission regression tests. Recorded approved
-  requirements, architecture decision and revised prerequisites for the
-  pre-existing product E2E order.
+- Slice 1 added typed backend profiles/health, exact selection and a Gateway
+  conversation adapter. Local Agent admission, deterministic routes, Bridge
+  policy, result formats and durable Workflow evidence remain unchanged.
+- Slice 2 added classified text/provenance contracts and a fail-closed data
+  decision. `models.data_approval` names the exact routed Gateway alias and
+  URL, allowed classes and approval reference. A host-built model client
+  treats the entire request as UNCLASSIFIED and does not call provider generate
+  or stream without matching approval. The doctor and Web Settings/Backend
+  status show missing approval.
+- Existing restricted Codex/Claude/Copilot CLI text chat now requires a new
+  PUBLIC session declared before messages. The CLI adapter checks labels
+  against every message actually sent; Web sends no local persona text and
+  blocks slash commands in PUBLIC sessions. An old conversation cannot be
+  relabeled PUBLIC; switching it to Gateway removes the PUBLIC declaration.
+  This restricted text chat is still not governed native task execution.
+- Added API, policy, host-wire and regression tests. The browser page has a
+  confirmation dialog that creates a new PUBLIC session when needed. Source
+  decisions, requirements and acceptance prerequisites were updated.
 
 ## Verification
 
-- Full local test selection with `PYTHONUTF8=1`, `-p no:cacheprovider`, a fresh
-  `.scratch` basetemp, `--ignore=tests/test_browser.py`, and the two existing
-  machine-specific exclusions: 1,516 passed, 4 skipped, 2 deselected.
+- Full local selection with `PYTHONUTF8=1`, a fresh `.scratch` pytest
+  basetemp, no pytest cache, `--ignore=tests/test_browser.py` and two existing
+  machine-specific exclusions: **1,523 passed, 4 skipped, 2 deselected**.
 - `.venv/Scripts/python -m ruff check src tests`: passed.
-- `.venv/Scripts/python -m mypy src tests`: passed, 276 source files.
+- `.venv/Scripts/python -m mypy src tests`: passed, 280 source files.
 - `.venv/Scripts/python -m build --no-isolation --outdir
-  .scratch/dist-backend-20261002`: sdist and wheel built.
-- `git diff --check`: passed. The initial unspecialized browser test failed
-  because local Chromium closed its WebSocket. The first complete run had an
-  incorrect new test expectation and a CP950 subprocess decode failure;
-  both focused reruns and the final full selection passed with UTF-8 mode.
+  .scratch/dist-data-final-20261002`: sdist and wheel built; wheel contains
+  the new data-policy and model-approval modules and the Web page.
+- Extracted inline Web JavaScript and ran `node --check`: passed.
+- The header-auth Web test passed alone. The separate real-Chromium UI test
+  failed before page navigation because this machine closed its CDP WebSocket;
+  no visual interaction result is claimed.
 
-## Still to do
+## Outstanding work and risks
 
-The current router accepts an eligibility set supplied by its caller, but no
-data classifier exists yet. Do not register a native task backend until slice
-2 denies unclassified/non-PUBLIC outbound context before sending any bytes and
-records why. After that, add portable task/run state and independent
-completion validation, then native adapters with workspace and credential
-containment. The existing Codex/Claude restricted CLI text-chat feature is a
-separate path and does not satisfy those gates.
+- Source enforcement is ready, but no actual preview host was newly approved.
+  The owner has been asked to confirm whether this workstation's LiteLLM
+  `http://127.0.0.1:4000/v1` may receive UNCLASSIFIED data. Until a host
+  administrator records that exact approval in its `host.json` and restarts
+  the Agent, the upgraded host will refuse ordinary Gateway model calls. The
+  running preview has not been reinstalled or restarted with these changes.
+- The current classifier conservatively treats every AEP model request as
+  UNCLASSIFIED. Future per-source provenance must preserve Knowledge citation
+  and attachment labels before native task backends receive any content.
+  PUBLIC session declaration is an explicit operator statement, not a
+  guarantee that human-entered text is actually public.
+- `BackendRouter` currently registers only Gateway for governed conversation.
+  Native task adapters still need workspace, environment, credential and
+  side-effect containment plus portable task/state and independent validation.
+- The private source Workflow checkout is read-only at
+  `C:\Users\Chi_L\Documents\claude\n8n_workflow_system`, revision
+  `896046e8fe2170d21f9213e56e5ce2f93c05ba43`. Remote HEAD could not be
+  verified with available GitHub REST scope. Hermes Skills and migrated
+  Workflows require individual provenance/license/dependency/policy review.
 
-The private source Workflow repository is available as a read-only pinned local
-checkout at `C:\Users\Chi_L\Documents\claude\n8n_workflow_system`, revision
-`896046e8fe2170d21f9213e56e5ce2f93c05ba43`; current remote HEAD was not
-verified with available REST scope. Source jobs and Hermes Skills still need
-individual provenance, license, dependency and policy review before migration
-or publication. No source repository file was modified.
-
-Next action: design and test the fail-closed data classification/eligibility
-contract for all outbound context, then attach it to backend selection before
-any native task adapter is enabled.
+Next action: implement the portable task and run-state contracts with
+persistence and independent completion validation tests, then attach them
+without changing deterministic Workflow execution.

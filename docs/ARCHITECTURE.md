@@ -311,8 +311,14 @@ harness or a future agent using its native harness; it never grants access.
 does not fall back. The sole task-capable entry in this slice is the Gateway
 adapter, which forwards context, history and persona to `Gateway.converse` and
 returns its existing typed result. Health is reported as unknown until a real
-Gateway request proves reachability. Data classification and native Agent task
-execution are separate, unimplemented gates; see `REQUIREMENTS.md` and the
+Gateway request proves reachability. The next data-trust slice requires an
+administrator approval tied to the exact routed Gateway alias and URL before
+the host's model client sends a request. A complete model request is treated as
+UNCLASSIFIED; an approval must include that class. Existing restricted native
+CLI text chat requires a separately declared PUBLIC session with no prior
+history and sends no local persona or command results. This is a text-chat
+safety boundary, not native Agent task execution. Field-level provenance and
+native Agent task adapters remain later slices; see `REQUIREMENTS.md` and the
 approved design under `superpowers/specs/`.
 
 Conversation feedback uses a separate local contribution boundary. The Host

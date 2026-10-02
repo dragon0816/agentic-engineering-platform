@@ -13,6 +13,7 @@ from pydantic import (
     model_validator,
 )
 
+from agent.data_policy import BackendDataApproval
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
@@ -271,6 +272,13 @@ class HostIntegrations(Contract):
     weekly_report: WeeklyReportSettings | None = None
 
 
+class GatewayHostApproval(BackendDataApproval):
+    """Tie a generic data grant to one exact host-configured Gateway URL."""
+
+    endpoint_alias: Symbol
+    endpoint_base_url: Text
+
+
 class ModelBinding(Contract):
     """The models this host may use, and how it is allowed to use them.
 
@@ -292,11 +300,10 @@ class ModelBinding(Contract):
     with the memory to do it can say so, and so that a machine which must
     keep working with nothing reachable can insist on it.
 
-    It is not a data boundary and does not pretend to be one. This platform
-    cannot tell a company's own gateway from anybody else's -- both are a URL
-    somebody wrote here -- so writing that URL, and mapping a credential to
-    go with it, is the decision. Asking for it twice would add a line to
-    every host and no information to any of them.
+    A configured endpoint is not data-transfer approval. A host administrator
+    separately approves an exact routed Gateway URL and explicit data classes.
+    Changing the routed endpoint invalidates the approval rather than silently
+    inheriting trust from a URL that happens to be on localhost.
     """
 
     catalog: ModelCatalog
@@ -306,6 +313,7 @@ class ModelBinding(Contract):
     # describe, such as a model that rejects the newer `max_completion_tokens`
     # name. Host wiring, which is why it is here and not in the catalog.
     options: dict[Symbol, dict[str, str]] = {}
+    data_approval: GatewayHostApproval | None = None
 
     @model_validator(mode="after")
     def the_routing_alias_is_one_of_the_endpoints(self) -> Self:
@@ -314,6 +322,18 @@ class ModelBinding(Contract):
         unknown = sorted(alias for alias in self.options if self.catalog.endpoint(alias) is None)
         if unknown:
             raise ValueError(f"options name no endpoint: {', '.join(unknown)}")
+        approval = self.data_approval
+        if approval is not None:
+            endpoint = (
+                None if self.routing_alias is None else self.catalog.endpoint(self.routing_alias)
+            )
+            if (
+                approval.backend_id != "gateway"
+                or endpoint is None
+                or approval.endpoint_alias != endpoint.alias
+                or approval.endpoint_base_url != endpoint.base_url
+            ):
+                raise ValueError("Gateway data approval must name the exact routed endpoint")
         if self.require_local_model and self.routing_alias is not None:
             endpoint = self.catalog.endpoint(self.routing_alias)
             if endpoint is not None and not endpoint.capabilities.local:

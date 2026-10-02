@@ -656,7 +656,7 @@ def test_conversation_history_survives_a_runtime_restart(tmp_path: Path) -> None
         assert len(restored["selected"]["messages"]) == 2
 
 
-def test_local_cli_backend_selection_answers_and_persists(tmp_path: Path) -> None:
+def test_public_local_cli_backend_selection_answers_and_persists(tmp_path: Path) -> None:
     config, layout = ready(tmp_path)
 
     def run_cli(argv: list[str], **kwargs: Any) -> Any:
@@ -676,21 +676,59 @@ def test_local_cli_backend_selection_answers_and_persists(tmp_path: Path) -> Non
     with build_runtime(config) as runtime:
         web = AgentWeb(runtime, conversation_backends=backends)
         created = web.create_conversation()["conversation"]
-        selected = web.select_conversation_backend(
+        refused = web.select_conversation_backend(
             ConversationBackendSelectRequest(
                 session_id=created["session_id"], backend="claude_code"
             )
         )
+        assert refused == {"ok": False, "code": "public_context_required"}
+        selected = web.select_conversation_backend(
+            ConversationBackendSelectRequest(
+                session_id=created["session_id"], backend="claude_code", public_context=True
+            )
+        )
         assert selected["ok"] is True
+        assert selected["conversation"]["data_classification"] == "PUBLIC"
         answered = web.conversation_turn(
             ConversationTurnRequest(session_id=created["session_id"], message="What can you do?")
         )
         assert answered["answer"]["answer"] == "Answered by Claude."
         assert answered["conversation"]["backend"] == "claude_code"
+        command = web.conversation_turn(
+            ConversationTurnRequest(session_id=created["session_id"], message="/wiki-query private")
+        )
+        assert command["answer"]["status"] == "needs_input"
+        assert "Commands are unavailable" in command["answer"]["answer"]
 
     with build_runtime(config) as rebuilt:
         restored = AgentWeb(rebuilt).conversations(created["session_id"])
         assert restored["selected"]["backend"] == "claude_code"
+        assert restored["selected"]["data_classification"] == "PUBLIC"
+
+
+def test_existing_unclassified_history_cannot_be_redeclared_public(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+
+    def ready_status(argv: list[str], **_kwargs: Any) -> Any:
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    backends = LocalConversationBackends(
+        layout.workspace_root,
+        which=lambda name: "C:/fixed/claude.exe" if name == "claude" else None,
+        status_runner=ready_status,
+    )
+    with build_runtime(config) as runtime:
+        web = AgentWeb(runtime, conversation_backends=backends)
+        created = web.create_conversation()["conversation"]
+        web.conversation_turn(
+            ConversationTurnRequest(session_id=created["session_id"], message="private notes")
+        )
+        refused = web.select_conversation_backend(
+            ConversationBackendSelectRequest(
+                session_id=created["session_id"], backend="claude_code", public_context=True
+            )
+        )
+        assert refused == {"ok": False, "code": "public_context_requires_empty_session"}
 
 
 def test_conversation_requests_are_closed_and_owned_by_the_host(served: AgentWebServer) -> None:

@@ -72,6 +72,14 @@ token 貼到 Issue、聊天或測試證據中。
 如果 Gateway 需要憑證，只在頁面填 `SecretRef` 名稱與 Windows 環境變數名稱。
 憑證值只放在環境變數，不能放進 `host.json`。儲存後依頁面提示重新啟動 Web。
 
+模型連線資料和資料傳輸核准是兩件事。主機管理員須先確認這個 LiteLLM Gateway
+實際轉送到核准的內部服務，再於 `host.json` 的 `models` 下加入
+`data_approval`，指定 `backend_id: gateway`、與路由完全相同的
+`endpoint_alias` 和 `endpoint_base_url`、`approval_ref`、
+`internal_gateway: true`，以及允許的 `approved_classes`（現階段自然語言
+模型請求需要 `UNCLASSIFIED`）。完整非機密範例見 `docs/REQUIREMENTS.md`。
+僅設定 localhost URL 或憑證不等於核准；更改模型設定會清除舊核准。
+
 ## 5. 依序測試
 
 ### A. Ask：自然語言與指令提示
@@ -83,7 +91,8 @@ token 貼到 Issue、聊天或測試證據中。
 
 ### Expected result
 
-- 已配置 Gateway 時，Agent 以自然語言回覆，並保留 trace evidence。
+- 已配置且經管理員核准資料級別的 Gateway，Agent 才會以自然語言回覆，
+  並保留 trace evidence。
 - 命中固定指令時走 deterministic route，不需要模型重新猜測。
 - 缺少模型、grant 或 prerequisite 時，頁面顯示具體的 needs-input/setup-required，
   不應假裝成功。

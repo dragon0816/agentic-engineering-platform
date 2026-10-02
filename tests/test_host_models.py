@@ -54,6 +54,19 @@ def binding(**changes: Any) -> dict[str, Any]:
         "routing_alias": "company",
     }
     values.update(changes)
+    alias = values["routing_alias"]
+    selected = next(
+        (item for item in values["catalog"]["endpoints"] if item["alias"] == alias), None
+    )
+    if "data_approval" not in values and selected is not None:
+        values["data_approval"] = {
+            "backend_id": "gateway",
+            "endpoint_alias": alias,
+            "endpoint_base_url": selected["base_url"],
+            "approved_classes": ["UNCLASSIFIED"],
+            "approval_ref": "host-admin/internal-gateway-fixture",
+            "internal_gateway": True,
+        }
     return values
 
 
@@ -117,10 +130,7 @@ def test_a_configured_gateway_reaches_the_router(
         assert router.local_only is False, "nothing asked for a model on this machine"
 
 
-def test_naming_a_gateway_is_the_whole_decision(tmp_path: Path) -> None:
-    """No second line to write. Somebody put that URL in the file and mapped
-    a credential to go with it; asking again would add a line to every host
-    and no information to any of them."""
+def test_gateway_configuration_and_admin_data_approval_are_separate(tmp_path: Path) -> None:
     config = CompanyHostConfiguration.model_validate(
         {
             "device": device(),
@@ -131,6 +141,20 @@ def test_naming_a_gateway_is_the_whole_decision(tmp_path: Path) -> None:
     assert config.models is not None
     assert config.models.require_local_model is False
     assert config.models.routing_alias == "company"
+    assert config.models.data_approval is not None
+    assert config.models.data_approval.approved_classes == ("UNCLASSIFIED",)
+
+    without = ModelBinding.model_validate(binding(data_approval=None))
+    assert without.data_approval is None
+    with pytest.raises(ValidationError, match="exact routed endpoint"):
+        ModelBinding.model_validate(
+            binding(
+                data_approval={
+                    **binding()["data_approval"],
+                    "endpoint_base_url": "https://different.example.invalid/api",
+                }
+            )
+        )
 
 
 def _ollama(**changes: Any) -> dict[str, Any]:
@@ -245,7 +269,8 @@ def test_the_doctor_says_what_this_machine_can_reason_with(
         update={"models": ModelBinding.model_validate(_ollama(require_local_model=True))}
     )
     checks = {check.name: check for check in host_report(insisting, layout).checks}
-    assert "a model on this machine only" in checks["models"].detail
+    assert checks["models"].status == "failed"
+    assert "host-administrator approval" in checks["models"].detail
 
 
 def test_the_doctor_never_prints_the_token(
@@ -335,7 +360,7 @@ class FakeGateway:
         )
 
 
-def routed(tmp_path: Path, gateway: FakeGateway, message: str) -> Any:
+def routed(tmp_path: Path, gateway: FakeGateway, message: str, *, approved: bool = True) -> Any:
     """Assemble a real host with the fake gateway behind it and ask it
     something no installed command matches."""
     import asyncio
@@ -344,7 +369,7 @@ def routed(tmp_path: Path, gateway: FakeGateway, message: str) -> Any:
     from common.local_agent import LocalAgentRequest
     from host_runtime.agent import LocalAgent
 
-    config, layout = configured(tmp_path)
+    config, layout = configured(tmp_path, **({} if approved else {"data_approval": None}))
     from host_runtime.host import build_gateway, load_authorization, load_membership
     from host_runtime.state import SqliteLocalState
 
@@ -411,6 +436,16 @@ def test_the_request_goes_to_the_configured_gateway_and_carries_its_key(
     assert sent["url"].startswith(GATEWAY)
     assert sent["headers"]["Authorization"] == "Bearer sk-the-company-key"
     assert sent["payload"]["model"] == "gpt-5.5"
+
+
+def test_gateway_without_admin_data_approval_receives_no_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("AEP_LLM_TOKEN", "a value nobody prints")
+    gateway = FakeGateway(None)
+    outcome = routed(tmp_path, gateway, "private material", approved=False)
+    assert gateway.calls == []
+    assert outcome.decision is not None and outcome.decision.kind == "needs_input"
 
 
 def test_a_gateway_that_chooses_nothing_leaves_the_agent_asking(

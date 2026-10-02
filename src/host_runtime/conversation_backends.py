@@ -12,6 +12,8 @@ from typing import Literal, Protocol
 
 from pydantic import Field
 
+from agent.backend_contracts import BackendProfile
+from agent.data_policy import DataPolicy, OutboundContext
 from common.assets import RegistryContract
 from models.contracts import ModelMessage
 
@@ -325,6 +327,7 @@ class LocalConversationBackends:
         *,
         gateway_available: bool,
         gateway_configured: bool | None = None,
+        gateway_issue: str | None = None,
     ) -> tuple[ConversationBackendStatus, ...]:
         configured = gateway_available if gateway_configured is None else gateway_configured
         rows = [
@@ -341,7 +344,7 @@ class LocalConversationBackends:
                     "Configured and ready"
                     if gateway_available
                     else (
-                        "Configured; its mapped credential is unavailable"
+                        gateway_issue or "Configured; its mapped credential is unavailable"
                         if configured
                         else "Configure it in Settings"
                     )
@@ -415,11 +418,31 @@ class LocalConversationBackends:
         history: tuple[ModelMessage, ...],
         *,
         persona_guidance: str,
+        outbound: OutboundContext | None = None,
     ) -> ConversationBackendResult:
         spec = self._specs.get(backend)
         if spec is None:
             return ConversationBackendResult(
                 backend=backend, status="unavailable", code="backend_not_local_cli"
+            )
+        if outbound is not None:
+            expected = [("history", message.text) for message in history]
+            if persona_guidance:
+                expected.append(("persona", persona_guidance))
+            actual = [(item.origin, item.text) for item in outbound.materials]
+            if (
+                actual != expected
+                or any(message.images or message.tool_calls for message in history)
+            ):
+                return ConversationBackendResult(
+                    backend=backend, status="unavailable", code="context_mismatch"
+                )
+        decision = DataPolicy(()).decide(
+            BackendProfile(backend_id=backend, kind="agent", harness="native"), outbound
+        )
+        if not decision.allowed:
+            return ConversationBackendResult(
+                backend=backend, status="unavailable", code=decision.code
             )
         executable = self._which(spec.executable)
         if executable is None:

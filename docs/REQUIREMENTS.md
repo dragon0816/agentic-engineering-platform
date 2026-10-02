@@ -16,6 +16,34 @@ This rule needs an enforced classifier and negative tests before native task
 execution is enabled. The existing restricted CLI text-chat path does not
 qualify as a governed native task backend.
 
+The host administrator records an approval for the exact routed Gateway
+alias/URL and each permitted data class in `host.json`. An endpoint URL or
+credential alone is not approval; changing model settings clears the prior
+approval. Until finer-grained provenance is available, every complete AEP
+model request is classified `UNCLASSIFIED`. A PUBLIC external text-chat session
+must be declared before its first message; it cannot inherit old history,
+local persona text or command/tool results. A selected external CLI receives
+only the complete explicitly PUBLIC history, and changing back to Gateway
+removes the PUBLIC session declaration.
+
+For the current local LiteLLM route, an administrator who has verified its
+upstream data boundary can add this non-secret field under `models`:
+
+```json
+"data_approval": {
+  "backend_id": "gateway",
+  "endpoint_alias": "company",
+  "endpoint_base_url": "http://127.0.0.1:4000/v1",
+  "approved_classes": ["UNCLASSIFIED"],
+  "approval_ref": "host-admin/internal-gateway-approval",
+  "internal_gateway": true
+}
+```
+
+The alias and URL must match the configured routed endpoint exactly. The
+administrator chooses the classes and records the actual approval reference;
+this example itself does not approve a machine.
+
 The first implementation slice adds a provider-neutral backend profile,
 health and exact-selection contract, then adapts the existing Gateway
 conversation without changing its observable answer, failure or tool evidence.

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, StrictBool, model_validator
 
 from common.assets import reject_embedded_secrets
 from common.base import Contract, Symbol, Text
@@ -34,12 +34,16 @@ class ConversationRecord(Contract):
     actor: Symbol
     title: Text
     backend: ConversationBackendName = "gateway"
+    data_classification: Literal["UNCLASSIFIED", "PUBLIC"] = "UNCLASSIFIED"
+    classified_by: Symbol | None = None
     created_at: datetime
     updated_at: datetime
     messages: tuple[ConversationMessage, ...] = Field(default=(), max_length=100)
 
     @model_validator(mode="after")
     def ordered_history(self) -> Self:
+        if (self.data_classification == "PUBLIC") != (self.classified_by is not None):
+            raise ValueError("PUBLIC conversation requires an explicit classifier")
         if self.updated_at < self.created_at:
             raise ValueError("a conversation cannot be updated before it was created")
         moments = [item.created_at for item in self.messages]
@@ -67,6 +71,13 @@ class ConversationTurnRequest(Contract):
 class ConversationBackendSelectRequest(Contract):
     session_id: Symbol
     backend: ConversationBackendName
+    public_context: StrictBool = False
+
+    @model_validator(mode="after")
+    def public_declaration_is_for_external_backend(self) -> Self:
+        if self.public_context and self.backend == "gateway":
+            raise ValueError("Gateway selection cannot declare a PUBLIC session")
+        return self
 
 
 class ConversationBackendAuthenticationRequest(Contract):
