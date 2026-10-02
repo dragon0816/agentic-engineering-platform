@@ -420,8 +420,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   sequence in `docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
 - [x] Set the initial unclassified-data rule: use only a suitably approved
   internal Gateway; require explicit PUBLIC classification for Codex/Claude.
-- [ ] Review and approve the proposed backend/data-policy design before
-  implementing the first contract slice.
+- [x] Review and approve the incremental backend/data-policy design before
+  implementing the first contract slice (owner approval 2026-10-02).
+- [x] Implement slice 1: exact backend profile/health/selection contracts,
+  Gateway conversation adapter, equivalence and denial tests. Full local
+  selection: 1,516 passed, 4 skipped, 2 environment-specific deselected;
+  ruff, mypy and sdist/wheel build passed on 2026-10-02.
 - [ ] Add a backend-neutral orchestrator, data classification, portable task
   state and independent completion validation in tested slices.
 - [ ] Migrate source Workflow/job behavior with static and runtime parameter

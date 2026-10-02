@@ -2,82 +2,68 @@
 
 Date: 2026-10-02 (Asia/Taipei)
 
-Branch: `main`
+Branch: `main`; local-only work, no push.
 
-Status: multi-backend Agent Orchestrator Phase 0 audit complete; design review
-pending. No runtime implementation changed in this phase.
+Status: multi-backend Agent Orchestrator slice 1 complete. The overall harness,
+Workflow migration, Marketplace and E2E program is still active.
 
-## Current goal and sequence
+## Goal and approved boundary
 
-The owner wants to strengthen the Agent harness first, then migrate every
-relevant Workflow/job from `dragon0816/rs_workflow_system`, provide standardized
-per-user static and per-run parameter forms in Web and Telegram, publish
-reviewed Hermes Skills and migrated Workflows as Marketplace defaults, and
-validate SOP-to-Workflow, Knowledge and natural-language Skill use end to end.
-The detailed repository map and proposed slices are in
-`docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
+The owner approved the incremental design in
+`docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and
+`docs/superpowers/specs/2026-10-02-multi-backend-orchestrator-design.md`.
+Strengthen the Agent first, then migrate the pinned source Workflows with
+standardized parameter UI, publish reviewed defaults and prove user-level
+SOP/Knowledge/Skill scenarios. Unclassified data may use only a suitably
+approved internal Gateway; native Codex/Claude task backends require the full
+transferred context to be explicitly PUBLIC. No availability fallback may
+override eligibility. `docs/DECISIONS.md` records this choice.
 
-## Completed in this phase
+## Completed in slice 1
 
-- Read the downloaded multi-backend handoff as proposed requirements and
-  inspected the current architecture, Agent, Gateway, local CLI backends,
-  coding Harness, Workflow/Bridge policy, Knowledge and Marketplace code.
-- Verified that the private source Workflow repository has a local read-only
-  checkout at `896046e8fe2170d21f9213e56e5ce2f93c05ba43`, matching the
-  pinned Phase 7 revision. It contains 10 n8n graph files and 15 top-level
-  Host Bridge job modules. No source repository file was modified.
-- Counted 67 Hermes `SKILL.md` manifests in the workstation's Skills
-  installation directory across 12 categories; enabled state and content have
-  not been reviewed for Marketplace publication.
-- Recorded the owner decision that unclassified material may use only a
-  suitably approved internal Gateway; external Codex/Claude backends require
-  the entire transferred context to be explicitly PUBLIC. Backend availability
-  never overrides this rule.
-- Identified the current Codex/Claude path as restricted text chat, not native
-  AEP task execution, and the absence of classification before backend dispatch.
-  Recommended incremental orchestration around existing Gateway/Bridge
-  contracts, with data policy before native Agent adapters.
+- Added closed backend profile and health contracts, a generic execution
+  protocol and exact-selection router. Inconsistent model/native harness pairs,
+  duplicate IDs, ineligible/unavailable/mismatched selections are rejected.
+- Wrapped existing `Gateway.converse` in `GatewayModelBackend` and routed
+  admitted `LocalAgent.converse` requests through it. Gateway remains the sole
+  eligible registered backend. Existing response, tool evidence, durable run
+  recording and Bridge policy continue unchanged. Deterministic paths were not
+  modified.
+- Added contract, adapter and admission regression tests. Recorded approved
+  requirements, architecture decision and revised prerequisites for the
+  pre-existing product E2E order.
 
 ## Verification
 
-- No implementation code changed. Baseline local test selection: 1,509 passed,
-  4 skipped, 2 environment-specific deselected, 1 intermittent Windows
-  `os.replace` access-denied failure in extension staging. The exact failed
-  test passed alone on a fresh directory. The preceding verified full run at
-  the same runtime code had 1,510 passed, 4 skipped and 2 deselected.
-- The current Agent Web and Shared Platform preview were left running; this
-  phase did not change their installed packages or local credentials.
-- `git diff --check` passed and the audit was reviewed for placeholders and
-  internal contradictions before committing.
+- Full local test selection with `PYTHONUTF8=1`, `-p no:cacheprovider`, a fresh
+  `.scratch` basetemp, `--ignore=tests/test_browser.py`, and the two existing
+  machine-specific exclusions: 1,516 passed, 4 skipped, 2 deselected.
+- `.venv/Scripts/python -m ruff check src tests`: passed.
+- `.venv/Scripts/python -m mypy src tests`: passed, 276 source files.
+- `.venv/Scripts/python -m build --no-isolation --outdir
+  .scratch/dist-backend-20261002`: sdist and wheel built.
+- `git diff --check`: passed. The initial unspecialized browser test failed
+  because local Chromium closed its WebSocket. The first complete run had an
+  incorrect new test expectation and a CP950 subprocess decode failure;
+  both focused reruns and the final full selection passed with UTF-8 mode.
 
-## Outstanding work and risks
+## Still to do
 
-- Review the recommended backend/data-policy architecture in the audit. The
-  downloaded handoff describes a target, while the older repository Harness
-  proposal is stale relative to current code and `PRODUCT_ACCEPTANCE_TESTS.md`
-  has a different product-gate order. Update approved architecture/requirements
-  explicitly before implementation.
-- The available GitHub REST credential cannot read the private source repo's
-  current HEAD. The pinned local checkout is a valid initial comparison base;
-  confirm a newer exact revision before claiming complete migration.
-- `docs/REQUIREMENTS.md` and `docs/DECISIONS.md` do not yet exist. Create them
-  for approved multi-backend requirements and lasting security decisions.
-- External native Agent CLIs cannot receive confidential or unclassified
-  content. Workspace, environment, credential and Bridge containment require
-  tests before allowing them to execute tools.
-- Source `PARAMS_SCHEMA`/`x-ui` and `SettingField` use distinct per-run and
-  persistent settings semantics; preserve approval and path boundaries when
-  adapting them to shared parameter contracts. Do not publish all Skills or
-  jobs by copying files directly into the Marketplace.
+The current router accepts an eligibility set supplied by its caller, but no
+data classifier exists yet. Do not register a native task backend until slice
+2 denies unclassified/non-PUBLIC outbound context before sending any bytes and
+records why. After that, add portable task/run state and independent
+completion validation, then native adapters with workspace and credential
+containment. The existing Codex/Claude restricted CLI text-chat feature is a
+separate path and does not satisfy those gates.
 
-## Recommended next steps
+The private source Workflow repository is available as a read-only pinned local
+checkout at `C:\Users\Chi_L\Documents\claude\n8n_workflow_system`, revision
+`896046e8fe2170d21f9213e56e5ce2f93c05ba43`; current remote HEAD was not
+verified with available REST scope. Source jobs and Hermes Skills still need
+individual provenance, license, dependency and policy review before migration
+or publication. No source repository file was modified.
 
-1. Obtain owner review of `docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and the
-   incremental orchestrator direction.
-2. Write the approved design/spec and update the product acceptance order,
-   architecture and task contracts in a narrow documentation slice.
-3. Add Gateway-only backend abstraction with behavior-equivalence tests.
-4. Add data classification and backend trust with fail-closed payload-denial
-   tests before Codex/Claude native task adapters.
-5. Continue the remaining slices in the audit order, each with contract,
-   regression, verification, commit and handoff evidence.
+Next action: design and test the fail-closed data classification/eligibility
+contract for all outbound context, then attach it to backend selection before
+any native task adapter is enabled.

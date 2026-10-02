@@ -17,7 +17,10 @@ from typing import Literal, Self
 
 from pydantic import model_validator
 
+from agent.backend_contracts import GatewayConversationRequest
+from agent.backends.gateway import GatewayModelBackend
 from agent.gateway import Gateway, GatewayConversationResult
+from agent.orchestrator import BackendRouter
 from capabilities.runtime import CapabilityInvocation
 from common.base import Contract, Symbol
 from common.distribution import (
@@ -113,6 +116,9 @@ class LocalAgent:
     ) -> None:
         self.membership = BridgeMembership.model_validate(membership)
         self.gateway = gateway
+        self._conversation_backends: BackendRouter[
+            GatewayConversationRequest, GatewayConversationResult
+        ] = BackendRouter((GatewayModelBackend(gateway),))
         self.state = state
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         # How long a caller waits for a workflow when the request says
@@ -205,7 +211,12 @@ class LocalAgent:
             channel=item.ingress,
             session_id=item.session_id,
         )
-        result = await self.gateway.converse(context, history, persona_guidance=persona_guidance)
+        backend = self._conversation_backends.select("gateway", eligible_ids=("gateway",))
+        result = await backend.execute(
+            GatewayConversationRequest(
+                context=context, history=history, persona_guidance=persona_guidance
+            )
+        )
         runs: list[LocalRunSummary] = []
         unrecorded: list[LocalStateErrorCode] = []
         for tool in result.tools:

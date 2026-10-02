@@ -304,6 +304,17 @@ turns and tool calls are bounded; typed stop reasons end failed repair rather
 than allowing an unbounded agent loop. Known commands continue to bypass model
 selection.
 
+The first multi-backend harness slice wraps this existing conversation loop in
+an exact backend adapter. `BackendProfile` describes a model using the AEP
+harness or a future agent using its native harness; it never grants access.
+`BackendRouter` selects only one explicitly eligible registered backend and
+does not fall back. The sole task-capable entry in this slice is the Gateway
+adapter, which forwards context, history and persona to `Gateway.converse` and
+returns its existing typed result. Health is reported as unknown until a real
+Gateway request proves reachability. Data classification and native Agent task
+execution are separate, unimplemented gates; see `REQUIREMENTS.md` and the
+approved design under `superpowers/specs/`.
+
 Conversation feedback uses a separate local contribution boundary. The Host
 copies a bounded excerpt of the selected actor-owned conversation into an
 immutable draft. An improvement request must resolve to one exact installed

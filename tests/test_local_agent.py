@@ -23,7 +23,7 @@ from evaluation_runner import (
 )
 from pydantic import ValidationError
 
-from agent.gateway import Gateway
+from agent.gateway import Gateway, GatewayConversationResult
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillRegistry
 from capabilities.runtime import InstalledCapabilities, LocalPolicy
@@ -47,6 +47,7 @@ from common.execution import ExecutionAuthorization, RequestContext, TraceIdenti
 from common.local_agent import BridgeMembership, LocalAgentRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.state import SqliteLocalState
+from models.contracts import ModelMessage
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
@@ -153,6 +154,40 @@ def agent(membership: BridgeMembership, tmp_path: Path) -> tuple[LocalAgent, Gat
         membership, runner.gateway(), state_for(membership, tmp_path), clock=lambda: NOW
     )
     return resident, runner
+
+
+def test_conversation_uses_gateway_backend_after_admission(tmp_path: Path) -> None:
+    from unittest.mock import AsyncMock, patch
+
+    resident, _ = agent(company(), tmp_path)
+    reply = GatewayConversationResult(
+        trace=trace(), status="answered", text="I can help.", model_turns=1
+    )
+    history = (ModelMessage(role="user", text="hello"),)
+    with patch.object(resident.gateway, "converse", new=AsyncMock(return_value=reply)) as called:
+        outcome = asyncio.run(
+            resident.converse(request(message="hello"), history, persona_guidance="Be concise.")
+        )
+    assert outcome.conversation == reply
+    assert outcome.runs == () and outcome.refusal is None
+    called.assert_awaited_once()
+    assert called.await_args is not None
+    sent_context, sent_history = called.await_args.args
+    assert sent_context.message == "hello" and sent_context.actor == "engineer"
+    assert sent_history == history
+    assert called.await_args.kwargs == {"persona_guidance": "Be concise."}
+
+
+def test_conversation_refusal_never_reaches_backend(tmp_path: Path) -> None:
+    from unittest.mock import AsyncMock, patch
+
+    resident, _ = agent(company(), tmp_path)
+    history = (ModelMessage(role="user", text="hello"),)
+    with patch.object(resident.gateway, "converse", new=AsyncMock()) as called:
+        outcome = asyncio.run(resident.converse(request(actor="unbound", message="hello"), history))
+    assert outcome.refusal == "company_owner_required"
+    assert outcome.conversation is None
+    called.assert_not_awaited()
 
 
 class SlowHandler:
