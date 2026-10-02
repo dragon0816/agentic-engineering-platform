@@ -109,6 +109,8 @@ class ProjectItem(Contract):
     created: str = ""
     updated: str = ""
     author: str = ""
+    #: Logins on the underlying Issue, distinct from any Project text field.
+    issue_assignees: tuple[str, ...] = ()
     fields: Mapping[str, str] = {}
     comments: tuple[ProjectComment, ...] = ()
     #: True when the thread was longer than this client asked for.
@@ -165,6 +167,10 @@ query($owner: String!, $number: Int!, $size: Int!, $comments: Int!, $after: Stri
               createdAt
               updatedAt
               author { login }
+              assignees(first: 100) {
+                pageInfo { hasNextPage }
+                nodes { login }
+              }
               repository { nameWithOwner }
               comments(first: $comments) {
                 totalCount
@@ -352,6 +358,21 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
     )
     repository = ((content.get("repository") or {}) or {}).get("nameWithOwner") or ""
     number = content.get("number")
+    assignees = content.get("assignees")
+    if node.get("type") == "ISSUE" and not isinstance(assignees, Mapping):
+        raise GitHubError(
+            "github_bad_reply", "the Issue assignee connection is missing; refuse member counts"
+        )
+    assignees = assignees or {}
+    if (assignees.get("pageInfo") or {}).get("hasNextPage"):
+        raise GitHubError(
+            "github_bad_reply",
+            "the Issue assignee list was truncated; refuse incomplete member counts",
+        )
+    issue_assignees = tuple(
+        str(entry.get("login")) for entry in assignees.get("nodes") or []
+        if isinstance(entry, Mapping) and entry.get("login")
+    )
     return ProjectItem(
         item_id=item_id,
         key=f"{repository}#{number}" if repository and number is not None else "",
@@ -361,6 +382,7 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
         created=str(content.get("createdAt") or ""),
         updated=str(content.get("updatedAt") or ""),
         author=str(((content.get("author") or {}) or {}).get("login") or ""),
+        issue_assignees=issue_assignees,
         fields=fields,
         comments=comments,
         comments_truncated=int(thread.get("totalCount") or 0) > len(comments),

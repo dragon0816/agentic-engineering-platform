@@ -51,7 +51,7 @@ class WeeklyReportSettings(Contract):
     comment_tail_color: Colour = "#000000"
     new_row_fill: Colour = "#FFC7CE"
     status_done_fill: Colour = "#C6EFCE"
-    status_in_progress_fill: Colour = "#FFEB9C"
+    status_in_progress_fill: Colour = "#F8AD3E"
     new_row_border: BorderStyle = "thin"
     # Drive a local copy and write it back once, which the source measured at
     # 137s against 1001s in a synced folder. Off drives the real file in place.
@@ -184,6 +184,10 @@ class ReportItem(Contract):
     summary: str = ""
     status: str = ""
     assignee: str = ""
+    #: None means a legacy source did not supply Issue assignees; () means
+    #: GitHub explicitly reports none. Mail counts the latter as Unassigned.
+    #: Kept separate from the Project Assignee text used by the workbook.
+    issue_assignees: tuple[str, ...] | None = None
     company: str = ""
     sales: str = ""
     #: What the work is done on, as the team writes it, several on one

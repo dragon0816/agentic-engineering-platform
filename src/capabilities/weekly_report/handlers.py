@@ -219,6 +219,7 @@ def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
         summary=summary,
         status=_field(fields, settings.status_fields),
         assignee=_field(fields, settings.assignee_fields),
+        issue_assignees=row.issue_assignees,
         company=_field(fields, settings.company_fields),
         sales=_field(fields, settings.sales_fields),
         instrument=_field(fields, settings.instrument_fields),

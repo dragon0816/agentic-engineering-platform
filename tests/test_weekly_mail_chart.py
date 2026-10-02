@@ -128,7 +128,7 @@ def test_every_slice_gets_a_colour_even_past_the_palette() -> None:
     many = tuple(f"instrument-{index}" for index in range(len(chart.PALETTE) + 3))
     colours = chart.colours_for(many)
     assert len(colours) == len(many)
-    assert all(value in chart.PALETTE for value in colours.values())
+    assert len(set(colours.values())) == len(many)
     png = chart.pie_png(many, tuple(1 for _ in many), size=60)
     assert png is not None
 
@@ -143,30 +143,30 @@ def test_the_legend_is_keyed_to_the_picture() -> None:
     assert at(png, 0.5, 0.2) == rgb(colours["CMP180"]), "the first row is the slice at the top"
 
 
-def test_source_w2_folds_after_seven_named_instruments_and_keeps_unassigned_last() -> None:
-    """The pinned source's `_fold_slices` owns the seven-colour chart contract."""
+def test_all_production_names_survive_past_seven_and_unassigned_stays_last() -> None:
+    """The owner's override keeps actual names rather than a misleading Other."""
     totals = {f"Model-{index}": 10 for index in range(8)}
     totals["Unassigned"] = 3
     slices = chart.slices_for(totals)
     assert [label for label, _, _ in slices] == [
-        *(f"Model-{index}" for index in range(7)), "Other (1)", "Unassigned"
+        *(f"Model-{index}" for index in range(8)), "Unassigned"
     ]
-    assert [colour for _, _, colour in slices] == [*chart.PALETTE, chart.OTHER,
-                                                    chart.UNASSIGNED]
+    assert [colour for _, _, colour in slices[:7]] == list(chart.PALETTE)
+    assert slices[-1][2] == chart.UNASSIGNED
+    assert len({colour for _, _, colour in slices}) == len(slices)
     assert sum(count for _, count, _ in slices) == sum(totals.values())
 
 
-def test_source_w2_five_percent_threshold_uses_instrument_tickets() -> None:
+def test_small_production_names_are_never_folded_by_share() -> None:
     slices = chart.slices_for({"CMP180": 100, "CMX500": 2, "WMT": 1})
-    assert slices == (("CMP180", 100, chart.PALETTE[0]), ("Other (2)", 3, chart.OTHER))
-    assert chart.slices_for({"CMP180": 100, "CMX500": 2}, min_share=0)[1][:2] == (
-        "CMX500", 2
-    )
+    assert [entry[:2] for entry in slices] == [
+        ("CMP180", 100), ("CMX500", 2), ("WMT", 1)
+    ]
 
 
-def test_the_mailed_pie_uses_the_same_folded_series_as_its_totals() -> None:
+def test_the_mailed_pie_uses_the_same_complete_series_as_its_totals() -> None:
     totals = {f"Model-{index}": 10 for index in range(8)}
     picture = chart.pie_for(totals, size=90)
     assert picture is not None
     assert at(picture, 0.6, 0.25) == rgb(chart.PALETTE[0])
-    assert chart.slices_for(totals)[-1] == ("Other (1)", 10, chart.OTHER)
+    assert chart.slices_for(totals)[-1] == ("Model-7", 10, chart.colour_for_index(7))

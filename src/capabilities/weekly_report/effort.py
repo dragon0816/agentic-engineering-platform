@@ -64,9 +64,9 @@ DEFAULT_INSTRUMENTS: tuple[str, ...] = (
 #: One spelling wins where the team uses two.
 DEFAULT_INSTRUMENT_ALIASES: Mapping[str, str] = {"ZNB3K": "ZNB3000"}
 
-#: One ticket routinely covers more than one box, and the field says so with
-#: any of these between the names.
-INSTRUMENT_SPLIT = re.compile(r"[,;/&+]")
+#: Production is a comma-delimited Project field. A slash or plus can belong
+#: to a product name and is not a separator here.
+INSTRUMENT_SPLIT = re.compile(r"[,，]")
 
 
 def derive_instrument(
@@ -103,19 +103,14 @@ def instrument_field(
     instruments: Sequence[str] | None = None,
     aliases: Mapping[str, str] | None = None,
 ) -> str:
-    """The instrument for one ticket: the board's own field first, the title
-    second.
+    """The Project Production field, or Unassigned when it is blank.
 
-    The field is what the team maintains, and it is right in cases a title
-    cannot express. It is taken **as written** rather than filtered through
-    the vocabulary above: a field holding `PVT360A` should show that, not be
-    forced back to `Unassigned` because the name is unfamiliar. Hiding a real
-    answer is the failure this rule exists to prevent.
+    The original Jira renderer inferred from title text when its instrument
+    field was blank. The owner chose Production as the sole source for this
+    GitHub report; guessing from a title would misstate its provenance.
     """
     written = (item.instrument or "").strip()
-    if written:
-        return written
-    return derive_instrument(item.summary, instruments, aliases)
+    return written or UNASSIGNED
 
 
 def instruments_for(
@@ -125,9 +120,8 @@ def instruments_for(
 ) -> list[str]:
     """Every instrument one ticket is about, in the order written.
 
-    Counting `FSW, SMB` whole invented an instrument of that name with a
-    count of one, which then fell below a chart's fold and took both real
-    instruments with it. A ticket contributes at most one count per
+    Counting `FSW, SMB` whole would invent an instrument of that name with a
+    count of one and hide both real instruments. A ticket contributes at most one count per
     instrument, so `FSW, FSW` cannot inflate a total; the deliberate
     consequence is that instrument counts sum to more than the ticket count
     whenever a ticket names two, and the mail says so rather than hiding it.
@@ -150,9 +144,22 @@ def account_for(item: ReportItem) -> str:
     return (item.company or "").strip() or UNASSIGNED
 
 
+def members_for(item: ReportItem) -> tuple[str, ...]:
+    """GitHub Issue assignees own mail counts, not the Project's text field.
+
+    Older source fixtures have no Issue-assignee field and retain the prior
+    single-member behavior. An explicit empty Issue list is Unassigned, even
+    if Project Assignee text is populated for the workbook.
+    """
+    if item.issue_assignees is None:
+        return ((item.assignee or "").strip() or UNASSIGNED,)
+    names = tuple(dict.fromkeys(name.strip() for name in item.issue_assignees if name.strip()))
+    return names or (UNASSIGNED,)
+
+
 def member_for(item: ReportItem) -> str:
-    """Who is doing it."""
-    return (item.assignee or "").strip() or UNASSIGNED
+    """First member for single-cell legacy displays; counts use all members."""
+    return members_for(item)[0]
 
 
 def _ordered(counts: Mapping[str, int]) -> dict[str, int]:
@@ -162,11 +169,11 @@ def _ordered(counts: Mapping[str, int]) -> dict[str, int]:
 
 
 def member_totals(items: Iterable[ReportItem]) -> dict[str, int]:
-    """`{member: ticket count}`."""
+    """`{Issue assignee: ticket count}`; shared tickets count for each assignee."""
     counts: dict[str, int] = {}
     for item in items:
-        member = member_for(item)
-        counts[member] = counts.get(member, 0) + 1
+        for member in members_for(item):
+            counts[member] = counts.get(member, 0) + 1
     return _ordered(counts)
 
 
@@ -212,15 +219,15 @@ def buckets(
     """
     out: dict[str, dict[str, list[str]]] = {}
     for item in items:
-        member = member_for(item)
         if dimension == "instrument":
             labels = instruments_for(item, instruments, aliases)
         else:
             labels = [account_for(item)]
-        for label in labels:
-            keys = out.setdefault(member, {}).setdefault(label, [])
-            if item.key not in keys:
-                keys.append(item.key)
+        for member in members_for(item):
+            for label in labels:
+                keys = out.setdefault(member, {}).setdefault(label, [])
+                if item.key not in keys:
+                    keys.append(item.key)
     return out
 
 
@@ -229,24 +236,25 @@ def member_rows(
     instruments: Sequence[str] | None = None,
     aliases: Mapping[str, str] | None = None,
 ) -> list[dict[str, str]]:
-    """One row per ticket, grouped by member, for the mail's first table.
+    """One row per (ticket, Issue assignee), grouped by member for previews.
 
     The instrument is the single-cell view here: a table row names the
     ticket's own field as written, where the counting above splits it.
     """
     rows: list[dict[str, str]] = []
     for item in items:
-        rows.append(
-            {
-                "member": member_for(item),
-                "key": item.key,
-                "summary": item.summary,
-                "account": account_for(item),
-                "instrument": instrument_field(item, instruments, aliases),
-                "status": item.status,
-                "url": item.browse_url or "",
-            }
-        )
+        for member in members_for(item):
+            rows.append(
+                {
+                    "member": member,
+                    "key": item.key,
+                    "summary": item.summary,
+                    "account": account_for(item),
+                    "instrument": instrument_field(item, instruments, aliases),
+                    "status": item.status,
+                    "url": item.browse_url or "",
+                }
+            )
     rows.sort(key=lambda row: (row["member"] == UNASSIGNED, row["member"], row["key"]))
     return rows
 

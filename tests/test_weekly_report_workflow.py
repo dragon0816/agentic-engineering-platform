@@ -107,6 +107,7 @@ def board_item(
             "url": f"https://github.com/an-owner/a-board/issues/{number}",
             "state": "OPEN",
             "updatedAt": updated,
+            "assignees": {"pageInfo": {"hasNextPage": False}, "nodes": []},
             "repository": {"nameWithOwner": "an-owner/a-board"},
             "comments": {
                 "totalCount": total if total is not None else len(comments),

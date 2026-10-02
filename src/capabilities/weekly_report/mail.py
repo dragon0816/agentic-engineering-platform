@@ -200,7 +200,6 @@ def _member_split(items: Sequence[ReportItem], instruments: Sequence[str] | None
     totals = effort.instrument_totals(items, instruments)
     slices = chart.slices_for(totals)
     colours = {name: colour for name, _, colour in slices}
-    kept = {name for name in colours if name != "Unassigned" and not name.startswith("Other (")}
     maximum = max(
         (sum(len(keys) for keys in groups.values()) for groups in buckets.values()),
         default=1,
@@ -210,15 +209,7 @@ def _member_split(items: Sequence[ReportItem], instruments: Sequence[str] | None
         groups = buckets.get(member, {})
         segments = []
         for name, _, colour in slices:
-            if name == "Unassigned":
-                count = len(groups.get(name, []))
-            elif name.startswith("Other ("):
-                count = sum(
-                    len(keys) for label, keys in groups.items()
-                    if label not in kept and label != "Unassigned"
-                )
-            else:
-                count = len(groups.get(name, []))
+            count = len(groups.get(name, []))
             if not count:
                 continue
             width = max(8, round(300 * count / maximum))
@@ -263,6 +254,8 @@ def build_html(
     instrument_count = sum(instrument_totals.values())
     account_totals = effort.account_totals(items)
     members = effort.member_totals(items)
+    member_assignments = sum(members.values())
+    ticket_noun = "ticket" if len(items) == 1 else "tickets"
     summary = "".join(
         f"<td style='padding-right:14px;white-space:nowrap'><b style='font-size:17px'>{count}</b>"
         f" <span style='color:#898781'>{escape(name)}</span></td>"
@@ -294,7 +287,7 @@ def build_html(
         f"Tickets by instrument ({instrument_count} total)"
         if instrument_count == len(items) else
         f"Tickets by instrument ({instrument_count} instrument-tickets "
-        f"from {len(items)} tickets)"
+        f"from {len(items)} {ticket_noun})"
     )
     image = (
         f"<img src='cid:{escape(chart_cid, quote=True)}' width='300' "
@@ -307,6 +300,12 @@ def build_html(
         + escape(MULTI_INSTRUMENT_NOTE)
         + f" Share uses {instrument_count} instrument-tickets as its denominator.</p>"
         if instrument_count != len(items) else ""
+    )
+    member_note = (
+        "<p style='font-size:11px;color:#898781'>A ticket with multiple GitHub Issue "
+        f"assignees counts once for each person: {member_assignments} member assignments "
+        f"from {len(items)} {ticket_noun}.</p>"
+        if member_assignments != len(items) else ""
     )
     return (
         "<html><head><meta http-equiv='Content-Type' "
@@ -333,6 +332,7 @@ def build_html(
         "text-transform:uppercase;color:#52514e'>Tickets per team member</b>"
         "<table role='presentation' cellspacing='0' style='padding-top:8px'>"
         f"<tr>{summary}</tr></table>"
+        f"{member_note}"
         "</td></tr>"
         "<tr><td style='padding:16px 26px 0'><table role='presentation' width='100%' "
         "cellspacing='0'><tr><td width='45%' valign='top'>"

@@ -629,10 +629,15 @@ class ExcelComWriter:
             return False  # already at the top; the caller recolours instead
         try:
             target.Value = head + current
-            target.Characters(1, len(head)).Font.Color = self._bgr(colour)
+            target.GetCharacters(1, len(head)).Font.Color = self._bgr(colour)
             if current:
-                target.Characters(len(head) + 1, len(current)).Font.Color = self._bgr(tail_colour)
+                tail = target.GetCharacters(len(head) + 1, len(current))
+                tail.Font.Color = self._bgr(tail_colour)
         except Exception:  # noqa: BLE001
+            try:
+                target.Value = current
+            except Exception:  # noqa: BLE001 - preserve the original failure
+                pass
             raise WorkbookWriteError("write_failed") from None
         return True
 
@@ -644,7 +649,7 @@ class ExcelComWriter:
             start = 1
             for run in runs:
                 if run.text:
-                    target.Characters(start, len(run.text)).Font.Color = self._bgr(run.colour)
+                    target.GetCharacters(start, len(run.text)).Font.Color = self._bgr(run.colour)
                     start += len(run.text)
         except Exception:  # noqa: BLE001
             raise WorkbookWriteError("write_failed") from None

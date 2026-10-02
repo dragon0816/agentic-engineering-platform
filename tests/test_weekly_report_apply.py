@@ -329,8 +329,8 @@ def test_the_plan_is_written_in_the_sources_order(tmp_path: Path) -> None:
     # A new row reads as new: the border reaches the Comments column.
     marks = writer.calls[5][1]
     assert Border(range="A3:G3", style="thin") in marks
-    assert Fill(range="D3", colour="#FFEB9C") in marks
-    assert Fill(range="D2", colour="#FFEB9C") in marks
+    assert Fill(range="D3", colour="#F8AD3E") in marks
+    assert Fill(range="D2", colour="#F8AD3E") in marks
     # Every key links, not only the new ones, so old rows heal.
     links = writer.calls[6][1]
     assert [op.cell for op in links] == ["A3", "A2"]
@@ -407,7 +407,7 @@ def test_status_colours_follow_values_and_sort_moves_whole_rows(tmp_path: Path) 
     writer = RecordingWriter()
     apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
     marks = writer.operations()
-    for index, colour in enumerate(("#C6EFCE", "#FFEB9C", "#FFC7CE"), start=2):
+    for index, colour in enumerate(("#C6EFCE", "#F8AD3E", "#FFC7CE"), start=2):
         assert Fill(range=f"D{index}", colour=colour) in marks
     assert writer.calls[-2] == ("sort_highlighted_rows", ("A", "G", 4, "#FFF2CC"))
     assert writer.names.index("sort_highlighted_rows") > writer.names.index("rich_prepend")

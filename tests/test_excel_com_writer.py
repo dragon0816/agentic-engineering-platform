@@ -19,7 +19,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from integrations import excel_writer
-from integrations.excel_writer import Alignment, ExcelComWriter, WorkbookWriteError
+from integrations.excel_writer import Alignment, ExcelComWriter, TextRun, WorkbookWriteError
 
 
 def test_comments_alignment_and_colour_sort_use_excel_row_operations(
@@ -45,6 +45,54 @@ def test_comments_alignment_and_colour_sort_use_excel_row_operations(
     worksheet.Sort.SetRange.assert_called_once()
     assert worksheet.Sort.Header == 1
     worksheet.Sort.Apply.assert_called_once()
+
+
+def test_rich_comment_uses_excel_getcharacters_and_rolls_back_on_format_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worksheet = MagicMock()
+    target = worksheet.Range.return_value
+    target.Value = "old tail"
+    target.Characters.side_effect = AssertionError("dynamic COM Characters is not callable")
+    monkeypatch.setattr(excel_writer, "require_com", lambda: None)
+    writer = ExcelComWriter()
+    monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
+    path = tmp_path / "copy.xlsx"
+
+    assert writer.rich_prepend(
+        path, "weekly report temp", "G2", text="new head",
+        colour="#FF0000", tail_colour="#000000",
+    ) is True
+    assert target.Value == "new head\nold tail"
+    assert [call.args for call in target.GetCharacters.call_args_list] == [(1, 9), (10, 8)]
+    target.Characters.assert_not_called()
+
+    target.Value = "old tail"
+    target.GetCharacters.reset_mock()
+    target.GetCharacters.side_effect = AttributeError("GetCharacters unavailable")
+    with pytest.raises(WorkbookWriteError) as refused:
+        writer.rich_prepend(
+            path, "weekly report temp", "G2", text="new head",
+            colour="#FF0000", tail_colour="#000000",
+        )
+    assert refused.value.code == "write_failed"
+    assert target.Value == "old tail", "a failed colour must not leave unformatted new text"
+
+
+def test_recolour_existing_comment_uses_excel_getcharacters(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worksheet = MagicMock()
+    monkeypatch.setattr(excel_writer, "require_com", lambda: None)
+    writer = ExcelComWriter()
+    monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
+    writer.set_rich(
+        tmp_path / "copy.xlsx", "weekly report temp", "G2",
+        (TextRun(text="new", colour="#FF0000"), TextRun(text="old", colour="#000000")),
+    )
+    target = worksheet.Range.return_value
+    assert [call.args for call in target.GetCharacters.call_args_list] == [(1, 3), (4, 3)]
+    target.Characters.assert_not_called()
 
 
 class FakeBook:

@@ -15,19 +15,19 @@ shares as HTML so blocked images still leave usable figures.
 
 from __future__ import annotations
 
+import colorsys
 import math
 import struct
 import zlib
 from collections.abc import Mapping, Sequence
 
-#: Source W2's seven-step blue ramp. A week with more named instruments folds
-#: the tail into Other instead of cycling colours and implying false identity.
+#: Source W2's seven-step blue ramp. The owner now requires all Production
+#: names to stay visible; extra names get distinct generated colours.
 PALETTE: tuple[str, ...] = (
     "#12325b", "#18447b", "#1f579d", "#256bc0", "#377fd8", "#5a95df", "#7cabe6",
 )
-OTHER = "#c3c2b7"
 UNASSIGNED = "#898781"
-#: What sits behind the circle. White, because a mail body is white and a
+#: What sits behind the circle. Light like the mail body, because a
 #: transparent PNG in Outlook renders black often enough to matter.
 BACKGROUND = "#fcfcfb"
 #: The grey a slice is outlined in, so two similar colours still part.
@@ -42,25 +42,28 @@ def colours_for(labels: Sequence[str]) -> dict[str, str]:
     for label in labels:
         if label == "Unassigned":
             colours[label] = UNASSIGNED
-        elif label.startswith("Other ("):
-            colours[label] = OTHER
         else:
-            colours[label] = PALETTE[named % len(PALETTE)]
+            colours[label] = colour_for_index(named)
             named += 1
     return colours
 
 
-def slices_for(
-    totals: Mapping[str, int], *, min_share: float = 0.05
-) -> tuple[tuple[str, int, str], ...]:
-    """Source W2 chart grouping: seven named slices, then Other, then Unassigned.
+def colour_for_index(index: int) -> str:
+    """Keep the source ramp for seven names, then avoid reusing a legend colour."""
+    if index < len(PALETTE):
+        return PALETTE[index]
+    hue = ((index - len(PALETTE)) * 0.61803398875 + 0.08) % 1.0
+    red, green, blue = colorsys.hsv_to_rgb(hue, 0.58, 0.72)
+    return f"#{round(red * 255):02x}{round(green * 255):02x}{round(blue * 255):02x}"
 
-    The source's default five-percent threshold is retained here. This one
-    series drives the picture, member bars and totals table, so folding cannot
-    make any one of them disagree with the others.
+
+def slices_for(totals: Mapping[str, int]) -> tuple[tuple[str, int, str], ...]:
+    """Show every Production instrument, sorted by count, Unassigned last.
+
+    The original renderer folded minor instruments into Other. The owner
+    explicitly rejected that loss of actual names in the 2026-10-03 review.
+    One series still drives the picture, member bars and totals table.
     """
-    if not 0 <= min_share < 1:
-        raise ValueError("min_share must be between zero and one")
     if any(count < 0 for count in totals.values()):
         raise ValueError("a slice cannot be a negative number of tickets")
     named = sorted(
@@ -68,17 +71,7 @@ def slices_for(
         key=lambda entry: (-entry[1], entry[0]),
     )
     unassigned = totals.get("Unassigned", 0)
-    grand = sum(count for _, count in named) + unassigned
-    kept: list[tuple[str, int]] = []
-    folded: list[tuple[str, int]] = []
-    for name, count in named:
-        if len(kept) >= len(PALETTE) or (grand and count / grand < min_share):
-            folded.append((name, count))
-        else:
-            kept.append((name, count))
-    slices = [(name, count, PALETTE[index]) for index, (name, count) in enumerate(kept)]
-    if folded:
-        slices.append((f"Other ({len(folded)})", sum(count for _, count in folded), OTHER))
+    slices = [(name, count, colour_for_index(index)) for index, (name, count) in enumerate(named)]
     if unassigned:
         slices.append(("Unassigned", unassigned, UNASSIGNED))
     return tuple(slices)
@@ -203,7 +196,7 @@ def pie_png(
 
 
 def pie_for(totals: Mapping[str, int], **options: int) -> bytes | None:
-    """The chart for a `totals` mapping, using the source's folded series."""
+    """The chart for a `totals` mapping, keeping every Production name."""
     slices = slices_for(totals)
     return pie_png(
         tuple(label for label, _, _ in slices),

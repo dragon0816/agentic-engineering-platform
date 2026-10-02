@@ -136,6 +136,7 @@ def item(
             "url": f"https://github.com/an-owner/a-repo/issues/{number}",
             "state": "OPEN",
             "updatedAt": "2026-09-23T07:48:31Z",
+            "assignees": {"pageInfo": {"hasNextPage": False}, "nodes": []},
             "repository": {"nameWithOwner": "an-owner/a-repo"},
             "comments": {
                 "totalCount": total if total is not None else len(thread),
