@@ -3,13 +3,15 @@
 Date: 2026-10-02 (Asia/Taipei)
 
 Branch: `main`; local-only work, no push. Backend boundary is commit
-`4f5b92c`; data trust is commit `c15d8d0`. The portable task/state slice
-described below is the current handoff.
+`4f5b92c`; data trust is `c15d8d0`; portable state is `c7c33d6` and
+`222e851`. This handoff also covers the workstation Gateway default.
 
 Status: multi-backend Agent Orchestrator slices 1–2 and the portable task/state
-contract subset of slice 3 are complete in source. Normal Agent ingress is not
-yet connected to portable task state; backend re-authorization, native task
-adapters, Workflow migration, Marketplace defaults and product E2E remain.
+contract subset of slice 3 are complete in source. The owner-approved
+`company` Gateway route is recorded in the installed preview configuration.
+Normal Agent ingress is not yet connected to portable task state; backend
+re-authorization, native task adapters, Workflow migration, Marketplace
+defaults and product E2E remain.
 
 ## Goal and decisions
 
@@ -22,7 +24,10 @@ Knowledge and ordinary Skill scenarios. `docs/DECISIONS.md` records the
 owner's data boundary: UNCLASSIFIED data may use only a host-admin-approved
 internal Gateway. Codex/Claude may receive only complete explicitly PUBLIC
 context; availability never causes an ineligible fallback. The owner chose
-explicit host-admin Gateway approval over trusting localhost.
+explicit host-admin Gateway approval over trusting localhost. On 2026-10-02
+the owner specifically approved this workstation's LiteLLM route
+`http://127.0.0.1:4000/v1` for `UNCLASSIFIED` model requests and asked for an
+editable configuration, so that decision is now recorded in `host.json`.
 
 ## Completed
 
@@ -56,29 +61,41 @@ explicit host-admin Gateway approval over trusting localhost.
   bytes and rejects absent, empty or wrong-digest artifacts. Restart, stale
   transition, ownership and migration tests are included. This is not yet
   wired into ordinary Agent execution.
+- Added `deploy/windows-preview/gateway-default.json`, a secret-value-free
+  fragment with the exact approved `company` route, `gpt-5.5`,
+  `LITELLM_MASTER_KEY` environment-variable mapping and `UNCLASSIFIED`
+  approval. The installed preview at
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0` has been upgraded
+  with the local wheel and its `host.json` now records that approval. Settings
+  edits keep it only when the URL, alias, provider and credential mapping are
+  unchanged; another route clears it. No token value was written to JSON.
 
 ## Verification
 
-- Full local selection on the final task result and classification contract,
-  using `PYTHONUTF8=1`, fresh `.scratch/pytest-task-3b-full-20261002`, no
-  pytest cache, `--ignore=tests/test_browser.py` and two existing
-  machine-specific exclusions: **1,531 passed, 4 skipped, 2 deselected**.
-- `.venv/Scripts/python -m ruff check src tests`: passed.
-- `.venv/Scripts/python -m mypy src tests`: passed, 283 source files.
-- `.venv/Scripts/python -m build --no-isolation --outdir
-  .scratch/dist-task-3b-20261002`: sdist and wheel built.
-- The earlier slice-2 inline Web JavaScript passed `node --check`.
+- The final full local selection, using `PYTHONUTF8=1`, fresh
+  `.scratch/pytest-gateway-default-final-full-20261002`, no pytest cache,
+  `--ignore=tests/test_browser.py` and two existing machine-specific
+  exclusions: **1,534 passed, 4 skipped, 2 deselected**. The first run had
+  one transient Windows `os.replace` access denial in extension staging; it
+  passed both alone and in the final full run. Focused Gateway tests passed
+  **16 tests**.
+- `.venv/Scripts/python -m ruff check src tests` passed. Mypy passed for 283
+  files. Final sdist and wheel built in
+  `.scratch/dist-gateway-default-final-20261002`; the inline Web JavaScript
+  passed `node --check` before the final Python-only edit.
+- The installed `aep-host doctor` successfully parses the approved route.
+  `models` reports only that `LITELLM_MASTER_KEY` is absent in this shell;
+  port 4000 also had no listener. A live Gateway round trip was not possible.
 - The real-Chromium UI test still fails before navigation because this
   machine closes its CDP WebSocket; no visual interaction result is claimed.
 
 ## Outstanding work and risks
 
-- Source enforcement is ready, but no actual preview host was newly approved.
-  The owner has been asked to confirm whether this workstation's LiteLLM
-  `http://127.0.0.1:4000/v1` may receive UNCLASSIFIED data. Until a host
-  administrator records that exact approval in its `host.json` and restarts
-  the Agent, the upgraded host will refuse ordinary Gateway model calls. The
-  running preview has not been reinstalled or restarted with these changes.
+- The approval gate is configured on this host, but the current shell lacks
+  `LITELLM_MASTER_KEY` and no service was listening on port 4000 during this
+  handoff. Set the key in the Agent process environment, start LiteLLM and
+  restart the Agent Web before testing a real model answer. Do not copy this
+  workstation's approval to another host without its own approval decision.
 - The current classifier conservatively treats every AEP model request as
   UNCLASSIFIED. Future per-source provenance must preserve Knowledge citation
   and attachment labels before native task backends receive any content.

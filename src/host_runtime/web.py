@@ -400,6 +400,40 @@ class AgentWeb:
             current = CompanyHostConfiguration.model_validate_json(
                 self.config_path.read_text(encoding="utf-8-sig")
             )
+            old_endpoint = (
+                None
+                if current.models is None or current.models.routing_alias is None
+                else current.models.catalog.endpoint(current.models.routing_alias)
+            )
+            approval = None if current.models is None else current.models.data_approval
+            old_credential_environment = next(
+                (
+                    item.environment_variable
+                    for item in current.credentials
+                    if old_endpoint is not None
+                    and old_endpoint.credential is not None
+                    and item.secret == old_endpoint.credential.name
+                ),
+                None,
+            )
+            # Model changes at the same approved Gateway keep working. A route,
+            # provider or credential change needs a fresh host-config approval.
+            if (
+                approval is not None
+                and old_endpoint is not None
+                and old_endpoint.alias == checked.alias
+                and old_endpoint.base_url == checked.base_url
+                and old_endpoint.provider == checked.provider
+                and (None if old_endpoint.credential is None else old_endpoint.credential.name)
+                == checked.credential_secret
+                and old_credential_environment == checked.credential_environment
+            ):
+                model_binding = ModelBinding.model_validate(
+                    {
+                        **model_binding.model_dump(mode="json"),
+                        "data_approval": approval.model_dump(mode="json"),
+                    }
+                )
             old_model_secrets = {
                 item.credential.name
                 for item in (() if current.models is None else current.models.catalog.endpoints)

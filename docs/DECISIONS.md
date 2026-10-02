@@ -87,3 +87,20 @@ evidence. Carrying a classification that can silently decrease would let
 later backend selection expose newly discovered sensitive context. Allowing
 `RESTRICTED` under an ordinary internal-Gateway flag was rejected because
 that flag does not attest a restricted execution environment.
+
+## 2026-10-02 — Approve this workstation's loopback LiteLLM route by default
+
+Decision: The owner explicitly approved `http://127.0.0.1:4000/v1` through
+alias `company` for UNCLASSIFIED Agent model requests on this workstation.
+Record this as an exact `models.data_approval` in the editable installed
+`host.json` and provide a credential-free Gateway configuration fragment in
+`deploy/windows-preview/gateway-default.json`. Keep the existing strict match:
+changing URL, alias, provider or credential clears the approval. Changing only
+the model ID at that same route retains it. Other hosts do not inherit this
+machine's approval merely because they use localhost.
+
+Reason: The owner supplied the LiteLLM upstream configuration and explicitly
+asked that the known route be usable for subsequent tests without an approval
+dialog or repeat configuration step. The alternative of automatically trusting
+every localhost URL remains rejected because a local proxy can forward to an
+unreviewed destination.

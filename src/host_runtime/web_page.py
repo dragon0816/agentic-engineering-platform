@@ -398,7 +398,7 @@ tr:last-child td { border-bottom: none; }
         <p class="note">If the Gateway requires a token, set the token value in the named
           Windows environment variable before restarting the Agent. An administrator
           must separately approve the exact Gateway URL and permitted data classes
-          in host.json; changing model settings clears that approval.</p>
+          in host.json. Changing the URL, provider or credential clears that approval.</p>
         <p id="model-data-approval" class="note" role="status"></p>
         <p><button class="go" id="model-save" type="submit">Save model settings</button></p>
         <pre id="model-result" class="note">Reading current settings&hellip;</pre>
@@ -1210,7 +1210,7 @@ el("model-settings").addEventListener("submit", async (event) => {
   try {
     const saved = await call("/api/settings/model", body);
     result.textContent = "Saved. Restart the Agent to use this model configuration. "
-      + "An administrator must approve the routed Gateway and data classes in host.json."
+      + "If the Gateway route changed, update its approved data classes in host.json."
       + (environment
         ? "\nSet the token value in Windows environment variable " + environment + "."
         : "");

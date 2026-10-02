@@ -16,18 +16,22 @@ This rule needs an enforced classifier and negative tests before native task
 execution is enabled. The existing restricted CLI text-chat path does not
 qualify as a governed native task backend.
 
-The host administrator records an approval for the exact routed Gateway
-alias/URL and each permitted data class in `host.json`. An endpoint URL or
-credential alone is not approval; changing model settings clears the prior
-approval. Until finer-grained provenance is available, every complete AEP
+The host records an approval for the exact routed Gateway alias/URL and each
+permitted data class in `host.json`. An endpoint URL or credential alone is not
+approval; changing the URL, provider or credential clears the prior approval,
+while changing only the model on the same route preserves it. Until
+finer-grained provenance is available, every complete AEP
 model request is classified `UNCLASSIFIED`. A PUBLIC external text-chat session
 must be declared before its first message; it cannot inherit old history,
 local persona text or command/tool results. A selected external CLI receives
 only the complete explicitly PUBLIC history, and changing back to Gateway
 removes the PUBLIC session declaration.
 
-For the current local LiteLLM route, an administrator who has verified its
-upstream data boundary can add this non-secret field under `models`:
+The owner explicitly approved this workstation's local LiteLLM route
+`company` at `http://127.0.0.1:4000/v1` for `UNCLASSIFIED` data on 2026-10-02.
+The editable, credential-free fragment is
+`deploy/windows-preview/gateway-default.json`; its `models` and `credentials`
+keys belong in the installed `host.json`. The approval field under `models` is:
 
 ```json
 "data_approval": {
@@ -35,14 +39,15 @@ upstream data boundary can add this non-secret field under `models`:
   "endpoint_alias": "company",
   "endpoint_base_url": "http://127.0.0.1:4000/v1",
   "approved_classes": ["UNCLASSIFIED"],
-  "approval_ref": "host-admin/internal-gateway-approval",
+  "approval_ref": "owner-approved/localhost-litellm-2026-10-02",
   "internal_gateway": true
 }
 ```
 
 The alias and URL must match the configured routed endpoint exactly. The
-administrator chooses the classes and records the actual approval reference;
-this example itself does not approve a machine.
+approval applies to this workstation's owner-identified LiteLLM route; another
+host must make its own configuration decision. No secret value belongs in the
+fragment or `host.json`.
 
 The first implementation slice adds a provider-neutral backend profile,
 health and exact-selection contract, then adapts the existing Gateway

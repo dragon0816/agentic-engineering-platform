@@ -72,13 +72,12 @@ token 貼到 Issue、聊天或測試證據中。
 如果 Gateway 需要憑證，只在頁面填 `SecretRef` 名稱與 Windows 環境變數名稱。
 憑證值只放在環境變數，不能放進 `host.json`。儲存後依頁面提示重新啟動 Web。
 
-模型連線資料和資料傳輸核准是兩件事。主機管理員須先確認這個 LiteLLM Gateway
-實際轉送到核准的內部服務，再於 `host.json` 的 `models` 下加入
-`data_approval`，指定 `backend_id: gateway`、與路由完全相同的
-`endpoint_alias` 和 `endpoint_base_url`、`approval_ref`、
-`internal_gateway: true`，以及允許的 `approved_classes`（現階段自然語言
-模型請求需要 `UNCLASSIFIED`）。完整非機密範例見 `docs/REQUIREMENTS.md`。
-僅設定 localhost URL 或憑證不等於核准；更改模型設定會清除舊核准。
+本機預設可編輯的 Gateway 設定片段在 `gateway-default.json`。它包含
+`company`、`http://127.0.0.1:4000/v1`、`gpt-5.5`、環境變數名稱及本機
+`UNCLASSIFIED` 資料核准；沒有 token 值。將其中 `models`、`credentials`
+合併到安裝目錄的 `host.json`，或直接修改已安裝的 `host.json`。
+只更換同一路由的 model 不會清除核准；更換 URL、provider 或憑證時，
+需要在 `host.json` 重新設定對應核准。核准不會自動套用到其他主機。
 
 ## 5. 依序測試
 

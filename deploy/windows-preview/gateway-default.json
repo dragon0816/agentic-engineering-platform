@@ -1,0 +1,41 @@
+{
+  "models": {
+    "catalog": {
+      "endpoints": [
+        {
+          "alias": "company",
+          "provider": "openai_compatible",
+          "model": "gpt-5.5",
+          "base_url": "http://127.0.0.1:4000/v1",
+          "credential": {"name": "litellm_gateway"},
+          "capabilities": {
+            "reasoning": "medium",
+            "tool_calling": true,
+            "structured_output": true,
+            "streaming": false,
+            "vision": false,
+            "local": false,
+            "max_context_tokens": 128000
+          }
+        }
+      ],
+      "routes": [{"name": "default", "alias": "company"}]
+    },
+    "routing_alias": "company",
+    "require_local_model": false,
+    "data_approval": {
+      "backend_id": "gateway",
+      "endpoint_alias": "company",
+      "endpoint_base_url": "http://127.0.0.1:4000/v1",
+      "approved_classes": ["UNCLASSIFIED"],
+      "approval_ref": "owner-approved/localhost-litellm-2026-10-02",
+      "internal_gateway": true
+    }
+  },
+  "credentials": [
+    {
+      "secret": "litellm_gateway",
+      "environment_variable": "LITELLM_MASTER_KEY"
+    }
+  ]
+}

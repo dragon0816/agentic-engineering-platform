@@ -20,8 +20,13 @@ from test_host_wiring import device, host_json, ready
 from agent.routing import RequestRouter
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from host_runtime.cli import main
-from host_runtime.contracts import CompanyHostConfiguration, ModelBinding
+from host_runtime.contracts import (
+    CompanyHostConfiguration,
+    ModelBinding,
+    ModelSettingsUpdateRequest,
+)
 from host_runtime.host import HostError, build_router, build_runtime, host_report
+from host_runtime.web import AgentWeb
 from models.wire import Transport
 
 GATEWAY = "https://gateway.example.invalid/api"
@@ -80,6 +85,29 @@ def configured(tmp_path: Path, **changes: Any) -> tuple[Any, Any]:
             ],
         },
     )
+
+
+def test_editable_loopback_gateway_default_is_a_valid_non_secret_host_fragment() -> None:
+    template = (
+        Path(__file__).resolve().parents[1]
+        / "deploy"
+        / "windows-preview"
+        / "gateway-default.json"
+    )
+    fragment = json.loads(template.read_text(encoding="utf-8"))
+    config = CompanyHostConfiguration.model_validate(
+        {
+            "device": device(),
+            "workspace_root": str(Path(__file__).resolve().parents[1]),
+            **fragment,
+        }
+    )
+    assert config.models is not None
+    assert config.models.routing_alias == "company"
+    assert config.models.data_approval is not None
+    assert config.models.data_approval.endpoint_base_url == "http://127.0.0.1:4000/v1"
+    assert config.models.data_approval.approved_classes == ("UNCLASSIFIED",)
+    assert config.credential_environment()["litellm_gateway"] == "LITELLM_MASTER_KEY"
 
 
 def test_a_host_with_no_model_is_the_host_everyone_already_had(tmp_path: Path) -> None:
@@ -155,6 +183,52 @@ def test_gateway_configuration_and_admin_data_approval_are_separate(tmp_path: Pa
                 }
             )
         )
+
+
+def test_editing_a_model_keeps_the_same_gateway_approval_but_a_new_route_clears_it(
+    tmp_path: Path,
+) -> None:
+    config, layout = configured(tmp_path)
+    config_path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, config_path=config_path)
+        same_gateway = ModelSettingsUpdateRequest(
+            alias="company",
+            provider="openai_compatible",
+            model="gpt-5.4",
+            base_url=GATEWAY,
+            credential_secret="llm_gateway_token",
+            credential_environment="AEP_LLM_TOKEN",
+        )
+        web.update_model_settings(same_gateway)
+        saved = CompanyHostConfiguration.model_validate_json(config_path.read_text("utf-8"))
+        assert saved.models is not None and saved.models.data_approval is not None
+        assert saved.models.data_approval.approved_classes == ("UNCLASSIFIED",)
+        changed_gateway = same_gateway.model_copy(
+            update={"base_url": "https://other.example.invalid/v1"}
+        )
+        web.update_model_settings(changed_gateway)
+        changed = CompanyHostConfiguration.model_validate_json(config_path.read_text("utf-8"))
+        assert changed.models is not None and changed.models.data_approval is None
+
+
+def test_changing_the_gateway_credential_mapping_clears_approval(tmp_path: Path) -> None:
+    config, layout = configured(tmp_path)
+    config_path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, config_path=config_path)
+        web.update_model_settings(
+            ModelSettingsUpdateRequest(
+                alias="company",
+                provider="openai_compatible",
+                model="gpt-5.5",
+                base_url=GATEWAY,
+                credential_secret="llm_gateway_token",
+                credential_environment="OTHER_LLM_TOKEN",
+            )
+        )
+    saved = CompanyHostConfiguration.model_validate_json(config_path.read_text("utf-8"))
+    assert saved.models is not None and saved.models.data_approval is None
 
 
 def _ollama(**changes: Any) -> dict[str, Any]:

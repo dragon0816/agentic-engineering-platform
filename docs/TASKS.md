@@ -433,8 +433,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   matching and no local persona or slash-command results. Full local selection:
   1,523 passed, 4 skipped, 2 environment-specific deselected; ruff, mypy,
   JavaScript syntax and sdist/wheel build passed on 2026-10-02.
-- [ ] Apply an actual host-admin Gateway approval to the deployed preview only
-  after the administrator confirms the exact URL and accepted data class.
+- [x] Record the owner's explicit approval of this workstation's
+  `company` Gateway at `http://127.0.0.1:4000/v1` for `UNCLASSIFIED` data in
+  the installed preview `host.json`; provide an editable, secret-value-free
+  `deploy/windows-preview/gateway-default.json`. Preserve approval when only
+  the model ID changes and clear it when the route or credential changes.
+  The local doctor parses the approval; live chat still needs the LiteLLM
+  listener and `LITELLM_MASTER_KEY` in the Agent process environment.
 - [x] Add a backend-neutral Task contract, digest-only portable run state,
   additive SQLite persistence and independent artifact-byte validation with
   restart, transition and negative tests. This contract slice does not yet

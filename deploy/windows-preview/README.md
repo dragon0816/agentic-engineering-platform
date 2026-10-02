@@ -480,13 +480,13 @@ variable name. Put the token value in that Windows environment variable, then
 restart `aep-host web`. The Web form has no token-value field and never writes
 one into `host.json`.
 
-The host administrator must separately approve the exact routed Gateway
-alias and URL plus accepted data classes in `models.data_approval` after
-verifying the gateway's upstream. Until per-field provenance exists, model
-requests require approval for `UNCLASSIFIED`. A localhost URL and credential
-alone do not approve data transfer; changing the model setting clears prior
-approval. See `docs/REQUIREMENTS.md` for the non-secret example. Without this
-approval the host refuses provider calls before sending request content.
+For this workstation the owner approved the exact `company` route at
+`http://127.0.0.1:4000/v1` for `UNCLASSIFIED` requests. The editable
+`gateway-default.json` fragment supplies `models.data_approval` and the
+`LITELLM_MASTER_KEY` environment-variable mapping without a token value.
+Merge its `models` and `credentials` keys into the installed `host.json`.
+Changing only the model ID preserves that route's approval; changing the
+URL, provider or credential clears it. Other hosts need their own approval.
 
 The **Ask** tab shows whether natural-language routing is ready and lists every
 deterministic command declared by installed Skills. Clicking a command only
