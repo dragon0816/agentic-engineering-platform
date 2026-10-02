@@ -411,3 +411,22 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Diagnose Gateway chat failure caused by a missing credential in the Agent
   process, show the mapped environment variable in failed turns, and verify a
   live `gpt-5.5` conversation after fixing the local preview launch.
+
+# Multi-backend Agent Orchestrator and complete Workflow migration
+
+- [x] Audit current Agent, Gateway, CLI backend, Harness, Knowledge, Workflow,
+  Bridge and Marketplace boundaries against the proposed multi-backend target.
+  Record source inventories, conflicts, baseline tests and an incremental
+  sequence in `docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
+- [x] Set the initial unclassified-data rule: use only a suitably approved
+  internal Gateway; require explicit PUBLIC classification for Codex/Claude.
+- [ ] Review and approve the proposed backend/data-policy design before
+  implementing the first contract slice.
+- [ ] Add a backend-neutral orchestrator, data classification, portable task
+  state and independent completion validation in tested slices.
+- [ ] Migrate source Workflow/job behavior with static and runtime parameter
+  contracts, generated Web/Telegram forms, flexible `/run` aliases and parity.
+- [ ] Review and publish the active Hermes Skills and validated Workflows as
+  governed default Marketplace assets.
+- [ ] Prove SOP-to-Workflow, Knowledge and natural-language Skill integration
+  through user-level tests and the required enrolled-Bridge evidence.
