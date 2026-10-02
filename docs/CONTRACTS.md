@@ -2727,3 +2727,30 @@ recipients, activity count, member/instrument/account figures and new Excel
 format rules, but its pie-plus-HTML member split is still visually different
 from the source's single composite chart. Do not claim full mail or workbook
 parity until a source comparison and a saved workbook-copy check pass.
+
+# Local Agent schedule foundation (2026-10-03)
+
+`ScheduleDefinition` names one owner and one exact installed `workflow` or
+`agent_task` identity, plus bounded JSON runtime inputs and a daily or weekly
+local HH:MM recurrence in an IANA timezone. It contains no credential, grant,
+approval, arbitrary command or model-selected target. `ScheduleRecord` holds
+the current active/paused state and next UTC due time; `initial_status` is
+only the creation default. A nonexistent local time during a daylight-saving
+change is skipped. A repeated local time runs once at its first occurrence.
+
+`SqliteScheduleStore` is a Host-owned, device-bound SQLite store separate from
+conversation and Workflow checkpoint data. One committed transaction claims
+each due occurrence and advances its next due time. The claim carries a stable
+idempotency key derived from schedule ID and UTC due time, and remains pending
+across restarts until a worker records a terminal result. Repeated claims at
+the same time return nothing; contradictory terminal outcomes are refused.
+Pausing creates no backlog; resuming computes the next occurrence from the
+resume time. A worker must reconcile outstanding claims with the existing
+run ledger before retrying to avoid repeating a side effect. Claiming does
+not execute anything or confer permission.
+
+Execution wiring, a Host lifecycle worker, create/pause/resume/history UI or
+CLI, and a choice of first-release target kinds remain subsequent slices.
+When wired, each claimed target must pass resident Agent membership admission,
+exact installed-asset lookup, Workflow/Task policy, Bridge grants and any
+effect-specific approval. No scheduled send, write or draft may bypass them.

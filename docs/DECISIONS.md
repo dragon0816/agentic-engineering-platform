@@ -259,3 +259,20 @@ Reason: Workflow 11's first AEP port simplified a proven mail layout and
 formatting. A successful AEP run therefore did not meet the owner's expected
 output. Reimplementing from screenshots without a source comparison, or
 treating a transport change as permission to change output, was rejected.
+
+## 2026-10-03 — Keep the first Agent schedule slice as an inert local claim queue
+
+Decision: Model daily/weekly local-time recurrence and exact installed
+Workflow/Agent Task targets as provider-neutral contracts. Persist definitions,
+due claims and outcomes in a separate Bridge-bound SQLite file. Claiming
+advances the next due time atomically and retains a stable key for later
+reconciliation. A paused schedule skips missed occurrences. Add the PSF's
+Apache-2.0 `tzdata` package for IANA timezone rules on Windows.
+
+Reason: The existing resident Agent and Bridge already own admission and
+effect approval. A timer that directly invokes a capability would bypass that
+boundary, and placing pending claims into the existing run database would
+make a separate feature change its schema and recovery semantics. An n8n-only
+schedule was rejected because optional n8n cannot be required for local work.
+Automatic replay of a claimed but unfinished job was rejected until a worker
+can reconcile its actual outcome with the run ledger.
