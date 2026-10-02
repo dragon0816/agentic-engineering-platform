@@ -693,7 +693,7 @@ def build_router(
     """
     binding = config.models
     if binding is None or binding.routing_alias is None:
-        return RequestRouter(commands)
+        return RequestRouter(commands, decision_accelerator=config.decision_accelerator)
     if resolver is None:
         mapped = config.credential_environment()
         endpoint = binding.catalog.endpoint(binding.routing_alias)
@@ -720,6 +720,7 @@ def build_router(
         # Off unless this host asked for a model running on its own hardware.
         # The contract already refused the pair that cannot both be true.
         local_only=binding.require_local_model,
+        decision_accelerator=config.decision_accelerator,
     )
 
 

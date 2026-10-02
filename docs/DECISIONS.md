@@ -104,3 +104,24 @@ asked that the known route be usable for subsequent tests without an approval
 dialog or repeat configuration step. The alternative of automatically trusting
 every localhost URL remains rejected because a local proxy can forward to an
 unreviewed destination.
+
+## 2026-10-02 — Keep JEV behind an optional Decision Service
+
+Decision: Introduce a provider-neutral, typed Decision Service at the
+existing Agent routing decision. Its `NONE` default calls the established
+rule-first/Gateway baseline directly and never constructs or probes JEV.
+Configuration names only a provider, endpoint, `SecretRef`, timeout,
+confidence threshold and explicitly enabled decision types; it stores no
+credential value. An accelerator requires a trusted egress authorizer before
+its provider is constructed. Provider error, missing provider, unsupported
+output or low confidence returns to the baseline, with payload-free trace
+evidence. Final execution routing, security classification, completion and
+planning decisions cannot be enabled as accelerator-authoritative types.
+
+Reason: JEV may shorten repeated bounded classification later, but this
+repository has no JEV adapter, golden decision benchmark or approved JEV data
+boundary yet. Wiring JEV directly into the Gateway loop or replacing the
+strong-model path would make the baseline depend on an unavailable service
+and could create an unreviewed data-egress path. The alternative of a separate
+JEV Harness was rejected because decisions are orchestration inputs, not an
+execution plane.

@@ -433,6 +433,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   matching and no local persona or slash-command results. Full local selection:
   1,523 passed, 4 skipped, 2 environment-specific deselected; ruff, mypy,
   JavaScript syntax and sdist/wheel build passed on 2026-10-02.
+- [x] Implement JEV-ready Phase 1A: a typed Decision Service around the
+  existing rule-first/Gateway route, payload-free traces, local accelerator
+  configuration defaulting to `NONE`, and negative tests for zero optional
+  provider calls and pre-egress authorization. Keep the actual JEV adapter
+  disabled until the benchmark and policy gates in
+  `docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` are met. Full local selection:
+  1,548 passed, 4 skipped, 2 environment-specific deselected; ruff, mypy and
+  sdist/wheel build passed on 2026-10-02.
 - [x] Record the owner's explicit approval of this workstation's
   `company` Gateway at `http://127.0.0.1:4000/v1` for `UNCLASSIFIED` data in
   the installed preview `host.json`; provide an editable, secret-value-free
@@ -464,3 +472,6 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   governed default Marketplace assets.
 - [ ] Prove SOP-to-Workflow, Knowledge and natural-language Skill integration
   through user-level tests and the required enrolled-Bridge evidence.
+- [ ] Build a golden bounded-decision dataset and only then implement an
+  optional JEV provider for decision types with proven latency/accuracy gain;
+  keep data classification, authorization and strict validation deterministic.

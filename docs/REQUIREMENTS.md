@@ -69,6 +69,18 @@ the host must inspect the actual artifact and record a passing independent
 validation report. This contract slice does not enable native task execution
 or change existing Workflow routing.
 
+Bounded Agent decisions require a provider-neutral Decision Service. Without
+an explicitly configured accelerator, the service must execute the existing
+rule-first/Gateway path with the same result and number of provider calls;
+it must never initialize, probe or wait for JEV. A configured accelerator is
+eligible only for named decision types and after a trusted full-payload egress
+authorization. Unknown, unsupported, failed and low-confidence accelerator
+results fall back to the approved baseline, with payload-free provider,
+latency, confidence and fallback evidence. Data classification, access-control
+decisions, complex next-action planning and strict completion validation stay
+outside accelerator authority. A JEV adapter is a later, benchmark-gated
+slice; Phase 1A adds no JEV dependency or account requirement.
+
 The initial data-class vocabulary includes `RESTRICTED`, but no existing
 Gateway approval may list that class until a separately reviewed restricted
 execution environment exists. PUBLIC native tasks remain subject to a fresh

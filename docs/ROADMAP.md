@@ -251,6 +251,21 @@ Personal Agent Web + Bridge for execution computers, and Shared Platform for
 the Registry/Marketplace computer. See
 `docs/phases/PRODUCTIZATION_1_AGENT_WEB_MARKETPLACE.md`.
 
+## Multi-backend Agent and optional decision acceleration
+
+The 2026-10-02 owner-approved multi-backend sequence strengthens the Personal
+Agent before the remaining Workflow migration and product evidence. Existing
+backend profiles, Gateway adaptation, data policy and portable state are
+recorded in `MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and `TASKS.md`.
+
+The JEV-ready update inserts Phase 1A: a provider-neutral Decision Service
+around bounded Agent decisions, with `NONE` as the zero-configuration baseline.
+Only later, after whole-context egress policy and a golden accuracy/latency
+benchmark, may JEV be added as an optional provider for named low-risk
+classifications. It cannot decide confidentiality, execution authority or
+completion. See `MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the repository
+mapping, acceptance tests and later adapter gate.
+
 ## First implementation slice after Phase 0
 
 The recommended Phase 1 PR is intentionally small:

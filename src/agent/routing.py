@@ -2,10 +2,17 @@
 
 import json
 import re
+from collections.abc import Callable
 from typing import Literal, Self
 
 from pydantic import Field, JsonValue, ValidationError, model_validator
 
+from agent.decisions import (
+    DecisionAcceleratorConfig,
+    DecisionResult,
+    DecisionService,
+    DecisionTrace,
+)
 from agent.skills import CommandBinding, SkillRegistry
 from common.assets import AssetIdentity
 from common.base import Contract
@@ -137,17 +144,32 @@ class RequestRouter:
         model_alias: str = "routing",
         *,
         local_only: bool = True,
+        decision_accelerator: DecisionAcceleratorConfig | None = None,
+        decision_observer: Callable[[DecisionTrace], None] | None = None,
     ) -> None:
         self.commands = commands
         self.model = model
         self.model_alias = model_alias
         self.local_only = local_only
+        self.decisions = DecisionService[RequestContext, RoutingOutcome](
+            baseline=_BaselineRouteDecisionProvider(self),
+            config=decision_accelerator,
+            observer=decision_observer,
+        )
 
     def route(self, request: RequestContext) -> RoutingOutcome:
         context = RequestContext.model_validate(request)
-        deterministic = self.commands.match(context)
-        if deterministic is not None:
-            return deterministic
+        outcome = self.decisions.decide(context, decision_type="route_selection").result.value
+        if outcome.trace != context.trace:
+            return needs_input(context, "decision_context_mismatch")
+        if outcome.decision.kind in {"capability", "workflow"} and not any(
+            item.kind == outcome.decision.kind and item.target == outcome.decision.target
+            for item in self.commands.candidates(context.namespace)
+        ):
+            return needs_input(context, "uninstalled_decision_target")
+        return outcome
+
+    def _model_route(self, context: RequestContext) -> RoutingOutcome:
         candidates = self.commands.candidates(context.namespace)
         if self.model is None or not candidates:
             return needs_input(context, "no_known_route")
@@ -197,4 +219,38 @@ class RequestRouter:
                 target=proposal.target,
                 reason="Model selected an installed route",
             ),
+        )
+
+
+class _BaselineRouteDecisionProvider:
+    """The established rule-first route, including its one approved model call."""
+
+    provider_id = "baseline_route"
+
+    def __init__(self, router: RequestRouter) -> None:
+        self.router = router
+
+    def decide(self, request: RequestContext) -> DecisionResult[RoutingOutcome]:
+        deterministic = self.router.commands.match(request)
+        if deterministic is not None:
+            outcome = deterministic
+            provider_id = "rule"
+            confidence = 1.0
+        else:
+            outcome = self.router._model_route(request)
+            provider_id = (
+                "gateway_llm"
+                if self.router.model is not None
+                and self.router.commands.candidates(request.namespace)
+                else "rule"
+            )
+            confidence = None
+        return DecisionResult(
+            decision_type="route_selection",
+            value=outcome,
+            provider_id=provider_id,
+            reason_code=(
+                outcome.failure.code if outcome.failure is not None else "route_selected"
+            ),
+            confidence=confidence,
         )

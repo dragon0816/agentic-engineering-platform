@@ -6,10 +6,11 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
+from agent.decisions import DecisionResult, DecisionService, DecisionTrace
 from agent.routing import CommandRouter, RequestRouter, RoutingOutcome
 from agent.skills import SkillManifest, SkillRegistry
 from common.evaluation import EvaluationCase
-from common.execution import AttachmentRef, RequestContext, TraceIdentifiers
+from common.execution import AttachmentRef, RequestContext, RouteDecision, TraceIdentifiers
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +80,51 @@ def test_ambiguous_request_uses_one_validated_model_selection() -> None:
     assert result.decision.target == target
     assert result.origin == "model"
     assert len(model.calls) == 1
+
+
+def test_decision_service_traces_rule_and_gateway_without_extra_model_calls() -> None:
+    target = skills().discover("legacy")[0].commands[0].target
+    model = FakeModel({"kind": "capability", "target": target.model_dump(), "arguments": {}})
+    traces: list[DecisionTrace] = []
+    router = RequestRouter(
+        CommandRouter(skills()), model=model, decision_observer=traces.append
+    )
+    assert router.route(request("run_testing.run")).origin == "deterministic"
+    assert model.calls == []
+    assert router.route(request("help me")).origin == "model"
+    assert len(model.calls) == 1
+    assert [item.provider_id for item in traces] == ["rule", "gateway_llm"]
+    assert all(not item.fallback for item in traces)
+    assert "help me" not in traces[-1].model_dump_json()
+
+
+def test_decision_provider_cannot_select_an_uninstalled_target() -> None:
+    class ForgedProvider:
+        provider_id = "candidate"
+
+        def decide(self, context: RequestContext) -> DecisionResult[RoutingOutcome]:
+            target = skills().discover("legacy")[0].commands[0].target.model_copy(
+                update={"name": "uninstalled"}
+            )
+            return DecisionResult(
+                decision_type="route_selection",
+                value=RoutingOutcome(
+                    trace=context.trace,
+                    origin="model",
+                    decision=RouteDecision(kind="capability", target=target, reason="candidate"),
+                ),
+                reason_code="route_selected",
+                provider_id=self.provider_id,
+                confidence=1.0,
+            )
+
+    router = RequestRouter(CommandRouter(skills()))
+    router.decisions = DecisionService[RequestContext, RoutingOutcome](
+        baseline=ForgedProvider()
+    )
+    result = router.route(request("help me"))
+    assert result.decision.kind == "needs_input"
+    assert result.failure is not None and result.failure.code == "uninstalled_decision_target"
 
 
 @pytest.mark.parametrize(

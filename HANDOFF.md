@@ -9,6 +9,10 @@ Branch: `main`; local-only work, no push. Backend boundary is commit
 Status: multi-backend Agent Orchestrator slices 1–2 and the portable task/state
 contract subset of slice 3 are complete in source. The owner-approved
 `company` Gateway route is recorded in the installed preview configuration.
+The owner-supplied JEV-ready update is mapped in
+`docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md`; Phase 1A adds a provider-neutral
+Decision Service to the existing rule-first route, defaulting to `NONE` with
+no JEV adapter or runtime dependency.
 Normal Agent ingress is not yet connected to portable task state; backend
 re-authorization, native task adapters, Workflow migration, Marketplace
 defaults and product E2E remain.
@@ -69,6 +73,30 @@ editable configuration, so that decision is now recorded in `host.json`.
   with the local wheel and its `host.json` now records that approval. Settings
   edits keep it only when the URL, alias, provider and credential mapping are
   unchanged; another route clears it. No token value was written to JSON.
+- Phase 1A adds typed `DecisionResult`, `DecisionTrace`, `DecisionProvider` and
+  local `DecisionAcceleratorConfig`. `RequestRouter` now passes its established
+  rule-first/Gateway route through `DecisionService`; the default `NONE` path
+  never constructs, authorizes or calls an accelerator. The host config accepts
+  a non-secret optional accelerator binding. Final route selection, security
+  classification, completion validation and planning cannot be enabled for
+  acceleration. The service exposes payload-free traces and an optional
+  observer hook; normal ingress does not yet persist them. There is no JEV
+  provider implementation or external JEV request in this slice.
+
+## JEV-ready Phase 1A verification
+
+- Baseline before the slice: 43 focused routing/Gateway/backend tests passed.
+- Final focused decision/routing/Gateway/host selection: 80 passed.
+- Final full local selection with a fresh `.scratch` test directory,
+  `PYTHONUTF8=1`, no pytest cache, `--ignore=tests/test_browser.py` and two
+  established machine-specific exclusions: **1,548 passed, 4 skipped,
+  2 deselected**.
+- Ruff passed for `src` and `tests`; mypy passed for 285 source files; sdist
+  and wheel built in `.scratch/dist-jev-phase1a-final-20261002`. The wheel
+  contains `agent/decisions.py`.
+- No JEV endpoint, account, credential value or provider package was installed
+  or called. The installed local preview was not upgraded for this source
+  slice; review source tests before a preview rollout.
 
 ## Verification
 
@@ -104,6 +132,12 @@ editable configuration, so that decision is now recorded in `host.json`.
   answer. The Web URL is the temporary address printed by `aep-host web`,
   not the Gateway API's `http://127.0.0.1:4000/v1`. Do not copy this
   workstation's approval to another host without its own approval decision.
+- Before enabling JEV, supply an approved egress boundary for the complete
+  accelerator request, implement an adapter with its own bounded timeout and
+  circuit breaker, and prove per-decision accuracy/latency on a golden set.
+  Merely setting `provider: JEV` without an installed provider keeps the
+  baseline and reports a fallback. Decision traces are available through the
+  service observer but are not yet persisted as ordinary task evidence.
 - The current classifier conservatively treats every AEP model request as
   UNCLASSIFIED. Future per-source provenance must preserve Knowledge citation
   and attachment labels before native task backends receive any content.

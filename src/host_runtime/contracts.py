@@ -14,6 +14,7 @@ from pydantic import (
 )
 
 from agent.data_policy import BackendDataApproval
+from agent.decisions import DecisionAcceleratorConfig
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
@@ -412,6 +413,9 @@ class CompanyHostConfiguration(Contract):
     # matches commands and runs Workflows without reasoning about anything,
     # which is what every host did before this field existed.
     models: ModelBinding | None = None
+    # Optional bounded-decision acceleration. NONE is an exact baseline path;
+    # a configured provider alone grants no data egress or execution authority.
+    decision_accelerator: DecisionAcceleratorConfig = DecisionAcceleratorConfig()
     # Published Knowledge is installed only through exact local bindings.
     # Querying it needs the same explicitly configured model used by the
     # Personal Agent, so an empty binding cannot quietly become retrieval-only

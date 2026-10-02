@@ -321,6 +321,22 @@ safety boundary, not native Agent task execution. Field-level provenance and
 native Agent task adapters remain later slices; see `REQUIREMENTS.md` and the
 approved design under `superpowers/specs/`.
 
+Bounded decisions now cross a provider-neutral `DecisionService`. The first
+integration is `RequestRouter`: its baseline provider retains the same
+deterministic command match and approved Gateway model selection, while
+returning a normalized decision and payload-free trace. The local host's
+`decision_accelerator` defaults to `NONE`; that path constructs no accelerator,
+performs no authorization callback or probe and makes no additional model or
+network call. A future JEV provider is an optional accelerator for specifically
+enabled, benchmark-proven classifications. It must pass a trusted data-egress
+authorizer before construction or request delivery. Missing authorization,
+unsupported output, low confidence or provider failure returns to the baseline.
+Confidentiality, backend eligibility, Bridge grants and completion validation
+never derive authority from JEV confidence. `src/harness` remains the separate
+coding/validation vertical; it is not a second Agent routing stack. See
+`MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the phased adapter and benchmark
+gate.
+
 A portable `TaskContract` now names the actor, trace, objective, task type,
 initial data class, exact Skill and resource references, requested capability
 scope, bounded execution constraints, expected output artifacts and independent
