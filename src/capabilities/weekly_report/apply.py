@@ -12,9 +12,9 @@ not arbitrary and must not be rearranged:
 * **Then recolour what is still true.** A second run in the same week has
   nothing to prepend, so without this it would clear the first run's marks
   and put nothing back.
-* **Status fills are read, not cleared.** Unlike `Key`, the `Status` column
-  carries the member's own colours; only cells holding exactly this job's
-  pink are retired.
+* **Status fills follow the value.** Planned Done, In Progress and New rows
+  receive the declared colours. Other status values keep their existing fill;
+  only cells holding exactly this job's old pink are retired.
 
 Nothing here knows about Excel. What it does know is that a plan was made
 against a particular sheet, and it refuses to write it into a different one.
@@ -35,6 +35,7 @@ from capabilities.weekly_report.contracts import (
 )
 from integrations import excel
 from integrations.excel_writer import (
+    Alignment,
     Border,
     Fill,
     FontColour,
@@ -215,6 +216,7 @@ def _write(
                 range=f"{comments_column}2:{comments_column}{last_row}",
                 colour=settings.comment_tail_color,
             ),
+            Alignment(range=f"{comments_column}2:{comments_column}{last_row}"),
             Fill(range=f"{key_column}2:{key_column}{last_row}"),
         ]
         for cell, colour in _stale_fills(
@@ -238,7 +240,8 @@ def _write(
             ],
         )
 
-    # 3. A row that was not on the sheet before reads as new without dates.
+    # 3. New rows keep their border, while Status colour reflects the actual
+    # status rather than the row's age.
     new_rows = [key for key in plan.new_keys if key in placed]
     marks: list[FormatOperation] = []
     for key in new_rows:
@@ -247,8 +250,12 @@ def _write(
             # A:last, not the Key..Sales span: Comments is part of the row a
             # person reads, and a border stopping short looks like a failure.
             marks.append(Border(range=f"A{row}:{last_column}{row}", style=settings.new_row_border))
-        if status_column is not None:
-            marks.append(Fill(range=f"{status_column}{row}", colour=settings.new_row_fill))
+    if status_column is not None:
+        for planned in plan.rows:
+            at = placed.get(planned.key)
+            status_colour = _status_fill(planned.status, settings)
+            if at is not None and status_colour is not None:
+                marks.append(Fill(range=f"{status_column}{at}", colour=status_colour))
     if marks:
         writer.format(workbook, sheet, marks)
 
@@ -303,6 +310,14 @@ def _write(
             # job here.
             recoloured += 1
 
+    # Sort after every cell operation so comments, hyperlinks and hand-kept
+    # columns move with their entire ticket row.
+    if tinted:
+        writer.sort_highlighted_rows(
+            workbook, sheet, key_column=key_column, last_column=last_column,
+            last_row=last_row, colour=settings.key_highlight,
+        )
+
     return WeeklyReportApplied(
         week=plan.window.week,
         workbook=str(workbook),
@@ -346,6 +361,17 @@ def _record(row: WeeklyRow, sales_header: str) -> dict[str, str]:
         "Assignee": row.assignee,
         sales_header: row.sales,
     }
+
+
+def _status_fill(status: str, settings: WeeklyReportSettings) -> str | None:
+    normalized = " ".join(status.casefold().split())
+    if normalized == "done":
+        return settings.status_done_fill
+    if normalized == "in progress":
+        return settings.status_in_progress_fill
+    if normalized == "new":
+        return settings.new_row_fill
+    return None
 
 
 def _stale_fills(

@@ -512,6 +512,21 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   succeeded in three steps. Outlook read-back found the item in Drafts, unsent,
   with empty To/CC. The Agent Web was restarted on port 53582 with `--open`;
   apply and mail remain separate Workflows.
+- [x] Update Workflow 11's local Outlook recipients and SDE draft layout,
+  plus Excel Status colours, Comments alignment and highlighted-Key whole-row
+  sort. The Host configuration now holds 1 To and 8 CC addresses and the
+  `SDE Weekly Report` prefix; no address is hardcoded in a shared asset.
+  Focused tests passed (67 tests; one pre-existing machine-specific Excel
+  absence test deselected). Excel COM moved the row in memory on a disposable
+  copy, but this automation session's Excel opened files read-only, so saved
+  workbook parity remains to be checked from the user's normal Host session.
+- [x] Add a source migration parity contract to `docs/CONTRACTS.md`: pin each
+  original Workflow/job revision or file digest, compare source-derived
+  fixtures before adapting, and record every user-visible difference. Workflow
+  11's local GitHub mail adapter is untracked in the pinned source checkout,
+  so its digest and the owner's reference Outlook draft are identified as
+  separate baseline evidence. Full visual mail and saved workbook parity are
+  still open.
 - [ ] Validate Knowledge query, convert, ingest and lint with a small
   independent local test Vault before using the owner-supplied OneDrive tree.
   The existing Host manifest points to a different proof Vault and has no

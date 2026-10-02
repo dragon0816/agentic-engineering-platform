@@ -14,16 +14,45 @@ import time
 import types
 from pathlib import Path
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
 from integrations import excel_writer
-from integrations.excel_writer import ExcelComWriter, WorkbookWriteError
+from integrations.excel_writer import Alignment, ExcelComWriter, WorkbookWriteError
+
+
+def test_comments_alignment_and_colour_sort_use_excel_row_operations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    worksheet = MagicMock()
+    monkeypatch.setattr(excel_writer, "require_com", lambda: None)
+    writer = ExcelComWriter()
+    monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
+    path = tmp_path / "copy.xlsx"
+    writer.format(path, "weekly report temp", [Alignment(range="G2:G4")])
+    aligned = worksheet.Range.return_value
+    assert aligned.HorizontalAlignment == -4131
+    assert aligned.VerticalAlignment == -4160
+    assert aligned.WrapText is True
+    writer.sort_highlighted_rows(
+        path, "weekly report temp", key_column="A", last_column="G",
+        last_row=4, colour="#FFF2CC",
+    )
+    worksheet.Sort.SortFields.Add.assert_called_once()
+    assert worksheet.Sort.SortFields.Add.call_args.kwargs["SortOn"] == 1
+    assert worksheet.Sort.SortFields.Add.return_value.SortOnValue.Color == writer._bgr("#FFF2CC")
+    worksheet.Sort.SetRange.assert_called_once()
+    assert worksheet.Sort.Header == 1
+    worksheet.Sort.Apply.assert_called_once()
 
 
 class FakeBook:
-    def __init__(self, *, save_raises: bool = False, failures: int = 0) -> None:
+    def __init__(
+        self, *, save_raises: bool = False, failures: int = 0, read_only: bool = False
+    ) -> None:
         self.save_raises = save_raises
+        self.ReadOnly = read_only  # noqa: N815 - Excel's own spelling
         self.failures = failures
         self.attempts = 0
         self.saved = 0
@@ -117,6 +146,20 @@ def test_saving_and_releasing_are_asked_separately(
     writer.close(workbook, save=True)
     assert book.saved == 1
     assert book.closed_with == [False], "the save already happened; the close must not redo it"
+
+
+def test_read_only_excel_open_is_refused_before_reporting_a_saved_workbook(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    book = FakeBook(read_only=True)
+    install(monkeypatch, book)
+    path = tmp_path / "copy.xlsx"
+    path.write_bytes(b"test")
+    writer = ExcelComWriter()
+    with pytest.raises(WorkbookWriteError) as refused:
+        writer._book(path)
+    assert refused.value.code == "workbook_open"
+    assert book.closed_with == [False] and book.saved == 0
 
 
 def test_a_workbook_that_was_not_saved_says_so(

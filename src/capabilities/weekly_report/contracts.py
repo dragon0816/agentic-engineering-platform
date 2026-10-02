@@ -50,6 +50,8 @@ class WeeklyReportSettings(Contract):
     # the tail inherit would turn the whole history red run after run.
     comment_tail_color: Colour = "#000000"
     new_row_fill: Colour = "#FFC7CE"
+    status_done_fill: Colour = "#C6EFCE"
+    status_in_progress_fill: Colour = "#FFEB9C"
     new_row_border: BorderStyle = "thin"
     # Drive a local copy and write it back once, which the source measured at
     # 137s against 1001s in a synced folder. Off drives the real file in place.
@@ -60,7 +62,7 @@ class WeeklyReportSettings(Contract):
     # the whole team's work cannot leave by itself.
     mail_to: tuple[Text, ...] = ()
     mail_cc: tuple[Text, ...] = ()
-    mail_subject_prefix: Text = "GTM weekly report"
+    mail_subject_prefix: Text = "SDE Weekly Report"
     # Count only items somebody actually worked on in the week -- an item
     # whose timestamp moved because a field was edited is not work. Off
     # counts everything the week matched, and the mail says which it did.

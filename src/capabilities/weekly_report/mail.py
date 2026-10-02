@@ -33,9 +33,9 @@ MULTI_INSTRUMENT_NOTE = (
 )
 
 
-def subject(window: ReportingWindow, *, prefix: str = "GTM weekly report") -> str:
-    """`GTM weekly report 2026_39W (2026-09-21 .. 2026-09-27)`."""
-    return f"{prefix} {window.week} ({window.since:%Y-%m-%d} .. {window.until:%Y-%m-%d})"
+def subject(window: ReportingWindow, *, prefix: str = "SDE Weekly Report") -> str:
+    """The Outlook subject uses the same week and date range as the body."""
+    return f"{prefix} {window.week} ({window.since:%Y-%m-%d} - {window.until:%Y-%m-%d})"
 
 
 def _cell(text: str) -> str:
@@ -153,58 +153,159 @@ def totals_section(
     return table
 
 
+def _share_table(title: str, totals: Mapping[str, int]) -> str:
+    denominator = sum(totals.values())
+    rows = []
+    for label, count in totals.items():
+        share = round(count * 100 / denominator) if denominator else 0
+        rows.append(
+            "<tr>"
+            f"<td style='padding:6px 10px;border-bottom:1px solid #e1e0d9'>{escape(label)}</td>"
+            "<td align='right' style='padding:6px 10px;border-bottom:1px solid #e1e0d9'>"
+            f"{count}</td>"
+            "<td align='right' style='padding:6px 10px;border-bottom:1px solid #e1e0d9;"
+            f"color:#898781'>{share}%</td></tr>"
+        )
+    rows.append(
+        "<tr style='font-weight:600'><td style='padding:8px 10px;border-top:2px solid #52514e'>"
+        f"Total</td><td align='right' style='border-top:2px solid #52514e'>{denominator}</td>"
+        f"<td align='right' style='border-top:2px solid #52514e'>"
+        f"{'100%' if denominator else '0%'}</td></tr>"
+    )
+    return (
+        f"<h3 style='font-size:12px;text-transform:uppercase;color:#52514e'>{escape(title)}</h3>"
+        "<table role='presentation' width='100%' cellspacing='0' style='border-collapse:collapse'>"
+        "<tr style='text-align:left;color:#52514e'><th>" + escape(title.split()[0]) + "</th>"
+        "<th align='right'>Tickets</th><th align='right'>Share</th></tr>"
+        + "".join(rows) + "</table>"
+    )
+
+
+def _member_split(items: Sequence[ReportItem], instruments: Sequence[str] | None) -> str:
+    buckets = effort.buckets(items, instruments=instruments)
+    totals = effort.instrument_totals(items, instruments)
+    colours = chart.colours_for(tuple(totals))
+    maximum = max(
+        (sum(len(keys) for keys in groups.values()) for groups in buckets.values()),
+        default=1,
+    )
+    rows: list[str] = []
+    for member in effort.member_totals(items):
+        groups = buckets.get(member, {})
+        segments = []
+        for name, keys in groups.items():
+            width = max(8, round(300 * len(keys) / maximum))
+            segments.append(
+                f"<td width='{width}' bgcolor='{colours[name]}' title='{escape(name, quote=True)}'"
+                " style='height:22px;color:white;text-align:center;font-size:11px'>"
+                f"{len(keys)}</td>"
+            )
+        rows.append(
+            "<tr><td style='padding:5px 8px;text-align:right;white-space:nowrap'>"
+            f"{escape(member)}</td><td><table cellspacing='1'><tr>{''.join(segments)}"
+            "</tr></table></td></tr>"
+        )
+    legend = " ".join(
+        f"<span style='white-space:nowrap;margin-right:10px'>"
+        f"<span style='color:{colour}'>■</span> {escape(name)}</span>"
+        for name, colour in colours.items()
+    )
+    return (
+        "<div style='font-size:12px;color:#52514e'>Split per team member</div>"
+        "<table role='presentation' cellspacing='0'>" + "".join(rows) + "</table>"
+        f"<div style='font-size:11px;padding-top:6px'>{legend}</div>"
+    )
+
+
 def build_html(
     window: ReportingWindow,
     items: Sequence[ReportItem],
     *,
     chart_cid: str = "",
     instruments: Sequence[str] | None = None,
-    prefix: str = "GTM weekly report",
+    prefix: str = "SDE Weekly Report",
+    matched: int | None = None,
+    project: str = "",
+    activity_required: bool = True,
 ) -> str:
-    """The whole mail, as the HTML a draft carries.
-
-    `chart_cid` is the identifier of an image the draft will attach. Empty
-    means there is no picture -- a week where nothing was worked on has
-    nothing to draw -- and then the legend's colour column goes too, since a
-    colour that keys to no picture is decoration. The numbers are the same
-    either way: the chart is a second reading of the table under it, never
-    the only place a figure appears.
-    """
-    parts: list[str] = [
-        "<div style='font-family:Segoe UI,Arial,sans-serif;font-size:13px'>",
-        f"<h2 style='margin:0 0 4px'>{escape(subject(window, prefix=prefix))}</h2>",
-        f"<p style='color:#666;margin:0 0 12px'>{escape(EFFORT_NOTE)}</p>",
-        f"<h3 style='margin:16px 0 4px'>Tickets per member ({len(items)})</h3>",
-        member_section(items, instruments),
-        "<h3 style='margin:16px 0 4px'>Effort by instrument</h3>",
-    ]
-    totals = effort.instrument_totals(items, instruments)
-    if chart_cid:
-        parts.append(f"<img src='cid:{escape(chart_cid, quote=True)}' alt='effort by instrument'>")
-    parts.append(
-        totals_section(
-            "Instrument",
-            totals,
-            note=MULTI_INSTRUMENT_NOTE,
-            # The legend, keyed to the picture. Only when there is a picture:
-            # a colour column beside no chart is decoration that means nothing.
-            colours=chart.colours_for(tuple(totals)) if chart_cid else None,
-        )
+    """Render the approved Outlook layout from the current week's data."""
+    total_matched = len(items) if matched is None else matched
+    instrument_totals = effort.instrument_totals(items, instruments)
+    account_totals = effort.account_totals(items)
+    members = effort.member_totals(items)
+    summary = "".join(
+        f"<td style='padding-right:14px;white-space:nowrap'><b style='font-size:17px'>{count}</b>"
+        f" <span style='color:#898781'>{escape(name)}</span></td>"
+        for name, count in members.items()
     )
-    parts.append("<h3 style='margin:16px 0 4px'>Effort by account</h3>")
-    parts.append(totals_section("Account", effort.account_totals(items)))
-    parts.append("</div>")
-    return "".join(parts)
+    activity_label = "本週有留言的" if activity_required else "本週符合條件的"
+    image = (
+        f"<img src='cid:{escape(chart_cid, quote=True)}' width='300' "
+        "alt='Tickets by instrument' style='display:block;max-width:100%;height:auto'>"
+        if chart_cid else "<p>No instrument chart this week.</p>"
+    )
+    project_line = f" &middot; GitHub Project {escape(project)}" if project else ""
+    return (
+        "<html><head><meta http-equiv='Content-Type' "
+        "content='text/html; charset=utf-8'></head>"
+        "<body style='margin:0;padding:0;background:#f9f9f7'>"
+        "<table role='presentation' width='100%' cellspacing='0' style='background:#f9f9f7'>"
+        "<tr><td align='center' style='padding:20px 12px'>"
+        "<table role='presentation' width='860' cellspacing='0' "
+        "style='width:860px;max-width:100%;background:#fcfcfb;border:1px solid #e1e0d9;"
+        "font-family:Segoe UI,Calibri,Arial,sans-serif;font-size:13px;color:#0b0b0b'>"
+        "<tr><td style='padding:22px 26px 6px'>"
+        "<div style='font-size:20px;font-weight:600'>"
+        f"{escape(prefix)} &mdash; {escape(window.week)}</div>"
+        "<div style='color:#52514e;padding-top:5px'>"
+        f"{window.since:%Y-%m-%d} &ndash; {window.until:%Y-%m-%d} &middot; "
+        f"{activity_label} <b>{len(items)}</b> / {total_matched} 張{project_line}</div></td></tr>"
+        "<tr><td style='padding:12px 26px 0'><div style='background:#f4f6fa;"
+        "border-left:3px solid #256bc0;padding:9px 12px;color:#52514e'>"
+        "Effort below is a <b>ticket count</b>, not hours: this GitHub project "
+        "records no worklog, no time-spent and no story points, so there is no hour data "
+        "to report.</div></td></tr>"
+        "<tr><td style='padding:18px 26px 4px'><b style='font-size:12px;"
+        "text-transform:uppercase;color:#52514e'>Tickets per team member</b>"
+        "<table role='presentation' cellspacing='0' style='padding-top:8px'>"
+        f"<tr>{summary}</tr></table>"
+        "</td></tr>"
+        "<tr><td style='padding:16px 26px 0'><table role='presentation' width='100%' "
+        "cellspacing='0'><tr><td width='45%' valign='top'>"
+        "<div style='font-size:12px;color:#52514e'>Tickets by instrument</div>"
+        f"{image}</td><td valign='top'>{_member_split(items, instruments)}</td>"
+        "</tr></table></td></tr>"
+        "<tr><td style='padding:20px 26px 0'>"
+        f"{_share_table('Instrument totals', instrument_totals)}"
+        "<p style='font-size:11px;color:#898781'>" + escape(MULTI_INSTRUMENT_NOTE) + "</p>"
+        "</td></tr><tr><td style='padding:20px 26px 0'>"
+        f"{_share_table('Account totals', account_totals)}"
+        "</td></tr>"
+        "<tr><td style='padding:20px 26px 24px;font-size:11px;color:#898781'>"
+        f"{escape(EFFORT_NOTE)} "
+        f"{total_matched - len(items)} matching ticket(s) excluded by the activity rule."
+        "</td></tr></table></td></tr></table></body></html>"
+    )
 
 
 def build_text(
     window: ReportingWindow,
     items: Sequence[ReportItem],
     instruments: Sequence[str] | None = None,
+    *,
+    matched: int | None = None,
+    project: str = "",
+    prefix: str = "SDE Weekly Report",
 ) -> str:
     """The same mail as plain text, which is what a plan shows and what a
     person reads when checking a draft before it goes anywhere."""
-    lines = [subject(window), "", EFFORT_NOTE, ""]
+    total_matched = len(items) if matched is None else matched
+    lines = [
+        subject(window, prefix=prefix), "",
+        f"Counted {len(items)} / {total_matched} tickets", EFFORT_NOTE, "",
+    ]
+    if project:
+        lines.insert(2, f"GitHub Project {project}")
     rows = effort.member_rows(items, instruments)
     for member in dict.fromkeys(row["member"] for row in rows):
         mine = [row for row in rows if row["member"] == member]

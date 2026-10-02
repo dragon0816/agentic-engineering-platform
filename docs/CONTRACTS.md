@@ -2694,3 +2694,36 @@ threads, and names of fields the GitHub source could not supply. Jira
 Resolution is always absent. The capability still requires local
 `github.read` permission and `github-read-policy`; manifest installation,
 numeric resolution and Skill routing do not grant either.
+
+# Source Workflow migration parity (2026-10-03)
+
+For every future migration from `dragon0816/rs_workflow_system`, the original
+job and Workflow are the **behavioral baseline**. Before implementation, the
+migration record must identify the source repository revision and exact files.
+If local source additions are not committed, record their SHA-256 digests and
+the observed output fixture instead of presenting the repository commit as
+covering those files. The baseline includes input and configuration fields,
+static and runtime defaults, issue selection, output content and formatting,
+side effects, idempotency, dry-run behavior, and failure/partial-result rules.
+
+Each migrated Workflow must have source-derived regression fixtures or
+comparison runs before replacing behavior. The AEP adapter may change
+transport, authentication, data-source wiring and authorization boundaries,
+but it must preserve user-visible behavior. Every difference must be listed
+with the reason, expected effect, owner decision when behavior changes, and a
+test proving the new rule. A simplified reimplementation is not parity merely
+because it produces a successful run. Installation and approval remain
+separate from execution, and source repositories remain read-only.
+
+Workflow 11's initial pinned Jira source is
+`rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43`.
+Its later local `host-bridge/jobs/github_weekly_email.py` adapter is not in
+that commit; the inspected file's SHA-256 is
+`62c5220c8757f3596e55757d438e64efa03466e5bf5e5010326d821f08bf458d`.
+The owner's existing Outlook draft titled
+`SDE Weekly Report 2026_40W (2026-09-28 - 2026-10-04)` is an additional
+visible-output fixture. The AEP version now preserves the requested subject,
+recipients, activity count, member/instrument/account figures and new Excel
+format rules, but its pie-plus-HTML member split is still visually different
+from the source's single composite chart. Do not claim full mail or workbook
+parity until a source comparison and a saved workbook-copy check pass.

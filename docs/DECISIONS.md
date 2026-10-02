@@ -228,3 +228,34 @@ retired system or enable unverified writes. Folding Workflow 7 into Workflow
 11 was rejected because they answer different questions and have different
 workbook contracts. A typed preview can be tested and rolled back on its own,
 then compared with source fixtures before any Excel parity claim.
+
+## 2026-10-03 — Render Workflow 11's weekly mail and workbook presentation from data
+
+Decision: Keep the Outlook recipients in the local Host's `weekly_report`
+configuration. Render the SDE weekly draft from counted Project items with
+the approved subject, activity count, member split, instrument/account counts
+and shares. For Excel, colour planned `Done`, `In Progress` and `New` Status
+cells by value, align the Comments column top-left, and use Excel's native
+cell-colour sort on the complete scratch-sheet row range after all writes.
+Refuse a workbook Excel opens read-only.
+
+Reason: The owner supplied the recipient list and reference draft, and asked
+for status colours and highlighted Key rows first. Local recipients avoid
+publishing a team-specific distribution list as a shared asset. A native
+whole-row sort keeps hand-maintained Comments and other columns attached to
+their Key. A prior pink fill meaning merely "new row" conflicted with the
+requested New status; a row border continues to show first appearance.
+Sorting just Key cells or treating a read-only Excel save as successful were
+rejected because either can report a workbook that is wrong.
+
+## 2026-10-03 — Require original-source behavior as the migration baseline
+
+Decision: Apply the Source Workflow migration parity contract in
+`docs/CONTRACTS.md` to all later `rs_workflow_system` migrations. Pin the
+source files and revision or individual hashes, derive regression evidence
+from the original behavior, and record approved AEP differences explicitly.
+
+Reason: Workflow 11's first AEP port simplified a proven mail layout and
+formatting. A successful AEP run therefore did not meet the owner's expected
+output. Reimplementing from screenshots without a source comparison, or
+treating a transport change as permission to change output, was rejected.

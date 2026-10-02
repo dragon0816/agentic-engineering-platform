@@ -591,7 +591,11 @@ def test_the_mail_drafts_end_to_end_and_never_touches_the_workbook(tmp_path: Pat
     own asset rather than a fifth step on the report."""
     from integrations.outlook_draft import RecordingDraftWriter
 
-    config, layout, workbook = host(tmp_path)
+    config, layout, workbook = host(
+        tmp_path,
+        mail_to=["owner@example.com"],
+        mail_cc=["reviewer@example.com"],
+    )
     before = workbook.read_bytes()
     drafter = RecordingDraftWriter()
     with build_runtime(
@@ -610,7 +614,14 @@ def test_the_mail_drafts_end_to_end_and_never_touches_the_workbook(tmp_path: Pat
     assert workbook.read_bytes() == before, "the mail read no workbook and wrote none"
     assert len(drafter.drafts) == 1, "one draft, saved, not sent"
     saved = drafter.drafts[0]
-    assert saved.subject == "GTM weekly report 2026_31W (2026-07-27 .. 2026-08-02)"
+    assert saved.to == ("owner@example.com",)
+    assert saved.cc == ("reviewer@example.com",)
+    assert saved.subject == "SDE Weekly Report 2026_31W (2026-07-27 - 2026-08-02)"
+    assert "Tickets per team member" in saved.html_body
+    assert "Instrument totals" in saved.html_body
+    assert "Account totals" in saved.html_body
+    assert "GitHub Project" in saved.html_body
+    assert "2</b> / 4 張" in saved.html_body
     assert drafted.week == "2026_31W"
     # Two of the four board rows carry a comment inside the week; the other
     # two moved without anybody working on them, and they are named.

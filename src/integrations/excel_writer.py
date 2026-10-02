@@ -100,6 +100,16 @@ class FontColour(Contract):
     colour: Colour
 
 
+class Alignment(Contract):
+    """Place hand-maintained comments at the top-left of their cells."""
+
+    kind: Literal["alignment"] = "alignment"
+    range: Text
+    horizontal: Literal["left"] = "left"
+    vertical: Literal["top"] = "top"
+    wrap_text: bool = True
+
+
 class Border(Contract):
     kind: Literal["border"] = "border"
     range: Text
@@ -120,7 +130,7 @@ class Hyperlink(Contract):
         return hyperlink_formula(self.url, self.text)
 
 
-FormatOperation = Fill | FontColour | Border | Hyperlink
+FormatOperation = Fill | FontColour | Alignment | Border | Hyperlink
 
 
 class TextRun(Contract):
@@ -164,6 +174,11 @@ class WorkbookWriter(Protocol):
     def fills(self, path: Path, sheet: str, column: str, last_row: int) -> dict[str, str]: ...
 
     def format(self, path: Path, sheet: str, operations: Sequence[FormatOperation]) -> None: ...
+
+    def sort_highlighted_rows(
+        self, path: Path, sheet: str, *, key_column: str, last_column: str,
+        last_row: int, colour: str,
+    ) -> None: ...
 
     def cell_text(self, path: Path, sheet: str, cell: str) -> str: ...
 
@@ -355,7 +370,11 @@ class ExcelComWriter:
             if not path.is_file():
                 raise WorkbookWriteError("workbook_missing")
             try:
-                self._books[key] = self._app().Workbooks.Open(key, UpdateLinks=0)
+                book = self._app().Workbooks.Open(key, UpdateLinks=0)
+                if bool(getattr(book, "ReadOnly", False)):
+                    book.Close(SaveChanges=False)
+                    raise WorkbookWriteError("workbook_open")
+                self._books[key] = book
             except Exception:  # noqa: BLE001 - COM raises its own kinds
                 raise WorkbookWriteError("workbook_open") from None
         return self._books[key]
@@ -523,9 +542,15 @@ class ExcelComWriter:
                     if operation.colour is None:
                         target.Interior.ColorIndex = -4142
                     else:
+                        target.Interior.Pattern = 1  # xlSolid; Color alone can remain invisible
                         target.Interior.Color = self._bgr(operation.colour)
                 elif isinstance(operation, FontColour):
                     worksheet.Range(operation.range).Font.Color = self._bgr(operation.colour)
+                elif isinstance(operation, Alignment):
+                    target = worksheet.Range(operation.range)
+                    target.HorizontalAlignment = -4131  # xlLeft
+                    target.VerticalAlignment = -4160  # xlTop
+                    target.WrapText = operation.wrap_text
                 elif isinstance(operation, Border):
                     target = worksheet.Range(operation.range)
                     # Edge by edge, never the whole collection: setting
@@ -542,6 +567,32 @@ class ExcelComWriter:
                             border.Weight = 2 if operation.style == "thin" else -4138
                 else:
                     worksheet.Range(operation.cell).Formula = operation.formula
+        except Exception:  # noqa: BLE001
+            raise WorkbookWriteError("write_failed") from None
+
+    def sort_highlighted_rows(
+        self, path: Path, sheet: str, *, key_column: str, last_column: str,
+        last_row: int, colour: str,
+    ) -> None:
+        """Sort complete rows with this week's Key fill first, keeping the header."""
+        if last_row < 3:
+            return
+        worksheet = self._sheet(path, sheet)
+        try:
+            sort = worksheet.Sort
+            sort.SortFields.Clear()
+            field = sort.SortFields.Add(
+                Key=worksheet.Range(f"{key_column}2:{key_column}{last_row}"),
+                SortOn=1,  # xlSortOnCellColor
+                Order=1,  # xlAscending: the selected colour goes on top
+                DataOption=0,  # xlSortNormal
+            )
+            field.SortOnValue.Color = self._bgr(colour)
+            sort.SetRange(worksheet.Range(f"A1:{last_column}{last_row}"))
+            sort.Header = 1  # xlYes
+            sort.MatchCase = False
+            sort.Orientation = 1  # xlTopToBottom
+            sort.Apply()
         except Exception:  # noqa: BLE001
             raise WorkbookWriteError("write_failed") from None
 

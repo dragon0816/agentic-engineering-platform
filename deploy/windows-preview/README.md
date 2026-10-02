@@ -389,8 +389,10 @@ workbook first: a file Excel has open is refused before anything is copied.
 Two things to expect the first time. Every run retires last week's marks
 across the whole scratch sheet before making this week's, so a red `Comments`
 cell or a tinted `Key` cell you applied *by hand* loses its colour — never its
-text. And your own `Status` colours are left alone; only cells holding exactly
-the job's own pink are cleared.
+text. Planned rows with `Done`, `In Progress` and `New` receive green, amber
+and pink Status fills; other status values keep their existing fills. The
+Comments column is top-left aligned, and rows with this week's Key highlight
+are sorted to the top as complete rows.
 
 ### The weekly mail
 
@@ -428,10 +430,10 @@ What the mail says, and what it counts:
 - **A ticket naming several instruments counts once under each**, so the
   instrument totals add up to more than the number of tickets. That is
   deliberate and the mail says so rather than hiding it.
-- The pie chart is drawn by this package itself, with no charting library, so
-  it needs nothing installed and adds nothing to this bundle. Its legend is the
-  table beneath it, with a colour per row: the labels stay selectable text and
-  every number survives if the reader's mail client blocks images.
+- The pie chart is drawn by this package itself, with no charting library.
+  The draft also shows a per-member instrument split and Instrument/Account
+  totals with ticket counts and shares, as selectable HTML text. The tables
+  preserve every number if the reader's mail client blocks images.
 
 Who it is addressed to is configuration, and empty is the safer default — the
 draft then has no recipients and the person who opens it fills them in:
@@ -440,13 +442,14 @@ draft then has no recipients and the person who opens it fills them in:
 "weekly_report": {
   "mail_to": ["sde-team@example.com"],
   "mail_cc": [],
-  "mail_subject_prefix": "GTM weekly report"
+  "mail_subject_prefix": "SDE Weekly Report",
+  "project": "rs-sde-projects"
 }
 ```
 
-**This drafter has not yet been run against a real Outlook by anyone.** Like
-the workbook writer before it, it is written to the documented object model
-and is unproven until you run it.
+The configured recipients remain on this Host. The previously authorized
+`weekly.mail` run saved an unsent draft in Outlook; inspect a new draft before
+manually sending it.
 
 This writer has now been run against a real team workbook once, on
 2026-09-24, and an earlier build of it renamed the previous week's sheet

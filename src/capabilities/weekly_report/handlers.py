@@ -460,7 +460,15 @@ class MailHandler:
         images, cid = outlook_draft.images_for(picture, self._chart_root / window.week)
         draft = MailDraft(
             subject=mail.subject(window, prefix=self.settings.mail_subject_prefix),
-            html_body=mail.build_html(window, counted, chart_cid=cid),
+            html_body=mail.build_html(
+                window,
+                counted,
+                chart_cid=cid,
+                matched=len(issues),
+                project=self.settings.project,
+                activity_required=activity.required,
+                prefix=self.settings.mail_subject_prefix,
+            ),
             to=outlook_draft.recipients(self.settings.mail_to),
             cc=outlook_draft.recipients(self.settings.mail_cc),
             images=images,
@@ -481,7 +489,10 @@ class MailHandler:
             excluded=activity.excluded,
             activity_required=activity.required,
             chart_path=images[0].path if images else "",
-            preview=mail.build_text(window, counted),
+            preview=mail.build_text(
+                window, counted, matched=len(issues),
+                project=self.settings.project, prefix=self.settings.mail_subject_prefix,
+            ),
         )
 
 

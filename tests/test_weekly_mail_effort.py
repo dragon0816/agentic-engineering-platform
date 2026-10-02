@@ -7,10 +7,12 @@ that name an instrument the field does not.
 
 from __future__ import annotations
 
+import datetime as dt
+
 import pytest
 
-from capabilities.weekly_report import effort
-from capabilities.weekly_report.contracts import ReportItem
+from capabilities.weekly_report import effort, mail
+from capabilities.weekly_report.contracts import ReportingWindow, ReportItem
 
 
 def item(
@@ -24,6 +26,29 @@ def item(
     return ReportItem(
         key=key, summary=summary, assignee=assignee, company=company, instrument=instrument
     )
+
+
+def test_sde_draft_uses_live_counts_and_the_reference_sections() -> None:
+    window = ReportingWindow(
+        week="2026_40W", since=dt.date(2026, 9, 28), until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28), stamp_date=dt.date(2026, 10, 4),
+    )
+    items = (
+        item("GH-1", assignee="JennyChen", company="FII", instrument="CMP180, WMT"),
+        item("GH-2", assignee="JennyChen", company="FII", instrument="CMP180"),
+        item("GH-3", assignee="shih-m", company="Google", instrument="CMX500"),
+    )
+    html = mail.build_html(
+        window, items, chart_cid="chart-id", matched=4, project="rs-sde-projects"
+    )
+    assert mail.subject(window) == "SDE Weekly Report 2026_40W (2026-09-28 - 2026-10-04)"
+    assert "本週有留言的 <b>3</b> / 4 張" in html
+    assert "GitHub Project rs-sde-projects" in html
+    assert "cid:chart-id" in html
+    assert "Tickets per team member" in html and "Split per team member" in html
+    assert "Instrument totals" in html and "Account totals" in html
+    assert "CMP180" in html and "WMT" in html and "FII" in html
+    assert "Total</td>" in html and ">3</td>" in html
 
 
 @pytest.mark.parametrize(

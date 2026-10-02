@@ -226,21 +226,20 @@ def render_preview(
         f"2) upsert by Key  rows={len(plan.rows)}"
         f"  (new={len(plan.new_keys)}, update={len(plan.updated_keys)})",
         f"3) read {status_col or '-'}1:{status_col or '-'}<last> fills"
-        f"   <- find last week's {settings.new_row_fill} to retire; other colours are left alone",
+        f"   <- find stale {settings.new_row_fill}; planned Status values are recoloured",
         f"4) RESET: font {comment_col}2:{comment_col}<last> = {settings.comment_tail_color},"
         f"  clearFill {key_col}2:{key_col}<last>, clearFill each stale {settings.new_row_fill}"
         "   <- retires last week's marks; repaints rows this run does not touch",
         f"5) fill {key_col}<row> = {settings.key_highlight}"
         f"  x{len(plan.highlight_keys)}   <- new comment content, or a new row",
         f"6) new rows: border A<row>:{last_col}<row> style={settings.new_row_border}"
-        + (
-            f", fill {status_col}<row> = {settings.new_row_fill}"
-            if status_col and settings.new_row_border != "none"
-            else ""
-        )
-        + f"  x{len(plan.new_keys)}",
+        f"  x{len(plan.new_keys)}",
+        f"   Status: Done={settings.status_done_fill}, "
+        f"In Progress={settings.status_in_progress_fill}, New={settings.new_row_fill}",
         f"7) rich-prepend {comment_col}<row> color={settings.comment_color} dedupe=true"
         f"  x{len(plan.comment_operations)}",
+        f"8) align {comment_col}2:{comment_col}<last> top-left; "
+        f"sort A1:{last_col}<last> by {key_col} fill {settings.key_highlight} first",
         "",
         "-- new rows ------------------------------------------------------",
     ]

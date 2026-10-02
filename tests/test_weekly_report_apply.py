@@ -31,6 +31,7 @@ from capabilities.weekly_report.contracts import (
 from capabilities.weekly_report.plan import build_plan, resolve_window
 from integrations import excel, excel_writer
 from integrations.excel_writer import (
+    Alignment,
     Border,
     Fill,
     FontColour,
@@ -145,6 +146,12 @@ class RecordingWriter:
 
     def format(self, path: Path, sheet: str, operations: Any) -> None:
         self._record("format", list(operations))
+
+    def sort_highlighted_rows(
+        self, path: Path, sheet: str, *, key_column: str, last_column: str,
+        last_row: int, colour: str,
+    ) -> None:
+        self._record("sort_highlighted_rows", (key_column, last_column, last_row, colour))
 
     def cell_text(self, path: Path, sheet: str, cell: str) -> str:
         self._record("cell_text", cell)
@@ -303,11 +310,13 @@ def test_the_plan_is_written_in_the_sources_order(tmp_path: Path) -> None:
         "format",  # the links
         "rich_prepend",
         "rich_prepend",
+        "sort_highlighted_rows",
         "close",
     ]
     reset = writer.calls[3][1]
     # The reset covers the whole sheet, not only the rows this run touched.
     assert FontColour(range="G2:G3", colour="#000000") in reset
+    assert Alignment(range="G2:G3") in reset
     assert Fill(range="A2:A3") in reset
     # Only this job's pink is retired; the member's own colour is left alone.
     assert Fill(range="D2") in reset and Fill(range="D3") not in reset
@@ -320,7 +329,8 @@ def test_the_plan_is_written_in_the_sources_order(tmp_path: Path) -> None:
     # A new row reads as new: the border reaches the Comments column.
     marks = writer.calls[5][1]
     assert Border(range="A3:G3", style="thin") in marks
-    assert Fill(range="D3", colour="#FFC7CE") in marks
+    assert Fill(range="D3", colour="#FFEB9C") in marks
+    assert Fill(range="D2", colour="#FFEB9C") in marks
     # Every key links, not only the new ones, so old rows heal.
     links = writer.calls[6][1]
     assert [op.cell for op in links] == ["A3", "A2"]
@@ -332,6 +342,7 @@ def test_the_plan_is_written_in_the_sources_order(tmp_path: Path) -> None:
     assert prepend["cell"] == "G3"
     assert prepend["colour"] == "#FF0000" and prepend["tail_colour"] == "#000000"
     assert prepend["text"].startswith("7/29:")
+    assert writer.calls[-2] == ("sort_highlighted_rows", ("A", "G", 3, "#FFF2CC"))
     assert writer.closed_saving is True
 
     assert (applied.inserted, applied.updated) == (1, 1)
@@ -374,6 +385,32 @@ def test_a_second_run_in_the_same_week_recolours_instead_of_prepending(tmp_path:
     assert applied.recoloured == 1 and applied.prepended == 0
     # The week is still marked even though nothing was written.
     assert applied.highlighted == 1
+
+
+def test_status_colours_follow_values_and_sort_moves_whole_rows(tmp_path: Path) -> None:
+    workbook = tmp_path / "SDE_Weekly_Report.xlsx"
+    build_workbook(workbook)
+    original = plan_for(
+        workbook,
+        [issue(f"GTM-{number}", "completed:\n- checked") for number in (1, 2, 3)],
+    )
+    assert len(original.rows) == 3
+    statuses = ("Done", "In Progress", "New")
+    plan = original.model_copy(
+        update={
+            "rows": tuple(
+                row.model_copy(update={"status": status})
+                for row, status in zip(original.rows, statuses, strict=True)
+            )
+        }
+    )
+    writer = RecordingWriter()
+    apply_plan(plan, settings(workbook), writer, staging_root=tmp_path / "state")
+    marks = writer.operations()
+    for index, colour in enumerate(("#C6EFCE", "#FFEB9C", "#FFC7CE"), start=2):
+        assert Fill(range=f"D{index}", colour=colour) in marks
+    assert writer.calls[-2] == ("sort_highlighted_rows", ("A", "G", 4, "#FFF2CC"))
+    assert writer.names.index("sort_highlighted_rows") > writer.names.index("rich_prepend")
 
 
 def test_a_cell_that_moved_on_is_not_recoloured(tmp_path: Path) -> None:
