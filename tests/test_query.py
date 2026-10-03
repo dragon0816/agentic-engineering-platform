@@ -49,6 +49,20 @@ class Synth:
         raise NotImplementedError
 
 
+class SequenceSynth(Synth):
+    def __init__(self, texts: tuple[str, ...]) -> None:
+        super().__init__("")
+        self.texts = iter(texts)
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        self.requests.append(request)
+        return ModelResponse(
+            trace=request.trace,
+            model_alias=request.model_alias,
+            text=next(self.texts),
+        )
+
+
 def corpus(vault: Vault) -> None:
     """One typed Raw with pages, one office-like Raw with slides, a Wiki page
     that carries the first source's provenance (saved with CRLF), one without."""
@@ -192,7 +206,9 @@ def test_bilingual_market_question_covers_raw_market_and_product_option_evidence
     def add(name: str, text: str) -> str:
         original = f"drop/{name}.txt"
         drop(vault, original, text.encode("utf-8"))
-        return intake.intake(original, mode="apply", today=TODAY).raw_ref
+        result = intake.intake(original, mode="apply", today=TODAY)
+        assert result.raw_ref is not None
+        return result.raw_ref
 
     market = add(
         "market",
@@ -276,3 +292,87 @@ def test_synthesis_may_cite_only_what_was_retrieved(tmp_path: Path) -> None:
     assert Answer.model_validate_json(answer.model_dump_json()) == answer
     with pytest.raises(ValueError, match="come together"):
         QueryEngine(vault, good)
+
+
+def test_raw_synthesis_retries_an_ungrounded_sentence_with_the_same_raw_evidence(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    model = SequenceSynth((
+        "The front end uses a GaN amplifier [1]. It is fast.",
+        "The front end uses a GaN amplifier [1].",
+    ))
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert answer.status == "answered"
+    assert len(model.requests) == 2
+    assert "WIKI:" in model.requests[0].messages[0].text
+    assert "WIKI:" not in model.requests[1].messages[0].text
+    assert "RAW:" in model.requests[1].messages[0].text
+    assert "It is fast" not in model.requests[1].messages[0].text
+    identity = AssetIdentity(namespace="engineering", name="guide", version="1.0.0")
+    trace = TraceIdentifiers(trace_id="retry", request_id="retry", span_id="retry")
+    assert grounded_record(identity, trace, answer).cited_passages == (answer.passages[0],)
+
+
+def test_raw_synthesis_retry_cannot_turn_a_wiki_claim_into_raw_evidence(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    passages = retrieve(vault, "GaN power amplifier", k=4, min_raw=4)
+    wiki_number = next(
+        number for number, passage in enumerate(passages, 1) if passage.citation.kind == "wiki"
+    )
+    model = SequenceSynth((f"A wiki-only claim [{wiki_number}].",) * 2)
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert len(model.requests) == 2
+    assert answer.status != "answered"
+    assert answer.text == ""
+
+
+def test_raw_synthesis_can_recover_from_a_wiki_citation_without_relabeling_it(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    passages = retrieve(vault, "GaN power amplifier", k=4, min_raw=4)
+    wiki_number = next(
+        number for number, passage in enumerate(passages, 1) if passage.citation.kind == "wiki"
+    )
+    raw_number = next(
+        number for number, passage in enumerate(passages, 1) if passage.citation.kind == "raw"
+    )
+    model = SequenceSynth((
+        f"A wiki-only claim [{wiki_number}].",
+        f"The front end uses a GaN power amplifier [{raw_number}].",
+    ))
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert answer.status == "answered"
+    assert len(model.requests) == 2
+    identity = AssetIdentity(namespace="engineering", name="guide", version="1.0.0")
+    trace = TraceIdentifiers(trace_id="retry", request_id="retry", span_id="retry")
+    assert grounded_record(identity, trace, answer).cited_passages == (passages[raw_number - 1],)
+
+
+def test_raw_synthesis_does_not_retry_valid_or_explicitly_insufficient_answers(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    valid = Synth("The front end uses a GaN amplifier. [1]")
+    answer = QueryEngine(vault, valid, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert answer.status == "answered" and len(valid.requests) == 1
+    insufficient = Synth("The Raw passages do not answer the question.")
+    answer = QueryEngine(vault, insufficient, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert answer.status == "unanswered" and len(insufficient.requests) == 1

@@ -117,6 +117,29 @@ class Answer(Contract):
     failure: Failure | None = None
 
 
+def _has_raw_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
+    """Preflight the record's citation rules before a bounded synthesis retry.
+
+    The final KnowledgeAnswerRecord remains authoritative. This check only
+    decides whether a response needs another model attempt; it never adds a
+    citation or changes the kind of evidence behind one.
+    """
+    numbers = cited_numbers(text)
+    if not numbers or any(
+        number < 1 or number > len(passages) or passages[number - 1].citation.kind != "raw"
+        for number in numbers
+    ):
+        return False
+    with_attached_citations = re.sub(
+        r"([.!?。！？])\s*(\[[0-9][0-9,\s-]*\])", r" \2\1", text
+    )
+    sentences = (
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+|(?<=[。！？])\s*", with_attached_citations)
+    )
+    return all(cited_numbers(sentence) for sentence in sentences if sentence)
+
+
 class _Doc:
     def __init__(self, text: str, citation: Citation) -> None:
         self.text = text
@@ -384,35 +407,50 @@ class QueryEngine:
             trace = TraceIdentifiers(
                 trace_id=f"query-{digest}", request_id=f"ask-{self._asked}", span_id="synthesis"
             )
-        request = ModelRequest(
-            trace=trace,
-            model_alias=self.alias,
-            messages=(
-                ModelMessage(
-                    role="user", text=self.prompt.format(question=question, passages=numbered)
-                ),
-            ),
-            requirements=ModelRequirements(),
-            max_output_tokens=self.max_output_tokens,
-        )
-        try:
-            response = self.model.generate(request)
-        except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
-            return Answer(
-                question=question,
-                status="model_failed",
-                passages=passages,
-                failure=failure_from_exception(error),
+        prompt = self.prompt.format(question=question, passages=numbered)
+        for attempt in range(2 if raw_citations_only else 1):
+            if attempt:
+                # Keep the original passage numbers and omit Wiki text. Never
+                # feed the unsupported first answer back to the model.
+                raw_numbered = "\n\n".join(
+                    f"[{number}] RAW: {passage.text}"
+                    for number, passage in enumerate(passages, 1)
+                    if passage.citation.kind == "raw"
+                )
+                prompt = self.prompt.format(
+                    question=question, passages=raw_numbered or "No RAW passages available."
+                ) + (
+                    "\n\nUse one short sentence per supported claim. Put a RAW passage "
+                    "citation [n] in every sentence. If the RAW passages do not "
+                    "support an answer, say so without citations."
+                )
+            request = ModelRequest(
+                trace=trace,
+                model_alias=self.alias,
+                messages=(ModelMessage(role="user", text=prompt),),
+                requirements=ModelRequirements(),
+                max_output_tokens=self.max_output_tokens,
             )
-        if response.failure is not None:
-            return Answer(
-                question=question,
-                status="model_failed",
-                passages=passages,
-                failure=response.failure,
-            )
-        text = response.text.strip()
-        cited = cited_numbers(text)
+            try:
+                response = self.model.generate(request)
+            except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
+                return Answer(
+                    question=question,
+                    status="model_failed",
+                    passages=passages,
+                    failure=failure_from_exception(error),
+                )
+            if response.failure is not None:
+                return Answer(
+                    question=question,
+                    status="model_failed",
+                    passages=passages,
+                    failure=response.failure,
+                )
+            text = response.text.strip()
+            cited = cited_numbers(text)
+            if not raw_citations_only or not cited or _has_raw_grounding(text, passages):
+                break
         if any(n < 1 or n > len(passages) for n in cited):
             # Words without a retrieved source behind them are not an answer here.
             return Answer(question=question, status="uncited", passages=passages)
@@ -425,6 +463,10 @@ class QueryEngine:
                 text=text,
                 synthesized_by=self.alias,
             )
+        if raw_citations_only and not _has_raw_grounding(text, passages):
+            # A Wiki citation or uncited sentence cannot become a Raw-grounded
+            # answer, even after the formatting retry.
+            return Answer(question=question, status="uncited", passages=passages)
         return Answer(
             question=question,
             status="answered",
