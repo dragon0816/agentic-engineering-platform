@@ -376,3 +376,65 @@ def test_raw_synthesis_does_not_retry_valid_or_explicitly_insufficient_answers(
         "GaN power amplifier", k=4, raw_citations_only=True
     )
     assert answer.status == "unanswered" and len(insufficient.requests) == 1
+
+
+def test_broad_query_keeps_distant_option_and_interface_claims_in_separate_raw_excerpts(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PlainTextExtractor()])
+    unrelated_rows = [
+        f"Other specification row {number} has a numeric limit." for number in range(20)
+    ]
+    source = "\n".join(
+        ["Option B81 changes the RF output level.", *unrelated_rows,
+         "The high-speed USB digital input carries sample data."]
+    )
+    drop(vault, "drop/device-specs.txt", source.encode("utf-8"))
+    intake.intake("drop/device-specs.txt", mode="apply", today=TODAY)
+    question = "高速通訊市場有哪些產品和 option 可用於 high-speed USB digital input?"
+    original = retrieve(vault, question, k=1, min_raw=1, evidence_coverage=True)
+    assert "B81" in original[0].text and "USB" in original[0].text
+
+    wrong = Synth("Option B81 provides a high-speed USB digital input [1].")
+    answer = QueryEngine(vault, wrong, alias="a").ask(
+        question, k=1, raw_citations_only=True, evidence_coverage=True
+    )
+    assert "USB" in answer.passages[0].text
+    assert "B81" not in answer.passages[0].text
+    assert "B81" not in wrong.requests[0].messages[0].text
+    assert answer.status == "uncited"
+    assert len(wrong.requests) == 2
+
+    valid_source = "\n".join(
+        ["Option K17 provides a high-speed USB digital input.", *unrelated_rows,
+         "Another connection has a separate output."]
+    )
+    drop(vault, "drop/valid-specs.txt", valid_source.encode("utf-8"))
+    intake.intake("drop/valid-specs.txt", mode="apply", today=TODAY)
+    valid = Synth("Option K17 provides a high-speed USB digital input [1].")
+    valid_answer = QueryEngine(vault, valid, alias="a").ask(
+        question + " K17", k=1, raw_citations_only=True, evidence_coverage=True
+    )
+    assert valid_answer.status == "answered"
+    assert len(valid.requests) == 1
+
+
+def test_option_code_and_interface_must_coexist_in_one_cited_raw_passage(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PlainTextExtractor()])
+    for name, body in (
+        ("rf", "Option B81 controls the RF output level."),
+        ("digital", "A high-speed USB digital input carries sample data."),
+    ):
+        original = f"drop/{name}.txt"
+        drop(vault, original, body.encode("utf-8"))
+        intake.intake(original, mode="apply", today=TODAY)
+    model = Synth("Option B81 provides a high-speed USB digital input [1, 2].")
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "B81 option high-speed USB", k=2, raw_citations_only=True
+    )
+    assert len(answer.passages) == 2
+    assert answer.status == "uncited" and len(model.requests) == 2

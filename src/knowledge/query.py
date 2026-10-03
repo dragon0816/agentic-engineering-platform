@@ -33,6 +33,10 @@ from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequi
 _TOKEN = re.compile(r"\w+", re.UNICODE)
 _CJK = re.compile(r"[぀-ヿ㐀-䶿一-鿿豈-﫿]+")
 _BRACKET = re.compile(r"\[([0-9][0-9,\s-]*)\]")
+_OPTION_TOKEN = re.compile(
+    r"(?<![A-Z0-9])(?:[A-Z0-9]+-)?([BK]\d{1,4})(?![A-Z0-9])", re.IGNORECASE
+)
+_ACRONYM = re.compile(r"(?<![A-Za-z0-9])[A-Z]{2,8}(?![A-Za-z0-9])")
 DEFAULT_PROMPT = """Answer the question from the passages below and nothing else. Cite every
 claim with the passage number in square brackets, like [2]. If the passages do
 not answer the question, say so in one sentence and cite nothing.
@@ -137,7 +141,53 @@ def _has_raw_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
         sentence.strip()
         for sentence in re.split(r"(?<=[.!?])\s+|(?<=[。！？])\s*", with_attached_citations)
     )
-    return all(cited_numbers(sentence) for sentence in sentences if sentence)
+    for sentence in sentences:
+        if not sentence:
+            continue
+        sentence_citations = cited_numbers(sentence)
+        if not sentence_citations:
+            return False
+        # Exact option codes and uppercase technical abbreviations in one
+        # claim must coexist in at least one cited excerpt. This is a narrow
+        # lexical guard, not a general proof of semantic entailment.
+        option_codes = {code.upper() for code in _OPTION_TOKEN.findall(sentence)}
+        acronyms = set(_ACRONYM.findall(_OPTION_TOKEN.sub("", sentence))) - {"RAW"}
+        for code in option_codes:
+            if not any(
+                code in {item.upper() for item in _OPTION_TOKEN.findall(passages[n - 1].text)}
+                and acronyms <= set(_ACRONYM.findall(passages[n - 1].text))
+                for n in sentence_citations
+            ):
+                return False
+    return True
+
+
+def _focused_raw_passages(
+    passages: tuple[Passage, ...], question: str
+) -> tuple[Passage, ...]:
+    """Narrow long retrieved Raw sections before synthesis, without changing Raw.
+
+    Legacy specifications can hold many table rows in one paragraph. A model
+    seeing the whole section may incorrectly join distant rows under one
+    citation. The returned excerpt is an exact consecutive part of the same
+    section; the citation still points to that original section.
+    """
+    terms = set(tokens(question))
+    for facet_terms, _ in _coverage_terms(question):
+        terms.update(facet_terms)
+    focused: list[Passage] = []
+    for passage in passages:
+        lines = passage.text.splitlines()
+        if passage.citation.kind != "raw" or len(passage.text) <= 800 or len(lines) < 8:
+            focused.append(passage)
+            continue
+        chunks = ["\n".join(lines[index : index + 5]) for index in range(0, len(lines), 5)]
+        best = max(
+            enumerate(chunks),
+            key=lambda item: (len(set(tokens(item[1])) & terms), -item[0]),
+        )[1]
+        focused.append(Passage(text=best, citation=passage.citation, score=passage.score))
+    return tuple(focused)
 
 
 class _Doc:
@@ -390,6 +440,8 @@ class QueryEngine:
         )
         if not passages:
             return Answer(question=question, status="no_match")
+        if raw_citations_only and evidence_coverage and _coverage_terms(question):
+            passages = _focused_raw_passages(passages, question)
         if self.model is None or self.alias is None:
             return Answer(question=question, status="retrieved", passages=passages)
         if raw_citations_only:
