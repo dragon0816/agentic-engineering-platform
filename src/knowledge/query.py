@@ -34,7 +34,7 @@ _TOKEN = re.compile(r"\w+", re.UNICODE)
 _CJK = re.compile(r"[぀-ヿ㐀-䶿一-鿿豈-﫿]+")
 _BRACKET = re.compile(r"\[([0-9][0-9,\s-]*)\]")
 _OPTION_TOKEN = re.compile(
-    r"(?<![A-Z0-9])(?:[A-Z0-9]+-)?([BK]\d{1,4})(?![A-Z0-9])", re.IGNORECASE
+    r"(?<![A-Z0-9])(?:[A-Z0-9]+-)?([BK]\d{1,4}[A-Z]{0,2})(?![A-Z0-9])", re.IGNORECASE
 )
 _ACRONYM = re.compile(r"(?<![A-Za-z0-9])[A-Z]{2,8}(?![A-Za-z0-9])")
 DEFAULT_PROMPT = """Answer the question from the passages below and nothing else. Cite every

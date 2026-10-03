@@ -420,21 +420,22 @@ def test_broad_query_keeps_distant_option_and_interface_claims_in_separate_raw_e
     assert len(valid.requests) == 1
 
 
+@pytest.mark.parametrize("code", ("B81", "B200A"))
 def test_option_code_and_interface_must_coexist_in_one_cited_raw_passage(
-    tmp_path: Path,
+    tmp_path: Path, code: str,
 ) -> None:
     vault = make_vault(tmp_path)
     intake = DropIntake(vault, [PlainTextExtractor()])
     for name, body in (
-        ("rf", "Option B81 controls the RF output level."),
+        ("rf", f"Option {code} controls the RF output level."),
         ("digital", "A high-speed USB digital input carries sample data."),
     ):
         original = f"drop/{name}.txt"
         drop(vault, original, body.encode("utf-8"))
         intake.intake(original, mode="apply", today=TODAY)
-    model = Synth("Option B81 provides a high-speed USB digital input [1, 2].")
+    model = Synth(f"Option {code} provides a high-speed USB digital input [1, 2].")
     answer = QueryEngine(vault, model, alias="a").ask(
-        "B81 option high-speed USB", k=2, raw_citations_only=True
+        f"{code} option high-speed USB", k=2, raw_citations_only=True
     )
     assert len(answer.passages) == 2
     assert answer.status == "uncited" and len(model.requests) == 2
