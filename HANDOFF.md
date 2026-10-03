@@ -1,81 +1,26 @@
 # Handoff
 
-Date: 2026-10-03 (Asia/Taipei). Branch: `main`. Local commits:
-`ede8bc0` (schedule CLI), `b4f23a4` (private Marketplace candidate), and
-`1a3c1ad` (Workflow 10/13 migration). The source repositories, real release
-checkout, and production Excel workbook were not changed in this slice. No
-push was made. `docs/TASKS.md` is the cumulative progress record.
+Date: 2026-10-03 (Asia/Taipei). Branch: `main`. No push or live TypeSafe request was made in this checkpoint. `docs/TASKS.md` is the cumulative progress record.
 
 ## Current owner direction
 
-- Pause Workflow 7. The Windows User `AEP_JIRA_TOKEN` authenticates to Jira
-  (`/rest/api/2/myself` was HTTP 200), but `MRT1CV` returned 404. This is a
-  Project-access question, not a missing-token question. The owner asked to
-  migrate Workflows 10 and 13 first.
-- Use original `dragon0816/rs_workflow_system` behavior as the migration
-  baseline. The source was pinned read-only at
-  `896046e8fe2170d21f9213e56e5ce2f93c05ba43d`; no source file was edited.
-- The owner previously requested parallel independent slices. The local
-  schedule control and private Marketplace-candidate slices are present, but
-  neither starts an unattended job nor publishes an asset.
+- Prioritize JEV before the remaining validation work. The first provider is the official TypeSafe API, and only explicitly PUBLIC material may leave AEP for it. Existing UNCLASSIFIED conversation and RS Knowledge data stay on the owner-approved internal LiteLLM Gateway.
+- Stop treating n8n as a development requirement. Migrate the proven `rs_workflow_system` Python/PowerShell jobs through direct reuse or a thin Bridge wrapper before porting business logic. The original pinned source remains read-only. Record concrete parity differences instead of redesigning from memory.
+- An exact persistent Host grant suffices for an already owner-approved local effect. The existing Workflow 11 `outlook.draft` grant saved an unsent Outlook draft successfully; saving a draft does not imply sending mail. Workflow 7 remains paused at the owner's request. Jira PAT authentication returned HTTP 200, while the `MRT1CV` project returned 404 pending Browse access.
 
-## Implemented in this checkpoint
+## Completed JEV slices
 
-- Workflow 10: static Host source/target/rules configuration; installed
-  `/run 10` read-only preview and `chipset` Skill; source-order transformation
-  with source/drop/count/digest evidence; a separate exact write Workflow;
-  guarded staged Excel COM temp-sheet replacement with backup, stale-plan,
-  open-workbook, other-sheet and VBA checks; source snapshot baseline commits
-  only after verified copyback. Agent/Bridge tests cover denied and approved
-  execution. See `docs/WORKFLOW_10_HOST.md` and `docs/CONTRACTS.md`.
-- Workflow 13: pinned source characterization and pure release-file planning;
-  installed `/run 13` read-only preview; separate no-alias isolated preparation
-  Workflow enabled only by explicit Host settings. The latter requires an
-  exact write grant and approval, a marked allowed root and a no-remote Git
-  checkout. It does not run Git, commit, push or network calls. See
-  `docs/WORKFLOW_13_SOURCE_CONTRACT.md`.
-- Manual `aep-host schedules --config ...` create/list/pause/resume/history
-  controls for saved exact Workflow schedules. They do not auto-start a worker
-  or grant execution. Agent Task scheduling still requires trusted templates.
-- One Workflow 11 preview Marketplace candidate is staged as a private draft.
-  It is not published, installed or authorized. Hermes Skills remain pending
-  source pinning and licensing review.
-- Updated stale asset-export assertions and made the Excel-absence and
-  PowerShell-output tests independent of host installation and cp950 locale.
+- `519f2b9` added `evaluation/jev/golden-v1.json`: 16 PUBLIC synthetic cases across intent, Skill selection, retrieval and failure classification, plus an offline benchmark runner. It measures coverage, exact accuracy, Brier calibration, p50/p95 latency, fallback and cost evidence. The real NONE Skill baseline has 4/4 coverage and 1/4 exact match on this tiny corpus; the other three decision baselines are explicitly unavailable. No external service is called by the runner's default mode.
+- `5846a11` added an offline-tested `JEVSkillSelectionProvider` against TypeSafe's published SystemOne choice schema. It accepts an injected transport and a credential callable, selects at most one installed command, and falls back to the unchanged catalog on refusal, low confidence, malformed output, HTTP failure or timeout. It records token counts without request text. The first-turn `SkillCandidateRequest` now includes the complete model payload (system/persona, bounded history and installed tool descriptions) before any accelerator authorization; a denial constructs no JEV client.
+- `docs/JEV_ADAPTER_READINESS.md` records the API and remaining integration gap. Official schema: `https://api.typesafe.ai/openapi.json`; the adapter uses `POST https://api.typesafe.ai/v1/systemone` with Bearer auth and an explicit model profile. No live key was supplied or used. The Host has no JEV factory/egress authorizer, so setting `provider: JEV` alone still falls back to NONE.
+- All three delegated JEV agents completed and stopped. No Workflow, Outlook, Excel or Knowledge effect was invoked in this checkpoint.
 
-## Verification and limits
+## Verification
 
-- Workflow 10/13/schedule/Marketplace focused selection: 221 passed, one
-  directory-symlink case skipped. After the W13 Host integration, its focused
-  selection: 27 passed, one skipped. Ruff passed; strict mypy passed on 325
-  source and test files; offline wheel built in `.scratch/wheel-final`.
-- Broad non-browser run outside the filesystem sandbox: 1,690 passed, five
-  platform skips, one deselected (`tests/test_browser.py` ignored, the real
-  Agent Web browser case deselected). Two earlier sandboxed runs each had one
-  unrelated, transient Windows directory-rename permission error; both cases
-  passed immediately in isolation. Unrestricted Chromium/CDP tests fail on
-  this host because the browser connection closes; do not call the
-  unrestricted suite green.
-- Workflow 10 real parity is open. The actual FY source workbooks and team
-  `chipset-map.json` were unavailable. Excel opened a synthetic workbook as
-  read-only in this sandbox, so real COM write/copyback against a workbook
-  copy was not verified. Do not apply to the production macro workbook yet.
-- Workflow 13 full parity is open: published-version/readiness lookup,
-  upload transfer, branch/template creation, queued serialization, Git status,
-  commit and push remain separate governed steps. No real release happened.
-- The owner was asked asynchronously for Workflow 10 source/rules/target paths
-  and Workflow 13 release checkout/inbox paths. Await these before real-file
-  parity; do not invent paths.
-- Workflow 11 Outlook draft visual parity and robust broad RS Knowledge
-  grounding remain separate open tasks in `docs/TASKS.md`. The previous
-  handoff's live Workflow 11/Knowledge evidence is preserved in that progress
-  record and the source-specific docs.
+- Full non-browser suite outside the filesystem sandbox: **1709 passed, 5 platform skips, 1 real-browser deselection**. The first sandboxed run had 1707 pass and two unrelated Extension fixture failures at Windows `os.replace`; those two passed when rerun outside the sandbox, then the full suite passed there.
+- Focused final JEV adapter tests: 9 passed. Ruff passed for `src` and `tests`; strict mypy passed on 330 source/test files. Offline wheel build succeeded. `git diff --check` passed. Browser/CDP tests were not part of the green suite because Chromium/CDP is unavailable on this host.
 
-## Next sequence
+## Open work and next action
 
-1. With owner-provided files, compare Workflow 10 preview and staged Excel
-   output with the pinned source job on a disposable workbook copy. Then do a
-   company-host Workflow 13 read-only preview and isolated source comparison.
-2. Only after parity and explicit release policy work, implement Workflow 13
-   remote dependency and commit/push steps. Keep Workflow 7 paused until the
-   owner reopens it.
+- Do not connect JEV to ordinary Agent chat yet. First add a Host-owned exact TypeSafe endpoint approval, a credential mapping, and provenance for every outbound system/persona/history/Skill material; reject any request that is not wholly PUBLIC. Then add a bounded circuit breaker and collect repeated TypeSafe-vs-NONE benchmark observations with a real operator key. Do not infer cost from token counts without a verified price. Only wire a decision type if its measured quality and latency justify it.
+- Workflow 10 needs source-vs-AEP parity on copies of the owner's actual FY workbooks and mapping rules; Workflow 13 needs source-compatible dependency and release steps. Neither is complete. After the JEV gate, use the owner's revised REUSE/WRAP-first policy in `docs/DECISIONS.md` and `docs/CONTRACTS.md`; no n8n development task is required. Keep Workflow 7 paused. Other pending work is listed in `docs/TASKS.md`.

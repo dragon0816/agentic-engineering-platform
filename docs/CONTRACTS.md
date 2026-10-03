@@ -2715,6 +2715,19 @@ test proving the new rule. A simplified reimplementation is not parity merely
 because it produces a successful run. Installation and approval remain
 separate from execution, and source repositories remain read-only.
 
+For new migrations, evaluate direct reuse or a thin wrapper around the pinned
+Python/PowerShell job before porting its business logic. The wrapper may map
+the job's static and runtime parameters to AEP's typed form, resolve Host-owned
+paths/secrets, and invoke it through the Bridge's exact capability identity.
+The source's n8n trigger JSON is historical reference only; no n8n development
+is required or scheduled for this migration. A Host
+grant for an owner-approved local effect is durable and specific: an Outlook
+draft grant permits saving an unsent draft but never sending mail; a configured
+Excel write grant permits only the declared workbook operation. Missing grants
+are a Host configuration defect to repair, not a reason to replace the proven
+job or claim that a draft is a message send. See the owner correction recorded
+in `docs/DECISIONS.md` on 2026-10-03.
+
 Workflow 11's initial pinned Jira source is
 `rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43`.
 Its later local `host-bridge/jobs/github_weekly_email.py` adapter is not in

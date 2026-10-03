@@ -567,6 +567,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Build a golden bounded-decision dataset and only then implement an
   optional JEV provider for decision types with proven latency/accuracy gain;
   keep data classification, authorization and strict validation deterministic.
+- [x] Start the JEV-first validation track requested by the owner. Add a
+  PUBLIC-only synthetic 16-case bounded-decision corpus, an offline NONE
+  baseline and metrics runner; add an injected-transport TypeSafe SystemOne
+  Skill-choice adapter with malformed/low-confidence/error fallback tests.
+  The owner selected the official TypeSafe API and PUBLIC-only initial data.
+  No live JEV request, Host wiring or private-data egress is enabled yet.
+- [ ] Before enabling JEV in Agent Web, add exact TypeSafe endpoint approval,
+  whole-request PUBLIC provenance for system/persona/history/installed Skill
+  metadata, Host-owned credential mapping, circuit-breaker behavior and a
+  representative repeated benchmark showing accuracy, latency, fallback and
+  cost relative to the unchanged baseline. Keep ordinary UNCLASSIFIED Gateway
+  conversations on the approved internal LiteLLM route.
 - [ ] Add Agent scheduled jobs. Start with typed, durable, timezone-aware
   recurrence and a deterministic due-run claim; execute the exact installed
   Agent Task or Workflow through existing admission and Bridge grants, record
@@ -691,6 +703,16 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   checkout, Git status and distinct approved commit/push effects. Compare an
   isolated run with the original source job and collect company-host parity
   evidence before calling the migration complete.
+- [ ] Apply the owner's corrected migration priority after the JEV gate: for
+  remaining `rs_workflow_system` jobs, assess direct reuse or a thin Bridge
+  wrapper around the pinned Python/PowerShell implementation before porting
+  business logic. Map its existing parameters to AEP forms. n8n development
+  is outside the current scope and is not a required task.
+  Treat an exact, durable Host grant for owner-approved local Excel writes or
+  unsent Outlook drafts as sufficient for that effect, without repeated human
+  approval prompts. Do not conflate a saved draft with sending mail. Record
+  concrete incompatibilities before a rewrite; keep remote release/push behind
+  their separate authorization.
 - [ ] Pause Workflow 7 at the owner's request. `AEP_JIRA_TOKEN` is set and
   Jira identity returned HTTP 200; the separate `MRT1CV` Project returned
   HTTP 404. Do not replace its Jira source or continue its migration until

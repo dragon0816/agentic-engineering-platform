@@ -148,11 +148,17 @@ Adopt the `rs_workflow_system` separation:
 orchestrator -> Host Bridge router -> service/job -> local capability
 ```
 
-Preserve the ability to run jobs independently of n8n. The primary path is Agent/CLI -> Workflow or Capability contract -> Host Bridge/job. n8n is an optional event/business automation adapter that may invoke the same contract for schedules, triggers, notifications or SaaS integration. Do not fork separate Agent, CLI and n8n implementations for the same operation.
+The primary path is Agent/CLI -> Workflow or Capability contract -> Host
+Bridge/job. Reuse or thinly wrap the pinned source Python/PowerShell jobs before
+porting their proven logic. n8n development is outside the current owner-
+approved scope; the source's n8n definitions are historical references for
+triggers and parameter defaults, not a dependency or a required work item.
 
 Selectively migrate business workflows from `n8n_work_flow`; where both repositories solve the same problem, prefer the Host Bridge/service/job architecture and retain older scripts only as behavioural references/tests.
 
-Exit criteria: one representative engineering workflow can be triggered by deterministic command and Agent through one underlying contract; when n8n integration is enabled, it invokes that same contract without becoming a runtime dependency.
+Exit criteria: one representative engineering workflow can be triggered by
+deterministic command and Agent through one underlying contract, with source
+behavior and local effects verified. No n8n integration is required.
 
 ## Phase 4 — Knowledge platform
 
@@ -303,7 +309,6 @@ a company host at all today**. That file decides nothing; work appears in
 ## Open decisions for later phases
 
 - exact agent runtime/SDK implementation;
-- which business/event integrations justify enabling the optional n8n adapter;
 - storage/index technology for knowledge retrieval;
 - approval UX across Telegram/Web/other channels;
 - deployment topology for gateway, Agent runtime and Host Bridge;

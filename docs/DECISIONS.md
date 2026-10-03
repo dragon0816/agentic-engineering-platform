@@ -377,3 +377,53 @@ the owner's explicit migration contract makes the original output the baseline.
 The safe slices can be tested with synthetic files, while real Workflow 10
 Excel parity requires the team's source workbooks and mapping rules and full
 Workflow 13 parity requires controlled release dependencies.
+
+## 2026-10-03 — Reuse proven Workflow jobs behind a thin Bridge adapter
+
+Decision: For the next `rs_workflow_system` migrations, treat its pinned Python
+jobs and PowerShell helpers as the implementation baseline and first assess
+`REUSE` or `WRAP`. Keep their deterministic business logic intact where it can
+run in AEP, exposing its existing static/runtime parameters through the
+platform Workflow form and a thin typed Bridge entry point. Port or rewrite a
+piece only when a concrete incompatibility or failed parity case is recorded.
+The source n8n JSON may be read only as historical evidence for triggers and
+parameter defaults. n8n development is outside the current owner-approved
+scope; do not add a parallel n8n implementation or schedule it as required work.
+
+For owner-authorized local effects such as writing the configured weekly Excel
+workbook or saving an Outlook draft, install the exact persistent Host grant
+and effect policy for that capability, then run through it without repeatedly
+asking the owner to authorize the same operation. Saving a draft and sending a
+message are different effects; a draft grant never authorizes send. The
+existing Workflow 11 `outlook.draft` grant and successful unsent Drafts
+read-back are the precedent. Remote release/push and other effects not yet
+authorized retain their separate policy.
+
+Reason: The owner reported that reconstructing already validated jobs and
+overly narrow approvals delayed working Workflow parity. `WRAP` keeps source
+behavior testable while preserving AEP's member/device admission and Bridge
+boundary. A direct chat-launched script was rejected because it would skip
+that boundary; a broad reimplementation and n8n integration were
+rejected because neither improves fidelity to the proven jobs.
+
+## 2026-10-03 — Benchmark TypeSafe JEV with PUBLIC data before live Agent wiring
+
+Decision: Use the official TypeSafe SystemOne choice API for the first optional
+JEV decision adapter, initially limited to `skill_selection`. The owner chose
+PUBLIC-only content. Keep `NONE` as the default; construct the provider only
+after a trusted caller authorizes the complete request, including system and
+persona text, conversation history and installed tool descriptions. A
+high-confidence result may narrow to one installed command; uncertain,
+invalid, refused or failed responses retain the baseline installed catalog.
+The 16-case PUBLIC synthetic benchmark and offline transport tests precede
+Host wiring. The normal UNCLASSIFIED Gateway route stays on the approved
+internal LiteLLM endpoint.
+
+Reason: The TypeSafe [OpenAPI schema](https://api.typesafe.ai/openapi.json)
+specifies `POST /v1/systemone`, Bearer authentication, named questions and a
+choice answer with confidence. A conceptual `DecisionResult` is not the wire
+contract. Sending UNCLASSIFIED Agent context to this external endpoint or
+turning a selector into an authorization decision was rejected. Live use still
+requires exact-endpoint egress approval, PUBLIC provenance for every outbound
+material, an operator credential, circuit breaker and repeated benchmark
+evidence.
