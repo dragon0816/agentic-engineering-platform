@@ -48,3 +48,17 @@ egress authorization, PUBLIC-only data policy, output validation and
 approval boundary as the product runtime. Separate reviewer labels and a
 larger representative corpus are required before a provider can be selected
 for production traffic.
+
+An explicit TypeSafe diagnostic is available for this exact reviewed corpus:
+
+```powershell
+$env:AEP_JEV_API_KEY = ([System.Net.NetworkCredential]::new('', (Read-Host 'TypeSafe JEV API key' -AsSecureString))).Password
+& .venv/Scripts/python.exe -m evaluation.jev_live --model jev-latest
+```
+
+It checks the corpus SHA-256 before reading the key and can send only its four
+synthetic PUBLIC Skill cases to the fixed TypeSafe SystemOne endpoint. It does
+not connect JEV to Agent Web or RS Knowledge. The key stays in the current
+PowerShell process; do not paste it into `host.json` or a repository file.
+TypeSafe's authenticated `/v1/models` gives the model name for your account.
+Provider cost is reported as unknown until a verified price is available.

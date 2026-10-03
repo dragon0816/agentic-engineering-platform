@@ -573,6 +573,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Skill-choice adapter with malformed/low-confidence/error fallback tests.
   The owner selected the official TypeSafe API and PUBLIC-only initial data.
   No live JEV request, Host wiring or private-data egress is enabled yet.
+- [x] Add an explicitly invoked TypeSafe diagnostic for the pinned PUBLIC
+  synthetic corpus. It verifies the exact reviewed digest before reading
+  `AEP_JEV_API_KEY`, calls only the official SystemOne endpoint for four Skill
+  cases, and reports baseline/JEV coverage, accuracy, fallback and latency
+  without payloads or guessed cost. Offline fake-transport tests pass. The
+  owner has now prioritized making RS Knowledge Ask work before comparing
+  live JEV results, so no TypeSafe request was sent in this slice.
 - [ ] Before enabling JEV in Agent Web, add exact TypeSafe endpoint approval,
   whole-request PUBLIC provenance for system/persona/history/installed Skill
   metadata, Host-owned credential mapping, circuit-breaker behavior and a
