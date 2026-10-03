@@ -49,6 +49,55 @@ approval boundary as the product runtime. Separate reviewer labels and a
 larger representative corpus are required before a provider can be selected
 for production traffic.
 
+## Local Laya comparison
+
+The owner chose [NandhaKishorM/laya](https://github.com/NandhaKishorM/laya)
+0.3.24 for the next comparison instead of a live TypeSafe request. The
+`evaluation.laya_offline` diagnostic uses this same pinned PUBLIC corpus for
+all four decision types. It imports Laya only when explicitly run and forces
+Hugging Face offline mode before that import. It does not connect Laya to the
+Agent Web, read RS_Knowledge, or change the `NONE` baseline. The synthetic
+cases are too small to justify production routing on their own.
+
+On a computer with enough free memory, create an isolated Python environment
+inside a checkout of this repository:
+
+```powershell
+py -3.12 -m venv .scratch/laya-venv
+$LayaPython = Join-Path (Resolve-Path .scratch/laya-venv) 'Scripts/python.exe'
+& $LayaPython -m pip install -e . 'laya==0.3.24'
+```
+
+The English checkpoint has about 421 million parameters. Its first use needs
+an Internet connection to download from Hugging Face; prepare its cache once
+outside the timed benchmark:
+
+```powershell
+& $LayaPython -c 'from laya import Router; Router(max_loaded=1, device="cpu").predict("A synthetic sample request", {"selection": {"type": "choice", "instructions": "Choose a sample label", "criteria": {"a": "alpha", "b": "beta"}}}, model="english")'
+```
+
+Then disconnect the model download path and run the local diagnostic. The
+command enforces offline mode itself, warms the checkpoint separately from
+measured requests, and records its loaded revision, package version,
+per-decision aggregate scores, and warm-up duration:
+
+```powershell
+& $LayaPython -m evaluation.laya_offline --trials 3 --device cpu
+```
+
+Use `--device cuda` only on a host with an appropriate GPU and PyTorch build.
+`--min-confidence` is optional; leave it unset for raw accuracy, then try
+explicit thresholds as separate runs. Laya's `answer_confidence`, rather than
+its entropy-based `confidence`, is used for gating and calibration. The report
+does not include prompt text or individual answers. `known_cost_usd=0` means
+no metered provider call; it does not include electricity or hardware cost.
+
+The current development workstation has 31.13 GiB installed RAM but only about
+2 GiB available at the time of assessment. A full 421-million-parameter
+PyTorch run under that load could page and distort latency, so it is not a
+useful performance baseline. The local mapping/schema tests can run here
+without installing Laya or downloading a checkpoint.
+
 An explicit TypeSafe diagnostic is available for this exact reviewed corpus:
 
 ```powershell

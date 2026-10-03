@@ -4,6 +4,39 @@ Date: 2026-10-03 (Asia/Taipei). Branch: `main`. No push or TypeSafe request
 was made in this checkpoint. `docs/TASKS.md` remains the cumulative progress
 record; `docs/DECISIONS.md` holds the architecture decisions.
 
+## Latest checkpoint: local Laya comparison preparation
+
+- The owner selected `NandhaKishorM/laya`, not the same-named notification
+  project, and approved an offline decision comparison. Added
+  `src/evaluation/laya_offline.py`, its fake-router tests, the design spec and
+  a reproducible setup in `evaluation/jev/README.md`. The diagnostic maps all
+  four types in the pinned 16-case PUBLIC synthetic corpus to typed `choice`
+  questions and preserves the existing NONE baseline. It imports Laya only
+  when explicitly run; Agent Web and production routing are unchanged.
+- Package version is pinned to 0.3.24. Model input truncation, malformed or
+  low-confidence answers abstain. The aggregate report records checkpoint
+  revision and warm-up separately from measured latency, without request text.
+  Its model-call environment forces Hugging Face offline mode. No real Laya
+  checkpoint was installed or run on this computer; the benchmark currently
+  reports the missing optional package. On 2026-10-03 only about 2 GiB RAM
+  was free, so a full 421M-parameter run here would be a poor latency sample.
+  Run the documented diagnostic on a machine with sufficient free memory.
+- Focused Laya/JEV tests: 11 passed. Ruff and strict mypy (338 source files)
+  passed. The final full non-browser rerun passed: 1,731 passed, 5 platform
+  skips, 26 deselected. The first run had one known intermittent Windows
+  Extension staging `os.replace` permission failure; that test passed alone
+  and in the final complete rerun. `python -m build --wheel --no-isolation`
+  passed with a unique output directory; `git diff --check` passed.
+- Workflow 11 remains separate unfinished work: the owner wants original
+  `rs_workflow_system` statistics, blue chart, GitHub Issue key hyperlinks and
+  Issue Assignees. Its source snapshot is pinned at
+  `896046e8fe2170d21f9213e56e5ce2f93c05ba43d`; use original scripts as
+  the baseline. The current code already pulls Issue URL and assignees for
+  mail statistics, but workbook Assignee still uses the Project's `SDE
+  Assignee` field. This shell's GitHub tokens cannot jointly read the Project
+  and Issue content, so no live parity claim is justified. Do not request the
+  owner's LiteLLM key again; this Laya slice does not use it.
+
 ## Current owner direction
 
 - The previous Agent Web context/session Settings slice is complete. Context
@@ -12,9 +45,9 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
 - Make RS_Knowledge asking useful and verify answer quality before comparing
   TypeSafe JEV. The owner classified this complete Vault `public` in its exact
   Host binding, while other Vaults default to `private` and are owner-editable.
-- For this round, the owner explicitly chose **offline-only JEV validation**.
-  Do not call TypeSafe yet. The official TypeSafe adapter is a bounded Skill
-  selector, not a Knowledge answer generator, and remains unwired to Agent Web.
+- For this round, the owner chose a **local Laya offline decision comparison**
+  in place of a TypeSafe call. The TypeSafe adapter remains unwired to Agent
+  Web; neither decision model is a Knowledge answer generator.
 - n8n is not a required development item. Migrate remaining proven Workflow
   jobs by reuse or a thin Bridge wrapper first. Workflow 7 remains paused.
 
@@ -43,11 +76,11 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
   can pass. This is deliberately a narrow lexical safeguard, not full semantic
   entailment. See the new decision in `docs/DECISIONS.md`.
 - The running preview still has the prior installed wheel, so its **post-fix
-  live answer has not yet been tested**. A standalone source-runtime attempt
-  returned `knowledge_model_failed` because this shell does not have
-  `LITELLM_MASTER_KEY` in User/Process environment; the already-running Web
-  process did successfully answer with its existing credential. Do not claim
-  the new prompt has live model parity until preview refresh/retest.
+  live answer has not yet been tested**. A prior source-runtime attempt
+  returned `knowledge_model_failed` because that process did not inherit the
+  LiteLLM credential; the already-running Web process did answer with its own
+  credential. The owner has since confirmed the key was set. Check the actual
+  test process's inherited environment instead of asking for the key again.
 
 ## JEV offline result
 
@@ -55,9 +88,8 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
   corpus. The unchanged `NONE` Skill baseline returned candidates for 4/4
   cases and matched the exact expected set in 1/4. Intent, retrieval and
   failure classification have no baseline and remain `unavailable`.
-- No TypeSafe request or cost estimate was made. `AEP_JEV_API_KEY` is absent
-  from this Host's User environment, and the owner chose offline-only testing
-  for this round. Keep the TypeSafe comparison task open.
+- No TypeSafe request or cost estimate was made. The owner superseded the
+  pending live TypeSafe comparison with the local Laya benchmark preparation.
 
 ## Verification and known limits
 
@@ -77,11 +109,11 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
 
 ## Next action
 
-Refresh the installed preview from the verified offline wheel, restart its
-Web process with a valid LiteLLM credential, and ask the exact market question
-again. Save its `KnowledgeAnswerRecord` locally, run the pinned source-backed
-diagnostic and review each claim/citation manually. If the model still makes
-the market leap, improve the bounded retry or report `knowledge_not_grounded`
-without inventing fit. Keep TypeSafe offline until the owner changes that
-preference and supplies its key. Workflow 10/13 parity and other open work
-remain in `docs/TASKS.md`.
+Run the documented Laya benchmark on a computer with sufficient free RAM,
+then compare its per-type results with the unchanged NONE baseline. In parallel,
+refresh the installed preview from the verified offline wheel and retest the
+exact Knowledge market question through the running Web process; that post-fix
+live answer is still unverified. Do not ask the owner to re-enter the LiteLLM
+key; inspect the environment of the process doing the test. Workflow 11 visual
+parity, Workflow 10/13 source parity and other open work remain in
+`docs/TASKS.md`.

@@ -712,12 +712,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   interface/RF capabilities from unverified 800G/1.6T market fit; see
   `evaluation/knowledge/README.md`. This is a review aid, not a general
   semantic entailment proof or a JEV Knowledge-answer path.
-- [ ] Compare TypeSafe JEV's Skill selection against the pinned PUBLIC synthetic
-  cases and unchanged NONE baseline. NONE rerun: 4/4 coverage, 1/4 exact match;
-  the other three decision types have no baseline. No TypeSafe request has
-  been sent: the owner chose offline-only verification for this round, and
-  `AEP_JEV_API_KEY` is unavailable on this Host. JEV remains disconnected from
-  Agent Web and must not receive private Vaults.
+- [x] Prepare the owner's local Laya comparison in place of a live TypeSafe
+  JEV test. `evaluation.laya_offline` maps all 16 pinned PUBLIC synthetic
+  cases to Laya 0.3.24 typed choices, keeps the unchanged NONE baseline and
+  records coverage, accuracy, confidence, latency, fallback, warm-up and
+  checkpoint revision without prompt text. Its mapping tests pass without
+  installing Laya. No TypeSafe request or Agent Web activation is involved.
+- [ ] Run the pinned Laya checkpoint on a machine with sufficient free RAM,
+  after prefetching it, and inspect repeated offline results. This Host had
+  only about 2 GiB free on 2026-10-03; it is not a reliable performance
+  measurement environment under that load. NONE still has 4/4 Skill coverage
+  and 1/4 exact match; the other three baseline types remain unavailable.
 - [x] Give each Host Knowledge Vault an owner-editable `privacy` setting:
   `private` by default or `public`. Record the owner's current RS_Knowledge
   selection as `public` in the installed Host config. Do not impose a separate

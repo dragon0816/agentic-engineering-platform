@@ -505,3 +505,23 @@ Hard-coding R&S product assertions into the general retriever or treating a
 JEV Skill selector as an answer validator were rejected. The pinned evidence
 and regression make the observed failure reproducible without sending Vault
 content to TypeSafe.
+
+## 2026-10-03 — Compare local Laya before any JEV accelerator activation
+
+Decision: Use `NandhaKishorM/laya` 0.3.24, the local typed-decision model, for
+the next offline decision comparison instead of calling TypeSafe. Pin the
+existing PUBLIC synthetic 16-case corpus and map all four decision types to
+Laya `choice` questions. Keep Laya in a separately installed diagnostic
+environment, with the checkpoint cached before measured runs and Hugging Face
+offline mode enforced during measurement. Record its package version and
+checkpoint revision, warm-up time and aggregate scoring. Neither Laya nor
+TypeSafe is enabled in Agent Web by this decision.
+
+Reason: Laya offers the same System One decision shape while avoiding a new
+external egress path for the owner's first comparison. The similarly named
+`aayushch/laya` is a notification application and was rejected for this
+purpose. The current Host has about 2 GiB free RAM under load, so preparing
+the test here and measuring the 421-million-parameter checkpoint on another
+computer avoids a misleading latency result. Treating synthetic-case accuracy
+as production authorization or replacing the deterministic baseline was
+rejected.
