@@ -31,12 +31,14 @@ from common.base import Contract
 from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest
+from common.scheduling import ScheduleDefinition, ScheduleRecord
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from host_runtime.agent import LocalAgentOutcome
 from host_runtime.assets import export_assets
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
+from host_runtime.schedules import ScheduleStoreError, SqliteScheduleStore
 from host_runtime.sync import PlatformClient, advertisement
 from host_runtime.workspace import documents
 
@@ -99,6 +101,17 @@ def _parser() -> argparse.ArgumentParser:
     jobs.add_argument("--config", required=True, type=Path)
     jobs.add_argument("--once", action="store_true", help="poll a single time and stop")
     jobs.add_argument("--interval", type=float, default=5.0, help="seconds between polls")
+    schedules = commands.add_parser("schedules", help="manage this host's inert local schedules")
+    schedules.add_argument("--config", required=True, type=Path)
+    schedule_actions = schedules.add_subparsers(dest="schedule_action", required=True)
+    schedule_create = schedule_actions.add_parser("create", help="save an exact installed Workflow")
+    schedule_create.add_argument("--definition", required=True, type=Path)
+    schedule_actions.add_parser("list", help="list this member's schedules")
+    for action in ("pause", "resume", "history"):
+        target = schedule_actions.add_parser(action)
+        target.add_argument("schedule_id")
+        if action == "history":
+            target.add_argument("--limit", type=int, default=50)
     dut = commands.add_parser(
         "dut-validate",
         help="run an approved physical DUT request and retain its evidence as JSON",
@@ -629,6 +642,75 @@ def _write_in_utf8() -> None:
             continue
 
 
+def _schedule_line(record: ScheduleRecord) -> str:
+    definition = record.definition
+    identity = definition.target
+    return (
+        f"{definition.schedule_id}: {record.status}; "
+        f"{definition.target_kind} {identity.namespace}/{identity.name}@{identity.version}; "
+        f"next {record.next_due_at.isoformat()}"
+    )
+
+
+def _schedules(runtime: HostRuntime, args: argparse.Namespace) -> int:
+    """Control intent for the bound member; never claim or execute due work."""
+    owner = runtime.actor
+    if runtime.agent.admit(owner, runtime.config.device.bridge_id) is not None:
+        print("this host member is not admitted", file=sys.stderr)
+        return 1
+    definition: ScheduleDefinition | None = None
+    if args.schedule_action == "create":
+        try:
+            definition = ScheduleDefinition.model_validate_json(
+                args.definition.read_text(encoding="utf-8-sig")
+            )
+        except (OSError, ValidationError, ValueError):
+            print("schedule definition is unreadable or invalid", file=sys.stderr)
+            return 2
+        if definition.owner != owner:
+            print("schedule owner must be this host's bound member", file=sys.stderr)
+            return 1
+        if definition.target_kind != "workflow":
+            print("scheduled Agent Tasks need a trusted installed template", file=sys.stderr)
+            return 1
+        if runtime.agent.gateway.engine.workflows.get(definition.target) is None:
+            print("the exact Workflow is not installed on this host", file=sys.stderr)
+            return 1
+    try:
+        with SqliteScheduleStore(
+            runtime.layout.workspace_root / "schedules.sqlite",
+            bridge_id=runtime.config.device.bridge_id,
+        ) as store:
+            if args.schedule_action == "create":
+                assert definition is not None
+                print(_schedule_line(store.create(definition, now=datetime.now(UTC))))
+            elif args.schedule_action == "list":
+                for record in store.list(owner=owner):
+                    print(_schedule_line(record))
+            elif args.schedule_action in {"pause", "resume"}:
+                print(
+                    _schedule_line(
+                        store.set_active(
+                            args.schedule_id,
+                            owner=owner,
+                            active=args.schedule_action == "resume",
+                            now=datetime.now(UTC),
+                        )
+                    )
+                )
+            else:
+                for run in store.history(args.schedule_id, owner=owner, limit=args.limit):
+                    print(
+                        f"{run.due_at.isoformat()}: {run.status} "
+                        f"({run.result_code or 'pending'}); {run.idempotency_key}"
+                    )
+    except (ScheduleStoreError, OSError, ValueError) as error:
+        code = error.code if isinstance(error, ScheduleStoreError) else "invalid_request"
+        print(f"schedule control failed: {code}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _write_in_utf8()
     args = _parser().parse_args(argv)
@@ -687,6 +769,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _sync(runtime, args.json)
         if args.command == "jobs":
             return _jobs(runtime, args.once, args.interval)
+        if args.command == "schedules":
+            return _schedules(runtime, args)
         if args.command == "dut-validate":
             return _dut_validate(runtime, args.request, args.output)
         return _telegram(runtime, args.once)
