@@ -1,9 +1,10 @@
 # Handoff
 
-Date: 2026-10-03 (Asia/Taipei). Branch: `main`. This is a local checkpoint;
-the source repositories, real release checkout, and production Excel workbook
-were not changed in this slice. The owner authorized local per-slice commits
-and merges, but no push. `docs/TASKS.md` is the cumulative progress record.
+Date: 2026-10-03 (Asia/Taipei). Branch: `main`. Local commits:
+`ede8bc0` (schedule CLI), `b4f23a4` (private Marketplace candidate), and
+`1a3c1ad` (Workflow 10/13 migration). The source repositories, real release
+checkout, and production Excel workbook were not changed in this slice. No
+push was made. `docs/TASKS.md` is the cumulative progress record.
 
 ## Current owner direction
 
@@ -72,12 +73,9 @@ and merges, but no push. `docs/TASKS.md` is the cumulative progress record.
 
 ## Next sequence
 
-1. Finish `git diff --check` and commit the Workflow 10/13 migration. The
-   schedule CLI and private Marketplace candidate already have separate
-   local commits. Do not push.
-2. With owner-provided files, compare Workflow 10 preview and staged Excel
+1. With owner-provided files, compare Workflow 10 preview and staged Excel
    output with the pinned source job on a disposable workbook copy. Then do a
    company-host Workflow 13 read-only preview and isolated source comparison.
-3. Only after parity and explicit release policy work, implement Workflow 13
+2. Only after parity and explicit release policy work, implement Workflow 13
    remote dependency and commit/push steps. Keep Workflow 7 paused until the
    owner reopens it.
