@@ -142,13 +142,26 @@ class GatewayConversationResult(Contract):
 
 
 class SkillCandidateRequest(Contract):
-    """The complete context that must be authorized before candidate egress."""
+    """The exact initial model payload, available before candidate egress.
+
+    A selector can inspect the conversation and installed tool descriptions, but
+    it cannot see a shorter request than the model would receive. In particular,
+    persona guidance and earlier turns must not be omitted from authorization.
+    """
 
     context: RequestContext
-    tools: tuple[ModelTool, ...] = Field(min_length=1)
+    initial_request: ModelRequest
+
+    @property
+    def tools(self) -> tuple[ModelTool, ...]:
+        return self.initial_request.tools
 
     @model_validator(mode="after")
     def unique_tool_names(self) -> Self:
+        if self.initial_request.trace != self.context.trace:
+            raise ValueError("candidate request must keep the conversation trace")
+        if not self.tools:
+            raise ValueError("candidate request needs installed tools")
         names = [tool.name for tool in self.tools]
         if len(set(names)) != len(names):
             raise ValueError("installed tool names must be unique")
@@ -256,17 +269,6 @@ class Gateway:
             bindings = {
                 name: binding for name, binding in bindings.items() if name in allowed_tools
             }
-        if tools:
-            candidate_request = SkillCandidateRequest(context=context, tools=tuple(tools))
-            selected_names = set(
-                self.skill_decisions.decide(candidate_request, decision_type="skill_selection")
-                .result.value
-            )
-            tools = [tool for tool in tools if tool.name in selected_names]
-            bindings = {
-                name: binding for name, binding in bindings.items() if name in selected_names
-            }
-
         prompt = (
             "You are the Personal Engineering Agent. Answer naturally and concisely. "
             "Use only the supplied installed tools when work is required. Never invent a tool, "
@@ -289,6 +291,32 @@ class Gateway:
             for message in history[-MAX_CONVERSATION_HISTORY:]
         )
         messages = [ModelMessage(role="system", text=prompt), *bounded_history]
+        if tools:
+            # This is the exact first-turn payload before an optional selector
+            # narrows tools. Authorization sees the system/persona text, bounded
+            # history and every installed tool description before construction.
+            candidate_request = SkillCandidateRequest(
+                context=context,
+                initial_request=ModelRequest(
+                    trace=context.trace,
+                    model_alias=self.router.model_alias,
+                    messages=tuple(messages),
+                    requirements=ModelRequirements(
+                        tool_calling=True,
+                        local_only=self.router.local_only,
+                    ),
+                    tools=tuple(tools),
+                    max_output_tokens=1024,
+                ),
+            )
+            selected_names = set(
+                self.skill_decisions.decide(candidate_request, decision_type="skill_selection")
+                .result.value
+            )
+            tools = [tool for tool in tools if tool.name in selected_names]
+            bindings = {
+                name: binding for name, binding in bindings.items() if name in selected_names
+            }
         evidence: list[ConversationToolExecution] = []
         for turn in range(1, max_turns + 1):
             model_request = ModelRequest(

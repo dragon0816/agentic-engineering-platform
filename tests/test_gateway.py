@@ -397,6 +397,80 @@ def test_accelerated_skill_subset_cannot_execute_a_hidden_tool() -> None:
     assert handler.calls == 0
 
 
+def test_skill_candidate_authorization_sees_exact_history_persona_and_catalog() -> None:
+    """A selector must not be authorized against only the latest user message.
+
+    The first model turn carries older conversation, persona and Skill text;
+    all three are part of the candidate's egress decision before JEV exists.
+    """
+
+    class AnswerModel(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            return ModelResponse(trace=item.trace, model_alias=item.model_alias, text="Ready")
+
+    model = AnswerModel()
+    traces: list[DecisionTrace] = []
+    app = gateway(Handler(), model, decision_observer=traces.append)
+    seen: list[SkillCandidateRequest] = []
+
+    def authorize(item: SkillCandidateRequest) -> bool:
+        seen.append(item)
+        assert item.context.message == "Continue"
+        assert [message.role for message in item.initial_request.messages] == [
+            "system", "user", "user"
+        ]
+        assert "private persona marker" in item.initial_request.messages[0].text
+        assert "private history marker" in item.initial_request.messages[1].text
+        assert {tool.name for tool in item.tools} == {"release__check", "release__package"}
+        assert all("Executes installed" in tool.description for tool in item.tools)
+        return False
+
+    app.skill_decisions = DecisionService[SkillCandidateRequest, tuple[str, ...]](
+        baseline=app.skill_decisions.baseline,
+        config=DecisionAcceleratorConfig(
+            provider="JEV",
+            endpoint="http://127.0.0.1:9797/v1",
+            credential={"name": "jev_token"},
+            enabled_decision_types=("skill_selection",),
+        ),
+        authorize_accelerator=authorize,
+        accelerator_factory=lambda: pytest.fail("denied payload constructed JEV"),
+        accept_accelerator=_valid_skill_subset,
+        observer=traces.append,
+    )
+    result = asyncio.run(
+        app.converse(
+            request("Continue"),
+            (
+                ModelMessage(role="user", text="private history marker"),
+                ModelMessage(role="user", text="Continue"),
+            ),
+            persona_guidance="private persona marker",
+        )
+    )
+    assert result.status == "answered"
+    assert len(seen) == 1
+    assert len(model.calls) == 1
+    assert seen[0].initial_request == model.calls[0]
+    assert traces[0].fallback_reason == "accelerator_not_authorized"
+    assert "private" not in traces[0].model_dump_json()
+
+
+def test_skill_candidate_rejects_mismatched_context_trace() -> None:
+    original = request("Check release")
+    different = request("Check release").model_copy(
+        update={"trace": original.trace.model_copy(update={"trace_id": "other-trace"})}
+    )
+    model_request = ModelRequest(
+        trace=different.trace,
+        model_alias="routing",
+        messages=(ModelMessage(role="user", text="Check release"),),
+    )
+    with pytest.raises(ValidationError, match="conversation trace"):
+        SkillCandidateRequest(context=original, initial_request=model_request)
+
+
 def test_conversation_cannot_execute_an_invented_tool_and_stops() -> None:
     class InventingModel(FakeModel):
         def generate(self, item: ModelRequest) -> ModelResponse:
