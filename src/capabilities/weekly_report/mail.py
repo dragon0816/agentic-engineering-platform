@@ -190,8 +190,7 @@ def _share_table(title: str, totals: Mapping[str, int]) -> str:
         "style='width:808px;max-width:100%;border-collapse:collapse'>"
         f"<tr><th style='{th_left}'>{first}</th>"
         f"<th width='96' style='{th_right}'>{count_heading}</th>"
-        f"<th width='96' style='{th_right}'>{share_heading}</th></tr>"
-        + "".join(rows) + "</table>"
+        f"<th width='96' style='{th_right}'>{share_heading}</th></tr>" + "".join(rows) + "</table>"
     )
 
 
@@ -276,8 +275,8 @@ def build_html(
         reason = (
             f"沒有任何 ticket 在 {window.since:%Y-%m-%d}～{window.until:%Y-%m-%d} "
             f"之間有新的留言；{total_matched} 張符合查詢但未計入。"
-            if activity_required else
-            f"{window.since:%Y-%m-%d}～{window.until:%Y-%m-%d} 沒有符合條件的 ticket。"
+            if activity_required
+            else f"{window.since:%Y-%m-%d}～{window.until:%Y-%m-%d} 沒有符合條件的 ticket。"
         )
         empty_note = (
             "<tr><td style='padding:16px 26px 0'><div style='background:#fdf6e3;"
@@ -285,27 +284,31 @@ def build_html(
         )
     instrument_title = (
         f"Tickets by instrument ({instrument_count} total)"
-        if instrument_count == len(items) else
-        f"Tickets by instrument ({instrument_count} instrument-tickets "
+        if instrument_count == len(items)
+        else f"Tickets by instrument ({instrument_count} instrument-tickets "
         f"from {len(items)} {ticket_noun})"
     )
     image = (
-        f"<img src='cid:{escape(chart_cid, quote=True)}' width='300' "
-        "alt='Tickets by instrument' style='display:block;max-width:100%;height:auto'>"
-        if chart_cid else "<p>No instrument chart this week.</p>"
+        f"<img src='cid:{escape(chart_cid, quote=True)}' width='808' "
+        f"alt='{escape(instrument_title, quote=True)} and Split per team member' "
+        "style='display:block;max-width:100%;height:auto'>"
+        if chart_cid
+        else "<p>No instrument chart this week.</p>"
     )
     project_line = f" &middot; GitHub Project {escape(project)}" if project else ""
     multi_note = (
         "<p style='font-size:11px;color:#898781'>"
         + escape(MULTI_INSTRUMENT_NOTE)
         + f" Share uses {instrument_count} instrument-tickets as its denominator.</p>"
-        if instrument_count != len(items) else ""
+        if instrument_count != len(items)
+        else ""
     )
     member_note = (
         "<p style='font-size:11px;color:#898781'>A ticket with multiple GitHub Issue "
         f"assignees counts once for each person: {member_assignments} member assignments "
         f"from {len(items)} {ticket_noun}.</p>"
-        if member_assignments != len(items) else ""
+        if member_assignments != len(items)
+        else ""
     )
     return (
         "<html><head><meta http-equiv='Content-Type' "
@@ -334,11 +337,8 @@ def build_html(
         f"<tr>{summary}</tr></table>"
         f"{member_note}"
         "</td></tr>"
-        "<tr><td style='padding:16px 26px 0'><table role='presentation' width='100%' "
-        "cellspacing='0'><tr><td width='45%' valign='top'>"
-        f"<div style='font-size:12px;color:#52514e'>{instrument_title}</div>"
-        f"{image}</td><td valign='top'>{_member_split(items, instruments)}</td>"
-        "</tr></table></td></tr>"
+        "<tr><td style='padding:16px 26px 0'>"
+        f"{image}</td></tr>"
         "<tr><td style='padding:20px 26px 0'>"
         f"{_share_table('Instrument totals', displayed_instruments)}"
         f"{multi_note}"
@@ -368,8 +368,11 @@ def build_text(
     person reads when checking a draft before it goes anywhere."""
     total_matched = len(items) if matched is None else matched
     lines = [
-        subject(window, prefix=prefix), "",
-        f"Counted {len(items)} / {total_matched} tickets", EFFORT_NOTE, "",
+        subject(window, prefix=prefix),
+        "",
+        f"Counted {len(items)} / {total_matched} tickets",
+        EFFORT_NOTE,
+        "",
     ]
     if project:
         lines.insert(2, f"GitHub Project {project}")

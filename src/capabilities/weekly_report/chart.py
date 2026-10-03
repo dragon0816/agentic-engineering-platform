@@ -1,16 +1,10 @@
-"""The pie chart the weekly mail carries, drawn with the standard library.
+"""Weekly mail charts adapted from the pinned Workflow 11 source.
 
-The source drew a composite chart with matplotlib. Carrying matplotlib would mean carrying
-numpy, Pillow, fonttools, kiwisolver and contourpy into an offline bundle that
-is installed with `--no-index` on a company machine -- tens of megabytes of
-wheels, and the bundle has already had one install fail because a wheel's path
-was too long for Windows. A pie chart is arithmetic and a circle, so this
-draws one and writes the PNG itself: `zlib` and `struct` are both stdlib, and
-the bundle does not grow by a byte.
-
-Nothing here draws text. The source's direct slice labels and stacked bars
-remain a visible parity gap; the mail keeps the bar breakdown and all numeric
-shares as HTML so blocked images still leave usable figures.
+The original stdlib pie remains for existing callers. Workflow 11's mail uses
+``composite_for``: the source's headless Matplotlib pie-plus-member-bars
+layout, with the same data series and blue ramp. HTML totals remain readable
+when an email client blocks its inline image. Matplotlib is carried only in
+the optional ``weekly-mail`` extra and the Windows offline preview.
 """
 
 from __future__ import annotations
@@ -20,11 +14,20 @@ import math
 import struct
 import zlib
 from collections.abc import Mapping, Sequence
+from io import BytesIO
+
+from capabilities.weekly_report.contracts import ReportItem
 
 #: Source W2's seven-step blue ramp. The owner now requires all Production
-#: names to stay visible; extra names get distinct generated colours.
+#: names to stay visible; extra names get distinct blue-family colours.
 PALETTE: tuple[str, ...] = (
-    "#12325b", "#18447b", "#1f579d", "#256bc0", "#377fd8", "#5a95df", "#7cabe6",
+    "#12325b",
+    "#18447b",
+    "#1f579d",
+    "#256bc0",
+    "#377fd8",
+    "#5a95df",
+    "#7cabe6",
 )
 UNASSIGNED = "#898781"
 #: What sits behind the circle. Light like the mail body, because a
@@ -49,11 +52,11 @@ def colours_for(labels: Sequence[str]) -> dict[str, str]:
 
 
 def colour_for_index(index: int) -> str:
-    """Keep the source ramp for seven names, then avoid reusing a legend colour."""
+    """Keep the source ramp for seven names, then continue in one blue family."""
     if index < len(PALETTE):
         return PALETTE[index]
-    hue = ((index - len(PALETTE)) * 0.61803398875 + 0.08) % 1.0
-    red, green, blue = colorsys.hsv_to_rgb(hue, 0.58, 0.72)
+    lightness = 0.34 + ((index - len(PALETTE)) * 0.081) % 0.45
+    red, green, blue = colorsys.hls_to_rgb(0.58, lightness, 0.68)
     return f"#{round(red * 255):02x}{round(green * 255):02x}{round(blue * 255):02x}"
 
 
@@ -203,3 +206,122 @@ def pie_for(totals: Mapping[str, int], **options: int) -> bytes | None:
         tuple(count for _, count, _ in slices),
         **options,
     )
+
+
+def composite_for(items: Sequence[ReportItem], *, dpi: int = 160) -> bytes | None:
+    """Adapt the source W2's one-image pie and member split to GitHub fields.
+
+    ``effort`` owns the counts: Issue assignees and comma-split Project
+    Production feed both panels. Matplotlib is an optional mail-only runtime
+    dependency and uses an Agg canvas, so Outlook needs no display.
+    """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+    from matplotlib.ticker import MultipleLocator
+
+    from capabilities.weekly_report import effort
+
+    totals = effort.instrument_totals(items)
+    slices = slices_for(totals)
+    if not slices:
+        return None
+    members = effort.member_totals(items)
+    buckets = effort.buckets(items)
+    labels = [f"{name}\n{count} ({count / sum(totals.values()):.0%})" for name, count, _ in slices]
+    colours = [colour for _, _, colour in slices]
+    values = [count for _, count, _ in slices]
+
+    figure = Figure(figsize=(11.5, 4.6), facecolor=BACKGROUND)
+    FigureCanvasAgg(figure)
+    pie, bars = figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 1.15]})
+    pie.pie(
+        values,
+        labels=labels,
+        colors=colours,
+        startangle=90,
+        counterclock=False,
+        labeldistance=1.12,
+        wedgeprops={"linewidth": 2, "edgecolor": BACKGROUND},
+        textprops={"fontsize": 9, "color": "#52514e"},
+    )
+    instrument_tickets = sum(values)
+    ticket_count = len(items)
+    title = (
+        f"Tickets by instrument  ({instrument_tickets} total)"
+        if instrument_tickets == ticket_count
+        else f"Tickets by instrument  ({instrument_tickets} instrument-tickets "
+        f"from {ticket_count} tickets)"
+    )
+    pie.set_title(title, fontsize=11, color="#0b0b0b", pad=16)
+    pie.axis("equal")
+
+    names = list(members)
+    positions = list(range(len(names)))
+    left = [0.0] * len(names)
+    for name, _, colour in slices:
+        widths = [len(buckets.get(member, {}).get(name, ())) for member in names]
+        if not any(widths):
+            continue
+        bars.barh(
+            positions,
+            widths,
+            left=left,
+            height=0.62,
+            color=colour,
+            edgecolor=BACKGROUND,
+            linewidth=2,
+            label=name,
+        )
+        for position, width in enumerate(widths):
+            if width >= 2:
+                bars.text(
+                    left[position] + width / 2,
+                    position,
+                    str(width),
+                    ha="center",
+                    va="center",
+                    fontsize=8,
+                    color="white" if colour in PALETTE[:4] else "#0b0b0b",
+                )
+        left = [start + width for start, width in zip(left, widths, strict=True)]
+    bars.set_yticks(positions)
+    bars.set_yticklabels(names, fontsize=9, color="#52514e")
+    bars.invert_yaxis()
+    bars.set_xlabel(
+        "tickets" if instrument_tickets == ticket_count else "instrument-tickets",
+        fontsize=9,
+        color="#898781",
+    )
+    bars.xaxis.set_major_locator(MultipleLocator(1))
+    bars.tick_params(axis="x", labelsize=8, colors="#898781", length=0)
+    bars.tick_params(axis="y", length=0)
+    for spine in ("top", "right", "left"):
+        bars.spines[spine].set_visible(False)
+    bars.spines["bottom"].set_color("#e1e0d9")
+    bars.xaxis.grid(True, color="#e1e0d9", linewidth=0.8)
+    bars.set_axisbelow(True)
+    bars.set_title("Split per team member", fontsize=11, color="#0b0b0b", pad=16)
+    handles, legend_labels = bars.get_legend_handles_labels()
+    columns = max(1, min(len(handles), 6))
+    rows = -(-len(handles) // columns)
+    order = [
+        row * columns + col
+        for col in range(columns)
+        for row in range(rows)
+        if row * columns + col < len(handles)
+    ]
+    bars.legend(
+        [handles[index] for index in order],
+        [legend_labels[index] for index in order],
+        fontsize=8,
+        frameon=False,
+        ncol=columns,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.13),
+        labelcolor="#52514e",
+    )
+    figure.tight_layout(rect=(0, 0.02, 1, 0.98))
+    output = BytesIO()
+    figure.savefig(output, format="png", dpi=dpi, facecolor=BACKGROUND, bbox_inches="tight")
+    figure.clear()
+    return output.getvalue()

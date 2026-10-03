@@ -218,7 +218,7 @@ def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
         key=key,
         summary=summary,
         status=_field(fields, settings.status_fields),
-        assignee=_field(fields, settings.assignee_fields),
+        assignee=", ".join(row.issue_assignees),
         issue_assignees=row.issue_assignees,
         company=_field(fields, settings.company_fields),
         sales=_field(fields, settings.sales_fields),
@@ -453,11 +453,10 @@ class MailHandler:
             required=self.settings.mail_requires_activity,
         )
         counted = activity.counted
-        totals = effort.instrument_totals(counted)
         # The picture is written beside the draft rather than into it: an
         # attachment is a file on disk, and one this run wrote is one it can
         # name in its evidence.
-        picture = chart.pie_for(totals)
+        picture = chart.composite_for(counted)
         images, cid = outlook_draft.images_for(picture, self._chart_root / window.week)
         draft = MailDraft(
             subject=mail.subject(window, prefix=self.settings.mail_subject_prefix),
@@ -491,8 +490,11 @@ class MailHandler:
             activity_required=activity.required,
             chart_path=images[0].path if images else "",
             preview=mail.build_text(
-                window, counted, matched=len(issues),
-                project=self.settings.project, prefix=self.settings.mail_subject_prefix,
+                window,
+                counted,
+                matched=len(issues),
+                project=self.settings.project,
+                prefix=self.settings.mail_subject_prefix,
             ),
         )
 

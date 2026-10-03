@@ -2742,9 +2742,14 @@ The owner's existing Outlook draft titled
 `SDE Weekly Report 2026_40W (2026-09-28 - 2026-10-04)` is an additional
 visible-output fixture. The AEP version now preserves the requested subject,
 recipients, activity count, member/instrument/account figures and new Excel
-format rules, but its pie-plus-HTML member split is still visually different
-from the source's single composite chart. Do not claim full mail or workbook
-parity until a source comparison and a saved workbook-copy check pass.
+format rules. Its mail image now adapts the source's composite pie and stacked
+member bars using the same Issue-assignee and comma-split Project Production
+series as the HTML totals. The workbook Assignee cell uses the GitHub Issue
+assignees, while the Key hyperlink uses that Issue URL; an empty Issue
+assignee connection is not replaced by the Project's free-text field. The
+source's `Other` bucket is intentionally omitted at the owner's request, so
+each Production name remains visible. Do not claim full mail or workbook
+parity until a live source-draft comparison and saved workbook-copy check pass.
 
 # Local Agent schedule foundation (2026-10-03)
 

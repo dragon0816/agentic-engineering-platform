@@ -4,7 +4,45 @@ Date: 2026-10-03 (Asia/Taipei). Branch: `main`. No push or TypeSafe request
 was made in this checkpoint. `docs/TASKS.md` remains the cumulative progress
 record; `docs/DECISIONS.md` holds the architecture decisions.
 
-## Latest checkpoint: local Laya comparison preparation
+## Latest checkpoint: Workflow 11 source-style chart and Issue identity
+
+- The owner asked to continue development after the local Laya checkpoint
+  download was denied by Zscaler. The next independent slice uses the pinned
+  `rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43d`
+  Workflow 11 mail renderer as the baseline; see
+  `docs/superpowers/specs/2026-10-03-workflow11-source-chart-parity.md`.
+- `weekly_report.chart.composite_for` now draws the original one-image
+  instrument pie and stacked bars per member using AEP's existing counted
+  GitHub Issue assignees and comma-split Project Production. The original
+  seven blue shades are retained; additional instruments remain blue and are
+  not folded into `Other`. The mail keeps its HTML totals when images are
+  blocked. A rendered sample was inspected at ignored
+  `.scratch/workflow11-composite-preview-final.png` (integer x-axis ticks).
+- The workbook Assignee value now joins the Issue's assignees instead of
+  preferring the Project's free-text `SDE Assignee`. Empty Issue connections
+  stay empty/Unassigned; Key hyperlinks retain GitHub Issue URLs. Existing
+  project-read contract already refuses omitted or truncated Issue assignee
+  connections.
+- Matplotlib, NumPy and their transitive wheels are an optional `weekly-mail`
+  extra carried by the Windows offline preview. A real wheel and offline
+  bundle were built in ignored `.scratch/wf11-wheel` and
+  `.scratch/wf11-preview-bundle-closed`; bundle revision is the pre-commit
+  HEAD. A real offline installation into ignored `.scratch/wf11-offline-env`
+  succeeded, and Matplotlib, NumPy, tzdata, pywin32 and openpyxl imported with
+  `pip check` clean. The first dry-run caught a pre-existing missing `tzdata`
+  wheel in the preview manifest; it is now required and downloaded by CI.
+  Focused tests: 49 passed; the amended bundle tests: 8 passed. Ruff, strict
+  mypy (338 files), and `pip check` passed. The full non-browser suite passed:
+  1,733 passed, 5 platform skips, 26 browser deselections. Its first run hit
+  an unrelated intermittent Windows Knowledge `os.replace` permission error;
+  that test passed alone and the clean full rerun passed.
+- Live parity remains open: compare a newly saved Outlook draft with the
+  owner's reference and inspect an isolated copy of the real workbook. This
+  shell cannot jointly read the company GitHub Project and Issue content, so
+  no live-source assertion has been made. Do not send the draft or mutate the
+  production workbook just to close this test.
+
+## Previous checkpoint: local Laya comparison preparation
 
 - The owner selected `NandhaKishorM/laya`, not the same-named notification
   project, and approved an offline decision comparison. Added
@@ -31,13 +69,13 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
   Extension staging `os.replace` permission failure; that test passed alone
   and in the final complete rerun. `python -m build --wheel --no-isolation`
   passed with a unique output directory; `git diff --check` passed.
-- Workflow 11 remains separate unfinished work: the owner wants original
+- At the previous checkpoint, Workflow 11 remained separate unfinished work: the owner wanted original
   `rs_workflow_system` statistics, blue chart, GitHub Issue key hyperlinks and
   Issue Assignees. Its source snapshot is pinned at
   `896046e8fe2170d21f9213e56e5ce2f93c05ba43d`; use original scripts as
   the baseline. The current code already pulls Issue URL and assignees for
-  mail statistics, but workbook Assignee still uses the Project's `SDE
-  Assignee` field. This shell's GitHub tokens cannot jointly read the Project
+  mail statistics, but workbook Assignee still used the Project's `SDE
+  Assignee` field. The latest checkpoint above changes that mapping. This shell's GitHub tokens cannot jointly read the Project
   and Issue content, so no live parity claim is justified. Do not request the
   owner's LiteLLM key again; this Laya slice does not use it.
 
@@ -113,11 +151,13 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
 
 ## Next action
 
-Run the documented Laya benchmark on a computer with sufficient free RAM,
-then compare its per-type results with the unchanged NONE baseline. In parallel,
-refresh the installed preview from the verified offline wheel and retest the
-exact Knowledge market question through the running Web process; that post-fix
-live answer is still unverified. Do not ask the owner to re-enter the LiteLLM
-key; inspect the environment of the process doing the test. Workflow 11 visual
-parity, Workflow 10/13 source parity and other open work remain in
+Commit and review the Workflow 11 chart/identity slice, then refresh a test
+Agent preview from the verified offline wheel and compare a new unsent Outlook
+draft and workbook copy with the owner's source reference. Do not claim live
+parity from synthetic tests alone. Run the documented Laya benchmark on a
+computer with sufficient free RAM and permitted model access, then compare
+its per-type results with the unchanged NONE baseline. The exact Knowledge
+market question's post-fix live answer remains unverified. Do not ask the
+owner to re-enter the LiteLLM key; inspect the environment of the process
+doing the test. Workflow 10/13 source parity and other open work remain in
 `docs/TASKS.md`.

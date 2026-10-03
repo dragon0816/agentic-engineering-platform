@@ -525,3 +525,22 @@ the test here and measuring the 421-million-parameter checkpoint on another
 computer avoids a misleading latency result. Treating synthetic-case accuracy
 as production authorization or replacing the deterministic baseline was
 rejected.
+
+## 2026-10-03 — Restore Workflow 11's source-style composite mail chart
+
+Decision: Adapt the pinned `rs_workflow_system` Workflow 11 renderer at the
+mail-chart boundary. Generate its instrument pie and stacked per-member bars
+as one headless Matplotlib image from AEP's tested Issue-assignee and Project
+Production series. Ship the plotting stack in an optional `weekly-mail` extra
+and the Windows offline preview bundle. Continue all Production names through
+the sequential blue palette instead of folding minor names into `Other`, as
+the owner requested. Use GitHub Issue assignees for both mail statistics and
+the workbook Assignee cell, and the Issue URL for the workbook Key hyperlink.
+
+Reason: The AEP-only stdlib pie plus HTML bars was valid data but visibly
+different from the owner's already-tuned original draft. A thin renderer
+adapter preserves the source's presentation without replacing AEP's governed
+Outlook draft and Excel contracts. Keeping the plotting dependency optional
+limits its footprint to hosts that generate this mail. Copying the entire
+source job or rewriting its chart from screenshots would either bypass the
+Bridge boundary or lose the original as a regression baseline.

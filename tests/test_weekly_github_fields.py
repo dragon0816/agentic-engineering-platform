@@ -12,8 +12,9 @@ from pathlib import Path
 import pytest
 
 from capabilities.weekly_report import chart, effort, mail
-from capabilities.weekly_report.contracts import ReportingWindow, WeeklyReportSettings
+from capabilities.weekly_report.contracts import ReportingWindow, SheetState, WeeklyReportSettings
 from capabilities.weekly_report.handlers import _as_item
+from capabilities.weekly_report.plan import build_plan
 from integrations.github_project import GitHubError, _item, _query_for
 
 SETTINGS = WeeklyReportSettings(workbook_path=str(Path.cwd() / "weekly.xlsx"))
@@ -49,7 +50,7 @@ def test_project_query_and_mapping_keep_issue_assignees_separate_from_project_te
     assert row.issue_assignees == ("alice", "bob")
     assert row.fields["SDE Assignee"] == "Project-only person"
     report = _as_item(row, SETTINGS)
-    assert report.assignee == "Project-only person"  # Workbook still owns this field.
+    assert report.assignee == "alice, bob"
     assert report.issue_assignees == ("alice", "bob")
     assert report.instrument == "CMP180, CMX500"
     assert effort.member_totals((report,)) == {"alice": 1, "bob": 1}
@@ -58,6 +59,23 @@ def test_project_query_and_mapping_keep_issue_assignees_separate_from_project_te
         "alice": {"CMP180": ["GTM-42"], "CMX500": ["GTM-42"]},
         "bob": {"CMP180": ["GTM-42"], "CMX500": ["GTM-42"]},
     }
+    window = ReportingWindow(
+        week="2026_40W",
+        since=dt.date(2026, 9, 28),
+        until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28),
+        stamp_date=dt.date(2026, 10, 4),
+    )
+    sheet = SheetState(
+        headers=("Key", "Summary", "Company", "Status", "Assignee", "Sales", "Comments"),
+        existing={"GTM-42": ""},
+        scratch_present=True,
+        source_sheet="weekly report temp",
+        digest="0" * 64,
+    )
+    planned = build_plan(SETTINGS, window, (report,), sheet)
+    assert planned.rows[0].assignee == "alice, bob"
+    assert planned.rows[0].url == "https://github.com/team/repo/issues/42"
 
 
 def test_empty_issue_assignees_and_production_are_unassigned_not_guessed() -> None:
@@ -67,16 +85,14 @@ def test_empty_issue_assignees_and_production_are_unassigned_not_guessed() -> No
     content["assignees"] = {"pageInfo": {"hasNextPage": False}, "nodes": []}
     report = _as_item(_item(node), SETTINGS)
     assert report.summary == "CMX500 weekly work"
-    assert report.assignee == "Project-only person"
+    assert report.assignee == ""
     assert report.issue_assignees == ()
     assert effort.member_totals((report,)) == {"Unassigned": 1}
     assert effort.instrument_totals((report,)) == {"Unassigned": 1}
 
 
 def test_production_splits_commas_but_keeps_a_slash_inside_one_name() -> None:
-    report = _as_item(
-        _item(project_node(production="CMP180, CMX500，WMT2.0/NR")), SETTINGS
-    )
+    report = _as_item(_item(project_node(production="CMP180, CMX500，WMT2.0/NR")), SETTINGS)
     assert effort.instruments_for(report) == ["CMP180", "CMX500", "WMT2.0/NR"]
 
 
@@ -101,8 +117,11 @@ def test_missing_assignee_connection_is_not_mistaken_for_unassigned() -> None:
 def test_mail_shows_every_production_name_and_explains_shared_issue_count() -> None:
     report = _as_item(_item(project_node()), SETTINGS)
     window = ReportingWindow(
-        week="2026_40W", since=dt.date(2026, 9, 28), until=dt.date(2026, 10, 4),
-        comment_since=dt.date(2026, 9, 28), stamp_date=dt.date(2026, 10, 4),
+        week="2026_40W",
+        since=dt.date(2026, 9, 28),
+        until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28),
+        stamp_date=dt.date(2026, 10, 4),
     )
     html = mail.build_html(window, (report,), chart_cid="chart")
     assert "2 member assignments from 1 ticket" in html
@@ -110,5 +129,6 @@ def test_mail_shows_every_production_name_and_explains_shared_issue_count() -> N
     assert "CMP180" in html and "CMX500" in html
     assert "Other (" not in html
     assert [name for name, _, _ in chart.slices_for(effort.instrument_totals((report,)))] == [
-        "CMP180", "CMX500"
+        "CMP180",
+        "CMX500",
     ]

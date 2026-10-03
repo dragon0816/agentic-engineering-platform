@@ -40,6 +40,7 @@ REQUIRED_DEPENDENCIES = (
     "annotated_types-",
     "pydantic-",
     "pydantic_core-",
+    "tzdata-",
     "typing_extensions-",
     "typing_inspection-",
     # The `excel` extra: reading the weekly workbook without Excel.
@@ -49,9 +50,21 @@ REQUIRED_DEPENDENCIES = (
     "pypdf-",
     # The `windows` extra: writing it through Excel.
     "pywin32-",
+    # The `weekly-mail` extra: the source W2's composite chart and its wheels.
+    "matplotlib-",
+    "numpy-",
+    "pillow-",
+    "contourpy-",
+    "cycler-",
+    "fonttools-",
+    "kiwisolver-",
+    "packaging-",
+    "pyparsing-",
+    "python_dateutil-",
+    "six-",
 )
 #: What `install.ps1` installs the platform wheel with.
-BUNDLED_EXTRAS = ("excel", "windows")
+BUNDLED_EXTRAS = ("excel", "windows", "weekly-mail")
 #: These operator guides are part of the installable product.  A release that
 #: cannot tell its tester how to install and validate it is not a usable bundle.
 REQUIRED_OPERATOR_GUIDES = ("START-HERE.md", "README.md")

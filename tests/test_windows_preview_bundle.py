@@ -24,12 +24,24 @@ BUNDLED_WHEELS = (
     "annotated_types-0.1-py3-none-any.whl",
     "pydantic-2.0-py3-none-any.whl",
     "pydantic_core-2.0-cp312-cp312-win_amd64.whl",
+    "tzdata-2026.1-py2.py3-none-any.whl",
     "typing_extensions-4.0-py3-none-any.whl",
     "typing_inspection-0.1-py3-none-any.whl",
     "openpyxl-3.1.5-py2.py3-none-any.whl",
     "et_xmlfile-2.0.0-py3-none-any.whl",
     "pypdf-6.0.0-py3-none-any.whl",
     "pywin32-312-cp312-cp312-win_amd64.whl",
+    "matplotlib-3.11.2-cp312-cp312-win_amd64.whl",
+    "numpy-1.26.4-cp312-cp312-win_amd64.whl",
+    "pillow-11.3.0-cp312-cp312-win_amd64.whl",
+    "contourpy-1.3.3-cp312-cp312-win_amd64.whl",
+    "cycler-0.12.1-py3-none-any.whl",
+    "fonttools-4.60.0-cp312-cp312-win_amd64.whl",
+    "kiwisolver-1.4.9-cp312-cp312-win_amd64.whl",
+    "packaging-25.0-py3-none-any.whl",
+    "pyparsing-3.2.5-py3-none-any.whl",
+    "python_dateutil-2.9.0-py2.py3-none-any.whl",
+    "six-1.17.0-py2.py3-none-any.whl",
 )
 
 
@@ -139,7 +151,15 @@ def test_a_bundle_missing_a_wheel_its_extras_need_is_refused(tmp_path: Path) -> 
     repo = Path(__file__).resolve().parents[1]
     platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
     platform_wheel.write_bytes(b"platform-wheel")
-    for omitted in ("openpyxl-", "pywin32-", "et_xmlfile-", "pydantic_core-"):
+    for omitted in (
+        "openpyxl-",
+        "pywin32-",
+        "et_xmlfile-",
+        "pydantic_core-",
+        "tzdata-",
+        "matplotlib-",
+        "numpy-",
+    ):
         with pytest.raises(ValueError, match="incomplete"):
             build(
                 repo=repo,

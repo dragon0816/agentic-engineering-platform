@@ -430,10 +430,10 @@ What the mail says, and what it counts:
 - **A ticket naming several instruments counts once under each**, so the
   instrument totals add up to more than the number of tickets. That is
   deliberate and the mail says so rather than hiding it.
-- The pie chart is drawn by this package itself, with no charting library.
-  The draft also shows a per-member instrument split and Instrument/Account
-  totals with ticket counts and shares, as selectable HTML text. The tables
-  preserve every number if the reader's mail client blocks images.
+- The draft embeds one source-style pie and per-member stacked-bar image,
+  drawn headlessly with the bundled `weekly-mail` plotting dependency.
+  Instrument/Account totals remain selectable HTML text, so the figures
+  survive when the reader's mail client blocks images.
 
 Who it is addressed to is configuration, and empty is the safer default — the
 draft then has no recipients and the person who opens it fills them in:

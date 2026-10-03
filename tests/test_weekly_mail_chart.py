@@ -14,6 +14,7 @@ import zlib
 import pytest
 
 from capabilities.weekly_report import chart
+from capabilities.weekly_report.contracts import ReportItem
 
 
 def decoded(png: bytes) -> tuple[int, int, list[list[tuple[int, int, int]]]]:
@@ -149,7 +150,8 @@ def test_all_production_names_survive_past_seven_and_unassigned_stays_last() -> 
     totals["Unassigned"] = 3
     slices = chart.slices_for(totals)
     assert [label for label, _, _ in slices] == [
-        *(f"Model-{index}" for index in range(8)), "Unassigned"
+        *(f"Model-{index}" for index in range(8)),
+        "Unassigned",
     ]
     assert [colour for _, _, colour in slices[:7]] == list(chart.PALETTE)
     assert slices[-1][2] == chart.UNASSIGNED
@@ -159,9 +161,7 @@ def test_all_production_names_survive_past_seven_and_unassigned_stays_last() -> 
 
 def test_small_production_names_are_never_folded_by_share() -> None:
     slices = chart.slices_for({"CMP180": 100, "CMX500": 2, "WMT": 1})
-    assert [entry[:2] for entry in slices] == [
-        ("CMP180", 100), ("CMX500", 2), ("WMT", 1)
-    ]
+    assert [entry[:2] for entry in slices] == [("CMP180", 100), ("CMX500", 2), ("WMT", 1)]
 
 
 def test_the_mailed_pie_uses_the_same_complete_series_as_its_totals() -> None:
@@ -170,3 +170,24 @@ def test_the_mailed_pie_uses_the_same_complete_series_as_its_totals() -> None:
     assert picture is not None
     assert at(picture, 0.6, 0.25) == rgb(chart.PALETTE[0])
     assert chart.slices_for(totals)[-1] == ("Model-7", 10, chart.colour_for_index(7))
+
+
+def test_source_style_composite_has_two_panels_for_issue_assignees_and_production() -> None:
+    items = (
+        ReportItem(key="GTM-1", instrument="CMP180, CMX500", issue_assignees=("alice", "bob")),
+        ReportItem(key="GTM-2", instrument="CMP180", issue_assignees=("alice",)),
+    )
+    picture = chart.composite_for(items)
+    assert picture is not None and picture.startswith(b"\x89PNG\r\n\x1a\n")
+    width, height = struct.unpack(">II", picture[16:24])
+    assert width > height > 400
+    assert [name for name, _, _ in chart.slices_for({"CMP180": 2, "CMX500": 1})] == [
+        "CMP180",
+        "CMX500",
+    ]
+
+
+def test_extended_palette_stays_in_the_source_blue_family() -> None:
+    colours = [chart.colour_for_index(index) for index in range(11)]
+    assert len(set(colours)) == 11
+    assert all(rgb(colour)[2] > rgb(colour)[0] for colour in colours)

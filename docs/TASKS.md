@@ -649,6 +649,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Complete Workflow 11 visual draft parity against the owner's reference
   Outlook draft, and evaluate whether duplicate test drafts created during
   diagnostics should be removed. Draft creation does not grant send permission.
+- [x] Adapt Workflow 11's pinned source composite chart to the GitHub-backed
+  weekly mail: one headless blue-family PNG now contains the instrument pie
+  and stacked bars per Issue assignee. Keep all comma-split Production values,
+  with no `Other` bucket. Map the Excel Assignee cell from the GitHub Issue's
+  `assignees` connection, retain its Issue URL for the Key hyperlink, and
+  package the optional plotting stack in the Windows offline preview. Synthetic
+  source-shape and bundle regressions cover this slice; the open visual-draft
+  task above still requires a real Outlook/source comparison.
 - [ ] After the owner grants Browse permission to Jira `MRT1CV`, run Workflow
   7's exact read-only preview with the already valid User `AEP_JIRA_TOKEN`,
   compare it with the pinned source fixtures, then plan Excel parity.

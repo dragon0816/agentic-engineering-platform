@@ -31,6 +31,8 @@ class WeeklyReportSettings(Contract):
     # columns, and that is not a code change. The defaults are the columns
     # the board carried when it was read on 2026-09-23.
     status_fields: tuple[Text, ...] = ("Status", "GTM Status")
+    # Kept to read older Host settings. GitHub Issue assignees now drive the
+    # workbook and mail; this Project free-text field cannot override them.
     assignee_fields: tuple[Text, ...] = ("SDE Assignee", "Assignees")
     company_fields: tuple[Text, ...] = ("Company",)
     sales_fields: tuple[Text, ...] = ("Sales",)
