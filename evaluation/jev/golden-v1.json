@@ -1,0 +1,21 @@
+[
+  {"case_id":"intent-explain","decision_type":"intent_classification","classification":"PUBLIC","request":"Explain what a test fixture is.","candidates":["answer","knowledge_query","workflow_request","needs_input"],"expected":["answer"]},
+  {"case_id":"intent-wiki","decision_type":"intent_classification","classification":"PUBLIC","request":"Search the fictional public wiki for the sensor setup guide.","candidates":["answer","knowledge_query","workflow_request","needs_input"],"expected":["knowledge_query"]},
+  {"case_id":"intent-workflow","decision_type":"intent_classification","classification":"PUBLIC","request":"Prepare a preview of the installed sample report workflow.","candidates":["answer","knowledge_query","workflow_request","needs_input"],"expected":["workflow_request"]},
+  {"case_id":"intent-missing","decision_type":"intent_classification","classification":"PUBLIC","request":"Run the report for that week, but I have not said which week.","candidates":["answer","knowledge_query","workflow_request","needs_input"],"expected":["needs_input"]},
+
+  {"case_id":"skill-file","decision_type":"skill_selection","classification":"PUBLIC","request":"Read the local public example.txt file.","candidates":["read-file","wiki-query","report-preview"],"expected":["read-file"]},
+  {"case_id":"skill-wiki","decision_type":"skill_selection","classification":"PUBLIC","request":"Find the sample sensor note in the public wiki.","candidates":["read-file","wiki-query","report-preview"],"expected":["wiki-query"]},
+  {"case_id":"skill-report","decision_type":"skill_selection","classification":"PUBLIC","request":"Preview the sample weekly report.","candidates":["read-file","wiki-query","report-preview"],"expected":["report-preview"]},
+  {"case_id":"skill-broad","decision_type":"skill_selection","classification":"PUBLIC","request":"What installed sample tools are available?","candidates":["read-file","wiki-query","report-preview"],"expected":["read-file","wiki-query","report-preview"]},
+
+  {"case_id":"retrieval-raw","decision_type":"retrieval_routing","classification":"PUBLIC","request":"Show the exact line in the source note that states the sensor voltage.","candidates":["raw","wiki","hybrid","needs_input"],"expected":["raw"]},
+  {"case_id":"retrieval-wiki","decision_type":"retrieval_routing","classification":"PUBLIC","request":"Summarize the curated public sensor setup procedure.","candidates":["raw","wiki","hybrid","needs_input"],"expected":["wiki"]},
+  {"case_id":"retrieval-hybrid","decision_type":"retrieval_routing","classification":"PUBLIC","request":"Compare the curated setup steps with the original source note.","candidates":["raw","wiki","hybrid","needs_input"],"expected":["hybrid"]},
+  {"case_id":"retrieval-unknown","decision_type":"retrieval_routing","classification":"PUBLIC","request":"Use the document I mentioned earlier, but no document was supplied.","candidates":["raw","wiki","hybrid","needs_input"],"expected":["needs_input"]},
+
+  {"case_id":"failure-permission","decision_type":"failure_classification","classification":"PUBLIC","request":"A sample read was refused with permission_denied before the handler ran.","candidates":["permission_denied","missing_input","transient","invalid_output"],"expected":["permission_denied"]},
+  {"case_id":"failure-input","decision_type":"failure_classification","classification":"PUBLIC","request":"A required sample report date was omitted and the contract rejected the request.","candidates":["permission_denied","missing_input","transient","invalid_output"],"expected":["missing_input"]},
+  {"case_id":"failure-transient","decision_type":"failure_classification","classification":"PUBLIC","request":"The mock service timed out once and then recovered on retry.","candidates":["permission_denied","missing_input","transient","invalid_output"],"expected":["transient"]},
+  {"case_id":"failure-output","decision_type":"failure_classification","classification":"PUBLIC","request":"The sample handler returned a malformed result that failed schema validation.","candidates":["permission_denied","missing_input","transient","invalid_output"],"expected":["invalid_output"]}
+]
