@@ -22,6 +22,7 @@ from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 from host_runtime.cli import main
 from host_runtime.contracts import (
     CompanyHostConfiguration,
+    KnowledgeHostBinding,
     ModelBinding,
     ModelSettingsUpdateRequest,
 )
@@ -144,6 +145,20 @@ def test_installed_knowledge_without_a_model_does_not_block_setup_or_workflows(
     with build_runtime(config, layout=layout) as runtime:
         assert runtime.agent.gateway.router.model is None
         assert runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity) is None
+
+
+def test_each_knowledge_binding_has_owner_editable_privacy(tmp_path: Path) -> None:
+    binding = {
+        "asset": {"namespace": "engineering", "name": "rs-knowledge", "version": "1.0.0"},
+        "vault_root": str(tmp_path / "rs-k"),
+    }
+    private = KnowledgeHostBinding.model_validate(binding)
+    assert private.privacy == "private"
+    public = KnowledgeHostBinding.model_validate({**binding, "privacy": "public"})
+    assert public.privacy == "public"
+    assert KnowledgeHostBinding.model_validate_json(public.model_dump_json()) == public
+    with pytest.raises(ValidationError):
+        KnowledgeHostBinding.model_validate({**binding, "privacy": "internal"})
 
 
 def test_a_configured_gateway_reaches_the_router(

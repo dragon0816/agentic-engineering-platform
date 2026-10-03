@@ -386,6 +386,8 @@ class KnowledgeHostBinding(Contract):
 
     asset: AssetIdentity
     vault_root: Text
+    # The owner sets this for each Vault. Existing bindings remain private.
+    privacy: Literal["private", "public"] = "private"
 
     @field_validator("vault_root")
     @classmethod

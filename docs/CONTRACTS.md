@@ -1798,6 +1798,11 @@ Knowledge discovery is the intersection of validated local manifests and exact
 host bindings; it exposes identity, domain, owner and visibility but never the
 local `vault_root`.
 
+Each exact `KnowledgeHostBinding` also accepts the owner-editable
+`privacy: "private" | "public"` setting; omission means private. It labels
+that Vault independently of other bindings. It does not change the Knowledge
+capability grant or the content of a conversation.
+
 ## Personal Agent Web model settings (Productization 4, slices 1–2)
 
 `ModelSettingsUpdateRequest` is the explicit local-operator write boundary for

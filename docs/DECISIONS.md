@@ -448,3 +448,19 @@ named local sources are deterministic input, so resolving them before intent
 selection removes that failure without granting new capability authority or
 sending RS Knowledge to the external JEV service. Arbitrary fuzzy source
 matching and a second ungoverned Vault reader were rejected.
+
+## 2026-10-03 — Let the owner set privacy per Knowledge Vault
+
+Decision: Each exact Host Knowledge binding has one editable `privacy` field,
+either `private` (the default for old configurations) or `public`. The owner
+declared the complete current RS_Knowledge Vault public and its installed
+binding is set to `public`. That supersedes the earlier RS_Knowledge-specific
+prohibition on TypeSafe use. The owner may change this setting for any Vault
+in `host.json`; no separate classifier identity or multi-level label is
+required for this setting.
+
+Reason: The owner decides which Vaults are private or public. A small per-Vault
+setting expresses that decision without treating all local Knowledge as one
+class or adding an approval workflow to edit it. The existing TypeSafe JEV
+adapter is a decision selector, not a Knowledge answer model, so this privacy
+setting alone does not create a new JEV query path.

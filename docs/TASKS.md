@@ -695,8 +695,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Before comparing TypeSafe JEV, add a source-backed evaluation for the
   market-to-product inference quality and explicitly distinguish retrieved
   technical capabilities from a verified market or standards fit. Do not send
-  RS_Knowledge or its conversation history to TypeSafe; use only the pinned
-  PUBLIC synthetic JEV cases for the first comparison.
+  private Vaults to TypeSafe. The owner has declared the complete RS_Knowledge
+  Vault public, so it may be included in a later public Knowledge evaluation;
+  the current TypeSafe adapter only evaluates decision selection, not answer
+  generation. Use the pinned PUBLIC synthetic cases for its first comparison.
+- [x] Give each Host Knowledge Vault an owner-editable `privacy` setting:
+  `private` by default or `public`. Record the owner's current RS_Knowledge
+  selection as `public` in the installed Host config. Do not impose a separate
+  classifier field or infer the privacy of another Vault from this one.
 - [x] Pin original `rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43d`
   and migrate Workflow 10's typed local preview and staged temp-sheet apply.
   The Agent/Bridge route distinguishes `chipset-report.read` from an approved

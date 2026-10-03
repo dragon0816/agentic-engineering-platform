@@ -41,9 +41,23 @@ The Host administrator still needs to approve the exact TypeSafe endpoint and
 PUBLIC-only egress. No current Agent Gateway session provides a complete
 PUBLIC classification for its system/persona text, prior turns, and installed
 tool descriptions, so the adapter remains unwired to live Agent chat. The
-existing LiteLLM approval does not cover TypeSafe. `UNCLASSIFIED` and
-RS Knowledge content must stay out of TypeSafe. A separate golden benchmark
-and acceptance thresholds remain outstanding.
+existing LiteLLM approval does not cover TypeSafe. On 2026-10-03 the owner
+declared the complete `RS_Knowledge` Vault public. The Host records this with
+`privacy: "public"` on that Vault's binding; each Vault has an independent
+`private` or `public` setting chosen by the owner. This removes the earlier
+source-specific prohibition for RS_Knowledge. A separate golden benchmark and
+acceptance thresholds remain outstanding.
+
+The owner changes one Vault at a time in
+`%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json` under its
+`knowledge` entry:
+
+```json
+"privacy": "public"
+```
+
+The other accepted value is `"private"`; omitted means private. Restart the
+Agent Host after changing the file. This setting contains no credential.
 
 ## Smallest safe next slice
 
