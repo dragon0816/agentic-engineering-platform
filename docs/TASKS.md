@@ -687,6 +687,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   prove semantic entailment; a live post-fix answer still paraphrased one
   interface capability more broadly than the cited excerpt supports. Keep
   the broad mapping question open until claims and Raw citations are checked.
+  The pinned three-source audit now verifies source bytes and retrieval, and
+  flags a narrow unsupported product-to-800G/1.6T assertion. A live Agent Web
+  answer cited the expected Raw sources but incorrectly joined them into
+  market-fit claims; the diagnostic marked two assertions unsupported. The
+  Query Engine now prompts for a clear distinction and retries/refuses that
+  narrow cross-source claim. Its post-fix live behavior still needs checking
+  after the running preview is refreshed; the standalone source-runtime
+  process lacks the LiteLLM key.
 - [x] Make explicitly named RS_Knowledge questions work in Agent Web Ask.
   An unambiguous installed Knowledge name such as `RS_Knowledge` now dispatches
   the original question to the exact Bridge Knowledge capability without a
@@ -699,13 +707,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   failure. The source excerpts support the named interface and option facts;
   any broader claim that the products satisfy a particular 800G/1.6T market
   requirement remains an inference, not established by these excerpts.
-- [ ] Before comparing TypeSafe JEV, add a source-backed evaluation for the
-  market-to-product inference quality and explicitly distinguish retrieved
-  technical capabilities from a verified market or standards fit. Do not send
-  private Vaults to TypeSafe. The owner has declared the complete RS_Knowledge
-  Vault public, so it may be included in a later public Knowledge evaluation;
-  the current TypeSafe adapter only evaluates decision selection, not answer
-  generation. Use the pinned PUBLIC synthetic cases for its first comparison.
+- [x] Add a source-backed evaluation before TypeSafe comparison. The pinned
+  public RS_Knowledge Raw files and automated diagnostic distinguish named
+  interface/RF capabilities from unverified 800G/1.6T market fit; see
+  `evaluation/knowledge/README.md`. This is a review aid, not a general
+  semantic entailment proof or a JEV Knowledge-answer path.
+- [ ] Compare TypeSafe JEV's Skill selection against the pinned PUBLIC synthetic
+  cases and unchanged NONE baseline. NONE rerun: 4/4 coverage, 1/4 exact match;
+  the other three decision types have no baseline. No TypeSafe request has
+  been sent: the owner chose offline-only verification for this round, and
+  `AEP_JEV_API_KEY` is unavailable on this Host. JEV remains disconnected from
+  Agent Web and must not receive private Vaults.
 - [x] Give each Host Knowledge Vault an owner-editable `privacy` setting:
   `private` by default or `public`. Record the owner's current RS_Knowledge
   selection as `public` in the installed Host config. Do not impose a separate

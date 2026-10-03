@@ -37,6 +37,21 @@ _OPTION_TOKEN = re.compile(
     r"(?<![A-Z0-9])(?:[A-Z0-9]+-)?([BK]\d{1,4}[A-Z]{0,2})(?![A-Z0-9])", re.IGNORECASE
 )
 _ACRONYM = re.compile(r"(?<![A-Za-z0-9])[A-Z]{2,8}(?![A-Za-z0-9])")
+_PRODUCT_ID = re.compile(
+    r"(?<![A-Z0-9])(?:[A-Z]{2,}[A-Z0-9]*-)?[A-Z]{1,6}\d{2,}[A-Z0-9]*(?![A-Z0-9])",
+    re.IGNORECASE,
+)
+_MARKET_RATE = re.compile(r"(?<!\w)\d+(?:\.\d+)?\s*[GT](?!\w)", re.IGNORECASE)
+_MARKET_LINK = re.compile(
+    r"\b(?:supports?|meets?|validates?|qualifies?|tests?)\b|支援|符合|適用|可測|可驗證"
+    r"|對接|接軌|可對應",
+    re.IGNORECASE,
+)
+_MARKET_UNCERTAIN = re.compile(
+    r"\b(?:not|cannot|unverified|unsupported)\b|未證實|無法確認|不能證明|不代表"
+    r"|尚未驗證|不等於|缺乏證據|推論",
+    re.IGNORECASE,
+)
 DEFAULT_PROMPT = """Answer the question from the passages below and nothing else. Cite every
 claim with the passage number in square brackets, like [2]. If the passages do
 not answer the question, say so in one sentence and cite nothing.
@@ -44,6 +59,14 @@ not answer the question, say so in one sentence and cite nothing.
 Question: {question}
 
 {passages}"""
+_MARKET_FIT_GUIDANCE = """
+
+Separate directly stated product or option capabilities from market requirements.
+A market source naming a standard and a different product source naming a
+high-speed interface do not prove that product supports, tests or is qualified
+for the market standard. If no Raw passage directly establishes the connection,
+say that market fit is unverified. Cite the capability and market facts
+separately; do not present a possible application as a verified product claim."""
 
 
 def tokens(text: str) -> tuple[str, ...]:
@@ -159,6 +182,42 @@ def _has_raw_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
                 for n in sentence_citations
             ):
                 return False
+    return True
+
+
+def _has_market_fit_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
+    """Reject a narrow unsupported rate-to-product link in a broad market answer.
+
+    Product codes and market rates can be present in separate cited sources;
+    their co-occurrence in the answer is not evidence of verified fit. This is
+    intentionally narrower than semantic entailment and is only used for the
+    broad high-speed market question family.
+    """
+    products = {item.casefold() for item in _PRODUCT_ID.findall(text)}
+    rates = {item.replace(" ", "").casefold() for item in _MARKET_RATE.findall(text)}
+    if not products or not rates:
+        return True
+    attached = re.sub(r"([.!?。！？])\s*(\[[0-9][0-9,\s-]*\])", r" \2\1", text)
+    for sentence in re.split(r"(?<=[.!?])\s+|(?<=[。！？])\s*", attached):
+        if not _MARKET_LINK.search(sentence) or _MARKET_UNCERTAIN.search(sentence):
+            continue
+        if not ("市場" in sentence or "market" in sentence.casefold()
+                or _MARKET_RATE.search(sentence)):
+            continue
+        if not any(
+            number >= 1
+            and number <= len(passages)
+            and passages[number - 1].citation.kind == "raw"
+            and products & {
+                code.casefold() for code in _PRODUCT_ID.findall(passages[number - 1].text)
+            }
+            and rates & {
+                rate.replace(" ", "").casefold()
+                for rate in _MARKET_RATE.findall(passages[number - 1].text)
+            }
+            for number in cited_numbers(sentence)
+        ):
+            return False
     return True
 
 
@@ -459,7 +518,12 @@ class QueryEngine:
             trace = TraceIdentifiers(
                 trace_id=f"query-{digest}", request_id=f"ask-{self._asked}", span_id="synthesis"
             )
-        prompt = self.prompt.format(question=question, passages=numbered)
+        market_guidance = (
+            _MARKET_FIT_GUIDANCE
+            if raw_citations_only and evidence_coverage and _coverage_terms(question)
+            else ""
+        )
+        prompt = self.prompt.format(question=question, passages=numbered) + market_guidance
         for attempt in range(2 if raw_citations_only else 1):
             if attempt:
                 # Keep the original passage numbers and omit Wiki text. Never
@@ -471,7 +535,7 @@ class QueryEngine:
                 )
                 prompt = self.prompt.format(
                     question=question, passages=raw_numbered or "No RAW passages available."
-                ) + (
+                ) + market_guidance + (
                     "\n\nUse one short sentence per supported claim. Put a RAW passage "
                     "citation [n] in every sentence. If the RAW passages do not "
                     "support an answer, say so without citations."
@@ -501,7 +565,10 @@ class QueryEngine:
                 )
             text = response.text.strip()
             cited = cited_numbers(text)
-            if not raw_citations_only or not cited or _has_raw_grounding(text, passages):
+            if not raw_citations_only or not cited or (
+                _has_raw_grounding(text, passages)
+                and (not market_guidance or _has_market_fit_grounding(text, passages))
+            ):
                 break
         if any(n < 1 or n > len(passages) for n in cited):
             # Words without a retrieved source behind them are not an answer here.
@@ -515,7 +582,10 @@ class QueryEngine:
                 text=text,
                 synthesized_by=self.alias,
             )
-        if raw_citations_only and not _has_raw_grounding(text, passages):
+        if raw_citations_only and (
+            not _has_raw_grounding(text, passages)
+            or (market_guidance and not _has_market_fit_grounding(text, passages))
+        ):
             # A Wiki citation or uncited sentence cannot become a Raw-grounded
             # answer, even after the formatting retry.
             return Answer(question=question, status="uncited", passages=passages)

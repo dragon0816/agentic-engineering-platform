@@ -484,3 +484,24 @@ provider-neutral model contract without adding a tokenizer dependency, while
 retaining local session evidence. A global learned-memory store was deferred
 at the owner's request; changing the model's declared capacity alone was
 rejected because it cannot bound or expand the active transcript.
+
+## 2026-10-03 — Audit market-fit claims against pinned Raw evidence
+
+Decision: Keep the RS_Knowledge high-speed-market evaluation separate from
+runtime authorization. Pin the three reviewed Raw files by hash and excerpt:
+one market-demand note and two product specifications. The diagnostic reports
+source integrity, retrieval coverage and unsupported affirmative links from
+a named product or option to a specific market rate. It always retains a
+human semantic-review requirement. For broad Raw-only market questions,
+Knowledge synthesis now explicitly distinguishes directly stated technical
+capabilities from market suitability. A narrow guard retries and then refuses
+an affirmative product-to-rate claim when its cited Raw excerpt does not name
+both; it does not claim general semantic entailment.
+
+Reason: A real Agent Web answer cited the correct Raw documents but inferred
+CMX-B200A/SMBV100B applicability to 800G/1.6T from separate interface and
+market notes. Citation validity alone did not establish that relationship.
+Hard-coding R&S product assertions into the general retriever or treating a
+JEV Skill selector as an answer validator were rejected. The pinned evidence
+and regression make the observed failure reproducible without sending Vault
+content to TypeSafe.

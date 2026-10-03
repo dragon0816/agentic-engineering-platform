@@ -1,0 +1,27 @@
+{
+  "case_id": "rs-high-speed-market-v1",
+  "question": "根據RS_Knowledge的資料，Rohde-schwarz有那些產品和option可以跟高速通訊市場接軌",
+  "market_targets": ["800G", "1.6T"],
+  "products": ["CMX-B200A", "SMBV100B"],
+  "evidence": [
+    {
+      "kind": "market_requirement",
+      "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+      "sha256": "a891270c89982d1022c89225a5ec29659b1d25b8ed37758350812c87ca2afad1",
+      "anchor": "技術：800G / 1.6T / Ethernet / InfiniBand"
+    },
+    {
+      "kind": "product_capability",
+      "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+      "sha256": "5bee12c555a55c2e156bb110f89b4d24248ba6717c09abfc191c5a8683c1b23d",
+      "anchor": "The R&S®CMX-B200A option enables accelerated digital signal processing capabilities, including two high-speed digital I/Q interfaces"
+    },
+    {
+      "kind": "product_capability",
+      "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+      "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+      "anchor": "RF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz"
+    }
+  ],
+  "reviewed_conclusion": "The cited product specifications establish their named interface and RF capabilities; these excerpts do not verify either product or option for 800G/1.6T data-center testing. Any market fit is an inference requiring separate application or standards evidence."
+}

@@ -240,6 +240,11 @@ def test_bilingual_market_question_covers_raw_market_and_product_option_evidence
     raw_refs = {hit.citation.raw_ref for hit in covered if hit.citation.kind == "raw"}
     assert {market, product, second_product}.issubset(raw_refs)
     assert all(hit.citation.source is not None for hit in covered if hit.citation.kind == "raw")
+    model = Synth("The excerpts do not establish market qualification.")
+    QueryEngine(vault, model, alias="answerer").ask(
+        question, k=5, raw_citations_only=True, evidence_coverage=True
+    )
+    assert "market fit is unverified" in model.requests[0].messages[0].text
 
 
 def test_synthesis_may_cite_only_what_was_retrieved(tmp_path: Path) -> None:
@@ -458,3 +463,41 @@ def test_option_and_interface_grounding_ignores_acronym_case_in_raw(
     )
     assert answer.status == "answered"
     assert len(model.requests) == 1
+
+
+def test_market_answer_retries_when_product_and_rate_are_only_in_separate_raw(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PlainTextExtractor()])
+    for name, content in (
+        ("market", "高速通訊市場需要 800G Ethernet links."),
+        ("product", "CMX-B200A option has two high-speed digital I/Q interfaces."),
+    ):
+        drop(vault, f"drop/{name}.txt", content.encode("utf-8"))
+        intake.intake(f"drop/{name}.txt", mode="apply", today=TODAY)
+    question = "高速通訊市場有哪些產品和 option 可以接軌 800G?"
+    passages = retrieve(vault, question, k=2, min_raw=2, evidence_coverage=True)
+    product = next(n for n, passage in enumerate(passages, 1) if "CMX-B200A" in passage.text)
+    market = next(n for n, passage in enumerate(passages, 1) if "800G" in passage.text)
+    model = SequenceSynth(
+        (
+            f"CMX-B200A supports the 800G market [{product}, {market}].",
+            f"CMX-B200A has digital I/Q interfaces [{product}]. "
+            f"The market note names 800G [{market}]. "
+            f"These excerpts do not establish CMX-B200A support for 800G [{product}, {market}].",
+        )
+    )
+    answer = QueryEngine(vault, model, alias="a").ask(
+        question, k=2, raw_citations_only=True, evidence_coverage=True
+    )
+    assert answer.status == "answered"
+    assert "do not establish" in answer.text
+    assert len(model.requests) == 2
+
+    persistently_wrong = Synth(f"CMX-B200A supports the 800G market [{product}, {market}].")
+    refused = QueryEngine(vault, persistently_wrong, alias="a").ask(
+        question, k=2, raw_citations_only=True, evidence_coverage=True
+    )
+    assert refused.status == "uncited"
+    assert len(persistently_wrong.requests) == 2

@@ -1,75 +1,87 @@
 # Handoff
 
-Date: 2026-10-03 (Asia/Taipei). Branch: `main`. No push or live TypeSafe request was made in this checkpoint. `docs/TASKS.md` is the cumulative progress record.
-
-## Agent Web context and session-settings checkpoint
-
-- The owner requested configurable context after asking about the existing
-  128k model declaration, 12-message active history and memory. The owner
-  chose **context settings plus existing session-record management first**;
-  cross-session memory is not part of this slice.
-- Settings now distinguishes declared model context capacity from effective
-  chat history. The model capacity field preserves and can update endpoint
-  metadata. `conversation-context.json` under the Host workspace stores
-  `recent_messages` (1–40, default 12) and `history_budget_bytes`
-  (4,000–48,000, default 48,000), effective on the next ordinary Gateway or
-  restricted local CLI turn. The byte count is a conservative, provider-neutral
-  text-history bound; system/tool content is additional. Oversized current
-  questions return `needs_input` instead of being silently truncated.
-- Local sessions retain at most 100 messages, evicting oldest whole turns.
-  Settings lists saved sessions and offers explicit actor-owned deletion;
-  contribution drafts keep their immutable captured evidence. Knowledge Ask
-  and deterministic commands retain their own routes. No summarization or
-  cross-session learned memory was introduced.
-- Focused Agent Web/context/Gateway/local-agent tests passed after updating
-  exact adapter assertions. Final complete non-browser run using the normal
-  Windows temporary directory: **1,723 passed, 5 skipped, 1 CDP test
-  deselected**. Ruff and strict mypy (334 files) passed. An offline wheel built
-  successfully. Earlier runs with a repository `.scratch` temp root had
-  intermittent Windows `os.replace` permission failures in unrelated Extension
-  and Knowledge staging tests; each passed with the normal system temp root.
-  The independent Chromium/CDP browser test still closes its WebSocket here.
-- The installed `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0`
-  environment was updated from an offline wheel, and Agent Web restarted on
-  `127.0.0.1:53582`. Authenticated local `GET /api/settings` reported defaults
-  12 messages / 48,000 bytes, declared model capacity 128,000 tokens and
-  `session_only` memory. The served HTML contains all three new controls.
-  The existing Gateway remains configured and its mapped credential is present.
-  The refreshed preview was opened in Codex. The ephemeral URL/token is in
-  `agent-web-context-unbuffered.stdout.log` on this Host; do not commit it.
+Date: 2026-10-03 (Asia/Taipei). Branch: `main`. No push or TypeSafe request
+was made in this checkpoint. `docs/TASKS.md` remains the cumulative progress
+record; `docs/DECISIONS.md` holds the architecture decisions.
 
 ## Current owner direction
 
-- Prioritize JEV before the remaining validation work. The first provider is the official TypeSafe API. The owner has now declared the complete current RS_Knowledge Vault public; its Host binding has `privacy: "public"`. Other Vaults keep their own owner-editable `private`/`public` setting, defaulting to private.
-- Latest owner order: make RS Knowledge Ask work end-to-end first, then compare JEV. The Knowledge Ask path is working. The first TypeSafe comparison uses pinned PUBLIC synthetic decision cases; the owner also permits RS_Knowledge content in a future public Knowledge evaluation.
-- Stop treating n8n as a development requirement. Migrate the proven `rs_workflow_system` Python/PowerShell jobs through direct reuse or a thin Bridge wrapper before porting business logic. The original pinned source remains read-only. Record concrete parity differences instead of redesigning from memory.
-- An exact persistent Host grant suffices for an already owner-approved local effect. The existing Workflow 11 `outlook.draft` grant saved an unsent Outlook draft successfully; saving a draft does not imply sending mail. Workflow 7 remains paused at the owner's request. Jira PAT authentication returned HTTP 200, while the `MRT1CV` project returned 404 pending Browse access.
+- The previous Agent Web context/session Settings slice is complete. Context
+  limits and existing session records are configurable; cross-session memory
+  was deferred by the owner. The preview is still running on `127.0.0.1:53582`.
+- Make RS_Knowledge asking useful and verify answer quality before comparing
+  TypeSafe JEV. The owner classified this complete Vault `public` in its exact
+  Host binding, while other Vaults default to `private` and are owner-editable.
+- For this round, the owner explicitly chose **offline-only JEV validation**.
+  Do not call TypeSafe yet. The official TypeSafe adapter is a bounded Skill
+  selector, not a Knowledge answer generator, and remains unwired to Agent Web.
+- n8n is not a required development item. Migrate remaining proven Workflow
+  jobs by reuse or a thin Bridge wrapper first. Workflow 7 remains paused.
 
-## Completed JEV slices
+## Knowledge source-backed evaluation slice
 
-- `519f2b9` added `evaluation/jev/golden-v1.json`: 16 PUBLIC synthetic cases across intent, Skill selection, retrieval and failure classification, plus an offline benchmark runner. It measures coverage, exact accuracy, Brier calibration, p50/p95 latency, fallback and cost evidence. The real NONE Skill baseline has 4/4 coverage and 1/4 exact match on this tiny corpus; the other three decision baselines are explicitly unavailable. No external service is called by the runner's default mode.
-- `5846a11` added an offline-tested `JEVSkillSelectionProvider` against TypeSafe's published SystemOne choice schema. It accepts an injected transport and a credential callable, selects at most one installed command, and falls back to the unchanged catalog on refusal, low confidence, malformed output, HTTP failure or timeout. It records token counts without request text. The first-turn `SkillCandidateRequest` now includes the complete model payload (system/persona, bounded history and installed tool descriptions) before any accelerator authorization; a denial constructs no JEV client.
-- `docs/JEV_ADAPTER_READINESS.md` records the API and remaining integration gap. Official schema: `https://api.typesafe.ai/openapi.json`; the adapter uses `POST https://api.typesafe.ai/v1/systemone` with Bearer auth and an explicit model profile. No live key was supplied or used. The Host has no JEV factory/egress authorizer, so setting `provider: JEV` alone still falls back to NONE.
-- `src/evaluation/jev_live.py` is an explicitly invoked diagnostic restricted by a pinned SHA-256 to the synthetic PUBLIC corpus. It reads `AEP_JEV_API_KEY` only after admission, calls only the official endpoint for four Skill cases, and never sends arbitrary Agent/Knowledge content. Its fake-transport tests, full Ruff/mypy and wheel build pass. No actual TypeSafe request was made.
-- All three delegated JEV agents completed and stopped. Their JEV slices invoked no Workflow, Outlook, Excel or Knowledge effect.
+- Added `evaluation/knowledge/rs-market-v1.json` with SHA-256 pins and exact
+  text anchors for the staged Vault's market note, CMX500/CMX-B200A
+  specification and SMBV100B specification. The market note names
+  800G/1.6T; the product excerpts establish digital I/Q or RF wireless
+  capability, not 800G/1.6T qualification. The source files remain outside
+  the repository and unchanged.
+- Added `evaluation.knowledge_market` and regression tests. The read-only CLI
+  verifies pinned Raw bytes and retrieval, and can inspect a saved
+  `KnowledgeAnswerRecord`. It flags a narrow affirmative product-to-market
+  link without one reviewed cited Raw passage naming both. It always reports
+  `semantic_entailment_proven: false`; clean output still needs human review.
+- The installed Agent Web returned an `answered` record for the owner's exact
+  high-speed-market question. It cited the three expected Raw sources but
+  claimed the products could directly address the 800G/1.6T market. The new
+  diagnostic correctly marked two linked assertions `failed`. The record is
+  kept only in ignored `.scratch/market-live-record.json`, not committed.
+- `QueryEngine` now adds market-fit guidance to broad Raw-only market answers
+  and, on an affirmative product-to-rate assertion supported only by separate
+  market and product sources, retries once and then refuses the assertion.
+  The regression proves an overclaim is retried/refused and a qualified answer
+  can pass. This is deliberately a narrow lexical safeguard, not full semantic
+  entailment. See the new decision in `docs/DECISIONS.md`.
+- The running preview still has the prior installed wheel, so its **post-fix
+  live answer has not yet been tested**. A standalone source-runtime attempt
+  returned `knowledge_model_failed` because this shell does not have
+  `LITELLM_MASTER_KEY` in User/Process environment; the already-running Web
+  process did successfully answer with its existing credential. Do not claim
+  the new prompt has live model parity until preview refresh/retest.
 
-## RS Knowledge Ask checkpoint
+## JEV offline result
 
-- The owner confirmed that `LITELLM_MASTER_KEY` is set in the Windows User environment. It is never written to the repository or printed. In this Codex sandbox the User variable appears absent, but the real host User registry contains it; a host process can inherit it explicitly. The approved internal model route remains `http://127.0.0.1:4000/v1`.
-- Explicit mention of one installed Knowledge asset name (including `RS_Knowledge` spelling for the `rs-knowledge` asset) in a Gateway Web conversation now invokes the exact Knowledge query capability through Agent/Bridge. It bypasses only model tool selection, not Bridge permission checks or Raw citation validation. `/wiki-query` shares the same reply formatting. Conversation text includes the numbered Raw file references; typed failures include their reason code.
-- `src/knowledge/query.py` now compares technical acronyms case-insensitively against tokens in the same cited Raw passage. This avoids rejecting `USB` when the evidence writes `usb` while preserving exact option-code and same-passage checks. Regression tests cover the natural chat route, denied Bridge grant and case variant.
-- The owner's exact high-speed-market question succeeded in a real source-runtime Agent conversation and again through the reinstalled preview Web API on `127.0.0.1:53582`. Both selected `knowledge-query/ask@1.0.0`, returned `answered`, and cited Raw specifications. The preview environment was updated offline from the local wheel and its Web process restarted. The Web startup log under `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\agent-web-knowledge.stdout.log` contains the current ephemeral browser URL; do not copy its token into a repository file.
-- The cited excerpts directly support the CMX-B200A digital I/Q interface option and SMBV100B digital connectivity. They do not themselves establish qualification for the 800G/1.6T market examples in a separate Raw market note. Evaluate that market-to-product inference before claiming semantic mapping parity.
-- The owner subsequently declared the complete current RS_Knowledge Vault public and asked for a simple per-Vault setting. `KnowledgeHostBinding.privacy` now accepts `private` (default) or `public`; no classifier field or multi-level taxonomy is required. The installed `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json` has `privacy: "public"` only on `engineering/rs-knowledge@1.0.0`; a one-time backup is `host.json.before-knowledge-privacy-20261003.bak` beside it. The preview package was updated offline and Web restarted on 53582; the installed Host contract loaded `public`. The owner can edit each binding's `privacy` independently and restart Web.
+- Reran `evaluation.jev_benchmark` on the pinned 16-case PUBLIC synthetic
+  corpus. The unchanged `NONE` Skill baseline returned candidates for 4/4
+  cases and matched the exact expected set in 1/4. Intent, retrieval and
+  failure classification have no baseline and remain `unavailable`.
+- No TypeSafe request or cost estimate was made. `AEP_JEV_API_KEY` is absent
+  from this Host's User environment, and the owner chose offline-only testing
+  for this round. Keep the TypeSafe comparison task open.
 
-## Verification
+## Verification and known limits
 
-- Full non-browser suite outside the filesystem sandbox: **1709 passed, 5 platform skips, 1 real-browser deselection**. The first sandboxed run had 1707 pass and two unrelated Extension fixture failures at Windows `os.replace`; those two passed when rerun outside the sandbox, then the full suite passed there.
-- Focused final JEV adapter tests: 9 passed. Ruff passed for `src` and `tests`; strict mypy passed on 330 source/test files. Offline wheel build succeeded. `git diff --check` passed. Browser/CDP tests were not part of the green suite because Chromium/CDP is unavailable on this host.
-- Knowledge checkpoint: 7 Web Knowledge tests and 14 query tests passed. Full non-browser suite: **1715 passed, 5 platform skips, 1 browser deselection**; the independent Chromium WebSocket test failed when included (`integrations.websocket.WebSocketError: closed`), so the green suite excluded `tests/test_browser.py`. Ruff passed for `src tests`; strict mypy passed on 332 files; offline wheel build passed with `--no-isolation` after the isolated build attempted a blocked package-index fetch. The installed preview Web API also answered the real Knowledge question successfully.
-- Per-Vault privacy follow-up: 3 focused Host Knowledge tests passed; full non-browser suite **1716 passed, 5 platform skips, 1 browser deselection**. Ruff passed for `src tests`, strict mypy passed on 332 files, and the wheel built offline. The installed preview configuration loads RS_Knowledge as `public`.
+- Focused Knowledge tests: 18 passed. Full non-browser suite, using the
+  normal Windows temp directory: **1,727 passed, 5 platform skips, 1 CDP
+  browser test deselected**. Two preceding complete runs encountered the
+  known intermittent Windows `os.replace` permission failure in unrelated
+  Extension staging fixtures; those three affected tests passed in isolation
+  and the final complete rerun passed. Do not attribute that flake to this
+  Knowledge change.
+- `ruff check src tests`, strict `mypy src tests` (336 files), offline wheel
+  build and `git diff --check` passed. The CDP browser test was not run because
+  its Chromium WebSocket closes on this Host.
+- The source-backed diagnostic against the actual staged Vault verified all
+  three Raw hashes/anchors and retrieved 3/3 expected sources. With the saved
+  pre-fix live answer, it exited failed with two unsupported market links.
 
-## Open work and next action
+## Next action
 
-- First add a source-backed check that separates cited product/interface capabilities from inferred high-speed market fit, then run the pinned PUBLIC synthetic TypeSafe diagnostic with an operator key and compare against NONE. RS_Knowledge is owner-classified public, but the current JEV adapter is only a decision selector and cannot itself synthesize a Knowledge answer. Do not infer cost from token counts without a verified price.
-- Workflow 10 needs source-vs-AEP parity on copies of the owner's actual FY workbooks and mapping rules; Workflow 13 needs source-compatible dependency and release steps. Neither is complete. After the JEV gate, use the owner's revised REUSE/WRAP-first policy in `docs/DECISIONS.md` and `docs/CONTRACTS.md`; no n8n development task is required. Keep Workflow 7 paused. Other pending work is listed in `docs/TASKS.md`.
+Refresh the installed preview from the verified offline wheel, restart its
+Web process with a valid LiteLLM credential, and ask the exact market question
+again. Save its `KnowledgeAnswerRecord` locally, run the pinned source-backed
+diagnostic and review each claim/citation manually. If the model still makes
+the market leap, improve the bounded retry or report `knowledge_not_grounded`
+without inventing fit. Keep TypeSafe offline until the owner changes that
+preference and supplies its key. Workflow 10/13 parity and other open work
+remain in `docs/TASKS.md`.
