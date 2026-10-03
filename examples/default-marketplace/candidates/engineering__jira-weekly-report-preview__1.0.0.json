@@ -1,0 +1,262 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "engineering",
+      "name": "jira-weekly-report-preview",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "private",
+    "lifecycle": "draft",
+    "contributors": [],
+    "categories": [
+      "engineering",
+      "reporting"
+    ],
+    "provenance": [
+      {
+        "source": "dragon0816/rs_workflow_system:workflows/11_jira_weekly_report.json",
+        "revision": "896046e8fe2170d21f9213e56e5ce2f93c05ba43",
+        "author": null
+      },
+      {
+        "source": "agentic-engineering-platform:capabilities.weekly_report.manifest.preview_workflow",
+        "revision": null,
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [
+        "weekly-report.plan",
+        "github.read",
+        "excel.read"
+      ],
+      "policy_refs": [
+        "weekly-report-policy",
+        "github-read-policy",
+        "excel-read-policy"
+      ],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "description": "Preview the GTM weekly report: the week's tracked items planned against the workbook's scratch sheet, with nothing written",
+  "execution": {
+    "mode": "local"
+  },
+  "dependencies": {
+    "local_capabilities": [
+      "weekly_report.resolve_window",
+      "github.search_project",
+      "excel.read_scratch_sheet",
+      "weekly_report.plan"
+    ],
+    "central_services": [],
+    "central_required": false
+  },
+  "secrets": [],
+  "input_contract": "engineering.jira-weekly-report.request.v1",
+  "output_contract": "weekly-report.plan.output.v1",
+  "kind": "workflow",
+  "run_alias": 11,
+  "parameters": [
+    {
+      "name": "week",
+      "label": "Report week",
+      "kind": "text",
+      "scope": "runtime",
+      "description": "Weekly sheet name, for example 2026_40W.",
+      "required": false,
+      "options": [],
+      "minimum": null,
+      "maximum": null
+    },
+    {
+      "name": "since",
+      "label": "From date",
+      "kind": "date",
+      "scope": "runtime",
+      "description": "Optional start of the reporting window.",
+      "required": false,
+      "options": [],
+      "minimum": null,
+      "maximum": null
+    },
+    {
+      "name": "until",
+      "label": "Through date",
+      "kind": "date",
+      "scope": "runtime",
+      "description": "Optional end of the reporting window.",
+      "required": false,
+      "options": [],
+      "minimum": null,
+      "maximum": null
+    },
+    {
+      "name": "max_issues",
+      "label": "Maximum issues",
+      "kind": "integer",
+      "scope": "runtime",
+      "description": "Limit the number of Project items read.",
+      "required": false,
+      "options": [],
+      "minimum": 1,
+      "maximum": null
+    },
+    {
+      "name": "args",
+      "label": "Advanced arguments",
+      "kind": "text",
+      "scope": "runtime",
+      "description": "Optional command-style fields, such as since=2026-09-28 max=50.",
+      "required": false,
+      "options": [],
+      "minimum": null,
+      "maximum": null
+    }
+  ],
+  "steps": [
+    {
+      "capability": {
+        "namespace": "weekly-report",
+        "name": "resolve-window",
+        "version": "1.0.0"
+      },
+      "inputs": {
+        "request": {
+          "source": "run",
+          "path": []
+        }
+      },
+      "retry": {
+        "max_attempts": 1,
+        "delay_ms": 100
+      }
+    },
+    {
+      "capability": {
+        "namespace": "github",
+        "name": "search-project",
+        "version": "1.0.0"
+      },
+      "inputs": {
+        "since": {
+          "source": "step",
+          "step_index": 0,
+          "path": [
+            "since"
+          ]
+        },
+        "until": {
+          "source": "step",
+          "step_index": 0,
+          "path": [
+            "until"
+          ]
+        },
+        "max_issues": {
+          "source": "step",
+          "step_index": 0,
+          "path": [
+            "max_issues"
+          ]
+        }
+      },
+      "retry": {
+        "max_attempts": 1,
+        "delay_ms": 100
+      }
+    },
+    {
+      "capability": {
+        "namespace": "excel",
+        "name": "read-scratch-sheet",
+        "version": "1.0.0"
+      },
+      "inputs": {
+        "week": {
+          "source": "step",
+          "step_index": 0,
+          "path": [
+            "week"
+          ]
+        }
+      },
+      "retry": {
+        "max_attempts": 1,
+        "delay_ms": 100
+      }
+    },
+    {
+      "capability": {
+        "namespace": "weekly-report",
+        "name": "plan",
+        "version": "1.0.0"
+      },
+      "inputs": {
+        "window": {
+          "source": "step",
+          "step_index": 0,
+          "path": []
+        },
+        "issues": {
+          "source": "step",
+          "step_index": 1,
+          "path": [
+            "items"
+          ]
+        },
+        "capped": {
+          "source": "step",
+          "step_index": 1,
+          "path": [
+            "capped"
+          ]
+        },
+        "truncated_threads": {
+          "source": "step",
+          "step_index": 1,
+          "path": [
+            "truncated"
+          ]
+        },
+        "sheet": {
+          "source": "step",
+          "step_index": 2,
+          "path": []
+        }
+      },
+      "retry": {
+        "max_attempts": 1,
+        "delay_ms": 100
+      }
+    }
+  ]
+}
