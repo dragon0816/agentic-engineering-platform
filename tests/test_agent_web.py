@@ -1379,6 +1379,48 @@ def test_grounded_knowledge_asking_runs_the_exact_capability_and_keeps_citations
     assert answered["outcome"]["capability"]["status"] == "succeeded"
 
 
+def test_named_knowledge_in_natural_chat_uses_exact_bridge_query(
+    served_knowledge: AgentWebServer,
+) -> None:
+    created = fetch(
+        base(served_knowledge) + "/api/conversations",
+        token=served_knowledge.token,
+        body={},
+    ).json()["conversation"]
+    asked = fetch(
+        base(served_knowledge) + "/api/conversations/turn",
+        token=served_knowledge.token,
+        body={
+            "session_id": created["session_id"],
+            "message": "According to widget_guide, what firmware does Safe mode require?",
+        },
+    ).json()
+    assert asked["answer"]["status"] == "answered"
+    assert "Safe mode requires firmware 2.0 [1]." in asked["answer"]["answer"]
+    assert "Sources (Raw):" in asked["answer"]["answer"]
+    assert asked["answer"]["outcome"]["decision"]["target"] == (
+        KNOWLEDGE_QUERY_SPEC.identity.model_dump(mode="json")
+    )
+    assert asked["conversation"]["messages"][-1]["status"] == "answered"
+
+
+def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path, authorized=False) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="According to widget-guide, what firmware does Safe mode require?",
+            )
+        )
+    assert asked["answer"]["status"] == "failed"
+    assert "permission_denied" in asked["answer"]["answer"]
+    assert asked["answer"]["outcome"]["capability"]["failure"]["code"] == (
+        "permission_denied"
+    )
+
+
 def test_knowledge_ask_contract_cannot_claim_identity_model_or_vault(
     served_knowledge: AgentWebServer,
 ) -> None:

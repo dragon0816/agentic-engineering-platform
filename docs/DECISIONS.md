@@ -427,3 +427,24 @@ turning a selector into an authorization decision was rejected. Live use still
 requires exact-endpoint egress approval, PUBLIC provenance for every outbound
 material, an operator credential, circuit breaker and repeated benchmark
 evidence.
+
+## 2026-10-03 — Resolve an explicitly named installed Knowledge source before model tool selection
+
+Decision: In an Agent Web Gateway conversation, an unambiguous mention of one
+installed Knowledge asset name resolves to that exact asset version. The Host
+then invokes the existing `knowledge-query/ask@1.0.0` capability through the
+Agent and Bridge, including its actor grant, Raw-only grounding and internal
+Gateway model route. The conversation displays the answer's numbered Raw
+source references and a specific failure code when the query fails. `/wiki-query`
+uses the same reply path. General requests without an explicit installed
+source continue through the bounded model tool loop; PUBLIC external-backend
+conversations do not gain Knowledge access.
+
+Reason: The model-facing generic command schema does not carry the required
+exact `KnowledgeQueryRequest(asset, question)` arguments reliably. The owner's
+natural-language `RS_Knowledge` request could therefore fail before querying
+the installed Vault even though direct Knowledge asking worked. Explicitly
+named local sources are deterministic input, so resolving them before intent
+selection removes that failure without granting new capability authority or
+sending RS Knowledge to the external JEV service. Arbitrary fuzzy source
+matching and a second ungoverned Vault reader were rejected.

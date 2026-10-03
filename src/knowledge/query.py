@@ -155,7 +155,7 @@ def _has_raw_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
         for code in option_codes:
             if not any(
                 code in {item.upper() for item in _OPTION_TOKEN.findall(passages[n - 1].text)}
-                and acronyms <= set(_ACRONYM.findall(passages[n - 1].text))
+                and acronyms <= {token.upper() for token in tokens(passages[n - 1].text)}
                 for n in sentence_citations
             ):
                 return False

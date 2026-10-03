@@ -680,6 +680,23 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   prove semantic entailment; a live post-fix answer still paraphrased one
   interface capability more broadly than the cited excerpt supports. Keep
   the broad mapping question open until claims and Raw citations are checked.
+- [x] Make explicitly named RS_Knowledge questions work in Agent Web Ask.
+  An unambiguous installed Knowledge name such as `RS_Knowledge` now dispatches
+  the original question to the exact Bridge Knowledge capability without a
+  preliminary model tool-selection turn. The Ask reply names its cited Raw
+  files, and a Bridge/model/grounding failure exposes a specific code. A
+  case-insensitive acronym guard fixes one false rejection when Raw writes an
+  interface such as `usb` and the model says `USB`. The owner's exact Chinese
+  question succeeded through the source runtime and the reinstalled 53582 Web
+  API with `knowledge-query/ask@1.0.0`, Raw references and no capability
+  failure. The source excerpts support the named interface and option facts;
+  any broader claim that the products satisfy a particular 800G/1.6T market
+  requirement remains an inference, not established by these excerpts.
+- [ ] Before comparing TypeSafe JEV, add a source-backed evaluation for the
+  market-to-product inference quality and explicitly distinguish retrieved
+  technical capabilities from a verified market or standards fit. Do not send
+  RS_Knowledge or its conversation history to TypeSafe; use only the pinned
+  PUBLIC synthetic JEV cases for the first comparison.
 - [x] Pin original `rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43d`
   and migrate Workflow 10's typed local preview and staged temp-sheet apply.
   The Agent/Bridge route distinguishes `chipset-report.read` from an approved

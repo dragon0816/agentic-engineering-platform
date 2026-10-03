@@ -36,6 +36,7 @@ from __future__ import annotations
 import hmac
 import json
 import os
+import re
 import secrets
 import threading
 import uuid
@@ -100,6 +101,7 @@ from host_runtime.slash_commands import (
 )
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
+from knowledge.query import cited_numbers
 from models.contracts import ModelMessage
 
 #: Anything larger than this is not a request to an Agent.
@@ -773,7 +775,10 @@ class AgentWeb:
                 # Known commands keep their deterministic path and never pay
                 # for model selection. Ordinary language enters the bounded
                 # tool loop with only recent local conversation text.
-                if self.runtime.agent.gateway.router.commands.match(context) is not None:
+                named_knowledge = self._named_knowledge(item.message)
+                if named_knowledge is not None:
+                    answer = self._knowledge_reply(named_knowledge, item.message)
+                elif self.runtime.agent.gateway.router.commands.match(context) is not None:
                     direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
                         "ok": direct.refusal is None,
@@ -875,6 +880,53 @@ class AgentWeb:
             "draft": draft,
         }
 
+    def _named_knowledge(self, message: str) -> dict[str, Any] | None:
+        """Resolve an explicitly named installed source without model tool selection."""
+        matches = []
+        for item in self.assets()["knowledge"]:
+            parts = [re.escape(part) for part in re.split(r"[-_\s]+", item["name"]) if part]
+            if parts and re.search(
+                r"(?<![A-Za-z0-9])" + r"[-_\s]*".join(parts) + r"(?![A-Za-z0-9])",
+                message,
+                re.IGNORECASE,
+            ):
+                matches.append(item)
+        return matches[0] if len(matches) == 1 else None
+
+    def _knowledge_reply(self, selected: dict[str, Any], question: str) -> dict[str, Any]:
+        result = self.ask_knowledge(
+            KnowledgeAskRequest(
+                asset=AssetIdentity(
+                    namespace=selected["namespace"],
+                    name=selected["name"],
+                    version=selected["version"],
+                ),
+                question=question,
+            )
+        )
+        if not result["ok"]:
+            return {
+                "ok": False,
+                "answer": result["answer"],
+                "status": "failed",
+                "outcome": result["outcome"],
+            }
+        record = KnowledgeAnswerRecord.model_validate(result["record"])
+        sources = []
+        for number in sorted(cited_numbers(record.answer.text)):
+            citation = record.answer.passages[number - 1].citation
+            if citation.raw_ref is not None:
+                sources.append(f"[{number}] {citation.raw_ref}")
+        answer = record.answer.text
+        if sources:
+            answer += "\n\nSources (Raw):\n" + "\n".join(sources)
+        return {
+            "ok": True,
+            "answer": answer,
+            "status": "answered",
+            "outcome": result["outcome"],
+        }
+
     def _slash_command(self, command: SlashCommandInvocation) -> dict[str, Any]:
         """Dispatch known commands without model intent selection."""
 
@@ -898,22 +950,7 @@ class AgentWeb:
                     "Select exactly one installed Knowledge asset before using /wiki-query."
                 )
             selected = available[0]
-            result = self.ask_knowledge(
-                KnowledgeAskRequest(
-                    asset=AssetIdentity(
-                        namespace=selected["namespace"],
-                        name=selected["name"],
-                        version=selected["version"],
-                    ),
-                    question=command.argument,
-                )
-            )
-            return {
-                "ok": result["ok"],
-                "answer": result["answer"],
-                "status": "answered" if result["ok"] else "failed",
-                "outcome": result["outcome"],
-            }
+            return self._knowledge_reply(selected, command.argument)
         if command.name == "run_workflow":
             target_text, _, raw_arguments = command.argument.partition(" ")
             try:
@@ -1423,10 +1460,35 @@ class AgentWeb:
             record = KnowledgeAnswerRecord.model_validate(outcome.capability.data)
         return {
             "ok": record is not None,
-            "answer": record.answer.text if record is not None else readable(outcome),
+            "answer": (
+                record.answer.text
+                if record is not None
+                else self._knowledge_failure_text(outcome)
+            ),
             "record": (None if record is None else json.loads(record.model_dump_json())),
             "outcome": json.loads(outcome.model_dump_json()),
         }
+
+    @staticmethod
+    def _knowledge_failure_text(outcome: Any) -> str:
+        failure = outcome.capability.failure if outcome.capability is not None else None
+        if failure is None:
+            return readable(outcome)
+        explanations = {
+            "knowledge_insufficient_evidence": (
+                "No sufficient Raw evidence was found in the selected Knowledge asset."
+            ),
+            "knowledge_not_grounded": (
+                "The model answer could not be verified against Raw citations."
+            ),
+            "knowledge_model_failed": (
+                "The configured LLM Gateway could not synthesize an answer from the "
+                "retrieved evidence."
+            ),
+            "permission_denied": "This user is not granted the Knowledge query capability.",
+        }
+        explanation = explanations.get(failure.code, "The Knowledge query did not complete.")
+        return f"{explanation} ({failure.code})"
 
 
 class _Handler(BaseHTTPRequestHandler):

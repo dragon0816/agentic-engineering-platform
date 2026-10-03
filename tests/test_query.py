@@ -439,3 +439,22 @@ def test_option_code_and_interface_must_coexist_in_one_cited_raw_passage(
     )
     assert len(answer.passages) == 2
     assert answer.status == "uncited" and len(model.requests) == 2
+
+
+def test_option_and_interface_grounding_ignores_acronym_case_in_raw(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PlainTextExtractor()])
+    drop(
+        vault,
+        "drop/digital.txt",
+        b"Option K17 provides a high-speed usb digital input.",
+    )
+    intake.intake("drop/digital.txt", mode="apply", today=TODAY)
+    model = Synth("Option K17 provides a high-speed USB digital input [1].")
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "K17 option high-speed USB", k=1, raw_citations_only=True
+    )
+    assert answer.status == "answered"
+    assert len(model.requests) == 1
