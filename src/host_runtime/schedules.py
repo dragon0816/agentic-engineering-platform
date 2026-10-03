@@ -217,18 +217,27 @@ class SqliteScheduleStore:
             )
             return updated
 
-    def claim_due(self, *, now: datetime, limit: int = 20) -> tuple[ScheduledRun, ...]:
-        """Claim one occurrence per schedule, in due order, without execution."""
+    def claim_due(
+        self, *, now: datetime, limit: int = 20, owner: str | None = None
+    ) -> tuple[ScheduledRun, ...]:
+        """Claim due work for one member, withholding unresolved prior claims.
+
+        A previous attempt may have caused an external effect before its outcome
+        was recorded. Later occurrences must wait for explicit reconciliation.
+        """
         point = _utc(now)
         if type(limit) is not int or not 1 <= limit <= 50:
             raise ValueError("claim limit must be 1..50")
         claimed: list[ScheduledRun] = []
         with self._write() as conn:
             rows = conn.execute(
-                "SELECT schedule_id, record FROM schedules"
-                " WHERE status = 'active' AND next_due_at <= ?"
-                " ORDER BY next_due_at, schedule_id LIMIT ?",
-                (point.isoformat(), limit),
+                "SELECT s.schedule_id, s.record FROM schedules AS s"
+                " WHERE s.status = 'active' AND s.next_due_at <= ?"
+                " AND (? IS NULL OR s.owner = ?)"
+                " AND NOT EXISTS (SELECT 1 FROM scheduled_runs AS r"
+                " WHERE r.schedule_id = s.schedule_id AND r.status = 'claimed')"
+                " ORDER BY s.next_due_at, s.schedule_id LIMIT ?",
+                (point.isoformat(), owner, owner, limit),
             ).fetchall()
             for schedule_id, json_record in rows:
                 schedule = ScheduleRecord.model_validate_json(json_record)
