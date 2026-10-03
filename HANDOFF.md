@@ -97,8 +97,9 @@ implementation commits are on `main`.
   issue. The Marketplace sync test failed in the filesystem sandbox, then
   passed unsandboxed in isolation. The final non-browser selection, excluding
   the browser cases, Excel-machine case and sandbox-only Marketplace case,
-  passed: 1622 passed, four skipped, three deselected. Do not describe the
-  unrestricted suite as green.
+  passed before the final letter-suffix regex change: 1622 passed, four
+  skipped, three deselected. The changed guard then passed 19 focused tests.
+  Do not describe the unrestricted suite as green.
 - An isolated real-Excel copy demonstrated 22 highlighted rows at the top
   while retaining each hidden record and the original AutoFilter range.
   The actual saved workbook and Outlook draft were checked read-only afterward.
