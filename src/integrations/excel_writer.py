@@ -574,11 +574,34 @@ class ExcelComWriter:
         self, path: Path, sheet: str, *, key_column: str, last_column: str,
         last_row: int, colour: str,
     ) -> None:
-        """Sort complete rows with this week's Key fill first, keeping the header."""
+        """Sort complete rows by Key fill while preserving manually hidden rows.
+
+        Excel excludes hidden rows from a colour sort. A temporary row ID
+        travels with each row while all rows are visible; after sorting, the
+        original hidden state is restored to the same record. Active filter
+        criteria cannot be restored safely, so refuse before changing them.
+        """
         if last_row < 3:
             return
         worksheet = self._sheet(path, sheet)
         try:
+            if bool(worksheet.FilterMode):
+                raise WorkbookWriteError("write_failed")
+            hidden = {
+                row: bool(worksheet.Rows(row).Hidden)
+                for row in range(2, last_row + 1)
+            }
+            has_hidden = any(hidden.values())
+            helper_column: str | None = None
+            if has_hidden:
+                used = worksheet.UsedRange
+                used_last_column = int(used.Column) + int(used.Columns.Count) - 1
+                planned_last_column = int(worksheet.Range(f"{last_column}1").Column)
+                helper_column = column_letter(max(used_last_column, planned_last_column) + 1)
+                worksheet.Range(f"{helper_column}1").Value = "__AEP_ROW_ID__"
+                marker_range = worksheet.Range(f"{helper_column}2:{helper_column}{last_row}")
+                marker_range.Value = tuple((row,) for row in range(2, last_row + 1))
+                worksheet.Rows(f"2:{last_row}").Hidden = False
             sort = worksheet.Sort
             sort.SortFields.Clear()
             field = sort.SortFields.Add(
@@ -588,11 +611,23 @@ class ExcelComWriter:
                 DataOption=0,  # xlSortNormal
             )
             field.SortOnValue.Color = self._bgr(colour)
-            sort.SetRange(worksheet.Range(f"A1:{last_column}{last_row}"))
+            sort_last_column = helper_column or last_column
+            sort.SetRange(worksheet.Range(f"A1:{sort_last_column}{last_row}"))
             sort.Header = 1  # xlYes
             sort.MatchCase = False
             sort.Orientation = 1  # xlTopToBottom
             sort.Apply()
+            if helper_column is not None:
+                moved = worksheet.Range(f"{helper_column}2:{helper_column}{last_row}").Value
+                to_hide = [
+                    row for row, original in enumerate(moved, start=2)
+                    if hidden[int(original[0])]
+                ]
+                worksheet.Columns(helper_column).Delete()
+                for row in to_hide:
+                    worksheet.Rows(row).Hidden = True
+        except WorkbookWriteError:
+            raise
         except Exception:  # noqa: BLE001
             raise WorkbookWriteError("write_failed") from None
 

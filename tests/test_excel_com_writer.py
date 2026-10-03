@@ -29,6 +29,8 @@ def test_comments_alignment_and_colour_sort_use_excel_row_operations(
     monkeypatch.setattr(excel_writer, "require_com", lambda: None)
     writer = ExcelComWriter()
     monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
+    worksheet.FilterMode = False
+    worksheet.Rows.return_value.Hidden = False
     path = tmp_path / "copy.xlsx"
     writer.format(path, "weekly report temp", [Alignment(range="G2:G4")])
     aligned = worksheet.Range.return_value
@@ -45,6 +47,61 @@ def test_comments_alignment_and_colour_sort_use_excel_row_operations(
     worksheet.Sort.SetRange.assert_called_once()
     assert worksheet.Sort.Header == 1
     worksheet.Sort.Apply.assert_called_once()
+
+
+def test_colour_sort_moves_hidden_records_and_restores_visibility(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worksheet = MagicMock()
+    worksheet.FilterMode = False
+    worksheet.AutoFilterMode = True
+    worksheet.AutoFilter.Range.Address = "$A$1:$G$4"
+    worksheet.UsedRange.Column = 1
+    worksheet.UsedRange.Columns.Count = 7
+    rows = {number: MagicMock(Hidden=number == 3) for number in (2, 3, 4)}
+    worksheet.Rows.side_effect = (
+        lambda number: rows[number] if isinstance(number, int) else MagicMock()
+    )
+    marker = MagicMock()
+    worksheet.Sort.Apply.side_effect = lambda: setattr(marker, "Value", ((4,), (2,), (3,)))
+    ranges: dict[str, MagicMock] = {"H2:H4": marker}
+    worksheet.Range.side_effect = lambda address: ranges.setdefault(address, MagicMock(Column=7))
+    monkeypatch.setattr(excel_writer, "require_com", lambda: None)
+    writer = ExcelComWriter()
+    monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
+
+    writer.sort_highlighted_rows(
+        tmp_path / "copy.xlsx", "weekly report temp", key_column="A",
+        last_column="G", last_row=4, colour="#FFF2CC",
+    )
+
+    assert ranges["H1"].Value == "__AEP_ROW_ID__"
+    assert marker.Value == ((4,), (2,), (3,))
+    assert worksheet.Sort.SetRange.call_args.args[0] is ranges["A1:H4"]
+    worksheet.Columns.assert_called_once_with("H")
+    worksheet.Columns.return_value.Delete.assert_called_once_with()
+    assert worksheet.AutoFilterMode is True
+    assert rows[4].Hidden is True
+    assert rows[2].Hidden is False
+
+
+def test_colour_sort_refuses_active_filter_before_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worksheet = MagicMock()
+    worksheet.FilterMode = True
+    monkeypatch.setattr(excel_writer, "require_com", lambda: None)
+    writer = ExcelComWriter()
+    monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
+
+    with pytest.raises(WorkbookWriteError) as refused:
+        writer.sort_highlighted_rows(
+            tmp_path / "copy.xlsx", "weekly report temp", key_column="A",
+            last_column="G", last_row=4, colour="#FFF2CC",
+        )
+    assert refused.value.code == "write_failed"
+    worksheet.Rows.assert_not_called()
+    worksheet.Sort.Apply.assert_not_called()
 
 
 def test_rich_comment_uses_excel_getcharacters_and_rolls_back_on_format_failure(
