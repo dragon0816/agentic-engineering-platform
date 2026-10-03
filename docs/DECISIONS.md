@@ -276,3 +276,33 @@ make a separate feature change its schema and recovery semantics. An n8n-only
 schedule was rejected because optional n8n cannot be required for local work.
 Automatic replay of a claimed but unfinished job was rejected until a worker
 can reconcile its actual outcome with the run ledger.
+
+## 2026-10-03 — Restore company Jira as Workflow 7's source
+
+Decision: Workflow 7's first AEP slice is a read-only preview of the original
+company Jira project through the Host's Jira client and `AEP_JIRA_TOKEN`
+reference. Workflow 11 alone uses the GitHub Project. Keep Workflow 7's source
+JQL, managed columns, ticket routing and bounded comment reads as the
+behavioral baseline; Excel writes remain a separate parity slice.
+
+Reason: The owner clarified that Jira remains available at
+`https://jira.rsint.net/` for Workflow 7. The earlier GitHub substitution
+changed this Workflow's data source and could not establish source parity.
+The GitHub preview asset was superseded rather than promoted to a default.
+
+## 2026-10-03 — Preserve record visibility through Workflow 11's Excel sort
+
+Decision: Sort the entire weekly scratch sheet by the Key cell's highlight,
+including manually hidden records. Carry a temporary row identifier in an
+unused column, temporarily reveal rows, sort complete rows, then restore each
+record's hidden state and remove the helper column. Keep the existing
+AutoFilter range. Refuse an active filter before changing the sheet because
+its applied criteria cannot be restored reliably by this adapter.
+
+Reason: Excel's ordinary cell-colour sort left three highlighted records below
+hidden rows in the owner's workbook while reporting success. Sorting visible
+rows alone was rejected because it broke the requested highlighted-Key order;
+leaving all rows visible was rejected because it changed the owner's view.
+The copy-based Excel check preserved the hidden-record multiset and filter
+range, and the installed Workflow's saved workbook placed all 22 highlighted
+rows contiguously at the top.

@@ -563,3 +563,54 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Build a golden bounded-decision dataset and only then implement an
   optional JEV provider for decision types with proven latency/accuracy gain;
   keep data classification, authorization and strict validation deterministic.
+- [ ] Add Agent scheduled jobs. Start with typed, durable, timezone-aware
+  recurrence and a deterministic due-run claim; execute the exact installed
+  Agent Task or Workflow through existing admission and Bridge grants, record
+  outcomes, and provide create/pause/resume/history controls. The owner is
+  choosing whether the first release schedules both Agent tasks and Workflows
+  and whether the first control surface includes Agent Web; no scheduled
+  action may bypass write, draft, send or other approval policy.
+- [x] Add the inert local schedule foundation: exact-version Workflow/Agent Task
+  contracts, timezone-aware daily/weekly recurrence, durable SQLite definitions
+  and atomic due claims. Focused tests, schedule-file lint/typecheck and wheel
+  build passed. A Host worker, claim reconciliation, admission/Bridge execution,
+  and Agent Web/CLI controls remain open; no scheduled job runs yet.
+- [x] Correct Workflow 7's first preview source back to company Jira after the
+  owner clarified that GitHub belongs only to Workflow 11. The source-based
+  Jira read-only adapter and `/run 7` assets are committed. Previous GitHub
+  Workflow 7 entries above are superseded, not evidence of live parity. The
+  owner entered a new PAT; Jira `/rest/api/2/myself` returned HTTP 200, but
+  `MRT1CV` returns 404 until the owner grants project Browse access.
+- [x] Bind the owner-authorized *entire* `RS_Knowledge` query corpus to this
+  Host from a short Windows path, with exact digests, engineering namespace
+  Skill, permission and profile authorization. The source tree now has
+  `index.md` and `log.md`; the old missing-root/subset entry above is
+  superseded. Keep the source unchanged and state that the staging copy
+  excludes Drop originals while preserving all Raw/Wiki queryable content.
+  Installed Agent asking now answers a narrow CMX500 version question with a
+  cited Raw file. Broad market mapping still needs retrieval/grounding quality
+  work; do not claim unsupported conclusions.
+- [x] Validate Workflow 11's corrected mail statistics against a real read:
+  group by GitHub Issue Assignees, split comma-separated GitHub Project
+  Production values into individual instruments, and show every instrument
+  without an `Other` aggregate. A real Project read found five Issue-assigned
+  items and one comma-separated Production value. The installed mail Workflow
+  saved an unsent Outlook draft with 1 To, 8 CC, the expected subject, chart
+  image and no `Other` aggregate. The installed Excel Workflow updated
+  `2026_40W`: all 22 highlighted Key rows are contiguous at the top, their
+  current-week Comments are red with older text black, all 19 highlighted
+  `In Progress` cells have `#F8AD3E`, and all 241 Comments cells are aligned
+  top-left. This workbook was backed up before applying. Older, untouched
+  Status cells keep their hand-maintained fills by contract.
+- [x] Fix Excel colour sorting when the workbook has manually hidden rows.
+  Excel's ordinary colour sort skipped the hidden records; the adapter now
+  carries a temporary row ID through the sort, restores each record's hidden
+  state and retains its AutoFilter range. It refuses an active filter before
+  mutation. A real Excel copy preserved the hidden-record multiset and filter
+  range; the installed Workflow then passed saved-workbook validation.
+- [ ] Complete Workflow 11 visual draft parity against the owner's reference
+  Outlook draft, and evaluate whether duplicate test drafts created during
+  diagnostics should be removed. Draft creation does not grant send permission.
+- [ ] After the owner grants Browse permission to Jira `MRT1CV`, run Workflow
+  7's exact read-only preview with the already valid User `AEP_JIRA_TOKEN`,
+  compare it with the pinned source fixtures, then plan Excel parity.
