@@ -15,6 +15,8 @@ from pydantic import (
 
 from agent.data_policy import BackendDataApproval
 from agent.decisions import DecisionAcceleratorConfig
+from capabilities.chipset_report.contracts import ChipsetReportSettings
+from capabilities.release_package.contracts import IsolatedApplySettings, ReleasePreviewSettings
 from capabilities.team_tickets.contracts import TeamTicketsSettings
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
@@ -275,6 +277,9 @@ class HostIntegrations(Contract):
     jira: JiraConnection | None = None
     team_tickets: TeamTicketsSettings | None = None
     weekly_report: WeeklyReportSettings | None = None
+    chipset_report: ChipsetReportSettings | None = None
+    release_package: ReleasePreviewSettings | None = None
+    isolated_release_apply: IsolatedApplySettings | None = None
 
 
 class GatewayHostApproval(BackendDataApproval):

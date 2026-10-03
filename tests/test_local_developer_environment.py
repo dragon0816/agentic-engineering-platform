@@ -74,6 +74,7 @@ def test_loader_sets_only_allowlisted_values_without_echoing_them(tmp_path: Path
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
 
     assert result.returncode == 0, result.stderr
@@ -94,6 +95,7 @@ def test_loader_rejects_unknown_names_without_setting_them(tmp_path: Path) -> No
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
 
     assert result.returncode != 0

@@ -26,8 +26,12 @@ the history is complete; this table is the index into them.
 Phases 0 to 6 are complete. Phase 7 remains active under
 `docs/phases/PHASE_7_MIGRATION.md`. The enrollment, resident Agent, platform
 transport, authorization and workflow 11 implementation slices have merged;
-workflow 10 rules are ported and its remaining slices and real parity run are
-still open. PR #96 merged the local interfaces, company-model wiring, bounded
+workflow 10 rules and a guarded local preview/apply slice are ported; the
+owner's actual source workbooks, mapping rules and a real Excel parity run are
+still open. Workflow 13 has a source-pinned read-only preview and an isolated
+prepare slice, with governed release execution still open. Workflow 7 is
+paused at the owner's request while `MRT1CV` access is resolved. PR #96 merged
+the local interfaces, company-model wiring, bounded
 SOP-to-Workflow authoring, installed-browser automation and weekly mail draft.
 A product-direction review merged in PR #97 and is documented in
 `docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
@@ -657,3 +661,50 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   prove semantic entailment; a live post-fix answer still paraphrased one
   interface capability more broadly than the cited excerpt supports. Keep
   the broad mapping question open until claims and Raw citations are checked.
+- [x] Pin original `rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43d`
+  and migrate Workflow 10's typed local preview and staged temp-sheet apply.
+  The Agent/Bridge route distinguishes `chipset-report.read` from an approved
+  `excel.write`; preview returns source/drop/digest evidence, and apply refuses
+  a stale target or open workbook and verifies the staged workbook before
+  copyback. The source-diff baseline advances only after verified copyback.
+  Synthetic workbook and fake-COM regression tests passed. See
+  `docs/WORKFLOW_10_HOST.md` and `docs/CONTRACTS.md`.
+- [ ] Validate Workflow 10 against the owner's actual FY source workbooks,
+  mapping rules and an isolated copy of the real macro workbook. The source
+  files and `chipset-map.json` were unavailable on this Host; Excel opened a
+  synthetic workbook read-only in the sandbox, so a real COM write and
+  source-vs-AEP workbook parity have not been proven. Do not apply to the
+  production workbook on this evidence alone.
+- [x] Pin Workflow 13's source contract and install a governed read-only local
+  preview with alias `13`. It projects branch/version, release YAML, pinned
+  requirements, selected-file digests and changed paths without running Git
+  or changing the checkout. See `docs/WORKFLOW_13_SOURCE_CONTRACT.md`.
+- [x] Add a separate, no-alias Workflow 13 isolated preparation Workflow.
+  Explicit Host settings must name a marked allowed root and no-remote Git
+  checkout. The Bridge requires both the exact write grant and an approval
+  reference. Local preparation is locked and returns `committed=false` and
+  `pushed=false`; Agent/Bridge tests cover missing grant, missing approval and
+  approved preparation in a temporary checkout. It is not a production
+  release path.
+- [ ] Complete Workflow 13's governed release path: source-compatible version
+  lookup, controlled upload transfer, branch/template handling, serialized
+  checkout, Git status and distinct approved commit/push effects. Compare an
+  isolated run with the original source job and collect company-host parity
+  evidence before calling the migration complete.
+- [ ] Pause Workflow 7 at the owner's request. `AEP_JIRA_TOKEN` is set and
+  Jira identity returned HTTP 200; the separate `MRT1CV` Project returned
+  HTTP 404. Do not replace its Jira source or continue its migration until
+  the owner reopens the task and Project Browse access is confirmed.
+- [x] Add manual `aep-host schedules` create/list/pause/resume/history
+  controls over the durable schedule store. The CLI does not auto-start the
+  worker or grant scheduled execution. Agent Task creation requires a trusted
+  template and remains refused until that configuration is wired.
+- [x] Stage one private default-Marketplace candidate for the installed
+  Workflow 11 preview. This is a draft, not published or installed; no Hermes
+  Skill is repackaged without an exact source pin and licensing review.
+- [x] Verify the Workflow 10/13 local slices: focused migration, schedule and
+  Marketplace selection passed; strict mypy checked 325 files; Ruff and an
+  offline wheel build passed. The non-browser repository selection passed
+  1,690 tests with five platform skips and one real-browser deselection when
+  run outside Windows filesystem sandbox interference. Chromium/CDP remains
+  unavailable on this host; real-file Workflow 10/13 parity is still open.

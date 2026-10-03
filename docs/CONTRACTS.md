@@ -2754,3 +2754,45 @@ CLI, and a choice of first-release target kinds remain subsequent slices.
 When wired, each claimed target must pass resident Agent membership admission,
 exact installed-asset lookup, Workflow/Task policy, Bridge grants and any
 effect-specific approval. No scheduled send, write or draft may bypass them.
+
+# Workflow 10 Host preview and guarded apply (2026-10-03)
+
+`HostIntegrations.chipset_report` holds the source workbook paths and sheets,
+fiscal-year labels, target workbook, managed sheet/header row, temp sheet and
+rules-file path as **static** Host configuration. Runtime input may reduce the
+row cap but cannot supply a file path or ruleset. Paths must be absolute and
+the managed `Chipset_requirement` sheet cannot be selected as the temp sheet.
+No secret is stored in an asset. The pinned source and the validation gap are
+recorded in `docs/WORKFLOW_10_HOST.md`.
+
+`engineering/sales-to-chipset-preview@1.0.0` has alias `10` and invokes a
+`read` capability requiring `chipset-report.read`. Its output includes exact
+target/temp digests, source summaries and snapshot changes, projected rows,
+match and drop counts and row-level dropped evidence. Preview does not change
+the workbook or source baseline. `engineering/sales-to-chipset@1.0.0` then
+passes that typed plan to a separate `write` capability with `excel.write`,
+medium risk and explicit approval. Apply refuses changed target/temp content,
+an open workbook or changed non-temp sheets/macros, writes a staged copy and
+copies back only after verification. A snapshot baseline is saved after the
+verified copyback; a baseline-save error is reported as a warning without
+misstating the workbook result. Asset installation confers no execution grant.
+
+# Workflow 13 local preview (2026-10-03)
+
+`HostIntegrations.release_package` names an existing checkout and inbox using
+absolute paths. `engineering/release-package-preview@1.0.0` has alias `13`;
+the exact read capability requires `release-package.read` and returns the
+projected version, `release.yaml`, pinned requirements, selected file digests
+and changed paths. It rejects a checkout that is absent or on a different
+branch. The original parameter names are accepted through a typed request;
+runtime upload sets and automatic version lookup are not yet enabled. The
+source contract and explicit gaps are in `docs/WORKFLOW_13_SOURCE_CONTRACT.md`.
+No preview result authorizes Git commit, push or release publication.
+`engineering/release-package-apply-isolated@1.0.0` is a separate, no-alias
+write Workflow. It is registered only with explicit
+`HostIntegrations.isolated_release_apply` settings naming a marked allowed
+root and a no-remote Git checkout beneath it. It requires the exact local
+capability grant and an approval reference. It prepares local package files
+under a checkout lock and reports `prepared=true`, `committed=false`,
+`pushed=false`. It has no Git command, network, commit or push path. This
+isolated preparation is testable migration evidence, not a release action.

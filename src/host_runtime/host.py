@@ -27,6 +27,16 @@ from agent.gateway import Gateway
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
+from capabilities.chipset_report.apply import ChipsetApplyHandler, ChipsetWorkbookWriter
+from capabilities.chipset_report.contracts import (
+    ChipsetApplied,
+    ChipsetApplyInput,
+    ChipsetPreview,
+    ChipsetPreviewStepInput,
+)
+from capabilities.chipset_report.manifest import APPLY_SPEC as CHIPSET_APPLY_SPEC
+from capabilities.chipset_report.manifest import PREVIEW_SPEC as CHIPSET_PREVIEW_SPEC
+from capabilities.chipset_report.preview import ChipsetPreviewHandler
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
 from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
@@ -34,6 +44,16 @@ from capabilities.dut_engineering.handlers import (
 )
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, KnowledgeQueryHandler
+from capabilities.release_package.apply_isolated import IsolatedApplyHandler
+from capabilities.release_package.contracts import (
+    IsolatedApplyOutput,
+    IsolatedApplyStepInput,
+    ReleasePreview,
+    ReleasePreviewStepInput,
+)
+from capabilities.release_package.manifest import ISOLATED_APPLY_SPEC
+from capabilities.release_package.manifest import PREVIEW_SPEC as RELEASE_PREVIEW_SPEC
+from capabilities.release_package.preview import ReleasePreviewHandler
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.script_tools import (
     ScriptToolHandler,
@@ -104,6 +124,7 @@ from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.workspace import documents
 from integrations import excel
+from integrations.chipset_excel import ChipsetExcelWriter
 from integrations.excel_writer import (
     ExcelComWriter,
     WorkbookWriteError,
@@ -306,6 +327,7 @@ def build_integrations(
     layout: HostLayout,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    chipset_writer: Callable[[], ChipsetWorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
 ) -> None:
     """The capabilities the migrated workflows need, from what this host was
@@ -318,6 +340,44 @@ def build_integrations(
     if integrations is None:
         return
     settings = integrations.weekly_report
+    if integrations.chipset_report is not None:
+        installed.register(
+            CHIPSET_PREVIEW_SPEC,
+            ChipsetPreviewHandler(
+                integrations.chipset_report, state_dir=layout.workspace_root / "state"
+            ),
+            ChipsetPreviewStepInput,
+            ChipsetPreview,
+            ExecutionDependencies(central_required=False),
+        )
+        installed.register(
+            CHIPSET_APPLY_SPEC,
+            ChipsetApplyHandler(
+                integrations.chipset_report,
+                chipset_writer if chipset_writer is not None else ChipsetExcelWriter,
+                staging_root=layout.workspace_root,
+                state_dir=layout.workspace_root / "state",
+            ),
+            ChipsetApplyInput,
+            ChipsetApplied,
+            ExecutionDependencies(central_required=False),
+        )
+    if integrations.release_package is not None:
+        installed.register(
+            RELEASE_PREVIEW_SPEC,
+            ReleasePreviewHandler(integrations.release_package),
+            ReleasePreviewStepInput,
+            ReleasePreview,
+            ExecutionDependencies(central_required=False),
+        )
+    if integrations.isolated_release_apply is not None:
+        installed.register(
+            ISOLATED_APPLY_SPEC,
+            IsolatedApplyHandler(integrations.isolated_release_apply),
+            IsolatedApplyStepInput,
+            IsolatedApplyOutput,
+            ExecutionDependencies(central_required=False),
+        )
     if integrations.github_project is not None:
         if resolver is None:
             mapped = config.credential_environment()
@@ -484,6 +544,7 @@ def build_gateway(
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    chipset_writer: Callable[[], ChipsetWorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
     model_transport: Transport | None = None,
     membership: BridgeMembership | None = None,
@@ -568,6 +629,7 @@ def build_gateway(
         layout=layout,
         jira_transport=jira_transport,
         writer=writer,
+        chipset_writer=chipset_writer,
         drafter=drafter,
     )
     if config.dut is not None:
@@ -1163,6 +1225,7 @@ def build_runtime(
     resolver: CredentialResolver | None = None,
     jira_transport: MethodTransport | None = None,
     writer: Callable[[], WorkbookWriter] | None = None,
+    chipset_writer: Callable[[], ChipsetWorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
     model_transport: Transport | None = None,
     dut_adapter: DutAdapter | None = None,
@@ -1178,6 +1241,7 @@ def build_runtime(
         resolver=resolver,
         jira_transport=jira_transport,
         writer=writer,
+        chipset_writer=chipset_writer,
         drafter=drafter,
         model_transport=model_transport,
         membership=membership,

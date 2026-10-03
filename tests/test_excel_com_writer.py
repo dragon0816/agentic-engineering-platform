@@ -337,16 +337,16 @@ def test_a_machine_with_no_registry_at_all_registers_nothing() -> None:
 def test_a_machine_with_the_bridge_and_no_excel_says_which(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The two absences stay apart: this one is the machine, not the
-    installation."""
+    """The two absences stay apart even on a machine that has Excel."""
     client = types.ModuleType("win32com.client")
     win32com = types.ModuleType("win32com")
     win32com.client = client  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "win32com", win32com)
     monkeypatch.setitem(sys.modules, "win32com.client", client)
+    monkeypatch.setattr(excel_writer, "progid_is_registered", lambda _name: False)
     with pytest.raises(WorkbookWriteError) as refused:
         excel_writer.require_com()
-    assert refused.value.code == "excel_missing", "this machine has no Excel"
+    assert refused.value.code == "excel_missing"
 
 
 class FakeSheet:

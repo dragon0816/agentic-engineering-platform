@@ -651,3 +651,35 @@ are reporting, and it means the weeks before the rebuild are not reachable by
 time. The owner accepted that on 2026-09-23: the report runs forward, the
 `Week` field is a note for people rather than a selector, and it is going to
 be deleted.
+
+## 2026-10-03 — Workflow 10 and 13 source-pinned local slices
+
+The owner paused Workflow 7 despite a working Jira identity token because
+`MRT1CV` remains inaccessible. Work moved to original Workflow 10 and 13.
+The read-only source reference for both is
+`rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43d`.
+
+Workflow 10 adapts `host-bridge/jobs/sales_to_chipset.py`,
+`host-bridge/jobs/_source_snapshot.py`, `config/workflow-w1.example.json`
+and `docs/W1_MAPPING.md`. The source's project filtering, chipset projection,
+target-row matching, drop evidence, row formatting and temp-sheet-only output
+are the behavioral baseline. AEP replaces implicit local script execution with
+static Host paths, a read-only preview contract and a separately approved
+Excel COM write capability. The write runs against a staged copy and refuses
+changed target/temp content, changed other sheets or VBA bytes before
+copyback. The source snapshot advances after verified copyback. This guarded
+write is a deliberate authorization and recoverability adaptation, not a
+change to the projected report. Real workbook parity remains unproven until
+the owner's exact source workbooks and mapping rules are supplied and a copy
+of the macro workbook can be written and inspected on a company Host. See
+`docs/WORKFLOW_10_HOST.md` for configuration and exact limits.
+
+Workflow 13 adapts `host-bridge/jobs/release_package.py`, `_release_yaml.py`,
+`workflows/13_release_package.json` and the pinned source tests listed in
+`docs/WORKFLOW_13_SOURCE_CONTRACT.md`. The first installed Workflow is a
+read-only preview of the release files on an existing branch. An isolated
+prepare implementation writes only within an explicitly marked no-remote
+test checkout and never commits, pushes or sends data. Full release parity
+still needs version lookup, branch/template handling, upload transfer and
+separate approved Git effects. Neither the preview nor an installed asset
+confers release authority.

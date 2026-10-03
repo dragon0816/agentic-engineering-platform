@@ -357,3 +357,23 @@ Using Wiki as substitute evidence, silently fixing a citation, or claiming
 that lexical overlap proves general semantic entailment were rejected. The
 source Vault remains unchanged, and broad answer quality still requires
 source-backed evaluation.
+
+## 2026-10-03 — Stage Workflow 10 writes and defer Workflow 13 release effects
+
+Decision: Migrate Workflows 10 and 13 against the pinned original
+`rs_workflow_system` revision, preserving source transformation and packaging
+rules through typed local capabilities. Workflow 10 previews before it writes,
+requires a separate approved `excel.write` step, edits a staged workbook copy,
+and checks the managed and other sheets and VBA bytes before copyback. The
+source-diff baseline advances only after verified copyback. Workflow 13 first
+exposes a read-only preview and an explicitly isolated preparation path; Git
+commit, push, published-version lookup, upload transfer and production release
+remain separate governed work.
+
+Reason: The source scripts interleave deterministic rules with local file and
+release side effects. A direct script launch from chat would bypass AEP's
+Bridge admission and approval boundaries. A broad rewrite was rejected because
+the owner's explicit migration contract makes the original output the baseline.
+The safe slices can be tested with synthetic files, while real Workflow 10
+Excel parity requires the team's source workbooks and mapping rules and full
+Workflow 13 parity requires controlled release dependencies.

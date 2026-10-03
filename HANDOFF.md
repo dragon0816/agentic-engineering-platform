@@ -1,130 +1,83 @@
 # Handoff
 
-Date: 2026-10-03 (Asia/Taipei). Branch: `main`. This is a local checkpoint for
-the owner's Agent, Workflow and Knowledge program. The repository was not
-pushed. Source repositories and the original `RS_Knowledge` tree were not
-modified. The owner previously authorized local per-slice merges; the current
-implementation commits are on `main`.
+Date: 2026-10-03 (Asia/Taipei). Branch: `main`. This is a local checkpoint;
+the source repositories, real release checkout, and production Excel workbook
+were not changed in this slice. The owner authorized local per-slice commits
+and merges, but no push. `docs/TASKS.md` is the cumulative progress record.
 
-## Goal and owner decisions
+## Current owner direction
 
-- Preserve original `rs_workflow_system` behavior as the migration baseline;
-  record and test any user-visible adaptation (see `docs/CONTRACTS.md`).
-- Workflow 11 uses the GitHub Project. Workflow 7 uses company Jira at
-  `https://jira.rsint.net/`, project `MRT1CV`. The owner will grant that
-  project Browse permission. Do not substitute GitHub for Workflow 7.
-- The entire queryable `RS_Knowledge` corpus may be staged for the approved
-  internal Gateway. Keep the source unchanged and Ground answers in Raw
-  evidence. The approved default Gateway is `http://127.0.0.1:4000/v1`.
-- Agent scheduling is requested. A guarded worker now exists, but no Host
-  lifecycle, trusted authorization configuration or user controls are wired;
-  no unattended schedule is running.
+- Pause Workflow 7. The Windows User `AEP_JIRA_TOKEN` authenticates to Jira
+  (`/rest/api/2/myself` was HTTP 200), but `MRT1CV` returned 404. This is a
+  Project-access question, not a missing-token question. The owner asked to
+  migrate Workflows 10 and 13 first.
+- Use original `dragon0816/rs_workflow_system` behavior as the migration
+  baseline. The source was pinned read-only at
+  `896046e8fe2170d21f9213e56e5ce2f93c05ba43d`; no source file was edited.
+- The owner previously requested parallel independent slices. The local
+  schedule control and private Marketplace-candidate slices are present, but
+  neither starts an unattended job nor publishes an asset.
 
-## Completed and verified
+## Implemented in this checkpoint
 
-- Workflow 7's first read-only preview uses the source Jira adapter and exact
-  `/run 7` asset (`66a5680`). A fresh Windows User `AEP_JIRA_TOKEN` now
-  authenticates: `/rest/api/2/myself` returned HTTP 200. `MRT1CV` returns
-  HTTP 404 until project access is granted; live preview is pending.
-- Local schedules have typed exact-version Workflow/Agent Task targets,
-  timezone-aware daily/weekly recurrence, SQLite persistence and atomic due
-  claims (`8092949`). An explicitly invoked worker (`80bde5e`) now checks
-  per-occurrence authorization, Local Agent admission and Bridge grants,
-  records outcomes and blocks automatic replay of uncertain claims. No Host
-  lifecycle, authorization store, Agent Web/CLI control or automatic execution
-  exists yet.
-- Workflow 11 statistics use GitHub Issue Assignees for member grouping and
-  split comma-separated GitHub Project Production values into individual
-  instruments; the chart no longer collapses them into `Other` (`9d8e82d`).
-  A live Project read confirmed Issue assignees and a comma-separated
-  Production value. The Outlook draft mail Workflow was run through the
-  installed Agent: three steps succeeded. Its saved draft was verified in
-  Drafts, unsent, with the expected subject, one To, eight CC, a chart image
-  and no `Other` aggregate. All nine saved Exchange primary SMTP addresses
-  matched the Workflow receipt. No send operation was invoked. Diagnostic runs may
-  have created more than one unsent draft for `2026_40W`; reconcile them with
-  the owner's reference before deleting any.
-- Workflow 11 Excel apply was run twice for `2026_40W`: first to apply the
-  corrected Comments and Status formatting, then after fixing colour sorting
-  around hidden rows (`6810555`). The real workbook is
-  `C:\Users\Chi_L\OneDrive - Rohde & Schwarz\Stuff\Report\SDE_Weekly_Report.xlsx`.
-  Workflow backups were created beside it, and an additional pre-apply copy
-  is in ignored `.scratch/workflow11-redesign/`. Saved-workbook inspection
-  confirmed 22 highlighted Key rows contiguous at rows 2–23, all 22 current
-  Comments blocks red with older text black, all 19 highlighted `In Progress`
-  cells `#F8AD3E`, and all 241 Comments cells aligned top-left. Untouched
-  historical Status fills are preserved. The hidden-row sort was first proven
-  on an isolated Excel copy; the original hidden-record multiset, AutoFilter
-  range and column count were retained.
-- The owner-authorized Knowledge corpus was staged at
-  `C:\Users\Chi_L\AppData\Local\AEP\rs-k` with exact digests; 560 Raw files
-  and 2007 Wiki pages are queryable, while 673 Drop originals were not copied.
-  A private `engineering/rs-knowledge@1.0.0` manifest, Knowledge Skill,
-  binding, grant and profile authorization were installed in the Host. Source
-  Vault remains untouched. Host model credential plumbing was fixed
-  (`956b9b5`) and citation validation now accepts a citation after sentence
-  punctuation (`d66b78b`). Installed Agent asking answered a narrow CMX500
-  version question with “CSW 9.20.0 and higher” and one Raw citation. Broad
-  market/product questions now reserve distinct Raw evidence facets
-  (`b556838`), retry an invalid Raw-citation draft once (`3809be4`), and
-  show short local excerpts from long Raw sections (`50fc314`). The exact
-  broad question succeeded twice after Host reinstall and no longer claimed
-  that SMBV B81 provides a high-speed USB input. These changes preserve the
-  explicit refusal when Raw grounding still fails. They do not prove semantic
-  entailment: one live answer paraphrased interface use more broadly than
-  its cited excerpt. Full market-to-product/option mapping remains open.
-- The Host wheel was rebuilt and installed locally. Agent Web is running on
-  `http://127.0.0.1:53582/`. This bare route intentionally returns 401 without
-  the session token; the authenticated UI is reached via the launcher.
-- `scripts/set-jira-token.ps1` is an interactive helper that prompts for a
-  secure PAT and stores `AEP_JIRA_TOKEN` for the Windows User. It contains no
-  token value. The owner's one-line `Read-Host` command already worked.
+- Workflow 10: static Host source/target/rules configuration; installed
+  `/run 10` read-only preview and `chipset` Skill; source-order transformation
+  with source/drop/count/digest evidence; a separate exact write Workflow;
+  guarded staged Excel COM temp-sheet replacement with backup, stale-plan,
+  open-workbook, other-sheet and VBA checks; source snapshot baseline commits
+  only after verified copyback. Agent/Bridge tests cover denied and approved
+  execution. See `docs/WORKFLOW_10_HOST.md` and `docs/CONTRACTS.md`.
+- Workflow 13: pinned source characterization and pure release-file planning;
+  installed `/run 13` read-only preview; separate no-alias isolated preparation
+  Workflow enabled only by explicit Host settings. The latter requires an
+  exact write grant and approval, a marked allowed root and a no-remote Git
+  checkout. It does not run Git, commit, push or network calls. See
+  `docs/WORKFLOW_13_SOURCE_CONTRACT.md`.
+- Manual `aep-host schedules --config ...` create/list/pause/resume/history
+  controls for saved exact Workflow schedules. They do not auto-start a worker
+  or grant execution. Agent Task scheduling still requires trusted templates.
+- One Workflow 11 preview Marketplace candidate is staged as a private draft.
+  It is not published, installed or authorized. Hermes Skills remain pending
+  source pinning and licensing review.
+- Updated stale asset-export assertions and made the Excel-absence and
+  PowerShell-output tests independent of host installation and cp950 locale.
 
-## Verification
+## Verification and limits
 
-- The relevant Excel adapter and apply tests: 38 passed, one deliberately
-  deselected machine-absence test. Schedule tests: 15 passed. Knowledge
-  query/product tests: 19 passed after the final option-code correction.
-  Ruff across `src` and `tests` passed; mypy passed for 302 source files.
-  A wheel build succeeded and the Host was reinstalled locally.
-- Full non-browser suite: 1605 passed, four skipped, two deselected; one
-  unrelated loopback transport case failed once with Windows socket abort and
-  passed immediately in isolation. The unrestricted full run had 1618 passed,
-  four skipped, one deselected and ten Chromium browser-CDP connection failures
-  on this machine. After the new schedule/Knowledge slices, a further full
-  unrestricted run had 1628 passed, four skipped and 12 failures: ten Chromium
-  CDP failures, one Excel-machine expectation, and one PowerShell cp950 decode
-  issue. The Marketplace sync test failed in the filesystem sandbox, then
-  passed unsandboxed in isolation. The final non-browser selection, excluding
-  the browser cases, Excel-machine case and sandbox-only Marketplace case,
-  passed before the final letter-suffix regex change: 1622 passed, four
-  skipped, three deselected. The changed guard then passed 19 focused tests.
-  Do not describe the unrestricted suite as green.
-- An isolated real-Excel copy demonstrated 22 highlighted rows at the top
-  while retaining each hidden record and the original AutoFilter range.
-  The actual saved workbook and Outlook draft were checked read-only afterward.
+- Workflow 10/13/schedule/Marketplace focused selection: 221 passed, one
+  directory-symlink case skipped. After the W13 Host integration, its focused
+  selection: 27 passed, one skipped. Ruff passed; strict mypy passed on 325
+  source and test files; offline wheel built in `.scratch/wheel-final`.
+- Broad non-browser run outside the filesystem sandbox: 1,690 passed, five
+  platform skips, one deselected (`tests/test_browser.py` ignored, the real
+  Agent Web browser case deselected). Two earlier sandboxed runs each had one
+  unrelated, transient Windows directory-rename permission error; both cases
+  passed immediately in isolation. Unrestricted Chromium/CDP tests fail on
+  this host because the browser connection closes; do not call the
+  unrestricted suite green.
+- Workflow 10 real parity is open. The actual FY source workbooks and team
+  `chipset-map.json` were unavailable. Excel opened a synthetic workbook as
+  read-only in this sandbox, so real COM write/copyback against a workbook
+  copy was not verified. Do not apply to the production macro workbook yet.
+- Workflow 13 full parity is open: published-version/readiness lookup,
+  upload transfer, branch/template creation, queued serialization, Git status,
+  commit and push remain separate governed steps. No real release happened.
+- The owner was asked asynchronously for Workflow 10 source/rules/target paths
+  and Workflow 13 release checkout/inbox paths. Await these before real-file
+  parity; do not invent paths.
+- Workflow 11 Outlook draft visual parity and robust broad RS Knowledge
+  grounding remain separate open tasks in `docs/TASKS.md`. The previous
+  handoff's live Workflow 11/Knowledge evidence is preserved in that progress
+  record and the source-specific docs.
 
-## Next work
+## Next sequence
 
-1. After the owner grants Jira `MRT1CV` Browse access, run the exact Workflow
-   7 read-only preview with the User PAT and compare source-derived fixtures.
-   Excel write parity is a separate slice.
-2. Evaluate the broad `RS_Knowledge` product/option question with source
-   evidence. The previously observed B81/high-speed-USB error was blocked,
-   but semantic grounding and coverage remain incomplete; do not use the
-   current broad answer as an approved market mapping. Convert, ingest and
-   lint integration tests still need a complete user-level pass.
-3. Complete Workflow 11 visual draft comparison against the owner's reference,
-   then decide what to do with extra diagnostic drafts. Keep send permission
-   separate from draft permission.
-4. Wire the guarded schedule worker into an explicit Host lifecycle, trusted
-   per-occurrence authorization configuration, history/operator reconciliation
-   and user controls. No unattended scheduler is configured or running yet.
-5. Continue default Marketplace asset review and broader Agent evaluations
-   (SOP-to-Workflow and natural-language Skill selection). Update
-   `docs/TASKS.md` as these slices land.
-
-Key references: `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/TASKS.md`,
-`docs/DECISIONS.md`, `docs/CONTRACTS.md`,
-`docs/WORKFLOW_7_SOURCE_CONTRACT.md`, and
-`docs/MARKETPLACE_DEFAULTS_SOURCE_AUDIT_2026-10-03.md`.
+1. Finish `git diff --check` and commit the Workflow 10/13 migration. The
+   schedule CLI and private Marketplace candidate already have separate
+   local commits. Do not push.
+2. With owner-provided files, compare Workflow 10 preview and staged Excel
+   output with the pinned source job on a disposable workbook copy. Then do a
+   company-host Workflow 13 read-only preview and isolated source comparison.
+3. Only after parity and explicit release policy work, implement Workflow 13
+   remote dependency and commit/push steps. Keep Workflow 7 paused until the
+   owner reopens it.
