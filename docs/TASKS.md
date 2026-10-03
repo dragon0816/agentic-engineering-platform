@@ -575,6 +575,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   and atomic due claims. Focused tests, schedule-file lint/typecheck and wheel
   build passed. A Host worker, claim reconciliation, admission/Bridge execution,
   and Agent Web/CLI controls remain open; no scheduled job runs yet.
+- [x] Add an explicitly invoked Schedule worker with per-occurrence trusted
+  execution authorization, Local Agent/Bridge policy checks, durable outcome
+  recording and no automatic replay of uncertain claims. The worker supports
+  exact installed Workflows and trusted exact Agent Task templates; 15 focused
+  schedule tests, Ruff and mypy passed. It is not auto-started and no live
+  schedule was created. Host lifecycle, policy configuration, CLI/Web controls
+  and operator reconciliation of cross-restart uncertain claims remain open.
 - [x] Correct Workflow 7's first preview source back to company Jira after the
   owner clarified that GitHub belongs only to Workflow 11. The source-based
   Jira read-only adapter and `/run 7` assets are committed. Previous GitHub
@@ -596,7 +603,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   without an `Other` aggregate. A real Project read found five Issue-assigned
   items and one comma-separated Production value. The installed mail Workflow
   saved an unsent Outlook draft with 1 To, 8 CC, the expected subject, chart
-  image and no `Other` aggregate. The installed Excel Workflow updated
+  image and no `Other` aggregate; all nine resolved Exchange primary SMTP
+  addresses matched the Workflow receipt. The installed Excel Workflow updated
   `2026_40W`: all 22 highlighted Key rows are contiguous at the top, their
   current-week Comments are red with older text black, all 19 highlighted
   `In Progress` cells have `#F8AD3E`, and all 241 Comments cells are aligned
@@ -614,3 +622,38 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] After the owner grants Browse permission to Jira `MRT1CV`, run Workflow
   7's exact read-only preview with the already valid User `AEP_JIRA_TOKEN`,
   compare it with the pinned source fixtures, then plan Excel parity.
+- [ ] Improve broad, bilingual `RS_Knowledge` retrieval before claiming an
+  answer to the owner's high-speed communications product/option question.
+  The staged Raw corpus includes relevant product specifications and market
+  notes, but the exact Chinese question's top lexical hits are mostly unrelated
+  market/image paragraphs; a narrow English CMX500 question already answers
+  with a Raw citation. Add a source-backed evaluation case that retrieves both
+  market context and product/option evidence, without hardcoding R&S product
+  names in the core ranker. Every final claim must retain Raw provenance, and
+  insufficient evidence must remain an explicit result.
+- [x] Add an opt-in bilingual evidence-coverage retrieval mode for broad
+  high-speed communications market questions. Synthetic evaluation and a
+  read-only diagnostic against the installed Vault retrieve Raw market
+  context plus two distinct product/option specifications; narrow questions
+  retain their previous ranking. The installed Host was updated and one live
+  broad query succeeded with two Raw citations. An identical second query
+  failed closed as `knowledge_not_grounded`, so stable synthesis and claim
+  quality are still open. No product names are hardcoded in the ranker.
+- [x] Add one bounded Raw-only synthesis retry for a first answer with invalid
+  Wiki or per-sentence citations; the second prompt contains only the same
+  Raw evidence, and another invalid answer still fails closed. Then narrow
+  long retrieved Raw sections to local five-line excerpts for broad questions
+  and reject an option code plus technical acronym unless one cited excerpt
+  contains both. This reproduced and blocked the B81/high-speed-USB
+  misattribution. After Host reinstall, the exact broad question succeeded
+  twice without that B81 error; 19 focused tests, Ruff/mypy and the 1,622-test
+  non-browser selection passed. The final option-code guard also recognizes
+  letter-suffixed codes such as B200A; the full non-browser run preceded that
+  narrow follow-up, whose focused regression passed. The pre-fix model output
+  was not retained, so the exact citation defect behind its
+  `knowledge_not_grounded` result is not known.
+- [ ] Evaluate full semantic grounding and market-to-product/option coverage
+  against source-backed cases. The local excerpt and lexical guard do not
+  prove semantic entailment; a live post-fix answer still paraphrased one
+  interface capability more broadly than the cited excerpt supports. Keep
+  the broad mapping question open until claims and Raw citations are checked.

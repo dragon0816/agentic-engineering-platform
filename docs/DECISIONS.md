@@ -306,3 +306,54 @@ leaving all rows visible was rejected because it changed the owner's view.
 The copy-based Excel check preserved the hidden-record multiset and filter
 range, and the installed Workflow's saved workbook placed all 22 highlighted
 rows contiguously at the top.
+
+## 2026-10-03 — Keep scheduled execution explicit until authorization is wired
+
+Decision: A Schedule worker must receive a trusted authorization decision for
+each due occurrence and execute only exact installed targets through the
+resident Agent and Bridge. Do not start it from Host construction. An
+unresolved claim blocks later occurrences of that schedule; an ambiguous
+dispatch is never automatically replayed across process restarts.
+
+Reason: A saved recurrence is not permission to execute a future write or
+external effect, and an interrupted worker cannot assume that no effect
+happened. Direct timer-to-capability execution and automatic replay were
+rejected because they could bypass existing approval or duplicate effects.
+Host lifecycle, authorization configuration and an operator reconciliation
+surface are required before enabling unattended scheduled jobs.
+
+## 2026-10-03 — Reserve Raw evidence facets for broad Knowledge questions
+
+Decision: The Agent's installed Knowledge question capability may opt in to a
+bounded bilingual retrieval mode for broad market/product questions. It
+reserves Raw market and distinct Raw product/option candidates before filling
+remaining slots by the existing lexical ranking. Narrow questions retain the
+established order. This selection never grants an answer: every final claim
+must still cite exact Raw evidence, and failed grounding is refused.
+
+Reason: In the owner-authorized Vault, generic Chinese market passages
+crowded out English product specifications for the exact mixed-language
+question. Adding product names or answer mappings to the ranker was rejected
+because retrieval must remain source-driven. A live repeated query still
+showed model-format variability, so a candidate-set improvement alone is not
+accepted as proof of reliable answer quality.
+
+## 2026-10-03 — Correct Raw citation drafts once and narrow long evidence
+
+Decision: For the installed Raw-grounded Knowledge route, detect a cited
+draft that violates Raw-only or per-sentence citation rules and retry once
+with the same numbered Raw passages. Never feed the rejected answer back or
+relax final `KnowledgeAnswerRecord` validation. For broad evidence-coverage
+questions, show the model the most relevant consecutive five-line excerpt
+from each long retrieved Raw section while retaining its source citation.
+Reject an option-code claim with uppercase technical acronyms unless at least
+one cited excerpt contains the code and those acronyms together.
+
+Reason: The model sometimes produced an otherwise useful answer with an
+invalid citation format. The owner's SMBV specification also had a 40-line
+section in which the B81 RF-output option and high-speed USB input appeared
+far apart; citing that whole section allowed a false B81/high-speed link.
+Using Wiki as substitute evidence, silently fixing a citation, or claiming
+that lexical overlap proves general semantic entailment were rejected. The
+source Vault remains unchanged, and broad answer quality still requires
+source-backed evaluation.

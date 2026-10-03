@@ -16,8 +16,9 @@ implementation commits are on `main`.
 - The entire queryable `RS_Knowledge` corpus may be staged for the approved
   internal Gateway. Keep the source unchanged and Ground answers in Raw
   evidence. The approved default Gateway is `http://127.0.0.1:4000/v1`.
-- Agent scheduling is requested, but only the inert foundation is implemented;
-  no schedule should execute until worker/admission/approval and controls exist.
+- Agent scheduling is requested. A guarded worker now exists, but no Host
+  lifecycle, trusted authorization configuration or user controls are wired;
+  no unattended schedule is running.
 
 ## Completed and verified
 
@@ -27,8 +28,11 @@ implementation commits are on `main`.
   HTTP 404 until project access is granted; live preview is pending.
 - Local schedules have typed exact-version Workflow/Agent Task targets,
   timezone-aware daily/weekly recurrence, SQLite persistence and atomic due
-  claims (`8092949`). No worker, recovery, Agent Web/CLI control or automatic
-  execution exists yet.
+  claims (`8092949`). An explicitly invoked worker (`80bde5e`) now checks
+  per-occurrence authorization, Local Agent admission and Bridge grants,
+  records outcomes and blocks automatic replay of uncertain claims. No Host
+  lifecycle, authorization store, Agent Web/CLI control or automatic execution
+  exists yet.
 - Workflow 11 statistics use GitHub Issue Assignees for member grouping and
   split comma-separated GitHub Project Production values into individual
   instruments; the chart no longer collapses them into `Other` (`9d8e82d`).
@@ -36,7 +40,8 @@ implementation commits are on `main`.
   Production value. The Outlook draft mail Workflow was run through the
   installed Agent: three steps succeeded. Its saved draft was verified in
   Drafts, unsent, with the expected subject, one To, eight CC, a chart image
-  and no `Other` aggregate. No send operation was invoked. Diagnostic runs may
+  and no `Other` aggregate. All nine saved Exchange primary SMTP addresses
+  matched the Workflow receipt. No send operation was invoked. Diagnostic runs may
   have created more than one unsent draft for `2026_40W`; reconcile them with
   the owner's reference before deleting any.
 - Workflow 11 Excel apply was run twice for `2026_40W`: first to apply the
@@ -59,9 +64,15 @@ implementation commits are on `main`.
   Vault remains untouched. Host model credential plumbing was fixed
   (`956b9b5`) and citation validation now accepts a citation after sentence
   punctuation (`d66b78b`). Installed Agent asking answered a narrow CMX500
-  version question with “CSW 9.20.0 and higher” and one Raw citation.
-  Broad market mapping still needs retrieval and grounding quality work;
-  unsupported answers return an insufficient-evidence state.
+  version question with “CSW 9.20.0 and higher” and one Raw citation. Broad
+  market/product questions now reserve distinct Raw evidence facets
+  (`b556838`), retry an invalid Raw-citation draft once (`3809be4`), and
+  show short local excerpts from long Raw sections (`50fc314`). The exact
+  broad question succeeded twice after Host reinstall and no longer claimed
+  that SMBV B81 provides a high-speed USB input. These changes preserve the
+  explicit refusal when Raw grounding still fails. They do not prove semantic
+  entailment: one live answer paraphrased interface use more broadly than
+  its cited excerpt. Full market-to-product/option mapping remains open.
 - The Host wheel was rebuilt and installed locally. Agent Web is running on
   `http://127.0.0.1:53582/`. This bare route intentionally returns 401 without
   the session token; the authenticated UI is reached via the launcher.
@@ -72,13 +83,22 @@ implementation commits are on `main`.
 ## Verification
 
 - The relevant Excel adapter and apply tests: 38 passed, one deliberately
-  deselected machine-absence test. Ruff across `src` and `tests` passed;
-  mypy passed for 300 source files. A wheel build succeeded.
+  deselected machine-absence test. Schedule tests: 15 passed. Knowledge
+  query/product tests: 19 passed after the final option-code correction.
+  Ruff across `src` and `tests` passed; mypy passed for 302 source files.
+  A wheel build succeeded and the Host was reinstalled locally.
 - Full non-browser suite: 1605 passed, four skipped, two deselected; one
   unrelated loopback transport case failed once with Windows socket abort and
   passed immediately in isolation. The unrestricted full run had 1618 passed,
   four skipped, one deselected and ten Chromium browser-CDP connection failures
-  on this machine. Do not describe the unrestricted suite as green.
+  on this machine. After the new schedule/Knowledge slices, a further full
+  unrestricted run had 1628 passed, four skipped and 12 failures: ten Chromium
+  CDP failures, one Excel-machine expectation, and one PowerShell cp950 decode
+  issue. The Marketplace sync test failed in the filesystem sandbox, then
+  passed unsandboxed in isolation. The final non-browser selection, excluding
+  the browser cases, Excel-machine case and sandbox-only Marketplace case,
+  passed: 1622 passed, four skipped, three deselected. Do not describe the
+  unrestricted suite as green.
 - An isolated real-Excel copy demonstrated 22 highlighted rows at the top
   while retaining each hidden record and the original AutoFilter range.
   The actual saved workbook and Outlook draft were checked read-only afterward.
@@ -89,14 +109,16 @@ implementation commits are on `main`.
    7 read-only preview with the User PAT and compare source-derived fixtures.
    Excel write parity is a separate slice.
 2. Evaluate the broad `RS_Knowledge` product/option question with source
-   evidence and improve retrieval or curation only where supported. Convert,
-   ingest and lint integration tests still need a complete user-level pass.
+   evidence. The previously observed B81/high-speed-USB error was blocked,
+   but semantic grounding and coverage remain incomplete; do not use the
+   current broad answer as an approved market mapping. Convert, ingest and
+   lint integration tests still need a complete user-level pass.
 3. Complete Workflow 11 visual draft comparison against the owner's reference,
    then decide what to do with extra diagnostic drafts. Keep send permission
    separate from draft permission.
-4. Implement the schedule worker with claim reconciliation, exact installed
-   Task/Workflow admission, Bridge grants, approval checks, history and user
-   controls. No scheduler may run before those protections exist.
+4. Wire the guarded schedule worker into an explicit Host lifecycle, trusted
+   per-occurrence authorization configuration, history/operator reconciliation
+   and user controls. No unattended scheduler is configured or running yet.
 5. Continue default Marketplace asset review and broader Agent evaluations
    (SOP-to-Workflow and natural-language Skill selection). Update
    `docs/TASKS.md` as these slices land.
