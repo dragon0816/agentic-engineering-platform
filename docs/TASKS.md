@@ -720,9 +720,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   installing Laya. No TypeSafe request or Agent Web activation is involved.
 - [ ] Run the pinned Laya checkpoint on a machine with sufficient free RAM,
   after prefetching it, and inspect repeated offline results. This Host had
-  only about 2 GiB free on 2026-10-03; it is not a reliable performance
-  measurement environment under that load. NONE still has 4/4 Skill coverage
-  and 1/4 exact match; the other three baseline types remain unavailable.
+  about 5.4 GiB free after the optional CPU environment was installed on
+  2026-10-03, but company Zscaler denied the public Hugging Face checkpoint
+  download with HTTP 403. No model-backed inference has run here; the offline
+  CLI reports a missing cached checkpoint. Use a machine with enough free RAM
+  and permitted model access. NONE still has 4/4 Skill coverage and 1/4 exact
+  match; the other three baseline types remain unavailable.
 - [x] Give each Host Knowledge Vault an owner-editable `privacy` setting:
   `private` by default or `public`. Record the owner's current RS_Knowledge
   selection as `public` in the installed Host config. Do not impose a separate

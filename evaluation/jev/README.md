@@ -68,6 +68,13 @@ $LayaPython = Join-Path (Resolve-Path .scratch/laya-venv) 'Scripts/python.exe'
 & $LayaPython -m pip install -e . 'laya==0.3.24'
 ```
 
+If the Windows `py` launcher is unavailable, use an existing Python 3.11+
+interpreter instead, for example:
+
+```powershell
+& .\.venv\Scripts\python.exe -m venv .scratch/laya-venv
+```
+
 The English checkpoint has about 421 million parameters. Its first use needs
 an Internet connection to download from Hugging Face; prepare its cache once
 outside the timed benchmark:
@@ -97,6 +104,17 @@ The current development workstation has 31.13 GiB installed RAM but only about
 PyTorch run under that load could page and distort latency, so it is not a
 useful performance baseline. The local mapping/schema tests can run here
 without installing Laya or downloading a checkpoint.
+
+On 2026-10-03 the owner requested a live try on this workstation. The isolated
+`.scratch/laya-venv` now has Laya 0.3.24 and CPU-only PyTorch 2.7.1 installed;
+the machine had about 5.4 GiB available after installation. The public model
+download from Hugging Face was denied by the company Zscaler proxy with HTTP
+403. Windows certificate trust resolved an earlier TLS error but not this
+network block. There is no cached checkpoint, so the actual inference has not
+run; the offline CLI reports `LocalEntryNotFoundError`. A machine permitted to
+download the public checkpoint can follow the commands above and produce the
+first model-backed comparison. This is a network-access limit, not a missing
+Laya credential or a measured model-quality result.
 
 An explicit TypeSafe diagnostic is available for this exact reviewed corpus:
 

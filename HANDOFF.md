@@ -17,10 +17,14 @@ record; `docs/DECISIONS.md` holds the architecture decisions.
   low-confidence answers abstain. The aggregate report records checkpoint
   revision and warm-up separately from measured latency, without request text.
   Its model-call environment forces Hugging Face offline mode. No real Laya
-  checkpoint was installed or run on this computer; the benchmark currently
-  reports the missing optional package. On 2026-10-03 only about 2 GiB RAM
-  was free, so a full 421M-parameter run here would be a poor latency sample.
-  Run the documented diagnostic on a machine with sufficient free memory.
+  checkpoint was run on this computer. At the owner's request, an isolated
+  ignored `.scratch/laya-venv` now has Laya 0.3.24 and CPU-only PyTorch 2.7.1;
+  memory available after installation was about 5.4 GiB. The company Zscaler
+  proxy returned HTTP 403 for the public Hugging Face checkpoint. Windows
+  truststore resolved TLS validation but not this block. Offline CLI reports
+  `LocalEntryNotFoundError` because the model was not cached. Run the
+  documented diagnostic on a machine with permitted model access and enough
+  free RAM; no model accuracy or latency number exists yet.
 - Focused Laya/JEV tests: 11 passed. Ruff and strict mypy (338 source files)
   passed. The final full non-browser rerun passed: 1,731 passed, 5 platform
   skips, 26 deselected. The first run had one known intermittent Windows
