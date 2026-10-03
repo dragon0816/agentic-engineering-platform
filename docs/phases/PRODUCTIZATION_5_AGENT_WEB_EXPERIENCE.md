@@ -77,3 +77,21 @@ Platform discovery as one coherent capability browser.
   regression tests pass before each slice is committed.
 - The final local preview is restarted and exercised with the configured
   Gateway plus every installed CLI backend status.
+
+## Follow-up — owner-controlled conversation context (2026-10-03)
+
+The owner requested context limits in Settings and chose local session-record
+management before any cross-session memory. The Settings page must show the
+model endpoint's declared context capacity separately from the actual chat
+history controls. `recent_messages` may be 1–40; `history_budget_bytes` may be
+4,000–48,000. Both apply immediately to ordinary Gateway and restricted local
+CLI conversations. The byte budget is a conservative, provider-neutral bound
+for **conversation text only**; system guidance, installed-tool schemas and
+tool observations remain separately bounded. An oversized current question is
+returned for editing rather than silently truncated. Known commands and
+Knowledge retrieval keep their existing routes.
+
+Each local session stores at most 100 messages, evicting the oldest complete
+turns as it grows. Settings can list and explicitly delete an actor-owned
+session; contribution drafts keep their already-captured evidence. No automatic
+summary or cross-session memory is introduced by this follow-up.

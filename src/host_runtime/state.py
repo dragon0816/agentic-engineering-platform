@@ -34,7 +34,7 @@ from common.distribution import (
 )
 from common.enrollment import BridgeDevice
 from host_runtime.contributions import ContributionDraft
-from host_runtime.conversations import ConversationRecord
+from host_runtime.conversations import MAX_STORED_MESSAGES, ConversationRecord
 
 # Version 5 adds portable task-run evidence. Tables are additive and
 # every open creates them, so older files migrate rather than being refused.
@@ -393,9 +393,15 @@ class SqliteLocalState:
             stored = ConversationRecord.model_validate_json(row[0])
             if stored.actor != item.actor:
                 raise LocalStateError("conversation_owner_fixed")
-            if item.updated_at < stored.updated_at or item.messages[: len(stored.messages)] != (
-                stored.messages
-            ):
+            old = stored.messages
+            new = item.messages
+            appended = len(new) >= len(old) and new[: len(old)] == old
+            rolled = (
+                len(old) == MAX_STORED_MESSAGES
+                and len(new) == MAX_STORED_MESSAGES
+                and new[: MAX_STORED_MESSAGES - 2] == old[2:]
+            )
+            if item.updated_at < stored.updated_at or not (appended or rolled):
                 raise LocalStateError("conversation_update_stale")
             conn.execute(
                 "UPDATE conversations SET updated_at = ?, record = ? WHERE session_id = ?",
@@ -414,6 +420,15 @@ class SqliteLocalState:
                 (session_id, actor),
             ).fetchone()
             return None if row is None else ConversationRecord.model_validate_json(row[0])
+
+    def delete_conversation(self, session_id: Symbol, actor: Symbol) -> bool:
+        """Delete only this actor's transcript; independent draft evidence is retained."""
+        with self._write() as conn:
+            deleted = conn.execute(
+                "DELETE FROM conversations WHERE session_id = ? AND actor = ?",
+                (session_id, actor),
+            )
+        return deleted.rowcount == 1
 
     def conversations(self, actor: Symbol, *, limit: int = 50) -> tuple[ConversationRecord, ...]:
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1 or limit > 100:

@@ -419,6 +419,7 @@ class LocalConversationBackends:
         *,
         persona_guidance: str,
         outbound: OutboundContext | None = None,
+        max_history_messages: int = 12,
     ) -> ConversationBackendResult:
         spec = self._specs.get(backend)
         if spec is None:
@@ -449,7 +450,9 @@ class LocalConversationBackends:
             return ConversationBackendResult(
                 backend=backend, status="unavailable", code="backend_not_installed"
             )
-        prompt = self._prompt(history, persona_guidance)
+        if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
+            raise ValueError("conversation supports one to forty history messages")
+        prompt = self._prompt(history, persona_guidance, max_history_messages)
         try:
             completed = self._runner(
                 [executable, *spec.arguments],
@@ -482,21 +485,29 @@ class LocalConversationBackends:
         return ConversationBackendResult(backend=backend, status="answered", text=answer)
 
     @staticmethod
-    def _prompt(history: tuple[ModelMessage, ...], persona_guidance: str) -> str:
+    def _prompt(
+        history: tuple[ModelMessage, ...], persona_guidance: str, max_history_messages: int = 12
+    ) -> str:
         policy = (
             "You are a restricted conversation backend for a Personal Engineering Agent. "
             "Answer with text only. Do not use tools, read files, execute commands, browse, "
             "modify state, or claim an action occurred. The host Agent separately validates "
             "and executes every supported tool through its Bridge."
         )
-        transcript = "\n".join(
-            f"{message.role}: {message.text[:4000]}" for message in history[-12:]
-        )
-        return (
+        prefix = (
             policy
             + "\n\nPersona controls speaking style only:\n"
             + persona_guidance[:4000]
             + "\n\nConversation:\n"
-            + transcript
-            + "\nassistant:"
-        )[:MAX_BACKEND_PROMPT_CHARS]
+        )
+        suffix = "\nassistant:"
+        remaining = MAX_BACKEND_PROMPT_CHARS - len(prefix) - len(suffix)
+        selected: list[str] = []
+        for message in reversed(history[-max_history_messages:]):
+            line = f"{message.role}: {message.text[:4000]}"
+            size = len(line) + (1 if selected else 0)
+            if size > remaining:
+                break
+            selected.append(line)
+            remaining -= size
+        return prefix + "\n".join(reversed(selected)) + suffix

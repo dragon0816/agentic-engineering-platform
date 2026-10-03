@@ -82,10 +82,17 @@ from host_runtime.contributions import (
     ConversationExcerpt,
 )
 from host_runtime.conversation_backends import LocalConversationBackends
+from host_runtime.conversation_context import (
+    ConversationContextSettings,
+    ConversationContextStore,
+    prepare_history,
+)
 from host_runtime.conversations import (
+    MAX_STORED_MESSAGES,
     ConversationBackendAuthenticationRequest,
     ConversationBackendSelectRequest,
     ConversationCreateRequest,
+    ConversationDeleteRequest,
     ConversationMessage,
     ConversationRecord,
     ConversationTurnRequest,
@@ -204,6 +211,7 @@ class AgentWeb:
         self.namespace = namespace if namespace is not None else runtime.config.namespace
         self.config_path = config_path
         self.persona = AgentPersonaStore(runtime.layout.workspace_root)
+        self.conversation_context = ConversationContextStore(runtime.layout.workspace_root)
         self.backends = conversation_backends or LocalConversationBackends(
             runtime.layout.workspace_root
         )
@@ -340,6 +348,12 @@ class AgentWeb:
             "writable": self.config_path is not None,
             "restart_required": False,
             "persona": self.persona.load().model_dump(mode="json"),
+            "context": self.conversation_context.load().model_dump(mode="json"),
+            "memory": {
+                "scope": "session_only",
+                "cross_session": False,
+                "stored_messages": MAX_STORED_MESSAGES,
+            },
             "model": {
                 "configured": endpoint is not None,
                 "data_approval": (
@@ -353,6 +367,9 @@ class AgentWeb:
                 "alias": "" if endpoint is None else endpoint.alias,
                 "provider": "" if endpoint is None else endpoint.provider,
                 "model": "" if endpoint is None else endpoint.model,
+                "declared_context_tokens": (
+                    None if endpoint is None else endpoint.capabilities.max_context_tokens
+                ),
                 "base_url": "" if endpoint is None else endpoint.base_url or "",
                 "credential_secret": "" if credential is None else credential.name,
                 "credential_environment": (
@@ -373,6 +390,11 @@ class AgentWeb:
         with self._one_at_a_time:
             saved = self.persona.save(request)
         return {"ok": True, "restart_required": False, "persona": saved.model_dump(mode="json")}
+
+    def update_context_settings(self, request: ConversationContextSettings) -> dict[str, Any]:
+        with self._one_at_a_time:
+            saved = self.conversation_context.save(request)
+        return {"ok": True, "restart_required": False, "context": saved.model_dump(mode="json")}
 
     def update_model_settings(self, request: ModelSettingsUpdateRequest) -> dict[str, Any]:
         """Validate and atomically save one provider-neutral model endpoint."""
@@ -511,6 +533,12 @@ class AgentWeb:
         with self._one_at_a_time:
             created = self.runtime.state.create_conversation(record)
         return {"conversation": json.loads(created.model_dump_json())}
+
+    def delete_conversation(self, request: ConversationDeleteRequest) -> dict[str, Any]:
+        item = ConversationDeleteRequest.model_validate(request)
+        with self._one_at_a_time:
+            deleted = self.runtime.state.delete_conversation(item.session_id, self.runtime.actor)
+        return {"ok": deleted, "code": None if deleted else "conversation_unknown"}
 
     def conversation_backends(self) -> dict[str, Any]:
         binding = self.runtime.config.models
@@ -704,13 +732,31 @@ class AgentWeb:
                 else:
                     answer = self._slash_command(slash) if slash is not None else {}
             namespace = self.namespace
+            context_settings = self.conversation_context.load()
+            raw_history = tuple(
+                ModelMessage(role=message.role, text=message.text)
+                for message in record.messages[-39:]
+            ) + (ModelMessage(role="user", text=item.message),)
+            try:
+                history = prepare_history(raw_history, context_settings)
+                history_error = False
+            except ValueError:
+                history = ()
+                history_error = True
+            context_too_large = {
+                "ok": False,
+                "answer": (
+                    "This message exceeds the conversation history budget. "
+                    "Shorten it or increase the budget in Settings."
+                ),
+                "status": "needs_input",
+                "code": "current_message_too_large",
+            }
             if answer:
                 pass
+            elif history_error and record.backend != "gateway":
+                answer = context_too_large
             elif record.backend != "gateway":
-                history = tuple(
-                    ModelMessage(role=message.role, text=message.text)
-                    for message in record.messages[-19:]
-                ) + (ModelMessage(role="user", text=item.message),)
                 outbound = (
                     OutboundContext(
                         materials=tuple(
@@ -734,6 +780,7 @@ class AgentWeb:
                     # sends only explicitly declared conversation messages.
                     persona_guidance="",
                     outbound=outbound,
+                    max_history_messages=context_settings.recent_messages,
                 )
                 answer = {
                     "ok": completed.status == "answered",
@@ -790,16 +837,15 @@ class AgentWeb:
                         ),
                         "outcome": json.loads(direct.model_dump_json()),
                     }
+                elif history_error:
+                    answer = context_too_large
                 else:
-                    history = tuple(
-                        ModelMessage(role=message.role, text=message.text)
-                        for message in record.messages[-19:]
-                    ) + (ModelMessage(role="user", text=item.message),)
                     conversational = asyncio.run(
                         self.runtime.agent.converse(
                             local,
                             history,
                             persona_guidance=self.persona.load().prompt_guidance(),
+                            max_history_messages=context_settings.recent_messages,
                         )
                     )
                     result = conversational.conversation
@@ -830,28 +876,30 @@ class AgentWeb:
                 update={
                     "title": title,
                     "updated_at": finished,
-                    "messages": record.messages
-                    + (
-                        ConversationMessage(
-                            message_id=f"message-{uuid.uuid4().hex}",
-                            role="user",
-                            text=item.message,
-                            created_at=started,
-                            status="submitted",
-                        ),
-                        ConversationMessage(
-                            message_id=f"message-{uuid.uuid4().hex}",
-                            role="assistant",
-                            text=str(answer["answer"]),
-                            created_at=finished,
-                            status=status,
-                            trace=(
-                                None
-                                if trace_data is None
-                                else TraceIdentifiers.model_validate(trace_data)
+                    "messages": (
+                        record.messages
+                        + (
+                            ConversationMessage(
+                                message_id=f"message-{uuid.uuid4().hex}",
+                                role="user",
+                                text=item.message,
+                                created_at=started,
+                                status="submitted",
                             ),
-                        ),
-                    ),
+                            ConversationMessage(
+                                message_id=f"message-{uuid.uuid4().hex}",
+                                role="assistant",
+                                text=str(answer["answer"]),
+                                created_at=finished,
+                                status=status,
+                                trace=(
+                                    None
+                                    if trace_data is None
+                                    else TraceIdentifiers.model_validate(trace_data)
+                                ),
+                            ),
+                        )
+                    )[-MAX_STORED_MESSAGES:],
                 }
             )
             saved = self.runtime.state.save_conversation(updated)
@@ -1589,7 +1637,9 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/ask",
             "/api/settings/model",
             "/api/settings/persona",
+            "/api/settings/context",
             "/api/conversations",
+            "/api/conversations/delete",
             "/api/conversations/turn",
             "/api/conversations/backend",
             "/api/backends/authenticate",
@@ -1628,6 +1678,15 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             self._json(200, result)
             return
+        if path == "/api/settings/context":
+            try:
+                context_settings = ConversationContextSettings.model_validate(body)
+                result = self.server.web.update_context_settings(context_settings)
+            except (OSError, ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid context settings"})
+                return
+            self._json(200, result)
+            return
         if path == "/api/conversations":
             try:
                 ConversationCreateRequest.model_validate(body)
@@ -1635,6 +1694,15 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "conversation creation requires an empty request"})
                 return
             self._json(201, self.server.web.create_conversation())
+            return
+        if path == "/api/conversations/delete":
+            try:
+                deletion = ConversationDeleteRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid conversation deletion"})
+                return
+            result = self.server.web.delete_conversation(deletion)
+            self._json(200 if result["ok"] else 404, result)
             return
         if path == "/api/conversations/turn":
             try:

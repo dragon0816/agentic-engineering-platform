@@ -2,6 +2,42 @@
 
 Date: 2026-10-03 (Asia/Taipei). Branch: `main`. No push or live TypeSafe request was made in this checkpoint. `docs/TASKS.md` is the cumulative progress record.
 
+## Agent Web context and session-settings checkpoint
+
+- The owner requested configurable context after asking about the existing
+  128k model declaration, 12-message active history and memory. The owner
+  chose **context settings plus existing session-record management first**;
+  cross-session memory is not part of this slice.
+- Settings now distinguishes declared model context capacity from effective
+  chat history. The model capacity field preserves and can update endpoint
+  metadata. `conversation-context.json` under the Host workspace stores
+  `recent_messages` (1–40, default 12) and `history_budget_bytes`
+  (4,000–48,000, default 48,000), effective on the next ordinary Gateway or
+  restricted local CLI turn. The byte count is a conservative, provider-neutral
+  text-history bound; system/tool content is additional. Oversized current
+  questions return `needs_input` instead of being silently truncated.
+- Local sessions retain at most 100 messages, evicting oldest whole turns.
+  Settings lists saved sessions and offers explicit actor-owned deletion;
+  contribution drafts keep their immutable captured evidence. Knowledge Ask
+  and deterministic commands retain their own routes. No summarization or
+  cross-session learned memory was introduced.
+- Focused Agent Web/context/Gateway/local-agent tests passed after updating
+  exact adapter assertions. Final complete non-browser run using the normal
+  Windows temporary directory: **1,723 passed, 5 skipped, 1 CDP test
+  deselected**. Ruff and strict mypy (334 files) passed. An offline wheel built
+  successfully. Earlier runs with a repository `.scratch` temp root had
+  intermittent Windows `os.replace` permission failures in unrelated Extension
+  and Knowledge staging tests; each passed with the normal system temp root.
+  The independent Chromium/CDP browser test still closes its WebSocket here.
+- The installed `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0`
+  environment was updated from an offline wheel, and Agent Web restarted on
+  `127.0.0.1:53582`. Authenticated local `GET /api/settings` reported defaults
+  12 messages / 48,000 bytes, declared model capacity 128,000 tokens and
+  `session_only` memory. The served HTML contains all three new controls.
+  The existing Gateway remains configured and its mapped credential is present.
+  The refreshed preview was opened in Codex. The ephemeral URL/token is in
+  `agent-web-context-unbuffered.stdout.log` on this Host; do not commit it.
+
 ## Current owner direction
 
 - Prioritize JEV before the remaining validation work. The first provider is the official TypeSafe API. The owner has now declared the complete current RS_Knowledge Vault public; its Host binding has `privacy: "public"`. Other Vaults keep their own owner-editable `private`/`public` setting, defaulting to private.

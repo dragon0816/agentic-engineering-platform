@@ -396,6 +396,10 @@ tr:last-child td { border-bottom: none; }
         <input id="model-base-url" required>
         <label for="model-name">Model name served by the Gateway</label>
         <input id="model-name" placeholder="Ask your Gateway administrator for this name" required>
+        <label for="model-context-capacity">Declared model context capacity (tokens)</label>
+        <input id="model-context-capacity" type="number" min="1" max="10000000" required>
+        <p class="note">This value describes the model endpoint for routing. It does not
+          increase the context sent by chat; use the conversation limits below for that.</p>
         <div class="two">
           <div><label for="model-secret">SecretRef name (optional)</label>
             <input id="model-secret" placeholder="llm_gateway_token"></div>
@@ -410,6 +414,31 @@ tr:last-child td { border-bottom: none; }
         <p><button class="go" id="model-save" type="submit">Save model settings</button></p>
         <pre id="model-result" class="note">Reading current settings&hellip;</pre>
       </form>
+    </div>
+    <h2>Conversation context and saved sessions</h2>
+    <p class="note">These limits control how much recent chat text is sent on the next
+      ordinary conversation turn. They are separate from the model's declared
+      context window. Knowledge questions retrieve evidence independently.</p>
+    <div class="card settings">
+      <form id="context-settings">
+        <div class="two">
+          <div><label for="context-messages">Recent messages, including the new question</label>
+            <input id="context-messages" type="number" min="1" max="40" required></div>
+          <div><label for="context-budget">History text budget (UTF-8 bytes)</label>
+            <input id="context-budget" type="number" min="4000" max="48000" required></div>
+        </div>
+        <p class="note">UTF-8 bytes conservatively bound history text. System guidance,
+          tool definitions and tool results use additional context. A question that
+          exceeds this budget is returned for editing, never silently shortened.</p>
+        <p><button class="go" id="context-save" type="submit">Save context limits</button></p>
+        <p id="context-result" class="note" role="status"></p>
+      </form>
+      <hr>
+      <p id="memory-state" class="note"></p>
+      <label for="session-manage-target">Saved session</label>
+      <select id="session-manage-target"></select>
+      <p><button id="session-delete" type="button">Delete selected session</button></p>
+      <p id="session-manage-result" class="note" role="status"></p>
     </div>
     <h2>Capability management</h2>
     <div class="grid">
@@ -1173,6 +1202,7 @@ async function loadSettings() {
   el("model-alias").value = model.alias || "company";
   el("model-base-url").value = model.base_url || ["http:", "", "127.0.0.1:4000/v1"].join("/");
   el("model-name").value = model.model || "";
+  el("model-context-capacity").value = model.declared_context_tokens || 128000;
   el("model-secret").value = model.credential_secret || "";
   el("model-environment").value = model.credential_environment || "";
   el("model-save").disabled = !settings.writable;
@@ -1185,7 +1215,61 @@ async function loadSettings() {
     ? "Administrator approval: " + model.data_approval.approval_ref
       + " · Classes: " + model.data_approval.approved_classes.join(", ")
     : "No administrator data-transfer approval is recorded for this Gateway.";
+  el("context-messages").value = settings.context.recent_messages;
+  el("context-budget").value = settings.context.history_budget_bytes;
+  el("context-result").textContent = "Active now. Model-declared capacity: "
+    + (model.declared_context_tokens == null
+      ? "not configured" : model.declared_context_tokens + " tokens")
+    + ". The history budget is separate from that capacity.";
+  el("memory-state").textContent = "Saved locally per session (up to "
+    + settings.memory.stored_messages + " messages). Older messages are visible but outside"
+    + " the active context. Cross-session memory is off.";
+  const listed = await call("/api/conversations"), target = el("session-manage-target");
+  target.replaceChildren(...listed.conversations.map(item => {
+    const option = document.createElement("option"); option.value = item.session_id;
+    option.textContent = item.title + " · " + item.messages + " messages";
+    return option;
+  }));
+  if ([...target.options].some(option => option.value === activeConversation)) {
+    target.value = activeConversation;
+  }
+  el("session-delete").disabled = !listed.conversations.length;
 }
+
+el("context-settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = el("context-save"), result = el("context-result");
+  button.disabled = true; result.textContent = "Saving context limits…";
+  try {
+    const saved = await call("/api/settings/context", {
+      recent_messages: Number(el("context-messages").value),
+      history_budget_bytes: Number(el("context-budget").value),
+    });
+    result.textContent = "Saved. The next ordinary chat turn uses "
+      + saved.context.recent_messages + " recent messages within "
+      + saved.context.history_budget_bytes + " UTF-8 bytes of history text.";
+  } catch (failure) {
+    result.textContent = "Context limits were not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
+
+el("session-delete").addEventListener("click", async () => {
+  const target = el("session-manage-target"), selected = target.selectedOptions[0];
+  if (!selected || !confirm("Permanently delete saved session “"
+      + selected.textContent + "”?")) return;
+  const result = el("session-manage-result"), button = el("session-delete");
+  button.disabled = true; result.textContent = "Deleting session…";
+  try {
+    const deleted = await call("/api/conversations/delete", {session_id: selected.value});
+    if (!deleted.ok) throw new Error(deleted.code || "deletion_failed");
+    if (selected.value === activeConversation) activeConversation = "";
+    await loadChat(activeConversation || undefined);
+    await loadSettings();
+    result.textContent = "Session deleted. Independent contribution drafts retain their evidence.";
+  } catch (failure) {
+    result.textContent = "Session was not deleted: " + failure.message;
+  } finally { button.disabled = false; }
+});
 
 el("persona-settings").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -1214,6 +1298,7 @@ el("model-settings").addEventListener("submit", async (event) => {
   const body = {
     alias: el("model-alias").value.trim(), provider: el("model-provider").value,
     model: el("model-name").value.trim(), base_url: el("model-base-url").value.trim(),
+    max_context_tokens: Number(el("model-context-capacity").value),
   };
   if (secret || environment) {
     body.credential_secret = secret; body.credential_environment = environment;

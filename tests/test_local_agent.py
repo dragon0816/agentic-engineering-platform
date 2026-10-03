@@ -179,6 +179,7 @@ def test_conversation_uses_gateway_backend_after_admission(tmp_path: Path) -> No
         "persona_guidance": "Be concise.",
         "allowed_tools": None,
         "max_turns": 5,
+        "max_history_messages": 12,
     }
 
 

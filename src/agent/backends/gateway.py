@@ -28,4 +28,5 @@ class GatewayModelBackend:
                 None if request.allowed_tools is None else frozenset(request.allowed_tools)
             ),
             max_turns=request.max_turns,
+            max_history_messages=request.max_history_messages,
         )

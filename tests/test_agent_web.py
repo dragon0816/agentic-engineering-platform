@@ -35,6 +35,7 @@ from extensions.package import stage_extension_package
 from extensions.runtime import ExtensionActivationRecord, ExtensionLifecycleStore
 from host_runtime.contracts import CompanyHostConfiguration, KnowledgeAskRequest
 from host_runtime.conversation_backends import LocalConversationBackends
+from host_runtime.conversation_context import ConversationContextSettings
 from host_runtime.conversations import ConversationBackendSelectRequest, ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
@@ -269,6 +270,10 @@ def test_ask_uses_compact_composer_backend_control(served: AgentWebServer) -> No
     assert 'id="backend-auth-start"' in page
     assert 'call("/api/backends/authenticate"' in page
     assert 'const domKind = kind.replaceAll("_", "-")' in page
+    assert 'id="model-context-capacity"' in page
+    assert 'id="context-messages"' in page
+    assert 'id="context-budget"' in page
+    assert 'id="session-delete"' in page
 
 
 def test_workspace_navigation_and_sessions_live_in_the_sidebar(
@@ -507,6 +512,7 @@ def test_model_settings_write_only_names_and_require_restart(tmp_path: Path) -> 
                     "provider": "openai_compatible",
                     "model": "company-model",
                     "base_url": "http://127.0.0.1:4000/v1",
+                    "max_context_tokens": 64_000,
                     "credential_secret": "llm_gateway_token",
                     "credential_environment": "AEP_LLM_TOKEN",
                 },
@@ -523,6 +529,7 @@ def test_model_settings_write_only_names_and_require_restart(tmp_path: Path) -> 
     endpoint = written.models.catalog.endpoints[0]
     assert endpoint.base_url == "http://127.0.0.1:4000/v1"
     assert endpoint.model == "company-model"
+    assert endpoint.capabilities.max_context_tokens == 64_000
     assert endpoint.credential is not None
     assert endpoint.credential.name == "llm_gateway_token"
     assert written.credential_environment()["llm_gateway_token"] == "AEP_LLM_TOKEN"
@@ -657,6 +664,130 @@ def test_conversation_history_survives_a_runtime_restart(tmp_path: Path) -> None
         restored = AgentWeb(rebuilt).conversations(session_id)
         assert restored["selected"]["session_id"] == session_id
         assert len(restored["selected"]["messages"]) == 2
+
+
+def test_context_settings_persist_and_bound_gateway_history(tmp_path: Path) -> None:
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "models": binding(
+                catalog={
+                    "endpoints": [endpoint(credential=None, model="fixture-model")],
+                    "routes": [{"name": "default", "alias": "company"}],
+                }
+            )
+        },
+    )
+
+    class ChatGateway:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, Any]] = []
+
+        def send(
+            self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
+        ) -> GatewayReply:
+            self.calls.append(json.loads(body))
+            return GatewayReply(
+                200,
+                {"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}}]},
+            )
+
+    transport = ChatGateway()
+    with build_runtime(config, layout=layout, model_transport=transport) as runtime:
+        web = AgentWeb(runtime)
+        session = web.create_conversation()["conversation"]["session_id"]
+        assert web.settings()["context"]["recent_messages"] == 12
+        saved = web.update_context_settings(
+            ConversationContextSettings(recent_messages=3, history_budget_bytes=4_000)
+        )
+        assert saved["restart_required"] is False
+        for number in range(4):
+            reply = web.conversation_turn(
+                ConversationTurnRequest(session_id=session, message=f"question {number}")
+            )
+            assert reply["ok"] is True
+        assert [item["content"] for item in transport.calls[-1]["messages"][1:]] == [
+            "question 2",
+            "ok",
+            "question 3",
+        ]
+        web.update_context_settings(
+            ConversationContextSettings(recent_messages=20, history_budget_bytes=48_000)
+        )
+        for number in range(4, 8):
+            web.conversation_turn(
+                ConversationTurnRequest(session_id=session, message=f"question {number}")
+            )
+        assert transport.calls[-1]["messages"][1]["content"] == "question 0"
+        before = len(transport.calls)
+        too_large = web.conversation_turn(
+            ConversationTurnRequest(session_id=session, message="你" * 4_001)
+        )
+        assert too_large["answer"]["code"] == "current_message_too_large"
+        assert len(transport.calls) == before
+    with build_runtime(config, layout=layout) as rebuilt:
+        assert AgentWeb(rebuilt).settings()["context"]["recent_messages"] == 20
+
+
+def test_context_and_session_management_are_authenticated_and_owner_scoped(
+    served: AgentWebServer,
+) -> None:
+    settings = fetch(base(served) + "/api/settings", token=served.token).json()
+    assert settings["memory"]["cross_session"] is False
+    assert fetch(base(served) + "/api/settings/context", body={}).status == 401
+    assert fetch(
+        base(served) + "/api/settings/context",
+        token=served.token,
+        body={"recent_messages": 0, "history_budget_bytes": 4_000},
+    ).status == 400
+    saved = fetch(
+        base(served) + "/api/settings/context",
+        token=served.token,
+        body={"recent_messages": 1, "history_budget_bytes": 4_000},
+    )
+    assert saved.status == 200
+    assert saved.json()["context"]["recent_messages"] == 1
+    created = fetch(base(served) + "/api/conversations", token=served.token, body={}).json()
+    session = created["conversation"]["session_id"]
+    assert served.web.runtime.state.delete_conversation(session, "another-actor") is False
+    assert (
+        fetch(base(served) + "/api/conversations/delete", body={"session_id": session}).status
+        == 401
+    )
+    assert fetch(
+        base(served) + "/api/conversations/delete",
+        token=served.token,
+        body={"session_id": session, "actor": "other"},
+    ).status == 400
+    deleted = fetch(
+        base(served) + "/api/conversations/delete",
+        token=served.token,
+        body={"session_id": session},
+    )
+    assert deleted.status == 200
+    assert deleted.json()["ok"] is True
+    assert (
+        fetch(base(served) + "/api/conversations?session_id=" + session, token=served.token)
+        .json()["selected"]
+        is None
+    )
+
+
+def test_saved_session_rolls_at_one_hundred_messages_without_becoming_unreadable(
+    tmp_path: Path,
+) -> None:
+    config, layout = ready(tmp_path)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime)
+        session = web.create_conversation()["conversation"]["session_id"]
+        for _ in range(51):
+            assert web.conversation_turn(
+                ConversationTurnRequest(session_id=session, message="/help")
+            )["ok"] is True
+        saved = web.conversations(session)["selected"]
+        assert len(saved["messages"]) == 100
+    with build_runtime(config, layout=layout) as rebuilt:
+        assert len(AgentWeb(rebuilt).conversations(session)["selected"]["messages"]) == 100
 
 
 def test_public_local_cli_backend_selection_answers_and_persists(tmp_path: Path) -> None:

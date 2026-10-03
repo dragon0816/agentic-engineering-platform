@@ -2,7 +2,7 @@
 
 from typing import Literal, Protocol, Self, TypeVar
 
-from pydantic import StrictBool, model_validator
+from pydantic import Field, StrictBool, model_validator
 
 from common.base import Contract, Symbol
 from common.execution import RequestContext
@@ -47,6 +47,7 @@ class GatewayConversationRequest(Contract):
     persona_guidance: str | None = None
     allowed_tools: tuple[Symbol, ...] | None = None
     max_turns: int = 5
+    max_history_messages: int = Field(default=12, ge=1, le=40, strict=True)
 
     @model_validator(mode="after")
     def bounded_tool_scope(self) -> Self:

@@ -210,6 +210,7 @@ class LocalAgent:
         history: tuple[ModelMessage, ...],
         *,
         persona_guidance: str | None = None,
+        max_history_messages: int = 12,
     ) -> LocalConversationOutcome:
         """Run the bounded conversation loop after normal device admission."""
         item = LocalAgentRequest.model_validate(request)
@@ -232,7 +233,10 @@ class LocalAgent:
         backend = self._conversation_backends.select("gateway", eligible_ids=("gateway",))
         result = await backend.execute(
             GatewayConversationRequest(
-                context=context, history=history, persona_guidance=persona_guidance
+                context=context,
+                history=history,
+                persona_guidance=persona_guidance,
+                max_history_messages=max_history_messages,
             )
         )
         runs: list[LocalRunSummary] = []

@@ -10,6 +10,8 @@ from common.base import Contract, Symbol, Text
 from common.execution import TraceIdentifiers
 from host_runtime.conversation_backends import ConversationBackendName
 
+MAX_STORED_MESSAGES = 100
+
 
 class ConversationMessage(Contract):
     message_id: Symbol
@@ -38,7 +40,7 @@ class ConversationRecord(Contract):
     classified_by: Symbol | None = None
     created_at: datetime
     updated_at: datetime
-    messages: tuple[ConversationMessage, ...] = Field(default=(), max_length=100)
+    messages: tuple[ConversationMessage, ...] = Field(default=(), max_length=MAX_STORED_MESSAGES)
 
     @model_validator(mode="after")
     def ordered_history(self) -> Self:
@@ -56,6 +58,10 @@ class ConversationRecord(Contract):
 
 class ConversationCreateRequest(Contract):
     """An explicit empty request; identity and title come from the host."""
+
+
+class ConversationDeleteRequest(Contract):
+    session_id: Symbol
 
 
 class ConversationTurnRequest(Contract):

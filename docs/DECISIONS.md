@@ -464,3 +464,23 @@ setting expresses that decision without treating all local Knowledge as one
 class or adding an approval workflow to edit it. The existing TypeSafe JEV
 adapter is a decision selector, not a Knowledge answer model, so this privacy
 setting alone does not create a new JEV query path.
+
+## 2026-10-03 — Make conversation history limits explicit and local
+
+Decision: Store Agent Web context controls in a host-local
+`conversation-context.json`, separate from the model catalog's declared
+context capacity. Ordinary Gateway and restricted local CLI chat use the same
+recent-message and UTF-8 history-text budgets, effective on the next turn.
+The current question must fit in full or return `needs_input`; prior messages
+are taken as a contiguous recent tail. Saved session transcripts retain up to
+100 messages and can be explicitly deleted by their owner. Knowledge Ask and
+deterministic commands keep their own routing. This slice adds no cross-session
+memory or automatic summary.
+
+Reason: The catalog's 128k context declaration was a routing capability, not
+a control over what Web sent to the model. The previous hard-coded 12-message
+window hid that distinction. A conservative text budget works with the
+provider-neutral model contract without adding a tokenizer dependency, while
+retaining local session evidence. A global learned-memory store was deferred
+at the owner's request; changing the model's declared capacity alone was
+rejected because it cannot bound or expand the active transcript.

@@ -218,6 +218,7 @@ class Gateway:
         persona_guidance: str | None = None,
         allowed_tools: frozenset[str] | None = None,
         max_turns: int = 5,
+        max_history_messages: int = MAX_CONVERSATION_HISTORY,
     ) -> GatewayConversationResult:
         """Use installed commands as tools in a five-turn/four-call maximum loop.
 
@@ -230,6 +231,8 @@ class Gateway:
         context = RequestContext.model_validate(request)
         if isinstance(max_turns, bool) or not 1 <= max_turns <= 5:
             raise ValueError("Gateway conversation supports one to five turns")
+        if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
+            raise ValueError("Gateway conversation supports one to forty history messages")
         if any(
             message.role not in {"user", "assistant"}
             or message.images
@@ -288,7 +291,7 @@ class Gateway:
                 role=message.role,
                 text=message.text[:MAX_CONVERSATION_MESSAGE_CHARS],
             )
-            for message in history[-MAX_CONVERSATION_HISTORY:]
+            for message in history[-max_history_messages:]
         )
         messages = [ModelMessage(role="system", text=prompt), *bounded_history]
         if tools:

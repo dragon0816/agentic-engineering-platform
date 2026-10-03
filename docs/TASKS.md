@@ -23,6 +23,13 @@ the history is complete; this table is the index into them.
 
 ## Status
 
+- [x] Add Agent Web context Settings and local session management (2026-10-03):
+  show declared model capacity separately from effective recent-message and
+  UTF-8 history-text limits; apply saved limits to Gateway and local CLI chat;
+  reject oversized current questions without truncation; keep a rolling
+  100-message transcript and allow owner-scoped session deletion. Cross-session
+  memory remains out of this owner-selected slice.
+
 Phases 0 to 6 are complete. Phase 7 remains active under
 `docs/phases/PHASE_7_MIGRATION.md`. The enrollment, resident Agent, platform
 transport, authorization and workflow 11 implementation slices have merged;
