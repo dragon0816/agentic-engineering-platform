@@ -58,6 +58,7 @@ class KnowledgeQueryHandler:
             k=8,
             trace=context.trace,
             raw_citations_only=True,
+            evidence_coverage=True,
         )
         if answer.status in ("no_match", "unanswered"):
             raise CapabilityRefused("knowledge_insufficient_evidence")

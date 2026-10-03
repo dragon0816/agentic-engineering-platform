@@ -124,6 +124,7 @@ def test_retrieval_is_ranked_deterministic_and_cites_provenance(tmp_path: Path) 
     assert wiki["wiki/entities/GaN.md"].citation.source is None
     assert all("source_id" not in p.text for p in retrieve(vault, "source_id src", k=9))
     assert retrieve(vault, "GaN power amplifier", k=4) == passages
+    assert retrieve(vault, "GaN power amplifier", k=4, evidence_coverage=True) == passages
     assert [p.score for p in passages] == sorted((p.score for p in passages), reverse=True)
     raw_grounded = retrieve(vault, "GaN power amplifier", k=2, min_raw=2)
     assert [p.citation.kind for p in raw_grounded] == ["raw", "raw"]
@@ -180,6 +181,49 @@ def test_only_the_current_version_of_an_original_is_cited(tmp_path: Path) -> Non
     hits = retrieve(vault, "watts limit", k=5)
     assert [p.citation.raw_ref for p in hits] == [latest.raw_ref]
     assert hits[0].text == "The limit is 12 watts."
+
+
+def test_bilingual_market_question_covers_raw_market_and_product_option_evidence(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PlainTextExtractor()])
+
+    def add(name: str, text: str) -> str:
+        original = f"drop/{name}.txt"
+        drop(vault, original, text.encode("utf-8"))
+        return intake.intake(original, mode="apply", today=TODAY).raw_ref
+
+    market = add(
+        "market",
+        "高速通訊市場正在部署 800G Ethernet 和 high-speed digital links，測試需求包含訊號完整性。",
+    )
+    product = add(
+        "Helios_specs",
+        "Helios vector analyzer measures signal integrity on high-speed digital links. "
+        "Option K17 enables differential measurements for these links.",
+    )
+    second_product = add(
+        "Lyra_specs",
+        "Lyra signal tester validates high-speed communication links. "
+        "Option K22 adds an eye-diagram measurement for digital interfaces.",
+    )
+    for number in range(10):
+        add(
+            f"unrelated-{number}",
+            f"高速通訊市場產品新聞第 {number} 期。本文只有供應商名單。",
+        )
+    (vault.root / "wiki" / "overview.md").write_text(
+        "# 高速通訊市場產品與 option\n\n百科摘要不是原始產品規格。",
+        encoding="utf-8",
+    )
+    question = "根據資料，哪些產品和 option 可以接軌高速通訊市場？"
+    ordinary = retrieve(vault, question, k=4, min_raw=4)
+    assert product not in {hit.citation.raw_ref for hit in ordinary}
+    covered = retrieve(vault, question, k=5, min_raw=4, evidence_coverage=True)
+    raw_refs = {hit.citation.raw_ref for hit in covered if hit.citation.kind == "raw"}
+    assert {market, product, second_product}.issubset(raw_refs)
+    assert all(hit.citation.source is not None for hit in covered if hit.citation.kind == "raw")
 
 
 def test_synthesis_may_cite_only_what_was_retrieved(tmp_path: Path) -> None:

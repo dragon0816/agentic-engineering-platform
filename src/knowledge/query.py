@@ -16,6 +16,7 @@ import hashlib
 import math
 import re
 from collections import Counter
+from pathlib import PurePosixPath
 from typing import Literal
 
 from pydantic import Field, ValidationError
@@ -122,6 +123,56 @@ class _Doc:
         self.citation = citation
         self.counts = Counter(tokens(text))
         self.length = sum(self.counts.values())
+        reference = citation.raw_ref or citation.wiki_page or ""
+        self.search_counts = self.counts + Counter(
+            tokens(PurePosixPath(reference).stem.replace("_", " ").replace("-", " "))
+        )
+        self.search_length = sum(self.search_counts.values())
+
+
+def _coverage_terms(question: str) -> tuple[tuple[set[str], tuple[str, ...]], ...]:
+    """Small, product-neutral bilingual facets for broad evidence questions.
+
+    These are retrieval aliases, never answer facts. Their exact matching
+    prevents an unrelated single-language or narrow question from changing
+    the established BM25 order.
+    """
+    lower = question.casefold()
+
+    def asks(*phrases: str) -> bool:
+        return any(phrase in lower for phrase in phrases)
+
+    if not (asks("高速", "high speed", "high-speed") and asks("市場", "market")):
+        return ()
+    if not asks("產品", "product", "instrument", "analyzer", "tester"):
+        return ()
+    speed = "高速 high speed high-speed digital"
+    communications = "通訊 通信 communication communications connectivity links"
+    market = "市場 market applications industry"
+    product = "產品 product products instrument analyzer tester specs specifications"
+    option = "選配 選件 option options optional configuration feature"
+    facets: list[tuple[set[str], tuple[str, ...]]] = [
+        (set(tokens(f"{speed} {communications} {market}")), ("market", "市場")),
+    ]
+    if asks("option", "選配", "選件"):
+        facets.append(
+            (
+                set(tokens(f"{speed} {communications} {product} {option}")),
+                ("option", "選配", "選件"),
+            )
+        )
+    else:
+        facets.append((set(tokens(f"{speed} {communications} {product}")), ("product", "產品")))
+    return tuple(facets)
+
+
+def _facet_candidate(doc: _Doc, label: tuple[str, ...]) -> bool:
+    if doc.citation.kind != "raw":
+        return False
+    searchable = f"{doc.text} {doc.citation.raw_ref or ''}".casefold()
+    if not any(word in searchable for word in label):
+        return False
+    return any(word in searchable for word in ("高速", "high speed", "high-speed"))
 
 
 def _corpus(vault: Vault) -> list[_Doc]:
@@ -170,7 +221,12 @@ def _corpus(vault: Vault) -> list[_Doc]:
 
 
 def retrieve(
-    vault: Vault, question: str, *, k: int = 5, min_raw: int = 0
+    vault: Vault,
+    question: str,
+    *,
+    k: int = 5,
+    min_raw: int = 0,
+    evidence_coverage: bool = False,
 ) -> tuple[Passage, ...]:
     """BM25 over every current Raw section and Wiki paragraph; ties break by
     corpus order, so the same question always returns the same passages."""
@@ -184,30 +240,85 @@ def retrieve(
     docs = _corpus(vault)
     if not docs:
         return ()
+    facets = _coverage_terms(question) if evidence_coverage else ()
+    covered = bool(facets)
     average = sum(doc.length for doc in docs) / len(docs)
     frequency: Counter[str] = Counter()
     for doc in docs:
         frequency.update(set(doc.counts))
+    search_average = sum(doc.search_length for doc in docs) / len(docs) if covered else average
+    search_frequency: Counter[str] = Counter()
+    if covered:
+        for doc in docs:
+            search_frequency.update(set(doc.search_counts))
     k1, b = 1.5, 0.75
+
+    def score(doc: _Doc, terms: set[str], *, search_fields: bool = False) -> float:
+        counts = doc.search_counts if search_fields else doc.counts
+        length = doc.search_length if search_fields else doc.length
+        frequencies = search_frequency if search_fields else frequency
+        mean_length = search_average if search_fields else average
+        return sum(
+            math.log(1 + (len(docs) - frequencies[term] + 0.5) / (frequencies[term] + 0.5))
+            * counts[term]
+            * (k1 + 1)
+            / (counts[term] + k1 * (1 - b + b * length / mean_length))
+            for term in terms
+            if counts[term]
+        )
+
     scored: list[tuple[float, int, _Doc]] = []
     for position, doc in enumerate(docs):
-        score = 0.0
-        for term in set(query):
-            count = doc.counts.get(term, 0)
-            if not count:
-                continue
-            idf = math.log(1 + (len(docs) - frequency[term] + 0.5) / (frequency[term] + 0.5))
-            score += idf * count * (k1 + 1) / (count + k1 * (1 - b + b * doc.length / average))
-        if score > 0:
-            scored.append((score, position, doc))
+        relevance = score(doc, set(query))
+        if relevance > 0:
+            scored.append((relevance, position, doc))
     scored.sort(key=lambda item: (-item[0], item[1]))
-    selected = [item for item in scored if item[2].citation.kind == "raw"][:min_raw]
+    selected: list[tuple[float, int, _Doc]] = []
+    selected_texts: set[str] = set()
+    if covered:
+        for terms, label in facets:
+            candidates = (
+                (score(doc, terms, search_fields=True), position, doc)
+                for position, doc in enumerate(docs)
+                if _facet_candidate(doc, label)
+            )
+            ranked = sorted(
+                (item for item in candidates if item[0] > 0),
+                key=lambda item: (-item[0], item[1]),
+            )
+            limit = 1 if label[0] == "market" else 2
+            added = 0
+            for item in ranked:
+                if len(selected) >= k or added >= limit:
+                    break
+                seen_sources = {candidate[2].citation.raw_ref for candidate in selected}
+                normalized = item[2].text.strip().casefold()
+                if item[2].citation.raw_ref in seen_sources or normalized in selected_texts:
+                    continue
+                selected.append(item)
+                selected_texts.add(normalized)
+                added += 1
     selected_positions = {position for _, position, _ in selected}
+    for item in scored:
+        if len(selected) >= min_raw:
+            break
+        normalized = item[2].text.strip().casefold()
+        if (
+            item[2].citation.kind == "raw"
+            and item[1] not in selected_positions
+            and (not covered or normalized not in selected_texts)
+        ):
+            selected.append(item)
+            selected_positions.add(item[1])
+            selected_texts.add(normalized)
     for item in scored:
         if len(selected) >= k:
             break
-        if item[1] not in selected_positions:
+        normalized = item[2].text.strip().casefold()
+        if item[1] not in selected_positions and (not covered or normalized not in selected_texts):
             selected.append(item)
+            selected_positions.add(item[1])
+            selected_texts.add(normalized)
     return tuple(
         Passage(text=doc.text, citation=doc.citation, score=round(score, 6))
         for score, _, doc in sorted(selected, key=lambda item: (-item[0], item[1]))
@@ -245,12 +356,14 @@ class QueryEngine:
         k: int = 5,
         trace: TraceIdentifiers | None = None,
         raw_citations_only: bool = False,
+        evidence_coverage: bool = False,
     ) -> Answer:
         passages = retrieve(
             self.vault,
             question,
             k=k,
             min_raw=min(k, 4) if raw_citations_only else 0,
+            evidence_coverage=evidence_coverage,
         )
         if not passages:
             return Answer(question=question, status="no_match")
