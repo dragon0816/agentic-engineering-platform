@@ -939,3 +939,99 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   inert text. Focused browser-script and DOM safety tests passed, and a local
   Edge screenshot was visually inspected. Full repository verification remains
   deferred to the owner's merge checkpoint.
+- [ ] G3 Wiki-first Knowledge candidate 1.3.0: source Vault schema and
+  `ask-market` / `ask-competitor` Skills were reviewed. An opt-in index-to-Wiki-
+  to-Raw navigator and Skill answer guidance are implemented locally with
+  focused tests; the live Web remains on rollback Skill 1.1.0. Isolated tests
+  of the owner's three questions found: CMP180/market has partial Raw but no
+  proven option-to-trend link; NTN validates CMX500 but the answer copies PR
+  marketing and omits other candidate products; CMP180/competitor has only a
+  CMX500 battle-card co-mention. Finish source-aware partial answering,
+  market/source-date and competitor comparability checks, then rerun the three
+  questions before installing the candidate in Agent Web.
+- [ ] G3 Hermes reference comparison and acceptance: the owner's Downloads
+  `rs-knowledge-base_SKILL.md` and `html-report-delivery_SKILL.md` match the
+  local Hermes versions exactly. The former requires index-first navigation,
+  bilingual Wiki/Raw search and separate market, technical and product/option
+  evidence; the latter is only for HTML artifact delivery. Candidate 1.3.0
+  now finds CMP180 market and option Raw that previously fell below top-k,
+  retains the NTN signal-generator source as well as CMX500, bounds long Raw
+  sections before Gateway synthesis, retries one empty model response, and
+  can preserve individually cited claims. Focused Query/Knowledge tests:
+  92 passed; guided Agent Web tests: 4 passed; Ruff and mypy passed.
+  **Acceptance remains open:** a live NTN answer still got `validated` despite
+  recommending a product only because NTN appears as a target market and
+  including a citation-only line and clipped phrase. Strengthen semantic
+  recommendation/source-role checks, make partial answers readable, and rerun
+  all three owner questions before installing 1.3.0 in Agent Web.
+- [ ] G3 candidate 1.3.0 live quality checkpoint after Hermes Skill review:
+  the three owner questions now run in an isolated Host with the real Vault and
+  Gateway. CMP180/market returns cited market and option facts while retaining
+  `needs_input` for the absent direct link; however the chosen 5G market trend
+  is not yet well matched to the cited WLAN/other CMP180 options. NTN rejects
+  an OSP/NTN reseller target-market co-mention and validates only the narrower
+  supported CMX500/related test use cases; it still misses other instrument
+  roles such as signal generation. CMP180/competitor returns cited option and
+  RF-test facts with explicit competitor/direct-link gaps. Fix iterative
+  product-to-market retrieval, source-role breadth, and answer quality before
+  installing this candidate in Agent Web. A credential-like example in Raw is
+  now redacted before answer recording; `Rel. 17` stays intact in citation
+  parsing. Local Query/Knowledge/Agent Web tests: 175 passed, 2 deselected;
+  Ruff and mypy were run on changed modules. Full merge verification remains
+  pending.
+  A follow-up NTN query expansion trial found the signal-generator slide in
+  Raw but still failed to surface the independent NTN whitepaper in the final
+  product evidence set because several CMX500 sources filled the bounded
+  slots. That query-only trial was reverted. The next slice should diversify
+  product source roles and prioritize direct technical documents over repeated
+  promotional sources, with a real-Vault acceptance check before deployment.
+  A source/family diversity implementation now brings the NTN whitepaper into
+  the real-Vault evidence set while retaining CMX500 sources. Its isolated
+  live answer still fell back to one CMX500 sentence, so the remaining work is
+  source-section selection and multi-role answer synthesis/validation, not
+  another expansion of keyword lists. Re-run the three owner questions after
+  that change; candidate 1.3.0 remains uninstalled.
+  Handoff checkpoint on 2026-10-04: diagnosed the single-sentence fallback as
+  a successful Gateway response with empty visible text at the candidate's
+  800-token synthesis cap. Candidate 1.3.0 now declares 3072 tokens through a
+  Skill procedure field; a real isolated NTN probe produced a Chinese,
+  multi-item, Raw-cited answer. Source-aware recommendations now accept a
+  nearby context sentence (PVT360) while still rejecting a reseller-only NTN
+  market list. The most recent isolated three-question run validated NTN, but
+  CMP180/market and CMP180/competitor remain `needs_input` and their partial
+  answer text is clipped or incomplete. A latest adjacent-Raw-section context
+  edit passed focused tests but has not had a real-Vault/Gateway rerun. Claude
+  Code handoff and exact next action are in `HANDOFF.md`; Skill 1.3.0 remains
+  uncommitted, uninstalled and unreleased.
+- [x] G3 candidate 1.3.0 answer-salvage and retrieval fixes (Claude Code,
+  2026-10-04): real-Vault/Gateway reruns of the three owner questions traced
+  the remaining loss of supported facts to process defects, not Vault gaps.
+  (1) Sentence splitting treated list markers (`1.`) and a second citation
+  group (`。[5][7]`) as uncited sentences, failing whole drafts. (2) A failed
+  first draft was discarded and a thinner retry kept; the adapter now keeps
+  the draft with more Raw-grounded sentences. (3) The NTN recommendation
+  check split PDF hard-wrapped lines and missed nearby NTN context (PVT360);
+  it now unwraps lines and treats a Raw file named for the focus (NTN
+  whitepaper) as focused context, still rejecting the reseller list. (4) The
+  handler and Host required the literal subject (`CMP180`) in answer text;
+  a claim cited from the subject's own Raw document now counts. (5) Number
+  checks hid digits next to CJK text (`2026年`). (6) Skill 1.3.0
+  `market_trend` stopped at its first weak hit; it now pools all queries
+  with a Chinese query and terms, surfacing the 2026 Taiwan wireless market
+  report. Live results: CMP180/market `needs_input` with Wi-Fi 7/320 MHz
+  market facts and KM351/KM352/KM280 option facts (direct link unverified);
+  NTN `validated` with CMX500, options, PVT360, ZNA/ATS1800C, TS-LBS and
+  signal-generator roles; CMP180/competitor `needs_input` with cited option
+  facts and a genuine competitor data gap. Full pytest: 1887 passed, 5
+  skipped, 2 failed (Windows-flaky `test_extension_runtime` file lock and
+  pre-existing `test_local_developer_environment` cp950 decoding failure,
+  which also fails at HEAD). Ruff and mypy passed. Candidate not yet
+  installed in the live Agent Web.
+- [ ] Scheduled tasks (定期任務) without n8n: owner decided on 2026-10-04 not
+  to use n8n. Existing `common.scheduling`, `SqliteScheduleStore`,
+  schedule worker and `aep-host schedules` CLI need a per-schedule execution
+  grant, a CLI tick plus optional Host-resident loop, stuck-claim resolution
+  and Agent Web API/panel. Owner decisions still open: Workflows only or also
+  Agent Tasks; CLI first or Agent Web in v1; resident loop, Windows Task
+  Scheduler or both; which effect classes may run unattended; skip or catch
+  up missed runs.

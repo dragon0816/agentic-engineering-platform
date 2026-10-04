@@ -681,3 +681,137 @@ facet rules in the common runner would break its Workflow/Task and Coding use.
 The rejected alternative was to treat multiple nearby Raw passages or a model
 claim as proof of product-market fit. Lexical overlap is a limited preflight,
 not semantic entailment; source and recommendation review remain necessary.
+
+## 2026-10-04 — Navigate the owner's LLM Wiki before checking Raw evidence
+
+Decision: The private Knowledge Skill candidate 1.3.0 opts into an
+`index.md → Wiki page → linked source page → Raw` retrieval path. The Wiki
+provides query context and source discovery; the existing Host still checks
+immutable Raw citations for factual acceptance. Keep this Knowledge-specific
+path inside the Knowledge adapter, leaving the common Workflow/Knowledge/Coding
+harness unchanged. If an index entry or source link is unavailable, supplement
+with the existing global retrieval rather than treating the Wiki as complete.
+
+Reason: The owner's `RS_Knowledge/CLAUDE.md` and `ask-market` / `ask-competitor`
+Skills explicitly say to orient with `index.md`, read relevant entity, concept,
+synthesis and source pages, match model/option identifiers exactly, and trace
+claims to sources. The 1.2.0 candidate searched Raw sections directly and
+therefore missed that curated navigation. Raw-only lexical gates can reject a
+useful partial answer or accept a marketing co-mention, so page discovery and
+final answer quality must be evaluated separately. The rejected alternative
+was to move Wiki rules into the shared harness or treat a Wiki summary alone
+as verified source evidence.
+
+## 2026-10-04 — Adapt the proven Hermes Knowledge procedure, keep answer acceptance separate
+
+Decision: Use the owner's `rs-knowledge-base` Skill as a behavioral reference
+for the private Knowledge candidate: orient through the Vault schema and index,
+search Wiki and Raw bilingually, distinguish market demand, technical need and
+product/options, and label facts, inference and gaps. The separate
+`html-report-delivery` Skill governs a browser-viewable artifact when a report
+is requested; it does not alter retrieval or answer validation. Adapt these
+behaviors inside the Knowledge Skill and adapter, not the shared harness or a
+copied Hermes runtime. Keep the configured Vault path rather than hardcoding
+the personal path in the reference Skill.
+
+Reason: The user's downloaded Skill files were byte-identical to the local
+Hermes installation. AEP's fixed top-k filtering excluded existing valid Raw
+sources; pooling all Wiki-linked Raw let one product dominate an open-ended
+question; an oversized Raw section then consumed the model context. Focused
+fixes now rank eligible Raw across the loaded corpus, retain one eligible
+section per indexed source, preserve multiple discovery queries and bound the
+text sent to the model. These improve discovery but do not make a sales
+recommendation true. In isolated NTN probes the current Host still accepted
+an answer that treated a target-market mention as a recommendation and
+contained citation-only or clipped fragments. Therefore the candidate remains
+undeployed pending source-aware recommendation and artifact validation. The
+rejected alternative was to treat a passing lexical citation gate as evidence
+of product/customer fit.
+
+## 2026-10-04 — Preserve cited partial Knowledge facts without declaring the question complete
+
+Decision: The candidate Knowledge Skill may return independently supported
+facts when a requested facet or direct relationship remains unverified. The
+Knowledge adapter removes unsupported recommendation lines, keeps only cited
+claims that pass the Raw overlap check, and redacts credential-like strings in
+retrieved passages before they enter an answer record. The Host reports a
+`needs_input` harness phase with the exact missing facets and source paths;
+it does not upgrade a partial answer to a complete comparison. The older
+installed Skill path retains its current behavior during this candidate test.
+
+Reason: The Hermes reference Skill distinguishes fact, inference and gap. The
+earlier AEP candidate discarded every supported fact when one facet was
+missing, while a broad `Target Markets: NTN` list could validate an unrelated
+product recommendation. Live probes also showed that a sample `Bearer` phrase
+in Raw triggered answer-record secret detection and that `Rel. 17` was split
+into a misleading fragment. The rejected alternatives were to disable secret
+checks, accept market-list co-mentions as product fit, or mark partial evidence
+as a validated direct relationship.
+
+## 2026-10-04 — Diversify product evidence before accepting open-ended market recommendations
+
+Decision: For a Skill's open-ended product facet, rank eligible Raw passages
+across the corpus, keep distinct instrument families within the bounded
+evidence set, and prefer technical/product documents before press releases.
+This selection remains inside the Knowledge adapter and retains each Raw
+section's original citation. It does not claim that every product named in a
+market document is suitable for a particular customer.
+
+Reason: The real NTN question found a signal-generator slide, but several
+CMX500 documents occupied the final evidence slots. Merely adding more search
+queries did not bring the independent NTN whitepaper into the result, so that
+trial was reverted. Source/family diversity did bring the whitepaper into the
+real-Vault evidence set. The model or extractive fallback still returned only
+a narrow CMX500 answer, so answer-quality acceptance remains open and the
+candidate is not deployed. The rejected alternative was to increase the
+context budget without controlling duplicate product and promotional sources.
+
+## 2026-10-04 — Let the Knowledge Skill set synthesis output budget and preserve adjacent Raw citations
+
+Decision: Add a bounded `synthesis_max_output_tokens` field to the Knowledge
+procedure, defaulting to the prior 800-token behavior; private candidate 1.3.0
+uses 3072. The Knowledge adapter may read adjacent Raw sections around a short
+selected hit, retaining each section's own citation. These changes do not
+alter the shared harness or grant new execution permissions. The adjacent
+section step remains a candidate until real-Vault verification is complete.
+
+Reason: The approved internal Gateway returned two successful but empty visible
+responses for an 800-token NTN synthesis request. At 3072, the same isolated
+question produced a substantial Chinese answer with Raw citations. Separately,
+some PDF Raw sources split an option sentence across sections (`accord-` /
+`ing`); sending only the matched section made both synthesis and citation
+checking lose the rest of the claim. The rejected alternatives were to treat
+the one-sentence extractive fallback as a good answer, disable citation checks,
+or merge neighboring section text under one misleading citation.
+
+## 2026-10-04 — Keep the richer grounded Knowledge draft and judge claims by cited source identity
+
+Decision: In the Knowledge adapter, a second synthesis attempt no longer
+replaces a first draft that retains more Raw-grounded sentences; sentence
+splitting keeps list markers and grouped citations with their claim; a
+subject check accepts a claim cited from a Raw document named for the subject;
+a Skill focus check accepts a Raw document named for the focus when the cited
+section names the product in a concrete test role; and stated numbers are
+extracted with ASCII-only boundaries so CJK neighbors do not hide them. The
+Skill candidate (not the harness) pools all market-trend queries. The shared
+harness, Bridge grants and Raw citation contract are unchanged.
+
+Reason: Real-Vault probes showed the model's first draft was often the most
+complete and correctly cited, but formatting artifacts (`1.`, `。[5][7]`, an
+uncited conclusion) or CJK-adjacent numbers failed it, and the retry was a
+fresh, thinner generation. Option statements in CMP180's own feature and
+specification documents omit "CMP180", which pushed a good answer into the
+clipped extractive fallback. The rejected alternatives were to drop per-
+sentence citation checks, to allow uncited conclusions into the record, or
+to treat any document mentioning the focus anywhere as product-fit evidence.
+
+## 2026-10-04 — Do not use n8n for scheduled tasks
+
+Decision: Scheduled/recurring tasks use the existing native schedule store and
+worker, triggered by a CLI tick (for Windows Task Scheduler) and/or an opt-in
+Host-resident loop. n8n is not a scheduling dependency.
+
+Reason: The owner finds deploying n8n on company PCs too burdensome, and the
+architecture already treats n8n as optional. The rejected alternative was an
+n8n-hosted schedule, which also conflicts with the 2026-10-03 decision that a
+schedule must not exist only in n8n.
