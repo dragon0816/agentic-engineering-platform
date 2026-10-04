@@ -598,17 +598,43 @@ behind it; that is where a configuration problem is reported.
 
 ### On a schedule
 
+Scheduled tasks are kept by this host itself; n8n is not used. Open Agent Web
+and choose **Schedules** to create one for an installed Workflow or Agent Task,
+then **grant** it. A schedule without a grant never runs on its own. The grant
+names the highest effect it may have:
+
+- `read` runs unattended;
+- `write` / `execute` (an Excel write, an Outlook draft) run unattended only
+  when this host's `grants.json` also grants those capabilities;
+- anything that sends (mail, messages, a release) is never automatic: each run
+  waits under **Waiting for your approval** until you approve or deny it.
+
+Something has to look for due schedules. Either keep Agent Web running with
+`aep-host web --config host.json --schedules` (or set
+`"schedules": {"resident_loop": true}` in `host.json`), or let Windows run one
+check every few minutes:
+
 ```powershell
-.\schedule-weekly.ps1                  # every Friday at 16:00
-.\schedule-weekly.ps1 -DayOfWeek Monday -At 09:00
-.\schedule-weekly.ps1 -Remove
+.\schedule-tick.ps1                    # every 15 minutes while you are signed in
+.\schedule-tick.ps1 -EveryMinutes 5
+.\schedule-tick.ps1 -Remove
 ```
 
-This registers a Windows scheduled task that runs the **preview** and writes
-nothing. Writing stays something a person does, because it changes the team's
-workbook. The task runs as you, not as SYSTEM: the workbook, the board token
-and Excel all belong to your account, and a task running as SYSTEM would see
-none of them — so it runs when you are signed in.
+If the computer was off, only the latest missed run within
+`schedules.catch_up_hours` (24 by default) is caught up, once. A run that was
+interrupted is never retried by itself: the schedule shows as blocked until you
+record what happened under **History → Resolve** (or
+`aep-host schedules resolve`). The same controls exist on the command line:
+`aep-host schedules list|grant|revoke|pending|approve|deny|resolve|tick`.
+
+The task runs as you, not as SYSTEM: the workbook, the tokens and Office all
+belong to your account, and a task running as SYSTEM would see none of them —
+so it runs when you are signed in.
+
+`schedule-weekly.ps1` is the earlier stopgap: it registers a fixed Windows task
+that runs the weekly report **preview** only, outside these schedules and their
+grants. Prefer a native schedule; the script remains for hosts that already use
+it.
 
 ## Remove
 
