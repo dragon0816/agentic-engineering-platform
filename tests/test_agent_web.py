@@ -37,7 +37,7 @@ from host_runtime.contracts import CompanyHostConfiguration, KnowledgeAskRequest
 from host_runtime.conversation_backends import LocalConversationBackends
 from host_runtime.conversation_context import ConversationContextSettings
 from host_runtime.conversations import ConversationBackendSelectRequest, ConversationTurnRequest
-from host_runtime.host import build_runtime
+from host_runtime.host import HostError, HostLayout, build_knowledge_catalog, build_runtime
 from host_runtime.web import AgentWeb, AgentWebServer
 from integrations.browser import Browser, browser_path
 
@@ -1617,6 +1617,20 @@ def test_named_knowledge_market_matrix_requires_exact_grant(tmp_path: Path) -> N
         )
     assert asked["answer"]["status"] == "failed"
     assert "permission_denied" in asked["answer"]["answer"]
+
+
+def test_missing_knowledge_vault_reports_its_configured_path(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path) as runtime:
+        config = runtime.config
+        layout = HostLayout.under(config.workspace_root)
+    root = Path(config.knowledge[0].vault_root)
+    (root / "index.md").unlink()
+
+    with pytest.raises(HostError) as raised:
+        build_knowledge_catalog(config, layout, None)
+
+    assert raised.value.code == "knowledge_invalid"
+    assert raised.value.path == root
 
 
 def test_knowledge_ask_contract_cannot_claim_identity_model_or_vault(

@@ -147,7 +147,7 @@ from knowledge.evolution import (
     KnowledgeQueryRequest,
 )
 from knowledge.market_matrix import MarketMatrixRecord, MarketMatrixRequest
-from knowledge.vault import Vault
+from knowledge.vault import Vault, VaultError
 from models.approved import ApprovedModelClient
 from models.clients import ModelClients
 from models.contracts import ModelClient
@@ -783,8 +783,8 @@ def build_knowledge_catalog(
             raise HostError("knowledge_invalid", layout.knowledge)
         try:
             catalog.register(manifest, Vault(Path(binding.vault_root)))
-        except (OSError, ValueError):
-            raise HostError("knowledge_invalid", layout.knowledge) from None
+        except (OSError, ValueError, VaultError):
+            raise HostError("knowledge_invalid", Path(binding.vault_root)) from None
     return catalog
 
 

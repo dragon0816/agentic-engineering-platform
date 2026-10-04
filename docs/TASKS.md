@@ -814,3 +814,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `docs/HARNESS_6_LAYER_STATUS.md`: define an explicit evidence-sufficiency
   result, bounded re-retrieval policy and independent final-claim validation
   for one selected cell before generalizing task/domain routing policy.
+- [x] Convert an invalid configured Knowledge Vault into a Host startup error
+  that names the configured Vault path instead of leaking a `VaultError`
+  traceback. The owner's preview binding currently points to an existing Vault;
+  the same `host.json` passes the local Host startup/status check. If startup
+  fails again, inspect the exact path in the new error rather than assuming the
+  original RS_Knowledge directory was modified.
