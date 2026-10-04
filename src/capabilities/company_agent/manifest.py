@@ -2,7 +2,7 @@
 
 from agent.skills import SkillManifest
 from capabilities.contracts import CapabilitySpec
-from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.workflow_author.handlers import DRAFT_SPEC
 from common.assets import AssetIdentity, WorkflowManifest
 
@@ -89,6 +89,41 @@ def knowledge_skill() -> SkillManifest:
                 }
             ],
             "default_command": "ask",
+        }
+    )
+
+
+def market_alignment_skill() -> SkillManifest:
+    """Procedure for evidence-first product/market discovery, not a claim database."""
+    return SkillManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {
+                    "namespace": "company-agent",
+                    "name": "market-alignment",
+                    "version": "1.0.0",
+                },
+                **_META,
+            },
+            "alias": "market_alignment",
+            "instructions": (
+                "Map the five R&S product families against wireless communications, "
+                "aerospace/defense, automotive, AI server and semiconductor using one "
+                "installed Knowledge Vault. Start with the 25-cell Raw evidence and "
+                "knowledge-gap matrix. A same-section mention is only a discovery lead, "
+                "not proof of market fit or an option recommendation. For one selected "
+                "cell, ask for application, measurement standard, product variant, option "
+                "code and customer evidence; use grounded Knowledge Ask to verify each "
+                "claim before proposing a strategy. Never invent unsupported fit."
+            ),
+            "commands": [
+                {
+                    "name": "matrix",
+                    "kind": "capability",
+                    "target": MARKET_MATRIX_SPEC.identity.model_dump(),
+                }
+            ],
+            "default_command": "matrix",
         }
     )
 

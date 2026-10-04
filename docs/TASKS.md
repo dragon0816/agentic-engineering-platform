@@ -795,3 +795,22 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   1,690 tests with five platform skips and one real-browser deselection when
   run outside Windows filesystem sandbox interference. Chromium/CDP remains
   unavailable on this host; real-file Workflow 10/13 parity is still open.
+
+- [x] Add the first product/market Knowledge evidence matrix for five R&S
+  product families and five target markets. A read-only Bridge capability scans
+  exact installed Raw passages once and returns 25 typed cells, with evidence
+  level, source/section, excerpt and next knowledge gaps. The new Skill and
+  Agent Web natural-language route use this capability; neither claims market
+  fit from lexical co-mentions. The owner's staged RS_Knowledge scan produced
+  15 nearby mentions and 10 separate-passage leads in about nine seconds;
+  these counts are retrieval leads, not validated suitability. Focused tests
+  cover output ordering, evidence level, no-fit invariant, exact grant and Web
+  route. Full verification and installed-host activation are recorded in
+  `HANDOFF.md`.
+- [ ] For each chosen product/market cell, confirm the application and market
+  standard, product/option specifications, and customer evidence, then use
+  grounded Knowledge Ask to produce a reviewed strategy recommendation.
+- [ ] Close the general Knowledge harness gaps documented in
+  `docs/HARNESS_6_LAYER_STATUS.md`: define an explicit evidence-sufficiency
+  result, bounded re-retrieval policy and independent final-claim validation
+  for one selected cell before generalizing task/domain routing policy.

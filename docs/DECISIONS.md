@@ -544,3 +544,20 @@ Outlook draft and Excel contracts. Keeping the plotting dependency optional
 limits its footprint to hosts that generate this mail. Copying the entire
 source job or rewriting its chart from screenshots would either bypass the
 Bridge boundary or lose the original as a regression baseline.
+
+## 2026-10-04 — Keep the product/market matrix as read-only evidence discovery
+
+Decision: Add a distinct, exact-grant Bridge capability for the owner's five
+R&S product families by five target markets. Scan the current Raw passages in
+one installed Knowledge Vault, recording nearby mentions, separate passages
+and gaps with immutable source references. Agent Web detects a matrix request
+deterministically and invokes this capability; an installed Skill explains how
+to move from the overview into grounded single-cell investigation. The first
+matrix makes no verified product/option-to-market claim and needs no model.
+
+Reason: The earlier generic Knowledge answer over eight retrieved passages
+joined separate technical and market facts into an unsupported fit claim.
+Using a separate output contract preserves the existing cited-answer contract
+and Bridge policy. Hard-coding 25 recommendations, treating lexical matches
+as proof, and creating a separate per-market workflow were rejected. The
+owner chose an evidence-and-gap overview before deep recommendations.

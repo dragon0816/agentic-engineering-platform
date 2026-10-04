@@ -43,7 +43,12 @@ from capabilities.dut_engineering.handlers import (
     PhysicalDutValidationHandler,
 )
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
-from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, KnowledgeQueryHandler
+from capabilities.knowledge_query.handlers import (
+    KNOWLEDGE_QUERY_SPEC,
+    MARKET_MATRIX_SPEC,
+    KnowledgeQueryHandler,
+    MarketMatrixHandler,
+)
 from capabilities.release_package.apply_isolated import IsolatedApplyHandler
 from capabilities.release_package.contracts import (
     IsolatedApplyOutput,
@@ -141,6 +146,7 @@ from knowledge.evolution import (
     KnowledgeManifest,
     KnowledgeQueryRequest,
 )
+from knowledge.market_matrix import MarketMatrixRecord, MarketMatrixRequest
 from knowledge.vault import Vault
 from models.approved import ApprovedModelClient
 from models.clients import ModelClients
@@ -681,20 +687,36 @@ def build_gateway(
         if authorization is None
         else tuple(item for item in authorization.selections if item.kind == "knowledge")
     )
-    if (config.knowledge or selected_knowledge) and (
-        drafting_model is not None and binding is not None and binding.routing_alias is not None
-    ):
-        # Knowledge remains installed but unavailable until a routing model is
-        # configured. Deterministic commands and the local Settings page must
-        # still start so the operator can resolve that prerequisite.
-        catalog = build_knowledge_catalog(config, layout, authorization, profile=profile)
-        installed.register(
-            KNOWLEDGE_QUERY_SPEC,
-            KnowledgeQueryHandler(catalog, drafting_model, alias=binding.routing_alias),
-            KnowledgeQueryRequest,
-            KnowledgeAnswerRecord,
-            ExecutionDependencies(central_required=False),
+    if config.knowledge or selected_knowledge:
+        model_ready = (
+            drafting_model is not None and binding is not None and binding.routing_alias is not None
         )
+        try:
+            catalog = build_knowledge_catalog(config, layout, authorization, profile=profile)
+        except HostError as error:
+            # A partially configured Knowledge binding did not block Settings
+            # or Workflows before a model existed. Keep that setup behavior;
+            # the offline matrix becomes available once the asset is valid.
+            if model_ready or error.code != "knowledge_invalid":
+                raise
+            catalog = None
+        if catalog is not None:
+            installed.register(
+                MARKET_MATRIX_SPEC,
+                MarketMatrixHandler(catalog),
+                MarketMatrixRequest,
+                MarketMatrixRecord,
+                ExecutionDependencies(central_required=False),
+            )
+            if model_ready and drafting_model is not None and binding is not None:
+                assert binding.routing_alias is not None
+                installed.register(
+                    KNOWLEDGE_QUERY_SPEC,
+                    KnowledgeQueryHandler(catalog, drafting_model, alias=binding.routing_alias),
+                    KnowledgeQueryRequest,
+                    KnowledgeAnswerRecord,
+                    ExecutionDependencies(central_required=False),
+                )
     # Derive policy only after every configured built-in capability is in the
     # registry. A selected Knowledge query or workflow-author capability must
     # not disappear merely because its handler is assembled from local model

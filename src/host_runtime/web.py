@@ -52,7 +52,7 @@ from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
 from agent.skills import SkillManifest
-from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.execution import Failure, RequestContext, TraceIdentifiers
@@ -108,6 +108,14 @@ from host_runtime.slash_commands import (
 )
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
+from knowledge.market_matrix import (
+    MARKET_QUESTIONS,
+    PRODUCT_FAMILIES,
+    PRODUCT_QUESTIONS,
+    TARGET_MARKETS,
+    MarketMatrixRecord,
+    MarketMatrixRequest,
+)
 from knowledge.query import cited_numbers
 from models.contracts import ModelMessage
 
@@ -822,9 +830,18 @@ class AgentWeb:
                 # Known commands keep their deterministic path and never pay
                 # for model selection. Ordinary language enters the bounded
                 # tool loop with only recent local conversation text.
+                matrix_intent = self._market_matrix_intent(item.message)
                 named_knowledge = self._named_knowledge(item.message)
+                if named_knowledge is None and matrix_intent:
+                    installed_knowledge = self.assets()["knowledge"]
+                    if len(installed_knowledge) == 1:
+                        named_knowledge = installed_knowledge[0]
                 if named_knowledge is not None:
-                    answer = self._knowledge_reply(named_knowledge, item.message)
+                    answer = (
+                        self._market_matrix_reply(named_knowledge)
+                        if matrix_intent
+                        else self._knowledge_reply(named_knowledge, item.message)
+                    )
                 elif self.runtime.agent.gateway.router.commands.match(context) is not None:
                     direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
@@ -973,6 +990,105 @@ class AgentWeb:
             "answer": answer,
             "status": "answered",
             "outcome": result["outcome"],
+        }
+
+    @staticmethod
+    def _market_matrix_intent(message: str) -> bool:
+        lowered = message.casefold()
+        return any(
+            term in lowered
+            for term in (
+                "市場矩陣", "知識缺口矩陣", "產品市場對標", "產品與市場對標",
+                "market matrix", "market alignment matrix",
+            )
+        )
+
+    def _market_matrix_reply(self, selected: dict[str, Any]) -> dict[str, Any]:
+        asset = AssetIdentity(
+            namespace=selected["namespace"],
+            name=selected["name"],
+            version=selected["version"],
+        )
+        local = LocalCapabilityRequest(
+            ingress="local",
+            actor=self.runtime.actor,
+            bridge_id=self.runtime.config.device.bridge_id,
+            target=MARKET_MATRIX_SPEC.identity,
+            arguments=MarketMatrixRequest(asset=asset).model_dump(mode="json"),
+            trace=_trace(),
+        )
+        import asyncio
+
+        outcome = asyncio.run(self.runtime.agent.execute_capability(local))
+        if (
+            outcome.refusal is not None
+            or outcome.capability is None
+            or outcome.capability.status != "succeeded"
+        ):
+            return {
+                "ok": False,
+                "answer": self._knowledge_failure_text(outcome),
+                "status": "failed",
+                "outcome": json.loads(outcome.model_dump_json()),
+            }
+        record = MarketMatrixRecord.model_validate(outcome.capability.data)
+        labels = {item[0]: item[1] for item in PRODUCT_FAMILIES}
+        markets = {item[0]: item[1] for item in TARGET_MARKETS}
+        lines = [
+            "RS Knowledge product × market evidence matrix (Raw discovery, not verified fit)",
+            "",
+            "| Product family | " + " | ".join(markets[item[0]] for item in TARGET_MARKETS) + " |",
+            "| --- | " + " | ".join("---" for _ in TARGET_MARKETS) + " |",
+        ]
+        references: dict[tuple[str, int], int] = {}
+        sources: list[str] = []
+        by_pair = {(cell.product_family, cell.market): cell for cell in record.cells}
+        for family, _label, _products in PRODUCT_FAMILIES:
+            cells = []
+            for market, _market_label, _aliases in TARGET_MARKETS:
+                cell = by_pair[(family, market)]
+                marks = []
+                for evidence in cell.evidence:
+                    key = (evidence.raw_ref, evidence.section)
+                    if key not in references:
+                        references[key] = len(sources) + 1
+                        sources.append(
+                            f"[{len(sources) + 1}] {evidence.raw_ref} §{evidence.section}"
+                        )
+                    marks.append(f"[{references[key]}]")
+                lead = {
+                    "nearby_mention": "附近提及",
+                    "separate_passages": "分開段落",
+                    "no_raw_match": "缺 Raw",
+                }[cell.evidence_level]
+                cells.append(lead + (" " + " ".join(marks) if marks else ""))
+            lines.append("| " + labels[family] + " | " + " | ".join(cells) + " |")
+        lines.extend(
+            [
+                "",
+                "共同提及只代表檢索線索，尚不能證明產品或 option 適用該市場。"
+                "每格仍需客戶情境與獨立驗證。",
+                "",
+                "按市場需補的知識：",
+                *(
+                    f"- {label}: {MARKET_QUESTIONS[key]}"
+                    for key, label, _aliases in TARGET_MARKETS
+                ),
+                "按產品類別需補的規格與 option：",
+                *(
+                    f"- {label}: {PRODUCT_QUESTIONS[key]}"
+                    for key, label, _products in PRODUCT_FAMILIES
+                ),
+                "請指定一格與具體需求，再深入查證及提出建議。",
+            ]
+        )
+        if sources:
+            lines.extend(["", "Sources (Raw):", *sources])
+        return {
+            "ok": True,
+            "answer": "\n".join(lines),
+            "status": "answered",
+            "outcome": json.loads(outcome.model_dump_json()),
         }
 
     def _slash_command(self, command: SlashCommandInvocation) -> dict[str, Any]:

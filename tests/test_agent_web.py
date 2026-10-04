@@ -27,7 +27,7 @@ from test_platform_transport import Platform, host
 from test_product_e2e_05 import V1, copy_vault, manifest
 
 from agent.gateway import GatewayConversationResult
-from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.weekly_report.manifest import preview_workflow
 from common.execution import Failure, TraceIdentifiers
 from control_plane.http import ControlPlaneServer
@@ -123,7 +123,13 @@ class ToolCallingGateway:
         )
 
 
-def knowledge_runtime(tmp_path: Path, *, authorized: bool = True) -> Any:
+def knowledge_runtime(
+    tmp_path: Path,
+    *,
+    authorized: bool = True,
+    matrix_authorized: bool = False,
+    model_configured: bool = True,
+) -> Any:
     vault = copy_vault(tmp_path)
     grants = grant_record()
     if authorized:
@@ -135,16 +141,29 @@ def knowledge_runtime(tmp_path: Path, *, authorized: bool = True) -> Any:
                 "policy_refs": list(KNOWLEDGE_QUERY_SPEC.policy.policy_refs),
             }
         )
+    if matrix_authorized:
+        grants.append(
+            {
+                "actor": "engineer",
+                "asset": MARKET_MATRIX_SPEC.identity.model_dump(mode="json"),
+                "permissions": list(MARKET_MATRIX_SPEC.policy.required_permissions),
+                "policy_refs": list(MARKET_MATRIX_SPEC.policy.policy_refs),
+            }
+        )
     config, layout = workspace(
         tmp_path,
         membership=membership_record(),
         grants=grants,
         config_changes={
-            "models": binding(
-                catalog={
-                    "endpoints": [endpoint(credential=None, model="fixture-model")],
-                    "routes": [{"name": "default", "alias": "company"}],
-                }
+            "models": (
+                binding(
+                    catalog={
+                        "endpoints": [endpoint(credential=None, model="fixture-model")],
+                        "routes": [{"name": "default", "alias": "company"}],
+                    }
+                )
+                if model_configured
+                else None
             ),
             "knowledge": [{"asset": V1.model_dump(mode="json"), "vault_root": str(vault.root)}],
         },
@@ -1550,6 +1569,54 @@ def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> Non
     assert asked["answer"]["outcome"]["capability"]["failure"]["code"] == (
         "permission_denied"
     )
+
+
+def test_named_knowledge_market_matrix_uses_exact_read_capability(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path, matrix_authorized=True) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="請根據 widget_guide 做產品市場對標矩陣",
+            )
+        )
+    answer = asked["answer"]
+    assert answer["status"] == "answered"
+    assert "Vector network analyzers" in answer["answer"]
+    assert "AI server" in answer["answer"]
+    assert "缺 Raw" in answer["answer"]
+    assert answer["outcome"]["decision"]["target"] == MARKET_MATRIX_SPEC.identity.model_dump(
+        mode="json"
+    )
+
+
+def test_single_installed_knowledge_can_answer_matrix_without_exact_name(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path, matrix_authorized=True, model_configured=False) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="請做產品市場對標矩陣",
+            )
+        )
+    assert asked["answer"]["status"] == "answered"
+    assert "Oscilloscopes" in asked["answer"]["answer"]
+
+
+def test_named_knowledge_market_matrix_requires_exact_grant(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="請根據 widget_guide 做市場矩陣",
+            )
+        )
+    assert asked["answer"]["status"] == "failed"
+    assert "permission_denied" in asked["answer"]["answer"]
 
 
 def test_knowledge_ask_contract_cannot_claim_identity_model_or_vault(

@@ -2819,3 +2819,23 @@ capability grant and an approval reference. It prepares local package files
 under a checkout lock and reports `prepared=true`, `committed=false`,
 `pushed=false`. It has no Git command, network, commit or push path. This
 isolated preparation is testable migration evidence, not a release action.
+
+# Product/market Knowledge evidence matrix (2026-10-04)
+
+`knowledge-query/market-matrix@1.0.0` is a read-only Bridge capability for one
+exact installed Knowledge asset. It takes only an `AssetIdentity`; the Host
+resolves the Vault, actor and Bridge from trusted configuration. It needs an
+exact Host grant with `knowledge-query.ask` and `knowledge-grounding-policy`.
+It does not require a model or a LiteLLM credential. Installing the companion
+`company-agent/market-alignment@1.0.0` Skill does not grant execution.
+
+The v1 output has exactly 25 cells in the canonical five product-family by
+five-market order. A cell contains one of `nearby_mention` (Raw product and
+market aliases within 350 characters), `separate_passages` (distinct product
+and market evidence without a nearby match), or `no_raw_match`. Evidence names
+the immutable Raw source identity, file, section, optional page/slide and a
+bounded verbatim excerpt. A cell also lists three knowledge gaps: market
+application/standard, product and option specifications, and independent
+customer/use-case validation. `market_fit_verified` is always false in v1.
+These lexical discovery labels cannot authorize a recommendation. Existing
+`knowledge-query/ask@1.0.0` and its grounded answer contract are unchanged.

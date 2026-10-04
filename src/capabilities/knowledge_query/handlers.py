@@ -7,6 +7,7 @@ from capabilities.runtime import CapabilityRefused
 from common.base import Contract
 from common.execution import RequestContext
 from knowledge.evolution import KnowledgeCatalog, KnowledgeQueryRequest, grounded_record
+from knowledge.market_matrix import MarketMatrixRequest, discover_market_matrix
 from knowledge.query import QueryEngine
 from models.contracts import ModelClient
 
@@ -25,6 +26,35 @@ KNOWLEDGE_QUERY_SPEC = CapabilitySpec.model_validate(
         },
     }
 )
+
+MARKET_MATRIX_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "knowledge-query", "name": "market-matrix", "version": "1.0.0"},
+        "name": "knowledge_query.market_matrix",
+        "description": "Discover Raw evidence and gaps across the fixed product/market grid",
+        "input_contract": "knowledge-query.market-matrix.input.v1",
+        "output_contract": "knowledge-query.market-matrix.output.v1",
+        "side_effect": "read",
+        "policy": {
+            "approval_required": False,
+            "required_permissions": ["knowledge-query.ask"],
+            "policy_refs": ["knowledge-grounding-policy"],
+        },
+    }
+)
+
+
+class MarketMatrixHandler:
+    def __init__(self, catalog: KnowledgeCatalog) -> None:
+        self.catalog = catalog
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = MarketMatrixRequest.model_validate(inputs)
+        found = self.catalog.get(request.asset)
+        if found is None:
+            raise CapabilityRefused("knowledge_version_not_found")
+        _manifest, vault = found
+        return await asyncio.to_thread(discover_market_matrix, request.asset, context.trace, vault)
 
 
 class KnowledgeQueryHandler:

@@ -13,6 +13,7 @@ from capabilities.chipset_report.manifest import preview_workflow as chipset_pre
 from capabilities.chipset_report.manifest import report_workflow as chipset_report_workflow
 from capabilities.company_agent.manifest import (
     knowledge_skill,
+    market_alignment_skill,
     personal_proof_skill,
     personal_proof_workflow,
     workflow_author_skill,
@@ -47,6 +48,7 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         team_tickets_preview_skill(),
         workflow_author_skill(),
         knowledge_skill(),
+        market_alignment_skill(),
         personal_proof_skill(),
         preview_workflow(),
         team_tickets_preview_workflow(),
