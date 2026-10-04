@@ -21,7 +21,7 @@ from pydantic import Field, JsonValue, StrictBool, ValidationError, field_valida
 from agent.task_contract import TaskContract
 from common.assets import AssetIdentity, WorkflowManifest
 from common.base import Contract, Symbol, Text
-from common.execution import IdempotencyKey, SideEffect
+from common.execution import IdempotencyKey, SideEffect, TraceIdentifiers
 from common.scheduling import (
     Recurrence,
     ResolutionOutcome,
@@ -32,6 +32,7 @@ from common.scheduling import (
     ScheduleRecord,
 )
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
+from host_runtime.agent_tasks import AgentTaskTemplate, installed_agent_tasks
 from host_runtime.host import HostRuntime
 from host_runtime.schedule_policy import ScheduleGrantAuthorizer, target_side_effect
 from host_runtime.schedule_worker import ScheduleWorker
@@ -99,12 +100,27 @@ class ScheduleControl:
         *,
         lock: AbstractContextManager[Any] | None = None,
         clock: Callable[[], datetime] | None = None,
-        task_templates: Mapping[tuple[str, str, str], TaskContract] | None = None,
+        agent_tasks: Mapping[tuple[str, str, str], AgentTaskTemplate] | None = None,
     ) -> None:
         self.runtime = runtime
         self._lock = lock
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
-        self.task_templates = dict(task_templates or {})
+        # Installed Agent Task templates, read once per control; the worker
+        # receives exact task contracts for the bound member.
+        self.agent_tasks = dict(
+            installed_agent_tasks(runtime.layout.workspace_root)
+            if agent_tasks is None
+            else agent_tasks
+        )
+        trace = TraceIdentifiers(
+            trace_id="scheduled-template",
+            request_id="scheduled-template",
+            span_id="scheduled-template",
+        )
+        self.task_templates: dict[tuple[str, str, str], TaskContract] = {
+            key: template.to_task(actor=runtime.actor, task_id="scheduled-template", trace=trace)
+            for key, template in self.agent_tasks.items()
+        }
 
     # -- plumbing ----------------------------------------------------------
 
@@ -188,14 +204,14 @@ class ScheduleControl:
                     "typed": bool(manifest.parameters),
                 }
             )
-        for key in sorted(self.task_templates):
-            template = self.task_templates[key]
-            identity = AssetIdentity(namespace=key[0], name=key[1], version=key[2])
+        for key in sorted(self.agent_tasks):
+            template = self.agent_tasks[key]
+            identity = template.identity
             listed.append(
                 {
                     "target_kind": "agent_task",
                     "target": identity.model_dump(mode="json"),
-                    "description": template.task_type,
+                    "description": template.description,
                     "side_effect": target_side_effect(
                         agent, "agent_task", identity, self.task_templates
                     ),

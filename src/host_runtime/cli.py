@@ -690,7 +690,9 @@ _SCHEDULE_REFUSALS = {
     "not_admitted": "this host member is not admitted",
     "definition_owner_mismatch": "schedule owner must be this host's bound member",
     "workflow_not_installed": "the exact Workflow is not installed on this host",
-    "task_not_installed": "scheduled Agent Tasks need a trusted installed template",
+    "task_not_installed": (
+        "scheduled Agent Tasks need a trusted installed template in assets/agent-tasks"
+    ),
     "task_input_unsupported": "this Agent Task template declares no runtime inputs",
     "workflow_parameters_invalid": "the inputs do not match the Workflow's declared fields",
 }

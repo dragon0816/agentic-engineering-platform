@@ -337,9 +337,8 @@ class ScheduleWorker:
         effect: SideEffect | None,
     ) -> ScheduledRun:
         definition = schedule.definition
-        # Task manifests are not installed by the current Host builder.
-        # An exact trusted template must be supplied explicitly; run inputs
-        # have no Task parameter contract yet, so none may be interpolated.
+        # An exact installed template (host_runtime.agent_tasks) is required;
+        # templates declare no runtime parameters yet, so none are interpolated.
         template = self.task_templates.get(definition.target.key)
         if template is None:
             return self._settle(claim, owner, "unavailable", "task_not_installed", effect)
