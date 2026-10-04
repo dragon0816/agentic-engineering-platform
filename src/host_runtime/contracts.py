@@ -398,6 +398,21 @@ class KnowledgeHostBinding(Contract):
         return value
 
 
+class ScheduleHostSettings(Contract):
+    """How this host runs its local schedules. Off unless the owner opts in.
+
+    `resident_loop` starts a schedule loop inside the long-running Agent Web
+    process; nothing starts it when a host is merely built. `aep-host
+    schedules tick` runs one poll either way, for Windows Task Scheduler or
+    recovery. A missed occurrence older than `catch_up_hours` is skipped
+    rather than run; only the latest missed occurrence is ever caught up.
+    """
+
+    resident_loop: StrictBool = False
+    poll_seconds: int = Field(default=30, ge=5, le=3600, strict=True)
+    catch_up_hours: int = Field(default=24, ge=1, le=336, strict=True)
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -447,6 +462,9 @@ class CompanyHostConfiguration(Contract):
     # still running; no shorter than a step's cap, or the caller would be
     # told `workflow_timeout` while the step was still allowed to finish.
     workflow_wait_seconds: int = Field(default=900, ge=1, le=7200, strict=True)
+    # Local scheduled tasks; the resident loop stays off unless enabled here
+    # or by `aep-host web --schedules`.
+    schedules: ScheduleHostSettings = ScheduleHostSettings()
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:

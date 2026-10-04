@@ -11,6 +11,10 @@ account other than the one already signed in.
 The task runs the preview, which writes nothing. Writing stays a thing a
 person does, because it changes the team's workbook.
 
+Superseded: native schedules (Agent Web's Schedules panel, `aep-host
+schedules`) with `schedule-tick.ps1` or `aep-host web --schedules` replace
+this fixed task. It remains for hosts that already registered it.
+
 .EXAMPLE
 .\schedule-weekly.ps1
 Every Friday at 16:00, which is when the source's own schedule ran.

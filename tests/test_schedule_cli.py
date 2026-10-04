@@ -135,3 +135,87 @@ def test_history_shows_durable_outcome_without_dispatch(
     output = capsys.readouterr().out
     assert "needs_input (schedule_approval_required)" in output
     assert claim.idempotency_key in output
+
+
+def _due_an_hour_ago(layout_root: Path, schedule_id: str) -> None:
+    """Save a read schedule whose occurrence fell due an hour ago."""
+    now = datetime.now(UTC)
+    at = (now - timedelta(hours=1)).time().replace(second=0, microsecond=0)
+    definition = ScheduleDefinition.model_validate(
+        {
+            "schedule_id": schedule_id,
+            "owner": "engineer",
+            "target_kind": "workflow",
+            "target": {"namespace": "engineering", "name": "read-local-file", "version": "1.0.0"},
+            "recurrence": {"kind": "daily", "timezone": "UTC", "at": at.isoformat("minutes")},
+            "runtime_inputs": {"args": "notes.txt"},
+        }
+    )
+    with SqliteScheduleStore(
+        layout_root / "schedules.sqlite", bridge_id="bridge-company"
+    ) as store:
+        store.create(definition, now=now - timedelta(hours=2))
+
+
+def test_tick_runs_only_a_granted_schedule_and_never_twice(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    config, layout = ready(tmp_path)
+    host = host_json(tmp_path, config)
+
+    def command(*args: str) -> int:
+        return main(["schedules", "--config", str(host), *args])
+
+    _due_an_hour_ago(layout.workspace_root, "ungranted")
+    _due_an_hour_ago(layout.workspace_root, "granted")
+    assert command("grant", "granted", "--max-effect", "read", "--days", "30") == 0
+    assert "granted: granted up to read by engineer until" in capsys.readouterr().out
+    assert command("tick") == 0
+    output = capsys.readouterr().out
+    assert "granted" in output and "succeeded (workflow_succeeded) [read]" in output
+    assert "ungranted" in output and "needs_input (schedule_grant_missing)" in output
+    assert command("tick") == 0
+    assert capsys.readouterr().out.strip() == "nothing was due"
+    assert command("revoke", "granted") == 0
+    assert "granted: grant revoked" in capsys.readouterr().out
+    assert command("revoke", "granted") == 1
+    assert "no_grant" in capsys.readouterr().err
+
+
+def test_pending_and_resolve_settle_an_uncertain_claim_without_running_it(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    config, layout = ready(tmp_path)
+    host = host_json(tmp_path, config)
+
+    def command(*args: str) -> int:
+        return main(["schedules", "--config", str(host), *args])
+
+    _due_an_hour_ago(layout.workspace_root, "stuck")
+    with SqliteScheduleStore(
+        layout.workspace_root / "schedules.sqlite", bridge_id="bridge-company"
+    ) as store:
+        # A claim whose process died after dispatch: nobody knows what happened.
+        (claim,) = store.claim_due(now=datetime.now(UTC), owner="engineer")
+    assert command("pending") == 0
+    assert f"stuck: blocked by unresolved claim {claim.idempotency_key}" in (
+        capsys.readouterr().out
+    )
+    assert command("tick") == 0
+    assert capsys.readouterr().out.strip() == "nothing was due"
+    assert command("approve", claim.idempotency_key) == 1
+    assert "not_awaiting_approval" in capsys.readouterr().err
+    assert (
+        command(
+            "resolve", claim.idempotency_key, "--outcome", "failed", "--note", "checked log"
+        )
+        == 0
+    )
+    assert "failed (operator_resolved_failed)" in capsys.readouterr().out
+    assert command("pending") == 0
+    assert capsys.readouterr().out == ""
+    with SqliteScheduleStore(
+        layout.workspace_root / "schedules.sqlite", bridge_id="bridge-company"
+    ) as store:
+        (decision,) = store.decisions("stuck", owner="engineer")
+        assert decision.note == "checked log" and decision.decided_by == "engineer"

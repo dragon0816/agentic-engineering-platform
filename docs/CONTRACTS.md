@@ -2777,6 +2777,96 @@ CLI, and a choice of first-release target kinds remain subsequent slices.
 When wired, each claimed target must pass resident Agent membership admission,
 exact installed-asset lookup, Workflow/Task policy, Bridge grants and any
 effect-specific approval. No scheduled send, write or draft may bypass them.
+The paragraph above is superseded by the following section.
+
+# Scheduled tasks v1 (2026-10-04)
+
+The owner decided on 2026-10-04: no n8n; both Workflows and Agent Tasks are
+targets; Agent Web screens are in the first release; an opt-in loop runs in
+the long-running Host process; `read` may run unattended, `write`/`execute`
+need both grants, `external_side_effect` always needs per-run approval; missed
+runs are caught up once within a bounded window. See `docs/DECISIONS.md`.
+
+**Execution grant.** `ScheduleExecutionGrant` names the owner, one
+`schedule_id`, the exact `target_kind`/`target`, `max_side_effect`, a
+`policy_ref`, `approved_by` (must equal the owner), `approved_at` and an
+optional later `expires_at`. Only the owner creates one, through
+`aep-host schedules grant` or Agent Web; the Host supplies owner, approver,
+time and policy reference (`owner-schedule-grant`). It never comes from a
+schedule definition, asset or model. Granting again revokes the previous
+grant; `ScheduleGrantRecord` keeps revoked grants with `revoked_by` and
+`revoked_at` for audit. A saved schedule is not permission.
+
+**Per-occurrence decision.** `ScheduleGrantAuthorizer.decide` returns a
+`ScheduleDecision` with a code. It refuses `schedule_grant_missing`,
+`schedule_grant_expired`, `schedule_grant_mismatch`, `workflow_not_installed`,
+`task_not_installed`, `capability_not_installed`,
+`schedule_effect_above_grant` (the highest `side_effect` among every
+capability the target can reach exceeds the grant) and `bridge_grant_missing`
+(the Bridge `LocalPolicy` would not authorize one of those capabilities for
+the owner). When everything holds and the target can reach an
+`external_side_effect`, it returns `run_approval_required`. The worker
+enforces that last rule itself for any authorizer. Admission, Workflow
+preflight and Bridge policy still run at dispatch. Workflow runtime inputs are
+validated against declared parameters at creation and again at dispatch
+(`workflow_parameters_invalid`).
+
+**Run states.** `ScheduledRun.status` adds `awaiting_approval`; it also
+records the evaluated `side_effect`. `claimed` may have dispatched and blocks
+later occurrences of its schedule. `awaiting_approval` dispatched nothing and
+does not block; claiming a newer occurrence settles it as
+`needs_input/run_approval_superseded`. Approving turns it back into a
+`claimed` occurrence before dispatch, recording a `ScheduleOperatorDecision`,
+then every check above runs again with the per-run approval present. Denying
+settles it as `needs_input/run_approval_denied`. Resolving a stuck `claimed`
+occurrence records who decided, when, an optional note and one outcome:
+`succeeded`, `failed` or `not_run` (stored as
+`succeeded/operator_resolved_succeeded`, `failed/operator_resolved_failed` or
+`needs_input/operator_resolved_not_run`). Resolution dispatches nothing and
+releases the schedule. Notes reject credential material.
+
+**Catch-up once.** `claim_due(catch_up=...)` claims only the latest
+occurrence that is due; earlier missed occurrences are skipped. When that
+latest occurrence is older than the window (`schedules.catch_up_hours`,
+default 24, 1-336), nothing runs and it is recorded as
+`unavailable/schedule_missed`. Claims are never replayed across restarts.
+
+**Store.** `schedules.sqlite` schema version 2 adds `schedule_grants` and
+`schedule_decisions`. A version 1 file is migrated in place; a newer version
+is refused as `unavailable`. Connections wait up to five seconds on a busy
+file because the loop, Agent Web and a CLI tick may share it.
+
+**Agent Task targets.** An installed Agent Task is an `AgentTaskTemplate`
+in `<workspace>/assets/agent-tasks/*.json`: exact identity, description and
+the `TaskContract` fields (objective, task type, classification, Skills,
+allowed/prohibited capabilities, expected outputs, checks, constraints). It
+has no actor, trace, grant or runtime parameters. An identity installed twice
+is not installed. Per occurrence the Host builds a `TaskContract` for the
+bound member with a unique task ID and artifact references and runs it
+through `LocalAgent.run_task`, the same admission, `GatewayTaskExecutor`
+scope and data-policy, Bridge policy and completion validation as
+`aep-host run-task`. Scheduled Agent Tasks take no runtime inputs. Their
+effect class is the highest among allowed capabilities, which the executor
+limits to `read`. There is no Registry asset kind or installer for Agent
+Tasks yet.
+
+**Trigger.** `aep-host schedules tick` runs one poll (for Windows Task
+Scheduler via `deploy/windows-preview/schedule-tick.ps1`, or recovery).
+`ScheduleLoop` polls immediately, then every `schedules.poll_seconds`
+(default 30), in the `aep-host web` process only when `--schedules` or
+`schedules.resident_loop` is set; `aep-host schedules run` runs the same loop
+without a page. Building a Host or `AgentWeb` never starts it. Each poll and
+each approval holds Agent Web's one-request-at-a-time lock. Stopping waits
+for the poll in progress; an interrupted run stays an open claim.
+
+**Controls.** `ScheduleControl` serves the CLI (`create`, `list`, `pause`,
+`resume`, `history`, `grant`, `revoke`, `pending`, `approve`, `deny`,
+`resolve`, `tick`, `run`) and Agent Web (`GET /api/schedules`,
+`GET /api/schedules/history`, `POST /api/schedules/{create,pause,resume,
+grant,revoke,approve,deny,resolve}`). The routes use Agent Web's loopback,
+`Host` header and Bearer token guards and refuse a non-loopback `Origin`.
+Browser bodies cannot name an owner, approver or policy; resolution requires
+`confirm: true`. The Schedules panel renders host values as text nodes only.
 
 # Workflow 10 Host preview and guarded apply (2026-10-03)
 

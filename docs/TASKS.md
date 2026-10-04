@@ -1062,3 +1062,21 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   options, scenarios, limits); NTN `validated` report; CMP180/market and
   CMP180/competitor `needs_input` with cited partial facts. Full pytest:
   1907 passed, 5 skipped, 1 known pre-existing failure; Ruff and mypy passed.
+- [x] Scheduled tasks v1 on branch `schedules-v1` (owner decisions of
+  2026-10-04; see `docs/DECISIONS.md` and `docs/CONTRACTS.md` "Scheduled
+  tasks v1"). Host-owned `ScheduleExecutionGrant` and per-occurrence
+  `ScheduleGrantAuthorizer`: `read` unattended with a grant, `write`/`execute`
+  also need the Bridge grant, `external_side_effect` always waits for per-run
+  approve/deny. Store schema v2 (grants, operator decisions, v1 migration),
+  catch-up of only the latest missed run within `schedules.catch_up_hours`,
+  stuck-claim resolution. Agent Task targets from `assets/agent-tasks/`
+  through `LocalAgent.run_task`. CLI `schedules tick|grant|revoke|pending|
+  approve|deny|resolve|run`; opt-in resident loop in `aep-host web
+  --schedules` / `schedules.resident_loop`; Agent Web `/api/schedules*` routes
+  and Schedules panel; `deploy/windows-preview/schedule-tick.ps1`. Ruff and
+  `mypy src` passed. Full pytest: 1917 passed, 5 skipped, 6 failed; the same
+  6 (`test_default_marketplace_candidates` snapshot, `test_jev_live` x2,
+  `test_laya_offline` x3) also fail at base commit `dcf2122` in the same
+  checkout. Not merged to `main`; no live schedule created. Open: Registry
+  asset kind and runtime parameters for Agent Tasks; doctor reporting of
+  schedules; live Windows Task Scheduler check.

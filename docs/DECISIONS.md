@@ -857,3 +857,54 @@ evidence", which addressed whole-section citation errors now handled by
 section-level Wiki chunks and per-claim checks. Rejected alternatives: keep
 Raw-only citation; cite Wiki without provenance; flag runtime Wiki/Raw
 mismatches in answers (owner assigns conflict resolution to ingest).
+
+## 2026-10-04 — Scheduled tasks v1: separate grants, effect-tiered unattended runs
+
+Decision: Implement the owner's scheduled-task decisions on the existing
+native store and worker (contract details in `docs/CONTRACTS.md`,
+"Scheduled tasks v1"):
+
+1. Unattended execution needs a Host-owned `ScheduleExecutionGrant` that the
+   owner creates through the CLI or Agent Web. It names the schedule's exact
+   target and a maximum effect class and may expire. `read` targets run
+   unattended with it. `write`/`execute` targets also need the Bridge's exact
+   durable `CapabilityGrant` for every capability they reach. An
+   `external_side_effect` target never runs unattended: each occurrence waits
+   as `awaiting_approval` for an approve/deny decision, and the worker
+   enforces this whatever authorizer it is given.
+2. Workflows and Agent Tasks are both targets. Because there is no Registry
+   kind or installer for Agent Tasks, v1 reads exact owner-installed
+   `AgentTaskTemplate` files from `assets/agent-tasks/` and runs them through
+   `LocalAgent.run_task`, the path `aep-host run-task` uses. Templates take
+   no runtime inputs yet.
+3. The trigger is an opt-in `ScheduleLoop` inside the long-running
+   `aep-host web` process (`--schedules` or `schedules.resident_loop`), plus
+   `aep-host schedules tick` for Windows Task Scheduler and recovery, and
+   `aep-host schedules run` for a host without a page. Each poll holds Agent
+   Web's one-request-at-a-time lock.
+4. After downtime, only the latest due occurrence is claimed, and only if it
+   is within `schedules.catch_up_hours` (default 24); otherwise it is
+   recorded as `schedule_missed`. Uncertain claims still block and are
+   never replayed. An operator records a resolution (outcome, who, when,
+   note) that dispatches nothing.
+5. The store moves to schema version 2 with in-place migration and a
+   five-second busy wait.
+
+Reason: A saved recurrence is not permission (2026-10-03). Tying the grant to
+the exact target and an effect ceiling lets a read report run unattended
+while keeping writes behind the Bridge's own durable grant and every send
+behind a person, as the owner required. The Bridge/Host process is where
+deterministic execution near resources already happens, so the loop lives
+there rather than in a separate service. Approval reopens the occurrence as
+a claim before dispatch, so a crash during an approved send is blocked for
+resolution rather than repeated.
+
+Rejected alternatives: n8n or another external scheduler as the source of
+truth (owner decision; optional dependency). Treating a schedule's creation,
+or a published asset's approval metadata, as execution permission. Allowing
+an `external_side_effect` grant to auto-send. Replaying every missed
+occurrence after downtime (a backlog flood) or none at all (silently losing
+the weekly run). Starting the loop whenever a Host is built, which would make
+every CLI command a scheduler. Letting a model choose a scheduled target or
+fill Agent Task inputs. Adding a Registry asset kind for Agent Tasks inside
+this slice; that is a separate platform contract change.

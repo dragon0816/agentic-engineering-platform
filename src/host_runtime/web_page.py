@@ -73,6 +73,22 @@ body {
 #new-conversation::before { content: "+"; font-size: 20px; line-height: 0; }
 #nav-capabilities::before { content: "\25c7"; }
 #nav-settings::before { content: "\2699"; }
+#nav-schedules::before { content: "\25f7"; }
+.schedule-grid { display: grid; gap: 14px; }
+.schedule-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  background: var(--panel); }
+.schedule-card h3 { margin: 0 0 6px; font-size: 14px; overflow-wrap: anywhere; }
+.schedule-meta { color: var(--dim); font-size: 12.5px; margin: 2px 0; overflow-wrap: anywhere; }
+.schedule-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin-top: 8px; }
+.schedule-actions input, .schedule-actions select { font: inherit; min-height: 32px; }
+.schedule-warning { color: var(--bad); font-size: 12.5px; }
+.schedule-runs { width: 100%; font-size: 12.5px; margin-top: 8px; }
+.schedule-runs td { padding: 4px 6px; vertical-align: top; overflow-wrap: anywhere; }
+.schedule-form { display: grid; gap: 8px; max-width: 640px; }
+.schedule-form label { font-size: 13px; font-weight: 600; }
+.schedule-form input, .schedule-form select, .schedule-form textarea { font: inherit; }
+.schedule-days { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; }
 .session-heading { display: flex; justify-content: space-between; align-items: center;
   margin: 8px 8px 7px; color: var(--dim); font-size: 12px; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase; }
@@ -322,6 +338,7 @@ tr:last-child td { border-bottom: none; }
     <button id="new-conversation" type="button">New session</button>
     <button id="nav-capabilities" type="button">Capabilities</button>
     <button id="nav-settings" type="button">Settings</button>
+    <button id="nav-schedules" type="button">Schedules</button>
   </div>
   <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
   <input id="session-search" class="session-search" type="search"
@@ -612,6 +629,50 @@ tr:last-child td { border-bottom: none; }
         <div class="card"><div id="decisions" class="empty">reading&hellip;</div></div>
       </details>
     </div>
+  </section>
+
+  <section id="panel-schedules">
+    <div class="workspace-head">
+      <div><h2>Scheduled tasks</h2>
+        <p class="note">A schedule saves intent only. It runs unattended only after you
+          grant it, up to the effect class you choose. Anything that sends mail or
+          messages waits for your approval on every run.</p>
+        <p class="note" id="schedule-loop" role="status">reading&hellip;</p></div>
+      <button class="go" id="schedule-refresh" type="button">Refresh</button>
+    </div>
+    <h2>Waiting for your approval</h2>
+    <div class="card"><div id="schedule-approvals" class="empty">reading&hellip;</div></div>
+    <h2>Schedules</h2>
+    <div id="schedule-list" class="schedule-grid" aria-live="polite">reading&hellip;</div>
+    <div id="schedule-result" class="section-status" role="status" aria-live="polite"></div>
+    <h2>History</h2>
+    <div class="card"><div id="schedule-history" class="empty">
+      Choose History on a schedule.</div></div>
+    <h2>New schedule</h2>
+    <form id="schedule-form" class="schedule-form">
+      <label for="schedule-target">Installed Workflow or Agent Task</label>
+      <select id="schedule-target" required></select>
+      <p class="hint" id="schedule-target-note"></p>
+      <label for="schedule-id">Schedule name</label>
+      <input id="schedule-id" required pattern="[a-zA-Z_][a-zA-Z0-9_.\-]*"
+             placeholder="weekly-report">
+      <label for="schedule-kind">Repeats</label>
+      <select id="schedule-kind"><option value="weekly">Weekly</option>
+        <option value="daily">Daily</option></select>
+      <div id="schedule-days" class="schedule-days" role="group" aria-label="Weekdays"></div>
+      <label for="schedule-at">Local time</label>
+      <input id="schedule-at" type="time" value="09:00" required>
+      <label for="schedule-timezone">Time zone (IANA)</label>
+      <input id="schedule-timezone" required>
+      <div id="schedule-fields"></div>
+      <div id="schedule-json-box" hidden>
+        <label for="schedule-json">Runtime inputs (one JSON object)</label>
+        <textarea id="schedule-json" spellcheck="false">{}</textarea>
+      </div>
+      <label><input id="schedule-paused" type="checkbox"> Save paused</label>
+      <p><button class="go" id="schedule-save" type="submit">Save schedule</button></p>
+      <pre id="schedule-form-result" class="note"></pre>
+    </form>
   </section>
 </main>
 </div>
@@ -1867,10 +1928,367 @@ el("cap-refresh").addEventListener("click", () => {
   loadCapabilities().catch(showBootError);
 });
 
+// -- Schedules ------------------------------------------------------------
+// Every value from the host becomes a text node; these builders add markup.
+const SCHEDULE_EFFECTS = ["read", "write", "execute", "external_side_effect"];
+const SCHEDULE_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function scheduleNode(tag, className, value) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (value !== undefined) node.append(text(value));
+  return node;
+}
+
+function scheduleButton(label, onClick, go) {
+  const button = scheduleNode("button", go ? "go" : "", label);
+  button.type = "button";
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function scheduleTarget(target) {
+  return target.namespace + "/" + target.name + "@" + target.version;
+}
+
+function scheduleRecurrence(rule) {
+  const days = rule.kind === "weekly"
+    ? " on " + rule.weekdays.map((day) => SCHEDULE_DAYS[day - 1] || String(day)).join(", ")
+    : "";
+  return rule.kind + days + " at " + String(rule.at).slice(0, 5) + " (" + rule.timezone + ")";
+}
+
+function scheduleRunRows(runs, actions) {
+  const rows = scheduleNode("table", "schedule-runs");
+  for (const run of runs) {
+    const row = scheduleNode("tr");
+    row.append(scheduleNode("td", "", run.due_at));
+    row.append(scheduleNode("td", "", run.status));
+    row.append(scheduleNode("td", "", (run.result_code || "pending")
+      + (run.side_effect ? " [" + run.side_effect + "]" : "")));
+    const cell = scheduleNode("td");
+    if (run.status === "claimed" && actions && actions.resolve) {
+      cell.append(actions.resolve(run));
+    }
+    row.append(cell);
+    rows.append(row);
+  }
+  return rows;
+}
+
+function renderScheduleApprovals(container, runs, actions) {
+  container.replaceChildren();
+  if (!runs.length) {
+    container.append(scheduleNode("div", "empty", "Nothing is waiting for approval."));
+    return;
+  }
+  for (const run of runs) {
+    const card = scheduleNode("div", "schedule-card");
+    card.append(scheduleNode("h3", "", run.schedule_id + " — due " + run.due_at));
+    card.append(scheduleNode("p", "schedule-warning",
+      "This run can cause an external effect (" + (run.side_effect || "unknown")
+      + "). Nothing has been sent."));
+    const note = scheduleNode("input");
+    note.setAttribute("aria-label", "Approval note");
+    note.placeholder = "note (optional)";
+    note.maxLength = 500;
+    const bar = scheduleNode("div", "schedule-actions");
+    bar.append(note,
+      scheduleButton("Approve and run", () => actions.approve(run, note.value), true),
+      scheduleButton("Deny", () => actions.deny(run, note.value)));
+    card.append(bar);
+    container.append(card);
+  }
+}
+
+function renderScheduleList(container, data, actions) {
+  container.replaceChildren();
+  if (!data.schedules.length) {
+    container.append(scheduleNode("div", "empty", "No schedules yet."));
+    return;
+  }
+  for (const item of data.schedules) {
+    const card = scheduleNode("div", "schedule-card");
+    card.append(scheduleNode("h3", "", item.schedule_id + " — " + item.status));
+    card.append(scheduleNode("p", "schedule-meta",
+      item.target_kind + " " + scheduleTarget(item.target)
+      + " · reaches " + (item.side_effect || "unknown effects")));
+    card.append(scheduleNode("p", "schedule-meta",
+      scheduleRecurrence(item.recurrence) + " · next " + item.next_due_at));
+    const grant = item.grant;
+    card.append(scheduleNode("p", "schedule-meta", grant
+      ? "Granted up to " + grant.max_side_effect + " by " + grant.approved_by
+        + (grant.expires_at ? " until " + grant.expires_at : "")
+      : "Not granted: due runs stop as needs input."));
+    if (item.blocked_by) {
+      card.append(scheduleNode("p", "schedule-warning",
+        "Blocked by an unresolved run. Open History to resolve it."));
+    }
+    const bar = scheduleNode("div", "schedule-actions");
+    bar.append(item.status === "active"
+      ? scheduleButton("Pause", () => actions.pause(item))
+      : scheduleButton("Resume", () => actions.resume(item)));
+    const effect = scheduleNode("select");
+    effect.setAttribute("aria-label", "Highest effect to allow");
+    for (const name of SCHEDULE_EFFECTS) {
+      const option = scheduleNode("option", "", name);
+      option.value = name;
+      if (name === (item.side_effect || "read")) option.selected = true;
+      effect.append(option);
+    }
+    const days = scheduleNode("input");
+    days.type = "number"; days.min = "1"; days.max = "3650";
+    days.placeholder = "days (optional)";
+    days.setAttribute("aria-label", "Grant expires after days");
+    bar.append(effect, days,
+      scheduleButton("Grant", () => actions.grant(item, effect.value, days.value), true));
+    if (grant) bar.append(scheduleButton("Revoke grant", () => actions.revoke(item)));
+    bar.append(scheduleButton("History", () => actions.history(item)));
+    card.append(bar);
+    if (item.side_effect === "external_side_effect") {
+      card.append(scheduleNode("p", "schedule-warning",
+        "Sending is never automatic: every run waits for your approval."));
+    }
+    if (item.runs.length) card.append(scheduleRunRows(item.runs.slice(0, 3)));
+    container.append(card);
+  }
+}
+
+function renderScheduleHistory(container, history, actions) {
+  container.replaceChildren();
+  container.append(scheduleNode("h3", "", "History of " + history.schedule_id));
+  if (!history.runs.length) container.append(scheduleNode("div", "empty", "No runs yet."));
+  else container.append(scheduleRunRows(history.runs, actions));
+  if (history.decisions.length) {
+    container.append(scheduleNode("h3", "", "Decisions"));
+    for (const decision of history.decisions) {
+      container.append(scheduleNode("p", "schedule-meta",
+        decision.decided_at + " · " + decision.kind + " " + decision.outcome
+        + " by " + decision.decided_by + (decision.note ? ": " + decision.note : "")));
+    }
+  }
+}
+
+function scheduleResolveControl(run, onResolve) {
+  const bar = scheduleNode("div", "schedule-actions");
+  const outcome = scheduleNode("select");
+  outcome.setAttribute("aria-label", "What actually happened");
+  for (const [value, label] of [["not_run", "It did not run"],
+    ["succeeded", "It succeeded"], ["failed", "It failed"]]) {
+    const option = scheduleNode("option", "", label); option.value = value;
+    outcome.append(option);
+  }
+  const note = scheduleNode("input");
+  note.placeholder = "what you checked"; note.maxLength = 500;
+  note.setAttribute("aria-label", "Resolution note");
+  bar.append(outcome, note,
+    scheduleButton("Resolve", () => onResolve(run, outcome.value, note.value), true));
+  return bar;
+}
+// -- end Schedules renderers ----------------------------------------------
+
+let scheduleData = {schedules: [], targets: [], awaiting_approval: []};
+
+async function scheduleAction(path, body, success) {
+  const result = el("schedule-result");
+  try {
+    const reply = await call(path, body);
+    result.textContent = success(reply);
+  } catch (failure) {
+    result.textContent = "Not done: " + (failure.code || failure.message);
+  }
+  await loadSchedules();
+}
+
+const scheduleActions = {
+  pause: (item) => scheduleAction("/api/schedules/pause", {schedule_id: item.schedule_id},
+    () => item.schedule_id + " paused."),
+  resume: (item) => scheduleAction("/api/schedules/resume", {schedule_id: item.schedule_id},
+    () => item.schedule_id + " resumed."),
+  grant: (item, effect, days) => {
+    const body = {schedule_id: item.schedule_id, max_side_effect: effect};
+    const count = Number(days);
+    if (days && Number.isSafeInteger(count) && count > 0) {
+      body.expires_at = new Date(Date.now() + count * 86400000).toISOString();
+    }
+    return scheduleAction("/api/schedules/grant", body,
+      () => item.schedule_id + " may now run up to " + effect + ".");
+  },
+  revoke: (item) => scheduleAction("/api/schedules/revoke", {schedule_id: item.schedule_id},
+    () => item.schedule_id + " grant revoked."),
+  approve: (run, note) => scheduleAction("/api/schedules/approve",
+    {idempotency_key: run.idempotency_key, note: note.trim() || null},
+    (reply) => "Approved run finished as " + reply.run.status
+      + " (" + (reply.run.result_code || "pending") + ")."),
+  deny: (run, note) => scheduleAction("/api/schedules/deny",
+    {idempotency_key: run.idempotency_key, note: note.trim() || null},
+    () => "Run denied; nothing was sent."),
+  history: (item) => showScheduleHistory(item.schedule_id),
+  resolve: (run) => scheduleResolveControl(run, async (chosen, outcome, note) => {
+    if (!window.confirm("Record that this run " + outcome.replace("_", " ")
+        + "? Nothing will be run again.")) return;
+    await scheduleAction("/api/schedules/resolve", {idempotency_key: chosen.idempotency_key,
+      outcome: outcome, note: note.trim() || null, confirm: true},
+      () => "Resolution recorded.");
+    await showScheduleHistory(chosen.schedule_id);
+  }),
+};
+
+async function showScheduleHistory(scheduleId) {
+  const history = await call("/api/schedules/history?schedule_id="
+    + encodeURIComponent(scheduleId));
+  renderScheduleHistory(el("schedule-history"), history, scheduleActions);
+}
+
+function renderScheduleTargets() {
+  const select = el("schedule-target");
+  const previous = select.value;
+  select.replaceChildren();
+  for (const target of scheduleData.targets) {
+    const option = document.createElement("option");
+    option.value = JSON.stringify({kind: target.target_kind, target: target.target});
+    option.append(text((target.target_kind === "workflow" ? "Workflow " : "Agent Task ")
+      + scheduleTarget(target.target)));
+    select.append(option);
+  }
+  if (previous) select.value = previous;
+  showScheduleTargetFields();
+}
+
+function chosenScheduleTarget() {
+  const value = el("schedule-target").value;
+  if (!value) return null;
+  const chosen = JSON.parse(value);
+  return scheduleData.targets.find((item) => item.target_kind === chosen.kind
+    && JSON.stringify(item.target) === JSON.stringify(chosen.target)) || null;
+}
+
+function showScheduleTargetFields() {
+  const target = chosenScheduleTarget();
+  const container = el("schedule-fields"); container.replaceChildren();
+  el("schedule-target-note").textContent = target
+    ? (target.description || "") + " · reaches " + (target.side_effect || "unknown effects")
+    : "Nothing installed can be scheduled.";
+  el("schedule-json-box").hidden = !target || target.typed;
+  if (!target) return;
+  for (const field of target.fields) {
+    const id = "schedule-field-" + field.name;
+    const label = document.createElement("label"); label.htmlFor = id;
+    label.append(text(field.label + (field.required ? " *" : "")));
+    const input = field.kind === "select" ? document.createElement("select")
+      : document.createElement("input");
+    input.id = id; input.dataset.name = field.name; input.dataset.kind = field.kind;
+    if (field.kind === "select") {
+      const empty = document.createElement("option"); empty.value = "";
+      empty.append(text("Select " + field.label)); input.append(empty);
+      for (const value of field.options) {
+        const option = document.createElement("option"); option.value = value;
+        option.append(text(value)); input.append(option);
+      }
+    } else {
+      input.type = field.kind === "integer" ? "number" : field.kind === "date" ? "date"
+        : field.kind === "boolean" ? "checkbox" : "text";
+    }
+    input.required = field.required && field.kind !== "boolean";
+    const help = document.createElement("p"); help.className = "hint";
+    help.append(text(field.description || ""));
+    container.append(label, input, help);
+  }
+}
+
+function scheduleInputs() {
+  const target = chosenScheduleTarget();
+  if (target && !target.typed) {
+    const value = JSON.parse(el("schedule-json").value || "{}");
+    if (!value || Array.isArray(value) || typeof value !== "object") {
+      throw new Error("runtime inputs must be one JSON object");
+    }
+    return value;
+  }
+  const value = {};
+  for (const input of el("schedule-fields").querySelectorAll("input, select")) {
+    const kind = input.dataset.kind;
+    const raw = kind === "boolean" ? input.checked : input.value.trim();
+    if (kind !== "boolean" && raw === "") continue;
+    if (kind === "integer" && !/^-?\d+$/.test(raw)) {
+      throw new Error(input.dataset.name + " must be a whole number");
+    }
+    value[input.dataset.name] = kind === "integer" ? Number(raw) : raw;
+  }
+  return value;
+}
+
+function renderScheduleDays() {
+  const box = el("schedule-days"); box.replaceChildren();
+  SCHEDULE_DAYS.forEach((name, index) => {
+    const label = document.createElement("label");
+    const box_ = document.createElement("input"); box_.type = "checkbox";
+    box_.value = String(index + 1); box_.checked = index === 0;
+    label.append(box_, text(" " + name)); box.append(label);
+  });
+  box.hidden = el("schedule-kind").value !== "weekly";
+}
+
+async function loadSchedules() {
+  scheduleData = await call("/api/schedules");
+  const loop = scheduleData.resident_loop || {running: false};
+  el("schedule-loop").textContent = loop.running
+    ? "This Agent checks due schedules every " + loop.interval_seconds + " seconds."
+    : "This Agent is not checking schedules by itself. Start it with "
+      + "`aep-host web --schedules` (or set schedules.resident_loop), or run "
+      + "`aep-host schedules tick` from Windows Task Scheduler. Missed runs are caught up "
+      + "once within " + scheduleData.catch_up_hours + " hours.";
+  renderScheduleApprovals(el("schedule-approvals"), scheduleData.awaiting_approval,
+    scheduleActions);
+  renderScheduleList(el("schedule-list"), scheduleData, scheduleActions);
+  renderScheduleTargets();
+}
+
+el("schedule-refresh").addEventListener("click", () => {
+  loadSchedules().catch(showBootError);
+});
+el("schedule-kind").addEventListener("change", () => {
+  el("schedule-days").hidden = el("schedule-kind").value !== "weekly";
+});
+el("schedule-target").addEventListener("change", showScheduleTargetFields);
+el("schedule-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const result = el("schedule-form-result"), button = el("schedule-save");
+  const target = chosenScheduleTarget();
+  if (!target) { result.textContent = "Choose an installed target."; return; }
+  let inputs;
+  try { inputs = scheduleInputs(); }
+  catch (failure) { result.textContent = "Cannot save: " + failure.message; return; }
+  const kind = el("schedule-kind").value;
+  const weekdays = kind === "weekly"
+    ? [...el("schedule-days").querySelectorAll("input:checked")].map((box) => Number(box.value))
+    : [];
+  button.disabled = true;
+  try {
+    const reply = await call("/api/schedules/create", {
+      schedule_id: el("schedule-id").value.trim(),
+      target_kind: target.target_kind,
+      target: target.target,
+      recurrence: {kind: kind, timezone: el("schedule-timezone").value.trim(),
+        at: el("schedule-at").value, weekdays: weekdays},
+      runtime_inputs: inputs,
+      initial_status: el("schedule-paused").checked ? "paused" : "active",
+    });
+    result.textContent = "Saved " + reply.schedule.definition.schedule_id
+      + ". Grant it below before it can run unattended.";
+    await loadSchedules();
+  } catch (failure) {
+    result.textContent = "Not saved: " + (failure.code || failure.message);
+  } finally { button.disabled = false; }
+});
+el("schedule-timezone").value =
+  (Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Taipei");
+renderScheduleDays();
+
 // -- Workspace navigation -------------------------------------------------
 
 const panels = {ask: null, installed: loadCapabilities,
-  settings: loadSettings};
+  settings: loadSettings, schedules: loadSchedules};
 
 function showBootError(failure) {
   const banner = el("boot-error"); banner.hidden = false;
@@ -1883,6 +2301,7 @@ async function selectPrimaryTab(name) {
   }
   el("nav-capabilities").toggleAttribute("aria-current", name === "installed");
   el("nav-settings").toggleAttribute("aria-current", name === "settings");
+  el("nav-schedules").toggleAttribute("aria-current", name === "schedules");
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
@@ -1890,6 +2309,7 @@ async function selectPrimaryTab(name) {
 
 el("nav-capabilities").addEventListener("click", () => selectPrimaryTab("installed"));
 el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"));
+el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"));
 
 Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands()])
   .catch(showBootError);
