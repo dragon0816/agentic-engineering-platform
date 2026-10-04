@@ -475,8 +475,15 @@ tr:last-child td { border-bottom: none; }
         </div>
         <label for="model-base-url">Gateway URL</label>
         <input id="model-base-url" required>
+        <label for="model-choices">Models this Gateway serves</label>
+        <div class="two">
+          <div><select id="model-choices" aria-describedby="model-choices-state">
+            <option value="">Load the list from the saved Gateway&hellip;</option></select></div>
+          <div><button id="model-choices-load" type="button">Reload available models</button></div>
+        </div>
+        <p id="model-choices-state" class="note" role="status"></p>
         <label for="model-name">Model name served by the Gateway</label>
-        <input id="model-name" placeholder="Ask your Gateway administrator for this name" required>
+        <input id="model-name" placeholder="Choose above, or type the exact name" required>
         <label for="model-context-capacity">Declared model context capacity (tokens)</label>
         <input id="model-context-capacity" type="number" min="1" max="10000000" required>
         <p class="note">This value describes the model endpoint for routing. It does not
@@ -1705,6 +1712,7 @@ async function loadSettings() {
   el("model-alias").value = model.alias || "company";
   el("model-base-url").value = model.base_url || ["http:", "", "127.0.0.1:4000/v1"].join("/");
   el("model-name").value = model.model || "";
+  if (model.configured) loadModelChoices();
   el("model-context-capacity").value = model.declared_context_tokens || 128000;
   el("model-secret").value = model.credential_secret || "";
   el("model-environment").value = model.credential_environment || "";
@@ -1791,6 +1799,35 @@ el("persona-settings").addEventListener("submit", async (event) => {
     result.textContent = "Agent identity was not saved: " + failure.message;
   } finally { button.disabled = false; }
 });
+
+async function loadModelChoices() {
+  const select = el("model-choices"), state = el("model-choices-state");
+  state.textContent = "Reading the Gateway model list…";
+  try {
+    const listed = await call("/api/settings/models");
+    const first = document.createElement("option"); first.value = "";
+    first.append(text(listed.ok ? "Choose a model (" + listed.models.length + ")"
+      : "Model list unavailable"));
+    select.replaceChildren(first);
+    for (const name of listed.models) {
+      const option = document.createElement("option");
+      option.value = name; option.append(text(name)); select.append(option);
+    }
+    const current = el("model-name").value;
+    if (listed.models.includes(current)) select.value = current;
+    state.textContent = listed.ok
+      ? "Choosing a model fills the field below; save to apply it."
+      : "Could not read the list (" + listed.code + "); type the model name instead.";
+  } catch (failure) {
+    state.textContent = "Could not read the list: " + failure.message;
+  }
+}
+
+el("model-choices").addEventListener("change", () => {
+  const chosen = el("model-choices").value;
+  if (chosen) el("model-name").value = chosen;
+});
+el("model-choices-load").addEventListener("click", loadModelChoices);
 
 el("model-settings").addEventListener("submit", async (event) => {
   event.preventDefault();

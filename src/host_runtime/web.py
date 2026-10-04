@@ -134,6 +134,7 @@ from knowledge.market_matrix import (
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import cited_numbers
 from models.contracts import ModelMessage
+from models.wire import MethodTransport, UrllibTransport
 
 #: Anything larger than this is not a request to an Agent.
 MAX_BODY_BYTES = 256 * 1024
@@ -273,6 +274,8 @@ class AgentWeb:
         # The opt-in resident schedule loop, when `aep-host web` started one.
         # It shares the lock above, so a scheduled run never overlaps a request.
         self.schedule_loop: Any = None
+        # Reads the configured Gateway's model list for the Settings picker.
+        self.model_listing_transport: MethodTransport = UrllibTransport()
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -402,6 +405,50 @@ class AgentWeb:
                 "process environment and restart the Agent."
             )
         return "LLM Gateway credential is unavailable. Check its mapping in Settings."
+
+    def available_models(self) -> dict[str, Any]:
+        """List model names the configured Gateway serves, for the Settings picker.
+
+        Only the saved endpoint is queried (never a browser-supplied URL),
+        the credential comes from its environment variable and is never
+        returned, and nothing but the model names is reported.
+        """
+        binding = self.runtime.config.models
+        endpoint = (
+            None if binding is None or binding.routing_alias is None
+            else binding.catalog.endpoint(binding.routing_alias)
+        )
+        if endpoint is None or not endpoint.base_url:
+            return {"ok": False, "code": "model_not_configured", "models": []}
+        headers = {"Accept": "application/json"}
+        if endpoint.credential is not None:
+            variable = self.runtime.config.credential_environment().get(endpoint.credential.name)
+            token = os.environ.get(variable) if variable else None
+            if not token:
+                return {"ok": False, "code": "credential_unavailable", "models": []}
+            headers["Authorization"] = f"Bearer {token}"
+        base_url = endpoint.base_url.rstrip("/")
+        url = (
+            base_url.removesuffix("/v1") + "/api/tags" if endpoint.provider == "ollama"
+            else base_url + "/models"
+        )
+        try:
+            reply = self.model_listing_transport.request("GET", url, None, headers, 10.0)
+            try:
+                payload = json.loads(b"".join(reply.chunks()) or b"{}")
+            finally:
+                reply.close()
+        except (OSError, ValueError):
+            return {"ok": False, "code": "gateway_unreachable", "models": []}
+        if reply.status != 200 or not isinstance(payload, dict):
+            return {"ok": False, "code": f"gateway_http_{reply.status}", "models": []}
+        rows = payload.get("models" if endpoint.provider == "ollama" else "data") or []
+        names = sorted({
+            str(row.get("name" if endpoint.provider == "ollama" else "id"))
+            for row in rows if isinstance(row, dict)
+            and row.get("name" if endpoint.provider == "ollama" else "id")
+        })
+        return {"ok": True, "models": names[:500], "current": endpoint.model}
 
     def _gateway_configured(self) -> bool:
         binding = self.runtime.config.models
@@ -2199,6 +2246,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
+        elif parsed.path == "/api/settings/models":
+            self._json(200, web.available_models())
         elif parsed.path == "/api/backends":
             self._json(200, web.conversation_backends())
         elif parsed.path == "/api/commands":
