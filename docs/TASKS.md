@@ -831,6 +831,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   completion only after every Host check is reported. Ten focused plan/run
   tests passed, including a negative path for each domain. This is still a
   pure state machine; live adapters and independent validator wiring are G3/G4.
+- [x] G2 execution slice: add one provider-neutral runner for Knowledge,
+  Workflow/Task and Coding actions. It records context/execution evidence
+  references, delegates execution and Host checks to the supplied adapter,
+  and enforces the shared retry/stop state machine. Fifteen focused tests,
+  Ruff and touched-source mypy passed. Live domain adapters remain G3/G4.
 - [ ] G3: use the candidate Knowledge Asking Skill to test data coverage,
   retrieval, answer validation and gap feedback in Agent Web. Keep the
   published 1.0.0 Skill immutable; activate a new version only after review.
