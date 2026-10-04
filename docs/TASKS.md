@@ -883,6 +883,20 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   not been validated. Next: Skill-guided intent/asset selection, facet-specific
   retrieval, explicit missing-facet feedback and bounded re-retrieval before
   allowing a strategy result.
+- [x] Diagnose G3 combined-case failures before changing runtime behavior.
+  The unnamed market/product case misses Knowledge routing; named cases enter
+  the harness but receive a single whole-question `k=8` retrieval, zero
+  permitted harness retries and only Raw-citation/nonempty Host checks. The
+  installed candidate Skill's prose is not an executable retrieval plan;
+  `facet_status` remains `not_assessed`. CMP180 source material and some
+  CMX500 competitor battle cards exist, but direct CMP180 competitive fit is
+  unverified. See the causal analysis in
+  `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`. This identifies process wiring
+  as primary, Skill contract as secondary and data coverage as still open.
+- [ ] G3 exhaustive combination proof: evaluate all 15 nonempty subsets of
+  market, product/option/spec, technical and competitor facets using supported,
+  missing and misleading co-mention cases; then run live Vault cases after
+  route, Skill-guided retrieval and Host acceptance are repaired.
 - [x] Rename Knowledge evaluation-only schema, cases and test to `scenario`
   names so they cannot be mistaken for a separate Knowledge harness. Shared
   runtime contracts remain under `src/agent`; the candidate Skill remains
