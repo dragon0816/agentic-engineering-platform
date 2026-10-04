@@ -1,6 +1,6 @@
 """Schedule contracts and durable claim behavior, without target execution."""
 
-from datetime import UTC, datetime, time
+from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
 from typing import Literal
 
@@ -134,3 +134,123 @@ def test_pause_resume_skips_missed_runs_and_owner_is_fixed(tmp_path: Path) -> No
             store.create(definition(), now=datetime(2026, 10, 10, tzinfo=UTC))
     with pytest.raises(ScheduleStoreError, match="unavailable"):
         SqliteScheduleStore(path, bridge_id="other-bridge")
+
+
+def daily(timezone: str = "Asia/Taipei", at: time = time(9, 0)) -> ScheduleDefinition:
+    return ScheduleDefinition(
+        schedule_id="daily",
+        owner="engineer",
+        target_kind="workflow",
+        target=AssetIdentity(namespace="engineering", name="weekly-report", version="1.0.0"),
+        recurrence=Recurrence(kind="daily", timezone=timezone, at=at),
+    )
+
+
+def test_downtime_catches_up_only_the_latest_occurrence_once(tmp_path: Path) -> None:
+    path = tmp_path / "schedules.sqlite"
+    with SqliteScheduleStore(path, bridge_id="bridge-company") as store:
+        store.create(daily(), now=datetime(2026, 10, 1, 0, 0, tzinfo=UTC))
+        # Three weeks offline; back at 10:00 Taipei on 22 October.
+        back = datetime(2026, 10, 22, 2, 0, tzinfo=UTC)
+        (claim,) = store.claim_due(now=back)
+        assert claim.due_at == datetime(2026, 10, 22, 1, 0, tzinfo=UTC)
+        assert store.claim_due(now=back) == ()
+        assert store.get("daily", owner="engineer").next_due_at == datetime(
+            2026, 10, 23, 1, 0, tzinfo=UTC
+        )
+        assert store.history("daily", owner="engineer") == (claim,)
+    # A restart neither replays nor duplicates the caught-up occurrence.
+    with SqliteScheduleStore(path, bridge_id="bridge-company") as reopened:
+        assert reopened.claim_due(now=back) == ()
+        assert reopened.pending_claims() == (claim,)
+
+
+def test_an_occurrence_older_than_the_window_is_recorded_missed_not_run(
+    tmp_path: Path,
+) -> None:
+    due = datetime(2026, 10, 5, 1, 0, tzinfo=UTC)
+    later = datetime(2026, 10, 8, 1, 0, tzinfo=UTC)
+    with SqliteScheduleStore(tmp_path / "a.sqlite", bridge_id="bridge-company") as store:
+        store.create(definition(), now=due)
+        assert store.claim_due(now=later) == ()
+        (missed,) = store.history("weekly-report", owner="engineer")
+        assert (missed.due_at, missed.status, missed.result_code) == (
+            due,
+            "unavailable",
+            "schedule_missed",
+        )
+        assert store.pending_claims() == ()
+        assert store.get("weekly-report", owner="engineer").next_due_at == datetime(
+            2026, 10, 12, 1, tzinfo=UTC
+        )
+    with SqliteScheduleStore(tmp_path / "b.sqlite", bridge_id="bridge-company") as store:
+        store.create(definition(), now=due)
+        (claim,) = store.claim_due(now=later, catch_up=timedelta(days=4))
+        assert claim.due_at == due
+        with pytest.raises(ValueError):
+            store.claim_due(now=later, catch_up=timedelta(seconds=10))
+        with pytest.raises(ValueError):
+            store.claim_due(now=later, catch_up=timedelta(days=15))
+
+
+def test_catch_up_across_a_daylight_saving_gap_uses_real_occurrences(tmp_path: Path) -> None:
+    created = datetime(2026, 3, 7, 7, 0, tzinfo=UTC)
+    # 02:30 does not exist on 8 March; the latest real occurrence is 7 March.
+    back = datetime(2026, 3, 8, 12, 0, tzinfo=UTC)
+    with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
+        store.create(daily("America/New_York", time(2, 30)), now=created)
+        assert store.claim_due(now=back) == ()
+        (missed,) = store.history("daily", owner="engineer")
+        assert missed.due_at == datetime(2026, 3, 7, 7, 30, tzinfo=UTC)
+    with SqliteScheduleStore(tmp_path / "t.sqlite", bridge_id="bridge-company") as store:
+        store.create(daily("America/New_York", time(2, 30)), now=created)
+        (claim,) = store.claim_due(now=back, catch_up=timedelta(hours=48))
+        assert claim.due_at == datetime(2026, 3, 7, 7, 30, tzinfo=UTC)
+        assert store.get("daily", owner="engineer").next_due_at == datetime(
+            2026, 3, 9, 6, 30, tzinfo=UTC
+        )
+
+
+def test_resolution_releases_a_blocked_schedule_without_dispatch(tmp_path: Path) -> None:
+    due = datetime(2026, 9, 28, 1, 0, tzinfo=UTC)
+    week = datetime(2026, 10, 5, 1, 0, tzinfo=UTC)
+    with SqliteScheduleStore(tmp_path / "s.sqlite", bridge_id="bridge-company") as store:
+        store.create(definition(), now=due)
+        (claim,) = store.claim_due(now=due)
+        assert store.claim_due(now=week) == ()
+        with pytest.raises(ScheduleStoreError, match="owner_mismatch"):
+            store.resolve(
+                claim.idempotency_key,
+                owner="other",
+                outcome="failed",
+                decided_by="other",
+                now=week,
+            )
+        resolved = store.resolve(
+            claim.idempotency_key,
+            owner="engineer",
+            outcome="not_run",
+            decided_by="engineer",
+            now=week,
+            note="Bridge log shows no dispatch",
+        )
+        assert (resolved.status, resolved.result_code) == (
+            "needs_input",
+            "operator_resolved_not_run",
+        )
+        with pytest.raises(ScheduleStoreError, match="not_claimed"):
+            store.resolve(
+                claim.idempotency_key,
+                owner="engineer",
+                outcome="succeeded",
+                decided_by="engineer",
+                now=week,
+            )
+        (decision,) = store.decisions("weekly-report", owner="engineer")
+        assert (decision.kind, decision.outcome, decision.decided_by) == (
+            "resolve",
+            "not_run",
+            "engineer",
+        )
+        (next_claim,) = store.claim_due(now=week)
+        assert next_claim.due_at == week

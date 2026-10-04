@@ -23,7 +23,7 @@ from pydantic import StrictBool, model_validator
 
 from agent.task_contract import TaskContract
 from capabilities.contracts import CapabilitySpec
-from common.assets import WorkflowStep
+from common.assets import AssetIdentity, WorkflowStep
 from common.base import Contract, Symbol
 from common.execution import (
     ExecutionAuthorization,
@@ -75,7 +75,8 @@ class ScheduleDecider(Protocol):
 
 def target_capabilities(
     agent: LocalAgent,
-    schedule: ScheduleRecord,
+    target_kind: str,
+    target: AssetIdentity,
     task_templates: Mapping[tuple[str, str, str], TaskContract],
 ) -> tuple[CapabilitySpec, ...] | str:
     """Every installed capability the exact target may reach, or why not.
@@ -84,10 +85,9 @@ def target_capabilities(
     template's explicitly allowed capabilities; a text-only task reaches none
     and is therefore `read`.
     """
-    definition = schedule.definition
     engine = agent.gateway.engine
-    if definition.target_kind == "workflow":
-        manifest = engine.workflows.get(definition.target)
+    if target_kind == "workflow":
+        manifest = engine.workflows.get(target)
         if manifest is None:
             return "workflow_not_installed"
         identities = tuple(
@@ -95,7 +95,7 @@ def target_capabilities(
             for step in manifest.steps
         )
     else:
-        template = task_templates.get(definition.target.key)
+        template = task_templates.get(target.key)
         if template is None:
             return "task_not_installed"
         identities = template.allowed_capabilities
@@ -106,6 +106,19 @@ def target_capabilities(
             return "capability_not_installed"
         specs.append(binding.spec)
     return tuple(specs)
+
+
+def target_side_effect(
+    agent: LocalAgent,
+    target_kind: str,
+    target: AssetIdentity,
+    task_templates: Mapping[tuple[str, str, str], TaskContract],
+) -> SideEffect | None:
+    """The highest effect class the target can reach, or None if unresolvable."""
+    specs = target_capabilities(agent, target_kind, target, task_templates)
+    if isinstance(specs, str):
+        return None
+    return max_side_effect(spec.side_effect for spec in specs)
 
 
 def schedule_context(schedule: ScheduleRecord, trace: TraceIdentifiers) -> RequestContext:
@@ -156,7 +169,9 @@ class ScheduleGrantAuthorizer:
             return ScheduleDecision(code="schedule_grant_expired")
         if not grant.covers(definition):
             return ScheduleDecision(code="schedule_grant_mismatch")
-        specs = target_capabilities(self.agent, schedule, self.task_templates)
+        specs = target_capabilities(
+            self.agent, definition.target_kind, definition.target, self.task_templates
+        )
         if isinstance(specs, str):
             return ScheduleDecision(code=specs)
         effect = max_side_effect(spec.side_effect for spec in specs)

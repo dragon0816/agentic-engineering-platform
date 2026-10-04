@@ -14,7 +14,7 @@ import asyncio
 import sys
 import uuid
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import TypeVar
@@ -31,14 +31,13 @@ from common.base import Contract
 from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest
-from common.scheduling import ScheduleDefinition, ScheduleRecord
+from common.scheduling import ScheduleDefinition, ScheduledRun, ScheduleRecord
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from host_runtime.agent import LocalAgentOutcome
 from host_runtime.assets import export_assets
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
-from host_runtime.schedules import ScheduleStoreError, SqliteScheduleStore
 from host_runtime.sync import PlatformClient, advertisement
 from host_runtime.workspace import documents
 
@@ -101,17 +100,44 @@ def _parser() -> argparse.ArgumentParser:
     jobs.add_argument("--config", required=True, type=Path)
     jobs.add_argument("--once", action="store_true", help="poll a single time and stop")
     jobs.add_argument("--interval", type=float, default=5.0, help="seconds between polls")
-    schedules = commands.add_parser("schedules", help="manage this host's inert local schedules")
+    schedules = commands.add_parser("schedules", help="manage this host's local schedules")
     schedules.add_argument("--config", required=True, type=Path)
     schedule_actions = schedules.add_subparsers(dest="schedule_action", required=True)
-    schedule_create = schedule_actions.add_parser("create", help="save an exact installed Workflow")
+    schedule_create = schedule_actions.add_parser(
+        "create", help="save an exact installed Workflow or Agent Task (intent only)"
+    )
     schedule_create.add_argument("--definition", required=True, type=Path)
     schedule_actions.add_parser("list", help="list this member's schedules")
-    for action in ("pause", "resume", "history"):
+    for action in ("pause", "resume", "history", "revoke"):
         target = schedule_actions.add_parser(action)
         target.add_argument("schedule_id")
         if action == "history":
             target.add_argument("--limit", type=int, default=50)
+    schedule_grant = schedule_actions.add_parser(
+        "grant", help="let one schedule run unattended up to an effect class"
+    )
+    schedule_grant.add_argument("schedule_id")
+    schedule_grant.add_argument(
+        "--max-effect",
+        required=True,
+        choices=("read", "write", "execute", "external_side_effect"),
+        help="the highest effect class this schedule may reach; sending always asks per run",
+    )
+    schedule_grant.add_argument("--days", type=int, help="expire the grant after this many days")
+    schedule_actions.add_parser("pending", help="runs waiting for approval and open claims")
+    for action in ("approve", "deny"):
+        decide = schedule_actions.add_parser(action, help=f"{action} one waiting run")
+        decide.add_argument("idempotency_key")
+        decide.add_argument("--note")
+    schedule_resolve = schedule_actions.add_parser(
+        "resolve", help="record what happened to an uncertain claim; runs nothing"
+    )
+    schedule_resolve.add_argument("idempotency_key")
+    schedule_resolve.add_argument(
+        "--outcome", required=True, choices=("succeeded", "failed", "not_run")
+    )
+    schedule_resolve.add_argument("--note")
+    schedule_actions.add_parser("tick", help="run one schedule poll now, then stop")
     dut = commands.add_parser(
         "dut-validate",
         help="run an approved physical DUT request and retain its evidence as JSON",
@@ -652,61 +678,102 @@ def _schedule_line(record: ScheduleRecord) -> str:
     )
 
 
+def _run_line(run: ScheduledRun) -> str:
+    effect = f" [{run.side_effect}]" if run.side_effect is not None else ""
+    return (
+        f"{run.schedule_id} {run.due_at.isoformat()}: {run.status} "
+        f"({run.result_code or 'pending'}){effect}; {run.idempotency_key}"
+    )
+
+
+_SCHEDULE_REFUSALS = {
+    "not_admitted": "this host member is not admitted",
+    "definition_owner_mismatch": "schedule owner must be this host's bound member",
+    "workflow_not_installed": "the exact Workflow is not installed on this host",
+    "task_not_installed": "scheduled Agent Tasks need a trusted installed template",
+    "task_input_unsupported": "this Agent Task template declares no runtime inputs",
+    "workflow_parameters_invalid": "the inputs do not match the Workflow's declared fields",
+}
+
+
 def _schedules(runtime: HostRuntime, args: argparse.Namespace) -> int:
-    """Control intent for the bound member; never claim or execute due work."""
-    owner = runtime.actor
-    if runtime.agent.admit(owner, runtime.config.device.bridge_id) is not None:
-        print("this host member is not admitted", file=sys.stderr)
-        return 1
-    definition: ScheduleDefinition | None = None
-    if args.schedule_action == "create":
-        try:
-            definition = ScheduleDefinition.model_validate_json(
-                args.definition.read_text(encoding="utf-8-sig")
-            )
-        except (OSError, ValidationError, ValueError):
-            print("schedule definition is unreadable or invalid", file=sys.stderr)
-            return 2
-        if definition.owner != owner:
-            print("schedule owner must be this host's bound member", file=sys.stderr)
-            return 1
-        if definition.target_kind != "workflow":
-            print("scheduled Agent Tasks need a trusted installed template", file=sys.stderr)
-            return 1
-        if runtime.agent.gateway.engine.workflows.get(definition.target) is None:
-            print("the exact Workflow is not installed on this host", file=sys.stderr)
-            return 1
+    """The owner's schedule controls; only `tick` and `approve` dispatch work."""
+    from host_runtime.schedule_control import ScheduleControl, ScheduleControlError
+
+    control = ScheduleControl(runtime)
+    action = args.schedule_action
     try:
-        with SqliteScheduleStore(
-            runtime.layout.workspace_root / "schedules.sqlite",
-            bridge_id=runtime.config.device.bridge_id,
-        ) as store:
-            if args.schedule_action == "create":
-                assert definition is not None
-                print(_schedule_line(store.create(definition, now=datetime.now(UTC))))
-            elif args.schedule_action == "list":
-                for record in store.list(owner=owner):
-                    print(_schedule_line(record))
-            elif args.schedule_action in {"pause", "resume"}:
-                print(
-                    _schedule_line(
-                        store.set_active(
-                            args.schedule_id,
-                            owner=owner,
-                            active=args.schedule_action == "resume",
-                            now=datetime.now(UTC),
-                        )
-                    )
+        if action == "create":
+            try:
+                definition = ScheduleDefinition.model_validate_json(
+                    args.definition.read_text(encoding="utf-8-sig")
                 )
-            else:
-                for run in store.history(args.schedule_id, owner=owner, limit=args.limit):
+            except (OSError, ValidationError, ValueError):
+                print("schedule definition is unreadable or invalid", file=sys.stderr)
+                return 2
+            print(_schedule_line(control.create(definition)))
+        elif action == "list":
+            for record in control.schedules():
+                print(_schedule_line(record))
+        elif action in {"pause", "resume"}:
+            print(_schedule_line(control.set_active(args.schedule_id, active=action == "resume")))
+        elif action == "history":
+            for run in control.history(args.schedule_id, limit=args.limit):
+                print(
+                    f"{run.due_at.isoformat()}: {run.status} "
+                    f"({run.result_code or 'pending'}); {run.idempotency_key}"
+                )
+        elif action == "grant":
+            expires = (
+                None
+                if args.days is None
+                else datetime.now(UTC) + timedelta(days=max(1, min(args.days, 3650)))
+            )
+            item = control.grant(
+                args.schedule_id, max_side_effect=args.max_effect, expires_at=expires
+            ).grant
+            print(
+                f"{item.schedule_id}: granted up to {item.max_side_effect} by "
+                f"{item.approved_by}"
+                + (f" until {item.expires_at.isoformat()}" if item.expires_at else "")
+            )
+            if item.max_side_effect == "external_side_effect":
+                print("every run that can send still waits for your approval")
+        elif action == "revoke":
+            revoked = control.revoke(args.schedule_id)
+            print(f"{revoked.grant.schedule_id}: grant revoked")
+        elif action == "pending":
+            overview = control.overview()
+            for run in overview["awaiting_approval"]:
+                print(_run_line(ScheduledRun.model_validate(run)))
+            for schedule in overview["schedules"]:
+                if schedule["blocked_by"] is not None:
                     print(
-                        f"{run.due_at.isoformat()}: {run.status} "
-                        f"({run.result_code or 'pending'}); {run.idempotency_key}"
+                        f"{schedule['schedule_id']}: blocked by unresolved claim "
+                        f"{schedule['blocked_by']}"
                     )
-    except (ScheduleStoreError, OSError, ValueError) as error:
-        code = error.code if isinstance(error, ScheduleStoreError) else "invalid_request"
-        print(f"schedule control failed: {code}", file=sys.stderr)
+        elif action == "approve":
+            print(_run_line(control.approve(args.idempotency_key, note=args.note)))
+        elif action == "deny":
+            print(_run_line(control.deny(args.idempotency_key, note=args.note)))
+        elif action == "resolve":
+            print(
+                _run_line(
+                    control.resolve(args.idempotency_key, outcome=args.outcome, note=args.note)
+                )
+            )
+        elif action == "tick":
+            results = control.tick()
+            for run in results:
+                print(_run_line(run))
+            if not results:
+                print("nothing was due")
+    except ScheduleControlError as error:
+        message = _SCHEDULE_REFUSALS.get(error.code)
+        print(message or f"schedule control failed: {error.code}", file=sys.stderr)
+        return 1
+    except (OSError, ValueError, ValidationError):
+        print("schedule control failed: invalid_request", file=sys.stderr)
         return 1
     return 0
 

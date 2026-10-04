@@ -130,7 +130,9 @@ class ScheduleWorker:
             and authorization.trace == trace
         ):
             return ScheduleDecision(code="schedule_approval_required")
-        specs = target_capabilities(self.agent, schedule, self.task_templates)
+        specs = target_capabilities(
+            self.agent, definition.target_kind, definition.target, self.task_templates
+        )
         if isinstance(specs, str):
             return ScheduleDecision(code=specs)
         effect = max_side_effect(spec.side_effect for spec in specs)
