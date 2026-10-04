@@ -871,6 +871,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   actions. The typed suite rejects a strategy case missing competitor or other
   required facets and requires Raw citations or an explicit gap. Two focused
   contract tests, Ruff and mypy passed. No live model result is claimed yet.
+- [ ] G3 combined-case acceptance: the two existing combined scenarios were
+  run through the live Agent Web on 2026-10-04. `market-product-wireless-cmp180`
+  stopped at routing (`needs_input`) because it does not name the Knowledge
+  asset; prepending `RS_Knowledge` reached the harness but still returned
+  `knowledge_insufficient_evidence`. `full-competitive-strategy-wireless`
+  reached the harness and returned the same evidence stop. Its top eight
+  retrieved passages included CMP180 product/option and nearby market notes,
+  but no verified competitor comparison. Both returned zero accepted Raw
+  citations and `facet_status=not_assessed`; a multi-source strategy/SWOT has
+  not been validated. Next: Skill-guided intent/asset selection, facet-specific
+  retrieval, explicit missing-facet feedback and bounded re-retrieval before
+  allowing a strategy result.
 - [x] Rename Knowledge evaluation-only schema, cases and test to `scenario`
   names so they cannot be mistaken for a separate Knowledge harness. Shared
   runtime contracts remain under `src/agent`; the candidate Skill remains
