@@ -252,3 +252,21 @@ assert.ok(content(api.feedbackSummary({rating: "up", note: HOSTILE})).includes(H
         [node, str(script)], capture_output=True, text=True, encoding="utf-8", timeout=60
     )
     assert completed.returncode == 0, completed.stderr
+
+
+def test_each_session_row_offers_a_confirmed_delete() -> None:
+    script = _script()
+    render = script.split("function renderSessionList()", 1)[1].split("async function", 1)[0]
+    assert "session-delete-button" in render and "deleteSession(item.session_id" in render
+    delete = script.split("async function deleteSession(", 1)[1].split("\nasync function", 1)[0]
+    assert "confirm(" in delete and '"/api/conversations/delete"' in delete
+
+
+def test_public_backend_switch_updates_the_selector_before_reloading() -> None:
+    script = _script()
+    start = script.split('el("backend-public-start").addEventListener', 1)[1].split(
+        "\n});\n", 1
+    )[0]
+    assert start.index('el("conversation-backend").value = activeBackend') < start.index(
+        "await loadChat(activeConversation)"
+    )

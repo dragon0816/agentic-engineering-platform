@@ -101,6 +101,13 @@ body {
 .session-item strong, .session-item small { display: block; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; }
 .session-item small { margin-top: 2px; color: var(--dim); font-size: 11px; }
+.session-row { position: relative; }
+.session-row .session-item { padding-right: 38px; }
+.session-delete-button { position: absolute; top: 50%; right: 4px; transform: translateY(-50%);
+  min-width: 30px; min-height: 30px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--dim); cursor: pointer; opacity: 0; }
+.session-row:hover .session-delete-button, .session-delete-button:focus { opacity: 1; }
+.session-delete-button:hover { color: var(--bad); background: var(--bg); }
 .workspace { min-width: 0; }
 .topbar { display: flex; justify-content: flex-end; padding: 10px 18px;
   border-bottom: 1px solid var(--line); background: var(--bg); }
@@ -1154,7 +1161,14 @@ function renderSessionList() {
       try { await loadChat(item.session_id); field.focus(); }
       catch (failure) { showBootError(failure); }
     });
-    return button;
+    const row = document.createElement("div"); row.className = "session-row";
+    const remove = document.createElement("button"); remove.type = "button";
+    remove.className = "session-delete-button"; remove.append(text("\u{1F5D1}"));
+    remove.title = "刪除此 session";
+    remove.setAttribute("aria-label", remove.title + "：" + item.title);
+    remove.addEventListener("click", () => deleteSession(item.session_id, item.title));
+    row.append(button, remove);
+    return row;
   });
   if (buttons.length) el("session-list").replaceChildren(...buttons);
   else {
@@ -1162,6 +1176,16 @@ function renderSessionList() {
     empty.append(text("No sessions match this search."));
     el("session-list").replaceChildren(empty);
   }
+}
+
+async function deleteSession(sessionId, title) {
+  if (!confirm("永久刪除 session「" + title + "」？")) return;
+  try {
+    const deleted = await call("/api/conversations/delete", {session_id: sessionId});
+    if (!deleted.ok) throw new Error(deleted.code || "deletion_failed");
+    if (sessionId === activeConversation) activeConversation = "";
+    await loadChat(activeConversation || undefined);
+  } catch (failure) { showBootError(failure); }
 }
 
 async function loadConversations(selectId) {
@@ -1282,6 +1306,10 @@ el("backend-public-start").addEventListener("click", async () => {
     activeBackend = pendingPublicBackend;
     activeConversationPublic = true;
     pendingPublicBackend = "";
+    // Show the new backend at once; the backend list reload below is slow,
+    // and a stale "Gateway" entry would swallow the user's switch back.
+    el("conversation-backend").value = activeBackend; renderBackendState();
+    el("backend-public-result").textContent = "";
     el("backend-public-dialog").close();
     await loadChat(activeConversation); field.focus();
   } catch (failure) {
