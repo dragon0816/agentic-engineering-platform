@@ -194,6 +194,7 @@ LocalStateErrorCode = Literal[
     "conversation_unknown",
     "conversation_owner_fixed",
     "conversation_update_stale",
+    "conversation_message_unknown",
     "contribution_exists",
     "task_exists",
     "task_unknown",

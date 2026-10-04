@@ -13,6 +13,17 @@ from host_runtime.conversation_backends import ConversationBackendName
 MAX_STORED_MESSAGES = 100
 
 
+FeedbackRating = Literal["up", "down", "neutral"]
+
+
+class MessageFeedback(Contract):
+    """The user's rating of one answer, with an optional reason."""
+
+    rating: FeedbackRating
+    note: str | None = Field(default=None, max_length=2000)
+    updated_at: datetime
+
+
 class ConversationMessage(Contract):
     message_id: Symbol
     role: Literal["user", "assistant"]
@@ -20,6 +31,10 @@ class ConversationMessage(Contract):
     created_at: datetime
     status: Literal["submitted", "answered", "needs_input", "failed"]
     trace: TraceIdentifiers | None = None
+    # A user message may reply to an earlier exchange (its assistant message).
+    reply_to: Symbol | None = None
+    # Only an answer carries the user's feedback.
+    feedback: MessageFeedback | None = None
 
     @model_validator(mode="after")
     def user_and_assistant_evidence(self) -> Self:
@@ -27,6 +42,10 @@ class ConversationMessage(Contract):
             raise ValueError("a user message is submitted and carries no result trace")
         if self.role == "assistant" and self.status == "submitted":
             raise ValueError("an assistant message records an outcome")
+        if self.role == "user" and self.feedback is not None:
+            raise ValueError("feedback rates an answer, not a question")
+        if self.role == "assistant" and self.reply_to is not None:
+            raise ValueError("only a question replies to an earlier exchange")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -67,6 +86,19 @@ class ConversationDeleteRequest(Contract):
 class ConversationTurnRequest(Contract):
     session_id: Symbol
     message: Text
+    reply_to: Symbol | None = None
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
+class ConversationFeedbackRequest(Contract):
+    session_id: Symbol
+    message_id: Symbol
+    rating: FeedbackRating
+    note: str | None = Field(default=None, max_length=2000)
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

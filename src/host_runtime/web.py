@@ -64,6 +64,7 @@ from agent.task_contract import (
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from common.assets import AssetIdentity, Owner, WorkflowManifest
+from common.distribution import LocalStateError
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
@@ -102,9 +103,11 @@ from host_runtime.conversations import (
     ConversationBackendSelectRequest,
     ConversationCreateRequest,
     ConversationDeleteRequest,
+    ConversationFeedbackRequest,
     ConversationMessage,
     ConversationRecord,
     ConversationTurnRequest,
+    MessageFeedback,
 )
 from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.knowledge_observation import KnowledgeBridgeActions
@@ -774,6 +777,40 @@ class AgentWeb:
                     return kind, manifest.metadata.owner
         return None
 
+    @staticmethod
+    def _replied_exchange(
+        record: ConversationRecord, reply_to: str | None,
+    ) -> tuple[ConversationMessage, ConversationMessage] | None:
+        """The (question, answer) pair whose answer the user chose to reply to."""
+        if reply_to is None:
+            return None
+        messages = record.messages
+        for index, message in enumerate(messages):
+            if (
+                message.message_id == reply_to and message.role == "assistant"
+                and index > 0 and messages[index - 1].role == "user"
+            ):
+                return messages[index - 1], message
+        return None
+
+    def conversation_feedback(self, request: ConversationFeedbackRequest) -> dict[str, Any]:
+        """Record the user's rating and reason for one answer."""
+        item = ConversationFeedbackRequest.model_validate(request)
+        note = (item.note or "").strip() or None
+        try:
+            saved = self.runtime.state.set_message_feedback(
+                item.session_id, self.runtime.actor, item.message_id,
+                MessageFeedback(rating=item.rating, note=note, updated_at=datetime.now(UTC)),
+            )
+        except LocalStateError as error:
+            return {"ok": False, "code": error.code}
+        message = next(m for m in saved.messages if m.message_id == item.message_id)
+        return {
+            "ok": True, "message_id": item.message_id,
+            "feedback": None if message.feedback is None
+            else message.feedback.model_dump(mode="json"),
+        }
+
     def conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
         item = ConversationTurnRequest.model_validate(request)
         with self._one_at_a_time:
@@ -805,10 +842,29 @@ class AgentWeb:
                     answer = self._slash_command(slash) if slash is not None else {}
             namespace = self.namespace
             context_settings = self.conversation_context.load()
+            quoted = self._replied_exchange(record, item.reply_to)
+            if item.reply_to is not None and quoted is None and not answer:
+                answer = {
+                    "ok": False,
+                    "answer": "找不到要回覆的那段對話，請重新選擇。",
+                    "status": "needs_input",
+                }
+            recent = tuple(
+                message for message in record.messages[-39:]
+                if quoted is None or message.message_id not in {
+                    quoted[0].message_id, quoted[1].message_id
+                }
+            )
+            # A reply keeps the chosen exchange directly before the new
+            # question, even when it is older than the recent-history window.
             raw_history = tuple(
                 ModelMessage(role=message.role, text=message.text)
-                for message in record.messages[-39:]
+                for message in (*recent, *(quoted or ()))
             ) + (ModelMessage(role="user", text=item.message),)
+            routed_message = (
+                item.message if quoted is None
+                else f"{item.message}\n\n（延續先前的問題：{quoted[0].text}）"
+            )
             try:
                 history = prepare_history(raw_history, context_settings)
                 history_error = False
@@ -895,7 +951,7 @@ class AgentWeb:
                 # for model selection. Ordinary language enters the bounded
                 # tool loop with only recent local conversation text.
                 matrix_intent = self._market_matrix_intent(item.message)
-                named_knowledge = self._named_knowledge(item.message)
+                named_knowledge = self._named_knowledge(routed_message)
                 if named_knowledge is None and matrix_intent:
                     installed_knowledge = self.assets()["knowledge"]
                     if len(installed_knowledge) == 1:
@@ -918,7 +974,7 @@ class AgentWeb:
                     answer = (
                         self._market_matrix_reply(named_knowledge)
                         if matrix_intent
-                        else self._knowledge_reply(named_knowledge, item.message)
+                        else self._knowledge_reply(named_knowledge, routed_message)
                     )
                 elif command_match is not None:
                     direct = asyncio.run(self.runtime.agent.handle(local))
@@ -933,9 +989,9 @@ class AgentWeb:
                         "outcome": json.loads(direct.model_dump_json()),
                     }
                 elif (
-                    inferred_knowledge := self._skill_intended_knowledge(item.message)
+                    inferred_knowledge := self._skill_intended_knowledge(routed_message)
                 ) is not None:
-                    answer = self._knowledge_reply(inferred_knowledge, item.message)
+                    answer = self._knowledge_reply(inferred_knowledge, routed_message)
                 elif history_error:
                     answer = context_too_large
                 else:
@@ -984,6 +1040,7 @@ class AgentWeb:
                                 text=item.message,
                                 created_at=started,
                                 status="submitted",
+                                reply_to=None if quoted is None else quoted[1].message_id,
                             ),
                             ConversationMessage(
                                 message_id=f"message-{uuid.uuid4().hex}",
@@ -2181,6 +2238,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/conversations",
             "/api/conversations/delete",
             "/api/conversations/turn",
+            "/api/conversations/feedback",
             "/api/conversations/backend",
             "/api/backends/authenticate",
             "/api/contributions",
@@ -2252,6 +2310,15 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             result = self.server.web.conversation_turn(turn)
             self._json(200 if result.get("code") is None else 404, result)
+            return
+        if path == "/api/conversations/feedback":
+            try:
+                feedback = ConversationFeedbackRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid answer feedback"})
+                return
+            result = self.server.web.conversation_feedback(feedback)
+            self._json(200 if result["ok"] else 404, result)
             return
         if path == "/api/conversations/backend":
             try:

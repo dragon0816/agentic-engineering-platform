@@ -1080,3 +1080,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   checkout. Not merged to `main`; no live schedule created. Open: Registry
   asset kind and runtime parameters for Agent Tasks; doctor reporting of
   schedules; live Windows Task Scheduler check.
+- [x] Agent Web grouped conversation turns (Claude Code, 2026-10-05, owner
+  request): each question and answer render as one card; hovering shows
+  thumbs up / thumbs down / normal (neutral) and reply; a rating opens an
+  optional reason note stored as `MessageFeedback` on that answer through
+  `/api/conversations/feedback` (an annotation that keeps the transcript
+  append-only); right-click offers reply, copy and rating. Reply sends
+  `reply_to`, keeping the chosen exchange directly before the new question in
+  model history and attaching the original question to Knowledge routing.
+  Tests: contract, history placement, feedback persistence, authenticated
+  endpoint, page safety (Node harness); browser screenshots inspected.

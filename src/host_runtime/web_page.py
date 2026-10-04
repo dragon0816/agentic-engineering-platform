@@ -116,8 +116,34 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
   border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
   padding: 12px; min-height: 220px; max-height: 58vh; overflow-y: auto;
 }
-.turn { margin: 0 0 14px; }
+.turn { margin: 0 0 14px; position: relative; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
 .turn:last-child { margin-bottom: 0; }
+.turn:hover, .turn:focus-within { border-color: var(--accent); }
+.turn-reply-ref { font-size: 12px; color: var(--dim); margin: 0 0 4px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.turn-tools { position: absolute; top: 6px; right: 8px; display: flex; gap: 2px;
+  opacity: 0; transition: opacity .12s; background: var(--bg); border-radius: 8px; }
+.turn:hover .turn-tools, .turn:focus-within .turn-tools { opacity: 1; }
+.turn-tools button { min-width: 32px; min-height: 30px; padding: 2px 6px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+  color: var(--ink); cursor: pointer; font-size: 13px; }
+.turn-tools button[aria-pressed="true"] { background: var(--selected);
+  border-color: var(--accent); }
+.turn-feedback { margin: 8px 0 0; display: grid; gap: 6px; }
+.turn-feedback textarea { width: 100%; min-height: 56px; box-sizing: border-box; }
+.turn-feedback-row { display: flex; gap: 8px; align-items: center;
+  font-size: 12px; color: var(--dim); }
+.turn-feedback-saved { font-size: 12px; color: var(--dim); margin: 6px 0 0; }
+.turn-menu { position: fixed; z-index: 50; min-width: 170px; padding: 4px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+  box-shadow: 0 6px 24px rgba(0,0,0,.18); }
+.turn-menu button { display: block; width: 100%; text-align: left; padding: 8px 10px;
+  border: 0; border-radius: 6px; background: transparent; color: var(--ink); cursor: pointer; }
+.turn-menu button:hover, .turn-menu button:focus { background: var(--accent-soft); }
+.reply-chip { display: flex; gap: 8px; align-items: center; margin: 0 0 6px; padding: 6px 10px;
+  border-radius: 8px; background: var(--accent-soft); font-size: 13px; }
+.reply-chip span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .asked { font-weight: 600; color: var(--accent); word-break: break-word; }
 .said {
   margin: 8px 0 0; line-height: 1.65; overflow-wrap: anywhere;
@@ -354,7 +380,13 @@ tr:last-child td { border-bottom: none; }
   <section id="panel-ask" data-open>
     <div id="log"></div>
     <div id="command-palette" class="command-menu" role="listbox" hidden></div>
+    <div id="turn-menu" class="turn-menu" role="menu" hidden></div>
     <form class="ask" id="ask">
+      <div id="reply-chip" class="reply-chip" hidden>
+        <span id="reply-chip-text"></span>
+        <button type="button" id="reply-chip-clear" class="link-button"
+          aria-label="取消回覆">✕</button>
+      </div>
       <textarea id="message" rows="3" autocomplete="off" spellcheck="true"
         placeholder="Ask naturally, or type / to choose a command"></textarea>
       <div class="composer-footer">
@@ -915,32 +947,194 @@ let pendingPublicBackend = "";
 let activeConversationPublic = false;
 let activeConversationMessages = 0;
 
-function turn(asked) {
+function turn(asked, replyQuestion) {
+  const block = turnBlock(asked, replyQuestion);
+  log.append(block);
+  log.scrollTop = log.scrollHeight;
+  return block.querySelector(".said");
+}
+
+function renderConversation(record) {
+  log.replaceChildren();
+  closeTurnMenu();
+  if (replyTarget && !(record && record.messages.some(
+    item => item.message_id === replyTarget.message_id))) clearReply();
+  if (!record) return;
+  const questions = new Map();
+  for (let index = 0; index + 1 < record.messages.length; index += 2) {
+    questions.set(record.messages[index + 1].message_id, record.messages[index].text);
+  }
+  for (let index = 0; index < record.messages.length; index += 2) {
+    const asked = record.messages[index];
+    const replied = record.messages[index + 1];
+    const said = turn(asked.text, asked.reply_to ? questions.get(asked.reply_to) || "" : null);
+    if (replied) {
+      said.className = "said" + (replied.status === "failed" ? " bad" : "");
+      renderAnswer(said, replied.text);
+      attachTurnControls(said.parentNode, asked.text, replied);
+    }
+  }
+}
+
+// -- Turn groups ----------------------------------------------------------
+
+const RATINGS = [["up", "\u{1F44D}", "\u6709\u5e6b\u52a9"],
+  ["down", "\u{1F44E}", "\u6c92\u5e6b\u52a9"], ["neutral", "\u2796", "\u666e\u901a"]];
+let replyTarget = null;
+
+function turnBlock(asked, replyQuestion) {
   const block = document.createElement("div");
-  block.className = "turn";
+  block.className = "turn"; block.tabIndex = 0;
+  block.setAttribute("role", "group");
+  block.setAttribute("aria-label", "\u5c0d\u8a71\uff1a" + asked);
+  if (replyQuestion !== null && replyQuestion !== undefined) {
+    const ref = document.createElement("div");
+    ref.className = "turn-reply-ref";
+    ref.append(text("\u21a9 \u56de\u8986\uff1a"
+      + (replyQuestion || "\u5148\u524d\u7684\u5c0d\u8a71")));
+    block.append(ref);
+  }
   const line = document.createElement("div");
   line.className = "asked"; line.append(text("> " + asked));
   const said = document.createElement("div");
   said.className = "said waiting"; said.append(text("working\u2026"));
   block.append(line, said);
-  log.append(block);
-  log.scrollTop = log.scrollHeight;
-  return said;
+  return block;
 }
 
-function renderConversation(record) {
-  log.replaceChildren();
-  if (!record) return;
-  for (let index = 0; index < record.messages.length; index += 2) {
-    const asked = record.messages[index];
-    const replied = record.messages[index + 1];
-    const said = turn(asked.text);
-    if (replied) {
-      said.className = "said" + (replied.status === "failed" ? " bad" : "");
-      renderAnswer(said, replied.text);
-    }
-  }
+function ratingLabel(rating) {
+  const found = RATINGS.find(item => item[0] === rating);
+  return found ? found[1] + " " + found[2] : rating;
 }
+
+function feedbackSummary(feedback) {
+  const line = document.createElement("div");
+  line.className = "turn-feedback-saved";
+  line.append(text("\u4f60\u7684\u8a55\u50f9\uff1a" + ratingLabel(feedback.rating)
+    + (feedback.note ? " \u2014 " + feedback.note : "")));
+  return line;
+}
+
+function attachTurnControls(block, question, message) {
+  block.dataset.messageId = message.message_id;
+  const tools = document.createElement("div");
+  tools.className = "turn-tools";
+  for (const [rating, icon, label] of RATINGS) {
+    const button = document.createElement("button");
+    button.type = "button"; button.append(text(icon));
+    button.title = label; button.setAttribute("aria-label", "\u8a55\u50f9\uff1a" + label);
+    button.setAttribute("aria-pressed",
+      String(!!message.feedback && message.feedback.rating === rating));
+    button.dataset.rating = rating;
+    button.addEventListener("click", () => openFeedback(block, message, rating));
+    tools.append(button);
+  }
+  const reply = document.createElement("button");
+  reply.type = "button"; reply.append(text("\u21a9"));
+  reply.title = "\u56de\u8986\u9019\u6bb5\u5c0d\u8a71";
+  reply.setAttribute("aria-label", reply.title);
+  reply.addEventListener("click", () => chooseReply(message.message_id, question));
+  tools.append(reply);
+  block.append(tools);
+  const area = document.createElement("div");
+  area.className = "turn-feedback-area";
+  if (message.feedback) area.append(feedbackSummary(message.feedback));
+  block.append(area);
+  block.addEventListener("contextmenu", event => {
+    event.preventDefault();
+    showTurnMenu(event.clientX, event.clientY, block, question, message);
+  });
+}
+
+function openFeedback(block, message, rating) {
+  const area = block.querySelector(".turn-feedback-area");
+  const form = document.createElement("div");
+  form.className = "turn-feedback";
+  const row = document.createElement("div");
+  row.className = "turn-feedback-row";
+  row.append(text("\u8a55\u50f9\uff1a" + ratingLabel(rating)
+    + "\uff08\u53ef\u88dc\u5145\u539f\u56e0\uff0c\u9078\u586b\uff09"));
+  const note = document.createElement("textarea");
+  note.maxLength = 2000; note.setAttribute("aria-label", "\u8a55\u50f9\u539f\u56e0");
+  note.value = message.feedback && message.feedback.note ? message.feedback.note : "";
+  const actions = document.createElement("div");
+  actions.className = "turn-feedback-row";
+  const save = document.createElement("button");
+  save.type = "button"; save.append(text("\u5132\u5b58"));
+  const cancel = document.createElement("button");
+  cancel.type = "button"; cancel.className = "link-button"; cancel.append(text("\u53d6\u6d88"));
+  const status = document.createElement("span");
+  status.setAttribute("role", "status");
+  actions.append(save, cancel, status);
+  form.append(row, note, actions);
+  const previous = [...area.childNodes];
+  area.replaceChildren(form);
+  note.focus();
+  cancel.addEventListener("click", () => area.replaceChildren(...previous));
+  save.addEventListener("click", async () => {
+    save.disabled = true;
+    try {
+      const saved = await call("/api/conversations/feedback", {
+        session_id: activeConversation, message_id: message.message_id,
+        rating: rating, note: note.value,
+      });
+      message.feedback = saved.feedback;
+      area.replaceChildren(feedbackSummary(saved.feedback));
+      for (const button of block.querySelectorAll(".turn-tools button[data-rating]")) {
+        button.setAttribute("aria-pressed", String(button.dataset.rating === rating));
+      }
+    } catch (failure) {
+      save.disabled = false;
+      status.replaceChildren(text("\u7121\u6cd5\u5132\u5b58\uff1a" + failure.message));
+    }
+  });
+}
+
+function chooseReply(messageId, question) {
+  replyTarget = {message_id: messageId, question: question};
+  el("reply-chip-text").replaceChildren(text("\u21a9 \u56de\u8986\uff1a" + question));
+  el("reply-chip").hidden = false;
+  closeTurnMenu();
+  field.focus();
+}
+
+function clearReply() {
+  replyTarget = null;
+  el("reply-chip").hidden = true;
+  el("reply-chip-text").replaceChildren();
+}
+
+function closeTurnMenu() {
+  const menu = el("turn-menu");
+  if (menu) { menu.hidden = true; menu.replaceChildren(); }
+}
+
+function showTurnMenu(x, y, block, question, message) {
+  const menu = el("turn-menu");
+  const items = [
+    ["\u56de\u8986\u9019\u6bb5\u5c0d\u8a71", () => chooseReply(message.message_id, question)],
+    ["\u8907\u88fd\u56de\u8986", () => { closeTurnMenu();
+      if (navigator.clipboard) navigator.clipboard.writeText(message.text); }],
+    ...RATINGS.map(([rating, icon, label]) => [
+      "\u8a55\u50f9\uff1a" + icon + " " + label,
+      () => { closeTurnMenu(); openFeedback(block, message, rating); },
+    ]),
+  ];
+  menu.replaceChildren();
+  for (const [label, action] of items) {
+    const button = document.createElement("button");
+    button.type = "button"; button.setAttribute("role", "menuitem");
+    button.append(text(label));
+    button.addEventListener("click", action);
+    menu.append(button);
+  }
+  menu.style.left = Math.min(x, window.innerWidth - 190) + "px";
+  menu.style.top = Math.min(y, window.innerHeight - 220) + "px";
+  menu.hidden = false;
+  menu.querySelector("button").focus();
+}
+
+// -- end Turn groups
 
 function renderSessionList() {
   const query = el("session-search").value.trim().toLowerCase();
@@ -1122,6 +1316,15 @@ el("new-conversation").addEventListener("click", async () => {
   await loadChat(created.conversation.session_id); field.focus();
 });
 
+el("reply-chip-clear").addEventListener("click", () => { clearReply(); field.focus(); });
+document.addEventListener("click", (event) => {
+  const menu = el("turn-menu");
+  if (!menu.hidden && !menu.contains(event.target)) closeTurnMenu();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeTurnMenu();
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const asked = field.value.trim();
@@ -1129,10 +1332,13 @@ form.addEventListener("submit", async (event) => {
   field.value = "";
   el("command-palette").hidden = true;
   field.disabled = send.disabled = true;
-  const said = turn(asked);
+  const replying = replyTarget;
+  clearReply();
+  const said = turn(asked, replying ? replying.question : null);
   try {
     const completed = await call("/api/conversations/turn", {
       session_id: activeConversation, message: asked,
+      ...(replying ? {reply_to: replying.message_id} : {}),
     });
     const answer = completed.answer;
     said.className = "said" + (answer.ok ? "" : " bad");

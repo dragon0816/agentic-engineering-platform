@@ -34,7 +34,7 @@ from common.distribution import (
 )
 from common.enrollment import BridgeDevice
 from host_runtime.contributions import ContributionDraft
-from host_runtime.conversations import MAX_STORED_MESSAGES, ConversationRecord
+from host_runtime.conversations import MAX_STORED_MESSAGES, ConversationRecord, MessageFeedback
 
 # Version 5 adds portable task-run evidence. Tables are additive and
 # every open creates them, so older files migrate rather than being refused.
@@ -412,6 +412,40 @@ class SqliteLocalState:
                 ),
             )
         return item
+
+    def set_message_feedback(
+        self, session_id: Symbol, actor: Symbol, message_id: Symbol,
+        feedback: MessageFeedback,
+    ) -> ConversationRecord:
+        """Annotate one answer with the user's feedback.
+
+        The transcript stays append-only: only that assistant message's
+        `feedback` changes, and the conversation's update time is kept.
+        """
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM conversations WHERE session_id = ? AND actor = ?",
+                (session_id, actor),
+            ).fetchone()
+            if row is None:
+                raise LocalStateError("conversation_unknown")
+            stored = ConversationRecord.model_validate_json(row[0])
+            target = next(
+                (item for item in stored.messages if item.message_id == message_id), None
+            )
+            if target is None or target.role != "assistant":
+                raise LocalStateError("conversation_message_unknown")
+            updated = stored.model_copy(update={"messages": tuple(
+                item.model_copy(update={"feedback": feedback})
+                if item.message_id == message_id else item
+                for item in stored.messages
+            )})
+            checked = ConversationRecord.model_validate(updated.model_dump())
+            conn.execute(
+                "UPDATE conversations SET record = ? WHERE session_id = ?",
+                (checked.model_dump_json(), session_id),
+            )
+        return checked
 
     def conversation(self, session_id: Symbol, actor: Symbol) -> ConversationRecord | None:
         with self._read() as conn:
