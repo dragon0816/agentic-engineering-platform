@@ -1,0 +1,40 @@
+{
+  "version": "1",
+  "cases": [
+    {
+      "case_id": "market-trend-wireless",
+      "tier": "standalone",
+      "question": "根據 RS_Knowledge，無線通訊市場目前有哪些有原始資料支持的測試需求趨勢？請列來源與尚不確定之處。",
+      "facets": ["market_trend"],
+      "outputs": ["facts"]
+    },
+    {
+      "case_id": "product-cmp180-options-spec",
+      "tier": "standalone",
+      "question": "根據 RS_Knowledge，CMP180 的產品功能、option 與關鍵規格有哪些？每項請引用原始規格資料；找不到的請標為缺口。",
+      "facets": ["product_option_spec"],
+      "outputs": ["facts"]
+    },
+    {
+      "case_id": "technical-signaling-difference",
+      "tier": "standalone",
+      "question": "根據 RS_Knowledge，signaling 與 non-signaling 無線通訊測試的技術差異與適用測項是什麼？請區分有來源與推論。",
+      "facets": ["technical_knowledge"],
+      "outputs": ["facts"]
+    },
+    {
+      "case_id": "market-product-wireless-cmp180",
+      "tier": "combined",
+      "question": "把無線通訊市場的測試需求與 CMP180 的規格對照，哪些有直接證據、哪些只有線索、哪些完全缺資料？",
+      "facets": ["market_trend", "product_option_spec"],
+      "outputs": ["comparison"]
+    },
+    {
+      "case_id": "full-competitive-strategy-wireless",
+      "tier": "combined",
+      "question": "根據 RS_Knowledge 的市場趨勢、CMP180 產品與 option 規格、相關技術資料及可查證的競品資訊，提出在無線通訊市場的銷售策略、SWOT 分析和專案執行步驟。每個關鍵主張引用 Raw；缺少競品、客戶情境或適配證據時，先列缺口，不要編造策略結論。",
+      "facets": ["market_trend", "product_option_spec", "technical_knowledge", "competitor"],
+      "outputs": ["comparison", "strategy", "swot", "execution_actions"]
+    }
+  ]
+}

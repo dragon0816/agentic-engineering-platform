@@ -834,6 +834,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] G3: use the candidate Knowledge Asking Skill to test data coverage,
   retrieval, answer validation and gap feedback in Agent Web. Keep the
   published 1.0.0 Skill immutable; activate a new version only after review.
+- [x] Prepare G3 evaluation inputs at two levels: three standalone questions
+  (market trends, product options/specs, technical knowledge) and combined
+  market/product comparison plus competitive strategy with SWOT and project
+  actions. The typed suite rejects a strategy case missing competitor or other
+  required facets and requires Raw citations or an explicit gap. Two focused
+  contract tests, Ruff and mypy passed. No live model result is claimed yet.
 - [ ] G4–G6: adapt exact Workflow/Task and Coding runs to the same state and
   validation envelope, then prove all three from Agent Web. Order and
   acceptance are in `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.

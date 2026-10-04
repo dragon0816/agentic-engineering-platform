@@ -9,14 +9,14 @@ Date: 2026-10-04 (Asia/Taipei). Branch: main. Goal: build a six-layer Agent harn
 - G1 adds optional `SkillHarnessGuidance` to Skill manifests and a provider-neutral `AgentHarnessPlan` built from an existing TaskContract. Skill guidance can request evidence, context and fallback, but cannot add capability grants, remove Host completion checks or exceed the Task retry budget. The plan always ends in a validation stage.
 - G2 adds `AgentHarnessRun`, a bounded, payload-free state machine shared by all three domains. Context and execution must be observed before Host checks; failed checks route to `needs_input`, `failed` or a bounded retry. It is pure state logic, not a live executor or proof of semantic validation.
 - The owner specified Knowledge evaluation in two levels: standalone market trends, product/option/spec and technical questions; then combinations including market, product, technical context and competitor evidence for sales strategy, SWOT and project execution advice. Missing competitor or fit evidence must produce an explicit gap rather than invented conclusions.
+- `evaluation/knowledge/harness-cases-v1.json` now records five such scenarios. `evaluation.knowledge_harness.KnowledgeHarnessSuite` enforces the standalone/combined shape and requires all four evidence facets for strategy/SWOT/actions; it asserts no factual product or competitor answer. Two focused suite tests, Ruff and mypy passed. Live Vault and Agent Web runs remain G3.
 - Three test Skill manifests cover Knowledge, Workflow and Coding. The Knowledge fixture is a validated 1.1.0 candidate for the main Knowledge Asking Skill; the published 1.0.0 Skill is untouched. The candidate owns the procedure; later adapter code should only map retrieval and Raw citations into common observations.
 - Focused checks after G2: `pytest -q tests/test_agent_harness_plan.py tests/test_agent_harness_run.py tests/test_routing.py tests/test_gateway_task_execution.py` passed 49 tests; Ruff and mypy on G2 code/tests and `git diff --check` passed. Full repository verification is deferred to the owner's merge checkpoint.
 
 ## Next work
 
-1. Commit the clean G2 state slice. Define the owner's standalone and combined Knowledge evaluation cases as data, with explicit evidence facets and fail-closed outcomes. Do not assume the current Vault contains competitor evidence.
-2. Use the candidate Knowledge Asking Skill in G3 to test exact installed Vault coverage, bounded retrieval, citations and independent answer validation in Agent Web. Diagnose each failure as routing, Skill planning, data coverage, retrieval, execution or validation. Do not treat co-mentions as market fit.
-3. Bind existing exact Workflow/Task and Coding execution in G4 without replacing their deterministic logic or Bridge policy; finish cross-domain acceptance and Web proof.
+1. Commit the Knowledge evaluation-case slice. Use the candidate Knowledge Asking Skill in G3 to test exact installed Vault coverage, bounded retrieval, citations and independent answer validation in Agent Web. Diagnose each failure as routing, Skill planning, data coverage, retrieval, execution or validation. Do not treat co-mentions as market fit.
+2. Bind existing exact Workflow/Task and Coding execution in G4 without replacing their deterministic logic or Bridge policy; finish cross-domain acceptance and Web proof.
 
 ## Operational context
 

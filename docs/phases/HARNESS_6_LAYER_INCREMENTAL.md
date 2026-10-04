@@ -14,3 +14,14 @@ The previous product/market `MarketCellSufficiency` is a Knowledge pilot. It is 
 | G6 Agent Web proof | User-level validation | Knowledge, Workflow/Task and Coding traces are inspectable from Agent Web; the owner tests Knowledge first, then the other two applications. |
 
 Each slice receives focused tests. Full repository verification is reserved for the owner's merge checkpoint. Do not add n8n as a core dependency, mutate the source Vault, or edit a published Skill version in place.
+
+## Knowledge-first evaluation cases
+
+`evaluation/knowledge/harness-cases-v1.json` is the test input for G3. The
+standalone tier asks separately about market trends, product/option/spec data
+and technical knowledge. The combined tier first compares market and product
+evidence, then asks for a market/product/technical/competitor strategy with
+SWOT and project execution actions. Every factual output needs Raw citations;
+missing competitor, customer or fit evidence is an explicit gap, not an
+invented recommendation. The case data defines questions and acceptance
+facets, not pre-approved answers or a claim that the current Vault covers them.
