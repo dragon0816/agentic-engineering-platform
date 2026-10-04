@@ -11,15 +11,29 @@ from knowledge.evidence import (
     answer_claims_overlap_raw,
     answer_concerns_subject,
     assess_knowledge_evidence,
+    assess_wiki_primary,
     extractive_observation_answer,
     extractive_relation_answer,
     omit_unsupported_product_recommendations,
     omit_unverified_answer_lines,
     passage_number,
 )
-from knowledge.evolution import KnowledgeCatalog, KnowledgeQueryRequest, grounded_record
+from knowledge.evolution import (
+    KnowledgeCatalog,
+    KnowledgeQueryRequest,
+    WikiProvenance,
+    grounded_record,
+)
 from knowledge.market_matrix import MarketMatrixRequest, discover_market_matrix
-from knowledge.query import MAX_LABELED_INFERENCES, Answer, QueryEngine
+from knowledge.procedure import KnowledgeProcedure
+from knowledge.query import (
+    MAX_LABELED_INFERENCES,
+    Answer,
+    QueryEngine,
+    RetrievalSnapshot,
+    cited_numbers,
+)
+from knowledge.vault import Vault
 from models.contracts import ModelClient
 
 KNOWLEDGE_QUERY_SPEC = CapabilitySpec.model_validate(
@@ -80,6 +94,10 @@ class KnowledgeQueryHandler:
         if found is None:
             raise CapabilityRefused("knowledge_version_not_found")
         _manifest, vault = found
+        if request.procedure is not None and request.procedure.citation_policy == "wiki_primary":
+            return await asyncio.to_thread(
+                self._wiki_primary, context, request, request.procedure, vault
+            )
         assessment: KnowledgeEvidenceAssessment | None = None
         selected_passages = None
         if request.procedure is not None:
@@ -251,6 +269,89 @@ class KnowledgeQueryHandler:
             return grounded_record(
                 request.asset, context.trace, answer,
                 assessment=None if assessment is None else assessment.summary(),
+            )
+        except ValueError:
+            raise CapabilityRefused("knowledge_not_grounded") from None
+
+    def _wiki_primary(
+        self, context: RequestContext, request: KnowledgeQueryRequest,
+        procedure: KnowledgeProcedure, vault: Vault,
+    ) -> Contract:
+        """Answer from curated Wiki sections, with Raw as provenance and fallback."""
+        snapshot = RetrievalSnapshot(vault)
+        subject = procedure.subject(request.question)
+        focus = procedure.focus(request.question)
+        prefix = " ".join(part for part in (subject, focus.query if focus else None) if part)
+        queries = [request.question]
+        for facet in procedure.requested_facets(request.question):
+            for search in (*facet.search_queries, *facet.discovery_queries)[:2]:
+                queries.append(f"{prefix} {search}".strip())
+        passages = snapshot.wiki_primary_passages(tuple(dict.fromkeys(queries))[:8])
+        if not passages:
+            raise CapabilityRefused("knowledge_insufficient_evidence")
+        assessment = assess_wiki_primary(passages, request.question, procedure)
+        label = procedure.inference_label
+        facets = tuple(item.name for item in assessment.observations)
+        prompt = (
+            "Answer the question from the passages below and nothing else. WIKI "
+            "passages are the curated knowledge base and the primary evidence; RAW "
+            "passages are original source text for claims the Wiki does not cover. "
+            "Cite every supported claim with passage numbers in square brackets, "
+            "like [2]. Never cite a passage that does not state the claim. If no "
+            "passage supports an answer, say so in one sentence and cite nothing."
+            "\n\nQuestion: {question}\n\n{passages}"
+            + (
+                "\n\nRequested evidence facets: " + ", ".join(facets) + ". A "
+                "comparison or recommendation needs a cited passage directly "
+                "connecting the relevant facets; separate co-mentions are insufficient."
+                if facets else ""
+            )
+            + (
+                "\n\nInstalled Knowledge Skill guidance: " + procedure.answer_guidance
+                if procedure.answer_guidance else ""
+            )
+            + (
+                f"\n\nYou may add at most {MAX_LABELED_INFERENCES} inference lines after "
+                f"the facts. Start each inference line with {label}, cite the passages "
+                "of its premises, and use only product codes and numbers that appear "
+                "in them. An inference is not a verified fact or a direct relationship."
+                if label else ""
+            )
+        )
+        answer = QueryEngine(
+            vault, self.model, alias=self.alias,
+            max_output_tokens=procedure.synthesis_max_output_tokens,
+            prompt=prompt, inference_label=label, allow_wiki=True,
+        ).ask(
+            request.question, trace=context.trace, raw_citations_only=True,
+            selected_passages=passages,
+        )
+        if answer.status == "model_failed":
+            raise CapabilityRefused("knowledge_model_failed")
+        if answer.status == "answered":
+            answer = omit_unsupported_product_recommendations(
+                answer, request.question, procedure, allow_wiki=True
+            )
+            answer = omit_unverified_answer_lines(
+                answer, inference_label=label, allow_wiki=True
+            )
+        if answer.status != "answered":
+            raise CapabilityRefused("knowledge_insufficient_evidence")
+        cited_pages = tuple(dict.fromkeys(
+            passage.citation.wiki_page
+            for number, passage in enumerate(answer.passages, 1)
+            if number in cited_numbers(answer.text)
+            and passage.citation.kind == "wiki" and passage.citation.wiki_page
+        ))
+        try:
+            return grounded_record(
+                request.asset, context.trace, answer,
+                assessment=assessment.summary(),
+                citation_policy="wiki_primary",
+                wiki_provenance=tuple(
+                    WikiProvenance(wiki_page=page, raw_refs=snapshot.wiki_provenance(page))
+                    for page in cited_pages
+                ),
             )
         except ValueError:
             raise CapabilityRefused("knowledge_not_grounded") from None

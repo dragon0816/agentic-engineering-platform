@@ -68,6 +68,7 @@ class KnowledgeBridgeActions:
         else:
             status = (
                 "passed" if checked.answer.text.strip() and checked.cited_passages
+                and checked.citation_policy == self._citation_policy()
                 else "failed"
             )
         if set(self.required_evidence) - {"raw_citations"}:
@@ -95,20 +96,8 @@ class KnowledgeBridgeActions:
                 HarnessCheckResult(
                     check_id="claim_support",
                     status=(
-                        "passed" if checked is not None
-                        and answer_claims_overlap_raw(
-                    checked.answer, inference_label=self._inference_label()
-                )
-                        and (
-                            self.procedure is None
-                            or not unsupported_product_recommendations(
-                                checked.answer, checked.answer.question, self.procedure
-                            )
-                        )
-                        and (
-                            self.required_subject is None
-                            or answer_concerns_subject(checked.answer, self.required_subject)
-                        ) else "failed"
+                        "passed" if checked is not None and self._claims_supported(checked)
+                        else "failed"
                     ),
                     evidence_ref="bridge_claim_overlap",
                 )
@@ -117,6 +106,38 @@ class KnowledgeBridgeActions:
 
     def _inference_label(self) -> str | None:
         return None if self.procedure is None else self.procedure.inference_label
+
+    def _citation_policy(self) -> str:
+        return "raw_only" if self.procedure is None else self.procedure.citation_policy
+
+    def _claims_supported(self, checked: KnowledgeAnswerRecord) -> bool:
+        """Host-check cited claims under the citation policy the Skill declared.
+
+        A record whose policy differs from the installed Skill's is refused,
+        so the Bridge cannot widen what counts as citable evidence.
+        """
+        if checked.citation_policy != self._citation_policy():
+            return False
+        allow_wiki = checked.citation_policy == "wiki_primary"
+        return (
+            answer_claims_overlap_raw(
+                checked.answer, inference_label=self._inference_label(),
+                allow_wiki=allow_wiki,
+            )
+            and (
+                self.procedure is None
+                or not unsupported_product_recommendations(
+                    checked.answer, checked.answer.question, self.procedure,
+                    allow_wiki=allow_wiki,
+                )
+            )
+            and (
+                self.required_subject is None
+                or answer_concerns_subject(
+                    checked.answer, self.required_subject, allow_wiki=allow_wiki
+                )
+            )
+        )
 
     def facet_report(self) -> dict[str, object]:
         """Host-check cited facet and relationship observations independently."""
@@ -178,18 +199,6 @@ class KnowledgeBridgeActions:
                 item.name: item.attempts for item in assessment.facets
             },
             "claim_status": (
-                "supported" if answer_claims_overlap_raw(
-                    checked.answer, inference_label=self._inference_label()
-                )
-                and (
-                    self.procedure is None
-                    or not unsupported_product_recommendations(
-                        checked.answer, checked.answer.question, self.procedure
-                    )
-                )
-                and (
-                    self.required_subject is None
-                    or answer_concerns_subject(checked.answer, self.required_subject)
-                ) else "unverified"
+                "supported" if self._claims_supported(checked) else "unverified"
             ),
         }

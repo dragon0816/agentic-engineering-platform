@@ -160,6 +160,33 @@ def manifests(directory: Path, model: type[Any]) -> tuple[Any, ...]:
     return tuple(found)
 
 
+def knowledge_source_lines(record: dict[str, Any]) -> list[str]:
+    """List cited sources: Raw paths, or Wiki pages with their Raw provenance."""
+    answer = record.get("answer") or {}
+    passages = answer.get("passages") or []
+    provenance = {
+        item.get("wiki_page"): tuple(item.get("raw_refs") or ())
+        for item in record.get("wiki_provenance") or []
+    }
+    lines = []
+    for number in sorted(cited_numbers(answer.get("text") or "")):
+        if number < 1 or number > len(passages):
+            continue
+        citation = passages[number - 1].get("citation") or {}
+        if citation.get("kind") == "wiki" and citation.get("wiki_page"):
+            page = citation["wiki_page"]
+            refs = provenance.get(page, ())
+            backing = (
+                "來源：" + "、".join(f"`{Path(ref).name}`" for ref in refs[:3])
+                + ("…" if len(refs) > 3 else "")
+                if refs else "缺來源連結"
+            )
+            lines.append(f"[{number}] Wiki：{Path(page).stem}（{backing}）")
+        elif citation.get("raw_ref"):
+            lines.append(f"[{number}] `{citation['raw_ref']}`")
+    return lines
+
+
 def extension_lifecycle(runtime: HostRuntime) -> tuple[ExtensionLifecycleProjection, ...]:
     """Project valid staged packages and optional runtime evidence without executing code."""
     layout = runtime.layout
@@ -1051,20 +1078,27 @@ class AgentWeb:
                 "evidence": result.get("evidence"),
             }
         record = KnowledgeAnswerRecord.model_validate(result["record"])
-        sources = []
-        for number in sorted(cited_numbers(record.answer.text)):
-            citation = record.answer.passages[number - 1].citation
-            if citation.raw_ref is not None:
-                sources.append(f"[{number}] {citation.raw_ref}")
         answer = record.answer.text
-        if sources:
-            answer += "\n\nSources (Raw):\n" + "\n".join(sources)
+        wiki_primary = record.citation_policy == "wiki_primary"
+        if wiki_primary:
+            sources = knowledge_source_lines(record.model_dump(mode="json"))
+            if sources:
+                answer += "\n\n來源：\n" + "\n".join(sources)
+        else:
+            sources = []
+            for number in sorted(cited_numbers(record.answer.text)):
+                citation = record.answer.passages[number - 1].citation
+                if citation.raw_ref is not None:
+                    sources.append(f"[{number}] {citation.raw_ref}")
+            if sources:
+                answer += "\n\nSources (Raw):\n" + "\n".join(sources)
         if result.get("harness") is not None:
             facet_status = (result.get("evidence") or {}).get("facet_status")
+            kind = "Wiki/Raw" if wiki_primary else "Raw"
             answer += (
-                "\n\nEvidence check: Raw citations and requested facets verified."
+                f"\n\nEvidence check: {kind} citations and requested facets verified."
                 if facet_status == "covered"
-                else "\n\nEvidence check: Raw citations verified; facet coverage not assessed."
+                else f"\n\nEvidence check: {kind} citations verified; facet coverage not assessed."
             )
         return {
             "ok": True,
@@ -1834,6 +1868,9 @@ class AgentWeb:
             )
         elif run.phase == "validated" or not base["ok"]:
             visible_answer = base["answer"]
+            record = base.get("record") or {}
+            if run.phase == "validated" and record.get("citation_policy") == "wiki_primary":
+                visible_answer += "\n\n來源：\n" + "\n".join(knowledge_source_lines(record))
         else:
             visible_answer = "The selected Skill requires evidence this Host cannot yet verify."
         return {
@@ -1855,15 +1892,8 @@ class AgentWeb:
     def _knowledge_partial_preview(record: dict[str, Any], assessment: dict[str, Any]) -> str:
         """Show cited facts with their source paths while keeping gaps visible."""
         answer = record.get("answer") or {}
-        passages = answer.get("passages") or []
         text = (answer.get("text") or "").strip()
-        sources = []
-        for number in sorted(cited_numbers(text)):
-            if number < 1 or number > len(passages):
-                continue
-            raw_ref = (passages[number - 1].get("citation") or {}).get("raw_ref")
-            if raw_ref:
-                sources.append(f"[{number}] `{raw_ref}`")
+        sources = knowledge_source_lines(record)
         gaps = list(assessment.get("missing_facets") or [])
         if assessment.get("relation_required") and not connected_facets(
             tuple(item["name"] for item in assessment.get("facets") or []),

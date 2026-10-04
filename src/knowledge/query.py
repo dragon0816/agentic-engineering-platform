@@ -180,6 +180,16 @@ _LIST_MARKER = re.compile(r"^[ \t]*(?:\d{1,3}[.)]|[-*•])[ \t]+")
 STATED_NUMBER = re.compile(r"(?<![0-9A-Za-z_])\d+(?:\.\d+)?(?![0-9A-Za-z_])")
 
 
+def citable(passage: "Passage", allow_wiki: bool = False) -> bool:
+    """Raw is always citable; a curated Wiki page only under Wiki-primary.
+
+    `index.md` is navigation and never citable evidence.
+    """
+    if passage.citation.kind == "raw":
+        return True
+    return allow_wiki and passage.citation.wiki_page not in (None, "index.md")
+
+
 def split_labeled_inferences(text: str, label: str | None) -> tuple[str, tuple[str, ...]]:
     """Separate a Skill's labeled inference lines from factual lines."""
     if not label:
@@ -195,7 +205,9 @@ def split_labeled_inferences(text: str, label: str | None) -> tuple[str, tuple[s
     return "\n".join(facts), tuple(inferences)
 
 
-def labeled_inference_grounded(line: str, passages: tuple[Passage, ...], label: str) -> bool:
+def labeled_inference_grounded(
+    line: str, passages: tuple[Passage, ...], label: str, *, allow_wiki: bool = False,
+) -> bool:
     """Check one labeled inference against the Raw premises it cites.
 
     An inference may connect separately cited sources, which is why it is
@@ -209,7 +221,8 @@ def labeled_inference_grounded(line: str, passages: tuple[Passage, ...], label: 
         return False
     numbers = cited_numbers(body)
     if not numbers or any(
-        number < 1 or number > len(passages) or passages[number - 1].citation.kind != "raw"
+        number < 1 or number > len(passages)
+        or not citable(passages[number - 1], allow_wiki)
         for number in numbers
     ):
         return False
@@ -232,6 +245,7 @@ def labeled_inference_grounded(line: str, passages: tuple[Passage, ...], label: 
 
 def _has_raw_grounding(
     text: str, passages: tuple[Passage, ...], *, inference_label: str | None = None,
+    allow_wiki: bool = False,
 ) -> bool:
     """Preflight the record's citation rules before a bounded synthesis retry.
 
@@ -245,14 +259,17 @@ def _has_raw_grounding(
     if inferences and (
         len(inferences) > MAX_LABELED_INFERENCES
         or not all(
-            labeled_inference_grounded(line, passages, inference_label or "")
+            labeled_inference_grounded(
+                line, passages, inference_label or "", allow_wiki=allow_wiki
+            )
             for line in inferences
         )
     ):
         return False
     numbers = cited_numbers(text)
     if not numbers or any(
-        number < 1 or number > len(passages) or passages[number - 1].citation.kind != "raw"
+        number < 1 or number > len(passages)
+        or not citable(passages[number - 1], allow_wiki)
         for number in numbers
     ):
         return False
@@ -312,7 +329,7 @@ def _has_market_fit_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
 
 def _salvage_raw_sentences(
     text: str, passages: tuple[Passage, ...], *, market_guidance: bool,
-    inference_label: str | None = None,
+    inference_label: str | None = None, allow_wiki: bool = False,
 ) -> str:
     """Keep individually grounded claims if another sentence failed citation checks.
 
@@ -324,13 +341,15 @@ def _salvage_raw_sentences(
         sentence.strip()
         for sentence in cited_claim_sentences(facts)
         if sentence.strip()
-        and _has_raw_grounding(sentence.strip(), passages)
+        and _has_raw_grounding(sentence.strip(), passages, allow_wiki=allow_wiki)
         and (not market_guidance or _has_market_fit_grounding(sentence.strip(), passages))
     ]
     if supported and inference_label:
         supported.extend([
             line for line in inferences
-            if labeled_inference_grounded(line, passages, inference_label)
+            if labeled_inference_grounded(
+                line, passages, inference_label, allow_wiki=allow_wiki
+            )
         ][:MAX_LABELED_INFERENCES])
     return "\n".join(supported)
 
@@ -510,6 +529,7 @@ class RetrievalSnapshot:
         self._wiki_by_title: dict[str, str] = {}
         self._index_docs: list[_Doc] = []
         self._navigation_ready = False
+        self._wiki_sections: list[_Doc] | None = None
 
     def _prepare_wiki_navigation(self) -> None:
         if self._navigation_ready:
@@ -732,6 +752,160 @@ class RetrievalSnapshot:
             if target and target != page:
                 self._follow_wiki_sources(target, raw_refs, depth=0)
 
+    def wiki_provenance(self, page: str) -> tuple[str, ...]:
+        """The Raw sources a Wiki page was curated from, via its source links."""
+        self._prepare_wiki_navigation()
+        refs: set[str] = set()
+        self._follow_wiki_sources(page, refs, depth=1)
+        return tuple(sorted(refs))[:16]
+
+    def _wiki_section_docs(self) -> list[_Doc]:
+        if self._wiki_sections is None:
+            self._wiki_sections = [
+                _Doc(text, Citation(kind="wiki", wiki_page=rel, section=number))
+                for rel, title in self._vault.wiki_pages()
+                for number, text in enumerate(
+                    wiki_sections(title, self._vault.read(rel)), 1
+                )
+            ]
+        return self._wiki_sections
+
+    def wiki_primary_passages(
+        self, queries: tuple[str, ...], *, k: int = 24, per_page: int = 3,
+        index_k: int = 8, raw_k: int = 4, max_chars: int = 40000, linked_from: int = 6,
+    ) -> tuple[Passage, ...]:
+        """Rank curated Wiki sections first, then add a few Raw fallbacks.
+
+        For every query, sections of pages located through `index.md` lead,
+        followed by a full-text ranking of all Wiki sections. Queries are
+        interleaved so one facet cannot fill the budget, and no page supplies
+        more than `per_page` sections. Raw passages cover claims the Wiki
+        does not; they keep their own citations.
+        """
+        self._prepare_wiki_navigation()
+        docs = self._wiki_section_docs()
+        by_page: dict[str, list[_Doc]] = {}
+        for doc in docs:
+            by_page.setdefault(doc.citation.wiki_page or "", []).append(doc)
+        ranked: list[list[Passage]] = []
+        for query in queries:
+            led: list[Passage] = []
+            if self._index_docs:
+                for hit in _retrieve_docs(self._index_docs, query, k=index_k, min_raw=0):
+                    match = WIKILINK.search(hit.text)
+                    page = self._wiki_by_title.get(match.group(1).casefold()) if match else None
+                    if page and by_page.get(page):
+                        led.extend(_retrieve_docs(by_page[page], query, k=per_page, min_raw=0))
+            found = [*led, *_retrieve_docs(docs, query, k=k, min_raw=0)]
+            ranked.append(found)
+            # Follow the leading concept/synthesis pages' links to the entity
+            # (product) pages they discuss, as a reader of the Wiki would.
+            linked: list[Passage] = []
+            followed: set[str] = set()
+            for passage in found[:linked_from]:
+                page = passage.citation.wiki_page or ""
+                if page.startswith("wiki/entities/") or page in followed:
+                    continue
+                followed.add(page)
+                for link in WIKILINK.finditer(passage.text):
+                    target = self._wiki_by_title.get(link.group(1).casefold())
+                    if target and target.startswith("wiki/entities/") and by_page.get(target):
+                        linked.extend(_retrieve_docs(by_page[target], query, k=1, min_raw=0))
+            ranked.append(linked)
+        selected: list[Passage] = []
+        seen: set[tuple[str | None, int | None]] = set()
+        counts: dict[str, int] = {}
+        chars = 0
+        for position in range(max((len(items) for items in ranked), default=0)):
+            for items in ranked:
+                if position >= len(items) or len(selected) >= k:
+                    continue
+                passage = items[position]
+                page = passage.citation.wiki_page or ""
+                key = (page, passage.citation.section)
+                if (
+                    key in seen or counts.get(page, 0) >= per_page
+                    or chars + len(passage.text) > max_chars
+                ):
+                    continue
+                selected.append(passage)
+                seen.add(key)
+                counts[page] = counts.get(page, 0) + 1
+                chars += len(passage.text)
+        raw_docs = [doc for doc in self._docs if doc.citation.kind == "raw"]
+        fallback = (
+            _retrieve_docs(raw_docs, queries[0], k=raw_k, min_raw=raw_k)
+            if queries and raw_docs and raw_k else ()
+        )
+        return (*selected, *fallback)
+
+
+_HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
+WIKI_SECTION_CHARS = 1800
+
+
+def _bounded_parts(content: str, limit: int = WIKI_SECTION_CHARS) -> list[str]:
+    """Split a long Wiki section by paragraph, then by line, repeating a
+    table's header row and divider in every part so each stays readable."""
+    if len(content) <= limit:
+        return [content]
+    parts: list[str] = []
+    current = ""
+    for paragraph in re.split(r"\n\s*\n", content):
+        if len(paragraph) > limit:
+            lines = paragraph.splitlines()
+            header = (
+                lines[:2]
+                if len(lines) > 2 and lines[0].lstrip().startswith("|")
+                and re.match(r"^\s*\|?\s*:?-{3,}", lines[1]) else []
+            )
+            chunk = list(header)
+            for line in lines[len(header):]:
+                if chunk and len("\n".join([*chunk, line])) > limit and len(chunk) > len(header):
+                    parts.append("\n".join(chunk))
+                    chunk = [*header]
+                chunk.append(line)
+            if len(chunk) > len(header):
+                parts.append("\n".join(chunk))
+            continue
+        if current and len(current) + len(paragraph) + 2 > limit:
+            parts.append(current)
+            current = ""
+        current = f"{current}\n\n{paragraph}" if current else paragraph
+    if current:
+        parts.append(current)
+    return parts
+
+
+def wiki_sections(title: str, text: str) -> list[str]:
+    """Chunk one Wiki page by heading; each chunk names its page and heading.
+
+    Tables stay with their heading, so a cited row keeps its column meaning.
+    """
+    sections: list[str] = []
+    heading = ""
+    lines: list[str] = []
+
+    def flush() -> None:
+        content = "\n".join(lines).strip()
+        # A "See also" style list of links is navigation, not evidence.
+        prose = re.sub(r"[-*•\s|]+", " ", WIKILINK.sub(" ", content)).strip()
+        if not content or len(prose) < 24:
+            return
+        label = f"{title} › {heading}" if heading else title
+        sections.extend(f"{label}\n{part}" for part in _bounded_parts(content))
+
+    for line in one_line_ending(body_of(text)).splitlines():
+        match = _HEADING.match(line)
+        if match is None:
+            lines.append(line)
+            continue
+        flush()
+        lines = []
+        heading = "" if match.group(2).strip() == title else match.group(2).strip()
+    flush()
+    return sections
+
 
 def _retrieve_docs(
     docs: list[_Doc], question: str, *, k: int, min_raw: int,
@@ -909,6 +1083,7 @@ class QueryEngine:
         prompt: Text = DEFAULT_PROMPT,
         max_output_tokens: int = 800,
         inference_label: str | None = None,
+        allow_wiki: bool = False,
     ) -> None:
         if (model is None) != (alias is None):
             raise ValueError("a model and its alias come together")
@@ -920,6 +1095,7 @@ class QueryEngine:
         self.prompt = prompt
         self.max_output_tokens = max_output_tokens
         self.inference_label = inference_label
+        self.allow_wiki = allow_wiki
         self._asked = 0
 
     def ask(
@@ -973,18 +1149,20 @@ class QueryEngine:
         drafts: list[str] = []
         for attempt in range(2 if raw_citations_only else 1):
             if attempt:
-                # Keep the original passage numbers and omit Wiki text. Never
-                # feed the unsupported first answer back to the model.
+                # Keep the original passage numbers and omit uncitable text.
+                # Never feed the unsupported first answer back to the model.
+                kinds = "WIKI or RAW" if self.allow_wiki else "RAW"
                 raw_numbered = "\n\n".join(
-                    f"[{number}] RAW: {passage.text}"
+                    f"[{number}] {passage.citation.kind.upper()}: {passage.text}"
                     for number, passage in enumerate(passages, 1)
-                    if passage.citation.kind == "raw"
+                    if citable(passage, self.allow_wiki)
                 )
                 prompt = self.prompt.format(
-                    question=question, passages=raw_numbered or "No RAW passages available."
+                    question=question,
+                    passages=raw_numbered or f"No {kinds} passages available.",
                 ) + market_guidance + (
-                    "\n\nUse one short sentence per supported claim. Put a RAW passage "
-                    "citation [n] in every sentence. If the RAW passages do not "
+                    f"\n\nUse one short sentence per supported claim. Put a {kinds} passage "
+                    f"citation [n] in every sentence. If the {kinds} passages do not "
                     "support an answer, say so without citations."
                 )
             request = ModelRequest(
@@ -1019,7 +1197,10 @@ class QueryEngine:
             if text:
                 drafts.append(text)
             if not raw_citations_only or not cited or (
-                _has_raw_grounding(text, passages, inference_label=self.inference_label)
+                _has_raw_grounding(
+                    text, passages, inference_label=self.inference_label,
+                    allow_wiki=self.allow_wiki,
+                )
                 and (not market_guidance or _has_market_fit_grounding(text, passages))
             ):
                 break
@@ -1031,7 +1212,7 @@ class QueryEngine:
             def supported(draft: str) -> int:
                 salvaged = _salvage_raw_sentences(
                     draft, passages, market_guidance=bool(market_guidance),
-                    inference_label=self.inference_label,
+                    inference_label=self.inference_label, allow_wiki=self.allow_wiki,
                 )
                 return len(salvaged.splitlines()) if salvaged else 0
 
@@ -1051,12 +1232,15 @@ class QueryEngine:
                 synthesized_by=self.alias,
             )
         if raw_citations_only and (
-            not _has_raw_grounding(text, passages, inference_label=self.inference_label)
+            not _has_raw_grounding(
+                    text, passages, inference_label=self.inference_label,
+                    allow_wiki=self.allow_wiki,
+                )
             or (market_guidance and not _has_market_fit_grounding(text, passages))
         ):
             text = _salvage_raw_sentences(
                 text, passages, market_guidance=bool(market_guidance),
-                inference_label=self.inference_label,
+                inference_label=self.inference_label, allow_wiki=self.allow_wiki,
             )
             if not text:
                 # A Wiki citation or uncited sentence cannot become a

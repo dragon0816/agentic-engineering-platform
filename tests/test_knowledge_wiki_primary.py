@@ -1,11 +1,25 @@
 """Wiki-primary Knowledge citation: Wiki is the answer source, Raw the backing."""
 
-import pytest
+import asyncio
+import json
+from collections.abc import Callable, Iterator
+from datetime import date
+from pathlib import Path
 
+import pytest
+from test_raw import make_vault
+
+from capabilities.knowledge_query.handlers import KnowledgeQueryHandler
 from common.assets import AssetIdentity
-from common.execution import TraceIdentifiers
+from common.execution import RequestContext, TraceIdentifiers
+from host_runtime.knowledge_observation import KnowledgeBridgeActions
+from host_runtime.web import knowledge_source_lines
 from knowledge.evolution import KnowledgeAnswerRecord, WikiProvenance, grounded_record
-from knowledge.query import Answer, Citation, Passage
+from knowledge.procedure import KnowledgeProcedure
+from knowledge.query import Answer, Citation, Passage, RetrievalSnapshot, wiki_sections
+from knowledge.raw import RawDocument, RawSection, render, source_for
+from knowledge.vault import Vault, provenance_lines
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 ASSET = AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0")
 TRACE = TraceIdentifiers(trace_id="wiki", request_id="wiki", span_id="answer")
@@ -28,6 +42,9 @@ INDEX = Passage(
 
 def _answer(text: str, *passages: Passage) -> Answer:
     return Answer(question="ZNA options", status="answered", passages=passages, text=text)
+
+
+# -- Record contract ---------------------------------------------------------
 
 
 def test_raw_only_policy_still_rejects_wiki_citations() -> None:
@@ -88,3 +105,205 @@ def test_raw_only_record_cannot_carry_wiki_provenance() -> None:
             cited_passages=(RAW,),
             wiki_provenance=(WikiProvenance(wiki_page="wiki/entities/R&S ZNA.md"),),
         )
+
+
+# -- Wiki sections -----------------------------------------------------------
+
+
+def test_wiki_sections_keep_tables_with_headings_and_drop_link_lists() -> None:
+    page = (
+        "---\ntitle: R&S ZNA\n---\n# R&S ZNA\n\nAnalyzer overview text here.\n\n"
+        "## Options\n\n| Option | Function |\n|---|---|\n| ZNA-K2 | TDR |\n\n"
+        "## See also\n\n- [[A]]\n- [[B]]\n"
+    )
+    sections = wiki_sections("R&S ZNA", page)
+    assert sections[0].startswith("R&S ZNA\nAnalyzer overview")
+    assert sections[1].startswith("R&S ZNA › Options\n| Option | Function |")
+    assert len(sections) == 2
+
+
+def test_long_wiki_table_repeats_its_header_in_every_part() -> None:
+    rows = "\n".join(f"| ZNA-K{n} | function number {n} for analysis |" for n in range(200))
+    page = f"---\ntitle: T\n---\n## Options\n\n| Option | Function |\n|---|---|\n{rows}\n"
+    sections = wiki_sections("T", page)
+    assert len(sections) > 1
+    assert all("| Option | Function |\n|---|---|" in part for part in sections)
+
+
+# -- Retrieval, synthesis and Host checks over a small Vault -----------------
+
+
+def _wiki_vault(tmp_path: Path) -> Vault:
+    vault = make_vault(tmp_path)
+    source = source_for(b"zna specs", "drop/ZNA_specs.pdf").model_copy(
+        update={"raw_ref": "raw/ZNA_specs.md"}
+    )
+    vault.write_raw("raw/ZNA_specs.md", render(RawDocument(
+        source=source, extractor="pdf.v1", created=date(2026, 10, 5),
+        sections=(RawSection(text="ZNA-K20 extended time domain analysis with eye diagram."),),
+    )))
+    root = vault.root
+    (root / "wiki" / "sources").mkdir(parents=True, exist_ok=True)
+    (root / "wiki" / "entities").mkdir(parents=True, exist_ok=True)
+    id_line, sha_line = provenance_lines(source)
+    (root / "wiki" / "sources" / "ZNA_specs.md").write_text(
+        f"---\ntitle: ZNA_specs\n{id_line}\n{sha_line}\n---\nZNA specification source page.\n",
+        encoding="utf-8",
+    )
+    (root / "wiki" / "entities" / "R&S ZNA.md").write_text(
+        "---\ntitle: R&S ZNA\n---\n# R&S ZNA\n\n"
+        "[[R&S ZNA]] is a vector network analyzer from 10 MHz to 67 GHz. "
+        "Source: [[ZNA_specs]].\n\n"
+        "## Options\n\n| Option | Function |\n|---|---|\n"
+        "| ZNA-K2 | time domain TDR analysis |\n| ZNA-K20 | eye diagram |\n\n"
+        "## See also\n\n- [[ZNA_specs]]\n",
+        encoding="utf-8",
+    )
+    (root / "wiki" / "entities" / "Orphan.md").write_text(
+        "---\ntitle: Orphan\n---\nOrphan analyzer option supports TDR eye diagram measurement.\n",
+        encoding="utf-8",
+    )
+    (root / "index.md").write_text(
+        "# Index\n\n- [[R&S ZNA]] — vector network analyzer with TDR and eye diagram\n",
+        encoding="utf-8",
+    )
+    return vault
+
+
+def _procedure(**update: object) -> KnowledgeProcedure:
+    payload: dict[str, object] = {
+        "intent_patterns": ["option"],
+        "facets": [{
+            "name": "product_option_spec",
+            "request_patterns": ["option"],
+            "search_queries": ["ZNA option TDR eye diagram"],
+            "support_terms": ["option", "ZNA"],
+        }],
+        "citation_policy": "wiki_primary",
+        **update,
+    }
+    return KnowledgeProcedure.model_validate(payload)
+
+
+class _Synth:
+    def __init__(self, write: Callable[[str], str]) -> None:
+        self.write = write
+        self.requests: list[ModelRequest] = []
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        self.requests.append(request)
+        return ModelResponse(
+            trace=request.trace, model_alias=request.model_alias,
+            text=self.write(request.messages[0].text),
+        )
+
+    def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise NotImplementedError
+
+
+class _Catalog:
+    def __init__(self, vault: Vault) -> None:
+        self.vault = vault
+
+    def get(self, identity: AssetIdentity) -> tuple[None, Vault]:
+        return None, self.vault
+
+
+def _number(prompt: str, marker: str) -> int:
+    """The passage number the model was offered for a passage containing marker."""
+    for block in prompt.split("\n\n["):
+        head, _, body = block.partition("]")
+        if marker in body and head.strip().lstrip("[").isdigit():
+            return int(head.strip().lstrip("["))
+    raise AssertionError(f"{marker!r} was not offered to the model")
+
+
+def _ask(vault: Vault, procedure: KnowledgeProcedure, model: _Synth) -> dict[str, object]:
+    handler = KnowledgeQueryHandler(_Catalog(vault), model, alias="a")  # type: ignore[arg-type]
+    context = RequestContext(
+        trace=TRACE, actor="engineer", namespace="engineering",
+        message="ZNA option", channel="local",
+    )
+    request = {
+        "asset": ASSET.model_dump(mode="json"), "question": "ZNA option",
+        "procedure": procedure.model_dump(mode="json"),
+    }
+    record = asyncio.run(handler(context, request))  # type: ignore[arg-type]
+    loaded: dict[str, object] = json.loads(record.model_dump_json())
+    return loaded
+
+
+def test_wiki_primary_retrieval_leads_with_indexed_page_and_traces_provenance(
+    tmp_path: Path,
+) -> None:
+    snapshot = RetrievalSnapshot(_wiki_vault(tmp_path))
+    passages = snapshot.wiki_primary_passages(("ZNA option TDR eye diagram",))
+    assert passages[0].citation.kind == "wiki"
+    assert passages[0].citation.wiki_page == "wiki/entities/R&S ZNA.md"
+    assert any(passage.citation.kind == "raw" for passage in passages)
+    assert snapshot.wiki_provenance("wiki/entities/R&S ZNA.md") == ("raw/ZNA_specs.md",)
+    assert snapshot.wiki_provenance("wiki/entities/Orphan.md") == ()
+
+
+def test_wiki_primary_answer_cites_wiki_with_provenance_and_passes_host(
+    tmp_path: Path,
+) -> None:
+    procedure = _procedure()
+    model = _Synth(lambda prompt: (
+        "ZNA-K2 provides time domain TDR analysis "
+        f"[{_number(prompt, 'ZNA-K2 | time domain')}].\n"
+        "Orphan analyzer option supports TDR eye diagram measurement "
+        f"[{_number(prompt, 'Orphan analyzer')}]."
+    ))
+    record = _ask(_wiki_vault(tmp_path), procedure, model)
+    assert record["citation_policy"] == "wiki_primary"
+    provenance = {
+        item["wiki_page"]: item["raw_refs"]
+        for item in record["wiki_provenance"]  # type: ignore[attr-defined]
+    }
+    assert provenance == {
+        "wiki/entities/R&S ZNA.md": ["raw/ZNA_specs.md"],
+        "wiki/entities/Orphan.md": [],
+    }
+    assert "WIKI passages are the curated knowledge base" in model.requests[0].messages[0].text
+    lines = knowledge_source_lines(record)
+    assert any("Wiki：R&S ZNA（來源：`ZNA_specs.md`）" in line for line in lines)
+    assert any("Wiki：Orphan（缺來源連結）" in line for line in lines)
+    actions = KnowledgeBridgeActions(
+        lambda: {}, required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",), procedure=procedure,
+    )
+    actions.result = {"ok": True, "record": record}
+    checks = {check.check_id: check.status for check in actions.validate()}
+    assert checks == {
+        "answer_nonempty": "passed", "facet_coverage": "passed", "claim_support": "passed",
+    }
+
+
+def test_host_refuses_a_record_whose_policy_differs_from_the_skill(tmp_path: Path) -> None:
+    model = _Synth(lambda prompt: (
+        "ZNA-K2 provides time domain TDR analysis "
+        f"[{_number(prompt, 'ZNA-K2 | time domain')}]."
+    ))
+    record = _ask(_wiki_vault(tmp_path), _procedure(), model)
+    actions = KnowledgeBridgeActions(
+        lambda: {}, required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",),
+        procedure=_procedure(citation_policy="raw_only"),
+    )
+    actions.result = {"ok": True, "record": record}
+    checks = {check.check_id: check.status for check in actions.validate()}
+    assert checks["answer_nonempty"] == "failed"
+    assert checks["claim_support"] == "failed"
+
+
+def test_wiki_primary_drops_an_invented_wiki_claim(tmp_path: Path) -> None:
+    model = _Synth(lambda prompt: (
+        "ZNA-K2 provides time domain TDR analysis "
+        f"[{_number(prompt, 'ZNA-K2 | time domain')}].\n"
+        f"ZNA-K99 reaches 110 GHz [{_number(prompt, 'ZNA-K2 | time domain')}]."
+    ))
+    record = _ask(_wiki_vault(tmp_path), _procedure(), model)
+    text = record["answer"]["text"]  # type: ignore[index]
+    assert "ZNA-K2 provides" in text
+    assert "K99" not in text

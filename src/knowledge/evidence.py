@@ -21,6 +21,7 @@ from knowledge.query import (
     Citation,
     Passage,
     RetrievalSnapshot,
+    citable,
     cited_claim_sentences,
     cited_numbers,
     labeled_inference_grounded,
@@ -168,7 +169,9 @@ _CLAIM_STOPWORDS = {
 }
 
 
-def answer_claims_overlap_raw(answer: Answer, *, inference_label: str | None = None) -> bool:
+def answer_claims_overlap_raw(
+    answer: Answer, *, inference_label: str | None = None, allow_wiki: bool = False,
+) -> bool:
     """Reject obvious citation laundering; this is not semantic entailment.
 
     Each answer sentence needs meaningful lexical overlap with its cited Raw
@@ -180,7 +183,9 @@ def answer_claims_overlap_raw(answer: Answer, *, inference_label: str | None = N
     if inferences and (
         len(inferences) > MAX_LABELED_INFERENCES
         or not all(
-            labeled_inference_grounded(line, answer.passages, inference_label or "")
+            labeled_inference_grounded(
+                line, answer.passages, inference_label or "", allow_wiki=allow_wiki
+            )
             for line in inferences
         )
     ):
@@ -192,7 +197,7 @@ def answer_claims_overlap_raw(answer: Answer, *, inference_label: str | None = N
         sources = [
             answer.passages[number - 1].text
             for number in numbers if 1 <= number <= len(answer.passages)
-            and answer.passages[number - 1].citation.kind == "raw"
+            and citable(answer.passages[number - 1], allow_wiki)
         ]
         if not sources:
             return False
@@ -261,7 +266,7 @@ def _source_supports_focused_use_case(
     for every section, but the cited section still needs the product in a
     concrete test role.
     """
-    document_focus = _names_focus(source.citation.raw_ref, focus)
+    document_focus = _names_focus(source.citation.raw_ref or source.citation.wiki_page, focus)
     sentences = [
         sentence.strip()
         for sentence in re.split(
@@ -282,6 +287,7 @@ def _source_supports_focused_use_case(
 
 def unsupported_product_recommendations(
     answer: Answer, question: str, procedure: KnowledgeProcedure,
+    *, allow_wiki: bool = False,
 ) -> tuple[str, ...]:
     """Find recommendations supported only by a broad market/product listing.
 
@@ -314,7 +320,7 @@ def unsupported_product_recommendations(
             answer.passages[number - 1]
             for number in cited_numbers(line)
             if 1 <= number <= len(answer.passages)
-            and answer.passages[number - 1].citation.kind == "raw"
+            and citable(answer.passages[number - 1], allow_wiki)
         )
         for entity in entities:
             supported = any(
@@ -329,9 +335,12 @@ def unsupported_product_recommendations(
 
 def omit_unsupported_product_recommendations(
     answer: Answer, question: str, procedure: KnowledgeProcedure,
+    *, allow_wiki: bool = False,
 ) -> Answer:
     """Preserve independently cited claims after dropping weak recommendations."""
-    rejected = unsupported_product_recommendations(answer, question, procedure)
+    rejected = unsupported_product_recommendations(
+        answer, question, procedure, allow_wiki=allow_wiki
+    )
     if not rejected:
         return answer
     remaining = "\n".join(
@@ -343,7 +352,7 @@ def omit_unsupported_product_recommendations(
     })
 
 
-def answer_concerns_subject(answer: Answer, subject: str) -> bool:
+def answer_concerns_subject(answer: Answer, subject: str, *, allow_wiki: bool = False) -> bool:
     """The answer names the subject or cites a Raw document named for it.
 
     Option statements in a product's own feature or specification document
@@ -354,16 +363,18 @@ def answer_concerns_subject(answer: Answer, subject: str) -> bool:
     if folded in answer.text.casefold():
         return True
     return any(
-        folded in PurePosixPath(answer.passages[number - 1].citation.raw_ref or "")
-        .stem.casefold()
+        folded in PurePosixPath(
+            answer.passages[number - 1].citation.raw_ref
+            or answer.passages[number - 1].citation.wiki_page or ""
+        ).stem.casefold()
         for number in cited_numbers(answer.text)
         if 1 <= number <= len(answer.passages)
-        and answer.passages[number - 1].citation.kind == "raw"
+        and citable(answer.passages[number - 1], allow_wiki)
     )
 
 
 def omit_unverified_answer_lines(
-    answer: Answer, *, inference_label: str | None = None,
+    answer: Answer, *, inference_label: str | None = None, allow_wiki: bool = False,
 ) -> Answer:
     """Retain independently supported lines of a partly faulty model answer.
 
@@ -375,7 +386,8 @@ def omit_unverified_answer_lines(
     kept = [
         line for line in answer.text.splitlines()
         if line.strip() and answer_claims_overlap_raw(
-            answer.model_copy(update={"text": line}), inference_label=inference_label
+            answer.model_copy(update={"text": line}), inference_label=inference_label,
+            allow_wiki=allow_wiki,
         )
     ]
     facts, inferences = split_labeled_inferences("\n".join(kept), inference_label)
@@ -547,17 +559,20 @@ def extractive_observation_answer(
 
 def _supports_facet(
     passage: Passage, facet: KnowledgeFacetInstruction, subject: str | None,
-    focus: KnowledgeFocusHint | None, question: str,
+    focus: KnowledgeFocusHint | None, question: str, *, allow_wiki: bool = False,
 ) -> bool:
-    if passage.citation.kind != "raw":
+    if not citable(passage, allow_wiki):
         return False
-    if facet.source_areas and not any(
+    # Source areas name Raw folders; a curated Wiki page is not filed by them.
+    if passage.citation.kind == "raw" and facet.source_areas and not any(
         (passage.citation.raw_ref or "").startswith(area)
         for area in facet.source_areas
     ):
         return False
     content = _evidence_words(passage.text).casefold()
-    source_identity = f"{content} {passage.citation.raw_ref or ''}".casefold()
+    source_identity = (
+        f"{content} {passage.citation.raw_ref or passage.citation.wiki_page or ''}".casefold()
+    )
     if facet.include_subject and subject and subject.casefold() not in source_identity:
         return False
     focus_found = bool(
@@ -593,8 +608,9 @@ def _relation_pairs(
     subject: str | None,
     focus: KnowledgeFocusHint | None,
     terms: tuple[str, ...],
+    *, allow_wiki: bool = False,
 ) -> tuple[tuple[str, str], ...]:
-    if passage.citation.kind != "raw":
+    if not citable(passage, allow_wiki):
         return ()
     pairs: set[tuple[str, str]] = set()
     for sentence in re.split(r"(?<=[.!?。！？])\s+|\n", _evidence_words(passage.text)):
@@ -934,4 +950,63 @@ def assess_knowledge_evidence(
                 question, index_k=procedure.wiki_index_hits
             )
         ) if procedure.wiki_index_first else (),
+    )
+
+
+def assess_wiki_primary(
+    passages: tuple[Passage, ...], question: str, procedure: KnowledgeProcedure,
+) -> KnowledgeEvidenceAssessment:
+    """Observe the Skill's requested facets in Wiki-primary evidence.
+
+    The same facet and direct-relationship rules as the Raw path apply, with
+    curated Wiki sections citable. Coverage remains an observation for the
+    Host to check against the cited answer, never a claim of product fit.
+    """
+    facets = procedure.requested_facets(question)
+    if not facets:
+        return KnowledgeEvidenceAssessment(status="covered")
+    subject = procedure.subject(question)
+    focus = procedure.focus(question)
+    safe = tuple(_safe_passage(passage) for passage in passages)
+    observations = tuple(
+        FacetObservation(
+            name=facet.name,
+            passages=tuple(
+                passage for passage in safe
+                if _supports_facet(
+                    passage, facet, subject, focus, question, allow_wiki=True
+                )
+            )[:6],
+            attempts=1,
+        )
+        for facet in facets
+    )
+    relation_required = procedure.require_relation_for_combination and len(facets) > 1
+    relation_passages: list[Passage] = []
+    relations: list[FacetRelation] = []
+    if relation_required:
+        for passage in safe:
+            pairs = _relation_pairs(
+                passage, facets, subject, focus, procedure.relation_terms, allow_wiki=True
+            )
+            if not pairs or len(relation_passages) >= 3:
+                continue
+            relation_passages.append(passage)
+            relations.extend(
+                FacetRelation(left=left, right=right, citation=passage.citation)
+                for left, right in pairs
+            )
+    relations = relations[:18]
+    missing = tuple(item.name for item in observations if not item.passages)
+    linked = connected_facets(
+        tuple(item.name for item in observations),
+        tuple((item.left, item.right) for item in relations),
+    )
+    return KnowledgeEvidenceAssessment(
+        status="covered" if not missing and (not relation_required or linked) else "missing",
+        observations=observations,
+        missing_facets=missing,
+        relation_required=relation_required,
+        relation_passages=tuple(relation_passages),
+        relations=tuple(relations),
     )
