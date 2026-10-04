@@ -1101,3 +1101,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Bridge effect serialization; browser check inspected. Full pytest: 1955
   passed, 5 skipped; remaining failures are the known intermittent
   `test_knowledge_stage` and pre-existing cp950 `test_local_developer_environment`.
+- [ ] rs_workflow_system full migration with one parameter declaration
+  (owner request 2026-10-05): inventory, gap analysis, contract extension,
+  generators (Agent Web, schedule, Telegram, Agent tool schema, settings),
+  slice order and owner decisions are in
+  `docs/phases/RS_WORKFLOW_MIGRATION.md`. Awaiting owner decisions before S1.
