@@ -11,7 +11,16 @@ from test_raw import drop, make_vault
 from common.assets import AssetIdentity
 from common.execution import Failure, TraceIdentifiers
 from knowledge.evolution import grounded_record
-from knowledge.query import Answer, Citation, QueryEngine, cited_numbers, retrieve, tokens
+from knowledge.query import (
+    Answer,
+    Citation,
+    Passage,
+    QueryEngine,
+    cited_claim_sentences,
+    cited_numbers,
+    retrieve,
+    tokens,
+)
 from knowledge.raw import (
     DropIntake,
     PlainTextExtractor,
@@ -116,6 +125,25 @@ def test_tokens_split_scripts_and_index_cjk_at_every_length() -> None:
     assert tokens("採用GaN功率") == ("採", "用", "採用", "gan", "功", "率", "功率")
     assert tokens("   ") == ()
     assert cited_numbers("see [1], [2, 3] and [5-7] but not [x]") == {1, 2, 3, 5, 6, 7}
+
+
+def test_cited_claim_split_keeps_release_number_and_separate_citation_line() -> None:
+    assert cited_claim_sentences(
+        "CMW500 supports NB-NTN Rel. 17 Test Solution [1].\n[2]"
+    ) == ("CMW500 supports NB-NTN Rel. 17 Test Solution [1].", "[2]")
+
+
+def test_cited_claim_split_keeps_list_markers_and_grouped_citations_with_claim() -> None:
+    text = (
+        "1. **R&S CMX500**：支援 NR-NTN 測試。[10][12]\n"
+        "2) CMX-KC665B is an NR-NTN RF option. [4] [5]\n"
+        "- KM351 is required for 802.11ax.[5][7]"
+    )
+    assert cited_claim_sentences(text) == (
+        "**R&S CMX500**：支援 NR-NTN 測試 [10][12]。",
+        "CMX-KC665B is an NR-NTN RF option [4] [5].",
+        "KM351 is required for 802.11ax [5][7].",
+    )
 
 
 def test_named_raw_document_precedes_unrelated_chinese_matches(tmp_path: Path) -> None:
@@ -473,6 +501,64 @@ def test_raw_synthesis_does_not_retry_valid_or_explicitly_insufficient_answers(
     assert answer.status == "unanswered" and len(insufficient.requests) == 1
 
 
+def test_raw_synthesis_retries_an_empty_gateway_response(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    model = SequenceSynth(("", "The front end uses a GaN amplifier [1]."))
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert answer.status == "answered"
+    assert len(model.requests) == 2
+
+
+def test_raw_synthesis_keeps_only_supported_sentences_after_retry(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    response = (
+        "The front end uses a GaN power amplifier [1]. "
+        "The front end uses option K999 [1]."
+    )
+    model = Synth(response)
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert answer.status == "answered"
+    assert "GaN power amplifier" in answer.text
+    assert "K999" not in answer.text
+    assert len(model.requests) == 2
+
+
+def test_raw_synthesis_keeps_the_richer_supported_draft_across_the_retry(
+    tmp_path: Path,
+) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    raw_number = next(
+        number
+        for number, passage in enumerate(
+            retrieve(vault, "GaN power amplifier", k=4, min_raw=4), 1
+        )
+        if passage.citation.kind == "raw"
+    )
+    first = (
+        "Overview without a citation.\n"
+        f"1. The front end uses a GaN power amplifier. [{raw_number}]\n"
+        f"2. The GaN amplifier is in the front end. [{raw_number}]"
+    )
+    model = SequenceSynth((first, f"The front end uses a GaN amplifier [{raw_number}]."))
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert len(model.requests) == 2
+    assert answer.status == "answered"
+    assert "Overview" not in answer.text
+    assert "uses a GaN power amplifier" in answer.text
+    assert "is in the front end" in answer.text
+
+
 def test_broad_query_keeps_distant_option_and_interface_claims_in_separate_raw_excerpts(
     tmp_path: Path,
 ) -> None:
@@ -591,3 +677,24 @@ def test_market_answer_retries_when_product_and_rate_are_only_in_separate_raw(
     )
     assert refused.status == "uncited"
     assert len(persistently_wrong.requests) == 2
+
+
+def test_preselected_large_raw_is_bounded_before_model_synthesis(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    content = "background text " * 4000 + (
+        "SMW200A supports NTN channel emulation for satellite testing."
+    )
+    passage = Passage(
+        text=content,
+        citation=Citation(kind="raw", raw_ref="raw/ntn.md", section=1),
+        score=1.0,
+    )
+    model = Synth("SMW200A supports NTN channel emulation [1].")
+    answer = QueryEngine(vault, model, alias="answerer").ask(
+        "Which instrument supports NTN channel emulation?",
+        selected_passages=(passage,), raw_citations_only=True,
+    )
+    assert answer.status == "answered"
+    assert len(model.requests[0].messages[0].text) < 2500
+    assert "SMW200A supports NTN channel emulation" in answer.passages[0].text
+    assert answer.passages[0].text in content

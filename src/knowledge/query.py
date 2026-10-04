@@ -16,6 +16,7 @@ import hashlib
 import math
 import re
 from collections import Counter
+from collections.abc import Callable
 from pathlib import PurePosixPath
 from typing import Literal
 
@@ -24,10 +25,10 @@ from pydantic import Field, ValidationError
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
 from knowledge.contracts import KnowledgeSource
-from knowledge.lint import body_of, head_fields, read_pages
+from knowledge.lint import WIKILINK, body_of, head_fields, read_pages
 from knowledge.modelcalls import failure_from_exception
 from knowledge.raw import RawIndex, load_document, one_line_ending
-from knowledge.vault import Vault, VaultError
+from knowledge.vault import Vault, VaultError, normalize
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
 _TOKEN = re.compile(r"\w+", re.UNICODE)
@@ -107,6 +108,33 @@ def cited_numbers(text: str) -> set[int]:
     return cited
 
 
+def cited_claim_sentences(text: str) -> tuple[str, ...]:
+    """Split cited prose without breaking release abbreviations or list lines."""
+    # A list marker ("1.", "2)", "-") is formatting, not an uncited claim.
+    unlisted = re.sub(r"(?m)^[ \t]*(?:\d{1,3}[.)]|[-*•])[ \t]+", "", text)
+    # Keep every citation group that follows the terminal punctuation
+    # ("fact。[5][7]") with its claim, not only the first one.
+    attached = re.sub(
+        r"([.!?。！？])[ \t]*((?:\[[0-9][0-9,\s-]*\][ \t]*)+)",
+        lambda match: (
+            " " + match.group(2).rstrip() + match.group(1)
+            + match.group(2)[len(match.group(2).rstrip()):]
+        ),
+        unlisted,
+    )
+    protected = re.sub(
+        r"\b(?:Rel|Fig|No)\.",
+        lambda match: match.group(0)[:-1] + "\ue000",
+        attached,
+        flags=re.IGNORECASE,
+    )
+    return tuple(
+        sentence.replace("\ue000", ".").strip()
+        for sentence in re.split(r"(?<=[.!?])\s+|(?<=[。！？])\s*|\n+", protected)
+        if sentence.strip()
+    )
+
+
 class Citation(Contract):
     """Where a passage came from. A Raw passage names the source, its file and
     section, with the page or slide when the extractor knew it; a Wiki passage
@@ -157,16 +185,7 @@ def _has_raw_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
         for number in numbers
     ):
         return False
-    with_attached_citations = re.sub(
-        r"([.!?。！？])\s*(\[[0-9][0-9,\s-]*\])", r" \2\1", text
-    )
-    sentences = (
-        sentence.strip()
-        for sentence in re.split(r"(?<=[.!?])\s+|(?<=[。！？])\s*", with_attached_citations)
-    )
-    for sentence in sentences:
-        if not sentence:
-            continue
+    for sentence in cited_claim_sentences(text):
         sentence_citations = cited_numbers(sentence)
         if not sentence_citations:
             return False
@@ -197,8 +216,7 @@ def _has_market_fit_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
     rates = {item.replace(" ", "").casefold() for item in _MARKET_RATE.findall(text)}
     if not products or not rates:
         return True
-    attached = re.sub(r"([.!?。！？])\s*(\[[0-9][0-9,\s-]*\])", r" \2\1", text)
-    for sentence in re.split(r"(?<=[.!?])\s+|(?<=[。！？])\s*", attached):
+    for sentence in cited_claim_sentences(text):
         if not _MARKET_LINK.search(sentence) or _MARKET_UNCERTAIN.search(sentence):
             continue
         if not ("市場" in sentence or "market" in sentence.casefold()
@@ -221,6 +239,20 @@ def _has_market_fit_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
     return True
 
 
+def _salvage_raw_sentences(
+    text: str, passages: tuple[Passage, ...], *, market_guidance: bool,
+) -> str:
+    """Keep individually grounded claims if another sentence failed citation checks."""
+    supported = [
+        sentence.strip()
+        for sentence in cited_claim_sentences(text)
+        if sentence.strip()
+        and _has_raw_grounding(sentence.strip(), passages)
+        and (not market_guidance or _has_market_fit_grounding(sentence.strip(), passages))
+    ]
+    return "\n".join(supported)
+
+
 def _focused_raw_passages(
     passages: tuple[Passage, ...], question: str
 ) -> tuple[Passage, ...]:
@@ -236,11 +268,21 @@ def _focused_raw_passages(
         terms.update(facet_terms)
     focused: list[Passage] = []
     for passage in passages:
-        lines = passage.text.splitlines()
-        if passage.citation.kind != "raw" or len(passage.text) <= 800 or len(lines) < 8:
+        if passage.citation.kind != "raw" or len(passage.text) <= 800:
             focused.append(passage)
             continue
-        chunks = ["\n".join(lines[index : index + 5]) for index in range(0, len(lines), 5)]
+        # Keep distant table rows separate. Legacy Raw can also contain a
+        # whole slide deck in one paragraph, so cap each line group/window.
+        lines = passage.text.splitlines()
+        groups = (
+            ["\n".join(lines[index : index + 5]) for index in range(0, len(lines), 5)]
+            if len(lines) >= 8 else [passage.text]
+        )
+        chunks = [
+            group[start : start + 1200]
+            for group in groups
+            for start in range(0, len(group), 1000)
+        ]
         best = max(
             enumerate(chunks),
             key=lambda item: (len(set(tokens(item[1])) & terms), -item[0]),
@@ -380,6 +422,32 @@ class RetrievalSnapshot:
 
     def __init__(self, vault: Vault) -> None:
         self._docs = _corpus(vault)
+        self._vault = vault
+        self._raw_by_ref: dict[str, list[_Doc]] = {}
+        self._raw_by_id: dict[str, str] = {}
+        self._wiki_by_title: dict[str, str] = {}
+        self._index_docs: list[_Doc] = []
+        self._navigation_ready = False
+
+    def _prepare_wiki_navigation(self) -> None:
+        if self._navigation_ready:
+            return
+        self._navigation_ready = True
+        for doc in self._docs:
+            ref = doc.citation.raw_ref
+            if doc.citation.kind == "raw" and ref:
+                self._raw_by_ref.setdefault(ref, []).append(doc)
+                if doc.citation.source is not None:
+                    self._raw_by_id[doc.citation.source.source_id] = ref
+        self._wiki_by_title = {
+            title.casefold(): rel for rel, title in self._vault.wiki_pages()
+        }
+        for line in self._vault.read("index.md").splitlines():
+            match = re.match(r"^\s*[-*]\s+\[\[([^\]]+)\]\]\s*[—–-]\s*(.+)$", line)
+            if match is not None:
+                self._index_docs.append(
+                    _Doc(line, Citation(kind="wiki", wiki_page="index.md"))
+                )
 
     def batch(
         self, queries: tuple[str, ...], *, k: int, min_raw: int = 0
@@ -388,6 +456,199 @@ class RetrievalSnapshot:
             _retrieve_docs(self._docs, query, k=k, min_raw=min_raw)
             for query in queries
         )
+
+    def matching_raw(
+        self, query: str, *, accepts: Callable[[Passage], bool], k: int = 3,
+    ) -> tuple[Passage, ...]:
+        """Rank eligible Raw sections after filtering the whole loaded corpus.
+
+        A Skill's evidence constraint must not be applied only to the first
+        lexical hits: a valid source can be ranked below unrelated snippets.
+        """
+        eligible = [
+            doc for doc in self._docs
+            if doc.citation.kind == "raw"
+            and accepts(Passage(text=doc.text, citation=doc.citation, score=0.0))
+        ]
+        return _retrieve_docs(eligible, query, k=k, min_raw=k)
+
+    def source_section(
+        self, raw_ref: str, *, matches_sentence: Callable[[str], bool],
+    ) -> Passage | None:
+        """Follow a selected Raw source to its first matching original section."""
+        self._prepare_wiki_navigation()
+        for doc in self._raw_by_ref.get(raw_ref, ()):
+            if any(
+                matches_sentence(sentence)
+                for sentence in re.split(r"(?<=[.!?。！？])\s+|\n+", doc.text)
+            ):
+                return Passage(text=doc.text, citation=doc.citation, score=0.0)
+        return None
+
+    def source_neighbors(self, raw_ref: str, section: int) -> tuple[Passage, ...]:
+        """Read adjacent Raw sections without assigning them the hit's citation."""
+        self._prepare_wiki_navigation()
+        docs = self._raw_by_ref.get(raw_ref, ())
+        position = next(
+            (index for index, doc in enumerate(docs) if doc.citation.section == section),
+            None,
+        )
+        if position is None:
+            return ()
+        return tuple(
+            Passage(text=docs[index].text, citation=docs[index].citation, score=0.0)
+            for index in (position - 1, position + 1)
+            if 0 <= index < len(docs)
+        )
+
+    def matching_wiki_sources(
+        self, query: str, *, accepts: Callable[[Passage], bool],
+        k: int = 3, index_k: int = 8,
+    ) -> tuple[Passage, ...]:
+        """Read eligible Raw from each ranked index entry's linked Wiki source.
+
+        Ranking one pooled set can let repeated sections of a popular product
+        hide a different indexed source. Keep one section per source first.
+        """
+        self._prepare_wiki_navigation()
+        if not self._index_docs:
+            return ()
+        index_hits = _retrieve_docs(self._index_docs, query, k=index_k, min_raw=0)
+        refs: list[str] = []
+        for hit in index_hits:
+            match = WIKILINK.search(hit.text)
+            page = self._wiki_by_title.get(match.group(1).casefold()) if match else None
+            if page is None:
+                continue
+            linked: set[str] = set()
+            self._follow_wiki_sources(page, linked, depth=1)
+            for ref in sorted(linked):
+                if ref not in refs:
+                    refs.append(ref)
+        selected: list[Passage] = []
+        for ref in refs:
+            eligible = [
+                doc for doc in self._raw_by_ref.get(ref, ())
+                if accepts(Passage(text=doc.text, citation=doc.citation, score=0.0))
+            ]
+            best = _retrieve_docs(eligible, query, k=1, min_raw=1)
+            if best:
+                selected.append(best[0])
+            if len(selected) >= k:
+                break
+        return tuple(selected)
+
+    def wiki_batch(
+        self, queries: tuple[str, ...], *, k: int = 8
+    ) -> tuple[tuple[Passage, ...], ...]:
+        """Find curated Wiki leads before verifying claims in immutable Raw."""
+        wiki = [doc for doc in self._docs if doc.citation.kind == "wiki"]
+        return tuple(_retrieve_docs(wiki, query, k=k, min_raw=0) for query in queries)
+
+    def wiki_guided_batch(
+        self, queries: tuple[str, ...], *, k: int, min_raw: int = 0,
+        index_k: int = 8,
+    ) -> tuple[tuple[Passage, ...], ...]:
+        """Navigate index → Wiki links → linked Raw, then supplement globally.
+
+        The index and Wiki rank candidate sources; neither is silently treated
+        as proof. The returned passages keep immutable Raw citations.
+        """
+        self._prepare_wiki_navigation()
+        if not self._index_docs:
+            return self.batch(queries, k=k, min_raw=min_raw)
+        results: list[tuple[Passage, ...]] = []
+        for query in queries:
+            index_hits = _retrieve_docs(self._index_docs, query, k=index_k, min_raw=0)
+            page_refs: list[str] = []
+            for hit in index_hits:
+                match = WIKILINK.search(hit.text)
+                if match is None:
+                    continue
+                page = self._wiki_by_title.get(match.group(1).casefold())
+                if page and page not in page_refs:
+                    page_refs.append(page)
+            raw_refs: list[str] = []
+            for page in page_refs:
+                linked: set[str] = set()
+                self._follow_wiki_sources(page, linked, depth=1)
+                for ref in sorted(linked):
+                    if ref not in raw_refs:
+                        raw_refs.append(ref)
+            guided_limit = min(k, max(4, index_k // 3))
+            guided_list: list[Passage] = []
+            for ref in raw_refs:
+                best = _retrieve_docs(
+                    self._raw_by_ref.get(ref, []), query, k=1, min_raw=1
+                )
+                if best:
+                    guided_list.append(best[0])
+                if len(guided_list) >= guided_limit:
+                    break
+            guided = tuple(guided_list)
+            global_passages = self.batch((query,), k=k, min_raw=min_raw)[0]
+            seen: set[tuple[str | None, int | None]] = set()
+            merged: list[Passage] = []
+            for passage in (*guided, *global_passages):
+                key = (passage.citation.raw_ref, passage.citation.section)
+                if key not in seen and len(merged) < k:
+                    merged.append(passage)
+                    seen.add(key)
+            results.append(tuple(merged))
+        return tuple(results)
+
+    def wiki_index_context(
+        self, question: str, *, k: int = 3, index_k: int = 8,
+    ) -> tuple[Passage, ...]:
+        """Read bounded curated text from pages located through index.md."""
+        self._prepare_wiki_navigation()
+        if not self._index_docs:
+            return ()
+        index_hits = _retrieve_docs(self._index_docs, question, k=index_k, min_raw=0)
+        pages: list[str] = []
+        for hit in index_hits:
+            match = WIKILINK.search(hit.text)
+            if match is None:
+                continue
+            page = self._wiki_by_title.get(match.group(1).casefold())
+            if page and page not in pages:
+                pages.append(page)
+        for page in tuple(pages):
+            for link in WIKILINK.finditer(body_of(self._vault.read(page))):
+                target = self._wiki_by_title.get(link.group(1).casefold())
+                if target and target not in pages and len(pages) < 12:
+                    pages.append(target)
+        docs = [
+            doc for doc in self._docs
+            if doc.citation.kind == "wiki" and doc.citation.wiki_page in pages
+        ]
+        if not docs:
+            return ()
+        ranked = _retrieve_docs(docs, question, k=k, min_raw=0)
+        if ranked:
+            return ranked
+        return tuple(
+            Passage(text=doc.text, citation=doc.citation, score=0.0)
+            for doc in docs[:k]
+        )
+
+    def _follow_wiki_sources(
+        self, page: str, raw_refs: set[str], *, depth: int
+    ) -> None:
+        text = self._vault.read(page)
+        head = head_fields(text) or {}
+        raw_ref = normalize(head.get("source_path", ""))
+        if raw_ref in self._raw_by_ref:
+            raw_refs.add(raw_ref)
+        source_ref = self._raw_by_id.get(head.get("source_id", ""))
+        if source_ref:
+            raw_refs.add(source_ref)
+        if depth == 0:
+            return
+        for link in WIKILINK.finditer(body_of(text)):
+            target = self._wiki_by_title.get(link.group(1).casefold())
+            if target and target != page:
+                self._follow_wiki_sources(target, raw_refs, depth=0)
 
 
 def _retrieve_docs(
@@ -600,7 +861,7 @@ class QueryEngine:
         )
         if not passages:
             return Answer(question=question, status="no_match")
-        if raw_citations_only and evidence_coverage and _coverage_terms(question):
+        if raw_citations_only and (evidence_coverage or selected_passages is not None):
             passages = _focused_raw_passages(passages, question)
         if self.model is None or self.alias is None:
             return Answer(question=question, status="retrieved", passages=passages)
@@ -625,6 +886,7 @@ class QueryEngine:
             else ""
         )
         prompt = self.prompt.format(question=question, passages=numbered) + market_guidance
+        drafts: list[str] = []
         for attempt in range(2 if raw_citations_only else 1):
             if attempt:
                 # Keep the original passage numbers and omit Wiki text. Never
@@ -666,11 +928,31 @@ class QueryEngine:
                 )
             text = response.text.strip()
             cited = cited_numbers(text)
+            if raw_citations_only and not text and attempt == 0:
+                # Some Gateway turns complete with no visible text despite no
+                # provider failure. Give the same evidence one bounded retry.
+                continue
+            if text:
+                drafts.append(text)
             if not raw_citations_only or not cited or (
                 _has_raw_grounding(text, passages)
                 and (not market_guidance or _has_market_fit_grounding(text, passages))
             ):
                 break
+        if len(drafts) == 2 and cited_numbers(drafts[0]):
+            # The retry is a fresh generation, not a repair, so even a fully
+            # grounded retry can drop supported claims the first draft had.
+            # Keep the first draft only if it retains strictly more grounded
+            # sentences; the per-sentence salvage below decides what survives.
+            def supported(draft: str) -> int:
+                salvaged = _salvage_raw_sentences(
+                    draft, passages, market_guidance=bool(market_guidance)
+                )
+                return len(salvaged.splitlines()) if salvaged else 0
+
+            if supported(drafts[0]) > supported(drafts[1]):
+                text = drafts[0]
+                cited = cited_numbers(text)
         if any(n < 1 or n > len(passages) for n in cited):
             # Words without a retrieved source behind them are not an answer here.
             return Answer(question=question, status="uncited", passages=passages)
@@ -687,9 +969,13 @@ class QueryEngine:
             not _has_raw_grounding(text, passages)
             or (market_guidance and not _has_market_fit_grounding(text, passages))
         ):
-            # A Wiki citation or uncited sentence cannot become a Raw-grounded
-            # answer, even after the formatting retry.
-            return Answer(question=question, status="uncited", passages=passages)
+            text = _salvage_raw_sentences(
+                text, passages, market_guidance=bool(market_guidance)
+            )
+            if not text:
+                # A Wiki citation or uncited sentence cannot become a
+                # Raw-grounded answer, even after the formatting retry.
+                return Answer(question=question, status="uncited", passages=passages)
         return Answer(
             question=question,
             status="answered",

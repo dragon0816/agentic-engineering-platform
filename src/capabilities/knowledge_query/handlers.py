@@ -8,8 +8,14 @@ from common.base import Contract
 from common.execution import RequestContext
 from knowledge.evidence import (
     KnowledgeEvidenceAssessment,
+    answer_claims_overlap_raw,
+    answer_concerns_subject,
     assess_knowledge_evidence,
-    connected_facets,
+    extractive_observation_answer,
+    extractive_relation_answer,
+    omit_unsupported_product_recommendations,
+    omit_unverified_answer_lines,
+    passage_number,
 )
 from knowledge.evolution import KnowledgeCatalog, KnowledgeQueryRequest, grounded_record
 from knowledge.market_matrix import MarketMatrixRequest, discover_market_matrix
@@ -84,25 +90,24 @@ class KnowledgeQueryHandler:
                 selected_passages = assessment.selected_passages()
                 if not selected_passages:
                     raise CapabilityRefused("knowledge_insufficient_evidence")
-                if assessment.status == "missing":
-                    gaps = [*assessment.missing_facets]
-                    if assessment.relation_required and not connected_facets(
-                        tuple(item.name for item in assessment.observations),
-                        tuple((item.left, item.right) for item in assessment.relations),
-                    ):
-                        gaps.append("direct_relationship")
-                    answer = Answer(
-                        question=request.question,
-                        status="answered",
-                        passages=selected_passages,
-                        text=(
-                            "Raw candidate material was retrieved [1], but the requested "
-                            f"evidence remains incomplete ({', '.join(gaps)}); "
-                            "no cross-facet recommendation has been validated."
-                        ),
-                    )
+                if assessment.status == "missing" and not request.procedure.wiki_index_first:
+                    candidates = []
+                    for observation in assessment.observations:
+                        if not observation.passages:
+                            continue
+                        passage = observation.passages[0]
+                        number = passage_number(selected_passages, passage)
+                        if number is None:
+                            raise CapabilityRefused("knowledge_insufficient_evidence")
+                        candidates.append(f"Raw candidate for {observation.name} [{number}].")
                     return grounded_record(
-                        request.asset, context.trace, answer,
+                        request.asset, context.trace,
+                        Answer(
+                            question=request.question,
+                            status="answered",
+                            passages=selected_passages,
+                            text=" ".join(candidates),
+                        ),
                         assessment=assessment.summary(),
                     )
         facets = () if assessment is None else tuple(item.name for item in assessment.observations)
@@ -113,11 +118,28 @@ class KnowledgeQueryHandler:
             "the relevant facets; separate co-mentions are insufficient."
             if facets else ""
         )
+        skill_guidance = (
+            "\n\nInstalled Knowledge Skill guidance: " + request.procedure.answer_guidance
+            if request.procedure is not None and request.procedure.answer_guidance
+            else ""
+        )
+        partial_guidance = (
+            "\n\nThe retrieved evidence does not establish every requested facet or "
+            "direct relationship. State only independently supported facts "
+            "with Raw citations. Do not claim the requested comparison or "
+            "direct link is established. The Host will report the exact gaps."
+            if assessment is not None and assessment.status == "missing"
+            else ""
+        )
         answer = await asyncio.to_thread(
             QueryEngine(
                 vault,
                 self.model,
                 alias=self.alias,
+                max_output_tokens=(
+                    request.procedure.synthesis_max_output_tokens
+                    if request.procedure is not None else 800
+                ),
                 prompt=(
                     "Answer the question from the passages below and nothing else. "
                     "RAW passages are the only citable evidence. WIKI passages may "
@@ -125,7 +147,8 @@ class KnowledgeQueryHandler:
                     "only by them. Cite every supported claim with RAW passage numbers "
                     "in square brackets, like [2]. If no RAW passage supports an "
                     "answer, say so in one sentence and cite nothing.\n\n"
-                    "Question: {question}\n\n{passages}" + facet_guidance
+                    "Question: {question}\n\n{passages}"
+                    + facet_guidance + skill_guidance + partial_guidance
                 ),
             ).ask,
             request.question,
@@ -135,6 +158,78 @@ class KnowledgeQueryHandler:
             evidence_coverage=selected_passages is None,
             selected_passages=selected_passages,
         )
+        if (
+            request.procedure is not None
+            and request.procedure.wiki_index_first
+            and answer.status == "answered"
+        ):
+            answer = omit_unsupported_product_recommendations(
+                answer, request.question, request.procedure
+            )
+            answer = omit_unverified_answer_lines(answer)
+        if (
+            assessment is not None
+            and request.procedure is not None
+            and request.procedure.extractive_fallback
+            and request.procedure.wiki_index_first
+            and bool(assessment.observations)
+            and (
+                answer.status != "answered"
+                or not answer_claims_overlap_raw(answer)
+                or (
+                    (subject := request.procedure.subject(request.question)) is not None
+                    and not answer_concerns_subject(answer, subject)
+                )
+            )
+        ):
+            fallbacks = (
+                extractive_relation_answer(
+                    request.question, assessment, request.procedure
+                ),
+                extractive_observation_answer(
+                    request.question, assessment, request.procedure
+                ),
+            )
+            verified = None
+            for fallback in fallbacks:
+                if fallback is None:
+                    continue
+                fallback = omit_unsupported_product_recommendations(
+                    fallback, request.question, request.procedure
+                )
+                if fallback.status != "answered":
+                    continue
+                try:
+                    grounded_record(
+                        request.asset, context.trace, fallback,
+                        assessment=assessment.summary(),
+                    )
+                except ValueError:
+                    continue
+                verified = fallback
+                break
+            if verified is None:
+                if assessment.status == "missing":
+                    assert selected_passages is not None
+                    candidates = []
+                    for observation in assessment.observations:
+                        if not observation.passages:
+                            continue
+                        number = passage_number(selected_passages, observation.passages[0])
+                        if number is not None:
+                            candidates.append(f"Raw candidate for {observation.name} [{number}].")
+                    if candidates:
+                        return grounded_record(
+                            request.asset, context.trace,
+                            Answer(
+                                question=request.question, status="answered",
+                                passages=selected_passages,
+                                text=" ".join(candidates),
+                            ),
+                            assessment=assessment.summary(),
+                        )
+                raise CapabilityRefused("knowledge_not_grounded")
+            answer = verified
         if answer.status in ("no_match", "unanswered"):
             raise CapabilityRefused("knowledge_insufficient_evidence")
         if answer.status == "model_failed":

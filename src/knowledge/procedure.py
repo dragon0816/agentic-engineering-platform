@@ -13,23 +13,55 @@ from pydantic import Field, model_validator
 from common.base import Contract, Symbol, Text
 
 
+class KnowledgeFacetEvidenceRequirement(Contract):
+    question_pattern: Text
+    evidence_patterns: tuple[Text, ...] = Field(min_length=1, max_length=8)
+
+
 class KnowledgeFacetInstruction(Contract):
     name: Symbol
     request_patterns: tuple[Text, ...] = Field(min_length=1, max_length=12)
     search_queries: tuple[Text, ...] = Field(min_length=1, max_length=3)
+    discovery_queries: tuple[Text, ...] = Field(default=(), max_length=3)
     support_terms: tuple[Text, ...] = Field(min_length=1, max_length=12)
+    search_subject: bool = False
     include_subject: bool = False
     link_terms: tuple[Text, ...] = Field(default=(), max_length=12)
     link_subject: bool = False
+    focus_is_support: bool = False
+    focus_is_link: bool = False
+    require_focus: bool = False
+    require_focus_when_unbound: bool = False
+    entity_pattern: Text | None = None
+    evidence_requirements: tuple[KnowledgeFacetEvidenceRequirement, ...] = Field(
+        default=(), max_length=8
+    )
+    comparison_terms: tuple[Text, ...] = Field(default=(), max_length=8)
+    source_areas: tuple[Text, ...] = Field(default=(), max_length=8)
+    collect_all_queries: bool = False
+    max_passages: int = Field(default=3, ge=1, le=6, strict=True)
+
+
+class KnowledgeFocusHint(Contract):
+    pattern: Text
+    query: Text
+    evidence_terms: tuple[Text, ...] = Field(min_length=1, max_length=8)
 
 
 class KnowledgeProcedure(Contract):
     kind: Literal["knowledge_query_v1"] = "knowledge_query_v1"
     intent_patterns: tuple[Text, ...] = Field(min_length=1, max_length=20)
     subject_pattern: Text | None = None
+    focus_hints: tuple[KnowledgeFocusHint, ...] = Field(default=(), max_length=20)
     facets: tuple[KnowledgeFacetInstruction, ...] = Field(min_length=1, max_length=12)
     relation_terms: tuple[Text, ...] = Field(default=(), max_length=20)
+    relation_search_queries: tuple[Text, ...] = Field(default=(), max_length=4)
     require_relation_for_combination: bool = False
+    extractive_fallback: bool = False
+    wiki_index_first: bool = False
+    wiki_index_hits: int = Field(default=8, ge=1, le=32, strict=True)
+    synthesis_max_output_tokens: int = Field(default=800, ge=256, le=8192, strict=True)
+    answer_guidance: str | None = Field(default=None, max_length=2000)
 
     @model_validator(mode="after")
     def valid_patterns(self) -> Self:
@@ -42,6 +74,16 @@ class KnowledgeProcedure(Contract):
         patterns = [
             *self.intent_patterns,
             *(pattern for facet in self.facets for pattern in facet.request_patterns),
+            *(hint.pattern for hint in self.focus_hints),
+            *(facet.entity_pattern for facet in self.facets if facet.entity_pattern),
+            *(
+                pattern
+                for facet in self.facets
+                for requirement in facet.evidence_requirements
+                for pattern in (
+                    requirement.question_pattern, *requirement.evidence_patterns,
+                )
+            ),
         ]
         if self.subject_pattern is not None:
             patterns.append(self.subject_pattern)
@@ -69,3 +111,9 @@ class KnowledgeProcedure(Contract):
             return None
         matched = re.search(self.subject_pattern, question, re.IGNORECASE)
         return None if matched is None else matched.group(0)
+
+    def focus(self, question: str) -> KnowledgeFocusHint | None:
+        return next(
+            (hint for hint in self.focus_hints if re.search(hint.pattern, question, re.IGNORECASE)),
+            None,
+        )

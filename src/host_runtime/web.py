@@ -117,6 +117,7 @@ from host_runtime.slash_commands import (
     parse_slash_command,
 )
 from host_runtime.workspace import documents, write_atomically
+from knowledge.evidence import connected_facets, evidence_excerpt
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest, KnowledgeQueryRequest
 from knowledge.market_matrix import (
     MARKET_QUESTIONS,
@@ -1799,6 +1800,8 @@ class AgentWeb:
             required_evidence=plan.skill_evidence,
             required_facets=required_facets,
             relation_required=relation_required,
+            required_subject=procedure.subject(item.question) if procedure else None,
+            procedure=procedure,
         )
         run = run_harness(plan, actions)
         base = actions.result or {
@@ -1807,7 +1810,15 @@ class AgentWeb:
         }
         facet_report = actions.facet_report()
         incomplete = run.phase != "validated" and base["ok"] and required_facets
-        if incomplete and facet_report["facet_status"] == "missing":
+        assessment = (base.get("record") or {}).get("assessment") or {}
+        if incomplete and assessment.get("status") == "missing":
+            record_answer = (base["record"].get("answer") or {}).get("text") or ""
+            visible_answer = (
+                self._knowledge_partial_preview(base["record"], assessment)
+                if record_answer and facet_report.get("claim_status") == "supported"
+                else self._knowledge_gap_preview(base["record"], assessment, procedure)
+            )
+        elif incomplete and facet_report["facet_status"] == "missing":
             missing = facet_report["missing_facets"]
             gaps = list(missing) if isinstance(missing, list) else []
             if facet_report["relation_status"] == "missing":
@@ -1839,6 +1850,83 @@ class AgentWeb:
                 ),
             },
         }
+
+    @staticmethod
+    def _knowledge_partial_preview(record: dict[str, Any], assessment: dict[str, Any]) -> str:
+        """Show cited facts with their source paths while keeping gaps visible."""
+        answer = record.get("answer") or {}
+        passages = answer.get("passages") or []
+        text = (answer.get("text") or "").strip()
+        sources = []
+        for number in sorted(cited_numbers(text)):
+            if number < 1 or number > len(passages):
+                continue
+            raw_ref = (passages[number - 1].get("citation") or {}).get("raw_ref")
+            if raw_ref:
+                sources.append(f"[{number}] `{raw_ref}`")
+        gaps = list(assessment.get("missing_facets") or [])
+        if assessment.get("relation_required") and not connected_facets(
+            tuple(item["name"] for item in assessment.get("facets") or []),
+            tuple(
+                (item["left"], item["right"])
+                for item in assessment.get("relations") or []
+            ),
+        ):
+            gaps.append("direct_relationship")
+        return (
+            "已查到可引用的部分資料：\n\n" + text +
+            ("\n\n來源：\n" + "\n".join(sources) if sources else "") +
+            "\n\n尚未證實：" + ", ".join(gaps) +
+            "。因此不能把上列資料當成完整的推薦或比較。"
+        )
+
+    @staticmethod
+    def _knowledge_gap_preview(
+        record: dict[str, Any], assessment: dict[str, Any],
+        procedure: KnowledgeProcedure | None,
+    ) -> str:
+        """Expose cited Raw candidates without presenting them as a recommendation."""
+        passages = (record.get("answer") or {}).get("passages") or []
+        lines = ["已找到以下原始資料片段，但完整比較仍未通過證據檢查："]
+        question = (record.get("answer") or {}).get("question") or ""
+        subject = procedure.subject(question) if procedure else None
+        facet_terms = {facet.name: facet.support_terms + facet.link_terms
+                       for facet in procedure.facets} if procedure else {}
+        priority = {
+            facet.name: tuple(
+                pattern
+                for requirement in facet.evidence_requirements
+                if re.search(requirement.question_pattern, question, re.IGNORECASE)
+                for pattern in requirement.evidence_patterns
+            )
+            for facet in procedure.facets
+        } if procedure else {}
+        for facet in assessment.get("facets") or []:
+            citations = facet.get("citations") or []
+            if not citations:
+                continue
+            for passage in passages:
+                if passage.get("citation") != citations[0]:
+                    continue
+                excerpt = evidence_excerpt(
+                    passage.get("text") or "", subject=subject,
+                    terms=facet_terms.get(facet["name"], ()),
+                    priority_patterns=priority.get(facet["name"], ()),
+                )
+                source = (passage.get("citation") or {}).get("raw_ref") or "Raw"
+                lines.append(f"- {facet['name']}：{excerpt}（來源：`{source}`）")
+                break
+        missing = list(assessment.get("missing_facets") or [])
+        if assessment.get("relation_required") and not connected_facets(
+            tuple(item["name"] for item in assessment.get("facets") or []),
+            tuple(
+                (item["left"], item["right"])
+                for item in assessment.get("relations") or []
+            ),
+        ):
+            missing.append("direct_relationship")
+        lines.append("仍缺：" + ", ".join(missing) + "。目前不能把這些片段當成已證實的推薦或比較。")
+        return "\n".join(lines)
 
     def _ask_knowledge_bridge(
         self, item: KnowledgeAskRequest, trace: TraceIdentifiers,

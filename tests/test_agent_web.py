@@ -1808,6 +1808,51 @@ def test_skill_guided_combination_reports_exact_missing_evidence(tmp_path: Path)
     assert "direct_relationship" in result["answer"]
 
 
+def test_guided_partial_evidence_stays_visible_when_relationship_is_missing(
+    tmp_path: Path,
+) -> None:
+    from datetime import date
+
+    from knowledge.raw import RawDocument, RawSection, render, source_for
+    from knowledge.vault import Vault
+
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.3.0")
+    with knowledge_runtime(
+        tmp_path,
+        harness_skill=True,
+        harness_skill_file="knowledge-evidence-v1.3.json",
+    ) as runtime:
+        vault = Vault(Path(runtime.config.knowledge[0].vault_root))
+        for name, content in (
+            ("market", "Wi-Fi 7 wireless market testing demand is increasing."),
+            ("option", "CMP180 product option K352 specifies WLAN 802.11be testing."),
+        ):
+            raw_ref = (
+                "raw/Market/market.md" if name == "market" else "raw/option.md"
+            )
+            source = source_for(content.encode(), f"drop/{name}.txt").model_copy(
+                update={"raw_ref": raw_ref}
+            )
+            vault.write_raw(
+                raw_ref,
+                render(RawDocument(
+                    source=source, extractor="txt.v1", created=date(2026, 10, 4),
+                    sections=(RawSection(text=content),),
+                )),
+            )
+        result = AgentWeb(runtime).ask_knowledge(KnowledgeAskRequest(
+            asset=V1,
+            question="CMP180 wireless market trend and product option",
+            skill=skill,
+        ))
+    assert result["ok"] is False
+    assert result["harness"]["phase"] == "needs_input"
+    assert result["evidence"]["missing_facets"] == []
+    assert "raw/Market/market.md" in result["answer"]
+    assert "raw/option.md" in result["answer"]
+    assert "direct_relationship" in result["answer"]
+
+
 def test_skill_guided_no_raw_reports_unverified_facets(tmp_path: Path) -> None:
     skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
     with knowledge_runtime(

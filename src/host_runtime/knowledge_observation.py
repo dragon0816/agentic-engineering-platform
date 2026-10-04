@@ -9,8 +9,14 @@ from typing import Any
 
 from agent.harness_run import HarnessCheckResult
 from agent.harness_runner import HarnessActionFailure
-from knowledge.evidence import answer_claims_overlap_raw, connected_facets
+from knowledge.evidence import (
+    answer_claims_overlap_raw,
+    answer_concerns_subject,
+    connected_facets,
+    unsupported_product_recommendations,
+)
 from knowledge.evolution import KnowledgeAnswerRecord
+from knowledge.procedure import KnowledgeProcedure
 
 
 class KnowledgeBridgeActions:
@@ -21,11 +27,15 @@ class KnowledgeBridgeActions:
         required_evidence: tuple[str, ...],
         required_facets: tuple[str, ...] = (),
         relation_required: bool = False,
+        required_subject: str | None = None,
+        procedure: KnowledgeProcedure | None = None,
     ) -> None:
         self.invoke = invoke
         self.required_evidence = required_evidence
         self.required_facets = required_facets
         self.relation_required = relation_required
+        self.required_subject = required_subject
+        self.procedure = procedure
         self.result: dict[str, Any] | None = None
 
     def collect_context(self) -> str:
@@ -86,7 +96,17 @@ class KnowledgeBridgeActions:
                     check_id="claim_support",
                     status=(
                         "passed" if checked is not None
-                        and answer_claims_overlap_raw(checked.answer) else "failed"
+                        and answer_claims_overlap_raw(checked.answer)
+                        and (
+                            self.procedure is None
+                            or not unsupported_product_recommendations(
+                                checked.answer, checked.answer.question, self.procedure
+                            )
+                        )
+                        and (
+                            self.required_subject is None
+                            or answer_concerns_subject(checked.answer, self.required_subject)
+                        ) else "failed"
                     ),
                     evidence_ref="bridge_claim_overlap",
                 )
@@ -153,6 +173,16 @@ class KnowledgeBridgeActions:
                 item.name: item.attempts for item in assessment.facets
             },
             "claim_status": (
-                "supported" if answer_claims_overlap_raw(checked.answer) else "unverified"
+                "supported" if answer_claims_overlap_raw(checked.answer)
+                and (
+                    self.procedure is None
+                    or not unsupported_product_recommendations(
+                        checked.answer, checked.answer.question, self.procedure
+                    )
+                )
+                and (
+                    self.required_subject is None
+                    or answer_concerns_subject(checked.answer, self.required_subject)
+                ) else "unverified"
             ),
         }

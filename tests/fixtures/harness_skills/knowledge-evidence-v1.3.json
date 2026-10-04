@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "identity": {"namespace": "company-agent", "name": "knowledge-query", "version": "1.3.0"},
+    "owner": {"type": "team", "id": "engineering"},
+    "visibility": "private",
+    "lifecycle": "validated"
+  },
+  "alias": "knowledge_evidence_candidate",
+  "instructions": "Follow the vault's index.md to relevant Wiki entity, concept, synthesis and source pages before checking their linked Raw sources. Match exact model and option codes literally; search bilingual concepts with alternate wording. Cite supported evidence, distinguish fact from inference, and name missing links rather than inventing a recommendation.",
+  "commands": [
+    {"name": "ask", "kind": "capability", "target": {"namespace": "knowledge-query", "name": "ask", "version": "1.0.0"}}
+  ],
+  "harness_guidance": {
+    "domains": ["knowledge"],
+    "required_evidence": ["raw_citations"],
+    "context_required": true,
+    "fallback": "needs_input",
+    "max_retries": 0
+  },
+  "procedure": {
+    "kind": "knowledge_query_v1",
+    "intent_patterns": [
+      "\\bfirmware\\b",
+      "市場|規格|選配|產品|技術|競品|競爭對手|知識庫|推薦|\\b(?:market|specification|option|technical|competitor|knowledge|NTN)\\b"
+    ],
+    "subject_pattern": "\\b[A-Z]{2,}[A-Z0-9]*[0-9][A-Z0-9]*\\b",
+    "focus_hints": [
+      {"pattern": "(?<![A-Za-z0-9])NTN(?![A-Za-z0-9])|non.?terrestrial", "query": "NTN", "evidence_terms": ["NTN", "non-terrestrial"]},
+      {"pattern": "無線通訊|\\bwireless\\b", "query": "無線通訊 wireless communications", "evidence_terms": ["無線通訊", "wireless", "WLAN", "Wi-Fi 7", "802.11"]}
+    ],
+    "facets": [
+      {
+        "name": "market_trend",
+        "request_patterns": ["趨勢|需求|\\btrend\\b|\\bdemand\\b|市場趨勢|測試需求"],
+        "search_queries": ["market testing demand trend", "industry testing application growth", "市場趨勢 成長 規格升級 驅動力"],
+        "support_terms": ["demand", "growth", "trend", "趨勢", "需求", "rising", "increasing", "expanding", "成長", "驅動", "滲透率", "升級"],
+        "search_subject": false,
+        "collect_all_queries": true,
+        "max_passages": 4,
+        "require_focus": true,
+        "source_areas": ["raw/Market/"],
+        "link_terms": ["market", "市場", "demand", "industry"]
+      },
+      {
+        "name": "market_segment",
+        "request_patterns": ["^(?!.*(?:趨勢|需求|trend|demand)).*市場", "\\bmarket\\b(?!\\s*(?:trend|demand))"],
+        "search_queries": ["market segment product testing"],
+        "support_terms": ["market", "segment"],
+        "focus_is_support": true,
+        "focus_is_link": true
+      },
+      {
+        "name": "product_option_spec",
+        "request_patterns": ["產品|規格|選配|推薦|推給客戶|\\bproduct\\b|\\boption\\b|\\bspec(?:ification)?s?\\b"],
+        "search_queries": ["product option specification feature", "tester option application performance"],
+        "discovery_queries": ["Rohde Schwarz product tester solution", "product portfolio test solution", "signal generator channel emulation conformance"],
+        "support_terms": ["option", "spec", "feature", "tester", "solution", "instrument", "test", "規格", "產品"],
+        "include_subject": true,
+        "link_subject": true,
+        "link_terms": ["tester", "solution", "instrument", "option", "feature"],
+        "require_focus": true,
+        "require_focus_when_unbound": true,
+        "entity_pattern": "\\b(?:CMX|CMP|CMW|SMBV|SMW|FSW|ZNA|ZNB|MXO|RTO|PVT)[A-Z0-9-]*\\d[A-Z0-9-]*\\b",
+        "collect_all_queries": true,
+        "max_passages": 6,
+        "evidence_requirements": [
+          {"question_pattern": "選配|\\boption\\b", "evidence_patterns": ["\\b(?:CMP[- ]?)?[KB][A-Z]?\\d{2,4}\\b"]}
+        ]
+      },
+      {
+        "name": "technical_knowledge",
+        "request_patterns": ["技術|測試差異|\\btechnical\\b|\\bsignaling\\b|\\btechnology\\b"],
+        "search_queries": ["wireless test technology signaling measurement", "non signaling RF test method"],
+        "support_terms": ["measurement", "signaling", "technical", "RF testing", "技術方法"],
+        "include_subject": true,
+        "link_terms": ["RF testing", "measurement", "signaling", "test method", "technical test", "技術測試"]
+      },
+      {
+        "name": "competitor",
+        "request_patterns": ["競品|競爭對手|\\bcompetitor\\b|\\bKeysight\\b|\\bAnritsu\\b|\\bAmarisoft\\b"],
+        "search_queries": ["competitor comparison Keysight Anritsu Amarisoft", "competitive battle card alternative"],
+        "support_terms": ["competitor", "Keysight", "Anritsu", "Amarisoft", "競品"],
+        "include_subject": true,
+        "link_terms": ["competitor", "Keysight", "Anritsu", "Amarisoft", "競品"],
+        "comparison_terms": ["vs", "versus", "compared", "comparison", "對照", "比較"]
+      }
+    ],
+    "relation_terms": ["supports", "support", "tailored", "cover", "addresses", "designed", "compared", "versus", "vs", "適用", "對應", "compete"],
+    "relation_search_queries": ["Rohde Schwarz product tester solution", "product application testing demand"],
+    "require_relation_for_combination": true,
+    "extractive_fallback": true,
+    "wiki_index_first": true,
+    "wiki_index_hits": 24,
+    "synthesis_max_output_tokens": 3072,
+    "answer_guidance": "Use the user's language. Follow the vault index and curated Wiki pages to their Raw sources. For product questions, separate market demand (customer and date), technical measurement requirement, and R&S product/options. For an open-ended product list, check distinct instrument roles instead of stopping at the first product class. Lead with a short answer, then explain each candidate's use case, exact option or licence evidence, and remaining compatibility checks. Label source facts, inference, and gaps separately. A press release's positioning is attributed to that release and is not measured market demand; merely listing NTN as a target market does not establish customer fit. Never invent option codes, order numbers, prices, market share, or competitor advantages. Every factual sentence cites its Raw source."
+  }
+}

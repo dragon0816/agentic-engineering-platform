@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import re
 import shutil
 from pathlib import Path
 from typing import Literal, Self
@@ -21,7 +20,7 @@ from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.execution import TraceIdentifiers
 from knowledge.evidence import KnowledgeEvidenceSummary
 from knowledge.procedure import KnowledgeProcedure
-from knowledge.query import Answer, Passage, QueryEngine, cited_numbers
+from knowledge.query import Answer, Passage, QueryEngine, cited_claim_sentences, cited_numbers
 from knowledge.vault import Vault, WritePlan
 from models.contracts import ModelClient
 
@@ -124,18 +123,7 @@ class KnowledgeAnswerRecord(Contract):
         # Attach that citation before splitting; otherwise a valid citation
         # becomes a spurious sentence of its own. CJK punctuation can end a
         # sentence without a following space.
-        with_attached_citations = re.sub(
-            r"([.!?。！？])\s*(\[[0-9][0-9,\s-]*\])",
-            r" \2\1",
-            self.answer.text,
-        )
-        sentences = [
-            sentence.strip()
-            for sentence in re.split(
-                r"(?<=[.!?])\s+|(?<=[。！？])\s*", with_attached_citations
-            )
-            if sentence.strip()
-        ]
+        sentences = cited_claim_sentences(self.answer.text)
         if any(not cited_numbers(sentence) for sentence in sentences):
             raise ValueError("every answer sentence must cite Raw evidence")
         reject_embedded_secrets(self.model_dump(mode="json"))
