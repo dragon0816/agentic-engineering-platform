@@ -17,7 +17,7 @@ shared runner. The owner's reference is the Hermes `rs-knowledge-base` Skill
   Agent Web** on port 53583 (restarted 2026-10-04 by Claude Code from the repo
   `.venv`, editable install, logs `.scratch/agent-web-13-*.log`). Rollback:
   move `company-agent__knowledge-query__1.3.0.json` out of
-  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\workspacessets\skills\`
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\workspace\assets\skills\`
   and move `disabled/company-agent__knowledge-query__1.1.0.json` back, then
   restart Agent Web. Exactly one Knowledge-selectable Skill must be installed
   for natural chat routing.
