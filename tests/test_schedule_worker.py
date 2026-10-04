@@ -19,7 +19,9 @@ from host_runtime.schedules import SqliteScheduleStore
 from host_runtime.state import SqliteLocalState
 
 DUE = datetime(2026, 10, 5, 1, tzinfo=UTC)
-TARGET = AssetIdentity(namespace="engineering", name="release-package", version="1.0.0")
+# A read-only Workflow. Targets that can reach an external side effect are
+# covered by tests/test_schedule_grants.py: they always wait for a person.
+TARGET = AssetIdentity(namespace="engineering", name="release-validation", version="1.0.0")
 
 
 def definition(
