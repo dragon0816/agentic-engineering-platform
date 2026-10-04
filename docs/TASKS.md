@@ -826,8 +826,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   capability scope and Host checks; a Skill cannot add grants or retry beyond
   the Host budget. Focused five-case contract tests, Ruff and touched-source
   mypy passed. This is a planning contract, not live execution yet.
-- [ ] G2: connect that common plan to a bounded, observable state machine with
-  failure/needs-input routing and negative tests in all three domains.
+- [x] G2 contract/state slice: add a serializable shared run state with
+  ordered payload-free observations, bounded retry, `needs_input`/failure and
+  completion only after every Host check is reported. Ten focused plan/run
+  tests passed, including a negative path for each domain. This is still a
+  pure state machine; live adapters and independent validator wiring are G3/G4.
 - [ ] G3: use the candidate Knowledge Asking Skill to test data coverage,
   retrieval, answer validation and gap feedback in Agent Web. Keep the
   published 1.0.0 Skill immutable; activate a new version only after review.

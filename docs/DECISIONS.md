@@ -610,3 +610,18 @@ first, diagnose failures by process/Skill/data coverage, and keep the shared
 runtime applicable to all three. The Knowledge adapter only translates
 retrieval and Raw citations into common observations; the Skill owns the
 question-answering procedure and the Host owns final acceptance.
+
+## 2026-10-04 — Keep shared harness progress payload-free and bounded
+
+Decision: The shared run state records only typed phase transitions and
+references to observed context, execution and Host check evidence. It cannot
+reach `validated` without every declared Host check passing. A failed check
+routes to the Skill-guided fallback, with retry capped by the Task budget;
+exhaustion stops. Domain adapters will feed this state but do not replace their
+existing deterministic executors or validators.
+
+Reason: Storing model prose or raw enterprise material in a generic run log
+would widen data exposure and make later cross-domain reuse harder. A pure
+state contract can be tested across Knowledge, Workflow and Coding before
+binding any side-effecting capability. The alternative of building a separate
+Knowledge-only loop was rejected after the owner's clarification.

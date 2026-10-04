@@ -15,9 +15,10 @@ the narrower Coding Harness and explicit Task path.
 
 The product/market cell assessment is a Knowledge pilot, not the common
 harness. The owner clarified that the common six-layer process must serve
-Workflow/Task execution, Knowledge Asking and Coding. The shared plan envelope
-and Skill guidance are the first cross-domain contract; a bounded state loop,
-domain adapters and independent validation remain to be connected. Knowledge
+Workflow/Task execution, Knowledge Asking and Coding. A shared Skill-guided
+plan envelope and bounded, payload-free run state now have negative tests in
+all three domains. Live domain adapters and Host validator wiring remain to be
+connected. Knowledge
 is the first user-level validation case, driven by a candidate Knowledge
 Asking Skill. The adapter maps Raw citations into common observations without
 owning the procedure. See `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.
