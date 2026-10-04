@@ -248,6 +248,23 @@ class AgentWeb:
     def request_lock(self) -> threading.RLock:
         return self._one_at_a_time
 
+    def schedules_request(
+        self, method: str, path: str, query: dict[str, list[str]], body: object
+    ) -> tuple[int, dict[str, Any]]:
+        """The Schedules panel's routes; see `host_runtime.schedule_web`."""
+        from host_runtime import schedule_web
+        from host_runtime.schedule_control import ScheduleControl
+
+        loop = self.schedule_loop
+        return schedule_web.handle(
+            ScheduleControl(self.runtime, lock=self._one_at_a_time),
+            method,
+            path,
+            query,
+            body,
+            loop_status=None if loop is None else loop.status(),
+        )
+
     # -- what the pages ask for ---------------------------------------
 
     def about(self) -> dict[str, Any]:
@@ -2035,6 +2052,36 @@ class _Handler(BaseHTTPRequestHandler):
             "application/json; charset=utf-8",
         )
 
+    def _schedule_route(self, method: str, path: str, query: str) -> None:
+        """Scheduled-task routes, after the loopback and token guards."""
+        from host_runtime.schedule_web import origin_allowed
+
+        if not origin_allowed(self.headers.get("Origin")):
+            self._json(403, {"error": "this interface answers its own page only"})
+            return
+        body: object = None
+        if method == "POST":
+            try:
+                length = int(self.headers.get("Content-Length") or "0")
+            except ValueError:
+                self._json(400, {"error": "the request did not say how long it was"})
+                return
+            if length > MAX_BODY_BYTES:
+                self._json(413, {"error": "that is larger than a request to an Agent"})
+                return
+            try:
+                body = json.loads(self.rfile.read(length) or b"{}")
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid JSON"})
+                return
+        try:
+            status, payload = self.server.web.schedules_request(
+                method, path, parse_qs(query), body
+            )
+        except Exception as failure:  # noqa: BLE001 - a page shows everything
+            status, payload = 500, {"error": f"schedules: {type(failure).__name__}"}
+        self._json(status, payload)
+
     # -- the routes ----------------------------------------------------
 
     def do_GET(self) -> None:  # noqa: N802 - the base class's spelling
@@ -2054,6 +2101,9 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if not self._authorized():
             self._json(401, {"error": "this request carried no usable token"})
+            return
+        if parsed.path.startswith("/api/schedules"):
+            self._schedule_route("GET", parsed.path, parsed.query)
             return
         web = self.server.web
         if parsed.path == "/api/about":
@@ -2086,6 +2136,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(401, {"error": "this request carried no usable token"})
             return
         path = urlparse(self.path).path
+        if path.startswith("/api/schedules"):
+            self._schedule_route("POST", path, "")
+            return
         if path not in (
             "/api/ask",
             "/api/platform/sync",
