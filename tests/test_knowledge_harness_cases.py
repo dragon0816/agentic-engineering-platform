@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from evaluation.knowledge_harness import KnowledgeHarnessSuite
+from evaluation.knowledge_scenarios import KnowledgeHarnessSuite
 
 CASES = Path(__file__).resolve().parents[1] / "evaluation/knowledge/harness-cases-v1.json"
 

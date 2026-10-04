@@ -18,7 +18,10 @@ Each slice receives focused tests. Full repository verification is reserved for 
 ## Knowledge-first evaluation cases
 
 `evaluation/knowledge/harness-cases-v1.json` is the test input for G3. The
-standalone tier asks separately about market trends, product/option/spec data
+`evaluation.knowledge_scenarios` module validates the shape of these cases; it
+does not implement another harness. The shared execution contracts remain in
+`agent.harness_plan` and `agent.harness_run`. The standalone tier asks
+separately about market trends, product/option/spec data
 and technical knowledge. The combined tier first compares market and product
 evidence, then asks for a market/product/technical/competitor strategy with
 SWOT and project execution actions. Every factual output needs Raw citations;
