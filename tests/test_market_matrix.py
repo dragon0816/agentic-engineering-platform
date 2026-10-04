@@ -12,6 +12,8 @@ from knowledge.market_matrix import (
     MarketCellSufficiency,
     MarketMatrixRecord,
     MatrixCell,
+    ProductFamily,
+    TargetMarket,
     assess_market_cell,
     discover_market_matrix,
 )
@@ -106,11 +108,12 @@ def test_selected_cell_reports_insufficient_evidence_without_promoting_a_lead(
             ),
         ),
     )
-    for family, market, expected_level in (
+    cases: tuple[tuple[ProductFamily, TargetMarket, str], ...] = (
         ("nonsignaling_wireless", "automotive", "nearby_mention"),
         ("signal_generation_analysis", "ai_server", "separate_passages"),
         ("vector_network_analysis", "semiconductor", "no_raw_match"),
-    ):
+    )
+    for family, market, expected_level in cases:
         assessment = assess_market_cell(record, family, market)
         cell = _cell(record, family, market)
         assert assessment.status == "needs_evidence"
