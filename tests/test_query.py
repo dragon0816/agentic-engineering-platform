@@ -116,6 +116,96 @@ def test_tokens_split_scripts_and_index_cjk_at_every_length() -> None:
     assert tokens("採用GaN功率") == ("採", "用", "採用", "gan", "功", "率", "功率")
     assert tokens("   ") == ()
     assert cited_numbers("see [1], [2, 3] and [5-7] but not [x]") == {1, 2, 3, 5, 6, 7}
+
+
+def test_named_raw_document_precedes_unrelated_chinese_matches(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    stem = "CMX500_Features_CSW9-20-0_en_32"
+    raw_ref = f"raw/{stem}.md"
+    source = source_for(b"features", f"drop/{stem}.pdf").model_copy(
+        update={"raw_ref": raw_ref}
+    )
+    vault.write_raw(
+        raw_ref,
+        render(
+            RawDocument(
+                source=source,
+                extractor="pdf.v1",
+                created=TODAY,
+                sections=(
+                    RawSection(text="CMX500 Radio Communication Tester"),
+                    RawSection(text="CMX500 Features and Functions"),
+                    RawSection(
+                        text="This document provides an overview of the user interfaces "
+                        "and software options of the CMX500."
+                    ),
+                ),
+            )
+        ),
+    )
+    for number in range(4):
+        ref = f"raw/unrelated-{number}.md"
+        other = source_for(str(number).encode(), f"drop/unrelated-{number}.txt").model_copy(
+            update={"raw_ref": ref}
+        )
+        vault.write_raw(
+            ref,
+            render(
+                RawDocument(
+                    source=other,
+                    extractor="text.v1",
+                    created=TODAY,
+                    sections=(RawSection(text="根據這份文件，介紹哪些內容？"),),
+                )
+            ),
+        )
+    question = f"根據 RS_Knowledge 的 {stem}，這份文件介紹哪兩類內容？"
+    passages = retrieve(vault, question, k=4, min_raw=4, evidence_coverage=True)
+    assert [passage.citation.raw_ref for passage in passages[:3]] == [raw_ref] * 3
+    assert "user interfaces and software options" in passages[2].text
+
+
+def test_chinese_product_test_question_finds_english_raw_evidence(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    relevant_ref = "raw/CMX500-ota-testing.md"
+    relevant_source = source_for(b"ota", "drop/CMX500-ota-testing.txt").model_copy(
+        update={"raw_ref": relevant_ref}
+    )
+    vault.write_raw(
+        relevant_ref,
+        render(
+            RawDocument(
+                source=relevant_source,
+                extractor="text.v1",
+                created=TODAY,
+                sections=(
+                    RawSection(
+                        text="The CMX500 supports over-the-air signaling testing "
+                        "of 5G NR devices in this test setup."
+                    ),
+                ),
+            )
+        ),
+    )
+    for number in range(3):
+        ref = f"raw/other-{number}.md"
+        other = source_for(str(number).encode(), f"drop/other-{number}.txt").model_copy(
+            update={"raw_ref": ref}
+        )
+        vault.write_raw(
+            ref,
+            render(
+                RawDocument(
+                    source=other,
+                    extractor="text.v1",
+                    created=TODAY,
+                    sections=(RawSection(text="可以做哪些測試？只列有來源支持的事實。"),),
+                )
+            ),
+        )
+    passages = retrieve(vault, "CMX500 可以做哪些測試？", k=3, min_raw=3)
+    assert passages[0].citation.raw_ref == relevant_ref
+    assert "over-the-air signaling testing" in passages[0].text
     assert cited_numbers("no citations") == set()
 
 

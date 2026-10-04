@@ -969,6 +969,18 @@ class AgentWeb:
         return matches[0] if len(matches) == 1 else None
 
     def _knowledge_reply(self, selected: dict[str, Any], question: str) -> dict[str, Any]:
+        eligible_skills = [
+            item for item in self.assets()["skills"]
+            if item["knowledge_harness_selectable"]
+        ]
+        selected_skill = (
+            AssetIdentity(
+                namespace=eligible_skills[0]["namespace"],
+                name=eligible_skills[0]["name"],
+                version=eligible_skills[0]["version"],
+            )
+            if len(eligible_skills) == 1 else None
+        )
         result = self.ask_knowledge(
             KnowledgeAskRequest(
                 asset=AssetIdentity(
@@ -977,14 +989,21 @@ class AgentWeb:
                     version=selected["version"],
                 ),
                 question=question,
+                skill=selected_skill,
             )
         )
         if not result["ok"]:
             return {
                 "ok": False,
                 "answer": result["answer"],
-                "status": "failed",
+                "status": (
+                    "needs_input"
+                    if (result.get("harness") or {}).get("phase") == "needs_input"
+                    else "failed"
+                ),
                 "outcome": result["outcome"],
+                "harness": result.get("harness"),
+                "evidence": result.get("evidence"),
             }
         record = KnowledgeAnswerRecord.model_validate(result["record"])
         sources = []
@@ -995,11 +1014,15 @@ class AgentWeb:
         answer = record.answer.text
         if sources:
             answer += "\n\nSources (Raw):\n" + "\n".join(sources)
+        if result.get("harness") is not None:
+            answer += "\n\nEvidence check: Raw citations verified; facet coverage not assessed."
         return {
             "ok": True,
             "answer": answer,
             "status": "answered",
             "outcome": result["outcome"],
+            "harness": result.get("harness"),
+            "evidence": result.get("evidence"),
         }
 
     @staticmethod

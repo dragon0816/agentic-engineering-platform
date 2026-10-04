@@ -852,6 +852,19 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   smoke check found it selectable. The prior Web port had no listener; live
   model testing still needs a process started from the owner's credentialed
   shell and the remaining evidence-sufficiency checks.
+- [x] Make natural Knowledge chat use the one installed, selectable Knowledge
+  Asking Skill when a question names the installed asset. Keep exact Bridge
+  authorization, expose shared harness/evidence status, and retain the legacy
+  route when zero or multiple eligible Skills exist. Fix lexical retrieval of
+  explicitly named Raw files and Chinese product-test questions over English
+  Raw sources. The owner's live Agent Web on port 53583 answered both a named
+  CMX500 file question (one Raw citation) and a general CMX500 test question
+  (four Raw citations), each with `harness.phase=validated`. Focused tests:
+  33 passed. Final checks: repository Ruff and mypy passed, wheel/sdist build
+  passed, and the full suite had 1,791 passed, 5 skipped, one Windows directory
+  replacement failure that passed on isolated retry. A separate type-only test
+  annotation correction made the repository-wide mypy check pass. This verifies
+  Raw citations, not semantic entailment or strategy facet sufficiency.
 - [x] Prepare G3 evaluation inputs at two levels: three standalone questions
   (market trends, product options/specs, technical knowledge) and combined
   market/product comparison plus competitive strategy with SWOT and project

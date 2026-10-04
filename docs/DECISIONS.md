@@ -640,3 +640,24 @@ Reason: This provides an inspectable end-to-end Web slice without mutating the
 published 1.0.0 Skill or weakening Bridge permissions. Automatically claiming
 that Raw citations prove product/market recommendations, or silently routing
 all existing questions through an unfinished candidate Skill, was rejected.
+
+## 2026-10-04 — Enable live Knowledge Asking through the one installed candidate
+
+Decision: For a natural Agent Web question that names an installed Knowledge
+asset, select the Knowledge Asking harness Skill only when exactly one installed
+Skill is eligible. Keep the existing route for zero or multiple candidates and
+preserve Bridge authorization and Host Raw-citation validation. The Web exposes
+the harness phase and states that evidence facets are not yet assessed.
+
+Reason: The owner needs to test the shared harness in the real Agent Web before
+the next analysis cycle. Automatic selection is unambiguous in the current
+single-candidate Host, while silently choosing among multiple Skills would
+hide a routing decision. The alternative of leaving natural chat on the legacy
+path would make the new harness invisible to the owner's normal Ask workflow.
+
+Knowledge retrieval now treats an explicitly named Raw filename as a strong
+source hint and prioritizes Raw passages for a product code in the question.
+A narrow Chinese test-term expansion finds English test material; it adds no
+answer facts. These are deterministic retrieval changes inside Knowledge, not
+shared harness rules. A model-generated search rewrite was deferred until a
+bounded Skill-driven retrieval policy and evaluation cases can govern it.

@@ -366,7 +366,14 @@ def retrieve(
         raise ValueError("k is positive")
     if not 0 <= min_raw <= k:
         raise ValueError("min_raw must be between zero and k")
-    query = tokens(question)
+    # Filenames in a question are often copied verbatim from the vault. Treat
+    # their separators as word breaks, just as the indexed source stem does.
+    normalized_question = question.replace("_", " ").replace("-", " ")
+    # A Chinese test question should also find English source passages. This
+    # expands retrieval terms only; it never supplies answer facts.
+    if "測試" in question or "测试" in question:
+        normalized_question += " test testing measurement"
+    query = tokens(normalized_question)
     if not query:
         return ()
     docs = _corpus(vault)
@@ -407,6 +414,25 @@ def retrieve(
     scored.sort(key=lambda item: (-item[0], item[1]))
     selected: list[tuple[float, int, _Doc]] = []
     selected_texts: set[str] = set()
+    # An explicitly named Raw file is stronger evidence of intent than short
+    # CJK overlaps in unrelated notes. Reserve its first six sections in
+    # source order so an introduction can be read even when the question and
+    # the document use different languages.
+    named_refs = {
+        doc.citation.raw_ref
+        for doc in docs
+        if doc.citation.kind == "raw"
+        and doc.citation.raw_ref is not None
+        and len(PurePosixPath(doc.citation.raw_ref).stem) >= 8
+        and PurePosixPath(doc.citation.raw_ref).stem.casefold() in question.casefold()
+    }
+    if named_refs:
+        for item in sorted(scored, key=lambda candidate: candidate[1]):
+            if len(selected) >= min(k, 6):
+                break
+            if item[2].citation.raw_ref in named_refs:
+                selected.append(item)
+                selected_texts.add(item[2].text.strip().casefold())
     if covered:
         for terms, label in facets:
             candidates = (
@@ -430,6 +456,30 @@ def retrieve(
                 selected.append(item)
                 selected_texts.add(normalized)
                 added += 1
+    product_codes = {
+        code.casefold()
+        for code in _PRODUCT_ID.findall(question)
+        if len(code) >= 5 and not code.upper().startswith(("B", "K"))
+    }
+    product_positions: set[int] = set()
+    if product_codes and not named_refs:
+        product_limit = min(k, 2 if covered else 5)
+        seen_sources = {item[2].citation.raw_ref for item in selected}
+        for item in scored:
+            if len(product_positions) >= product_limit or len(selected) >= k:
+                break
+            doc = item[2]
+            if (
+                doc.citation.kind != "raw"
+                or doc.citation.raw_ref in seen_sources
+                or len(doc.text) < 80
+                or not product_codes.intersection(doc.search_counts)
+            ):
+                continue
+            selected.append(item)
+            product_positions.add(item[1])
+            selected_texts.add(doc.text.strip().casefold())
+            seen_sources.add(doc.citation.raw_ref)
     selected_positions = {position for _, position, _ in selected}
     for item in scored:
         if len(selected) >= min_raw:
@@ -451,9 +501,24 @@ def retrieve(
             selected.append(item)
             selected_positions.add(item[1])
             selected_texts.add(normalized)
+    ordered = (
+        sorted(
+            selected,
+            key=lambda item: (
+                0 if item[2].citation.raw_ref in named_refs else 1,
+                item[1] if item[2].citation.raw_ref in named_refs else -item[0],
+                item[1],
+            ),
+        )
+        if named_refs
+        else sorted(
+            selected,
+            key=lambda item: (0 if item[1] in product_positions else 1, -item[0], item[1]),
+        )
+    )
     return tuple(
         Passage(text=doc.text, citation=doc.citation, score=round(score, 6))
-        for score, _, doc in sorted(selected, key=lambda item: (-item[0], item[1]))
+        for score, _, doc in ordered
     )
 
 

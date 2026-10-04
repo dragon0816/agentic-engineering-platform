@@ -1734,6 +1734,25 @@ def test_named_knowledge_in_natural_chat_uses_exact_bridge_query(
     assert asked["conversation"]["messages"][-1]["status"] == "answered"
 
 
+def test_named_knowledge_chat_uses_one_installed_harness_skill(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path, harness_skill=True) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="According to widget-guide, what firmware does Safe mode require?",
+            )
+        )
+    answer = asked["answer"]
+    assert answer["status"] == "answered"
+    assert answer["harness"]["phase"] == "validated"
+    assert answer["harness"]["plan"]["domain"] == "knowledge"
+    assert answer["evidence"]["raw_citations"] == 1
+    assert "Sources (Raw):" in answer["answer"]
+    assert "facet coverage not assessed" in answer["answer"]
+
+
 def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> None:
     with knowledge_runtime(tmp_path, authorized=False) as runtime:
         web = AgentWeb(runtime)
