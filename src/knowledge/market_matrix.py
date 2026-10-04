@@ -27,6 +27,7 @@ TargetMarket = Literal[
 ]
 EvidenceFacet = Literal["same_section", "product", "market"]
 EvidenceLevel = Literal["nearby_mention", "separate_passages", "no_raw_match"]
+EvidenceNeedFacet = Literal["market_requirements", "product_options", "customer_use_case"]
 
 PRODUCT_FAMILIES: tuple[tuple[ProductFamily, str, tuple[str, ...]], ...] = (
     ("nonsignaling_wireless", "Nonsignaling wireless testers", ("CMP180", "CMP200", "CMW100")),
@@ -146,6 +147,73 @@ class MarketMatrixRecord(Contract):
         if actual != expected:
             raise ValueError("matrix must contain the canonical 5 by 5 grid")
         return self
+
+
+class EvidenceNeed(Contract):
+    facet: EvidenceNeedFacet
+    question: Text
+
+
+class MarketCellSufficiency(Contract):
+    """A discovery cell is an explicit evidence gap, never a fit verdict.
+
+    The matrix only finds nearby words or separate passages. Later retrieval
+    and claim validation may produce stronger records, but cannot promote this
+    discovery record by changing its status.
+    """
+
+    asset: AssetIdentity
+    trace: TraceIdentifiers
+    product_family: ProductFamily
+    market: TargetMarket
+    status: Literal["needs_evidence"] = "needs_evidence"
+    discovery_level: EvidenceLevel
+    discovery_evidence: tuple[MatrixEvidence, ...] = Field(max_length=2)
+    missing_evidence: tuple[EvidenceNeed, EvidenceNeed, EvidenceNeed]
+
+    @model_validator(mode="after")
+    def discovery_never_completes_evidence(self) -> Self:
+        expected_evidence = {
+            "nearby_mention": ("same_section",),
+            "separate_passages": ("product", "market"),
+            "no_raw_match": (),
+        }[self.discovery_level]
+        if tuple(item.facet for item in self.discovery_evidence) != expected_evidence:
+            raise ValueError("discovery evidence does not match its level")
+        if tuple(item.facet for item in self.missing_evidence) != (
+            "market_requirements", "product_options", "customer_use_case"
+        ):
+            raise ValueError("all three evidence needs must remain explicit")
+        return self
+
+
+def assess_market_cell(
+    record: MarketMatrixRecord, product_family: ProductFamily, market: TargetMarket
+) -> MarketCellSufficiency:
+    """Return the exact unresolved evidence for a selected discovery cell."""
+    cell = next(
+        (
+            item
+            for item in record.cells
+            if item.product_family == product_family and item.market == market
+        ),
+        None,
+    )
+    if cell is None:
+        raise ValueError("selected market cell is not in the matrix")
+    return MarketCellSufficiency(
+        asset=record.asset,
+        trace=record.trace,
+        product_family=product_family,
+        market=market,
+        discovery_level=cell.evidence_level,
+        discovery_evidence=cell.evidence,
+        missing_evidence=(
+            EvidenceNeed(facet="market_requirements", question=cell.knowledge_gaps[0]),
+            EvidenceNeed(facet="product_options", question=cell.knowledge_gaps[1]),
+            EvidenceNeed(facet="customer_use_case", question=cell.knowledge_gaps[2]),
+        ),
+    )
 
 
 def _pattern(aliases: tuple[str, ...]) -> re.Pattern[str]:

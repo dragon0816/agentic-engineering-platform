@@ -576,3 +576,20 @@ Reason: The offline Windows preview cannot depend on a CDN, and untrusted model
 output must not become executable HTML. The initial 25-cell matrix was legible
 as source Markdown but not as a user-facing table. A local DOM renderer fixes
 that presentation without changing Bridge evidence or conversation storage.
+
+## 2026-10-04 — Make evidence sufficiency explicit before expanding Agent routing
+
+Decision: Improve the six-layer harness in the order recorded in
+`docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`. First, assess an exact selected
+product/market matrix cell with a typed `needs_evidence` result and three
+machine-readable missing facets. Existing matrix mentions remain discovery
+evidence only. Bounded re-retrieval and independent claim validation must
+precede any route that labels a product recommendation complete. Keep known
+commands deterministic and all execution behind existing Bridge grants.
+
+Reason: The matrix currently finds useful leads, but neither a nearby mention
+nor separate product and market passages proves an application, option or
+customer fit. A generic classifier or larger model prompt would not close
+that evidence gap and could make unsupported recommendations look confident.
+The typed gap result is reversible and can drive later retrieval and Web
+feedback without adding model calls or bypassing policy.

@@ -1659,6 +1659,7 @@ def test_named_knowledge_market_matrix_uses_exact_read_capability(tmp_path: Path
     assert "Vector network analyzers" in answer["answer"]
     assert "AI server" in answer["answer"]
     assert "缺 Raw" in answer["answer"]
+    assert "證據充分性：25/25 格仍需補證據" in answer["answer"]
     assert answer["outcome"]["decision"]["target"] == MARKET_MATRIX_SPEC.identity.model_dump(
         mode="json"
     )

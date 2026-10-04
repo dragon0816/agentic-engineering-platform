@@ -115,6 +115,7 @@ from knowledge.market_matrix import (
     TARGET_MARKETS,
     MarketMatrixRecord,
     MarketMatrixRequest,
+    assess_market_cell,
 )
 from knowledge.query import cited_numbers
 from models.contracts import ModelMessage
@@ -1032,10 +1033,17 @@ class AgentWeb:
                 "outcome": json.loads(outcome.model_dump_json()),
             }
         record = MarketMatrixRecord.model_validate(outcome.capability.data)
+        assessments = tuple(
+            assess_market_cell(record, cell.product_family, cell.market)
+            for cell in record.cells
+        )
+        unresolved = sum(item.status == "needs_evidence" for item in assessments)
         labels = {item[0]: item[1] for item in PRODUCT_FAMILIES}
         markets = {item[0]: item[1] for item in TARGET_MARKETS}
         lines = [
             "RS Knowledge product × market evidence matrix (Raw discovery, not verified fit)",
+            "",
+            f"證據充分性：{unresolved}/{len(assessments)} 格仍需補證據；目前沒有已驗證的產品適配。",
             "",
             "| Product family | " + " | ".join(markets[item[0]] for item in TARGET_MARKETS) + " |",
             "| --- | " + " | ".join("---" for _ in TARGET_MARKETS) + " |",

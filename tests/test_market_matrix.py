@@ -8,7 +8,13 @@ from pydantic import ValidationError
 
 from common.assets import AssetIdentity
 from common.execution import TraceIdentifiers
-from knowledge.market_matrix import MarketMatrixRecord, MatrixCell, discover_market_matrix
+from knowledge.market_matrix import (
+    MarketCellSufficiency,
+    MarketMatrixRecord,
+    MatrixCell,
+    assess_market_cell,
+    discover_market_matrix,
+)
 from knowledge.raw import RawDocument, RawSection, render, source_for
 from knowledge.vault import Vault
 
@@ -83,3 +89,49 @@ def test_matrix_contract_refuses_fit_claim_without_evidence(tmp_path: Path) -> N
     bad["cells"][0]["market_fit_verified"] = True
     with pytest.raises(ValidationError):
         type(record).model_validate(bad)
+
+
+def test_selected_cell_reports_insufficient_evidence_without_promoting_a_lead(
+    tmp_path: Path,
+) -> None:
+    record = discover_market_matrix(
+        ASSET,
+        TRACE,
+        _vault(
+            tmp_path,
+            (
+                "CMP180 is listed beside automotive connectivity.",
+                "FSW lists a measurement capability.",
+                "AI data center power validation is a market requirement.",
+            ),
+        ),
+    )
+    for family, market, expected_level in (
+        ("nonsignaling_wireless", "automotive", "nearby_mention"),
+        ("signal_generation_analysis", "ai_server", "separate_passages"),
+        ("vector_network_analysis", "semiconductor", "no_raw_match"),
+    ):
+        assessment = assess_market_cell(record, family, market)
+        cell = _cell(record, family, market)
+        assert assessment.status == "needs_evidence"
+        assert assessment.discovery_level == expected_level
+        assert assessment.discovery_evidence == cell.evidence
+        assert tuple(need.question for need in assessment.missing_evidence) == (
+            cell.knowledge_gaps
+        )
+        assert tuple(need.facet for need in assessment.missing_evidence) == (
+            "market_requirements", "product_options", "customer_use_case"
+        )
+        assert assessment.asset == ASSET
+        assert assessment.trace == TRACE
+        assert MarketCellSufficiency.model_validate(
+            assessment.model_dump(mode="json")
+        ) == assessment
+        tampered = assessment.model_dump(mode="json")
+        tampered["status"] = "validated"
+        with pytest.raises(ValidationError):
+            MarketCellSufficiency.model_validate(tampered)
+        tampered = assessment.model_dump(mode="json")
+        tampered["missing_evidence"] = tampered["missing_evidence"][:2]
+        with pytest.raises(ValidationError):
+            MarketCellSufficiency.model_validate(tampered)

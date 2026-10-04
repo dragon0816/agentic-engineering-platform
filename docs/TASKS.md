@@ -814,6 +814,20 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `docs/HARNESS_6_LAYER_STATUS.md`: define an explicit evidence-sufficiency
   result, bounded re-retrieval policy and independent final-claim validation
   for one selected cell before generalizing task/domain routing policy.
+- [x] H1: record an exact selected matrix cell's evidence-sufficiency result.
+  Its three missing facets are machine-readable (market requirements,
+  product/options, customer use case); nearby mentions and separate Raw
+  passages remain `needs_evidence`. Agent Web shows the unresolved 25-cell
+  count. Focused tests, Ruff and touched-source mypy passed; full verification
+  awaits the owner's merge checkpoint.
+- [ ] H2: retrieve again for a selected cell's missing facets with a fixed
+  attempt budget and a trace of Raw source IDs; exhaustion returns a concrete
+  needs-evidence state without a recommendation.
+- [ ] H3: independently validate material claims against cited Raw and
+  acceptance criteria before any recommendation is called complete.
+- [ ] H4–H6: add Skill-owned ordinary Ask plans, reusable deterministic-first
+  task/domain routing and a six-layer Agent Web vertical proof, in the order
+  documented in `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.
 - [x] Convert an invalid configured Knowledge Vault into a Host startup error
   that names the configured Vault path instead of leaking a `VaultError`
   traceback. The owner's preview binding currently points to an existing Vault;
