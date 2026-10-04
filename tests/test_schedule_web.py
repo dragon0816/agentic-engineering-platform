@@ -19,6 +19,7 @@ from host_runtime.conversation_backends import LocalConversationBackends
 from host_runtime.host import build_runtime
 from host_runtime.schedules import SqliteScheduleStore
 from host_runtime.web import AgentWeb, AgentWebServer
+from integrations.browser import Browser, browser_path
 
 TARGET = {"namespace": "engineering", "name": "read-local-file", "version": "1.0.0"}
 
@@ -153,6 +154,45 @@ def test_create_grant_pause_resume_and_history_over_the_socket(served: Served) -
         "ok": False,
         "code": "no_grant",
     }
+
+
+@pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
+def test_schedules_panel_loads_and_creates_in_a_real_browser(
+    served: Served, tmp_path: Path
+) -> None:
+    browser = Browser(tmp_path / "schedule-browser", timeout_s=60)
+    browser.start()
+    try:
+        browser.navigate(served.base + f"/?token={served.server.token}")
+        controls = {item.element_id: item for item in browser.look().elements}
+        browser.click(controls["nav-schedules"].index, expected=controls["nav-schedules"])
+        opened = browser.look()
+        assert "Scheduled tasks" in opened.text
+        assert "Waiting for your approval" in opened.text
+        assert browser._evaluate('document.getElementById("boot-error").hidden') is True
+        assert browser._evaluate(
+            'document.getElementById("schedule-target").options.length'
+        ) == 1
+        browser._evaluate(
+            'document.getElementById("schedule-id").value = "browser-read";'
+            'document.getElementById("schedule-kind").value = "daily";'
+            'document.getElementById("schedule-json").value = '
+            '\'{"args": "notes.txt"}\';'
+            'document.getElementById("schedule-save").click(); true'
+        )
+        for _ in range(100):
+            result = browser._evaluate(
+                'document.getElementById("schedule-form-result").textContent'
+            )
+            if result:
+                break
+            threading.Event().wait(0.05)
+        assert "Saved browser-read" in result
+    finally:
+        browser.close()
+        browser.discard_profile()
+    status, overview = served.call("/api/schedules")
+    assert [item["schedule_id"] for item in overview["schedules"]] == ["browser-read"]
 
 
 def _open_claims(served: Served, count: int) -> list[str]:
