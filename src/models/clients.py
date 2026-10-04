@@ -109,8 +109,9 @@ class ModelClients:
                 code="provider_build_failed",
                 message=f"{alias}: {type(error).__name__}: {error}"[:200],
             )
-        self._built[alias] = client
-        return client
+        # Concurrent requests may build the same alias at once; every caller
+        # gets the one client that was stored first.
+        return self._built.setdefault(alias, client)
 
     def for_route(self, name: str) -> tuple[Symbol, ModelClient] | Failure:
         alias = self.catalog.select_route(name)

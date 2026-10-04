@@ -988,6 +988,7 @@ function renderConversation(record) {
       attachTurnControls(said.parentNode, asked.text, replied);
     }
   }
+  renderPendingTurns(record.session_id);
 }
 
 // -- Turn groups ----------------------------------------------------------
@@ -1161,10 +1162,14 @@ function renderSessionList() {
     button.setAttribute("aria-selected", String(item.session_id === activeConversation));
     const title = document.createElement("strong"); title.append(text(item.title));
     const detail = document.createElement("small");
-    detail.append(text(item.messages + " messages · " + item.backend));
+    detail.append(text(item.messages + " messages · " + item.backend
+      + (sessionBusy(item.session_id) ? " · 執行中" : "")));
     button.append(title, detail);
     button.addEventListener("click", async () => {
       selectPrimaryTab("ask");
+      // Switch at once, so a message typed during the reload goes here.
+      activeConversation = item.session_id; log.replaceChildren();
+      renderPendingTurns(item.session_id);
       try { await loadChat(item.session_id); field.focus(); }
       catch (failure) { showBootError(failure); }
     });
@@ -1360,35 +1365,84 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeTurnMenu();
 });
 
-form.addEventListener("submit", async (event) => {
+// -- Turn queues ------------------------------------------------------------
+// Each session sends its turns strictly in order; different sessions run at
+// the same time. Queued, running and failed turns stay visible across reloads.
+
+const pendingTurns = new Map();
+const sessionChains = new Map();
+
+function pendingFor(sessionId) {
+  if (!pendingTurns.has(sessionId)) pendingTurns.set(sessionId, []);
+  return pendingTurns.get(sessionId);
+}
+
+function sessionBusy(sessionId) {
+  return (pendingTurns.get(sessionId) || []).some(entry => entry.state !== "failed");
+}
+
+function showPendingState(entry) {
+  if (!entry.said) return;
+  entry.said.className = "said" + (entry.state === "failed" ? " bad" : " waiting");
+  entry.said.replaceChildren(text(entry.state === "queued" ? "排隊中…"
+    : entry.state === "working" ? "working…"
+      : "The request did not finish: " + entry.error));
+}
+
+function renderPendingTurns(sessionId) {
+  for (const entry of pendingTurns.get(sessionId) || []) {
+    entry.said = turn(entry.asked, entry.replyQuestion);
+    showPendingState(entry);
+  }
+}
+
+// -- end Turn queues
+
+form.addEventListener("submit", (event) => {
   event.preventDefault();
   const asked = field.value.trim();
-  if (!asked) return;
+  if (!asked || !activeConversation) return;
   field.value = "";
   el("command-palette").hidden = true;
-  field.disabled = send.disabled = true;
-  const replying = replyTarget;
+  const session = activeConversation, replying = replyTarget;
   clearReply();
-  const said = turn(asked, replying ? replying.question : null);
-  try {
-    const completed = await call("/api/conversations/turn", {
-      session_id: activeConversation, message: asked,
-      ...(replying ? {reply_to: replying.message_id} : {}),
-    });
-    const answer = completed.answer;
-    said.className = "said" + (answer.ok ? "" : " bad");
-    renderAnswer(said, answer.answer);
-    await loadConversations(activeConversation);
-    if (answer.backend && answer.backend.code === "backend_authentication_failed") {
-      await loadBackends();
+  const entry = {
+    asked: asked, replyQuestion: replying ? replying.question : null,
+    replyTo: replying ? replying.message_id : null, state: "queued", said: null,
+  };
+  const queue = pendingFor(session);
+  if (queue.every(item => item.state === "failed")) entry.state = "working";
+  queue.push(entry);
+  entry.said = turn(entry.asked, entry.replyQuestion);
+  showPendingState(entry);
+  renderSessionList();
+  const run = async () => {
+    entry.state = "working"; showPendingState(entry); renderSessionList();
+    let answer = null;
+    try {
+      const completed = await call("/api/conversations/turn", {
+        session_id: session, message: asked,
+        ...(entry.replyTo ? {reply_to: entry.replyTo} : {}),
+      });
+      answer = completed.answer;
+      queue.splice(queue.indexOf(entry), 1);
+    } catch (failure) {
+      entry.state = "failed"; entry.error = failure.message;
+      showPendingState(entry);
     }
-  } catch (failure) {
-    said.className = "said bad";
-    said.textContent = "The request did not finish: " + failure.message;
-  }
-  field.disabled = send.disabled = false;
+    try {
+      if (session === activeConversation) await loadConversations(session);
+      else { conversationRows = (await call("/api/conversations")).conversations;
+        renderSessionList(); }
+      if (answer && answer.backend && answer.backend.code === "backend_authentication_failed") {
+        await loadBackends();
+      }
+    } catch (failure) { showBootError(failure); }
+    if (session === activeConversation) log.scrollTop = log.scrollHeight;
+  };
+  const chain = (sessionChains.get(session) || Promise.resolve()).then(run, run);
+  sessionChains.set(session, chain);
   field.focus();
-  log.scrollTop = log.scrollHeight;
 });
 
 // -- The listings ---------------------------------------------------------

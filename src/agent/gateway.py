@@ -526,17 +526,20 @@ class Gateway:
         No routing/model call and no added authority. The engine owns validation,
         execution policy, idempotency and the default caller-wait timeout.
         """
-        if workflow_timeout_seconds is None:
+        # The engine's run table belongs to one event loop at a time, and a
+        # workflow may change shared resources: serialize runs across threads.
+        with self.bridge.exclusive:
+            if workflow_timeout_seconds is None:
+                return await self.engine.execute(
+                    request, workflow, arguments, idempotency_key=workflow_idempotency_key
+                )
             return await self.engine.execute(
-                request, workflow, arguments, idempotency_key=workflow_idempotency_key
+                request,
+                workflow,
+                arguments,
+                timeout_seconds=workflow_timeout_seconds,
+                idempotency_key=workflow_idempotency_key,
             )
-        return await self.engine.execute(
-            request,
-            workflow,
-            arguments,
-            timeout_seconds=workflow_timeout_seconds,
-            idempotency_key=workflow_idempotency_key,
-        )
 
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
         """Classify a run's steps for its owner; never executes anything.

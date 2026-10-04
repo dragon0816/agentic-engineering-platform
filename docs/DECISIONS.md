@@ -908,3 +908,30 @@ the weekly run). Starting the loop whenever a Host is built, which would make
 every CLI command a scheduler. Letting a model choose a scheduled target or
 fill Agent Task inputs. Adding a Registry asset kind for Agent Tasks inside
 this slice; that is a separate platform contract change.
+
+## 2026-10-05 — Run Agent Web sessions concurrently; keep effects serialized at the Bridge
+
+Decision: Agent Web no longer serializes every request on one process lock.
+Conversation turns take a per-session turn lock (a session's turns run in
+order; the page queues them and keeps the input usable), and a short
+per-session record lock guards read-modify-write of the stored record, so a
+rating, backend switch or deletion during a running turn is preserved.
+Knowledge asking, external backends and Gateway conversation run in parallel
+across sessions. Commands that may run workflows, settings, synchronization,
+profile activation and scheduled runs still take the exclusive lock. The
+Bridge holds a reentrant `BridgeExecutor.exclusive` lock around every
+workflow run and every non-read capability call, so whichever path starts
+them (chat tool, command, schedule), two effects never act on the same
+workbook or draft at once.
+
+Reason: The owner needs several sessions and a second message while one is
+working; a single global lock made a 1-2 minute Knowledge answer block every
+other session and session management. The original reason for the lock — one
+state file and one workbook — is addressed narrowly: the SQLite state store
+already serializes its own reads and writes, and effects are serialized
+where the architecture puts resource access (the Bridge). The workflow
+engine's run table is tied to one event loop, which is why workflow runs are
+serialized too. Rejected alternatives: run turns of one session in parallel
+(scrambles conversation history, owner rejected); remove the lock entirely
+(concurrent workbook writes); keep conversation turns under the exclusive
+lock (does not meet the multi-session requirement).

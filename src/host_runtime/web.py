@@ -267,10 +267,17 @@ class AgentWeb:
         self.backends = conversation_backends or LocalConversationBackends(
             runtime.layout.workspace_root
         )
-        # One request at a time. The Agent's state is one SQLite file and a
-        # capability may hold a workbook; two at once would be two runs
-        # against the same things.
+        # Exclusive operations: commands that may run workflows, settings,
+        # synchronization and profile changes. Conversations in different
+        # sessions run concurrently; the Bridge separately serializes every
+        # workflow run and every non-read capability (`BridgeExecutor.exclusive`),
+        # so two runs never act on the same workbook at once.
         self._one_at_a_time = threading.RLock()
+        # Per session: a turn lock queues that session's turns in order, and a
+        # short record lock guards read-modify-write of its stored record.
+        self._session_guard = threading.Lock()
+        self._turn_locks: dict[str, threading.Lock] = {}
+        self._record_locks: dict[str, threading.Lock] = {}
         # The opt-in resident schedule loop, when `aep-host web` started one.
         # It shares the lock above, so a scheduled run never overlaps a request.
         self.schedule_loop: Any = None
@@ -280,6 +287,14 @@ class AgentWeb:
     @property
     def request_lock(self) -> threading.RLock:
         return self._one_at_a_time
+
+    def _turn_lock(self, session_id: str) -> threading.Lock:
+        with self._session_guard:
+            return self._turn_locks.setdefault(session_id, threading.Lock())
+
+    def _record_lock(self, session_id: str) -> threading.Lock:
+        with self._session_guard:
+            return self._record_locks.setdefault(session_id, threading.Lock())
 
     def schedules_request(
         self, method: str, path: str, query: dict[str, list[str]], body: object
@@ -652,14 +667,12 @@ class AgentWeb:
             created_at=now,
             updated_at=now,
         )
-        with self._one_at_a_time:
-            created = self.runtime.state.create_conversation(record)
+        created = self.runtime.state.create_conversation(record)
         return {"conversation": json.loads(created.model_dump_json())}
 
     def delete_conversation(self, request: ConversationDeleteRequest) -> dict[str, Any]:
         item = ConversationDeleteRequest.model_validate(request)
-        with self._one_at_a_time:
-            deleted = self.runtime.state.delete_conversation(item.session_id, self.runtime.actor)
+        deleted = self.runtime.state.delete_conversation(item.session_id, self.runtime.actor)
         return {"ok": deleted, "code": None if deleted else "conversation_unknown"}
 
     def conversation_backends(self) -> dict[str, Any]:
@@ -697,7 +710,7 @@ class AgentWeb:
             return {"ok": False, "code": "backend_not_installed"}
         if item.backend != "gateway" and status.authentication != "ready":
             return {"ok": False, "code": "backend_authentication_required"}
-        with self._one_at_a_time:
+        with self._record_lock(item.session_id):
             record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
@@ -744,7 +757,7 @@ class AgentWeb:
     def create_contribution_draft(self, request: ContributionDraftCreateRequest) -> dict[str, Any]:
         """Capture evidence without creating, installing or publishing an asset."""
         item = ContributionDraftCreateRequest.model_validate(request)
-        with self._one_at_a_time:
+        with self._record_lock(item.session_id):
             conversation = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if conversation is None:
                 return {"ok": False, "code": "conversation_unknown"}
@@ -845,10 +858,13 @@ class AgentWeb:
         item = ConversationFeedbackRequest.model_validate(request)
         note = (item.note or "").strip() or None
         try:
-            saved = self.runtime.state.set_message_feedback(
-                item.session_id, self.runtime.actor, item.message_id,
-                MessageFeedback(rating=item.rating, note=note, updated_at=datetime.now(UTC)),
-            )
+            with self._record_lock(item.session_id):
+                saved = self.runtime.state.set_message_feedback(
+                    item.session_id, self.runtime.actor, item.message_id,
+                    MessageFeedback(
+                        rating=item.rating, note=note, updated_at=datetime.now(UTC)
+                    ),
+                )
         except LocalStateError as error:
             return {"ok": False, "code": error.code}
         message = next(m for m in saved.messages if m.message_id == item.message_id)
@@ -860,7 +876,7 @@ class AgentWeb:
 
     def conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
         item = ConversationTurnRequest.model_validate(request)
-        with self._one_at_a_time:
+        with self._turn_lock(item.session_id):
             record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
@@ -886,7 +902,11 @@ class AgentWeb:
                     }
                     slash = None
                 else:
-                    answer = self._slash_command(slash) if slash is not None else {}
+                    if slash is not None:
+                        with self._one_at_a_time:
+                            answer = self._slash_command(slash)
+                    else:
+                        answer = {}
             namespace = self.namespace
             context_settings = self.conversation_context.load()
             quoted = self._replied_exchange(record, item.reply_to)
@@ -1006,7 +1026,8 @@ class AgentWeb:
                 command_match = self.runtime.agent.gateway.router.commands.match(context)
                 explicit_command = bool(DOT_COMMAND.match(item.message.strip()))
                 if command_match is not None and explicit_command:
-                    direct = asyncio.run(self.runtime.agent.handle(local))
+                    with self._one_at_a_time:
+                        direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
                         "ok": direct.refusal is None,
                         "answer": readable(direct),
@@ -1024,7 +1045,8 @@ class AgentWeb:
                         else self._knowledge_reply(named_knowledge, routed_message)
                     )
                 elif command_match is not None:
-                    direct = asyncio.run(self.runtime.agent.handle(local))
+                    with self._one_at_a_time:
+                        direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
                         "ok": direct.refusal is None,
                         "answer": readable(direct),
@@ -1069,6 +1091,19 @@ class AgentWeb:
                 else ("answered" if answer.get("ok") else "failed")
             )
             trace_data = outcome.get("trace") if isinstance(outcome, dict) else None
+            # Append to the record as it is now: while this turn ran, the user
+            # may have rated an answer, switched the backend or deleted it.
+            record_lock = self._record_lock(item.session_id)
+            record_lock.acquire()
+            try:
+                fresh = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+            except BaseException:
+                record_lock.release()
+                raise
+            if fresh is None:
+                record_lock.release()
+                return {"ok": False, "code": "conversation_unknown"}
+            record = fresh
             title = (
                 item.message[:72] + ("…" if len(item.message) > 72 else "")
                 if not record.messages
@@ -1077,7 +1112,7 @@ class AgentWeb:
             updated = record.model_copy(
                 update={
                     "title": title,
-                    "updated_at": finished,
+                    "updated_at": max(finished, record.updated_at),
                     "messages": (
                         record.messages
                         + (
@@ -1105,7 +1140,10 @@ class AgentWeb:
                     )[-MAX_STORED_MESSAGES:],
                 }
             )
-            saved = self.runtime.state.save_conversation(updated)
+            try:
+                saved = self.runtime.state.save_conversation(updated)
+            finally:
+                record_lock.release()
             problem = answer.pop("problem", None)
             draft = None
             if isinstance(problem, str):
@@ -2105,8 +2143,8 @@ class AgentWeb:
         )
         import asyncio
 
-        with self._one_at_a_time:
-            outcome = asyncio.run(self.runtime.agent.execute_capability(local))
+        # Knowledge asking is a read-only capability; it runs concurrently.
+        outcome = asyncio.run(self.runtime.agent.execute_capability(local))
         record: KnowledgeAnswerRecord | None = None
         if (
             outcome.refusal is None

@@ -3,6 +3,8 @@
 import asyncio
 import json
 import math
+import threading
+from contextlib import nullcontext
 from typing import Literal
 
 from pydantic import ValidationError
@@ -44,6 +46,12 @@ class BridgeExecutor:
         self.services = services
         self.timeout_seconds = timeout_seconds
         self._events: list[ExecutionEvent] = []
+        # Requests may run concurrently on separate threads (one event loop
+        # each). Anything that can change a shared resource (a workbook, a
+        # draft, a release) and every workflow run is serialized here; reads
+        # run in parallel. Reentrant, so a workflow's own write steps on the
+        # same thread do not wait for themselves.
+        self.exclusive = threading.RLock()
 
     @property
     def events(self) -> tuple[ExecutionEvent, ...]:
@@ -108,10 +116,12 @@ class BridgeExecutor:
             )
         except (ValidationError, TypeError, ValueError):
             return self._failure(call, "invalid_input")
+        guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive
         try:
-            output = await asyncio.wait_for(
-                binding.handler(call.context, inputs), self.timeout_seconds
-            )
+            with guard:
+                output = await asyncio.wait_for(
+                    binding.handler(call.context, inputs), self.timeout_seconds
+                )
         except TimeoutError:
             return self._failure(call, "timeout", invoked=True)
         except CapabilityRefused as refusal:

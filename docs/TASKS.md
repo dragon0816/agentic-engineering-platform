@@ -1090,3 +1090,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   model history and attaching the original question to Knowledge routing.
   Tests: contract, history placement, feedback persistence, authenticated
   endpoint, page safety (Node harness); browser screenshots inspected.
+- [x] Agent Web concurrent sessions (Claude Code, 2026-10-05, owner request;
+  decision recorded): per-session turn queue and record lock, exclusive lock
+  only for commands/settings/sync/profile/schedules, `BridgeExecutor.exclusive`
+  around workflow runs and non-read capabilities. The page keeps the input
+  usable, shows queued/running turns, marks busy sessions in the sidebar and
+  switches session immediately. Also: confirmed per-session delete, backend
+  selector sync fix, and a Gateway model picker in Settings. Concurrency
+  tests cover parallel sessions, in-session order, rating during a turn and
+  Bridge effect serialization; browser check inspected. Full pytest: 1955
+  passed, 5 skipped; remaining failures are the known intermittent
+  `test_knowledge_stage` and pre-existing cp950 `test_local_developer_environment`.

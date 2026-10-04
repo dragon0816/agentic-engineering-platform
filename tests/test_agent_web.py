@@ -279,7 +279,8 @@ def test_ask_renders_markdown_as_safe_readable_elements(
         1
     ].split("// -- Ask", 1)[0]
     assert "renderAnswer(said, replied.text)" in script
-    assert "renderAnswer(said, answer.answer)" in script
+    # A sent turn is rendered when its conversation reloads (renderConversation).
+    assert "await loadConversations(session)" in script
     assert "innerHTML" not in renderer
     harness = r"""
 const assert = require("node:assert/strict");

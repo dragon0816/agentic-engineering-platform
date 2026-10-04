@@ -191,7 +191,7 @@ def _script() -> str:
 def test_the_page_groups_turns_with_rating_reply_and_context_menu() -> None:
     for expected in (
         'id="turn-menu"', 'id="reply-chip"', 'id="reply-chip-clear"',
-        '"/api/conversations/feedback"', '"contextmenu"', "reply_to: replying.message_id",
+        '"/api/conversations/feedback"', '"contextmenu"', "reply_to: entry.replyTo",
         'role", "group"', "aria-pressed",
     ):
         assert expected in PAGE, expected
