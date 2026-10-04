@@ -661,3 +661,23 @@ A narrow Chinese test-term expansion finds English test material; it adds no
 answer facts. These are deterministic retrieval changes inside Knowledge, not
 shared harness rules. A model-generated search rewrite was deferred until a
 bounded Skill-driven retrieval policy and evaluation cases can govern it.
+
+## 2026-10-04 — Let the Knowledge Skill guide facet retrieval without specializing the shared runner
+
+Decision: Add an optional opaque `procedure` to Skill manifests. The private
+Knowledge Asking Skill 1.2.0 uses it to declare natural intent, requested
+facets, bounded search queries and direct-link terms. Only the Knowledge
+adapter interprets this procedure. The common plan, runner and Bridge grants
+remain domain-neutral. The Host independently requires cited Raw support for
+every requested facet, a connected direct relationship for combined questions
+and a conservative lexical claim/source check. Missing support yields an
+explicit gap, not a recommendation. Deterministic commands retain routing
+precedence.
+
+Reason: The previous Skill instructions had no executable retrieval plan, so
+the harness accepted a Raw-cited answer without checking whether all requested
+market, product, technical and competitor facets were supported. Putting
+facet rules in the common runner would break its Workflow/Task and Coding use.
+The rejected alternative was to treat multiple nearby Raw passages or a model
+claim as proof of product-market fit. Lexical overlap is a limited preflight,
+not semantic entailment; source and recommendation review remain necessary.

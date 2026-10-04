@@ -362,6 +362,38 @@ def retrieve(
 ) -> tuple[Passage, ...]:
     """BM25 over every current Raw section and Wiki paragraph; ties break by
     corpus order, so the same question always returns the same passages."""
+    return _retrieve_docs(
+        _corpus(vault), question, k=k, min_raw=min_raw,
+        evidence_coverage=evidence_coverage,
+    )
+
+
+def retrieve_batch(
+    vault: Vault, queries: tuple[str, ...], *, k: int, min_raw: int = 0
+) -> tuple[tuple[Passage, ...], ...]:
+    """Search several Skill queries against one immutable corpus snapshot."""
+    return RetrievalSnapshot(vault).batch(queries, k=k, min_raw=min_raw)
+
+
+class RetrievalSnapshot:
+    """One Raw/Wiki corpus load across bounded facet searches."""
+
+    def __init__(self, vault: Vault) -> None:
+        self._docs = _corpus(vault)
+
+    def batch(
+        self, queries: tuple[str, ...], *, k: int, min_raw: int = 0
+    ) -> tuple[tuple[Passage, ...], ...]:
+        return tuple(
+            _retrieve_docs(self._docs, query, k=k, min_raw=min_raw)
+            for query in queries
+        )
+
+
+def _retrieve_docs(
+    docs: list[_Doc], question: str, *, k: int, min_raw: int,
+    evidence_coverage: bool = False,
+) -> tuple[Passage, ...]:
     if k < 1:
         raise ValueError("k is positive")
     if not 0 <= min_raw <= k:
@@ -376,7 +408,6 @@ def retrieve(
     query = tokens(normalized_question)
     if not query:
         return ()
-    docs = _corpus(vault)
     if not docs:
         return ()
     facets = _coverage_terms(question) if evidence_coverage else ()
@@ -554,13 +585,18 @@ class QueryEngine:
         trace: TraceIdentifiers | None = None,
         raw_citations_only: bool = False,
         evidence_coverage: bool = False,
+        selected_passages: tuple[Passage, ...] | None = None,
     ) -> Answer:
-        passages = retrieve(
-            self.vault,
-            question,
-            k=k,
-            min_raw=min(k, 4) if raw_citations_only else 0,
-            evidence_coverage=evidence_coverage,
+        passages = (
+            selected_passages
+            if selected_passages is not None
+            else retrieve(
+                self.vault,
+                question,
+                k=k,
+                min_raw=min(k, 4) if raw_citations_only else 0,
+                evidence_coverage=evidence_coverage,
+            )
         )
         if not passages:
             return Answer(question=question, status="no_match")

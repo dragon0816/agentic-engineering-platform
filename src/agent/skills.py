@@ -3,7 +3,7 @@
 import re
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, StringConstraints, field_validator, model_validator
+from pydantic import Field, JsonValue, StringConstraints, field_validator, model_validator
 
 from common.assets import AssetIdentity, AssetMetadata, RegistryContract
 from common.base import Contract, Symbol, Text
@@ -66,6 +66,9 @@ class SkillManifest(RegistryContract):
     # Supporting executable resources remain separately governed capabilities.
     script_tools: tuple[AssetIdentity, ...] = ()
     harness_guidance: SkillHarnessGuidance | None = None
+    # Domain adapters validate this JSON procedure before use; the common
+    # harness carries no Knowledge-, Workflow- or Coding-specific fields.
+    procedure: dict[str, JsonValue] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def explicit_bindings(self) -> Self:

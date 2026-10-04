@@ -4,6 +4,7 @@ These are evaluation inputs, not model answers or assertions that a Vault
 contains the facts. Live acceptance must inspect the resulting citations.
 """
 
+from itertools import combinations
 from typing import Literal, Self
 
 from pydantic import Field, model_validator
@@ -14,6 +15,9 @@ KnowledgeFacet = Literal[
     "market_trend", "product_option_spec", "technical_knowledge", "competitor"
 ]
 KnowledgeOutput = Literal["facts", "comparison", "strategy", "swot", "execution_actions"]
+ALL_FACETS: tuple[KnowledgeFacet, ...] = (
+    "market_trend", "product_option_spec", "technical_knowledge", "competitor"
+)
 
 
 class KnowledgeScenario(Contract):
@@ -42,17 +46,19 @@ class KnowledgeScenario(Contract):
 
 class KnowledgeScenarioSuite(Contract):
     version: Literal["1"] = "1"
-    cases: tuple[KnowledgeScenario, ...] = Field(min_length=5)
+    cases: tuple[KnowledgeScenario, ...] = Field(min_length=15)
 
     @model_validator(mode="after")
     def covers_owner_scenarios(self) -> Self:
         if len({case.case_id for case in self.cases}) != len(self.cases):
             raise ValueError("case IDs must be unique")
-        singles = {
-            case.facets[0] for case in self.cases if case.tier == "standalone"
+        observed = {frozenset(case.facets) for case in self.cases}
+        expected = {
+            frozenset(items) for size in range(1, 5)
+            for items in combinations(ALL_FACETS, size)
         }
-        if not {"market_trend", "product_option_spec", "technical_knowledge"} <= singles:
-            raise ValueError("suite needs the three standalone information checks")
+        if not expected <= observed:
+            raise ValueError("suite needs all 15 nonempty Knowledge facet combinations")
         if not any(
             case.tier == "combined" and {"strategy", "swot", "execution_actions"}
             <= set(case.outputs)

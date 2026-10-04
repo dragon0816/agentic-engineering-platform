@@ -19,6 +19,8 @@ from common.assets import (
 )
 from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.execution import TraceIdentifiers
+from knowledge.evidence import KnowledgeEvidenceSummary
+from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import Answer, Passage, QueryEngine, cited_numbers
 from knowledge.vault import Vault, WritePlan
 from models.contracts import ModelClient
@@ -91,6 +93,7 @@ class KnowledgeManifest(RegistryContract):
 class KnowledgeQueryRequest(Contract):
     asset: AssetIdentity
     question: Text
+    procedure: KnowledgeProcedure | None = None
 
     @model_validator(mode="after")
     def safe_question(self) -> Self:
@@ -103,6 +106,7 @@ class KnowledgeAnswerRecord(Contract):
     trace: TraceIdentifiers
     answer: Answer
     cited_passages: tuple[Passage, ...] = Field(min_length=1)
+    assessment: KnowledgeEvidenceSummary | None = None
 
     @model_validator(mode="after")
     def raw_grounding(self) -> Self:
@@ -270,7 +274,8 @@ class KnowledgeValidationEvidence(Contract):
 
 
 def grounded_record(
-    asset: AssetIdentity, trace: TraceIdentifiers, answer: Answer
+    asset: AssetIdentity, trace: TraceIdentifiers, answer: Answer,
+    *, assessment: KnowledgeEvidenceSummary | None = None,
 ) -> KnowledgeAnswerRecord:
     numbers = cited_numbers(answer.text)
     passages = tuple(
@@ -281,6 +286,7 @@ def grounded_record(
         trace=trace,
         answer=answer,
         cited_passages=passages,
+        assessment=assessment,
     )
 
 

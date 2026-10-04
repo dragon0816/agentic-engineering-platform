@@ -871,7 +871,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   actions. The typed suite rejects a strategy case missing competitor or other
   required facets and requires Raw citations or an explicit gap. Two focused
   contract tests, Ruff and mypy passed. No live model result is claimed yet.
-- [ ] G3 combined-case acceptance: the two existing combined scenarios were
+- [x] Diagnose the earlier G3 combined-case acceptance failures: the two existing combined scenarios were
   run through the live Agent Web on 2026-10-04. `market-product-wireless-cmp180`
   stopped at routing (`needs_input`) because it does not name the Knowledge
   asset; prepending `RS_Knowledge` reached the harness but still returned
@@ -893,10 +893,28 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   unverified. See the causal analysis in
   `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`. This identifies process wiring
   as primary, Skill contract as secondary and data coverage as still open.
-- [ ] G3 exhaustive combination proof: evaluate all 15 nonempty subsets of
-  market, product/option/spec, technical and competitor facets using supported,
-  missing and misleading co-mention cases; then run live Vault cases after
-  route, Skill-guided retrieval and Host acceptance are repaired.
+- [x] G3 guided-evidence slice: a private Skill 1.2.0 supplies typed natural
+  intent, per-facet searches and direct-link guidance. Exact commands retain
+  precedence. The Knowledge adapter retries only missing facets; independent
+  Host checks require cited Raw for requested facets, direct relationships for
+  combinations and basic claim/source overlap. Shared harness plan and runner
+  remain domain-neutral. Focused Knowledge/Web tests: 143 passed; Ruff and
+  mypy passed. The non-browser repository suite passed under short system Temp
+  (1,837 passed, 5 skipped); wheel and source package builds passed.
+- [x] G3 exhaustive controlled combinations: evaluate all 15 nonempty subsets
+  of market, product/option/spec, technical and competitor facets using
+  supported, missing and misleading co-mention cases. The read-only live
+  RS_Knowledge retrieval probe found facet candidate passages for all 15, but
+  direct connected links for 5/15 selected questions. This is retrieval
+  evidence, not a claim that the other facts are absent from the Vault.
+- [ ] G3 owner Agent Web acceptance: install the private Skill 1.2.0 into the
+  preview Host, restart the Web process and let the owner ask representative
+  standalone and combined questions. Review cited answer quality and refine
+  Skill search guidance or data coverage based on observed failure layer. The
+  install/restart and two local Web smoke turns are complete: a CMP180 product
+  question validated with cited support, while a market-plus-CMP180 question
+  stopped at `needs_input` with missing facet/direct-link evidence. Owner
+  answer-quality acceptance is still pending.
 - [x] Rename Knowledge evaluation-only schema, cases and test to `scenario`
   names so they cannot be mistaken for a separate Knowledge harness. Shared
   runtime contracts remain under `src/agent`; the candidate Skill remains

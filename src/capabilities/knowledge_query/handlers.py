@@ -6,9 +6,14 @@ from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
 from common.base import Contract
 from common.execution import RequestContext
+from knowledge.evidence import (
+    KnowledgeEvidenceAssessment,
+    assess_knowledge_evidence,
+    connected_facets,
+)
 from knowledge.evolution import KnowledgeCatalog, KnowledgeQueryRequest, grounded_record
 from knowledge.market_matrix import MarketMatrixRequest, discover_market_matrix
-from knowledge.query import QueryEngine
+from knowledge.query import Answer, QueryEngine
 from models.contracts import ModelClient
 
 KNOWLEDGE_QUERY_SPEC = CapabilitySpec.model_validate(
@@ -69,6 +74,45 @@ class KnowledgeQueryHandler:
         if found is None:
             raise CapabilityRefused("knowledge_version_not_found")
         _manifest, vault = found
+        assessment: KnowledgeEvidenceAssessment | None = None
+        selected_passages = None
+        if request.procedure is not None:
+            assessment = await asyncio.to_thread(
+                assess_knowledge_evidence, vault, request.question, request.procedure
+            )
+            if assessment.observations:
+                selected_passages = assessment.selected_passages()
+                if not selected_passages:
+                    raise CapabilityRefused("knowledge_insufficient_evidence")
+                if assessment.status == "missing":
+                    gaps = [*assessment.missing_facets]
+                    if assessment.relation_required and not connected_facets(
+                        tuple(item.name for item in assessment.observations),
+                        tuple((item.left, item.right) for item in assessment.relations),
+                    ):
+                        gaps.append("direct_relationship")
+                    answer = Answer(
+                        question=request.question,
+                        status="answered",
+                        passages=selected_passages,
+                        text=(
+                            "Raw candidate material was retrieved [1], but the requested "
+                            f"evidence remains incomplete ({', '.join(gaps)}); "
+                            "no cross-facet recommendation has been validated."
+                        ),
+                    )
+                    return grounded_record(
+                        request.asset, context.trace, answer,
+                        assessment=assessment.summary(),
+                    )
+        facets = () if assessment is None else tuple(item.name for item in assessment.observations)
+        facet_guidance = (
+            "\n\nRequested evidence facets: " + ", ".join(facets) + ". "
+            "Support each requested facet with a cited Raw passage. A comparison "
+            "or recommendation needs a cited Raw passage directly connecting "
+            "the relevant facets; separate co-mentions are insufficient."
+            if facets else ""
+        )
         answer = await asyncio.to_thread(
             QueryEngine(
                 vault,
@@ -81,20 +125,24 @@ class KnowledgeQueryHandler:
                     "only by them. Cite every supported claim with RAW passage numbers "
                     "in square brackets, like [2]. If no RAW passage supports an "
                     "answer, say so in one sentence and cite nothing.\n\n"
-                    "Question: {question}\n\n{passages}"
+                    "Question: {question}\n\n{passages}" + facet_guidance
                 ),
             ).ask,
             request.question,
             k=8,
             trace=context.trace,
             raw_citations_only=True,
-            evidence_coverage=True,
+            evidence_coverage=selected_passages is None,
+            selected_passages=selected_passages,
         )
         if answer.status in ("no_match", "unanswered"):
             raise CapabilityRefused("knowledge_insufficient_evidence")
         if answer.status == "model_failed":
             raise CapabilityRefused("knowledge_model_failed")
         try:
-            return grounded_record(request.asset, context.trace, answer)
+            return grounded_record(
+                request.asset, context.trace, answer,
+                assessment=None if assessment is None else assessment.summary(),
+            )
         except ValueError:
             raise CapabilityRefused("knowledge_not_grounded") from None

@@ -53,6 +53,7 @@ from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
 from agent.harness_plan import plan_task
 from agent.harness_runner import run_harness
+from agent.routing import DOT_COMMAND
 from agent.skills import SkillManifest
 from agent.task_contract import (
     CompletionCheck,
@@ -126,6 +127,7 @@ from knowledge.market_matrix import (
     MarketMatrixRequest,
     assess_market_cell,
 )
+from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import cited_numbers
 from models.contracts import ModelMessage
 
@@ -846,13 +848,9 @@ class AgentWeb:
                     installed_knowledge = self.assets()["knowledge"]
                     if len(installed_knowledge) == 1:
                         named_knowledge = installed_knowledge[0]
-                if named_knowledge is not None:
-                    answer = (
-                        self._market_matrix_reply(named_knowledge)
-                        if matrix_intent
-                        else self._knowledge_reply(named_knowledge, item.message)
-                    )
-                elif self.runtime.agent.gateway.router.commands.match(context) is not None:
+                command_match = self.runtime.agent.gateway.router.commands.match(context)
+                explicit_command = bool(DOT_COMMAND.match(item.message.strip()))
+                if command_match is not None and explicit_command:
                     direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
                         "ok": direct.refusal is None,
@@ -864,6 +862,28 @@ class AgentWeb:
                         ),
                         "outcome": json.loads(direct.model_dump_json()),
                     }
+                elif named_knowledge is not None:
+                    answer = (
+                        self._market_matrix_reply(named_knowledge)
+                        if matrix_intent
+                        else self._knowledge_reply(named_knowledge, item.message)
+                    )
+                elif command_match is not None:
+                    direct = asyncio.run(self.runtime.agent.handle(local))
+                    answer = {
+                        "ok": direct.refusal is None,
+                        "answer": readable(direct),
+                        "status": (
+                            "needs_input"
+                            if direct.decision is not None and direct.decision.kind == "needs_input"
+                            else ("answered" if direct.refusal is None else "failed")
+                        ),
+                        "outcome": json.loads(direct.model_dump_json()),
+                    }
+                elif (
+                    inferred_knowledge := self._skill_intended_knowledge(item.message)
+                ) is not None:
+                    answer = self._knowledge_reply(inferred_knowledge, item.message)
                 elif history_error:
                     answer = context_too_large
                 else:
@@ -968,6 +988,30 @@ class AgentWeb:
                 matches.append(item)
         return matches[0] if len(matches) == 1 else None
 
+    def _skill_intended_knowledge(self, message: str) -> dict[str, Any] | None:
+        """Use one installed Skill's declared intent only with one exact Vault."""
+        eligible = [
+            item for item in self.assets()["skills"] if item["knowledge_harness_selectable"]
+        ]
+        knowledge = self.assets()["knowledge"]
+        if len(eligible) != 1 or len(knowledge) != 1:
+            return None
+        candidate = eligible[0]
+        skill = self.runtime.agent.gateway.router.commands.skills.get(
+            candidate["namespace"], candidate["alias"]
+        )
+        if skill is None or not skill.procedure:
+            return None
+        try:
+            procedure = KnowledgeProcedure.model_validate(skill.procedure)
+        except ValueError:
+            return None
+        return (
+            knowledge[0]
+            if procedure.matches_intent(message)
+            else None
+        )
+
     def _knowledge_reply(self, selected: dict[str, Any], question: str) -> dict[str, Any]:
         eligible_skills = [
             item for item in self.assets()["skills"]
@@ -1015,7 +1059,12 @@ class AgentWeb:
         if sources:
             answer += "\n\nSources (Raw):\n" + "\n".join(sources)
         if result.get("harness") is not None:
-            answer += "\n\nEvidence check: Raw citations verified; facet coverage not assessed."
+            facet_status = (result.get("evidence") or {}).get("facet_status")
+            answer += (
+                "\n\nEvidence check: Raw citations and requested facets verified."
+                if facet_status == "covered"
+                else "\n\nEvidence check: Raw citations verified; facet coverage not assessed."
+            )
         return {
             "ok": True,
             "answer": answer,
@@ -1690,6 +1739,28 @@ class AgentWeb:
                 "outcome": None,
                 "harness": None,
             }
+        try:
+            procedure = (
+                KnowledgeProcedure.model_validate(skill.procedure)
+                if skill.procedure else None
+            )
+        except ValueError:
+            return {
+                "ok": False,
+                "answer": "The installed Knowledge Skill procedure is invalid.",
+                "record": None,
+                "outcome": None,
+                "harness": None,
+            }
+        required_facets = (
+            tuple(facet.name for facet in procedure.requested_facets(item.question))
+            if procedure is not None else ()
+        )
+        relation_required = bool(
+            procedure is not None
+            and procedure.require_relation_for_combination
+            and len(required_facets) > 1
+        )
         trace = _trace()
         task = TaskContract(
             task_id=f"knowledge-{uuid.uuid4().hex}",
@@ -1708,37 +1779,70 @@ class AgentWeb:
                 CompletionCheck(
                     check_id="answer_nonempty", output_id="answer", kind="nonempty"
                 ),
+                *(
+                    (
+                        CompletionCheck(
+                            check_id="facet_coverage", output_id="answer", kind="nonempty"
+                        ),
+                        CompletionCheck(
+                            check_id="claim_support", output_id="answer", kind="nonempty"
+                        ),
+                    )
+                    if required_facets else ()
+                ),
             ),
             constraints=TaskExecutionConstraints(max_retries=0),
         )
         plan = plan_task(task, skill, "knowledge")
         actions = KnowledgeBridgeActions(
-            lambda: self._ask_knowledge_bridge(item, trace),
+            lambda: self._ask_knowledge_bridge(item, trace, procedure=procedure),
             required_evidence=plan.skill_evidence,
+            required_facets=required_facets,
+            relation_required=relation_required,
         )
         run = run_harness(plan, actions)
         base = actions.result or {
             "ok": False, "answer": "The Knowledge query did not run.",
             "record": None, "outcome": None,
         }
+        facet_report = actions.facet_report()
+        incomplete = run.phase != "validated" and base["ok"] and required_facets
+        if incomplete and facet_report["facet_status"] == "missing":
+            missing = facet_report["missing_facets"]
+            gaps = list(missing) if isinstance(missing, list) else []
+            if facet_report["relation_status"] == "missing":
+                gaps.append("direct_relationship")
+            visible_answer = (
+                "The retrieved Raw evidence does not validate the complete answer. "
+                f"Missing: {', '.join(gaps)}. No cross-facet recommendation is accepted."
+            )
+        elif run.phase == "needs_input" and required_facets and not base["ok"]:
+            visible_answer = (
+                "The Knowledge query did not produce a validated answer. "
+                "Unverified requested facets: " + ", ".join(required_facets) + "."
+            )
+        elif run.phase == "validated" or not base["ok"]:
+            visible_answer = base["answer"]
+        else:
+            visible_answer = "The selected Skill requires evidence this Host cannot yet verify."
         return {
             **base,
             "ok": run.phase == "validated" and base["ok"],
-            "answer": (
-                base["answer"]
-                if run.phase == "validated" or not base["ok"]
-                else "The selected Skill requires evidence this Host cannot yet verify."
-            ),
+            "answer": visible_answer,
             "harness": run.model_dump(mode="json"),
             "evidence": {
                 "raw_citations": len((base.get("record") or {}).get("cited_passages") or ()),
-                "facet_status": "not_assessed",
-                "missing_facets": None,
+                **(
+                    facet_report
+                    if required_facets
+                    else {"facet_status": "not_assessed", "missing_facets": None}
+                ),
             },
         }
 
     def _ask_knowledge_bridge(
-        self, item: KnowledgeAskRequest, trace: TraceIdentifiers
+        self, item: KnowledgeAskRequest, trace: TraceIdentifiers,
+        *, procedure: KnowledgeProcedure | None = None,
     ) -> dict[str, Any]:
         device = self.runtime.config.device
         local = LocalCapabilityRequest(
@@ -1746,8 +1850,10 @@ class AgentWeb:
             actor=self.runtime.actor,
             bridge_id=device.bridge_id,
             target=KNOWLEDGE_QUERY_SPEC.identity,
-            arguments=KnowledgeQueryRequest(asset=item.asset, question=item.question).model_dump(
-                mode="json"
+            arguments=KnowledgeQueryRequest(
+                asset=item.asset, question=item.question, procedure=procedure
+            ).model_dump(
+                mode="json", exclude_none=True
             ),
             trace=trace,
         )

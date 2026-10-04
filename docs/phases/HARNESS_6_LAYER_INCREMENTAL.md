@@ -15,12 +15,13 @@ The previous product/market `MarketCellSufficiency` is a Knowledge pilot. It is 
 
 Each slice receives focused tests. Full repository verification is reserved for the owner's merge checkpoint. Do not add n8n as a core dependency, mutate the source Vault, or edit a published Skill version in place.
 
-The first G3 path is opt-in and intentionally narrow: Agent Web can run one
-installed Skill through the shared harness while preserving exact Bridge
-authorization and Raw-citation validation. It reports facet coverage as
-`not_assessed`; evidence sufficiency, controlled re-retrieval and scenario
-acceptance remain open. A grounded answer must not be interpreted as a
-validated product/market recommendation.
+The first G3 path was opt-in and reported facet coverage as `not_assessed`.
+The current candidate Skill adds a typed Knowledge procedure, per-facet Raw
+retrieval, bounded fallback searches for missing facets and independent Host
+checks of cited facets and direct relationships. These checks establish
+observable source support, not semantic entailment or product/market fit.
+The Host still refuses an unsupported recommendation and preserves exact
+Bridge authorization. The shared runner contains no Knowledge-specific rules.
 
 ## Knowledge-first evaluation cases
 
@@ -88,3 +89,25 @@ budget; (3) retrieve and report evidence by requested facet, retrying only
 missing facets; (4) require Host checks for each requested facet and any
 cross-source relationship claim; (5) run controlled 15-subset cases, then live
 Vault cases and distinguish retrieval failure from genuine source gaps.
+
+## G3 guided-evidence result (2026-10-04)
+
+Steps 1–4 above are implemented in the private
+`company-agent/knowledge-query@1.2.0` candidate. Command routing has
+precedence over natural Skill intent. The Skill's `procedure` is opaque to the
+shared plan and runner; the Knowledge adapter interprets it, and the Host
+checks the cited result separately. Every requested facet must have cited Raw
+support. A combination also needs a connected graph of direct Raw
+relationships; separate co-mentions do not establish that connection. When
+evidence is incomplete, Ask returns a structured gap instead of a strategy.
+
+The controlled evaluation exercises all 15 nonempty facet combinations in
+supported, missing and misleading co-mention cases. A read-only live
+RS_Knowledge retrieval probe observed candidate Raw for every queried facet,
+but a connected direct-link graph for only 5 of 15 questions. The other 10
+are **retrieval observations**, not proof that the Vault lacks the facts. A
+product-plus-technical model probe produced a cited candidate that passed the
+lexical claim check; live answer quality remains for the owner to assess in
+Agent Web. The claim check rejects obvious unsupported numbers and unrelated
+cited prose but is not semantic entailment. Strong market-fit, competitor,
+SWOT and execution advice therefore remains subject to source review.

@@ -131,6 +131,7 @@ def knowledge_runtime(
     matrix_authorized: bool = False,
     model_configured: bool = True,
     harness_skill: bool = False,
+    harness_skill_file: str = "knowledge-evidence.json",
     required_evidence: tuple[str, ...] | None = None,
 ) -> Any:
     vault = copy_vault(tmp_path)
@@ -176,7 +177,7 @@ def knowledge_runtime(
         manifest(vault).model_dump_json(), encoding="utf-8"
     )
     if harness_skill:
-        fixture = Path(__file__).parent / "fixtures/harness_skills/knowledge-evidence.json"
+        fixture = Path(__file__).parent / "fixtures/harness_skills" / harness_skill_file
         skill_payload = json.loads(fixture.read_text(encoding="utf-8"))
         if required_evidence is not None:
             skill_payload["harness_guidance"]["required_evidence"] = list(required_evidence)
@@ -1751,6 +1752,115 @@ def test_named_knowledge_chat_uses_one_installed_harness_skill(tmp_path: Path) -
     assert answer["evidence"]["raw_citations"] == 1
     assert "Sources (Raw):" in answer["answer"]
     assert "facet coverage not assessed" in answer["answer"]
+
+
+def test_skill_declared_natural_knowledge_intent_selects_the_only_vault(tmp_path: Path) -> None:
+    with knowledge_runtime(
+        tmp_path,
+        harness_skill=True,
+        harness_skill_file="knowledge-evidence-v1.2.json",
+    ) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="What firmware does Safe mode require?",
+            )
+        )
+    assert asked["answer"]["status"] == "answered"
+    assert asked["answer"]["harness"]["phase"] == "validated"
+    assert asked["answer"]["harness"]["plan"]["skill"]["version"] == "1.2.0"
+
+
+def test_skill_guided_combination_reports_exact_missing_evidence(tmp_path: Path) -> None:
+    from datetime import date
+
+    from knowledge.raw import RawDocument, RawSection, render, source_for
+    from knowledge.vault import Vault
+
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
+    with knowledge_runtime(
+        tmp_path,
+        harness_skill=True,
+        harness_skill_file="knowledge-evidence-v1.2.json",
+    ) as runtime:
+        vault = Vault(Path(runtime.config.knowledge[0].vault_root))
+        source = source_for(b"market", "drop/market.txt").model_copy(
+            update={"raw_ref": "raw/market.md"}
+        )
+        vault.write_raw(
+            "raw/market.md",
+            render(RawDocument(
+                source=source, extractor="txt.v1", created=date(2026, 10, 4),
+                sections=(RawSection(text="CMP180 wireless market demand is increasing."),),
+            )),
+        )
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(asset=V1, question="CMP180 market product", skill=skill)
+        )
+    assert result["ok"] is False
+    assert result["harness"]["phase"] == "needs_input"
+    assert result["evidence"]["facet_status"] == "missing"
+    assert result["evidence"]["missing_facets"] == ["product_option_spec"]
+    assert result["evidence"]["relation_status"] == "missing"
+    assert "product_option_spec" in result["answer"]
+    assert "direct_relationship" in result["answer"]
+
+
+def test_skill_guided_no_raw_reports_unverified_facets(tmp_path: Path) -> None:
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
+    with knowledge_runtime(
+        tmp_path, harness_skill=True,
+        harness_skill_file="knowledge-evidence-v1.2.json",
+    ) as runtime:
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(asset=V1, question="CMP180 market product", skill=skill)
+        )
+    assert result["ok"] is False
+    assert result["harness"]["phase"] == "needs_input"
+    assert result["evidence"]["missing_facets"] == [
+        "market_trend", "product_option_spec"
+    ]
+    assert "Unverified requested facets" in result["answer"]
+
+
+def test_skill_guided_host_rejects_unrelated_cited_model_answer(tmp_path: Path) -> None:
+    from datetime import date
+
+    from knowledge.raw import RawDocument, RawSection, render, source_for
+    from knowledge.vault import Vault
+
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
+    with knowledge_runtime(
+        tmp_path, harness_skill=True,
+        harness_skill_file="knowledge-evidence-v1.2.json",
+    ) as runtime:
+        vault = Vault(Path(runtime.config.knowledge[0].vault_root))
+        content = (
+            "CMP180 product option supports wireless market demand for technical "
+            "test requirements compared with competitor Keysight."
+        )
+        source = source_for(content.encode(), "drop/link.txt").model_copy(
+            update={"raw_ref": "raw/link.md"}
+        )
+        vault.write_raw(
+            "raw/link.md",
+            render(RawDocument(
+                source=source, extractor="txt.v1", created=date(2026, 10, 4),
+                sections=(RawSection(text=content),),
+            )),
+        )
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(asset=V1, question="CMP180 market product", skill=skill)
+        )
+    assert result["ok"] is False
+    assert result["harness"]["phase"] == "needs_input"
+    assert result["evidence"]["facet_status"] == "covered"
+    assert result["evidence"]["claim_status"] == "unverified"
+    assert result["harness"]["checks"][-1]["check_id"] == "claim_support"
+    assert result["harness"]["checks"][-1]["status"] == "failed"
+    assert "Safe mode" not in result["answer"]
 
 
 def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> None:
