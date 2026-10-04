@@ -13,9 +13,14 @@ shared runner. The owner's reference is the Hermes `rs-knowledge-base` Skill
 
 - Branch `main`. Candidate Skill `company-agent/knowledge-query@1.3.0` and its
   adapter fixes are committed (see `git log`); nothing was pushed.
-- The running Agent Web (`http://127.0.0.1:53583/`, started 2026-10-04 15:10)
-  still uses rollback Skill 1.1.0. **1.3.0 has not been installed in the live
-  Web.** All 1.3.0 results below come from an isolated runtime.
+- **Candidate 1.3.0 (with labeled inference `【推論】`) is installed in the live
+  Agent Web** on port 53583 (restarted 2026-10-04 by Claude Code from the repo
+  `.venv`, editable install, logs `.scratch/agent-web-13-*.log`). Rollback:
+  move `company-agent__knowledge-query__1.3.0.json` out of
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\workspacessets\skills\`
+  and move `disabled/company-agent__knowledge-query__1.1.0.json` back, then
+  restart Agent Web. Exactly one Knowledge-selectable Skill must be installed
+  for natural chat routing.
 - Test Vault copy `C:\Users\Chi_L\AppData\Local\AEP\rs-k` had disappeared; it
   was recreated by mirroring the staged copy `.scratch/k`, whose Raw,
   decisions and content digests match the published manifest
@@ -63,17 +68,21 @@ model outputs to JSON for offline replay of filters):
   portfolio line in the CMX500 Anritsu battle card); no source directly
   linking market trends to CMP180 option selection; market-trend sources are
   thin beyond one 2026 Taiwan report and OneNote slides.
-- Design question for the owner: allow a clearly labeled *inference* (e.g.
-  "Wi-Fi 7 320 MHz demand aligns with KM352/KB805") separately from verified
-  facts, as the Hermes Skill does? Today only cited facts survive.
-- Scheduled tasks: owner decided not to use n8n; remaining owner decisions are
-  listed in `docs/TASKS.md`. Existing code: `src/common/scheduling.py`,
+- Labeled inference is implemented (owner chose explicit labels); see
+  `docs/DECISIONS.md`. The owner should judge in Agent Web whether the
+  inference checks are too strict or too loose.
+- Scheduled tasks: owner decisions (2026-10-04): no n8n; Workflows **and**
+  Agent Tasks; Agent Web screens in v1; resident loop inside the running
+  Bridge/Host execution process; `external_side_effect` (sending) always needs
+  per-run approval, write/draft may run unattended only with a durable Bridge
+  grant plus a schedule grant; catch up a missed run once. Implementation is
+  in progress on branch `schedules-v1` (separate worktree under
+  `.claude/worktrees/`), not merged. Existing code: `src/common/scheduling.py`,
   `src/host_runtime/schedules.py`, `src/host_runtime/schedule_worker.py`,
   `aep-host schedules` CLI. Do this in a separate branch/worktree because it
   touches `web.py`.
 
 ## Next recommended action
 
-With the owner's consent, install candidate Skill 1.3.0 into the live Agent
-Web workspace (keep 1.1.0 for rollback), restart Agent Web, and let the owner
-run the three questions there.
+Collect the owner's Agent Web feedback on the three questions, then review and
+merge branch `schedules-v1` after its verification.
