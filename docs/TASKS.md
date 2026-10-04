@@ -839,6 +839,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] G3: use the candidate Knowledge Asking Skill to test data coverage,
   retrieval, answer validation and gap feedback in Agent Web. Keep the
   published 1.0.0 Skill immutable; activate a new version only after review.
+- [x] G3 first vertical path: Agent Web can explicitly select an installed,
+  versioned Knowledge Asking Skill. Its exact Bridge query now runs through
+  the shared plan/runner, reports the Skill, phase, attempts and Raw citation
+  count, and preserves Bridge permission denial. The Host revalidates the
+  grounded record; uninstalled Skills cannot run. Facet coverage is explicitly
+  `not_assessed` until evidence-sufficiency and bounded re-retrieval are wired.
+  Focused Knowledge Web tests (16), shared harness tests (15), Ruff and
+  touched-source mypy passed; full suite remains at the owner's merge checkpoint.
 - [x] Prepare G3 evaluation inputs at two levels: three standalone questions
   (market trends, product options/specs, technical knowledge) and combined
   market/product comparison plus competitive strategy with SWOT and project

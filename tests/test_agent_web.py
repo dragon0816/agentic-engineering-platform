@@ -29,6 +29,7 @@ from test_product_e2e_05 import V1, copy_vault, manifest
 from agent.gateway import GatewayConversationResult
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.weekly_report.manifest import preview_workflow
+from common.assets import AssetIdentity
 from common.execution import Failure, TraceIdentifiers
 from control_plane.http import ControlPlaneServer
 from extensions.package import stage_extension_package
@@ -129,6 +130,8 @@ def knowledge_runtime(
     authorized: bool = True,
     matrix_authorized: bool = False,
     model_configured: bool = True,
+    harness_skill: bool = False,
+    required_evidence: tuple[str, ...] | None = None,
 ) -> Any:
     vault = copy_vault(tmp_path)
     grants = grant_record()
@@ -172,6 +175,14 @@ def knowledge_runtime(
     (layout.knowledge / "widget-guide.json").write_text(
         manifest(vault).model_dump_json(), encoding="utf-8"
     )
+    if harness_skill:
+        fixture = Path(__file__).parent / "fixtures/harness_skills/knowledge-evidence.json"
+        skill_payload = json.loads(fixture.read_text(encoding="utf-8"))
+        if required_evidence is not None:
+            skill_payload["harness_guidance"]["required_evidence"] = list(required_evidence)
+        (layout.skills / "knowledge-evidence.json").write_text(
+            json.dumps(skill_payload), encoding="utf-8"
+        )
     return build_runtime(config, layout=layout, model_transport=KnowledgeGateway())
 
 
@@ -1602,6 +1613,102 @@ def test_grounded_knowledge_asking_runs_the_exact_capability_and_keeps_citations
     assert answered["outcome"]["capability"]["status"] == "succeeded"
 
 
+def test_installed_knowledge_skill_uses_shared_harness_and_bridge(tmp_path: Path) -> None:
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.1.0")
+    with knowledge_runtime(tmp_path, harness_skill=True) as runtime:
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(
+                asset=V1, question="What firmware does Safe mode require?", skill=skill
+            )
+        )
+    assert result["ok"] is True
+    assert result["harness"]["phase"] == "validated"
+    assert result["harness"]["plan"]["skill"] == skill.model_dump(mode="json")
+    assert result["harness"]["plan"]["requested_capabilities"] == [
+        KNOWLEDGE_QUERY_SPEC.identity.model_dump(mode="json")
+    ]
+    assert result["record"]["cited_passages"]
+    assert result["evidence"] == {
+        "raw_citations": 1, "facet_status": "not_assessed", "missing_facets": None
+    }
+    assert result["outcome"]["decision"]["target"] == (
+        KNOWLEDGE_QUERY_SPEC.identity.model_dump(mode="json")
+    )
+
+
+def test_knowledge_skill_selection_works_over_loopback_http(tmp_path: Path) -> None:
+    with knowledge_runtime(tmp_path, harness_skill=True) as runtime:
+        server = AgentWebServer(AgentWeb(runtime))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            answered = fetch(
+                base(server) + "/api/knowledge/ask",
+                token=server.token,
+                body={
+                    "asset": V1.model_dump(mode="json"),
+                    "question": "What firmware does Safe mode require?",
+                    "skill": {
+                        "namespace": "company-agent",
+                        "name": "knowledge-query",
+                        "version": "1.1.0",
+                    },
+                },
+            ).json()
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+    assert answered["ok"] is True
+    assert answered["harness"]["phase"] == "validated"
+    assert answered["evidence"]["facet_status"] == "not_assessed"
+
+
+def test_uninstalled_knowledge_skill_cannot_create_a_harness_run(tmp_path: Path) -> None:
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.1.0")
+    with knowledge_runtime(tmp_path) as runtime:
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(
+                asset=V1, question="What firmware does Safe mode require?", skill=skill
+            )
+        )
+    assert result["ok"] is False
+    assert result["harness"] is None
+    assert result["outcome"] is None
+
+
+def test_installed_knowledge_skill_still_obeys_bridge_permission(tmp_path: Path) -> None:
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.1.0")
+    with knowledge_runtime(tmp_path, harness_skill=True, authorized=False) as runtime:
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(
+                asset=V1, question="What firmware does Safe mode require?", skill=skill
+            )
+        )
+    assert result["ok"] is False
+    assert result["harness"]["phase"] == "failed"
+    assert result["harness"]["failure_code"] == "permission_denied"
+    assert result["outcome"]["capability"]["failure"]["code"] == "permission_denied"
+
+
+def test_unassessed_skill_evidence_cannot_validate_a_grounded_answer(tmp_path: Path) -> None:
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.1.0")
+    with knowledge_runtime(
+        tmp_path,
+        harness_skill=True,
+        required_evidence=("raw_citations", "unresolved_gaps"),
+    ) as runtime:
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(
+                asset=V1, question="What firmware does Safe mode require?", skill=skill
+            )
+        )
+    assert result["ok"] is False
+    assert result["harness"]["phase"] == "needs_input"
+    assert result["harness"]["checks"][0]["evidence_ref"] == "unmet_skill_evidence"
+    assert result["evidence"]["facet_status"] == "not_assessed"
+
+
 def test_named_knowledge_in_natural_chat_uses_exact_bridge_query(
     served_knowledge: AgentWebServer,
 ) -> None:
@@ -1749,6 +1856,7 @@ def test_page_asks_one_exact_knowledge_version_and_renders_citations(
 ) -> None:
     page = served.page().decode("utf-8")
     assert 'id="knowledge-target"' in page
+    assert 'id="knowledge-skill"' in page
     assert 'id="knowledge-question"' in page
     assert 'call("/api/knowledge/ask"' in page
     assert "cited_passages" in page

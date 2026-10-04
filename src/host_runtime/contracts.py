@@ -255,6 +255,7 @@ class KnowledgeAskRequest(Contract):
 
     asset: AssetIdentity
     question: Text
+    skill: AssetIdentity | None = None
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

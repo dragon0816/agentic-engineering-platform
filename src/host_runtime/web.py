@@ -51,7 +51,15 @@ from urllib.parse import parse_qs, urlparse
 from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
+from agent.harness_plan import plan_task
+from agent.harness_runner import run_harness
 from agent.skills import SkillManifest
+from agent.task_contract import (
+    CompletionCheck,
+    ExpectedOutput,
+    TaskContract,
+    TaskExecutionConstraints,
+)
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from common.assets import AssetIdentity, Owner, WorkflowManifest
@@ -98,6 +106,7 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
 )
 from host_runtime.host import HostRuntime, load_authorization
+from host_runtime.knowledge_observation import KnowledgeBridgeActions
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.slash_commands import (
@@ -1236,6 +1245,23 @@ class AgentWeb:
                 "status": "installed" if authorized else "not_authorized",
             }
 
+        active_skills = self.runtime.agent.gateway.router.commands.skills
+
+        def harness_selectable(item: SkillManifest) -> bool:
+            active = active_skills.get(item.metadata.identity.namespace, item.alias)
+            return bool(
+                active is not None
+                and active.metadata.identity == item.metadata.identity
+                and item.metadata.lifecycle in {"validated", "published"}
+                and item.harness_guidance is not None
+                and "knowledge" in item.harness_guidance.domains
+                and any(
+                    command.kind == "capability"
+                    and command.target == KNOWLEDGE_QUERY_SPEC.identity
+                    for command in item.commands
+                )
+            )
+
         skills = [
             {
                 "namespace": item.metadata.identity.namespace,
@@ -1260,6 +1286,11 @@ class AgentWeb:
                     for command in item.commands
                 ],
                 "default_command": item.default_command or "",
+                "harness_guidance": (
+                    None if item.harness_guidance is None
+                    else item.harness_guidance.model_dump(mode="json")
+                ),
+                "knowledge_harness_selectable": harness_selectable(item),
             }
             for item in manifests(layout.skills, SkillManifest)
         ]
@@ -1608,6 +1639,84 @@ class AgentWeb:
     def ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         """Ask one exact installed Knowledge version through Bridge policy."""
         item = KnowledgeAskRequest.model_validate(request)
+        if item.skill is None:
+            return self._ask_knowledge_bridge(item, _trace())
+        installed = self.runtime.agent.gateway.router.commands.skills.discover(
+            item.skill.namespace
+        )
+        skill = next(
+            (candidate for candidate in installed if candidate.metadata.identity == item.skill),
+            None,
+        )
+        if (
+            skill is None
+            or skill.metadata.lifecycle not in {"validated", "published"}
+            or skill.harness_guidance is None
+            or "knowledge" not in skill.harness_guidance.domains
+            or not any(
+                command.kind == "capability" and command.target == KNOWLEDGE_QUERY_SPEC.identity
+                for command in skill.commands
+            )
+        ):
+            return {
+                "ok": False,
+                "answer": (
+                    "Select an installed Knowledge Asking Skill with the exact query command."
+                ),
+                "record": None,
+                "outcome": None,
+                "harness": None,
+            }
+        trace = _trace()
+        task = TaskContract(
+            task_id=f"knowledge-{uuid.uuid4().hex}",
+            trace=trace,
+            actor=self.runtime.actor,
+            namespace=self.namespace or skill.metadata.identity.namespace,
+            task_type="knowledge",
+            objective=item.question,
+            skills=(skill.metadata.identity,),
+            resource_refs=("knowledge_asset",),
+            allowed_capabilities=(KNOWLEDGE_QUERY_SPEC.identity,),
+            expected_outputs=(
+                ExpectedOutput(output_id="answer", artifact_ref="bridge_raw_record"),
+            ),
+            checks=(
+                CompletionCheck(
+                    check_id="answer_nonempty", output_id="answer", kind="nonempty"
+                ),
+            ),
+            constraints=TaskExecutionConstraints(max_retries=0),
+        )
+        plan = plan_task(task, skill, "knowledge")
+        actions = KnowledgeBridgeActions(
+            lambda: self._ask_knowledge_bridge(item, trace),
+            required_evidence=plan.skill_evidence,
+        )
+        run = run_harness(plan, actions)
+        base = actions.result or {
+            "ok": False, "answer": "The Knowledge query did not run.",
+            "record": None, "outcome": None,
+        }
+        return {
+            **base,
+            "ok": run.phase == "validated" and base["ok"],
+            "answer": (
+                base["answer"]
+                if run.phase == "validated" or not base["ok"]
+                else "The selected Skill requires evidence this Host cannot yet verify."
+            ),
+            "harness": run.model_dump(mode="json"),
+            "evidence": {
+                "raw_citations": len((base.get("record") or {}).get("cited_passages") or ()),
+                "facet_status": "not_assessed",
+                "missing_facets": None,
+            },
+        }
+
+    def _ask_knowledge_bridge(
+        self, item: KnowledgeAskRequest, trace: TraceIdentifiers
+    ) -> dict[str, Any]:
         device = self.runtime.config.device
         local = LocalCapabilityRequest(
             ingress="local",
@@ -1617,7 +1726,7 @@ class AgentWeb:
             arguments=KnowledgeQueryRequest(asset=item.asset, question=item.question).model_dump(
                 mode="json"
             ),
-            trace=_trace(),
+            trace=trace,
         )
         import asyncio
 

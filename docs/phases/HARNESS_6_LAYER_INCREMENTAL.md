@@ -15,6 +15,13 @@ The previous product/market `MarketCellSufficiency` is a Knowledge pilot. It is 
 
 Each slice receives focused tests. Full repository verification is reserved for the owner's merge checkpoint. Do not add n8n as a core dependency, mutate the source Vault, or edit a published Skill version in place.
 
+The first G3 path is opt-in and intentionally narrow: Agent Web can run one
+installed Skill through the shared harness while preserving exact Bridge
+authorization and Raw-citation validation. It reports facet coverage as
+`not_assessed`; evidence sufficiency, controlled re-retrieval and scenario
+acceptance remain open. A grounded answer must not be interpreted as a
+validated product/market recommendation.
+
 ## Knowledge-first evaluation cases
 
 `evaluation/knowledge/scenarios-v1.json` is the test input for G3. The

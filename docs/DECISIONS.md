@@ -625,3 +625,18 @@ would widen data exposure and make later cross-domain reuse harder. A pure
 state contract can be tested across Knowledge, Workflow and Coding before
 binding any side-effecting capability. The alternative of building a separate
 Knowledge-only loop was rejected after the owner's clarification.
+
+## 2026-10-04 — Add an opt-in Knowledge Web path to the shared harness
+
+Decision: Permit a browser Knowledge question to select one exact installed,
+validated or published Knowledge Asking Skill. The Host builds a shared Task
+plan and runs the existing exact Bridge Knowledge capability through the
+provider-neutral runner. The Knowledge adapter only maps the Bridge result to
+a Raw-grounding check. The Web explicitly reports that evidence facets remain
+unassessed. Existing Knowledge questions without an explicit Skill keep their
+current path until the candidate procedure and missing-facet checks are proven.
+
+Reason: This provides an inspectable end-to-end Web slice without mutating the
+published 1.0.0 Skill or weakening Bridge permissions. Automatically claiming
+that Raw citations prove product/market recommendations, or silently routing
+all existing questions through an unfinished candidate Skill, was rejected.

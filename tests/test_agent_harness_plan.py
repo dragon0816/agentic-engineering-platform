@@ -46,7 +46,7 @@ def _task(skill: SkillManifest, *, max_retries: int = 1) -> TaskContract:
         (
             "knowledge-evidence.json", "knowledge",
             ("collect_context", "execute", "validate"),
-            ("raw_citations", "unresolved_gaps"), "needs_input",
+            ("raw_citations",), "needs_input",
         ),
         (
             "workflow-check.json", "workflow", ("execute", "validate"),

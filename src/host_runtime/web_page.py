@@ -523,6 +523,8 @@ tr:last-child td { border-bottom: none; }
         <div id="knowledge-action" class="action-box" hidden>
           <strong>Ask this Knowledge source</strong>
           <p class="note" id="knowledge-domain">No installed Knowledge.</p>
+          <label for="knowledge-skill">Knowledge Asking Skill</label>
+          <select id="knowledge-skill"><option value="">Existing query path</option></select>
           <label for="knowledge-question">Question</label>
           <textarea id="knowledge-question" spellcheck="true"></textarea>
           <p><button class="go" id="knowledge-ask" type="button" disabled>Ask Knowledge</button></p>
@@ -1186,6 +1188,16 @@ async function loadAssets() {
     knowledgeTarget.append(option);
   }
   knowledgeTarget.disabled = assets.knowledge.length === 0;
+  const knowledgeSkill = el("knowledge-skill");
+  knowledgeSkill.replaceChildren(new Option("Existing query path", ""));
+  for (const skill of assets.skills) {
+    if (!skill.knowledge_harness_selectable) continue;
+    const option = document.createElement("option");
+    option.value = JSON.stringify({namespace: skill.namespace, name: skill.name,
+      version: skill.version});
+    option.textContent = skill.namespace + "/" + skill.name + "@" + skill.version;
+    knowledgeSkill.append(option);
+  }
   el("knowledge-ask").disabled = assets.knowledge.length === 0;
   showKnowledgeDomain();
   renderCapabilityBrowser();
@@ -1637,12 +1649,20 @@ el("knowledge-ask").addEventListener("click", async () => {
   result.textContent = "Knowledge is answering\u2026";
   el("knowledge-citations").replaceChildren(text("Waiting for grounded citations\u2026"));
   try {
+    const selectedSkill = el("knowledge-skill").value;
     const answered = await call("/api/knowledge/ask", {
       asset: JSON.parse(chosen), question: question,
+      ...(selectedSkill ? {skill: JSON.parse(selectedSkill)} : {}),
     });
     const outcome = answered.outcome;
-    result.textContent = "trace " + outcome.trace.trace_id + " | request "
-      + outcome.trace.request_id + "\n\n" + answered.answer;
+    const harness = answered.harness;
+    const summary = harness ? ("Skill " + harness.plan.skill.namespace + "/"
+      + harness.plan.skill.name + "@" + harness.plan.skill.version
+      + " | harness " + harness.phase + " | attempts " + (harness.retry_count + 1)
+      + " | Raw citations " + (answered.evidence?.raw_citations || 0)
+      + " | facet coverage not assessed\n") : "";
+    result.textContent = summary + (outcome ? ("trace " + outcome.trace.trace_id
+      + " | request " + outcome.trace.request_id + "\n\n") : "") + answered.answer;
     if (!answered.record) {
       el("knowledge-citations").replaceChildren(text("No grounded answer was returned."));
     } else {
