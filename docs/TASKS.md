@@ -820,3 +820,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   the same `host.json` passes the local Host startup/status check. If startup
   fails again, inspect the exact path in the new error rather than assuming the
   original RS_Knowledge directory was modified.
+- [x] Replace the stale portable Agent Web process on port 53582 with the
+  current project runtime and verify the live page plus 25-cell Knowledge
+  matrix through authenticated HTTP. The exact intermittent cause of the
+  owner's earlier Knowledge catalog startup refusal remains unproven; the
+  current Vault, manifest digests and Host configuration now validate.

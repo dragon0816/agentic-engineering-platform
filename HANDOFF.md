@@ -28,11 +28,31 @@ Date: 2026-10-04 (Asia/Taipei). Branch: main. Current goal: give the owner a tru
   5 environment skips, 26 browser deselections. Full Ruff, strict mypy on
   207 source files and a non-isolated wheel build passed.
 - Ruff on src and tests, strict mypy on src, git diff --check and non-isolated wheel build passed. The isolated build could not download setuptools because this shell's network is restricted; non-isolated wheel build succeeded using the installed build tools.
-- Live Web browser click test was not run. The currently running Web process on port 53582 still has old Python modules loaded; restart it from the owner's existing PowerShell session to load this slice. This Codex shell cannot see LITELLM_MASTER_KEY, although the owner has set it previously; do not repeatedly ask for it or restart a new process from this shell and inadvertently break Gateway chat.
+- A visual browser click-through was not run. The live HTTP matrix route was
+  verified below. The LiteLLM key was already stored in the owner's User-scope
+  environment; it was inherited by the new Web process without printing or
+  changing its value. Do not ask the owner to configure it again.
+- Live activation on 2026-10-04: the old port-53582 process was confirmed to be
+  a 2026-10-03 portable `C:\aep\main-97eebc5` Web instance and was stopped.
+  The current project's `.venv` Web was started on the same port using the
+  owner's existing User-scope credentials (not printed or changed). Its parent
+  process was 61992 and the listening Python child was 27104 at verification
+  time. The new token URL was opened in the Codex browser pane. A real HTTP
+  smoke check returned 200 for the page and `answered` for the 25-cell matrix
+  with Raw source references; its temporary conversation was deleted. These
+  PIDs are ephemeral; confirm the process identity before stopping it later.
+  The earlier `knowledge_invalid` cause was not reproduced under the same
+  Windows account and actual User-scope key; the stale Web instance explains
+  why the old page was not replaced, but does not by itself explain that
+  catalog error. The temporary stdout file under ignored `.scratch` contains
+  the startup URL, is ACL-restricted to the owner/SYSTEM/Administrators, and
+  should be removed after the Web process stops.
 
 ## Open and next action
 
 - The scanner returns retrieval leads, sometimes a converted figure or table-of-contents passage. A reviewer should pick one cell and confirm application, market standard, product/option specifications and customer evidence. The next Knowledge harness slice should then add an explicit evidence-sufficiency result, bounded re-retrieval and an independent claim check for that cell. Generalize routing policy only after this vertical slice is validated.
 - General Skill-owned planning and a six-layer autonomous Knowledge loop remain incomplete; see docs/HARNESS_6_LAYER_STATUS.md.
 - Previous Workflow 11 chart/Issue-assignee source-parity work is in commit abc49dc. The remaining live comparison is an isolated workbook copy and an unsent Outlook draft against the owner's reference. Workflow 7 remains paused; Workflow 10/13 real-source parity is also open. Laya comparison is prepared offline but no full model inference has run on this host.
-- After deployment, stop the old Web process and launch aep-host web --config <preview host.json> --open in the already-working PowerShell, then ask for the five-by-five product/market evidence matrix. Do not run a second Web instance without preserving the existing Gateway credential environment.
+- The next owner action is to inspect the already running Web answer to
+  "請顯示 RS Knowledge 產品市場對標矩陣" and choose one product/market cell for
+  deeper evidence review. No second Web process or credential reset is needed.
