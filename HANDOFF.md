@@ -13,14 +13,16 @@ shared runner. The owner's reference is the Hermes `rs-knowledge-base` Skill
 
 - Branch `main`. Candidate Skill `company-agent/knowledge-query@1.3.0` and its
   adapter fixes are committed (see `git log`); nothing was pushed.
-- **Candidate 1.3.0 (with labeled inference `【推論】`) is installed in the live
-  Agent Web** on port 53583 (restarted 2026-10-04 by Claude Code from the repo
-  `.venv`, editable install, logs `.scratch/agent-web-13-*.log`). Rollback:
-  move `company-agent__knowledge-query__1.3.0.json` out of
-  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\workspace\assets\skills\`
-  and move `disabled/company-agent__knowledge-query__1.1.0.json` back, then
-  restart Agent Web. Exactly one Knowledge-selectable Skill must be installed
-  for natural chat routing.
+- **Candidate Skill 1.4.0 (`wiki_primary` citation, report answers) is installed
+  in the live Agent Web** on port 53583 (restarted 2026-10-05 from the repo
+  `.venv`, logs `.scratch/agent-web-14-*.log`). Rollback: move
+  `company-agent__knowledge-query__1.4.0.json` out of
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\workspace\assets\skills\`,
+  move `disabled/company-agent__knowledge-query__1.3.0.json` back, restart.
+  Exactly one Knowledge-selectable Skill must be installed.
+- Wiki is the primary answer source (owner decision 2026-10-05, see
+  `docs/DECISIONS.md`; E2E-05 criterion 1 amended). Wiki/Raw conflicts are
+  resolved by data experts at ingest, not by the answer layer.
 - Test Vault copy `C:\Users\Chi_L\AppData\Local\AEP\rs-k` had disappeared; it
   was recreated by mirroring the staged copy `.scratch/k`, whose Raw,
   decisions and content digests match the published manifest
@@ -84,5 +86,7 @@ model outputs to JSON for offline replay of filters):
 
 ## Next recommended action
 
-Collect the owner's Agent Web feedback on the three questions, then review and
-merge branch `schedules-v1` after its verification.
+Collect the owner's Agent Web feedback on Skill 1.4.0 reports (four probe
+questions incl. `R&S 高速通訊市場產品與 Option 對接`). Branch `schedules-v1` is
+verified (trial merge: only docs/DECISIONS.md and docs/TASKS.md conflict, keep
+both sides; 230 focused tests passed) and awaits the owner's merge approval.

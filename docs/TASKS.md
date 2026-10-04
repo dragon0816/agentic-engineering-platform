@@ -1047,3 +1047,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   unrelated premise. Candidate 1.3.0 is now installed in the live Agent Web
   (1.1.0 moved to `assets/skills/disabled/` for rollback). Full pytest: 1890
   passed, 5 skipped, 2 known environmental failures; Ruff and mypy passed.
+- [x] G3 Wiki-primary Knowledge citation and report answers (Claude Code,
+  2026-10-05, owner decision recorded in `docs/DECISIONS.md`; E2E-05
+  criterion 1 amended). `citation_policy: wiki_primary` lets a Skill cite
+  curated Wiki sections (chunked by heading, tables intact) with each cited
+  page's Raw provenance; 2004/2007 real Wiki pages trace to Raw, untraceable
+  pages are cited and labeled 缺來源連結. Answers may be Markdown reports:
+  headings and table header/divider rows are structure, each table row is a
+  claim whose codes must appear in its cited sources, and filters keep the
+  structure. Candidate Skill 1.4.0 (wiki_primary, 高速通訊 focus expansions,
+  report guidance, 8192-token budget) is installed in the live Agent Web
+  (1.3.0 moved to `disabled/`). Live probes: high-speed communications
+  mapping `validated` as a report (CMX500, ZNB/ZNA, FSWP50, SMW200A, FSWX
+  options, scenarios, limits); NTN `validated` report; CMP180/market and
+  CMP180/competitor `needs_input` with cited partial facts. Full pytest:
+  1907 passed, 5 skipped, 1 known pre-existing failure; Ruff and mypy passed.
