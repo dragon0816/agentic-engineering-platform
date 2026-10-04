@@ -240,6 +240,13 @@ class AgentWeb:
         # capability may hold a workbook; two at once would be two runs
         # against the same things.
         self._one_at_a_time = threading.RLock()
+        # The opt-in resident schedule loop, when `aep-host web` started one.
+        # It shares the lock above, so a scheduled run never overlaps a request.
+        self.schedule_loop: Any = None
+
+    @property
+    def request_lock(self) -> threading.RLock:
+        return self._one_at_a_time
 
     # -- what the pages ask for ---------------------------------------
 

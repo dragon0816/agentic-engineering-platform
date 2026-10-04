@@ -48,6 +48,7 @@ ScheduleErrorCode = Literal[
 ]
 
 SCHEMA_VERSION = "2"
+BUSY_TIMEOUT_SECONDS = 5.0
 #: The default bound on catching up a missed occurrence after downtime.
 DEFAULT_CATCH_UP = timedelta(hours=24)
 #: How many missed occurrences are stepped over to find the latest one.
@@ -98,8 +99,13 @@ class SqliteScheduleStore:
         self._conn: sqlite3.Connection | None = None
         self._lock = threading.RLock()
         try:
+            # A short busy wait: the resident loop, Agent Web and a CLI tick may
+            # each hold a brief write transaction on this file.
             self._conn = sqlite3.connect(
-                Path(path), isolation_level=None, timeout=0, check_same_thread=False
+                Path(path),
+                isolation_level=None,
+                timeout=BUSY_TIMEOUT_SECONDS,
+                check_same_thread=False,
             )
             self._conn.execute("PRAGMA synchronous=FULL")
             with self._write() as conn:

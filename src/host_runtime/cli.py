@@ -84,6 +84,11 @@ def _parser() -> argparse.ArgumentParser:
         "--port", type=int, default=0, help="a fixed port; by default the system picks a free one"
     )
     web.add_argument("--open", action="store_true", help="open the address in a browser")
+    web.add_argument(
+        "--schedules",
+        action="store_true",
+        help="also run due scheduled tasks in this process (host.json schedules.resident_loop)",
+    )
     status = commands.add_parser("status", help="what this Bridge has installed and has run")
     status.add_argument("--config", required=True, type=Path)
     status.add_argument("--json", action="store_true")
@@ -138,6 +143,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     schedule_resolve.add_argument("--note")
     schedule_actions.add_parser("tick", help="run one schedule poll now, then stop")
+    schedule_actions.add_parser("run", help="keep polling due schedules until interrupted")
     dut = commands.add_parser(
         "dut-validate",
         help="run an approved physical DUT request and retain its evidence as JSON",
@@ -437,19 +443,28 @@ def _web(
     port: int,
     open_it: bool,
     config_path: Path,
+    schedules: bool = False,
 ) -> int:
     """Serve the page until interrupted.
 
     The address carries the token, so it is printed and not logged, and the
     token is new every run: one left behind would be a standing key to this
-    machine's Agent.
+    machine's Agent. The schedule loop runs here only when the owner opted in.
     """
+    from host_runtime.schedule_loop import resident_schedule_loop
     from host_runtime.web import AgentWeb, AgentWebServer
 
-    server = AgentWebServer(
-        AgentWeb(runtime, namespace=namespace, config_path=config_path), port=port
-    )
+    web = AgentWeb(runtime, namespace=namespace, config_path=config_path)
+    server = AgentWebServer(web, port=port)
+    loop = resident_schedule_loop(runtime, lock=web.request_lock, requested=schedules)
+    web.schedule_loop = loop
     with server:
+        if loop is not None:
+            loop.start()
+            print(
+                f"Scheduled tasks are checked every {loop.interval_seconds:g} seconds "
+                "while this runs."
+            )
         print("This machine's Agent is at:")
         print(f"  {server.address}")
         print(
@@ -465,6 +480,9 @@ def _web(
             server.serve_forever()
         except KeyboardInterrupt:  # pragma: no cover - interactive only
             print("stopped")
+        finally:
+            if loop is not None:
+                loop.stop()
     return 0
 
 
@@ -686,6 +704,27 @@ def _run_line(run: ScheduledRun) -> str:
     )
 
 
+def _schedule_run(runtime: HostRuntime) -> int:
+    """The resident loop without a page, until interrupted."""
+    import threading
+
+    from host_runtime.schedule_loop import resident_schedule_loop
+
+    loop = resident_schedule_loop(runtime, lock=None, requested=True)
+    assert loop is not None
+    loop.start()
+    print(f"Checking scheduled tasks every {loop.interval_seconds:g} seconds; Ctrl+C stops.")
+    idle = threading.Event()
+    try:
+        while loop.running:
+            idle.wait(1.0)
+    except KeyboardInterrupt:  # pragma: no cover - interactive only
+        print("stopped")
+    finally:
+        loop.stop()
+    return 0
+
+
 _SCHEDULE_REFUSALS = {
     "not_admitted": "this host member is not admitted",
     "definition_owner_mismatch": "schedule owner must be this host's bound member",
@@ -764,6 +803,8 @@ def _schedules(runtime: HostRuntime, args: argparse.Namespace) -> int:
                     control.resolve(args.idempotency_key, outcome=args.outcome, note=args.note)
                 )
             )
+        elif action == "run":
+            return _schedule_run(runtime)
         elif action == "tick":
             results = control.tick()
             for run in results:
@@ -829,7 +870,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "chat":
             return _chat(runtime, args.actor, args.namespace)
         if args.command == "web":
-            return _web(runtime, args.namespace, args.port, args.open, args.config)
+            return _web(
+                runtime, args.namespace, args.port, args.open, args.config, args.schedules
+            )
         if args.command == "status":
             return _status(runtime, args.json)
         if args.command == "probe":
