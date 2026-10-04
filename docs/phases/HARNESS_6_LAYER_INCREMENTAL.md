@@ -17,7 +17,7 @@ Each slice receives focused tests. Full repository verification is reserved for 
 
 ## Knowledge-first evaluation cases
 
-`evaluation/knowledge/harness-cases-v1.json` is the test input for G3. The
+`evaluation/knowledge/scenarios-v1.json` is the test input for G3. The
 `evaluation.knowledge_scenarios` module validates the shape of these cases; it
 does not implement another harness. The shared execution contracts remain in
 `agent.harness_plan` and `agent.harness_run`. The standalone tier asks

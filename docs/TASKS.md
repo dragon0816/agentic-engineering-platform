@@ -840,6 +840,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   actions. The typed suite rejects a strategy case missing competitor or other
   required facets and requires Raw citations or an explicit gap. Two focused
   contract tests, Ruff and mypy passed. No live model result is claimed yet.
+- [x] Rename Knowledge evaluation-only schema, cases and test to `scenario`
+  names so they cannot be mistaken for a separate Knowledge harness. Shared
+  runtime contracts remain under `src/agent`; the candidate Skill remains
+  separate from the published version.
 - [ ] G4–G6: adapt exact Workflow/Task and Coding runs to the same state and
   validation envelope, then prove all three from Agent Web. Order and
   acceptance are in `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.

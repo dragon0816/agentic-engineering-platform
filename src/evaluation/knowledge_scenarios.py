@@ -1,4 +1,4 @@
-"""Knowledge-first harness scenarios, with explicit evidence and gap expectations.
+"""Knowledge evaluation scenarios, with explicit evidence and gap expectations.
 
 These are evaluation inputs, not model answers or assertions that a Vault
 contains the facts. Live acceptance must inspect the resulting citations.
@@ -16,7 +16,7 @@ KnowledgeFacet = Literal[
 KnowledgeOutput = Literal["facts", "comparison", "strategy", "swot", "execution_actions"]
 
 
-class KnowledgeHarnessCase(Contract):
+class KnowledgeScenario(Contract):
     case_id: Symbol
     tier: Literal["standalone", "combined"]
     question: Text
@@ -40,9 +40,9 @@ class KnowledgeHarnessCase(Contract):
         return self
 
 
-class KnowledgeHarnessSuite(Contract):
+class KnowledgeScenarioSuite(Contract):
     version: Literal["1"] = "1"
-    cases: tuple[KnowledgeHarnessCase, ...] = Field(min_length=5)
+    cases: tuple[KnowledgeScenario, ...] = Field(min_length=5)
 
     @model_validator(mode="after")
     def covers_owner_scenarios(self) -> Self:
