@@ -847,6 +847,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `not_assessed` until evidence-sufficiency and bounded re-retrieval are wired.
   Focused Knowledge Web tests (16), shared harness tests (15), Ruff and
   touched-source mypy passed; full suite remains at the owner's merge checkpoint.
+- [x] Install the validated private G3 candidate into the owner's local Host
+  Skill directory without publishing it. A `build_runtime`/Agent Web assets
+  smoke check found it selectable. The prior Web port had no listener; live
+  model testing still needs a process started from the owner's credentialed
+  shell and the remaining evidence-sufficiency checks.
 - [x] Prepare G3 evaluation inputs at two levels: three standalone questions
   (market trends, product options/specs, technical knowledge) and combined
   market/product comparison plus competitive strategy with SWOT and project
