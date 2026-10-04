@@ -1,16 +1,16 @@
-# Six-layer Agent harness improvement plan
+# Shared six-layer Agent harness plan
 
-Status: active (2026-10-04). The owner will validate the completed path in Agent Web before broader Workflow and product acceptance tests. This plan follows the current inventory in `docs/HARNESS_6_LAYER_STATUS.md` and keeps deterministic commands, Bridge authorization and existing Workflow contracts intact.
+Status: active (2026-10-04). The owner will use Knowledge Asking first to inspect the behavior in Agent Web, while the harness itself must support Workflow/Task execution and Coding without Knowledge-specific assumptions.
 
-## Order and acceptance
+The previous product/market `MarketCellSufficiency` is a Knowledge pilot. It is not the shared harness contract. Skill procedures, evidence needs and fallback guidance shape a plan; TaskContract and Host checks bound it; Bridge policy alone grants execution. A Knowledge adapter translates retrieval and Raw citations into common observations. It does not own the search strategy or final approval.
 
-| Slice | Layers | Deliverable | Acceptance |
-| --- | --- | --- | --- |
-| H1 | 3, 6 | Typed evidence-sufficiency assessment for one selected product/market cell | A matrix co-mention or two unrelated passages never becomes a verified fit; the exact missing evidence is returned without a model call. |
-| H2 | 3, 4 | Bounded re-retrieval over the selected cell's missing facets | At most a declared number of retrieval attempts; every attempt records its query, Raw source IDs and unmet facets; exhaustion returns `needs_evidence`. |
-| H3 | 4, 6 | Independent claim and artifact validation | A synthesized recommendation is accepted only when each material claim passes a separate Raw citation and acceptance check; failure routes to bounded retrieval or a concrete gap report. |
-| H4 | 2, 4 | Skill-owned plan for ordinary Ask | An installed Skill can declare plan steps, success criteria and fallback; unknown or unavailable tools stop with `needs_input`, and a checkpointed plan can be inspected. |
-| H5 | 1, 5 | Reusable task/domain routing policy | Known commands still bypass the model; ambiguous Skill selection asks rather than executes; selected capability scope is enforced by Bridge policy. |
-| H6 | 1–6 | Agent Web vertical proof | One selected cell and one ordinary Skill request show route, plan, evidence, bounded observations and validation outcome; failures remain visible and do not silently become answers. |
+| Slice | Six-layer contribution | Acceptance |
+| --- | --- | --- |
+| G1 Shared plan contract | Intent, Skill/Planning, validation contract | One Skill-guided, provider-neutral plan envelope works for Knowledge, Workflow/Task and Coding fixtures. Skill guidance cannot add capabilities, remove Host checks or exceed the Task budget. A candidate Knowledge Asking Skill is versioned separately from the published 1.0.0 Skill. |
+| G2 Bounded state machine | Context, reasoning loop, feedback | One shared transition model records route, plan, context observations, execution and independent validation. Missing evidence, failed checks and exhausted retries return structured stop states. Each of the three domains has a simulated negative case. |
+| G3 Knowledge vertical slice | Knowledge adapter and first user-level effect | The candidate Knowledge Asking Skill drives evidence needs and bounded re-retrieval on one exact installed Vault. Agent Web shows the selected Skill, Raw coverage, missing facets, attempts and validation result; an unsupported recommendation is refused. Diagnose failures by routing, Skill plan, data coverage, retrieval, execution or validation evidence. |
+| G4 Workflow/Task and Coding vertical slices | Existing Bridge/Workflow and Coding Harness adapters | The same plan/transition/validation envelope wraps one exact Workflow or Task and one bounded Coding run. Existing deterministic steps, grants, test cases and durable run artifacts remain authoritative. No LLM-selected target gains permission. |
+| G5 Cross-domain acceptance | Independent validation and failure routing | A deliberate wrong output fails in each domain. A pass requires observed evidence and Host checks, never just a model or Skill claim. |
+| G6 Agent Web proof | User-level validation | Knowledge, Workflow/Task and Coding traces are inspectable from Agent Web; the owner tests Knowledge first, then the other two applications. |
 
-H1–H3 use exact installed Knowledge and immutable Raw; they do not establish market fit from lexical matches. H4–H5 reuse the existing Agent, Skill, Task and Bridge boundaries. No new model provider, n8n dependency, external write or permission bypass is part of this plan. Each slice gets focused regression tests; the repository-wide verification runs at the owner's merge checkpoint.
+Each slice receives focused tests. Full repository verification is reserved for the owner's merge checkpoint. Do not add n8n as a core dependency, mutate the source Vault, or edit a published Skill version in place.

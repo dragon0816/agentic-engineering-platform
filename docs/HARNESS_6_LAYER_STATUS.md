@@ -13,8 +13,11 @@ the narrower Coding Harness and explicit Task path.
 | 5. Execution | Strong foundation | Bridge checks exact grants and validates input/output contracts; Workflow engine runs installed exact versions with durable run evidence; Coding Harness executes only declared paths and commands; explicit Gateway Tasks can use installed read-only capabilities. Knowledge query and the matrix are read capabilities. | The same broad agent planning/execution loop does not yet cover every tool, Workflow and backend. Native Codex/Claude task backends remain outside the first governed Gateway Task slice. |
 | 6. Validation / Feedback | Partial | Bridge validates typed results; Knowledge requires Raw citations and has a narrow product-to-market assertion guard; explicit Tasks validate artifact bytes; Coding Harness runs declared checks and bounded repairs; Workflows expose failure states. | No general independent semantic entailment/acceptance gate for every natural-language answer, no reusable `insufficient evidence → re-retrieval` failure route, and no validated product/option strategy recommendation yet. |
 
-The immediate Knowledge priority is an explicit evidence-sufficiency result for
-one selected product/market cell, followed by bounded re-retrieval and an
-independent final-claim check. The 25-cell matrix is only a read-only discovery
-step; nearby mentions and separate passages are not fit proof. A generic
-classifier or accelerator cannot substitute for this evidence gate.
+The product/market cell assessment is a Knowledge pilot, not the common
+harness. The owner clarified that the common six-layer process must serve
+Workflow/Task execution, Knowledge Asking and Coding. The shared plan envelope
+and Skill guidance are the first cross-domain contract; a bounded state loop,
+domain adapters and independent validation remain to be connected. Knowledge
+is the first user-level validation case, driven by a candidate Knowledge
+Asking Skill. The adapter maps Raw citations into common observations without
+owning the procedure. See `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.

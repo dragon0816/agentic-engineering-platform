@@ -593,3 +593,20 @@ customer fit. A generic classifier or larger model prompt would not close
 that evidence gap and could make unsupported recommendations look confident.
 The typed gap result is reversible and can drive later retrieval and Web
 feedback without adding model calls or bypassing policy.
+
+## 2026-10-04 — Keep the six-layer harness cross-domain and Skill-guided
+
+Decision: Treat the selected Knowledge matrix assessment above as an adapter
+pilot, not the core harness. Add a provider-neutral plan envelope built from
+the existing TaskContract and optional Skill guidance. It covers Workflow/Task,
+Knowledge and Coding, preserving Host completion checks and the Task's exact
+capability scope. A Skill declares evidence needs, context need and fallback
+guidance, but cannot grant execution or validate its own output. The candidate
+Knowledge Asking Skill is a new version; the published 1.0.0 asset is unchanged.
+
+Reason: A Knowledge-only loop would overfit one domain and diverge from the
+existing Workflow and Coding execution paths. The owner wants to test Knowledge
+first, diagnose failures by process/Skill/data coverage, and keep the shared
+runtime applicable to all three. The Knowledge adapter only translates
+retrieval and Raw citations into common observations; the Skill owns the
+question-answering procedure and the Host owns final acceptance.

@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "identity": {"namespace": "harness-test", "name": "workflow-check", "version": "1.0.0"},
+    "owner": {"type": "team", "id": "engineering"},
+    "visibility": "private",
+    "lifecycle": "validated"
+  },
+  "alias": "workflow_check",
+  "instructions": "Run only the exact installed Workflow chosen by the host and inspect its run and artifact evidence before reporting success.",
+  "harness_guidance": {
+    "domains": ["workflow"],
+    "required_evidence": ["workflow_run", "artifact_check"],
+    "context_required": false,
+    "fallback": "stop",
+    "max_retries": 0
+  }
+}

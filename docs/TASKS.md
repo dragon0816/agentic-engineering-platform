@@ -820,14 +820,20 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   passages remain `needs_evidence`. Agent Web shows the unresolved 25-cell
   count. Focused tests, Ruff and touched-source mypy passed; full verification
   awaits the owner's merge checkpoint.
-- [ ] H2: retrieve again for a selected cell's missing facets with a fixed
-  attempt budget and a trace of Raw source IDs; exhaustion returns a concrete
-  needs-evidence state without a recommendation.
-- [ ] H3: independently validate material claims against cited Raw and
-  acceptance criteria before any recommendation is called complete.
-- [ ] H4–H6: add Skill-owned ordinary Ask plans, reusable deterministic-first
-  task/domain routing and a six-layer Agent Web vertical proof, in the order
-  documented in `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.
+- [x] G1: introduce a common provider-neutral harness plan envelope and
+  optional Skill guidance across Knowledge, Workflow/Task and Coding. Three
+  versioned test Skills cover the domains. Planning preserves TaskContract
+  capability scope and Host checks; a Skill cannot add grants or retry beyond
+  the Host budget. Focused five-case contract tests, Ruff and touched-source
+  mypy passed. This is a planning contract, not live execution yet.
+- [ ] G2: connect that common plan to a bounded, observable state machine with
+  failure/needs-input routing and negative tests in all three domains.
+- [ ] G3: use the candidate Knowledge Asking Skill to test data coverage,
+  retrieval, answer validation and gap feedback in Agent Web. Keep the
+  published 1.0.0 Skill immutable; activate a new version only after review.
+- [ ] G4–G6: adapt exact Workflow/Task and Coding runs to the same state and
+  validation envelope, then prove all three from Agent Web. Order and
+  acceptance are in `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.
 - [x] Convert an invalid configured Knowledge Vault into a Host startup error
   that names the configured Vault path instead of leaking a `VaultError`
   traceback. The owner's preview binding currently points to an existing Vault;

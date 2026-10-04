@@ -6,7 +6,7 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from common.assets import AssetIdentity, AssetMetadata, RegistryContract
-from common.base import Contract, Text
+from common.base import Contract, Symbol, Text
 
 CommandName = Annotated[str, StringConstraints(pattern=r"^[a-zA-Z_][a-zA-Z0-9_]*$")]
 
@@ -33,6 +33,29 @@ class KeywordRule(Contract):
         return value
 
 
+HarnessDomain = Literal["workflow", "knowledge", "coding"]
+
+
+class SkillHarnessGuidance(Contract):
+    """Procedural hints; never an execution grant or host validation override."""
+
+    domains: tuple[HarnessDomain, ...] = Field(min_length=1, max_length=3)
+    required_evidence: tuple[Symbol, ...] = Field(default=(), max_length=20)
+    context_required: bool = False
+    fallback: Literal["needs_input", "stop", "retry"] = "needs_input"
+    max_retries: int = Field(default=0, ge=0, le=3, strict=True)
+
+    @model_validator(mode="after")
+    def distinct_scope(self) -> Self:
+        if len(self.domains) != len(set(self.domains)):
+            raise ValueError("harness domains must be unique")
+        if len(self.required_evidence) != len(set(self.required_evidence)):
+            raise ValueError("required evidence must be unique")
+        if self.fallback == "retry" and self.max_retries == 0:
+            raise ValueError("retry fallback requires a positive retry budget")
+        return self
+
+
 class SkillManifest(RegistryContract):
     metadata: AssetMetadata
     alias: CommandName
@@ -42,6 +65,7 @@ class SkillManifest(RegistryContract):
     default_command: CommandName | None = None
     # Supporting executable resources remain separately governed capabilities.
     script_tools: tuple[AssetIdentity, ...] = ()
+    harness_guidance: SkillHarnessGuidance | None = None
 
     @model_validator(mode="after")
     def explicit_bindings(self) -> Self:

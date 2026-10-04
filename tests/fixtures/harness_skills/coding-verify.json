@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "identity": {"namespace": "harness-test", "name": "coding-verify", "version": "1.0.0"},
+    "owner": {"type": "team", "id": "engineering"},
+    "visibility": "private",
+    "lifecycle": "validated"
+  },
+  "alias": "coding_verify",
+  "instructions": "Inspect the bounded workspace, propose a change, and accept it only after new and regression checks pass.",
+  "harness_guidance": {
+    "domains": ["coding"],
+    "required_evidence": ["new_test", "regression_test"],
+    "context_required": true,
+    "fallback": "retry",
+    "max_retries": 1
+  }
+}

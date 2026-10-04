@@ -1,19 +1,21 @@
 # Handoff
 
-Date: 2026-10-04 (Asia/Taipei). Branch: main. Current goal: complete the six-layer Agent harness in small slices, then validate the continuous path in Agent Web before broader Workflow/product testing.
+Date: 2026-10-04 (Asia/Taipei). Branch: main. Goal: build a six-layer Agent harness shared by Workflow/Task execution, Knowledge Asking and Coding. The owner wants Knowledge tested first in Agent Web with a Skill, while avoiding Knowledge-specific core logic.
 
-## Current slice: H1 evidence sufficiency
+## State and decisions
 
-- `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md` orders H1–H6: selected-cell evidence result, bounded re-retrieval, independent claim validation, Skill-owned ordinary Ask planning, deterministic-first domain routing, then a Web vertical proof.
-- `knowledge.market_matrix.assess_market_cell` now returns a serializable `MarketCellSufficiency` for an exact product/market cell. Matrix evidence is discovery only. Its three missing facets are typed as market requirements, product/options, and customer use case; the status cannot be promoted by changing a field in serialized data.
-- Agent Web matrix answers display how many cells still need evidence. No new capability grant, model call, external write, or source-Vault mutation was added.
-- Focused verification after the final contract validator edit: `pytest -q tests/test_market_matrix.py tests/test_agent_web.py -k 'market_matrix or selected_cell_reports'` passed 5 tests (67 deselected); Ruff on the four touched source/test files, mypy on the two touched source files and `git diff --check` passed. The repository-wide checks are deferred to the owner's merge checkpoint.
+- Commit `680eb34` added a typed evidence-gap assessment for a product/market matrix cell. This is a Knowledge pilot, not the common harness. It passed focused matrix/Web tests, Ruff and touched-source mypy.
+- The owner clarified that the common harness must cover all three domains. `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md` now orders shared plan, bounded state loop, Knowledge-first vertical test, Workflow/Task and Coding adapters, cross-domain validation and Agent Web proof.
+- G1 adds optional `SkillHarnessGuidance` to Skill manifests and a provider-neutral `AgentHarnessPlan` built from an existing TaskContract. Skill guidance can request evidence, context and fallback, but cannot add capability grants, remove Host completion checks or exceed the Task retry budget. The plan always ends in a validation stage.
+- Three test Skill manifests cover Knowledge, Workflow and Coding. The Knowledge fixture is a validated 1.1.0 candidate for the main Knowledge Asking Skill; the published 1.0.0 Skill is untouched. The candidate owns the procedure; later adapter code should only map retrieval and Raw citations into common observations.
+- Focused checks after G1: `pytest -q tests/test_agent_harness_plan.py tests/test_routing.py tests/test_gateway_task_execution.py` passed 44 tests; Ruff and mypy on touched code/tests passed; `git diff --check` passed. Full repository verification is deferred to the owner's merge checkpoint.
 
 ## Next work
 
-1. H2: retrieve again only for the selected cell's missing facets, with an explicit attempt budget and per-attempt Raw source trace. Preserve immutable Raw and never call a mere lexical match sufficient.
-2. H3: independently validate each material claim before a recommendation is shown as complete. Then proceed through H4–H6 in the documented order, reloading Agent Web only when the vertical path is ready for owner testing.
+1. Commit the clean G1 slice. Then build G2 as a bounded, serializable state machine over the shared plan: route, plan, context observations, execute, independent validation, and structured `needs_input`/failure. Add negative cases for all three domains before binding a live provider.
+2. Use the candidate Knowledge Asking Skill in G3 to test exact installed Vault coverage, bounded retrieval, citations and independent answer validation in Agent Web. Diagnose each failure as routing, Skill planning, data coverage, retrieval, execution or validation. Do not treat co-mentions as market fit.
+3. Bind existing exact Workflow/Task and Coding execution in G4 without replacing their deterministic logic or Bridge policy; finish cross-domain acceptance and Web proof.
 
 ## Operational context
 
-The existing Agent Web on 127.0.0.1:53582 was started before H1, so it still serves the prior build until deliberately restarted. Its current local token is in an ignored, owner-ACL-restricted startup output under `.scratch`; do not print or commit it. The installed `RS_Knowledge` corpus is owner-approved public data. Do not ask the owner to reset the existing User-scope `LITELLM_MASTER_KEY` merely because a different shell process cannot see it. The 25-cell matrix is a read-only discovery view; no product/option fit has been verified.
+The existing Agent Web on 127.0.0.1:53582 was started before these harness slices. Do not claim it is running G1/G2 until it is deliberately restarted at the Web-proof stage. The current local token is stored only in ignored owner-ACL-restricted `.scratch` startup output; do not print or commit it. `RS_Knowledge` is owner-approved public data. Do not ask the owner to reset the User-scope LiteLLM key merely because a separate shell process cannot see it.
