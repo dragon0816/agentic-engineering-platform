@@ -561,3 +561,18 @@ Using a separate output contract preserves the existing cited-answer contract
 and Bridge policy. Hard-coding 25 recommendations, treating lexical matches
 as proof, and creating a separate per-market workflow were rejected. The
 owner chose an evidence-and-gap overview before deep recommendations.
+
+## 2026-10-04 — Render Ask Markdown with local, safe DOM construction
+
+Decision: Keep Agent and Knowledge replies as plain text in the API and
+conversation store. In Agent Web, render the common Markdown subset used by
+answers—headings, paragraphs, lists, fenced and inline code, links and tables—
+using explicit browser DOM elements and text nodes. Do not assign model output
+to `innerHTML` or fetch a renderer from a CDN. Permit only absolute HTTP(S)
+and mailto links; show raw HTML and disallowed links as text. Apply the same
+renderer to new turns and saved-session history.
+
+Reason: The offline Windows preview cannot depend on a CDN, and untrusted model
+output must not become executable HTML. The initial 25-cell matrix was legible
+as source Markdown but not as a user-facing table. A local DOM renderer fixes
+that presentation without changing Bridge evidence or conversation storage.

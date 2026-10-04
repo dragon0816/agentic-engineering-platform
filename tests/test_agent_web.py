@@ -254,6 +254,79 @@ def test_the_emitted_browser_script_parses(served: AgentWebServer, tmp_path: Pat
     assert checked.returncode == 0, checked.stderr
 
 
+def test_ask_renders_markdown_as_safe_readable_elements(
+    served: AgentWebServer, tmp_path: Path
+) -> None:
+    """Existing and new answers use the same offline DOM renderer, without HTML injection."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is not installed, so Markdown rendering cannot be checked")
+    page = served.page().decode("utf-8")
+    script = page.split("<script>", 1)[1].split("</script>", 1)[0]
+    renderer = "function safeMarkdownHref" + script.split("function safeMarkdownHref", 1)[
+        1
+    ].split("// -- Ask", 1)[0]
+    assert "renderAnswer(said, replied.text)" in script
+    assert "renderAnswer(said, answer.answer)" in script
+    assert "innerHTML" not in renderer
+    harness = r"""
+const assert = require("node:assert/strict");
+class FakeNode {
+  constructor(tag, value = "") {
+    this.tag = tag; this.value = value; this.children = []; this.attrs = {};
+  }
+  append(...children) { this.children.push(...children); }
+  replaceChildren(...children) { this.children = children; }
+  setAttribute(name, value) { this.attrs[name] = value; }
+}
+const document = {
+  createElement: tag => new FakeNode(tag),
+  createTextNode: value => new FakeNode("#text", value),
+  createDocumentFragment: () => new FakeNode("#fragment"),
+};
+const text = value => document.createTextNode(value == null ? "" : String(value));
+const source = __RENDERER__;
+const {renderMarkdown, renderAnswer} = new Function(
+  "document", "text", "URL", source + "\nreturn {renderMarkdown, renderAnswer};"
+)(document, text, URL);
+const collect = (node, tag) => [
+  ...(node.tag === tag ? [node] : []),
+  ...node.children.flatMap(child => collect(child, tag)),
+];
+const content = node => node.tag === "#text"
+  ? node.value : node.children.map(content).join("");
+const target = new FakeNode("div");
+renderAnswer(target, [
+  "# 市場矩陣", "",
+  "| Product | AI server | Wireless |",
+  "| --- | --- | --- |",
+  "| CMP180 | 缺 Raw | [Issue](https://github.com/example/1) |", "",
+  "- **Evidence**", "- `Option`", "",
+  "```python", "print('<safe>')", "```", "",
+  "<img src=x onerror=alert(1)> [unsafe](javascript:alert(1))",
+].join("\n"));
+assert.equal(collect(target, "h1").length, 1);
+assert.equal(collect(target, "table").length, 1);
+assert.equal(collect(target, "tbody")[0].children.length, 1);
+assert.equal(collect(target, "ul")[0].children.length, 2);
+assert.equal(collect(target, "strong").length, 1);
+assert.equal(collect(target, "pre").length, 1);
+assert.equal(collect(target, "a").length, 1);
+assert.equal(collect(target, "a")[0].href, "https://github.com/example/1");
+assert.equal(collect(target, "script").length, 0);
+assert.equal(collect(target, "img").length, 0);
+assert.match(content(target), /<img src=x onerror=alert\(1\)>/);
+assert.match(content(target), /\[unsafe\]\(javascript:alert\(1\)\)/);
+""".replace("__RENDERER__", json.dumps(renderer))
+    path = tmp_path / "markdown-dom.js"
+    path.write_text(harness, encoding="utf-8")
+
+    checked = subprocess.run(
+        [node, str(path)], capture_output=True, check=False, text=True, timeout=20
+    )
+    assert checked.returncode == 0, checked.stderr
+
+
 def test_capability_workspace_exposes_real_categories_and_actions(
     served: AgentWebServer,
 ) -> None:

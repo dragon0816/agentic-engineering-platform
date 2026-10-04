@@ -104,10 +104,35 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 .turn:last-child { margin-bottom: 0; }
 .asked { font-weight: 600; color: var(--accent); word-break: break-word; }
 .said {
-  margin: 6px 0 0; white-space: pre-wrap; word-break: break-word;
-  font-family: var(--mono); font-size: 13px;
+  margin: 8px 0 0; line-height: 1.65; overflow-wrap: anywhere;
 }
 .said.bad { color: var(--bad); }
+.said > :first-child { margin-top: 0; }
+.said > :last-child { margin-bottom: 0; }
+.said p { margin: 0 0 12px; white-space: pre-wrap; }
+.said h1, .said h2, .said h3, .said h4 { margin: 18px 0 8px; line-height: 1.35; }
+.said h1 { font-size: 21px; }
+.said h2 { font-size: 18px; }
+.said h3, .said h4 { font-size: 15px; }
+.said ul, .said ol { margin: 6px 0 14px; padding-left: 24px; }
+.said li { margin: 3px 0; }
+.said blockquote { margin: 10px 0 14px; padding: 8px 12px;
+  border-left: 3px solid var(--accent); background: var(--bg); color: var(--dim); }
+.said blockquote p { margin: 0; }
+.said pre { margin: 10px 0 14px; padding: 12px 14px; overflow-x: auto;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+  font: 12.5px/1.55 var(--mono); white-space: pre; }
+.said :not(pre) > code { padding: 1px 4px; border-radius: 4px;
+  background: var(--accent-soft); font: .9em var(--mono); }
+.said a { color: var(--accent); text-decoration: underline; }
+.said .table-scroll { max-width: 100%; margin: 10px 0 16px; overflow-x: auto;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.said table { width: max-content; min-width: 100%; font-size: 13px; }
+.said th, .said td { min-width: 110px; padding: 9px 11px;
+  vertical-align: top; white-space: normal; overflow-wrap: anywhere; }
+.said th:first-child, .said td:first-child { min-width: 170px; }
+.said th { color: var(--ink); background: var(--accent-soft); }
+.said tr:nth-child(even) td { background: var(--panel); }
 .waiting { color: var(--dim); font-style: italic; }
 form.ask { margin: 12px 0 0; border: 1px solid var(--line); border-radius: 12px;
   overflow: hidden; background: var(--bg); }
@@ -644,6 +669,177 @@ function tag(on, yes, no) {
   return span;
 }
 
+// Render the useful Markdown subset without accepting model-supplied HTML.
+// Every string becomes a text node; only these local element constructors add markup.
+function safeMarkdownHref(value) {
+  if (!/^(https?:\/\/|mailto:)/i.test(value)) return null;
+  try {
+    const url = new URL(value);
+    return ["http:", "https:", "mailto:"].includes(url.protocol) ? url.href : null;
+  } catch (_) { return null; }
+}
+
+function appendMarkdownInline(target, source, depth = 0) {
+  const value = String(source == null ? "" : source);
+  if (depth > 6) { target.append(text(value)); return; }
+  let index = 0, plain = "";
+  const flush = () => { if (plain) { target.append(text(plain)); plain = ""; } };
+  while (index < value.length) {
+    if (value[index] === "\\" && index + 1 < value.length
+        && /[\\`*\[\]()~]/.test(value[index + 1])) {
+      plain += value[index + 1]; index += 2; continue;
+    }
+    if (value[index] === "`") {
+      const marker = /^`+/.exec(value.slice(index))[0];
+      const end = value.indexOf(marker, index + marker.length);
+      if (end > index + marker.length) {
+        flush(); const code = document.createElement("code");
+        code.append(text(value.slice(index + marker.length, end)));
+        target.append(code); index = end + marker.length; continue;
+      }
+    }
+    if (value[index] === "[") {
+      const middle = value.indexOf("](", index + 1);
+      const end = middle < 0 ? -1 : value.indexOf(")", middle + 2);
+      if (end > middle + 2) {
+        const href = safeMarkdownHref(value.slice(middle + 2, end).trim());
+        if (href) {
+          flush(); const link = document.createElement("a");
+          link.href = href; link.target = "_blank"; link.rel = "noopener noreferrer";
+          appendMarkdownInline(link, value.slice(index + 1, middle), depth + 1);
+          target.append(link); index = end + 1; continue;
+        }
+      }
+    }
+    let formatted = false;
+    for (const [marker, element] of [["**", "strong"], ["~~", "del"], ["*", "em"]]) {
+      if (!value.startsWith(marker, index)) continue;
+      const end = value.indexOf(marker, index + marker.length);
+      if (end <= index + marker.length) continue;
+      flush(); const node = document.createElement(element);
+      appendMarkdownInline(node, value.slice(index + marker.length, end), depth + 1);
+      target.append(node); index = end + marker.length; formatted = true; break;
+    }
+    if (formatted) continue;
+    plain += value[index]; index += 1;
+  }
+  flush();
+}
+
+function markdownRow(line) {
+  let value = line.trim();
+  if (value.startsWith("|")) value = value.slice(1);
+  if (value.endsWith("|") && !value.endsWith("\\|")) value = value.slice(0, -1);
+  const cells = []; let cell = "";
+  for (let index = 0; index < value.length; index += 1) {
+    if (value[index] === "\\" && value[index + 1] === "|") {
+      cell += "|"; index += 1;
+    } else if (value[index] === "|") {
+      cells.push(cell.trim()); cell = "";
+    } else cell += value[index];
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+
+function markdownTableStart(lines, index) {
+  if (index + 1 >= lines.length || !lines[index].includes("|")) return false;
+  const columns = markdownRow(lines[index]).length;
+  const divider = markdownRow(lines[index + 1]);
+  return columns > 1 && divider.length === columns
+    && divider.every(cell => /^:?-{3,}:?$/.test(cell));
+}
+
+function markdownBlockStart(lines, index) {
+  const line = lines[index];
+  return /^ {0,3}(?:#{1,6}\s|`{3,}|~{3,}|>|[-*+]\s|\d+[.)]\s)/.test(line)
+    || /^ {0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)
+    || markdownTableStart(lines, index);
+}
+
+function renderMarkdown(source) {
+  const lines = String(source == null ? "" : source).replace(/\r\n?/g, "\n").split("\n");
+  const output = document.createDocumentFragment();
+  let index = 0;
+  while (index < lines.length) {
+    const line = lines[index];
+    if (!line.trim()) { index += 1; continue; }
+    const fence = /^ {0,3}(`{3,}|~{3,})/.exec(line);
+    if (fence) {
+      const contents = []; index += 1;
+      while (index < lines.length && !lines[index].trim().startsWith(fence[1])) {
+        contents.push(lines[index]); index += 1;
+      }
+      if (index < lines.length) index += 1;
+      const pre = document.createElement("pre"), code = document.createElement("code");
+      code.append(text(contents.join("\n"))); pre.append(code); output.append(pre); continue;
+    }
+    const heading = /^ {0,3}(#{1,6})\s+(.+)$/.exec(line);
+    if (heading) {
+      const title = document.createElement("h" + heading[1].length);
+      appendMarkdownInline(title, heading[2]); output.append(title); index += 1; continue;
+    }
+    if (markdownTableStart(lines, index)) {
+      const headers = markdownRow(line), wrap = document.createElement("div");
+      wrap.className = "table-scroll"; wrap.setAttribute("role", "region");
+      wrap.setAttribute("aria-label", "Answer table"); wrap.tabIndex = 0;
+      const table = document.createElement("table"), head = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      for (const heading of headers) {
+        const th = document.createElement("th"); th.scope = "col";
+        appendMarkdownInline(th, heading); headerRow.append(th);
+      }
+      head.append(headerRow); table.append(head);
+      const body = document.createElement("tbody"); index += 2;
+      while (index < lines.length && lines[index].trim() && lines[index].includes("|")) {
+        const row = document.createElement("tr"), cells = markdownRow(lines[index]);
+        for (let column = 0; column < headers.length; column += 1) {
+          const td = document.createElement("td");
+          appendMarkdownInline(td, cells[column] || ""); row.append(td);
+        }
+        body.append(row); index += 1;
+      }
+      table.append(body); wrap.append(table); output.append(wrap); continue;
+    }
+    if (/^ {0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+      output.append(document.createElement("hr")); index += 1; continue;
+    }
+    const listStart = /^( {0,3})([-*+]|\d+[.)])\s+(.+)$/.exec(line);
+    if (listStart) {
+      const ordered = /^\d/.test(listStart[2]);
+      const list = document.createElement(ordered ? "ol" : "ul");
+      while (index < lines.length) {
+        const item = /^( {0,3})([-*+]|\d+[.)])\s+(.+)$/.exec(lines[index]);
+        if (!item || item[1].length !== listStart[1].length
+            || /^\d/.test(item[2]) !== ordered) break;
+        const li = document.createElement("li");
+        appendMarkdownInline(li, item[3]); list.append(li); index += 1;
+      }
+      output.append(list); continue;
+    }
+    if (/^ {0,3}>\s?/.test(line)) {
+      const quote = document.createElement("blockquote"), paragraph = document.createElement("p");
+      const quoted = [];
+      while (index < lines.length && /^ {0,3}>\s?/.test(lines[index])) {
+        quoted.push(lines[index].replace(/^ {0,3}>\s?/, "")); index += 1;
+      }
+      appendMarkdownInline(paragraph, quoted.join("\n"));
+      quote.append(paragraph); output.append(quote); continue;
+    }
+    const paragraph = document.createElement("p"), parts = [line];
+    index += 1;
+    while (index < lines.length && lines[index].trim() && !markdownBlockStart(lines, index)) {
+      parts.push(lines[index]); index += 1;
+    }
+    appendMarkdownInline(paragraph, parts.join("\n")); output.append(paragraph);
+  }
+  return output;
+}
+
+function renderAnswer(target, answer) {
+  target.replaceChildren(renderMarkdown(answer));
+}
+
 // -- Ask ------------------------------------------------------------------
 
 const log = el("log"), form = el("ask"), field = el("message"), send = el("send");
@@ -678,7 +874,7 @@ function renderConversation(record) {
     const said = turn(asked.text);
     if (replied) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
-      said.textContent = replied.text;
+      renderAnswer(said, replied.text);
     }
   }
 }
@@ -877,7 +1073,7 @@ form.addEventListener("submit", async (event) => {
     });
     const answer = completed.answer;
     said.className = "said" + (answer.ok ? "" : " bad");
-    said.textContent = answer.answer;
+    renderAnswer(said, answer.answer);
     await loadConversations(activeConversation);
     if (answer.backend && answer.backend.code === "backend_authentication_failed") {
       await loadBackends();

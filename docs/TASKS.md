@@ -825,3 +825,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   matrix through authenticated HTTP. The exact intermittent cause of the
   owner's earlier Knowledge catalog startup refusal remains unproven; the
   current Vault, manifest digests and Host configuration now validate.
+- [x] Render Markdown in Ask replies and saved-session history as readable
+  headings, lists, code and horizontally scrollable tables. Keep API messages
+  as text and build only allowed DOM nodes; unsafe links and raw HTML remain
+  inert text. Focused browser-script and DOM safety tests passed, and a local
+  Edge screenshot was visually inspected. Full repository verification remains
+  deferred to the owner's merge checkpoint.
