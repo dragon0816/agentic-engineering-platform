@@ -795,3 +795,41 @@ def test_subject_is_carried_by_cited_product_document_not_other_products() -> No
     assert answer_concerns_subject(own, "CMP180")
     assert not answer_concerns_subject(other, "CMP180")
     assert answer_concerns_subject(named, "CMP180")
+
+
+def test_host_checks_labeled_inference_without_upgrading_the_relationship() -> None:
+    market = Passage(
+        text="Wi-Fi 7 是網通代工最重要的規格升級驅動力，需支援完整 320MHz 頻寬。",
+        citation=Citation(kind="raw", raw_ref="raw/Market/report.md", section=2), score=1,
+    )
+    option = Passage(
+        text="R&S CMP-KM352 option, WLAN IEEE 802.11be analyzer.",
+        citation=Citation(kind="raw", raw_ref="raw/Productions/CMP180_specs.md", section=197),
+        score=1,
+    )
+    text = (
+        "R&S CMP-KM352 option is a WLAN IEEE 802.11be analyzer [2].\n"
+        "【推論】Wi-Fi 7 的 320MHz 需求與 CMP-KM352 802.11be analyzer 方向一致 [1][2]。"
+    )
+    answer = Answer(
+        question="無線通訊市場趨勢與 CMP180 選配", status="answered",
+        passages=(market, option), text=text,
+    )
+    procedure = _guided_procedure()
+    assert procedure.inference_label == "【推論】"
+    assert answer_claims_overlap_raw(answer, inference_label=procedure.inference_label)
+    record = grounded_record(
+        AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
+        TraceIdentifiers(trace_id="inference", request_id="inference", span_id="answer"),
+        answer,
+    )
+    actions = KnowledgeBridgeActions(
+        lambda: {}, required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",), required_subject="CMP180",
+        procedure=procedure,
+    )
+    actions.result = {"ok": True, "record": record.model_dump(mode="json")}
+    claim = next(check for check in actions.validate() if check.check_id == "claim_support")
+    assert claim.status == "passed"
+    invented = answer.model_copy(update={"text": text.replace("KM352 802", "KM999 802")})
+    assert not answer_claims_overlap_raw(invented, inference_label=procedure.inference_label)

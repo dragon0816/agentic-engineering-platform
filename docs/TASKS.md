@@ -1035,3 +1035,15 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Agent Tasks; CLI first or Agent Web in v1; resident loop, Windows Task
   Scheduler or both; which effect classes may run unattended; skip or catch
   up missed runs.
+- [x] G3 labeled Knowledge inference (Claude Code, 2026-10-04, owner
+  requested explicit labels): Knowledge procedure field `inference_label`
+  (opt-in; candidate 1.3.0 uses `【推論】`). Labeled lines may connect
+  separately cited Raw facts, at most three, only beside a supported fact;
+  every product/option code and number must appear in the cited premises and
+  each cited premise must share wording with the line. Facet and
+  `direct_relationship` status are unchanged by inferences. Live isolated
+  probe: CMP180/market kept one grounded inference (Wi-Fi 7/802.11be ↔
+  CMP-KM352) and dropped two that introduced an unseen number or an
+  unrelated premise. Candidate 1.3.0 is now installed in the live Agent Web
+  (1.1.0 moved to `assets/skills/disabled/` for rollback). Full pytest: 1890
+  passed, 5 skipped, 2 known environmental failures; Ruff and mypy passed.

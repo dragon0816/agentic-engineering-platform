@@ -96,7 +96,9 @@ class KnowledgeBridgeActions:
                     check_id="claim_support",
                     status=(
                         "passed" if checked is not None
-                        and answer_claims_overlap_raw(checked.answer)
+                        and answer_claims_overlap_raw(
+                    checked.answer, inference_label=self._inference_label()
+                )
                         and (
                             self.procedure is None
                             or not unsupported_product_recommendations(
@@ -112,6 +114,9 @@ class KnowledgeBridgeActions:
                 )
             )
         return tuple(checks)
+
+    def _inference_label(self) -> str | None:
+        return None if self.procedure is None else self.procedure.inference_label
 
     def facet_report(self) -> dict[str, object]:
         """Host-check cited facet and relationship observations independently."""
@@ -173,7 +178,9 @@ class KnowledgeBridgeActions:
                 item.name: item.attempts for item in assessment.facets
             },
             "claim_status": (
-                "supported" if answer_claims_overlap_raw(checked.answer)
+                "supported" if answer_claims_overlap_raw(
+                    checked.answer, inference_label=self._inference_label()
+                )
                 and (
                     self.procedure is None
                     or not unsupported_product_recommendations(

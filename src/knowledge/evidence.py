@@ -15,12 +15,16 @@ from common.assets import REDACTED, SECRET_PATTERN
 from common.base import Contract, Symbol
 from knowledge.procedure import KnowledgeFacetInstruction, KnowledgeFocusHint, KnowledgeProcedure
 from knowledge.query import (
+    MAX_LABELED_INFERENCES,
+    STATED_NUMBER,
     Answer,
     Citation,
     Passage,
     RetrievalSnapshot,
     cited_claim_sentences,
     cited_numbers,
+    labeled_inference_grounded,
+    split_labeled_inferences,
     tokens,
 )
 from knowledge.vault import Vault
@@ -164,20 +168,24 @@ _CLAIM_STOPWORDS = {
 }
 
 
-# Python treats CJK characters as word characters, so `\b` would hide the
-# number in "2026年" or "Wi-Fi 7規格". Only ASCII letters and digits bind a
-# number to a token here, which keeps ASCII behavior identical.
-_STATED_NUMBER = re.compile(r"(?<![0-9A-Za-z_])\d+(?:\.\d+)?(?![0-9A-Za-z_])")
-
-
-def answer_claims_overlap_raw(answer: Answer) -> bool:
+def answer_claims_overlap_raw(answer: Answer, *, inference_label: str | None = None) -> bool:
     """Reject obvious citation laundering; this is not semantic entailment.
 
     Each answer sentence needs meaningful lexical overlap with its cited Raw
     passages, and every stated number must occur there. Stronger strategic
-    claims still need the separate direct-relationship check.
+    claims still need the separate direct-relationship check. Lines carrying
+    the Skill's inference label are checked as bounded labeled inferences.
     """
-    for sentence in cited_claim_sentences(answer.text):
+    facts, inferences = split_labeled_inferences(answer.text, inference_label)
+    if inferences and (
+        len(inferences) > MAX_LABELED_INFERENCES
+        or not all(
+            labeled_inference_grounded(line, answer.passages, inference_label or "")
+            for line in inferences
+        )
+    ):
+        return False
+    for sentence in cited_claim_sentences(facts):
         if not sentence.strip():
             continue
         numbers = cited_numbers(sentence)
@@ -190,8 +198,8 @@ def answer_claims_overlap_raw(answer: Answer) -> bool:
             return False
         claim = re.sub(r"\[[0-9][0-9,\s-]*\]", "", sentence)
         source_text = " ".join(sources)
-        stated_numbers = set(_STATED_NUMBER.findall(claim))
-        source_numbers = set(_STATED_NUMBER.findall(source_text))
+        stated_numbers = set(STATED_NUMBER.findall(claim))
+        source_numbers = set(STATED_NUMBER.findall(source_text))
         if not stated_numbers <= source_numbers:
             return False
         claim_terms = {
@@ -354,16 +362,27 @@ def answer_concerns_subject(answer: Answer, subject: str) -> bool:
     )
 
 
-def omit_unverified_answer_lines(answer: Answer) -> Answer:
-    """Retain independently supported lines of a partly faulty model answer."""
+def omit_unverified_answer_lines(
+    answer: Answer, *, inference_label: str | None = None,
+) -> Answer:
+    """Retain independently supported lines of a partly faulty model answer.
+
+    Labeled inferences survive only beside at least one supported fact and
+    up to MAX_LABELED_INFERENCES.
+    """
     if answer.status != "answered":
         return answer
-    remaining = "\n".join(
+    kept = [
         line for line in answer.text.splitlines()
         if line.strip() and answer_claims_overlap_raw(
-            answer.model_copy(update={"text": line})
+            answer.model_copy(update={"text": line}), inference_label=inference_label
         )
-    ).strip()
+    ]
+    facts, inferences = split_labeled_inferences("\n".join(kept), inference_label)
+    remaining = (
+        "\n".join([facts, *inferences[:MAX_LABELED_INFERENCES]]).strip()
+        if facts.strip() else ""
+    )
     return answer.model_copy(update={
         "status": "answered" if remaining else "uncited",
         "text": remaining,

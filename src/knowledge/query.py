@@ -172,13 +172,84 @@ class Answer(Contract):
     failure: Failure | None = None
 
 
-def _has_raw_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
+MAX_LABELED_INFERENCES = 3
+_LIST_MARKER = re.compile(r"^[ \t]*(?:\d{1,3}[.)]|[-*•])[ \t]+")
+# Python treats CJK characters as word characters, so `\b` would hide the
+# number in "2026年" or "Wi-Fi 7規格". Only ASCII letters and digits bind a
+# number to a token here, which keeps ASCII behavior identical.
+STATED_NUMBER = re.compile(r"(?<![0-9A-Za-z_])\d+(?:\.\d+)?(?![0-9A-Za-z_])")
+
+
+def split_labeled_inferences(text: str, label: str | None) -> tuple[str, tuple[str, ...]]:
+    """Separate a Skill's labeled inference lines from factual lines."""
+    if not label:
+        return text, ()
+    facts: list[str] = []
+    inferences: list[str] = []
+    for line in text.splitlines():
+        body = _LIST_MARKER.sub("", line, count=1).strip()
+        if body.startswith(label):
+            inferences.append(body)
+        else:
+            facts.append(line)
+    return "\n".join(facts), tuple(inferences)
+
+
+def labeled_inference_grounded(line: str, passages: tuple[Passage, ...], label: str) -> bool:
+    """Check one labeled inference against the Raw premises it cites.
+
+    An inference may connect separately cited sources, which is why it is
+    labeled rather than stated as fact. It may not introduce a product or
+    option code or a number absent from its cited Raw premises, and each
+    cited premise must share wording with the inference. This is a lexical
+    guard, not proof that the inference is correct.
+    """
+    body = _LIST_MARKER.sub("", line.strip(), count=1).strip()
+    if not label or not body.startswith(label):
+        return False
+    numbers = cited_numbers(body)
+    if not numbers or any(
+        number < 1 or number > len(passages) or passages[number - 1].citation.kind != "raw"
+        for number in numbers
+    ):
+        return False
+    sources = " ".join(passages[number - 1].text for number in sorted(numbers))
+    claim = _BRACKET.sub(" ", body[len(label):])
+    def codes(text: str) -> set[str]:
+        # "CMP-KB805" and "KB805" name the same option.
+        return {code.casefold().rsplit("-", 1)[-1] for code in _PRODUCT_ID.findall(text)}
+
+    if codes(claim) - codes(sources):
+        return False
+    if set(STATED_NUMBER.findall(claim)) - set(STATED_NUMBER.findall(sources)):
+        return False
+    claim_terms = {term for term in tokens(claim) if len(term) >= 2}
+    return all(
+        len(claim_terms & set(tokens(passages[number - 1].text))) >= 2
+        for number in numbers
+    )
+
+
+def _has_raw_grounding(
+    text: str, passages: tuple[Passage, ...], *, inference_label: str | None = None,
+) -> bool:
     """Preflight the record's citation rules before a bounded synthesis retry.
 
     The final KnowledgeAnswerRecord remains authoritative. This check only
     decides whether a response needs another model attempt; it never adds a
-    citation or changes the kind of evidence behind one.
+    citation or changes the kind of evidence behind one. When a Skill names
+    an inference label, labeled lines are checked as inferences, at most
+    MAX_LABELED_INFERENCES, and at least one factual claim must remain.
     """
+    text, inferences = split_labeled_inferences(text, inference_label)
+    if inferences and (
+        len(inferences) > MAX_LABELED_INFERENCES
+        or not all(
+            labeled_inference_grounded(line, passages, inference_label or "")
+            for line in inferences
+        )
+    ):
+        return False
     numbers = cited_numbers(text)
     if not numbers or any(
         number < 1 or number > len(passages) or passages[number - 1].citation.kind != "raw"
@@ -241,15 +312,26 @@ def _has_market_fit_grounding(text: str, passages: tuple[Passage, ...]) -> bool:
 
 def _salvage_raw_sentences(
     text: str, passages: tuple[Passage, ...], *, market_guidance: bool,
+    inference_label: str | None = None,
 ) -> str:
-    """Keep individually grounded claims if another sentence failed citation checks."""
+    """Keep individually grounded claims if another sentence failed citation checks.
+
+    Grounded labeled inferences follow the facts, up to the bound, and only
+    when at least one fact survives.
+    """
+    facts, inferences = split_labeled_inferences(text, inference_label)
     supported = [
         sentence.strip()
-        for sentence in cited_claim_sentences(text)
+        for sentence in cited_claim_sentences(facts)
         if sentence.strip()
         and _has_raw_grounding(sentence.strip(), passages)
         and (not market_guidance or _has_market_fit_grounding(sentence.strip(), passages))
     ]
+    if supported and inference_label:
+        supported.extend([
+            line for line in inferences
+            if labeled_inference_grounded(line, passages, inference_label)
+        ][:MAX_LABELED_INFERENCES])
     return "\n".join(supported)
 
 
@@ -826,6 +908,7 @@ class QueryEngine:
         alias: Symbol | None = None,
         prompt: Text = DEFAULT_PROMPT,
         max_output_tokens: int = 800,
+        inference_label: str | None = None,
     ) -> None:
         if (model is None) != (alias is None):
             raise ValueError("a model and its alias come together")
@@ -836,6 +919,7 @@ class QueryEngine:
         self.alias = alias
         self.prompt = prompt
         self.max_output_tokens = max_output_tokens
+        self.inference_label = inference_label
         self._asked = 0
 
     def ask(
@@ -935,7 +1019,7 @@ class QueryEngine:
             if text:
                 drafts.append(text)
             if not raw_citations_only or not cited or (
-                _has_raw_grounding(text, passages)
+                _has_raw_grounding(text, passages, inference_label=self.inference_label)
                 and (not market_guidance or _has_market_fit_grounding(text, passages))
             ):
                 break
@@ -946,7 +1030,8 @@ class QueryEngine:
             # sentences; the per-sentence salvage below decides what survives.
             def supported(draft: str) -> int:
                 salvaged = _salvage_raw_sentences(
-                    draft, passages, market_guidance=bool(market_guidance)
+                    draft, passages, market_guidance=bool(market_guidance),
+                    inference_label=self.inference_label,
                 )
                 return len(salvaged.splitlines()) if salvaged else 0
 
@@ -966,11 +1051,12 @@ class QueryEngine:
                 synthesized_by=self.alias,
             )
         if raw_citations_only and (
-            not _has_raw_grounding(text, passages)
+            not _has_raw_grounding(text, passages, inference_label=self.inference_label)
             or (market_guidance and not _has_market_fit_grounding(text, passages))
         ):
             text = _salvage_raw_sentences(
-                text, passages, market_guidance=bool(market_guidance)
+                text, passages, market_guidance=bool(market_guidance),
+                inference_label=self.inference_label,
             )
             if not text:
                 # A Wiki citation or uncited sentence cannot become a

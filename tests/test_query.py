@@ -16,8 +16,11 @@ from knowledge.query import (
     Citation,
     Passage,
     QueryEngine,
+    _has_raw_grounding,
+    _salvage_raw_sentences,
     cited_claim_sentences,
     cited_numbers,
+    labeled_inference_grounded,
     retrieve,
     tokens,
 )
@@ -698,3 +701,52 @@ def test_preselected_large_raw_is_bounded_before_model_synthesis(tmp_path: Path)
     assert len(model.requests[0].messages[0].text) < 2500
     assert "SMW200A supports NTN channel emulation" in answer.passages[0].text
     assert answer.passages[0].text in content
+
+
+_MARKET = Passage(
+    text="Wi-Fi 7 是網通代工最重要的規格升級驅動力，需支援 6GHz 全頻段與完整 320MHz 頻寬。",
+    citation=Citation(kind="raw", raw_ref="raw/Market/report.md", section=2),
+    score=1,
+)
+_OPTION = Passage(
+    text="R&S CMP-KM352 option, WLAN IEEE 802.11be analyzer. Option R&S CMP-KB805 enables 320MHz.",
+    citation=Citation(kind="raw", raw_ref="raw/Productions/CMP180_specs.md", section=197),
+    score=1,
+)
+
+
+def test_labeled_inference_may_connect_cited_sources_but_not_invent_codes_or_numbers() -> None:
+    passages = (_MARKET, _OPTION)
+    good = (
+        "【推論】Wi-Fi 7 的 320MHz 頻寬需求與 CMP-KM352 802.11be analyzer、"
+        "KB805 選配方向一致 [1][2]。"
+    )
+    assert labeled_inference_grounded(good, passages, "【推論】")
+    assert labeled_inference_grounded("- " + good, passages, "【推論】")
+    assert not labeled_inference_grounded(good.replace("【推論】", ""), passages, "【推論】")
+    assert not labeled_inference_grounded(good.replace("KM352", "KM999"), passages, "【推論】")
+    assert not labeled_inference_grounded(good.replace("320MHz", "640 MHz"), passages, "【推論】")
+    assert not labeled_inference_grounded("【推論】市場與選配方向一致。", passages, "【推論】")
+    assert not labeled_inference_grounded(good.replace("[1][2]", "[3]"), passages, "【推論】")
+    unrelated = "【推論】客戶滿意度提升有助品牌形象與長期營收成長 [1]。"
+    assert not labeled_inference_grounded(unrelated, passages, "【推論】")
+
+
+def test_raw_grounding_admits_bounded_labeled_inferences_only_when_enabled() -> None:
+    passages = (_MARKET, _OPTION)
+    fact = "R&S CMP-KM352 option is a WLAN IEEE 802.11be analyzer [2]."
+    inference = "【推論】Wi-Fi 7 的 320MHz 需求與 CMP-KM352 802.11be analyzer 方向一致 [1][2]。"
+    text = fact + "\n" + inference
+    assert _has_raw_grounding(text, passages, inference_label="【推論】")
+    invented = fact + "\n" + inference.replace("KM352 802", "KM999 802")
+    assert not _has_raw_grounding(invented, passages, inference_label="【推論】")
+    assert not _has_raw_grounding(inference, passages, inference_label="【推論】")
+    flood = "\n".join([fact, *([inference] * 4)])
+    assert not _has_raw_grounding(flood, passages, inference_label="【推論】")
+    salvaged = _salvage_raw_sentences(
+        "Uncited overview.\n" + flood, passages, market_guidance=False,
+        inference_label="【推論】",
+    )
+    assert "Uncited" not in salvaged
+    assert salvaged.splitlines()[0] == fact
+    assert salvaged.count("【推論】") == 3

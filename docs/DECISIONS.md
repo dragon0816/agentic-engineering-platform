@@ -815,3 +815,19 @@ Reason: The owner finds deploying n8n on company PCs too burdensome, and the
 architecture already treats n8n as optional. The rejected alternative was an
 n8n-hosted schedule, which also conflicts with the 2026-10-03 decision that a
 schedule must not exist only in n8n.
+
+## 2026-10-04 — Allow bounded, labeled Knowledge inferences
+
+Decision: A Knowledge Skill may opt into an `inference_label`. Lines carrying
+that label are presented as inferences, not facts: they must cite the Raw
+premises they connect, may not introduce product codes or numbers absent from
+those premises, are limited to three, and survive only beside a supported
+fact. The Host checks them with the same rule but never counts them toward
+facet coverage or a direct relationship, so a missing link is still reported.
+
+Reason: The owner wants the Hermes-style separation of fact, inference and
+gap, with explicit labels. Without it, users saw cited market and option facts
+but no stated connection, or the model blended a connection into factual
+prose. The rejected alternatives were to keep inference out entirely, to let
+an inference satisfy the direct-relationship check, or to accept unlabeled
+cross-source conclusions.

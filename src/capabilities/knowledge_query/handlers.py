@@ -19,7 +19,7 @@ from knowledge.evidence import (
 )
 from knowledge.evolution import KnowledgeCatalog, KnowledgeQueryRequest, grounded_record
 from knowledge.market_matrix import MarketMatrixRequest, discover_market_matrix
-from knowledge.query import Answer, QueryEngine
+from knowledge.query import MAX_LABELED_INFERENCES, Answer, QueryEngine
 from models.contracts import ModelClient
 
 KNOWLEDGE_QUERY_SPEC = CapabilitySpec.model_validate(
@@ -123,6 +123,17 @@ class KnowledgeQueryHandler:
             if request.procedure is not None and request.procedure.answer_guidance
             else ""
         )
+        inference_label = (
+            request.procedure.inference_label if request.procedure is not None else None
+        )
+        inference_guidance = (
+            f"\n\nYou may add at most {MAX_LABELED_INFERENCES} inference lines after the "
+            f"facts. Start each inference line with {inference_label}, cite the RAW "
+            "passages of its premises, and use only product codes and numbers that "
+            "appear in them. An inference is not a verified fact or a direct "
+            "relationship; never state it as one. Do not write unlabeled inferences."
+            if inference_label else ""
+        )
         partial_guidance = (
             "\n\nThe retrieved evidence does not establish every requested facet or "
             "direct relationship. State only independently supported facts "
@@ -149,7 +160,9 @@ class KnowledgeQueryHandler:
                     "answer, say so in one sentence and cite nothing.\n\n"
                     "Question: {question}\n\n{passages}"
                     + facet_guidance + skill_guidance + partial_guidance
+                    + inference_guidance
                 ),
+                inference_label=inference_label,
             ).ask,
             request.question,
             k=8,
@@ -166,7 +179,7 @@ class KnowledgeQueryHandler:
             answer = omit_unsupported_product_recommendations(
                 answer, request.question, request.procedure
             )
-            answer = omit_unverified_answer_lines(answer)
+            answer = omit_unverified_answer_lines(answer, inference_label=inference_label)
         if (
             assessment is not None
             and request.procedure is not None
@@ -175,7 +188,7 @@ class KnowledgeQueryHandler:
             and bool(assessment.observations)
             and (
                 answer.status != "answered"
-                or not answer_claims_overlap_raw(answer)
+                or not answer_claims_overlap_raw(answer, inference_label=inference_label)
                 or (
                     (subject := request.procedure.subject(request.question)) is not None
                     and not answer_concerns_subject(answer, subject)
