@@ -282,11 +282,11 @@ class KnowledgeQueryHandler:
         subject = procedure.subject(request.question)
         focus = procedure.focus(request.question)
         prefix = " ".join(part for part in (subject, focus.query if focus else None) if part)
-        queries = [request.question]
+        queries = [request.question, *(focus.expansions if focus else ())]
         for facet in procedure.requested_facets(request.question):
             for search in (*facet.search_queries, *facet.discovery_queries)[:2]:
                 queries.append(f"{prefix} {search}".strip())
-        passages = snapshot.wiki_primary_passages(tuple(dict.fromkeys(queries))[:8])
+        passages = snapshot.wiki_primary_passages(tuple(dict.fromkeys(queries))[:12])
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")
         assessment = assess_wiki_primary(passages, request.question, procedure)
@@ -309,6 +309,13 @@ class KnowledgeQueryHandler:
             + (
                 "\n\nInstalled Knowledge Skill guidance: " + procedure.answer_guidance
                 if procedure.answer_guidance else ""
+            )
+            + (
+                "\n\nThe retrieved evidence does not establish every requested facet or "
+                "direct relationship. Still state every independently supported fact "
+                "with citations; do not claim the missing comparison or direct link. "
+                "The Host will report the exact gaps."
+                if assessment.status == "missing" else ""
             )
             + (
                 f"\n\nYou may add at most {MAX_LABELED_INFERENCES} inference lines after "

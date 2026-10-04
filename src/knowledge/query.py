@@ -108,7 +108,115 @@ def cited_numbers(text: str) -> set[int]:
     return cited
 
 
+_HEADING_LINE = re.compile(r"^ {0,3}#{1,6}\s")
+_TABLE_DIVIDER = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)*\|?\s*$")
+
+
+def is_table_row(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") and stripped.count("|") >= 2
+
+
+def markdown_formatting_lines(lines: list[str]) -> set[int]:
+    """Indices of headings, table header rows and dividers: structure, not claims."""
+    found: set[int] = set()
+    for index, line in enumerate(lines):
+        if _HEADING_LINE.match(line) or _TABLE_DIVIDER.match(line):
+            found.add(index)
+        elif (
+            is_table_row(line) and index + 1 < len(lines)
+            and _TABLE_DIVIDER.match(lines[index + 1])
+        ):
+            found.add(index)
+    return found
+
+
+def keep_supported_lines(text: str, supported: Callable[[str], str]) -> str:
+    """Filter an answer line by line while keeping its Markdown structure.
+
+    `supported` returns the part of a claim line to keep ("" drops it).
+    Headings and table header/divider rows are kept, then removed again if
+    nothing they introduce survived.
+    """
+    lines = text.splitlines()
+    formatting = markdown_formatting_lines(lines)
+    kept: list[tuple[bool, str]] = []
+    for index, line in enumerate(lines):
+        if index in formatting:
+            kept.append((True, line))
+        elif line.strip():
+            part = supported(line)
+            if part:
+                kept.append((False, part))
+    # Drop a heading or table header whose body did not survive.
+    result: list[str] = []
+    for position, (structural, line) in enumerate(kept):
+        if structural:
+            following = kept[position + 1:]
+            body = next((item for item in following if not item[0]), None)
+            if body is None:
+                continue
+            if _HEADING_LINE.match(line):
+                next_heading = next(
+                    (offset for offset, item in enumerate(following)
+                     if item[0] and _HEADING_LINE.match(item[1])),
+                    len(following),
+                )
+                if not any(not item[0] for item in following[:next_heading]):
+                    continue
+            elif not is_table_row(body[1]) or any(
+                item[0] and _HEADING_LINE.match(item[1])
+                for item in following[:following.index(body)]
+            ):
+                continue
+        result.append(line)
+    return "\n".join(result).strip()
+
+
+def cap_labeled_inferences(text: str, label: str | None) -> str:
+    """Keep labeled inferences in place, at most MAX_LABELED_INFERENCES,
+    and only beside a factual claim; drop structure left empty."""
+    if not label:
+        return text
+    facts, _ = split_labeled_inferences(text, label)
+    if not cited_claim_sentences(facts):
+        return ""
+    seen = 0
+
+    def keep(line: str) -> str:
+        nonlocal seen
+        if _LIST_MARKER.sub("", line, count=1).strip().startswith(label):
+            seen += 1
+            return line if seen <= MAX_LABELED_INFERENCES else ""
+        return line
+
+    return keep_supported_lines(text, keep)
+
+
 def cited_claim_sentences(text: str) -> tuple[str, ...]:
+    """Split cited prose into claims; a Markdown table row is one claim.
+
+    Headings and table header/divider rows are structure, not claims, so they
+    need no citation. A table row is checked as a whole: its cells describe
+    one cited item and must not be split at sentence punctuation.
+    """
+    lines = text.splitlines()
+    formatting = markdown_formatting_lines(lines)
+    claims: list[str] = []
+    prose: list[str] = []
+    for index, line in enumerate(lines):
+        if index in formatting or is_table_row(line):
+            claims.extend(_prose_sentences("\n".join(prose)))
+            prose = []
+            if index not in formatting:
+                claims.append(line.strip())
+            continue
+        prose.append(line)
+    claims.extend(_prose_sentences("\n".join(prose)))
+    return tuple(claims)
+
+
+def _prose_sentences(text: str) -> tuple[str, ...]:
     """Split cited prose without breaking release abbreviations or list lines."""
     # A list marker ("1.", "2)", "-") is formatting, not an uncited claim.
     unlisted = re.sub(r"(?m)^[ \t]*(?:\d{1,3}[.)]|[-*•])[ \t]+", "", text)
@@ -205,6 +313,24 @@ def split_labeled_inferences(text: str, label: str | None) -> tuple[str, tuple[s
     return "\n".join(facts), tuple(inferences)
 
 
+def product_codes(text: str) -> set[str]:
+    """Product and option codes; "CMP-KB805" and "KB805" name the same option."""
+    return {code.casefold().rsplit("-", 1)[-1] for code in _PRODUCT_ID.findall(text)}
+
+
+def table_row_grounded(row: str, passages: tuple[Passage, ...]) -> bool:
+    """A table row's codes must all appear in the sources that row cites.
+
+    Cells of one row describe one item from possibly several cited passages,
+    so the single-passage co-location rule for prose does not apply.
+    """
+    sources = " ".join(
+        passages[number - 1].text
+        for number in cited_numbers(row) if 1 <= number <= len(passages)
+    )
+    return not product_codes(_BRACKET.sub(" ", row)) - product_codes(sources)
+
+
 def labeled_inference_grounded(
     line: str, passages: tuple[Passage, ...], label: str, *, allow_wiki: bool = False,
 ) -> bool:
@@ -228,11 +354,7 @@ def labeled_inference_grounded(
         return False
     sources = " ".join(passages[number - 1].text for number in sorted(numbers))
     claim = _BRACKET.sub(" ", body[len(label):])
-    def codes(text: str) -> set[str]:
-        # "CMP-KB805" and "KB805" name the same option.
-        return {code.casefold().rsplit("-", 1)[-1] for code in _PRODUCT_ID.findall(text)}
-
-    if codes(claim) - codes(sources):
+    if product_codes(claim) - product_codes(sources):
         return False
     if set(STATED_NUMBER.findall(claim)) - set(STATED_NUMBER.findall(sources)):
         return False
@@ -277,6 +399,10 @@ def _has_raw_grounding(
         sentence_citations = cited_numbers(sentence)
         if not sentence_citations:
             return False
+        if is_table_row(sentence):
+            if not table_row_grounded(sentence, passages):
+                return False
+            continue
         # Exact option codes and uppercase technical abbreviations in one
         # claim must coexist in at least one cited excerpt. This is a narrow
         # lexical guard, not a general proof of semantic entailment.
@@ -333,25 +459,33 @@ def _salvage_raw_sentences(
 ) -> str:
     """Keep individually grounded claims if another sentence failed citation checks.
 
-    Grounded labeled inferences follow the facts, up to the bound, and only
-    when at least one fact survives.
+    Grounded labeled inferences stay where the model placed them, up to the
+    bound, and only when at least one fact survives.
     """
-    facts, inferences = split_labeled_inferences(text, inference_label)
-    supported = [
-        sentence.strip()
-        for sentence in cited_claim_sentences(facts)
-        if sentence.strip()
-        and _has_raw_grounding(sentence.strip(), passages, allow_wiki=allow_wiki)
-        and (not market_guidance or _has_market_fit_grounding(sentence.strip(), passages))
-    ]
-    if supported and inference_label:
-        supported.extend([
-            line for line in inferences
-            if labeled_inference_grounded(
+
+    def grounded(claim: str) -> bool:
+        return _has_raw_grounding(claim, passages, allow_wiki=allow_wiki) and (
+            not market_guidance or _has_market_fit_grounding(claim, passages)
+        )
+
+    def supported_part(line: str) -> str:
+        body = _LIST_MARKER.sub("", line, count=1).strip()
+        if inference_label and body.startswith(inference_label):
+            return line.strip() if labeled_inference_grounded(
                 line, passages, inference_label, allow_wiki=allow_wiki
-            )
-        ][:MAX_LABELED_INFERENCES])
-    return "\n".join(supported)
+            ) else ""
+        if is_table_row(line):
+            return line.strip() if grounded(line) else ""
+        return "\n".join(
+            sentence.strip()
+            for sentence in cited_claim_sentences(line)
+            if sentence.strip() and grounded(sentence.strip())
+        )
+
+    kept = keep_supported_lines(text, supported_part)
+    if not cited_claim_sentences(split_labeled_inferences(kept, inference_label)[0]):
+        return ""
+    return cap_labeled_inferences(kept, inference_label)
 
 
 def _focused_raw_passages(
@@ -1204,6 +1338,11 @@ class QueryEngine:
                 and (not market_guidance or _has_market_fit_grounding(text, passages))
             ):
                 break
+        if not text and drafts:
+            # The retry came back empty (a Gateway turn with no visible text);
+            # keep the earlier draft for per-sentence salvage below.
+            text = drafts[-1]
+            cited = cited_numbers(text)
         if len(drafts) == 2 and cited_numbers(drafts[0]):
             # The retry is a fresh generation, not a repair, so even a fully
             # grounded retry can drop supported claims the first draft had.

@@ -515,6 +515,21 @@ def test_raw_synthesis_retries_an_empty_gateway_response(tmp_path: Path) -> None
     assert len(model.requests) == 2
 
 
+def test_raw_synthesis_keeps_the_first_draft_when_the_retry_is_empty(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    model = SequenceSynth((
+        "Overview without a citation.\nThe front end uses a GaN power amplifier [1].",
+        "",
+    ))
+    answer = QueryEngine(vault, model, alias="a").ask(
+        "GaN power amplifier", k=4, raw_citations_only=True
+    )
+    assert len(model.requests) == 2
+    assert answer.status == "answered"
+    assert answer.text == "The front end uses a GaN power amplifier [1]."
+
+
 def test_raw_synthesis_keeps_only_supported_sentences_after_retry(
     tmp_path: Path,
 ) -> None:

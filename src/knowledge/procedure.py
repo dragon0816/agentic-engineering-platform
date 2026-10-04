@@ -46,6 +46,9 @@ class KnowledgeFocusHint(Contract):
     pattern: Text
     query: Text
     evidence_terms: tuple[Text, ...] = Field(min_length=1, max_length=8)
+    # Skill-authored readings of a broad focus ("高速通訊" -> SerDes/SI, Wi-Fi 7,
+    # clock jitter, wideband RF) searched as additional Wiki-primary queries.
+    expansions: tuple[Text, ...] = Field(default=(), max_length=8)
 
 
 class KnowledgeProcedure(Contract):

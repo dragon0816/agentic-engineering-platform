@@ -307,3 +307,68 @@ def test_wiki_primary_drops_an_invented_wiki_claim(tmp_path: Path) -> None:
     text = record["answer"]["text"]  # type: ignore[index]
     assert "ZNA-K2 provides" in text
     assert "K99" not in text
+
+
+# -- Markdown tables in answers ----------------------------------------------
+
+TABLE = (
+    "### 產品與 Option 對接\n"
+    "| 產品 | Option | 證據 |\n"
+    "|---|---|---|\n"
+    "| R&S ZNA | ZNA-K2 time domain analysis | [1] |\n"
+    "| R&S ZNA | ZNA-K20 eye diagram | [2] |"
+)
+
+
+def test_table_rows_are_claims_and_structure_needs_no_citation() -> None:
+    from knowledge.query import cited_claim_sentences
+
+    assert cited_claim_sentences(TABLE) == (
+        "| R&S ZNA | ZNA-K2 time domain analysis | [1] |",
+        "| R&S ZNA | ZNA-K20 eye diagram | [2] |",
+    )
+    record = grounded_record(
+        ASSET, TRACE, _answer(TABLE, WIKI, RAW), citation_policy="wiki_primary",
+        wiki_provenance=(WikiProvenance(wiki_page="wiki/entities/R&S ZNA.md"),),
+    )
+    assert record.cited_passages == (WIKI, RAW)
+
+
+def test_table_row_with_an_uncited_code_is_dropped_but_structure_kept() -> None:
+    from knowledge.evidence import answer_claims_overlap_raw, omit_unverified_answer_lines
+
+    bad = TABLE + "\n| R&S ZNA | ZNA-K99 110 GHz extension | [1] |"
+    answer = _answer(bad, WIKI, RAW)
+    assert not answer_claims_overlap_raw(answer, allow_wiki=True)
+    kept = omit_unverified_answer_lines(answer, allow_wiki=True)
+    assert "ZNA-K99" not in kept.text
+    assert kept.text.startswith("### 產品與 Option 對接\n| 產品 | Option | 證據 |\n|---|---|---|")
+    assert answer_claims_overlap_raw(kept, allow_wiki=True)
+
+
+def test_table_header_without_surviving_rows_is_removed() -> None:
+    from knowledge.evidence import omit_unverified_answer_lines
+
+    only_bad = (
+        "ZNA covers 10 MHz to 67 GHz [1].\n"
+        "### 對接表\n| 產品 | Option |\n|---|---|\n| R&S ZNA | ZNA-K99 extension [1] |"
+    )
+    kept = omit_unverified_answer_lines(_answer(only_bad, WIKI, RAW), allow_wiki=True)
+    assert kept.text == "ZNA covers 10 MHz to 67 GHz [1]."
+
+
+def test_labeled_inferences_stay_under_their_heading_and_are_capped() -> None:
+    from knowledge.evidence import omit_unverified_answer_lines
+
+    inference = "【推論】ZNA 的 time domain analysis 適合 TDR 驗證 [1]。"
+    text = (
+        "### 推薦先賣\n" + "\n".join([inference] * 4)
+        + "\n### 事實\nZNA covers 10 MHz to 67 GHz [1]."
+    )
+    kept = omit_unverified_answer_lines(
+        _answer(text, WIKI, RAW), inference_label="【推論】", allow_wiki=True
+    )
+    lines = kept.text.splitlines()
+    assert lines[0] == "### 推薦先賣"
+    assert lines[1:4] == [inference] * 3
+    assert lines[4:] == ["### 事實", "ZNA covers 10 MHz to 67 GHz [1]."]

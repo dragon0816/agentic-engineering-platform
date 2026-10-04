@@ -21,10 +21,14 @@ from knowledge.query import (
     Citation,
     Passage,
     RetrievalSnapshot,
+    cap_labeled_inferences,
     citable,
     cited_claim_sentences,
     cited_numbers,
+    is_table_row,
+    keep_supported_lines,
     labeled_inference_grounded,
+    product_codes,
     split_labeled_inferences,
     tokens,
 )
@@ -203,6 +207,8 @@ def answer_claims_overlap_raw(
             return False
         claim = re.sub(r"\[[0-9][0-9,\s-]*\]", "", sentence)
         source_text = " ".join(sources)
+        if is_table_row(sentence) and product_codes(claim) - product_codes(source_text):
+            return False
         stated_numbers = set(STATED_NUMBER.findall(claim))
         source_numbers = set(STATED_NUMBER.findall(source_text))
         if not stated_numbers <= source_numbers:
@@ -383,17 +389,16 @@ def omit_unverified_answer_lines(
     """
     if answer.status != "answered":
         return answer
-    kept = [
-        line for line in answer.text.splitlines()
-        if line.strip() and answer_claims_overlap_raw(
+    kept = keep_supported_lines(
+        answer.text,
+        lambda line: line if answer_claims_overlap_raw(
             answer.model_copy(update={"text": line}), inference_label=inference_label,
             allow_wiki=allow_wiki,
-        )
-    ]
-    facts, inferences = split_labeled_inferences("\n".join(kept), inference_label)
+        ) else "",
+    )
     remaining = (
-        "\n".join([facts, *inferences[:MAX_LABELED_INFERENCES]]).strip()
-        if facts.strip() else ""
+        cap_labeled_inferences(kept, inference_label) if inference_label
+        else kept if cited_claim_sentences(kept) else ""
     )
     return answer.model_copy(update={
         "status": "answered" if remaining else "uncited",
