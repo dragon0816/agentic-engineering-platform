@@ -100,19 +100,56 @@ class KnowledgeQueryRequest(Contract):
         return self
 
 
+CitationPolicy = Literal["raw_only", "wiki_primary"]
+
+
+class WikiProvenance(Contract):
+    """The Raw sources a cited Wiki page was curated from.
+
+    A page with no traceable Raw source stays citable under the Wiki-primary
+    policy (the curated Wiki is authoritative) but is reported as unlinked
+    so data experts can restore its source link.
+    """
+
+    wiki_page: Text
+    raw_refs: tuple[Text, ...] = Field(default=(), max_length=16)
+
+    @property
+    def status(self) -> Literal["sourced", "unlinked"]:
+        return "sourced" if self.raw_refs else "unlinked"
+
+
 class KnowledgeAnswerRecord(Contract):
     asset: AssetIdentity
     trace: TraceIdentifiers
     answer: Answer
     cited_passages: tuple[Passage, ...] = Field(min_length=1)
     assessment: KnowledgeEvidenceSummary | None = None
+    citation_policy: CitationPolicy = "raw_only"
+    wiki_provenance: tuple[WikiProvenance, ...] = Field(default=(), max_length=32)
 
     @model_validator(mode="after")
     def raw_grounding(self) -> Self:
         if self.answer.status != "answered" or not self.answer.text.strip():
             raise ValueError("a grounded record requires an answered query")
-        if any(passage.citation.kind != "raw" for passage in self.cited_passages):
-            raise ValueError("grounded claims require Raw evidence")
+        if self.citation_policy == "raw_only":
+            if any(passage.citation.kind != "raw" for passage in self.cited_passages):
+                raise ValueError("grounded claims require Raw evidence")
+            if self.wiki_provenance:
+                raise ValueError("Raw-only records carry no Wiki provenance")
+        else:
+            # Wiki-primary: a curated Wiki page is citable evidence, and each
+            # cited page carries the Raw sources it was derived from.
+            cited_pages = {
+                passage.citation.wiki_page
+                for passage in self.cited_passages
+                if passage.citation.kind == "wiki"
+            }
+            if "index.md" in cited_pages:
+                raise ValueError("the Wiki index is navigation, not citable evidence")
+            recorded = [item.wiki_page for item in self.wiki_provenance]
+            if len(recorded) != len(set(recorded)) or set(recorded) != cited_pages:
+                raise ValueError("each cited Wiki page needs exactly one provenance entry")
         numbers = cited_numbers(self.answer.text)
         expected = tuple(
             passage for number, passage in enumerate(self.answer.passages, 1) if number in numbers
@@ -264,6 +301,8 @@ class KnowledgeValidationEvidence(Contract):
 def grounded_record(
     asset: AssetIdentity, trace: TraceIdentifiers, answer: Answer,
     *, assessment: KnowledgeEvidenceSummary | None = None,
+    citation_policy: CitationPolicy = "raw_only",
+    wiki_provenance: tuple[WikiProvenance, ...] = (),
 ) -> KnowledgeAnswerRecord:
     numbers = cited_numbers(answer.text)
     passages = tuple(
@@ -275,6 +314,8 @@ def grounded_record(
         answer=answer,
         cited_passages=passages,
         assessment=assessment,
+        citation_policy=citation_policy,
+        wiki_provenance=wiki_provenance,
     )
 
 

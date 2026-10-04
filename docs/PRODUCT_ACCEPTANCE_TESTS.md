@@ -198,8 +198,13 @@ version after domain-owner review.
 
 ### Automated acceptance criteria
 
-1. The initial answer cites the Raw evidence from which every relevant claim was
-   derived.
+1. The initial answer cites the curated Wiki page (or Raw, where the Wiki does
+   not cover the claim) for every relevant claim, and each cited Wiki page
+   carries the Raw sources it was derived from, traced through the Wiki
+   sources page's `source_id` / `source_sha256`. A Wiki page without a
+   traceable source remains citable but is reported as lacking a source link.
+   A Knowledge Skill that keeps the `raw_only` citation policy cites Raw
+   directly. (Amended 2026-10-05 by owner decision; see `docs/DECISIONS.md`.)
 2. Feedback is linked to the exact Knowledge asset/version, answer, trace and
    cited passages.
 3. The Agent creates a structured improvement request with reproduction and

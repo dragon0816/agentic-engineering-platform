@@ -66,6 +66,9 @@ class KnowledgeProcedure(Contract):
     # connecting separately cited facts. They never establish a direct
     # relationship or complete a missing facet.
     inference_label: str | None = Field(default=None, min_length=1, max_length=16)
+    # "wiki_primary": curated Wiki pages are the cited answer source and each
+    # cited page carries its Raw provenance; Raw fills gaps the Wiki lacks.
+    citation_policy: Literal["raw_only", "wiki_primary"] = "raw_only"
 
     @model_validator(mode="after")
     def valid_patterns(self) -> Self:

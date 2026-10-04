@@ -831,3 +831,29 @@ but no stated connection, or the model blended a connection into factual
 prose. The rejected alternatives were to keep inference out entirely, to let
 an inference satisfy the direct-relationship check, or to accept unlabeled
 cross-source conclusions.
+
+## 2026-10-05 — Make the curated Wiki the primary Knowledge answer source
+
+Decision: A Knowledge Skill may opt into the `wiki_primary` citation policy.
+Under it, curated Wiki entity, concept, synthesis and source pages are cited
+directly as answer evidence; Raw is cited where the Wiki does not cover a
+claim. Every cited Wiki page carries a `WikiProvenance` entry listing the Raw
+sources it was curated from (followed through the Wiki sources page's
+`source_id` / `source_path`). A page with no traceable source stays citable
+and is reported as unlinked for data experts to repair. `index.md` is
+navigation, never evidence. The `raw_only` policy remains the default for
+existing Skills. Wiki/Raw inconsistencies are resolved by data experts during
+ingest; the answer layer does not override Wiki with Raw. Product acceptance
+E2E-05 criterion 1 was amended accordingly with the owner's approval.
+
+Reason: The owner's Vault is an LLM Wiki whose purpose is to curate Raw into
+dense, navigable pages; forcing every answer back to Raw sections discarded
+that work, limited breadth (one Wiki page summarizes dozens of Raw sections)
+and fragmented answers. On the real Vault 2004 of 2007 Wiki pages trace to
+Raw, so provenance survives. AGENTS.md requires that Raw remain immutable and
+that the curation layer never be the only copy of source evidence; both still
+hold. This supersedes the 2026-10-03 rejection of "using Wiki as substitute
+evidence", which addressed whole-section citation errors now handled by
+section-level Wiki chunks and per-claim checks. Rejected alternatives: keep
+Raw-only citation; cite Wiki without provenance; flag runtime Wiki/Raw
+mismatches in answers (owner assigns conflict resolution to ingest).
