@@ -43,13 +43,17 @@ Claude Code sandbox; inside it more file-permission failures appear.
 
 ## In progress
 
-Owner request: migrate every `rs_workflow_system` workflow/task (local clone
-`C:\Users\Chi_L\Documents\claude\n8n_workflow_system` at pinned
-`896046e8`) into AEP with one parameter declaration that generates the
-workflow settings UI, the Agent Web parameter GUI and the Telegram parameter
-GUI. A read-only inventory and plan is being prepared; follow
-`.agents/skills/migration/SKILL.md` and `docs/CONTRACTS.md` migration rules.
-No migration code has been written yet.
+rs_workflow_system migration per `docs/phases/RS_WORKFLOW_MIGRATION.md`
+(owner decisions recorded in `docs/DECISIONS.md` 2026-10-05). Done: S1
+parameter declaration contract (`common/assets.py`), S2 generated Agent Web
+run and schedule forms (`common/workflow_forms.py`, `renderParameterForm`),
+S3 Agent tool schema (`agent_tool_schema`, `ModelTool.input_schema`), S4
+Telegram `/run` question flow (`channels/telegram_flow.py`). Next: S5 generic
+`workflow_settings` store and editor (move W13 `checkout_path` off
+`HostIntegrations`), S6 dynamic choices (`ref:` sets in local SQLite, then
+`fn:`), then one workflow per slice: 90, 12, 14, 07, finish 10/11/13, 03,
+06/06b. Credentials: `host.json` holds SecretRef -> environment-variable
+mappings only.
 
 ## Open items for the owner / data team
 
@@ -59,6 +63,5 @@ No migration code has been written yet.
 
 ## Next recommended action
 
-Review the rs_workflow_system migration plan with the owner, record the
-parameter-declaration contract decision, then migrate one workflow slice at
-a time with characterization tests and parity evidence.
+Continue with S5 (`workflow_settings`), keeping each slice narrow with tests,
+then migrate workflows one at a time with the source pytest suite as oracle.
