@@ -1181,3 +1181,26 @@ progress is presentation, not policy); editing the status message into the
 answer (answers can span several messages); Telegram's 5-second "typing"
 action alone (shows activity but not which skill).
 
+
+## 2026-10-06 — Coding on the Bridge: Gateway author, pytest, restricted Windows execution
+
+Decision (owner): coding runs first through the in-house bounded harness with
+the internal Gateway model as the change author; native Claude Code follows
+later for PUBLIC-only tasks. Validation is pytest only, as declared commands.
+The first repository is a new practice repository. Generated code executes
+under restricted Windows execution: low-integrity process, one-process Job
+object with memory and time limits, an allowlisted environment, and an
+outbound firewall block on a dedicated runner interpreter, which the host
+checks before every run. Plan: `docs/phases/CODING_ON_BRIDGE.md`.
+
+Reason: E2E-03 proved the loop only with a scripted author and in-process
+validators; coding needs real tests to run. Low integrity is used in addition
+to the owner's choice because it stops writes outside the run folder without
+admin rights or new software. The firewall rule targets a separate
+interpreter, because a venv's python.exe on Windows starts the base
+interpreter, so a rule on it would also cut off AEP's own Gateway calls.
+Rejected alternatives: WSL (slower, separate Python to maintain); Docker
+(installation and licence approval on a company machine); running pytest
+with no isolation (secrets in the environment, writes anywhere); native
+Claude Code first (data rule allows PUBLIC context only and needs a
+classifier first).
