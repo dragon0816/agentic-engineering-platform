@@ -1053,3 +1053,26 @@ Rejected alternatives: WRAP with vendored third-party wheels (compiled lxml
 per Python version inside a hash-pinned package); a script-tool runtime with
 site-packages (weakens isolation for one job); keeping the draft inside the
 NCC capability (not reusable).
+
+## 2026-10-05 — The Telegram bot token may be entered on the settings page
+
+Decision (owner request): Agent Web Settings has a Telegram section that
+accepts the bot token, the allowed senders (Telegram user id -> actor) and an
+on/off switch. The token is written only to this Windows user's environment
+(`HKCU\Environment` variable `AEP_TELEGRAM_BOT_TOKEN`, plus the running
+process); `host.json` gains only the mapping `telegram_bot ->
+AEP_TELEGRAM_BOT_TOKEN` and `telegram.json` only the SecretRef name, Bridge
+and senders. The page never shows the token again, only whether one is
+present. Agent Web now polls Telegram in its own process when configured and
+replaces the polling loop after a save, so no restart and no separate
+`aep-host telegram` process are needed (the command remains for hosts without
+Agent Web). Turning the bot off moves `telegram.json` to
+`telegram.disabled.json`.
+
+Reason: entering an environment variable by hand was a barrier, and the
+project rule is that secret values never live in files; a per-user
+environment variable is the same store the operator would use manually. The
+model Gateway section still accepts names only. Rejected alternatives: a
+token field saved in `host.json` or `telegram.json` (secret in a file);
+Windows Credential Manager (a second secret store the rest of the host does
+not read); requiring a restart after saving.

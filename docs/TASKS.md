@@ -1200,6 +1200,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   source's 51 rule tests as oracle; local parity test gives the same document
   text as the source job on the real template. Not carried yet: source
   document re-import and hidden overrides (see `capabilities/ncc_plan/SOURCE.md`).
+- [x] Agent Web settings (owner request 2026-10-05): Telegram bot section
+  (token to the Windows user environment only, allowed senders, on/off; Agent
+  Web polls Telegram itself and swaps the loop on save) and Capabilities
+  "Recent runs" moved to a collapsed section at the bottom. Tests:
+  `tests/test_telegram_settings.py`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

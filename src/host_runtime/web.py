@@ -118,7 +118,7 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
     MessageFeedback,
 )
-from host_runtime.host import HostRuntime, choice_sources, load_authorization
+from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.knowledge_observation import KnowledgeBridgeActions
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
@@ -131,6 +131,14 @@ from host_runtime.slash_commands import (
     SlashCommandError,
     SlashCommandInvocation,
     parse_slash_command,
+)
+from host_runtime.telegram_loop import ResidentTelegram
+from host_runtime.telegram_settings import (
+    TelegramSettingsError,
+    TelegramSettingsUpdate,
+    apply_telegram_settings,
+    telegram_status,
+    windows_user_environment,
 )
 from host_runtime.workflow_settings import (
     SETTINGS_FILE,
@@ -299,6 +307,9 @@ class AgentWeb:
         # The opt-in resident schedule loop, when `aep-host web` started one.
         # It shares the lock above, so a scheduled run never overlaps a request.
         self.schedule_loop: Any = None
+        # Telegram polling inside this process; replaced when its settings change.
+        self.telegram_loop: ResidentTelegram | None = None
+        self.user_environment = windows_user_environment
         # Reads the configured Gateway's model list for the Settings picker.
         self.model_listing_transport: MethodTransport = UrllibTransport()
         # Per-install Workflow settings; the engine reads the same file per run.
@@ -603,6 +614,7 @@ class AgentWeb:
             "restart_required": False,
             "persona": self.persona.load().model_dump(mode="json"),
             "context": self.conversation_context.load().model_dump(mode="json"),
+            "telegram": self.telegram_settings(),
             "memory": {
                 "scope": "session_only",
                 "cross_session": False,
@@ -637,6 +649,50 @@ class AgentWeb:
                 "require_local_model": (False if binding is None else binding.require_local_model),
             },
         }
+
+    def telegram_settings(self) -> dict[str, Any]:
+        status = telegram_status(self.runtime.config, self.runtime.layout)
+        loop = self.telegram_loop
+        status["running"] = loop is not None and loop.running
+        status["failure"] = None if loop is None else loop.failure
+        return status
+
+    def start_telegram(self) -> None:
+        """Poll with the host's current Telegram ingress, if it has one."""
+        if self.runtime.telegram is not None:
+            self.telegram_loop = ResidentTelegram(self.runtime.telegram)
+            self.telegram_loop.start()
+
+    def update_telegram_settings(self, request: TelegramSettingsUpdate) -> dict[str, Any]:
+        """Save the bot settings and replace the polling loop; no restart."""
+        if self.config_path is None:
+            return {"ok": False, "code": "settings_read_only"}
+        with self._one_at_a_time:
+            try:
+                config = apply_telegram_settings(
+                    self.config_path, self.runtime.layout, request,
+                    store=self.user_environment,
+                )
+                ingress = build_telegram(
+                    config, self.runtime.layout, self.runtime.agent, None
+                )
+            except TelegramSettingsError as error:
+                return {"ok": False, "code": str(error)}
+            except (OSError, ValueError):
+                return {"ok": False, "code": "telegram_settings_refused"}
+            self.runtime.config = config
+            self.runtime.telegram = ingress
+            previous, self.telegram_loop = self.telegram_loop, None
+
+            def swap() -> None:
+                # The old loop may be inside a long poll; two pollers on one
+                # bot conflict, so the new one starts after the old one ends.
+                if previous is not None:
+                    previous.stop()
+                self.start_telegram()
+
+            threading.Thread(target=swap, name="telegram-swap", daemon=True).start()
+        return {"ok": True, "restart_required": False, "telegram": self.telegram_settings()}
 
     def update_persona_settings(self, request: AgentPersonaUpdateRequest) -> dict[str, Any]:
         """Save local presentation guidance without changing runtime authority."""
@@ -2435,6 +2491,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/workflows/run",
             "/api/knowledge/ask",
             "/api/settings/model",
+            "/api/settings/telegram",
             "/api/settings/workflows",
             "/api/workflow-options",
             "/api/settings/persona",
@@ -2469,6 +2526,15 @@ class _Handler(BaseHTTPRequestHandler):
             except (OSError, ValueError, TypeError):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
+            self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/settings/telegram":
+            try:
+                telegram = TelegramSettingsUpdate.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid Telegram settings"})
+                return
+            result = self.server.web.update_telegram_settings(telegram)
             self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/workflow-options":

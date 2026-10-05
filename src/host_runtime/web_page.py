@@ -530,6 +530,25 @@ tr:last-child td { border-bottom: none; }
       <p><button id="session-delete" type="button">Delete selected session</button></p>
       <p id="session-manage-result" class="note" role="status"></p>
     </div>
+    <h2>Telegram bot</h2>
+    <p class="note">Let people you list here talk to this Agent through a Telegram bot.
+      The access token is stored only in this Windows user's environment variables, never in a
+      file, and is never shown again; leave it empty to keep the saved one. Saving applies
+      at once.</p>
+    <div class="card settings">
+      <form id="telegram-settings" autocomplete="off">
+        <label><input type="checkbox" id="telegram-enabled"> Answer Telegram messages</label>
+        <label for="telegram-token">Bot access token (from @BotFather)</label>
+        <input id="telegram-token" type="password" autocomplete="new-password"
+               spellcheck="false" placeholder="123456789:AA…">
+        <label for="telegram-senders">Allowed senders, one per line:
+          Telegram user id, then actor</label>
+        <textarea id="telegram-senders" spellcheck="false"
+                  placeholder="123456789 leo.chi"></textarea>
+        <p><button class="go" id="telegram-save" type="submit">Save Telegram settings</button></p>
+        <p id="telegram-result" class="note" role="status"></p>
+      </form>
+    </div>
     <h2>Workflow settings</h2>
     <p class="note">Settings that adapt a Workflow to this computer, such as where its
       reference data lives. They are set here once, kept across upgrades, and never asked
@@ -1769,6 +1788,7 @@ async function loadSettings() {
   el("persona-name").value = persona.name;
   el("persona-introduction").value = persona.introduction;
   el("persona-soul").value = persona.soul;
+  showTelegram(settings.telegram);
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
   el("model-provider").value = model.provider || "openai_compatible";
@@ -1905,6 +1925,40 @@ el("session-delete").addEventListener("click", async () => {
   } catch (failure) {
     result.textContent = "Session was not deleted: " + failure.message;
   } finally { button.disabled = false; }
+});
+
+function showTelegram(telegram) {
+  el("telegram-enabled").checked = telegram.enabled;
+  el("telegram-senders").value = telegram.senders
+    .map((item) => item.sender_id + " " + item.actor).join("\n");
+  el("telegram-token").value = "";
+  el("telegram-result").textContent = (telegram.token_present
+    ? "Token saved in " + telegram.environment_variable + "."
+    : "No token saved yet.")
+    + (telegram.enabled ? (telegram.running ? " Bot is answering." : " Bot is starting…")
+      : " Bot is off.")
+    + (telegram.failure ? " Last stop: " + telegram.failure : "");
+}
+
+el("telegram-settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = el("telegram-save"), result = el("telegram-result");
+  const senders = [];
+  for (const line of el("telegram-senders").value.split("\n")) {
+    const parts = line.trim().split(/\s+/);
+    if (!parts[0]) continue;
+    senders.push({sender_id: Number(parts[0]), actor: parts[1] || ""});
+  }
+  const body = {enabled: el("telegram-enabled").checked, senders};
+  const token = el("telegram-token").value.trim();
+  if (token) body.token = token;
+  button.disabled = true; result.textContent = "Saving Telegram settings…";
+  try {
+    const saved = await call("/api/settings/telegram", body);
+    showTelegram(saved.telegram);
+  } catch (failure) {
+    result.textContent = "Telegram settings were not saved: " + (failure.code || failure.message);
+  } finally { button.disabled = false; el("telegram-token").value = ""; }
 });
 
 el("persona-settings").addEventListener("submit", async (event) => {

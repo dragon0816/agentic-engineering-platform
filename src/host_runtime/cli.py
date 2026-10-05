@@ -465,6 +465,9 @@ def _web(
                 f"Scheduled tasks are checked every {loop.interval_seconds:g} seconds "
                 "while this runs."
             )
+        web.start_telegram()
+        if web.telegram_loop is not None:
+            print("Telegram messages are answered while this runs.")
         print("This machine's Agent is at:")
         print(f"  {server.address}")
         print(
@@ -483,6 +486,8 @@ def _web(
         finally:
             if loop is not None:
                 loop.stop()
+            if web.telegram_loop is not None:
+                web.telegram_loop.stop(timeout=2)
     return 0
 
 
