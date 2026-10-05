@@ -559,3 +559,21 @@ def test_replies_are_chunked_scrubbed_and_a_failed_reply_is_recorded_not_raised(
     assert result.deliveries[0].disposition == "answered"
     assert result.deliveries[0].replied is False
     assert result.next_offset == 2
+
+
+def test_an_unmapped_sender_is_remembered_for_the_owner_but_not_answered(
+    tmp_path: Path,
+) -> None:
+    """The owner could not find their numeric id (2026-10-05): the ingress
+    remembers who messaged it so the settings page can offer Allow, while a
+    stranger still learns nothing."""
+    first, second = update(1, STRANGER, "hi"), update(2, STRANGER, "again")
+    for raw in (first, second):
+        raw["message"]["from"]["username"] = "stranger_name"
+    transport = FakeTransport([[first, second]])
+    item, _, _ = ingress(tmp_path, transport)
+    result = poll(item)
+    assert [d.disposition for d in result.deliveries] == ["unmapped_sender"] * 2
+    assert transport.sent() == []
+    (seen,) = item.unmapped.values()
+    assert seen.sender_id == STRANGER and seen.name == "@stranger_name"

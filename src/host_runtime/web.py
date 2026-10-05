@@ -656,6 +656,14 @@ class AgentWeb:
         loop = self.telegram_loop
         status["running"] = loop is not None and loop.running
         status["failure"] = None if loop is None else loop.failure
+        ingress = self.runtime.telegram
+        allowed = {item["sender_id"] for item in status["senders"]}
+        status["unknown_senders"] = [] if ingress is None else [
+            {"sender_id": item.sender_id, "name": item.name, "seen": item.seen.isoformat()}
+            for item in sorted(ingress.unmapped.values(), key=lambda item: item.seen,
+                               reverse=True)
+            if item.sender_id not in allowed
+        ]
         return status
 
     def start_telegram(self) -> None:

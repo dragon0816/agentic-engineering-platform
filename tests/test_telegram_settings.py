@@ -76,7 +76,6 @@ def test_the_token_goes_to_the_environment_and_no_file(
 
 @pytest.mark.parametrize(("changes", "code"), [
     ({"token": "not-a-token"}, "telegram_token_invalid"),
-    ({"senders": []}, "telegram_senders_missing"),
     ({"token": None}, "telegram_token_missing"),
 ])
 def test_incomplete_settings_are_refused_before_anything_is_written(
@@ -216,3 +215,32 @@ def test_an_expired_page_says_so_instead_of_request_failed() -> None:
     call = script.split("async function call(", 1)[1].split("\n}\n", 1)[0]
     assert "reply.status === 401" in call and '"page_expired"' in call
     assert "page_expired:" in script.split("const TELEGRAM_PROBLEMS", 1)[1]
+
+
+def test_a_bot_with_no_senders_runs_and_lists_who_messaged_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from datetime import UTC, datetime
+
+    from channels.telegram import UnmappedSender
+
+    monkeypatch.delenv(TOKEN_VARIABLE, raising=False)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, config_path=path)
+        web.user_environment = Store()
+        monkeypatch.setattr(web, "start_telegram", lambda: None)
+        saved = web.update_telegram_settings(_update(senders=[]))
+        assert saved["ok"] is True and saved["telegram"]["enabled"] is True
+        assert runtime.telegram is not None and runtime.telegram.config.senders == ()
+        now = datetime.now(UTC)
+        runtime.telegram.unmapped[555] = UnmappedSender(555, "@owner", now)
+        status = web.settings()["telegram"]
+        assert status["unknown_senders"][0]["sender_id"] == 555
+        assert status["unknown_senders"][0]["name"] == "@owner"
+        web.update_telegram_settings(
+            _update(token=None, senders=[{"sender_id": 555, "actor": "engineer"}])
+        )
+        runtime.telegram.unmapped[555] = UnmappedSender(555, "@owner", now)
+        assert web.settings()["telegram"]["unknown_senders"] == []   # allowed now

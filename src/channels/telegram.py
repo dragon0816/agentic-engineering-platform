@@ -22,7 +22,7 @@ import json
 import re
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from pydantic import Field, JsonValue, StrictBool, field_validator, model_validator
 
@@ -172,12 +172,14 @@ class TelegramPollResult(Contract):
 class _Update:
     def __init__(
         self, update_id: int, chat_id: int, sender_id: int, text: str | None,
-        callback_id: str | None = None,
+        callback_id: str | None = None, sender_name: str = "",
     ) -> None:
         self.update_id = update_id
         self.chat_id = chat_id
         self.sender_id = sender_id
         self.text = text
+        # `@username`, else the first name: shown to the owner, never routed.
+        self.sender_name = sender_name
         # A tapped inline button: its data is the text, and the tap is
         # acknowledged so the client stops showing it as pending.
         self.callback_id = callback_id
@@ -199,7 +201,10 @@ def _parse(raw: object) -> _Update | None:
             and isinstance(chat, dict) and type(chat.get("id")) is int
             and isinstance(data, str) and isinstance(callback.get("id"), str)
         ):
-            return _Update(raw["update_id"], chat["id"], sender["id"], data, callback["id"])
+            return _Update(
+                raw["update_id"], chat["id"], sender["id"], data, callback["id"],
+                sender_name=_display_name(sender),
+            )
         return None
     message = raw.get("message")
     if not isinstance(message, dict):
@@ -212,8 +217,30 @@ def _parse(raw: object) -> _Update | None:
         return None
     text = message.get("text")
     return _Update(
-        raw["update_id"], chat["id"], sender["id"], text if isinstance(text, str) else None
+        raw["update_id"], chat["id"], sender["id"], text if isinstance(text, str) else None,
+        sender_name=_display_name(sender),
     )
+
+
+def _display_name(sender: dict[str, Any]) -> str:
+    username = sender.get("username")
+    if isinstance(username, str) and username:
+        return f"@{username}"[:64]
+    first = sender.get("first_name")
+    return first[:64] if isinstance(first, str) else ""
+
+
+#: How many unmapped senders the ingress remembers for the settings page.
+MAX_UNMAPPED_SENDERS = 20
+
+
+class UnmappedSender:
+    """Somebody who messaged the bot without being in the sender map."""
+
+    def __init__(self, sender_id: int, name: str, seen: datetime) -> None:
+        self.sender_id = sender_id
+        self.name = name
+        self.seen = seen
 
 
 def slash_command(text: str) -> tuple[str, str | None, str | None] | None:
@@ -291,6 +318,7 @@ class TelegramIngress:
         self.agent = agent
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
+        self.unmapped: dict[int, UnmappedSender] = {}
         # Within a process, a duplicate inside one response is skipped; across
         # a restart, the durable cursor is what stops a batch being replayed.
         self._seen: dict[int, None] = {}
@@ -443,6 +471,13 @@ class TelegramIngress:
         if actor is None:
             # Refused before the text is even looked at, and not answered: a
             # stranger who found the bot learns nothing and spends nothing.
+            # The owner sees the id on the settings page and may allow it.
+            self.unmapped[update.sender_id] = UnmappedSender(
+                update.sender_id, update.sender_name, datetime.now(UTC)
+            )
+            while len(self.unmapped) > MAX_UNMAPPED_SENDERS:
+                oldest = min(self.unmapped.values(), key=lambda item: item.seen)
+                del self.unmapped[oldest.sender_id]
             return TelegramDelivery(**base, disposition="unmapped_sender")
         if update.text is None or not update.text.strip():
             return TelegramDelivery(

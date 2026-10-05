@@ -541,12 +541,15 @@ tr:last-child td { border-bottom: none; }
         <label for="telegram-token">Bot access token (from @BotFather)</label>
         <input id="telegram-token" type="password" autocomplete="new-password"
                spellcheck="false" placeholder="123456789:AA…">
-        <label for="telegram-senders">Allowed senders, one per line:
-          Telegram user id, then actor</label>
+        <label for="telegram-senders">Allowed senders, one per line: numeric Telegram user
+          id, optionally followed by an actor. Don't know yours? Save the token, send the bot
+          any message, then press “Check who messaged the bot” and Allow.</label>
         <textarea id="telegram-senders" spellcheck="false"
                   placeholder="123456789 leo.chi"></textarea>
-        <p><button class="go" id="telegram-save" type="submit">Save Telegram settings</button></p>
+        <p><button class="go" id="telegram-save" type="submit">Save Telegram settings</button>
+          <button id="telegram-check" type="button">Check who messaged the bot</button></p>
         <p id="telegram-result" class="note" role="status"></p>
+        <div id="telegram-unknown"></div>
       </form>
     </div>
     <h2>Workflow settings</h2>
@@ -1939,9 +1942,32 @@ function showTelegram(telegram) {
   el("telegram-senders").value = telegram.senders
     .map((item) => item.sender_id + " " + item.actor).join("\n");
   el("telegram-token").value = "";
+  const unknown = el("telegram-unknown");
+  unknown.replaceChildren();
+  for (const sender of telegram.unknown_senders || []) {
+    const row = document.createElement("p");
+    row.className = "note";
+    row.append(text("Not yet allowed: " + sender.sender_id
+      + (sender.name ? " (" + sender.name + ")" : "") + " "));
+    const allow = document.createElement("button");
+    allow.type = "button";
+    allow.append(text("Allow"));
+    allow.addEventListener("click", () => {
+      const box = el("telegram-senders");
+      box.value = (box.value.trim() ? box.value.trim() + "\n" : "") + sender.sender_id;
+      el("telegram-enabled").checked = true;
+      el("telegram-settings").requestSubmit();
+    });
+    row.append(allow);
+    unknown.append(row);
+  }
   el("telegram-result").textContent = (telegram.token_present
     ? "Token saved in " + telegram.environment_variable + "."
     : "No token saved yet.")
+    + (telegram.enabled && !telegram.senders.length
+      ? " The bot is running but allows nobody yet: send it a message, then press"
+        + " \u201cCheck who messaged the bot\u201d."
+      : "")
     + (telegram.enabled ? (telegram.running ? " Bot is answering." : " Bot is starting…")
       : (telegram.configured
         ? " Saved, but the bot is off: tick"
@@ -1949,6 +1975,14 @@ function showTelegram(telegram) {
         : " Bot is off."))
     + (telegram.failure ? " Last stop: " + telegram.failure : "");
 }
+
+el("telegram-check").addEventListener("click", async () => {
+  try {
+    showTelegram((await call("/api/settings")).telegram);
+  } catch (failure) {
+    el("telegram-result").textContent = "Could not check: " + failure.message;
+  }
+});
 
 const TELEGRAM_PROBLEMS = {
   telegram_token_invalid: "The token does not look like a bot token (123456789:AA…). "

@@ -150,9 +150,8 @@ def apply_telegram_settings(
     if checked.enabled:
         if not token and not os.environ.get(variable, ""):
             raise TelegramSettingsError("telegram_token_missing")
-        if not senders:
-            # An empty sender map admits nobody: the bot would answer no one.
-            raise TelegramSettingsError("telegram_senders_missing")
+        # No senders yet is allowed: the bot runs, answers nobody, and lists
+        # who messaged it on the settings page so the owner can allow them.
     elif not token and not checked.senders:
         # Only the switch: turn the bot off and keep what was configured.
         if layout.telegram.is_file():
