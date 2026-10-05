@@ -19,6 +19,21 @@ _PRESERVE_CATALOG = "0"
 _MAX_REPLY_BYTES = 256_000
 
 
+def _state(request: SkillCandidateRequest) -> dict[str, str]:
+    """The latest user message only.
+
+    Sending the whole model request (system and persona text, earlier turns,
+    tool schemas) buried the question: the self-hosted Laya SystemOne then
+    chose near-uniformly with confidence about 0.02, while the same cases as
+    a plain message were answered (docs/JEV_ADAPTER_READINESS.md, 2026-10-05).
+    It also sends less than the classified candidate request.
+    """
+    for message in reversed(request.initial_request.messages):
+        if message.role == "user" and message.text.strip():
+            return {"message": message.text}
+    return {"message": request.context.message}
+
+
 class JEVSkillSelectionProvider:
     """Choose one installed command, or request the unchanged full catalog."""
 
@@ -52,9 +67,7 @@ class JEVSkillSelectionProvider:
         )
         payload = {
             "model": self._config.model_profile,
-            "state": request.initial_request.model_dump(
-                mode="json", exclude={"trace", "model_alias"}
-            ),
+            "state": _state(request),
             "questions": {
                 _QUESTION: {
                     "type": "choice",

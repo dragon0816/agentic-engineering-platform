@@ -120,7 +120,8 @@ def test_official_choice_wire_and_high_confidence_selection() -> None:
     assert headers["Authorization"] == "Bearer synthetic-token"
     sent = json.loads(raw)
     assert sent["model"] == "jev-latest"
-    assert sent["state"]["messages"][0]["text"] == "Synthetic PUBLIC persona"
+    # The latest user message only: the persona and system text are not sent.
+    assert sent["state"] == {"message": "Find a report"}
     assert sent["questions"]["skill_candidate"]["criteria"]["1"] == "Search PUBLIC reports"
     assert "synthetic-token" not in result.model_dump_json()
     assert reply.closed
