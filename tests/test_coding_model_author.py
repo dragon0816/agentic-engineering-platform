@@ -76,6 +76,7 @@ def test_change_and_repair_return_whole_files_and_repair_sees_the_failure() -> N
     repaired = writer.repair(REQUEST, plan, failure, 1)
     assert "v * 2" in repaired.content                      # fenced JSON salvaged
     assert "assert 6 == 8" in model.requests[1].messages[1].text
+    assert "return v + 2" in model.requests[1].messages[1].text  # repairs its own last version
 
 
 @pytest.mark.parametrize(("answer", "code"), [

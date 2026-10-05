@@ -55,6 +55,7 @@ class ModelChangeAuthor:
         self.context = dict(context)
         self.local_only = local_only
         self.max_output_tokens = max_output_tokens
+        self._last: str | None = None
 
     def plan(self, request: CodingHarnessRequest) -> HarnessPlan:
         answer = self._ask(
@@ -77,7 +78,7 @@ class ModelChangeAuthor:
             f"Plan: {plan.summary}\nNow write the change. Return {{\"content\": the complete "
             f"new text of {request.artifact_path}}}.",
         )
-        return CandidateChange(path=request.artifact_path, content=_text(answer, "content"))
+        return self._candidate(request, answer)
 
     def repair(
         self, request: CodingHarnessRequest, plan: HarnessPlan, failure: CommandOutcome,
@@ -86,13 +87,22 @@ class ModelChangeAuthor:
         failures = "\n\n".join(
             f"[{item.case} {item.code}] {item.message}" for item in failure.failures
         )
+        last = (self._last or "")[:MAX_CONTEXT_FILE_CHARS]
         answer = self._ask(
             request,
-            f"Plan: {plan.summary}\nYour last version failed `{failure.command}` "
-            f"(repair attempt {attempt}):\n{failures}\n\nFix the file. Return "
-            f"{{\"content\": the complete corrected text of {request.artifact_path}}}.",
+            f"Plan: {plan.summary}\nYour last version of {request.artifact_path}:\n{last}\n\n"
+            f"It failed `{failure.command}` (repair attempt {attempt}):\n{failures}\n\n"
+            f"Fix the file. Return {{\"content\": the complete corrected text of "
+            f"{request.artifact_path}}}.",
         )
-        return CandidateChange(path=request.artifact_path, content=_text(answer, "content"))
+        return self._candidate(request, answer)
+
+    def _candidate(
+        self, request: CodingHarnessRequest, answer: Mapping[str, Any]
+    ) -> CandidateChange:
+        # The version the harness tests next; a repair starts from it.
+        self._last = _text(answer, "content")
+        return CandidateChange(path=request.artifact_path, content=self._last)
 
     def _ask(
         self, request: CodingHarnessRequest, instruction: str, *, max_output_tokens: int = 0
