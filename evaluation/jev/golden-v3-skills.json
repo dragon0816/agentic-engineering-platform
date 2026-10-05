@@ -1,0 +1,1820 @@
+[
+  {
+    "case_id": "weekly-en-run",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Run this week's SDE weekly report.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "weekly-zh-run",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "幫我跑這週的週報。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "weekly-en-dry",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Do a dry run of the weekly report for 2026_40W.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "weekly-zh-nomail",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "產生 2026_39W 的 weekly report，但先不要建郵件草稿。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "ncc-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Write the NCC improvement plan for the Gongguan station.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "ncc__plan"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "ncc-zh-dry",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "幫我做四條溝站的改善服務規劃，先試跑看看。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "ncc__plan"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "ncc-zh-docx",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "產生東清站的改善服務規劃 docx，寄草稿給我。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "ncc__plan"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "tickets-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Preview the team's Jira tickets.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "tickets__preview"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "tickets-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "看一下團隊 Jira 票的 Task 和 Issues 預覽。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "tickets__preview"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "knowledge-en-spec",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "What is the maximum frequency range of the CMP180?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "knowledge__ask"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "knowledge-zh-band",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "CMX500 支援哪些 5G NR 頻段？",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "knowledge__ask"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "knowledge-en-wifi",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Which R&S instrument should I use to test Wi-Fi 7 devices?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "knowledge__ask"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "market-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Map the R&S product families against the automotive and AI server markets.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "market_alignment__matrix"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "market-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "做一張 R&S 五大產品線對應各市場的證據矩陣。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "market_alignment__matrix"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "draft-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Draft a workflow from this SOP PDF.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "workflow__draft"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "draft-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "把這份 SOP 轉成 workflow 草稿。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "workflow__draft"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "proof-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Run the local proof workflow.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "personal__proof"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "proof-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "執行本機的 proof 測試流程。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "personal__proof"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "checklist-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Start a checklist review.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "checklist-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "幫我做 checklist 審查。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "broad-en-tools",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "What can you do for me?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "broad-zh-tools",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "你有哪些工具可以用？",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "broad-en-chat",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Hello, how are you today?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "broad-zh-chat",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "謝謝你，今天辛苦了。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "multi-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Run the weekly report and then write the NCC plan for Gongguan.",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "multi-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "先預覽 Jira 票，再幫我跑週報。",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-weekly-sheet",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Can you put together the status update spreadsheet for week 41?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-weekly-zh-dry",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "週報可以先幫我試算一下嗎，不要真的寫進 Excel",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-weekly-mail",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Generate last week's SDE report and the email draft",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-ncc-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "我需要大坑站的 NCC 規劃文件",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "ncc__plan"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-ncc-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Prepare the station improvement document for Dongqing, 5W transmitter",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "ncc__plan"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-tickets-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "What open Jira issues does the team have right now?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "tickets__preview"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-tickets-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "列出我們組在 Jira 上的工作項目",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "tickets__preview"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-knowledge-fsw",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Does the FSW signal analyzer support 6 GHz?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "knowledge__ask"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-knowledge-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "SMW200A 的最大輸出功率是多少？",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "knowledge__ask"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-knowledge-scope",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Which oscilloscope fits automotive Ethernet compliance testing?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "knowledge__ask"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-market-gaps",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Where are R&S's gaps in the semiconductor market?",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "market_alignment__matrix"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-market-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "比較羅德各產品線在國防航太市場的佈局",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "market_alignment__matrix"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-draft-rma",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "I have a procedure document for RMA handling, make it into a workflow",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "workflow__draft"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-draft-zh",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "這份作業流程文件可以自動化嗎？幫我產生草稿",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "workflow__draft"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-proof-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Test that this machine's agent setup works end to end",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "personal__proof"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-checklist-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Walk me through the release checklist",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-broad-morning",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Good morning!",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-broad-zh-can",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "你可以幫我做什麼事情？",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-multi-en",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "Preview the Jira tickets and also check the CMP180 spec",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  },
+  {
+    "case_id": "held-broad-zh-ok",
+    "decision_type": "skill_selection",
+    "classification": "PUBLIC",
+    "request": "ok 了解，謝謝",
+    "candidates": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "expected": [
+      "weekly__run",
+      "ncc__plan",
+      "tickets__preview",
+      "knowledge__ask",
+      "market_alignment__matrix",
+      "workflow__draft",
+      "personal__proof",
+      "checklist__run"
+    ],
+    "candidate_descriptions": {
+      "weekly__run": "Run the SDE weekly report (Workflow 11) for the current week, or for a named week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch sheet and saves the week's mail as a draft. Offer dry_run to see the plan first. Executes installed workflow engineering/sde-weekly-report@1.0.0.",
+      "ncc__plan": "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, which systems need work and who should get the draft; offer a dry run first. Executes installed workflow engineering/rs-ncc-improvement-plan@1.0.0.",
+      "tickets__preview": "Preview the configured company Jira project in Workflow 7's Task and Issues format. This is read-only and reports per-ticket comment failures. Executes installed workflow engineering/jira-team-tickets-preview@1.0.0.",
+      "knowledge__ask": "Use the exact installed engineering/rs-knowledge@1.0.0 Knowledge asset when the user asks about the staged RS_Knowledge Raw/Wiki corpus of R&S products and markets. Answers carry citations. Executes installed capability knowledge-query/ask@1.0.0.",
+      "market_alignment__matrix": "Map the five R&S product families against wireless communications, aerospace/defense, automotive, AI server and semiconductor using one installed Knowledge Vault, as an evidence and knowledge-gap matrix. Executes installed capability knowledge-query/market-matrix@1.0.0.",
+      "workflow__draft": "Draft a candidate workflow from one local SOP or SOP PDF. Drafting never installs, publishes, or executes it. Executes installed capability workflow-author/draft@1.0.0.",
+      "personal__proof": "Run the installed, side-effect-free local proof workflow against a controlled fixture. Executes installed workflow company-agent/personal-proof@1.0.0.",
+      "checklist__run": "Guide a checklist review and route execution to the preview Workflow. Executes installed workflow preview/checklist-review@1.0.0."
+    },
+    "candidate_hints": {
+      "weekly__run": "SDE weekly report 週報: GitHub board items into the weekly Excel sheet and mail draft",
+      "ncc__plan": "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站",
+      "tickets__preview": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
+      "knowledge__ask": "Answer a question about R&S instruments, specs and markets 儀器規格與產品知識 from the knowledge base",
+      "market_alignment__matrix": "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場",
+      "workflow__draft": "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿",
+      "personal__proof": "Local proof 本機 proof test workflow on a controlled fixture"
+    }
+  }
+]

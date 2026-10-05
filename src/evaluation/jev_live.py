@@ -33,9 +33,13 @@ PUBLIC_CORPUS_SHA256 = "4e0192921913d44073c4fdfffa2998c37a3e0f85c67556c5171b6d98
 #: Skill selection over the live install's eight Skill commands, English and
 #: Chinese, with their real descriptions (2026-10-05, owner request).
 SKILLS_CORPUS = PUBLIC_CORPUS.with_name("golden-v2-skills.json")
+#: v2 plus 20 held-out paraphrases, each case carrying the Skills'
+#: `selector_hint`s as the Gateway passes them.
+SKILLS_V3_CORPUS = PUBLIC_CORPUS.with_name("golden-v3-skills.json")
 REVIEWED_CORPORA = {
     PUBLIC_CORPUS.name: PUBLIC_CORPUS_SHA256,
     SKILLS_CORPUS.name: "286d59d42628ebf75368eade78c4d2f95ff4f7493f156b32c1b680ddd98af196",
+    SKILLS_V3_CORPUS.name: "ca958ed122f0b32737f5ae42bd85c88b393fd39f7f901218e934c128e2718635",
 }
 TYPESAFE_SYSTEMONE = "https://api.typesafe.ai/v1/systemone"
 KEY_ENV = "AEP_JEV_API_KEY"
@@ -83,6 +87,7 @@ def _candidate(case: GoldenDecisionCase, trial: int) -> SkillCandidateRequest:
                 for name in case.candidates
             ),
         ),
+        selector_hints=case.candidate_hints,
     )
 
 
@@ -202,8 +207,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--timeout-ms", type=int, default=3_000)
     parser.add_argument(
-        "--corpus", choices=("v1", "skills"), default="v1",
-        help="v1: the original four synthetic cases; skills: the live Skill catalogue",
+        "--corpus", choices=("v1", "skills", "skills-v3"), default="v1",
+        help="v1: four synthetic cases; skills: the live Skill catalogue (26); "
+        "skills-v3: plus 20 held-out cases and selector hints (46)",
     )
     parser.add_argument(
         "--threshold", type=float, default=None,
@@ -221,7 +227,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             timeout_ms=args.timeout_ms,
             credential=lambda: os.environ[KEY_ENV],
             endpoint=args.endpoint,
-            corpus=SKILLS_CORPUS if args.corpus == "skills" else PUBLIC_CORPUS,
+            corpus={"skills": SKILLS_CORPUS, "skills-v3": SKILLS_V3_CORPUS}.get(
+                args.corpus, PUBLIC_CORPUS
+            ),
             threshold=args.threshold,
         )
     except (OSError, ValueError, KeyError) as error:
