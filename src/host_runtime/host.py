@@ -138,6 +138,7 @@ from host_runtime.contracts import (
 # Re-exported: the layout moved to the contracts module so the platform client
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
+from host_runtime.jev_shadow import SHADOW_LOG_FILE, JevShadowLog, skill_accelerator
 from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceItem, ReferenceSetStore
 from host_runtime.runtime import inspect_host
@@ -807,6 +808,24 @@ def build_gateway(
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
     )
+    # JEV Skill selection: absent unless configured, sends nothing without the
+    # owner's egress approval, and in shadow mode only records its choices.
+    accelerator = config.decision_accelerator
+    if (
+        resolver is None and accelerator.credential is not None
+        and accelerator.credential.name not in config.credential_environment()
+    ):
+        raise HostError("credential_unmapped")
+    factory, authorize = skill_accelerator(
+        accelerator,
+        resolver if resolver is not None else EnvironmentCredentials(
+            config.credential_environment()
+        ),
+    )
+    shadow_log = (
+        JevShadowLog(layout.workspace_root / SHADOW_LOG_FILE)
+        if factory is not None and accelerator.mode == "shadow" else None
+    )
     return Gateway(
         router, bridge,
         WorkflowEngine(
@@ -814,6 +833,10 @@ def build_gateway(
             settings_provider=workflow_settings_provider(config, layout),
             choices_provider=choice_sources(config, layout).values,
         ),
+        skill_accelerator=factory,
+        skill_authorizer=authorize,
+        skill_shadow_observer=None if shadow_log is None else shadow_log.decision,
+        conversation_observer=None if shadow_log is None else shadow_log.conversation,
     )
 
 

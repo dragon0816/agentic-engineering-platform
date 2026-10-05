@@ -115,7 +115,10 @@ def run_public_benchmark(
         model_profile=model,
         timeout_ms=timeout_ms,
         enabled_decision_types=("skill_selection",),
-        **({} if threshold is None else {"confidence_threshold": threshold}),
+        confidence_threshold=(
+            DecisionAcceleratorConfig.model_fields["confidence_threshold"].default
+            if threshold is None else threshold
+        ),
     )
     if not credential().strip():
         raise ValueError("JEV credential is unavailable")

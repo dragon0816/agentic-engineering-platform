@@ -13,7 +13,13 @@ from typing import Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
-from agent.decisions import DecisionResult, DecisionService, DecisionTrace
+from agent.decisions import (
+    DecisionProvider,
+    DecisionResult,
+    DecisionService,
+    DecisionShadow,
+    DecisionTrace,
+)
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
@@ -206,6 +212,13 @@ class Gateway:
         engine: WorkflowEngine,
         *,
         decision_observer: Callable[[DecisionTrace], None] | None = None,
+        skill_accelerator: Callable[
+            [], DecisionProvider[SkillCandidateRequest, tuple[str, ...]]
+        ] | None = None,
+        skill_authorizer: Callable[[SkillCandidateRequest], bool] | None = None,
+        skill_shadow_observer: Callable[[SkillCandidateRequest, DecisionShadow], None]
+        | None = None,
+        conversation_observer: Callable[[GatewayConversationResult], None] | None = None,
     ):
         self.router = router
         self.bridge = bridge
@@ -213,11 +226,39 @@ class Gateway:
         self.skill_decisions = DecisionService[SkillCandidateRequest, tuple[str, ...]](
             baseline=_InstalledSkillCandidates(),
             config=router.decisions.config,
+            accelerator_factory=skill_accelerator,
+            authorize_accelerator=skill_authorizer,
             accept_accelerator=_valid_skill_subset,
             observer=decision_observer,
+            shadow_observer=skill_shadow_observer,
         )
+        # Sees each finished conversation turn (which tools the model called),
+        # so a shadow accelerator's choices can be compared with the outcome.
+        self._conversation_observer = conversation_observer
 
     async def converse(
+        self,
+        request: RequestContext,
+        history: tuple[ModelMessage, ...],
+        *,
+        persona_guidance: str | None = None,
+        allowed_tools: frozenset[str] | None = None,
+        max_turns: int = 5,
+        max_history_messages: int = MAX_CONVERSATION_HISTORY,
+    ) -> GatewayConversationResult:
+        result = await self._converse(
+            request, history, persona_guidance=persona_guidance, allowed_tools=allowed_tools,
+            max_turns=max_turns, max_history_messages=max_history_messages,
+        )
+        if self._conversation_observer is not None:
+            try:
+                self._conversation_observer(result)
+            except Exception:
+                # Telemetry cannot change the answer a person receives.
+                pass
+        return result
+
+    async def _converse(
         self,
         request: RequestContext,
         history: tuple[ModelMessage, ...],
