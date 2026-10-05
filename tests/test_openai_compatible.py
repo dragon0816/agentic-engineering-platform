@@ -150,6 +150,10 @@ def test_images_and_a_declared_output_contract_reach_the_wire() -> None:
     }
     # A contract name is a platform identifier; the provider is only asked for JSON.
     assert payload["response_format"] == {"type": "json_object"}
+    # JSON mode needs the word "json" in a message (OpenAI, vLLM: 400 otherwise).
+    assert payload["messages"][-1] == {
+        "role": "system", "content": "Respond with a single JSON object.",
+    }
     assert "platform.route-proposal.v1" not in json.dumps(payload)
     assert response.structured_output == {"kind": "workflow"}
     assert response.text == '{"kind": "workflow"}'
@@ -531,3 +535,16 @@ def test_a_refusal_in_a_two_hundred_body_is_not_a_success() -> None:
     assert events[1].failure is not None
     assert events[1].failure.code == "provider_error"
     assert "upstream closed" in events[1].failure.message
+
+
+def test_json_mode_adds_no_instruction_when_a_message_already_says_json() -> None:
+    transport = Transport(json_reply({**ANSWER, "choices": [{"message": {"content": "{}"}}]}))
+    OpenAICompatible(endpoint(), transport=transport).generate(
+        request(
+            messages=(ModelMessage(role="system", text="Return a JSON route."),
+                      ModelMessage(role="user", text="hi")),
+            requirements=ModelRequirements(structured_output=True),
+            output_contract="platform.route-proposal.v1",
+        )
+    )
+    assert len(transport.calls[0]["payload"]["messages"]) == 2

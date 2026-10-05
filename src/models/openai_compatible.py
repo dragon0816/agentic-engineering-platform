@@ -146,6 +146,15 @@ class OpenAICompatible:
             # The contract names a platform shape the provider knows nothing
             # about; all it is asked for is JSON. The caller validates.
             payload["response_format"] = {"type": "json_object"}
+            # OpenAI and vLLM refuse JSON mode (400) unless a message says
+            # "json"; the Telegram route prompt did not (2026-10-05).
+            if not any(
+                "json" in str(message.get("content") or "").lower()
+                for message in payload["messages"]
+            ):
+                payload["messages"].append(
+                    {"role": "system", "content": "Respond with a single JSON object."}
+                )
         if request.tools:
             payload["tools"] = [wire.tool_schema(tool) for tool in request.tools]
         if stream:
