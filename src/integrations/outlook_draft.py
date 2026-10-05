@@ -73,6 +73,8 @@ class MailDraft(Contract):
     to: tuple[Text, ...] = ()
     cc: tuple[Text, ...] = ()
     images: tuple[InlineImage, ...] = ()
+    # Files attached as themselves (a generated document), not shown inline.
+    attachments: tuple[Text, ...] = ()
 
 
 class DraftReceipt(Contract):
@@ -100,11 +102,15 @@ class RecordingDraftWriter:
 
     def save(self, draft: MailDraft) -> DraftReceipt:
         checked = MailDraft.model_validate(draft)
-        for image in checked.images:
-            if not Path(image.path).is_file():
-                raise DraftError("attachment_missing")
+        _require_files(checked)
         self.drafts.append(checked)
         return DraftReceipt(saved=True, entry_id=f"recorded-{len(self.drafts)}", folder="recorded")
+
+
+def _require_files(draft: MailDraft) -> None:
+    paths = [image.path for image in draft.images] + list(draft.attachments)
+    if any(not Path(path).is_file() for path in paths):
+        raise DraftError("attachment_missing")
 
 
 def require_com() -> None:
@@ -153,9 +159,7 @@ class OutlookComDraft:
         checked = MailDraft.model_validate(draft)
         # Checked before Outlook is touched: a missing picture should not
         # leave a half-built item in somebody's drafts.
-        for image in checked.images:
-            if not Path(image.path).is_file():
-                raise DraftError("attachment_missing")
+        _require_files(checked)
         application = self._application()
         try:
             item = application.CreateItem(_MAIL_ITEM)
@@ -170,6 +174,8 @@ class OutlookComDraft:
                 accessor = attached.PropertyAccessor
                 accessor.SetProperty(_CONTENT_ID, image.cid)
                 accessor.SetProperty(_HIDDEN, True)
+            for path in checked.attachments:
+                item.Attachments.Add(str(Path(path).resolve()))
             item.Save()
             return DraftReceipt(
                 saved=True,

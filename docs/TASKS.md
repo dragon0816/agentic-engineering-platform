@@ -1189,6 +1189,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   serves engine validation (`choice_function_unavailable`), Agent Web
   `/api/workflow-options` and Telegram buttons. Tests:
   `tests/test_choice_functions.py`.
+- [x] Building block `outlook.draft` (`capabilities/mail_draft`): a governed
+  write that saves one Outlook draft with optional file attachments, `skip`
+  and `best_effort`, and has no send. `MailDraft` gained `attachments`.
+  Tests: `tests/test_mail_draft_capability.py`, `tests/test_outlook_draft.py`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

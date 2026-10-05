@@ -192,3 +192,27 @@ def test_blank_recipients_are_dropped_and_the_rest_left_alone() -> None:
     """Not validated here: what an address may look like is Outlook's rule,
     and a host guessing wrong would refuse a draft nobody asked it to judge."""
     assert outlook_draft.recipients([" a@example.com ", "", "  ", "b"]) == ("a@example.com", "b")
+
+
+def test_a_document_is_attached_as_a_file_not_inline(tmp_path: Path) -> None:
+    """Workflow 14 attaches the plan it wrote. A file attachment carries no
+    content id and is not hidden, so the reader sees it in the attachment bar."""
+    document = tmp_path / "plan.docx"
+    document.write_bytes(b"PK\x03\x04")
+    outlook = FakeOutlook()
+    OutlookComDraft(dispatch=outlook).save(draft(attachments=(str(document),)))
+    assert [item.path for item in outlook.item.attached] == [str(document.resolve())]
+    assert outlook.item.properties == {}
+    assert outlook.item.saves == 1
+
+
+def test_a_missing_document_leaves_no_half_built_draft(tmp_path: Path) -> None:
+    outlook = FakeOutlook()
+    with pytest.raises(DraftError) as raised:
+        OutlookComDraft(dispatch=outlook).save(
+            draft(attachments=(str(tmp_path / "absent.docx"),))
+        )
+    assert raised.value.code == "attachment_missing"
+    assert outlook.created == []
+    with pytest.raises(DraftError):
+        RecordingDraftWriter().save(draft(attachments=(str(tmp_path / "absent.docx"),)))

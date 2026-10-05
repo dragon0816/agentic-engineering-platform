@@ -49,6 +49,8 @@ from capabilities.knowledge_query.handlers import (
     KnowledgeQueryHandler,
     MarketMatrixHandler,
 )
+from capabilities.mail_draft.handlers import DRAFT_SPEC as MAIL_DRAFT_SPEC
+from capabilities.mail_draft.handlers import MailDraftHandler, MailDraftRequest, MailDraftResult
 from capabilities.release_package.apply_isolated import IsolatedApplyHandler
 from capabilities.release_package.contracts import (
     IsolatedApplyOutput,
@@ -383,6 +385,15 @@ def build_integrations(
             IsolatedApplyHandler(),
             IsolatedApplyStepInput,
             IsolatedApplyOutput,
+            ExecutionDependencies(central_required=False),
+        )
+    # The Outlook draft building block: installed when a Workflow uses it.
+    if MAIL_DRAFT_SPEC.identity.key in uses:
+        installed.register(
+            MAIL_DRAFT_SPEC,
+            MailDraftHandler(drafter if drafter is not None else OutlookComDraft),
+            MailDraftRequest,
+            MailDraftResult,
             ExecutionDependencies(central_required=False),
         )
     integrations = config.integrations
