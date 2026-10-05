@@ -1122,3 +1122,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   fields and inline validation. Dynamic `ref:`/`fn:` choices render as text
   until S6. Browser DOM check confirmed rendering, pattern refusal and value
   collection. Next: S3 Agent tool schema.
+- [x] rs_workflow_system migration S3, Agent tool schema (Claude Code,
+  2026-10-05): `agent_tool_schema(manifest)` builds a closed JSON Schema from
+  the declaration (agent-channel runtime fields only; privileged `confirm`,
+  internal, static and secret fields are never offered). `ModelTool` carries
+  an optional provider-neutral `input_schema`; declared Workflow tools use it,
+  undeclared tools keep the generic object. Tool calls are refused before
+  execution if they set a non-offered field or fail `validate_run_parameters`
+  (defaults applied otherwise). Next: S4 Telegram question flow.

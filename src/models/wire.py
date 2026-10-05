@@ -250,7 +250,10 @@ TOOL_INPUT_SCHEMAS: dict[str, dict[str, Any]] = {
 
 
 def tool_schema(tool: ModelTool) -> dict[str, Any] | Failure:
-    schema = TOOL_INPUT_SCHEMAS.get(tool.input_contract)
+    schema = (
+        tool.input_schema if tool.input_schema is not None
+        else TOOL_INPUT_SCHEMAS.get(tool.input_contract)
+    )
     if schema is None:
         return Failure(
             code="tool_contract_unsupported",

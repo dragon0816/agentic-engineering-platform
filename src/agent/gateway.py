@@ -30,6 +30,8 @@ from common.execution import (
     RunId,
     TraceIdentifiers,
 )
+from common.workflow_forms import agent_fields, agent_tool_schema
+from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from models.contracts import (
     ModelMessage,
     ModelRequest,
@@ -257,6 +259,9 @@ class Gateway:
                 name = f"{skill.alias}__{command.name}"
                 bindings[name] = command
                 target = command.target
+                manifest = (
+                    self.engine.workflows.get(target) if command.kind == "workflow" else None
+                )
                 tools.append(
                     ModelTool(
                         name=name,
@@ -265,6 +270,11 @@ class Gateway:
                             f"{target.namespace}/{target.name}@{target.version}."
                         ),
                         input_contract="platform.command-arguments.v1",
+                        # A declared Workflow tells the model its exact fields.
+                        input_schema=(
+                            agent_tool_schema(manifest)
+                            if manifest is not None and manifest.parameters else None
+                        ),
                     )
                 )
         if allowed_tools is not None:
@@ -436,7 +446,26 @@ class Gateway:
                 decision=decision,
                 capability=result,
             )
-        snapshot = await self.execute_workflow(context, binding.target, call.arguments)
+        arguments: dict[str, JsonValue] = dict(call.arguments)
+        manifest = self.engine.workflows.get(binding.target)
+        if manifest is not None and manifest.parameters:
+            # The model may fill only the fields its schema offered; a
+            # privileged or internal field stays a person's choice.
+            offered = {field.name for field in agent_fields(manifest)}
+            refused = sorted(set(arguments) - offered)
+            try:
+                if refused:
+                    raise WorkflowParameterError(
+                        f"{', '.join(refused)} cannot be set by the Agent"
+                    )
+                arguments = validate_run_parameters(manifest, arguments)
+            except WorkflowParameterError as error:
+                return ConversationToolExecution(
+                    call_id=call.call_id,
+                    name=call.name,
+                    failure=Failure(code="workflow_parameters_invalid", message=str(error)),
+                )
+        snapshot = await self.execute_workflow(context, binding.target, arguments)
         return ConversationToolExecution(
             call_id=call.call_id,
             name=call.name,

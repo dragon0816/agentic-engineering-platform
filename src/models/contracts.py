@@ -51,6 +51,9 @@ class ModelTool(Contract):
     name: Symbol
     description: Text
     input_contract: Symbol
+    # A provider-neutral JSON Schema generated from the target's declaration
+    # (for example a Workflow's parameters); None uses the contract's schema.
+    input_schema: dict[str, JsonValue] | None = None
 
 
 class ModelRequest(Contract):

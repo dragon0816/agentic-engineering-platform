@@ -68,3 +68,56 @@ def form_field(field: WorkflowParameter) -> dict[str, Any]:
 
 def form_fields(manifest: WorkflowManifest, channel: ParameterChannel) -> list[dict[str, Any]]:
     return [form_field(field) for field in ordered_fields(manifest, channel)]
+
+
+def agent_fields(manifest: WorkflowManifest) -> tuple[WorkflowParameter, ...]:
+    """Fields a model may fill: agent-channel runtime fields, never privileged.
+
+    A privileged field (`confirm`) such as "send mail" stays a person's
+    choice; static settings and secrets are never run fields at all.
+    """
+    return tuple(field for field in ordered_fields(manifest, "agent") if not field.confirm)
+
+
+def _property_schema(field: WorkflowParameter) -> dict[str, Any]:
+    kind = field.kind
+    item: dict[str, Any]
+    if kind in ("integer", "number"):
+        item = {"type": kind}
+        if field.minimum is not None:
+            item["minimum"] = field.minimum
+        if field.maximum is not None:
+            item["maximum"] = field.maximum
+    elif kind == "boolean":
+        item = {"type": "boolean"}
+    elif kind == "date":
+        item = {"type": "string", "format": "date"}
+    elif kind == "emails":
+        item = {"type": "string", "format": "email"}
+    else:
+        item = {"type": "string", "minLength": max(1, field.min_length or 1)}
+        if field.pattern:
+            item["pattern"] = field.pattern
+        if field.choice_values and field.choices_source is None:
+            item["enum"] = list(field.choice_values)
+    schema = (
+        {"type": "array", "items": item}
+        if field.multiple or kind in ("text_list", "emails") else item
+    )
+    description = field.label + (f": {field.help or field.description}"
+                                 if field.help or field.description else "")
+    schema["description"] = description
+    if field.default is not None:
+        schema["default"] = field.default
+    return schema
+
+
+def agent_tool_schema(manifest: WorkflowManifest) -> dict[str, Any]:
+    """A closed JSON Schema for the model's tool call, from the declaration."""
+    fields = agent_fields(manifest)
+    return {
+        "type": "object",
+        "properties": {field.name: _property_schema(field) for field in fields},
+        "required": [field.name for field in fields if field.required],
+        "additionalProperties": False,
+    }
