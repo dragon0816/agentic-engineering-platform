@@ -26,6 +26,7 @@ from typing import Any, Literal, Self
 
 from pydantic import Field, JsonValue, StrictBool, field_validator, model_validator
 
+from agent.routing import DOT_COMMAND
 from channels import telegram_flow
 from common.assets import (
     REDACTED,
@@ -40,6 +41,7 @@ from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.schedule_policy import target_side_effect
+from models.contracts import ModelMessage
 from models.credentials import CredentialMisconfigured, CredentialResolver
 from models.wire import (
     Transport,
@@ -66,10 +68,13 @@ SLASH_COMMAND = re.compile(
     re.DOTALL,
 )
 HELP = (
-    "Send a skill command as /<skill> <command> [arguments], or describe the task in "
-    "words. /run <number or name> asks a Workflow's fields one by one. /status shows "
-    "this Bridge's state. Attachments are not accepted."
+    "Talk to the Agent in words, or send a skill command as /<skill> <command> "
+    "[arguments]. /run <number or name> asks a Workflow's fields one by one. /status "
+    "shows this Bridge's state. /new starts a fresh conversation. Attachments are not "
+    "accepted."
 )
+#: Turns of a Telegram chat kept as context for the next one (memory only).
+MAX_CHAT_HISTORY = 12
 
 Disposition = Literal[
     "unmapped_sender", "unsupported_content", "answered", "refused", "routed", "failed"
@@ -319,6 +324,7 @@ class TelegramIngress:
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
         self.unmapped: dict[int, UnmappedSender] = {}
+        self._histories: dict[tuple[int, int], list[ModelMessage]] = {}
         # Within a process, a duplicate inside one response is skipped; across
         # a restart, the durable cursor is what stops a batch being replayed.
         self._seen: dict[int, None] = {}
@@ -501,6 +507,11 @@ class TelegramIngress:
             return await self._start_flow(base, key, parsed, actor, update)
         if parsed is not None and parsed[0] in ("start", "help"):
             return TelegramDelivery(**base, disposition="answered", reply=HELP)
+        if parsed is not None and parsed[0] == "new":
+            self._histories.pop(key, None)
+            return TelegramDelivery(
+                **base, disposition="answered", reply="Started a fresh conversation."
+            )
         if parsed is not None and parsed[0] == "status":
             # A durable read under the store's lock, so never on the event loop.
             report = await asyncio.to_thread(self._status)
@@ -533,6 +544,13 @@ class TelegramIngress:
                 disposition="unsupported_content",
                 reply="That message was not forwarded: it looks like it contains a credential.",
             )
+        if (
+            parsed is None and not DOT_COMMAND.match(text)
+            and self.agent.gateway.router.model is not None
+        ):
+            # Free text is a conversation, as in Agent Web: the model answers
+            # and may call installed tools under the same policy.
+            return await self._converse(base, key, request, text)
         outcome = await self.agent.handle(request)
         if outcome.refusal is not None:
             return TelegramDelivery(
@@ -544,6 +562,31 @@ class TelegramIngress:
         return TelegramDelivery(
             **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
         )
+
+    async def _converse(
+        self, base: dict[str, Any], key: tuple[int, int], request: LocalAgentRequest,
+        text: str,
+    ) -> TelegramDelivery:
+        history = self._histories.get(key, [])
+        turn = [*history, ModelMessage(role="user", text=text)]
+        result = await self.agent.converse(request, tuple(turn))
+        if result.refusal is not None:
+            return TelegramDelivery(
+                **base, disposition="answered", reply=f"Refused: {result.refusal}."
+            )
+        conversation = result.conversation
+        if conversation is None or conversation.status != "answered":
+            code = (
+                conversation.failure.code
+                if conversation is not None and conversation.failure is not None
+                else "conversation_failed"
+            )
+            return TelegramDelivery(
+                **base, disposition="answered", reply=f"That could not be answered ({code})."
+            )
+        turn.append(ModelMessage(role="assistant", text=conversation.text))
+        self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+        return TelegramDelivery(**base, disposition="answered", reply=scrub(conversation.text))
 
     def _acting(self, actor: str) -> tuple[str, str | None]:
         """Who runs and on whose behalf, as for every other request."""

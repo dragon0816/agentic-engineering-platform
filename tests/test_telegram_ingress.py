@@ -577,3 +577,37 @@ def test_an_unmapped_sender_is_remembered_for_the_owner_but_not_answered(
     assert transport.sent() == []
     (seen,) = item.unmapped.values()
     assert seen.sender_id == STRANGER and seen.name == "@stranger_name"
+
+
+def test_free_text_is_a_conversation_with_context_and_new_clears_it(tmp_path: Path) -> None:
+    """Words in Telegram talk to the Agent as Agent Web chat does (owner
+    report 2026-10-05: "hi" got "No safe route was selected"); commands keep
+    their deterministic path."""
+    transport = FakeTransport([
+        [update(1, OWNER, "hi there")],
+        [update(2, OWNER, "and again")],
+        [update(3, OWNER, "/new")],
+    ])
+    from models.contracts import ModelRequest, ModelResponse
+
+    class Talking:
+        def __init__(self) -> None:
+            self.seen: list[int] = []
+
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            self.seen.append(len(request.messages))
+            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
+                                 text="Hello from the Agent")
+
+    item, agent, _ = ingress(tmp_path, transport)
+    model = Talking()
+    agent.gateway.router.model = model
+    first = poll(item).deliveries[0]
+    assert first.disposition == "answered" and first.reply
+    second = poll(item).deliveries[0]
+    assert second.disposition == "answered"
+    (history,) = item._histories.values()
+    assert [message.role for message in history] == ["user", "assistant", "user", "assistant"]
+    assert model.seen[1] > model.seen[0]       # the second turn carried the first
+    cleared = poll(item).deliveries[0]
+    assert cleared.reply == "Started a fresh conversation." and item._histories == {}
