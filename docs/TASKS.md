@@ -1215,6 +1215,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Workflow 11 renamed `engineering/gtm-weekly-report` ->
   `engineering/sde-weekly-report` (owner request 2026-10-05); same steps and
   parameters, `/run 11` unchanged.
+- [x] JEV benchmark `--endpoint` for a tunnelled self-hosted SystemOne
+  (Laya, 2026-10-05); first live run and findings recorded in
+  `docs/JEV_ADAPTER_READINESS.md` (state shape, threshold not applied in the
+  benchmark, latency above 300 ms default, corpus too small).
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

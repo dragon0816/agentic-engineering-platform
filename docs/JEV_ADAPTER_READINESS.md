@@ -67,3 +67,32 @@ Agent Host after changing the file. This setting contains no credential.
 4. Compare the same golden cases against the unchanged baseline: exact candidate set, accuracy/confusion, confidence calibration, p50/p95 latency, fallback rate, and cost. Keep `NONE` as the default and prove it constructs no client, performs no probe, and adds no network call. Expand to another decision type only after its own benchmark passes.
 
 This audit does not authorize production JEV calls or change the current routing path.
+
+## Self-hosted Laya SystemOne run (2026-10-05)
+
+The owner runs `laya-serve 0.1.0` (`POST /v1/systemone`, Bearer token, the
+`model` field is ignored and the reply names `laya-rl-agent`; it routes by
+language, English to `convaiinnovations/laya`). It was reached through an SSH
+tunnel (`ssh -N -p 2222 -L 18000:127.0.0.1:8000 openlab@172.25.228.141`) at
+`http://127.0.0.1:18000/v1/systemone`, token in `AEP_JEV_API_KEY`. The reply
+shape passes the adapter's validation unchanged.
+
+`python -m evaluation.jev_live --model laya-rl-agent --endpoint
+http://127.0.0.1:18000/v1/systemone --trials 3` (reviewed PUBLIC corpus,
+4 skill cases): 12/12 answered, exact accuracy 0.25 (baseline 0.25),
+latency p50 376 ms / p95 638 ms, Brier 0.238.
+
+Findings:
+
+1. The adapter sends the whole `ModelRequest` JSON as `state` (~280 state
+   tokens for a one-line request). Laya then picks option 1 for every case
+   with near-uniform probabilities and confidence about 0.02. With
+   `state = {"message": <user text>}` the same cases give: file -> 1 (correct,
+   0.84), report -> 3 (correct, 0.51), wiki -> 0 (preserve, 0.05), broad -> 1
+   (0.06). The state shape, not the service, caused the 25 %.
+2. The benchmark counts a provider answer as "answered" without the
+   DecisionService confidence threshold (default 0.9), so it overstates what
+   live routing would accept; at 0.9 every Laya answer above is rejected.
+3. Latency is above the Host default accelerator timeout of 300 ms.
+4. The corpus has four skill cases with placeholder tool descriptions
+   ("Synthetic installed command X"); it cannot show useful accuracy.
