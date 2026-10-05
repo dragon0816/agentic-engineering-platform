@@ -51,6 +51,10 @@ class FakeReply:
         return None
 
 
+#: How a progress status message begins.
+STATUS_MARK = "⏳"
+
+
 class FakeTransport:
     """Answers `getUpdates` from a queue of batches and accepts every
     `sendMessage`, recording each call's URL and payload."""
@@ -78,9 +82,22 @@ class FakeTransport:
         if url.endswith("/getUpdates"):
             batch = self.batches.pop(0) if self.batches else []
             return FakeReply(self.status, {"ok": True, "result": batch})
-        return FakeReply(self.send_status, {"ok": True, "result": {}})
+        message_id = sum(1 for called, _ in self.calls if called.endswith("/sendMessage"))
+        return FakeReply(self.send_status, {"ok": True, "result": {"message_id": message_id}})
 
     def sent(self) -> list[str]:
+        """Replies, without the "working on it" status messages."""
+        return [text for text in self._messages() if not text.startswith(STATUS_MARK)]
+
+    def statuses(self) -> list[str]:
+        """Each status message as first sent, then every edit of it, in order."""
+        return [
+            payload["text"] for url, payload in self.calls
+            if (url.endswith("/sendMessage") and payload["text"].startswith(STATUS_MARK))
+            or url.endswith("/editMessageText")
+        ]
+
+    def _messages(self) -> list[str]:
         return [payload["text"] for url, payload in self.calls if url.endswith("/sendMessage")]
 
     def polls(self) -> list[dict[str, Any]]:
@@ -611,3 +628,71 @@ def test_free_text_is_a_conversation_with_context_and_new_clears_it(tmp_path: Pa
     assert model.seen[1] > model.seen[0]       # the second turn carried the first
     cleared = poll(item).deliveries[0]
     assert cleared.reply == "Started a fresh conversation." and item._histories == {}
+
+
+def test_a_conversation_shows_it_is_working_and_which_skills_it_used(tmp_path: Path) -> None:
+    """Owner request 2026-10-06: while the Agent works, Telegram says so and
+    lists the skills in use; the status message is edited, then the answer
+    follows as its own message. Only tool names are shown."""
+    from models.contracts import ModelRequest, ModelResponse, ModelToolCall
+
+    class UsingATool:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            self.turns += 1
+            if self.turns == 1:
+                return ModelResponse(
+                    trace=request.trace, model_alias=request.model_alias, text="",
+                    tool_calls=(ModelToolCall(call_id="c1", name="shipment__run", arguments={}),),
+                )
+            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
+                                 text="The package was released.")
+
+    transport = FakeTransport([[update(1, OWNER, "please release the package")]])
+    item, agent, _ = ingress(tmp_path, transport)
+    agent.gateway.router.model = UsingATool()
+    delivery = poll(item).deliveries[0]
+    assert delivery.disposition == "answered" and delivery.replied
+    assert transport.sent() == ["The package was released."]
+    statuses = transport.statuses()
+    assert statuses[0].startswith(STATUS_MARK + " Working on it")
+    assert any("• /shipment run — running…" in text for text in statuses)
+    final = statuses[-1]
+    assert final.startswith("✅ Done after") and "• /shipment run — done" in final
+    # The status message comes before the answer, and every edit targets it.
+    first_status = next(i for i, (url, _) in enumerate(transport.calls)
+                        if url.endswith("/sendMessage"))
+    answer = max(i for i, (url, _) in enumerate(transport.calls) if url.endswith("/sendMessage"))
+    edits = [payload for url, payload in transport.calls if url.endswith("/editMessageText")]
+    assert first_status < answer and edits
+    assert {payload["message_id"] for payload in edits} == {1}
+    assert all("please release" not in text for text in statuses)
+
+
+def test_a_skill_command_shows_it_is_running_and_how_it_ended(tmp_path: Path) -> None:
+    transport = FakeTransport([[update(7, OWNER, "shipment.run")]])
+    item, _, _ = ingress(tmp_path, transport)
+    delivery = poll(item).deliveries[0]
+    assert delivery.disposition == "routed"
+    statuses = transport.statuses()
+    assert statuses[0].startswith(STATUS_MARK + " Running shipment.run")
+    assert statuses[-1].startswith("✅ Done after")
+    assert len(transport.sent()) == 1
+
+
+def test_progress_that_cannot_be_shown_never_fails_the_request(tmp_path: Path) -> None:
+    class NoStatus(FakeTransport):
+        def send(self, url: str, body: bytes, headers: Mapping[str, str],
+                 timeout_s: float) -> FakeReply:
+            if url.endswith("/sendMessage") and json.loads(body)["text"].startswith(STATUS_MARK):
+                self.calls.append((url, json.loads(body)))
+                return FakeReply(500, {"ok": False})
+            return super().send(url, body, headers, timeout_s)
+
+    transport = NoStatus([[update(7, OWNER, "shipment.run")]])
+    item, _, _ = ingress(tmp_path, transport)
+    delivery = poll(item).deliveries[0]
+    assert delivery.disposition == "routed" and delivery.replied
+    assert not any(url.endswith("/editMessageText") for url, _ in transport.calls)

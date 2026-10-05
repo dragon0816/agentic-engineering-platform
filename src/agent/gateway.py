@@ -9,6 +9,7 @@ deterministic ones, so a trigger's origin never changes what may execute.
 import asyncio
 import json
 from collections.abc import Callable
+from contextvars import ContextVar
 from typing import Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
@@ -53,6 +54,34 @@ from workflow.journal import SuspensionConfirmation
 MAX_CONVERSATION_HISTORY = 12
 MAX_CONVERSATION_MESSAGE_CHARS = 4_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
+
+ToolProgressState = Literal["running", "succeeded", "failed"]
+#: Set by a channel around one `converse` call to hear which installed tool
+#: starts and how it ends (by tool name, no arguments or results), so a person
+#: waiting on a slow chat can see what is happening. A context variable rather
+#: than a request field: the backend request is a frozen contract, and the
+#: callback is presentation, not policy.
+TOOL_PROGRESS: ContextVar[Callable[[str, ToolProgressState], None] | None] = ContextVar(
+    "aep_tool_progress", default=None
+)
+
+
+def _tool_progress(name: str, state: ToolProgressState) -> None:
+    listener = TOOL_PROGRESS.get()
+    if listener is None:
+        return
+    try:
+        listener(name, state)
+    except Exception:  # noqa: BLE001 - progress display cannot change the answer
+        pass
+
+
+def _tool_succeeded(item: "ConversationToolExecution") -> bool:
+    if item.failure is not None:
+        return False
+    if item.capability is not None:
+        return item.capability.status == "succeeded"
+    return item.workflow is not None and item.workflow.run.status == "succeeded"
 
 
 class RunControlResult(Contract):
@@ -441,7 +470,9 @@ class Gateway:
                     ),
                 )
             else:
+                _tool_progress(call.name, "running")
                 item = await self._execute_conversation_tool(context, call, binding)
+                _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
             evidence.append(item)
             messages.append(
                 ModelMessage(

@@ -20,12 +20,14 @@ failure rules.
 import asyncio
 import json
 import re
+import time
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime
 from typing import Any, Literal, Self
 
 from pydantic import Field, JsonValue, StrictBool, field_validator, model_validator
 
+from agent.gateway import TOOL_PROGRESS, ToolProgressState
 from agent.routing import DOT_COMMAND
 from channels import telegram_flow
 from common.assets import (
@@ -75,6 +77,11 @@ HELP = (
 )
 #: Turns of a Telegram chat kept as context for the next one (memory only).
 MAX_CHAT_HISTORY = 12
+#: How often a "working on it" message refreshes its elapsed time.
+PROGRESS_REFRESH_SECONDS = 5.0
+_STEP_MARKS: dict[ToolProgressState, str] = {
+    "running": "running…", "succeeded": "done", "failed": "failed",
+}
 
 Disposition = Literal[
     "unmapped_sender", "unsupported_content", "answered", "refused", "routed", "failed"
@@ -305,6 +312,96 @@ def _describe(outcome: LocalAgentOutcome) -> str:
     return f"{target.name}: {decision.kind}"
 
 
+def _tool_label(name: str) -> str:
+    """`weekly-report__run` -> `/weekly-report run`: how the person would type it."""
+    alias, _, command = name.partition("__")
+    return f"/{alias} {command}".strip()
+
+
+def _command_label(text: str) -> str:
+    return scrub(" ".join(text.split()[:2]))[:80]
+
+
+def _handled(outcome: LocalAgentOutcome) -> bool:
+    if outcome.capability is not None:
+        return outcome.capability.status == "succeeded"
+    if outcome.workflow is not None:
+        return outcome.workflow.run.status == "succeeded"
+    return False
+
+
+class _Progress:
+    """One "working on it" message per request, edited in place while the
+    Agent works: how long it has taken and which skills it used. Only tool
+    names are shown, never arguments or results. Every Bot API call runs off
+    the event loop, one at a time, so edits arrive in order."""
+
+    def __init__(self, ingress: "TelegramIngress", chat_id: int, title: str) -> None:
+        self._ingress = ingress
+        self._chat_id = chat_id
+        self._title = title
+        self._started = time.monotonic()
+        self._message_id: int | None = None
+        self._steps: dict[str, ToolProgressState] = {}
+        self._lock = asyncio.Lock()
+        self._pending: set[asyncio.Task[None]] = set()
+        self._ticker: asyncio.Task[None] | None = None
+
+    def text(self, outcome: bool | None = None) -> str:
+        seconds = int(time.monotonic() - self._started)
+        if outcome is None:
+            head = f"⏳ {self._title}… {seconds} s"
+        else:
+            head = f"{'✅ Done' if outcome else '⚠️ Stopped'} after {seconds} s"
+        lines = [head]
+        if self._steps:
+            lines.append("Skills used:" if outcome is not None else "Skills:")
+            lines.extend(
+                f"• {_tool_label(name)} — {_STEP_MARKS[state]}"
+                for name, state in self._steps.items()
+            )
+        elif outcome is not None:
+            lines.append("No skills were used.")
+        return scrub("\n".join(lines))
+
+    async def open(self) -> None:
+        self._message_id = await asyncio.to_thread(
+            self._ingress._send_status, self._chat_id, self.text()
+        )
+        if self._message_id is not None:
+            self._ticker = asyncio.create_task(self._tick())
+
+    def tool(self, name: str, state: ToolProgressState) -> None:
+        """The Gateway's TOOL_PROGRESS listener; called on the event loop."""
+        self._steps[name] = state
+        self._schedule()
+
+    async def finish(self, succeeded: bool) -> None:
+        if self._ticker is not None:
+            self._ticker.cancel()
+        if self._pending:
+            await asyncio.gather(*self._pending, return_exceptions=True)
+        await self._edit(self.text(succeeded))
+
+    async def _tick(self) -> None:
+        while True:
+            await asyncio.sleep(self._ingress.progress_refresh_s)
+            self._schedule()
+
+    def _schedule(self) -> None:
+        task = asyncio.get_running_loop().create_task(self._edit(self.text()))
+        self._pending.add(task)
+        task.add_done_callback(self._pending.discard)
+
+    async def _edit(self, text: str) -> None:
+        if self._message_id is None:
+            return
+        async with self._lock:
+            await asyncio.to_thread(
+                self._ingress._edit_status, self._chat_id, self._message_id, text
+            )
+
+
 class TelegramIngress:
     """One bot, one Bridge, one resident Agent. `poll_once` is the unit a
     host schedules and a test drives; `run` loops it until asked to stop."""
@@ -324,6 +421,7 @@ class TelegramIngress:
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
         self.unmapped: dict[int, UnmappedSender] = {}
+        self.progress_refresh_s = PROGRESS_REFRESH_SECONDS
         self._histories: dict[tuple[int, int], list[ModelMessage]] = {}
         # Within a process, a duplicate inside one response is skipped; across
         # a restart, the durable cursor is what stops a batch being replayed.
@@ -551,7 +649,13 @@ class TelegramIngress:
             # Free text is a conversation, as in Agent Web: the model answers
             # and may call installed tools under the same policy.
             return await self._converse(base, key, request, text)
-        outcome = await self.agent.handle(request)
+        progress = await self._progress(update.chat_id, f"Running {_command_label(text)}")
+        succeeded = False
+        try:
+            outcome = await self.agent.handle(request)
+            succeeded = outcome.refusal is None and _handled(outcome)
+        finally:
+            await progress.finish(succeeded)
         if outcome.refusal is not None:
             return TelegramDelivery(
                 **base,
@@ -569,7 +673,17 @@ class TelegramIngress:
     ) -> TelegramDelivery:
         history = self._histories.get(key, [])
         turn = [*history, ModelMessage(role="user", text=text)]
-        result = await self.agent.converse(request, tuple(turn))
+        progress = await self._progress(base["chat_id"], "Working on it")
+        listening = TOOL_PROGRESS.set(progress.tool)
+        answered = False
+        try:
+            result = await self.agent.converse(request, tuple(turn))
+            answered = (
+                result.conversation is not None and result.conversation.status == "answered"
+            )
+        finally:
+            TOOL_PROGRESS.reset(listening)
+            await progress.finish(answered)
         if result.refusal is not None:
             return TelegramDelivery(
                 **base, disposition="answered", reply=f"Refused: {result.refusal}."
@@ -643,20 +757,15 @@ class TelegramIngress:
         if step.kind == "cancelled" or step.arguments is None:
             return TelegramDelivery(**base, disposition="answered", reply="Cancelled.")
         acting, on_behalf_of = self._acting(actor)
-        outcome = await self.agent.execute_workflow(LocalWorkflowRequest(
-            ingress="telegram",
-            actor=acting,
-            on_behalf_of=on_behalf_of,
-            bridge_id=self.config.bridge_id,
-            workflow=state.workflow,
-            arguments=step.arguments,
-            idempotency_key=f"telegram-{update.update_id}",
-            trace=TraceIdentifiers(
-                trace_id=f"telegram-{update.update_id}",
-                request_id=f"telegram-{update.update_id}",
-                span_id="telegram-flow",
-            ),
-        ))
+        progress = await self._progress(update.chat_id, f"Running Workflow {state.workflow.name}")
+        succeeded = False
+        try:
+            outcome = await self._execute_flow(state, step, acting, on_behalf_of, update)
+            succeeded = (
+                outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
+            )
+        finally:
+            await progress.finish(succeeded)
         if outcome.refusal is not None:
             return TelegramDelivery(
                 **base, disposition="refused", reply=f"Refused: {outcome.refusal}.",
@@ -670,6 +779,52 @@ class TelegramIngress:
                      f"{run.completed_steps} step(s)"
                      + (f" ({run.failure.code})" if run.failure is not None else ""))
         return TelegramDelivery(**base, disposition="routed", reply=scrub(reply), outcome=outcome)
+
+    async def _execute_flow(
+        self, state: telegram_flow.FlowState, step: telegram_flow.FlowStep, acting: str,
+        on_behalf_of: str | None, update: _Update,
+    ) -> LocalAgentOutcome:
+        assert step.arguments is not None
+        return await self.agent.execute_workflow(LocalWorkflowRequest(
+            ingress="telegram",
+            actor=acting,
+            on_behalf_of=on_behalf_of,
+            bridge_id=self.config.bridge_id,
+            workflow=state.workflow,
+            arguments=step.arguments,
+            idempotency_key=f"telegram-{update.update_id}",
+            trace=TraceIdentifiers(
+                trace_id=f"telegram-{update.update_id}",
+                request_id=f"telegram-{update.update_id}",
+                span_id="telegram-flow",
+            ),
+        ))
+
+    async def _progress(self, chat_id: int, title: str) -> "_Progress":
+        progress = _Progress(self, chat_id, title)
+        await progress.open()
+        return progress
+
+    def _send_status(self, chat_id: int, text: str) -> int | None:
+        """Send one plain message and return its id, or None when it could not
+        be sent; progress is a courtesy and never fails the request."""
+        try:
+            status, body = self._call("sendMessage", {"chat_id": chat_id, "text": text})
+            if status != 200:
+                return None
+            message = json.loads(body).get("result")
+            identifier = message.get("message_id") if isinstance(message, dict) else None
+            return identifier if type(identifier) is int else None
+        except Exception:  # noqa: BLE001 - see above
+            return None
+
+    def _edit_status(self, chat_id: int, message_id: int, text: str) -> None:
+        try:
+            self._call(
+                "editMessageText", {"chat_id": chat_id, "message_id": message_id, "text": text}
+            )
+        except Exception:  # noqa: BLE001 - a stale status line is not worth a failure
+            pass
 
     def _status(self) -> str:
         snapshot = self.agent.snapshot(observed_at=datetime.now(UTC))
