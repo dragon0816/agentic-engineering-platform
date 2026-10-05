@@ -207,3 +207,12 @@ def test_the_page_explains_each_refusal_and_keeps_the_typed_token() -> None:
         assert code in section
     assert "@userinfobot" in section
     assert 'el("telegram-token").value = ""' not in section   # kept after a failure
+
+
+def test_an_expired_page_says_so_instead_of_request_failed() -> None:
+    """Each start issues a new access key; saving from an older tab used to
+    fail with only `request_failed` (owner report 2026-10-05)."""
+    script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
+    call = script.split("async function call(", 1)[1].split("\n}\n", 1)[0]
+    assert "reply.status === 401" in call and '"page_expired"' in call
+    assert "page_expired:" in script.split("const TELEGRAM_PROBLEMS", 1)[1]

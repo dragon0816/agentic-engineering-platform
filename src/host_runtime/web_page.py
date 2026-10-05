@@ -770,6 +770,12 @@ async function call(path, body) {
     options.body = JSON.stringify(body);
   }
   const reply = await fetch(path, options);
+  if (reply.status === 401) {
+    // The access key changes on every start; an older tab can no longer act.
+    const expired = new Error("This page is from an earlier start of Agent Web. Open the "
+      + "newest Agent Web tab (or the address printed when it started) and try again.");
+    expired.code = "page_expired"; throw expired;
+  }
   if (!reply.ok && reply.status !== 200) {
     const failed = await reply.json().catch(() => ({error: reply.statusText}));
     const problem = new Error(failed.error || failed.code || ("the host answered " + reply.status));
@@ -1953,6 +1959,8 @@ const TELEGRAM_PROBLEMS = {
     + "followed by an actor name. Message @userinfobot in Telegram to see your id.",
   telegram_actor_invalid: "An actor name may use letters, digits, '.', '_' and '-' only.",
   settings_read_only: "Settings are read-only in this launch mode.",
+  page_expired: "This page is from an earlier start of Agent Web. Open the newest Agent Web "
+    + "tab and save again.",
 };
 
 el("telegram-settings").addEventListener("submit", async (event) => {
