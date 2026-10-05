@@ -113,3 +113,25 @@ def test_missing_credential_fails_before_request() -> None:
             transport=transport,
         )
     assert transport.calls == []
+
+
+def test_a_tunnelled_self_hosted_endpoint_is_used_and_plain_lan_http_is_refused() -> None:
+    """A self-hosted SystemOne service (Laya) is reached through an SSH tunnel
+    on loopback; plain HTTP to a LAN address would carry the token in clear,
+    so it is refused before the credential is read."""
+    transport = Transport()
+    tunnel = "http://127.0.0.1:18000/v1/systemone"
+    run_public_benchmark(
+        model="laya-rl-agent", credential=lambda: "synthetic-token",
+        transport=transport, endpoint=tunnel,
+    )
+    assert transport.calls and all(url == tunnel for url, _, _, _ in transport.calls)
+
+    def forbidden_credential() -> str:
+        pytest.fail("credential read for a refused endpoint")
+
+    with pytest.raises(ValueError):
+        run_public_benchmark(
+            model="laya-rl-agent", credential=forbidden_credential, transport=Transport(),
+            endpoint="http://172.25.228.141:8000/v1/systemone",
+        )

@@ -85,6 +85,7 @@ def run_public_benchmark(
     timeout_ms: int = 3_000,
     credential: Callable[[], str],
     transport: wire.Transport | None = None,
+    endpoint: str = TYPESAFE_SYSTEMONE,
 ) -> dict[str, dict[str, dict[str, object]]]:
     """Benchmark one reviewed corpus; authorization happens before credentials/network."""
     cases = _public_cases(corpus)
@@ -92,7 +93,9 @@ def run_public_benchmark(
         raise ValueError("JEV benchmark supports one to five trials")
     config = DecisionAcceleratorConfig(
         provider="JEV",
-        endpoint=TYPESAFE_SYSTEMONE,
+        # Validated like the Host's accelerator endpoint: HTTPS, or HTTP only
+        # to this machine (an SSH tunnel to a self-hosted SystemOne service).
+        endpoint=endpoint,
         credential={"name": "jev_api_key"},
         model_profile=model,
         timeout_ms=timeout_ms,
@@ -146,10 +149,14 @@ def run_public_benchmark(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run reviewed PUBLIC TypeSafe JEV benchmark")
+    parser = argparse.ArgumentParser(description="Run the reviewed PUBLIC JEV SystemOne benchmark")
     parser.add_argument("--model", required=True, help="Model name returned by TypeSafe /v1/models")
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--timeout-ms", type=int, default=3_000)
+    parser.add_argument(
+        "--endpoint", default=TYPESAFE_SYSTEMONE,
+        help="SystemOne URL: HTTPS, or http://127.0.0.1:<port>/v1/systemone through a tunnel",
+    )
     args = parser.parse_args(argv)
     try:
         report = run_public_benchmark(
@@ -157,6 +164,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             trials=args.trials,
             timeout_ms=args.timeout_ms,
             credential=lambda: os.environ[KEY_ENV],
+            endpoint=args.endpoint,
         )
     except (OSError, ValueError, KeyError) as error:
         parser.exit(2, f"JEV benchmark unavailable: {type(error).__name__}\n")
