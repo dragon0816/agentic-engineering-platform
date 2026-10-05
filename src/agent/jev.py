@@ -46,7 +46,14 @@ def _state(request: SkillCandidateRequest) -> dict[str, str]:
 
 
 class JEVSkillSelectionProvider:
-    """Choose one installed command, or request the unchanged full catalog."""
+    """Narrow the installed commands, or request the unchanged full catalog.
+
+    `max_tools=1` keeps the single best command (confidence is Laya's).
+    `max_tools>1` keeps the most likely commands until their probabilities
+    reach `mass` (confidence is that cumulative probability), so the model
+    still chooses among a short list. (A second "several tasks?" question in
+    the same call was measured: no accuracy change, latency nearly doubled.)
+    """
 
     provider_id = "jev"
 
@@ -56,6 +63,8 @@ class JEVSkillSelectionProvider:
         credential: Callable[[], str],
         *,
         transport: wire.Transport | None = None,
+        max_tools: int = 1,
+        mass: float | None = None,
     ) -> None:
         if config.provider != "JEV" or not config.endpoint or not config.model_profile:
             raise ValueError("JEV skill selection needs endpoint and model profile")
@@ -64,6 +73,10 @@ class JEVSkillSelectionProvider:
         self._config = config
         self._credential = credential
         self._transport = transport if transport is not None else wire.UrllibTransport()
+        if max_tools < 1:
+            raise ValueError("max_tools is at least one")
+        self._max_tools = max_tools
+        self._mass = config.confidence_threshold if mass is None else mass
 
     def decide(self, request: SkillCandidateRequest) -> DecisionResult[tuple[str, ...]]:
         names = tuple(tool.name for tool in request.tools)
@@ -81,19 +94,20 @@ class JEVSkillSelectionProvider:
                 for index, tool in enumerate(request.tools, start=1)
             }
         )
+        questions: dict[str, Any] = {
+            _QUESTION: {
+                "type": "choice",
+                "instructions": (
+                    "Select one installed tool only when this conversation clearly needs "
+                    "that single tool. Otherwise choose 0. Do not infer permission."
+                ),
+                "criteria": criteria,
+            }
+        }
         payload = {
             "model": self._config.model_profile,
             "state": _state(request),
-            "questions": {
-                _QUESTION: {
-                    "type": "choice",
-                    "instructions": (
-                        "Select one installed tool only when this conversation clearly needs "
-                        "that single tool. Otherwise choose 0. Do not infer permission."
-                    ),
-                    "criteria": criteria,
-                }
-            },
+            "questions": questions,
         }
         token = self._credential()
         if not token or not token.strip():
@@ -126,10 +140,21 @@ class JEVSkillSelectionProvider:
             for key in ("input_tokens", "output_tokens")
         ):
             raise ValueError("JEV usage is invalid")
-        metadata = {
+        metadata: dict[str, Any] = {
             "input_tokens": usage["input_tokens"],
             "output_tokens": usage["output_tokens"],
         }
+        probabilities = answer.get("probabilities")
+        if isinstance(probabilities, dict):
+            # By tool name (never request text), so a shadow log can replay any
+            # threshold or list length offline.
+            labels = {_PRESERVE_CATALOG: "catalog"} | {
+                str(index): name for index, name in enumerate(names, start=1)
+            }
+            metadata["probabilities"] = {
+                labels[key]: _number(value)
+                for key, value in probabilities.items() if key in labels
+            }
         choice = answer.get("choice")
         confidence = answer.get("confidence")
         if (
@@ -140,16 +165,12 @@ class JEVSkillSelectionProvider:
             or not 0 <= confidence <= 1
         ):
             raise ValueError("JEV choice answer is invalid")
+        # Laya's own confidence in its top choice, whatever this adapter reports.
+        metadata["choice_confidence"] = float(confidence)
         if choice == _PRESERVE_CATALOG:
-            return DecisionResult(
-                decision_type="skill_selection",
-                value=names,
-                accepted=False,
-                confidence=float(confidence),
-                reason_code="preserve_catalog",
-                provider_id=self.provider_id,
-                metadata=metadata,
-            )
+            return self._preserve(names, float(confidence), metadata, "preserve_catalog")
+        if self._max_tools > 1:
+            return self._most_likely(names, answer, metadata)
         return DecisionResult(
             decision_type="skill_selection",
             value=(names[int(choice) - 1],),
@@ -158,3 +179,54 @@ class JEVSkillSelectionProvider:
             provider_id=self.provider_id,
             metadata=metadata,
         )
+
+    def _preserve(
+        self, names: tuple[str, ...], confidence: float, metadata: dict[str, Any], reason: str
+    ) -> DecisionResult[tuple[str, ...]]:
+        return DecisionResult(
+            decision_type="skill_selection",
+            value=names,
+            accepted=False,
+            confidence=confidence,
+            reason_code=reason,
+            provider_id=self.provider_id,
+            metadata=metadata,
+        )
+
+    def _most_likely(
+        self, names: tuple[str, ...], answer: dict[str, Any], metadata: dict[str, Any]
+    ) -> DecisionResult[tuple[str, ...]]:
+        """The fewest commands whose probabilities reach the mass, at most
+        `max_tools`; the catalog when "keep the catalog" ranks before that."""
+        probabilities = answer.get("probabilities")
+        if not isinstance(probabilities, dict):
+            raise ValueError("JEV probabilities are missing")
+        ranked = sorted(
+            ((key, _number(value)) for key, value in probabilities.items()),
+            key=lambda item: -item[1],
+        )
+        kept: list[str] = []
+        total = 0.0
+        for key, probability in ranked:
+            if key == _PRESERVE_CATALOG:
+                return self._preserve(names, total, metadata, "preserve_catalog")
+            if not key.isdigit() or not 1 <= int(key) <= len(names):
+                raise ValueError("JEV probabilities name an unknown option")
+            kept.append(names[int(key) - 1])
+            total += probability
+            if total >= self._mass or len(kept) >= self._max_tools:
+                break
+        return DecisionResult(
+            decision_type="skill_selection",
+            value=tuple(kept),
+            confidence=min(1.0, total),
+            reason_code="likely_skill_candidates",
+            provider_id=self.provider_id,
+            metadata=metadata,
+        )
+
+
+def _number(value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 1:
+        raise ValueError("JEV probability is invalid")
+    return float(value)

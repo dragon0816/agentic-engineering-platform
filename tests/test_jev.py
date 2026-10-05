@@ -111,7 +111,12 @@ def test_official_choice_wire_and_high_confidence_selection() -> None:
     transport = Transport(reply)
     result = service(transport).decide(candidate(), decision_type="skill_selection")
     assert result.result.value == ("search",)
-    assert result.result.metadata == {"input_tokens": 100, "output_tokens": 1}
+    assert result.result.metadata == {
+        "input_tokens": 100, "output_tokens": 1,
+        # By tool name only, for replaying thresholds from a shadow log.
+        "probabilities": {"catalog": 0.01, "search": 0.96, "draft": 0.03},
+        "choice_confidence": 0.96,
+    }
     assert result.trace.provider_id == "jev"
     assert not result.trace.fallback
     url, raw, headers, timeout = transport.calls[0]
