@@ -167,3 +167,43 @@ def test_a_token_and_senders_saved_while_off_are_kept_for_later(
     monkeypatch.setenv(TOKEN_VARIABLE, TOKEN)
     apply_telegram_settings(path, layout, _update(token=None, senders=[]), store=Store())
     assert json.loads(layout.telegram.read_text("utf-8"))["senders"] == kept["senders"]
+
+
+def test_the_form_accepts_an_id_alone_and_a_token_copied_with_bot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Owner report 2026-10-05: saving failed on ordinary input and the page
+    said only `request_failed`."""
+    from host_runtime.telegram_settings import TelegramSettingsForm
+
+    monkeypatch.delenv(TOKEN_VARIABLE, raising=False)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, config_path=path)
+        store = Store()
+        web.user_environment = store
+        monkeypatch.setattr(web, "start_telegram", lambda: None)
+        form = TelegramSettingsForm.model_validate({
+            "enabled": True, "token": f"  bot{TOKEN} ",
+            "senders": [{"sender_id": 42}, {"sender_id": 7, "actor": "@reviewer"}],
+        })
+        result = web.update_telegram_settings(form)
+        assert result["ok"] is True, result
+        assert store.saved == {TOKEN_VARIABLE: TOKEN}
+        assert result["telegram"]["senders"] == [
+            {"sender_id": 42, "actor": runtime.actor}, {"sender_id": 7, "actor": "reviewer"},
+        ]
+        refused = web.update_telegram_settings(TelegramSettingsForm.model_validate(
+            {"enabled": True, "senders": [{"sender_id": 7, "actor": "two words"}]}))
+        assert refused == {"ok": False, "code": "telegram_actor_invalid"}
+
+
+def test_the_page_explains_each_refusal_and_keeps_the_typed_token() -> None:
+    script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
+    section = script.split("const TELEGRAM_PROBLEMS", 1)[1]
+    section = section.split('el("persona-settings")', 1)[0]
+    for code in ("telegram_token_invalid", "telegram_sender_invalid", "telegram_actor_invalid"):
+        assert code in section
+    assert "@userinfobot" in section
+    assert 'el("telegram-token").value = ""' not in section   # kept after a failure

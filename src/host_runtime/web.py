@@ -135,6 +135,7 @@ from host_runtime.slash_commands import (
 from host_runtime.telegram_loop import ResidentTelegram
 from host_runtime.telegram_settings import (
     TelegramSettingsError,
+    TelegramSettingsForm,
     TelegramSettingsUpdate,
     apply_telegram_settings,
     telegram_status,
@@ -663,10 +664,17 @@ class AgentWeb:
             self.telegram_loop = ResidentTelegram(self.runtime.telegram)
             self.telegram_loop.start()
 
-    def update_telegram_settings(self, request: TelegramSettingsUpdate) -> dict[str, Any]:
+    def update_telegram_settings(
+        self, request: TelegramSettingsUpdate | TelegramSettingsForm
+    ) -> dict[str, Any]:
         """Save the bot settings and replace the polling loop; no restart."""
         if self.config_path is None:
             return {"ok": False, "code": "settings_read_only"}
+        if isinstance(request, TelegramSettingsForm):
+            try:
+                request = request.to_update(self.runtime.actor)
+            except ValueError:
+                return {"ok": False, "code": "telegram_actor_invalid"}
         with self._one_at_a_time:
             try:
                 config = apply_telegram_settings(
@@ -2530,9 +2538,9 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/settings/telegram":
             try:
-                telegram = TelegramSettingsUpdate.model_validate(body)
+                telegram = TelegramSettingsForm.model_validate(body)
             except (ValueError, TypeError):
-                self._json(400, {"error": "the request was not valid Telegram settings"})
+                self._json(400, {"ok": False, "code": "telegram_sender_invalid"})
                 return
             result = self.server.web.update_telegram_settings(telegram)
             self._json(200 if result.get("ok") else 409, result)

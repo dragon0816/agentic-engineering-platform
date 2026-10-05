@@ -18,7 +18,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 
 from channels.telegram import TelegramIngressConfig, TelegramSender
 from common.base import Contract
@@ -43,6 +43,35 @@ class TelegramSettingsUpdate(Contract):
     # Write-only; empty keeps the value already stored.
     token: SecretStr | None = None
     senders: tuple[TelegramSender, ...] = ()
+
+
+class TelegramSenderEntry(Contract):
+    """One line of the settings form: a numeric Telegram user id, and the
+    actor it acts as (empty: this host's own actor)."""
+
+    sender_id: int = Field(gt=0, strict=True)
+    actor: str = ""
+
+
+class TelegramSettingsForm(Contract):
+    """What the settings page sends; `to_update` fills in the defaults."""
+
+    enabled: bool
+    token: SecretStr | None = None
+    senders: tuple[TelegramSenderEntry, ...] = ()
+
+    def to_update(self, default_actor: str) -> TelegramSettingsUpdate:
+        return TelegramSettingsUpdate(
+            enabled=self.enabled,
+            token=self.token,
+            senders=tuple(
+                TelegramSender(
+                    sender_id=entry.sender_id,
+                    actor=entry.actor.strip().lstrip("@") or default_actor,
+                )
+                for entry in self.senders
+            ),
+        )
 
 
 def windows_user_environment(name: str, value: str) -> None:
@@ -110,6 +139,9 @@ def apply_telegram_settings(
         config_path.read_text(encoding="utf-8-sig")
     )
     token = "" if checked.token is None else checked.token.get_secret_value().strip()
+    if token.lower().startswith("bot") and token[3:4].isdigit():
+        # Copied from a Bot API URL (`.../bot123:ABC/...`).
+        token = token[3:]
     if token and not _TOKEN_SHAPE.fullmatch(token):
         raise TelegramSettingsError("telegram_token_invalid")
     variable = current.credential_environment().get(TELEGRAM_SECRET, TOKEN_VARIABLE)

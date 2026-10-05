@@ -1944,13 +1944,29 @@ function showTelegram(telegram) {
     + (telegram.failure ? " Last stop: " + telegram.failure : "");
 }
 
+const TELEGRAM_PROBLEMS = {
+  telegram_token_invalid: "The token does not look like a bot token (123456789:AA…). "
+    + "Copy it again from @BotFather.",
+  telegram_token_missing: "Paste the bot token from @BotFather first.",
+  telegram_senders_missing: "Add at least one allowed sender (a numeric Telegram user id).",
+  telegram_sender_invalid: "Each sender line is a numeric Telegram user id, optionally "
+    + "followed by an actor name. Message @userinfobot in Telegram to see your id.",
+  telegram_actor_invalid: "An actor name may use letters, digits, '.', '_' and '-' only.",
+  settings_read_only: "Settings are read-only in this launch mode.",
+};
+
 el("telegram-settings").addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = el("telegram-save"), result = el("telegram-result");
   const senders = [];
   for (const line of el("telegram-senders").value.split("\n")) {
-    const parts = line.trim().split(/\s+/);
-    if (!parts[0]) continue;
+    const parts = line.trim().split(/[\s,]+/).filter(Boolean);
+    if (!parts.length) continue;
+    if (!/^\d+$/.test(parts[0])) {
+      result.textContent = "Not saved: “" + parts[0] + "” is not a numeric Telegram "
+        + "user id. Message @userinfobot in Telegram to see yours.";
+      return;
+    }
     senders.push({sender_id: Number(parts[0]), actor: parts[1] || ""});
   }
   const body = {enabled: el("telegram-enabled").checked, senders};
@@ -1959,10 +1975,12 @@ el("telegram-settings").addEventListener("submit", async (event) => {
   button.disabled = true; result.textContent = "Saving Telegram settings…";
   try {
     const saved = await call("/api/settings/telegram", body);
-    showTelegram(saved.telegram);
+    if (saved.ok === false) throw Object.assign(new Error(saved.code), {code: saved.code});
+    showTelegram(saved.telegram);   // clears the token field only after a save
   } catch (failure) {
-    result.textContent = "Telegram settings were not saved: " + (failure.code || failure.message);
-  } finally { button.disabled = false; el("telegram-token").value = ""; }
+    const code = failure.code || "";
+    result.textContent = "Not saved: " + (TELEGRAM_PROBLEMS[code] || code || failure.message);
+  } finally { button.disabled = false; }
 });
 
 el("persona-settings").addEventListener("submit", async (event) => {
