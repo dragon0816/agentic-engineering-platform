@@ -1219,6 +1219,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   (Laya, 2026-10-05); first live run and findings recorded in
   `docs/JEV_ADAPTER_READINESS.md` (state shape, threshold not applied in the
   benchmark, latency above 300 ms default, corpus too small).
+- [x] JEV adapter sends only the latest user message as `state`; the
+  benchmark applies the confidence threshold (`--threshold`) and scores the
+  live route with fallback; Laya results at 0.9 and 0.3 in
+  `docs/JEV_ADAPTER_READINESS.md`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

@@ -96,3 +96,29 @@ Findings:
 3. Latency is above the Host default accelerator timeout of 300 ms.
 4. The corpus has four skill cases with placeholder tool descriptions
    ("Synthetic installed command X"); it cannot show useful accuracy.
+
+### Follow-up the same day: state shape, threshold, live-catalogue corpus
+
+- Adapter: `state` is now `{"message": <latest user message>}`; system and
+  persona text, earlier turns and tool schemas are no longer sent.
+- Benchmark: `--threshold` (default the Host's 0.9) decides whether a choice
+  is admitted; a new `jev-systemone.with-fallback` column scores what a person
+  gets (admitted choice, else the whole catalogue) against the baseline.
+- Corpus `--corpus skills` (`evaluation/jev/golden-v2-skills.json`): 26 PUBLIC
+  cases, English and Chinese, over the eight installed Skill commands with
+  their real descriptions; six broad, chit-chat or multi-command cases expect
+  the whole catalogue.
+
+Laya, 26 cases x 3 trials (exact accuracy; baseline 0.231):
+
+| Threshold | Admitted | Admitted correct | With fallback | p50 / p95 |
+|---|---|---|---|---|
+| 0.9 | 9 / 78 | 9 (100 %) | 0.346 | 216 / 439 ms |
+| 0.3 | 42 / 78 | 30 (71 %) | 0.577 | 230 / 416 ms |
+
+Before the state change the same corpus scored 0.115 raw with every answer
+below 0.15 confidence. A wrongly admitted choice hides the right tool from the
+model, so precision matters more than coverage; the threshold is an owner
+decision. Weak spots: Chinese short commands (proof, checklist), knowledge
+questions confused with the market matrix, and broad/chit-chat requests that
+should keep the catalogue. Latency p95 still exceeds the 300 ms default.
