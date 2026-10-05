@@ -1928,7 +1928,8 @@ el("session-delete").addEventListener("click", async () => {
 });
 
 function showTelegram(telegram) {
-  el("telegram-enabled").checked = telegram.enabled;
+  // Unconfigured: someone filling this in wants the bot on.
+  el("telegram-enabled").checked = telegram.enabled || !telegram.configured;
   el("telegram-senders").value = telegram.senders
     .map((item) => item.sender_id + " " + item.actor).join("\n");
   el("telegram-token").value = "";
@@ -1936,7 +1937,10 @@ function showTelegram(telegram) {
     ? "Token saved in " + telegram.environment_variable + "."
     : "No token saved yet.")
     + (telegram.enabled ? (telegram.running ? " Bot is answering." : " Bot is starting…")
-      : " Bot is off.")
+      : (telegram.configured
+        ? " Saved, but the bot is off: tick"
+          + " \u201cAnswer Telegram messages\u201d and save to start it."
+        : " Bot is off."))
     + (telegram.failure ? " Last stop: " + telegram.failure : "");
 }
 

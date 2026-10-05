@@ -100,30 +100,32 @@ def apply_telegram_settings(
     *,
     store: UserEnvironmentWriter = windows_user_environment,
 ) -> CompanyHostConfiguration:
-    """Save the settings and return the updated host configuration."""
+    """Save the settings and return the updated host configuration.
+
+    A token and senders given while the bot is off are kept (in the user's
+    environment and `telegram.disabled.json`), so turning it on later needs
+    only the switch; nothing typed is discarded."""
     checked = TelegramSettingsUpdate.model_validate(request)
     current = CompanyHostConfiguration.model_validate_json(
         config_path.read_text(encoding="utf-8-sig")
     )
-    if not checked.enabled:
-        if layout.telegram.is_file():
-            os.replace(layout.telegram, _disabled(layout))
-        return current
     token = "" if checked.token is None else checked.token.get_secret_value().strip()
     if token and not _TOKEN_SHAPE.fullmatch(token):
         raise TelegramSettingsError("telegram_token_invalid")
     variable = current.credential_environment().get(TELEGRAM_SECRET, TOKEN_VARIABLE)
-    if not token and not os.environ.get(variable, ""):
-        raise TelegramSettingsError("telegram_token_missing")
-    if not checked.senders:
-        # An empty sender map admits nobody: the bot would answer no one.
-        raise TelegramSettingsError("telegram_senders_missing")
-    ingress = TelegramIngressConfig(
-        credential={"name": TELEGRAM_SECRET},
-        bridge_id=current.device.bridge_id,
-        namespace=current.namespace,
-        senders=checked.senders,
-    )
+    kept = _read(layout.telegram) or _read(_disabled(layout))
+    senders = checked.senders or (() if kept is None else kept.senders)
+    if checked.enabled:
+        if not token and not os.environ.get(variable, ""):
+            raise TelegramSettingsError("telegram_token_missing")
+        if not senders:
+            # An empty sender map admits nobody: the bot would answer no one.
+            raise TelegramSettingsError("telegram_senders_missing")
+    elif not token and not checked.senders:
+        # Only the switch: turn the bot off and keep what was configured.
+        if layout.telegram.is_file():
+            os.replace(layout.telegram, _disabled(layout))
+        return current
     if token:
         store(variable, token)
         os.environ[variable] = token
@@ -138,9 +140,19 @@ def apply_telegram_settings(
         ]
         updated = CompanyHostConfiguration.model_validate(candidate)
         write_atomically(config_path, updated.model_dump_json(indent=2).encode("utf-8") + b"\n")
-    write_atomically(
-        layout.telegram, ingress.model_dump_json(indent=2).encode("utf-8") + b"\n"
+    ingress = TelegramIngressConfig(
+        credential={"name": TELEGRAM_SECRET},
+        bridge_id=current.device.bridge_id,
+        namespace=current.namespace,
+        senders=senders,
     )
-    if _disabled(layout).is_file():
-        _disabled(layout).unlink()
+    payload = ingress.model_dump_json(indent=2).encode("utf-8") + b"\n"
+    if checked.enabled:
+        write_atomically(layout.telegram, payload)
+        if _disabled(layout).is_file():
+            _disabled(layout).unlink()
+    else:
+        write_atomically(_disabled(layout), payload)
+        if layout.telegram.is_file():
+            layout.telegram.unlink()
     return updated

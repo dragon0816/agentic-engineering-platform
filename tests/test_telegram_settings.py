@@ -114,8 +114,8 @@ def test_agent_web_saves_and_starts_the_bot_without_echoing_the_token(
         status = web.settings()["telegram"]
         assert status["enabled"] and status["token_present"]
         assert TOKEN not in json.dumps(web.settings())
-        refused = web.update_telegram_settings(_update(senders=[]))
-        assert refused == {"ok": False, "code": "telegram_senders_missing"}
+        refused = web.update_telegram_settings(_update(token="not-a-token"))
+        assert refused == {"ok": False, "code": "telegram_token_invalid"}
 
 
 def test_the_resident_loop_starts_and_stops_on_request() -> None:
@@ -146,3 +146,24 @@ def test_the_page_offers_a_write_only_token_field_and_tucks_recent_runs_away() -
     section = section.split("async function loadModelChoices", 1)[0]
     for unsafe in ("innerHTML", "insertAdjacentHTML", "outerHTML"):
         assert unsafe not in section
+
+
+def test_a_token_and_senders_saved_while_off_are_kept_for_later(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Saving with the switch off used to discard what was typed and the
+    form came back empty (owner report 2026-10-05)."""
+    monkeypatch.delenv(TOKEN_VARIABLE, raising=False)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    store = Store()
+    updated = apply_telegram_settings(path, layout, _update(enabled=False), store=store)
+    assert store.saved == {TOKEN_VARIABLE: TOKEN}
+    assert updated.credential_environment()["telegram_bot"] == TOKEN_VARIABLE
+    assert not layout.telegram.exists()
+    kept = json.loads((layout.workspace_root / "telegram.disabled.json").read_text("utf-8"))
+    assert kept["senders"] == [{"sender_id": 42, "actor": "engineer"}]
+    # Turning it on later needs only the switch.
+    monkeypatch.setenv(TOKEN_VARIABLE, TOKEN)
+    apply_telegram_settings(path, layout, _update(token=None, senders=[]), store=Store())
+    assert json.loads(layout.telegram.read_text("utf-8"))["senders"] == kept["senders"]
