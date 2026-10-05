@@ -138,3 +138,26 @@ baseline 0.217:
 Still weak: multi-task requests answered with one tool at high confidence,
 and SOP-to-workflow vs NCC document requests. The threshold remains an owner
 decision; latency p95 remains above the 300 ms default.
+
+### Intent first, then Skill (owner question, 2026-10-05)
+
+Hypothesis: classify the request (task execution, knowledge asking, coding,
+or general chat / several tasks) and then choose among that class's Skills.
+Measured on Laya over the 46 skills-v3 cases (scratch experiment, not
+shipped):
+
+| Strategy | Intent correct | Exact set | Right tool still offered | Avg tools |
+|---|---|---|---|---|
+| Flat Skill choice with hints, threshold 0.5 (current) | - | 67 % | 89 % | - |
+| 4 intents, then Skill within the class | 67 % (50 cases incl. 4 coding) | 46 % | 70 % | 2.8 |
+| 3 intents (coding folded into task), then Skill | 80 % | 52 % | 87 % | 3.6 |
+| 3 intents, intent ignored below 0.3 | 80 % | 50 % | 91 % | 5.3 |
+| Intent and Skill asked in one call | - | 24 % | 89 % | 6.7 |
+
+Intent-first lowered the hit rate: the two decisions' errors multiply, the
+classes overlap (an SOP-to-workflow request is both task and coding; "fix the
+failing test" was read as a task), and good hints already carry the class.
+With eight installed commands a flat choice is easier than two chained ones.
+An intent layer is worth revisiting when the catalogue grows to dozens of
+Skills, and intent remains useful as a routing signal for which harness runs
+(Knowledge, coding, task) rather than as a tool filter.
