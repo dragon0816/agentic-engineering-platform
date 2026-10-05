@@ -1,9 +1,17 @@
 """Installed Skill procedures and explicit route bindings, without executable imports."""
 
 import re
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, JsonValue, StringConstraints, field_validator, model_validator
+from pydantic import (
+    Field,
+    JsonValue,
+    SerializerFunctionWrapHandler,
+    StringConstraints,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 
 from common.assets import AssetIdentity, AssetMetadata, RegistryContract
 from common.base import Contract, Symbol, Text
@@ -69,6 +77,18 @@ class SkillManifest(RegistryContract):
     # Domain adapters validate this JSON procedure before use; the common
     # harness carries no Knowledge-, Workflow- or Coding-specific fields.
     procedure: dict[str, JsonValue] = Field(default_factory=dict)
+    # One short line, English and Chinese keywords, that tells a Skill
+    # selector (JEV SystemOne) what this Skill is for and how it differs from
+    # the others; `instructions` stays the guidance for the model.
+    selector_hint: Annotated[str, StringConstraints(min_length=1, max_length=240)] | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # Manifests published before the hint keep their bytes and digests.
+        data: dict[str, Any] = handler(self)
+        if self.selector_hint is None:
+            data.pop("selector_hint", None)
+        return data
 
     @model_validator(mode="after")
     def explicit_bindings(self) -> Self:

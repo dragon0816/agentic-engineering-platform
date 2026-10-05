@@ -18,7 +18,7 @@ from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
 from common.assets import AssetIdentity
-from common.base import Contract, Symbol
+from common.base import Contract, Symbol, Text
 from common.execution import (
     CapabilityResult,
     Failure,
@@ -153,6 +153,9 @@ class SkillCandidateRequest(Contract):
 
     context: RequestContext
     initial_request: ModelRequest
+    # Each tool's Skill `selector_hint`, when its Skill declares one: what a
+    # selector is told the tool is for. Never a wider payload than the tools.
+    selector_hints: dict[Symbol, Text] = Field(default_factory=dict)
 
     @property
     def tools(self) -> tuple[ModelTool, ...]:
@@ -167,6 +170,8 @@ class SkillCandidateRequest(Contract):
         names = [tool.name for tool in self.tools]
         if len(set(names)) != len(names):
             raise ValueError("installed tool names must be unique")
+        if not set(self.selector_hints) <= set(names):
+            raise ValueError("selector hints name only installed tools")
         return self
 
 
@@ -247,6 +252,7 @@ class Gateway:
             return self._conversation_failure(context, "model_not_configured", 0, ())
         bindings: dict[str, CommandBinding] = {}
         tools: list[ModelTool] = []
+        hints: dict[str, str] = {}
         for skill in self.router.commands.skills.discover(context.namespace):
             for command in skill.commands:
                 if (
@@ -258,6 +264,8 @@ class Gateway:
                     continue
                 name = f"{skill.alias}__{command.name}"
                 bindings[name] = command
+                if skill.selector_hint:
+                    hints[name] = skill.selector_hint
                 target = command.target
                 manifest = (
                     self.engine.workflows.get(target) if command.kind == "workflow" else None
@@ -279,6 +287,7 @@ class Gateway:
                 )
         if allowed_tools is not None:
             tools = [tool for tool in tools if tool.name in allowed_tools]
+            hints = {name: hint for name, hint in hints.items() if name in allowed_tools}
             bindings = {
                 name: binding for name, binding in bindings.items() if name in allowed_tools
             }
@@ -321,6 +330,7 @@ class Gateway:
                     tools=tuple(tools),
                     max_output_tokens=1024,
                 ),
+                selector_hints=hints,
             )
             selected_names = set(
                 self.skill_decisions.decide(candidate_request, decision_type="skill_selection")

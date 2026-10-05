@@ -7,6 +7,7 @@ this provider. This adapter never decides data classification or permissions.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -17,6 +18,16 @@ from models import wire
 _QUESTION = "skill_candidate"
 _PRESERVE_CATALOG = "0"
 _MAX_REPLY_BYTES = 256_000
+
+
+#: The suffix every Gateway tool description shares; it names the target,
+#: not the purpose, and buried what told the tools apart.
+_EXECUTES = re.compile(r"\s*Executes installed \w+ \S+@\S+\.?\s*$")
+
+
+def _distinct(description: str) -> str:
+    """A tool description without the shared execution suffix."""
+    return _EXECUTES.sub("", description).strip() or description
 
 
 def _state(request: SkillCandidateRequest) -> dict[str, str]:
@@ -56,14 +67,19 @@ class JEVSkillSelectionProvider:
 
     def decide(self, request: SkillCandidateRequest) -> DecisionResult[tuple[str, ...]]:
         names = tuple(tool.name for tool in request.tools)
+        # Concrete wording measured on Laya (docs/JEV_ADAPTER_READINESS.md):
+        # an abstract "preserve" lost to every tool on greetings and chat.
         criteria = {
             _PRESERVE_CATALOG: (
-                "No single installed command is clearly sufficient, or multiple commands "
-                "may be needed; preserve the full catalog."
+                "General chat, greetings, thanks, asking what you can do, or a request "
+                "needing several tools 閒聊/打招呼/問能做什麼/一次多件事"
             )
         }
         criteria.update(
-            {str(index): tool.description for index, tool in enumerate(request.tools, start=1)}
+            {
+                str(index): request.selector_hints.get(tool.name) or _distinct(tool.description)
+                for index, tool in enumerate(request.tools, start=1)
+            }
         )
         payload = {
             "model": self._config.model_profile,
