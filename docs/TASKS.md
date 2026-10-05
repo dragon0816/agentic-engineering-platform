@@ -1243,6 +1243,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   approval `owner-approved-2026-10-05-laya-shadow`, `skill_max_tools` 3,
   timeout 1500 ms); shadow outcome `kept_catalog` named. GitLab credential
   mapping `gitlab_token -> AEP_GITLAB_TOKEN` added and the token verified.
+- [x] Telegram free text talks to the Agent (owner report 2026-10-05: "hi"
+  answered `model_unavailable`): JSON mode names "json" in the request
+  (vLLM 400), a null route is `no_matching_route`, and free text goes to
+  `LocalAgent.converse` with 12 turns kept in memory; `/new` clears them.
+  Commits `f30ec7f`, `bb711ee`, `a4051e0`.
+- [x] A Workflow's settings are shown with that Workflow under Capabilities
+  and no longer on the Settings page (owner request 2026-10-06). Commit
+  `cf6ee1b`; checked live in a browser.
+- [x] Telegram shows a "working on it" message, edited in place with elapsed
+  time and each skill as it runs and ends, then the answer (owner request
+  2026-10-06). `agent.gateway.TOOL_PROGRESS`; tests in
+  `tests/test_telegram_ingress.py`. Commit `abb0fd8`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

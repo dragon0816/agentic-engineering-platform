@@ -1164,3 +1164,20 @@ Rejected alternatives: going straight to active mode (a wrong narrowing hides
 the right tool); synchronous shadow calls (adds Laya's latency to every
 turn); logging message text for later review (unnecessary for the replay and
 widens what is stored).
+
+## 2026-10-06 — Tool progress reaches a channel through a context variable
+
+Decision: the Gateway reports each conversation tool call as it starts and
+ends (`running`, `succeeded`, `failed`) to a listener in the context variable
+`agent.gateway.TOOL_PROGRESS`, by tool name only. Telegram sets it around
+`converse` and edits one status message in place (elapsed time, each skill
+and how it ended), refreshed every 5 s; the answer follows as its own
+message. Progress that cannot be sent is dropped and never fails the request.
+
+Reason: the owner could not tell whether the bot was working during long
+Workflows. Rejected alternatives: a callback field on
+`GatewayConversationRequest` (a frozen contract shared by every backend;
+progress is presentation, not policy); editing the status message into the
+answer (answers can span several messages); Telegram's 5-second "typing"
+action alone (shows activity but not which skill).
+
