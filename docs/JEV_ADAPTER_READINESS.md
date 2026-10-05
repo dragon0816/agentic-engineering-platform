@@ -161,3 +161,33 @@ With eight installed commands a flat choice is easier than two chained ones.
 An intent layer is worth revisiting when the catalogue grows to dozens of
 Skills, and intent remains useful as a routing signal for which harness runs
 (Knowledge, coding, task) rather than as a tool filter.
+
+### Most-likely lists and shadow mode (2026-10-05)
+
+Adapter options on skills-v3 at threshold 0.9 (46 cases x 2):
+
+| Mode | Narrowed | Right tool still offered | Right tool hidden | p50 |
+|---|---|---|---|---|
+| Single best | 11 % | 100 % | 0 / 92 | 237 ms |
+| Up to 3 tools by probability | 46 % (1.6 kept) | 96 % | 4 / 92 | 278 ms |
+| Either + "several tasks?" question | unchanged | unchanged | unchanged | ~450 ms |
+
+Shadow mode is built (DECISIONS 2026-10-05) and off until the owner adds an
+`egress_approval`. To enable it, in `host.json`:
+
+```json
+"decision_accelerator": {
+  "provider": "JEV",
+  "endpoint": "http://127.0.0.1:18000/v1/systemone",
+  "credential": {"name": "jev_api_key"},
+  "model_profile": "laya-rl-agent",
+  "timeout_ms": 1500,
+  "enabled_decision_types": ["skill_selection"],
+  "mode": "shadow",
+  "skill_max_tools": 3,
+  "egress_approval": {"approval_ref": "<owner approval reference>"}
+}
+```
+
+plus `{"secret": "jev_api_key", "environment_variable": "AEP_JEV_API_KEY"}` in
+`credentials`, the SSH tunnel running, and an Agent Web restart.

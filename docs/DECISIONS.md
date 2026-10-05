@@ -1140,3 +1140,27 @@ on 20 held-out cases from 50 % to 80 %. Rejected alternatives: rewriting
 `instructions` (they guide the model, not the selector); deriving hints
 automatically (measured worse than written ones); a two-stage "one tool?"
 then "which tool?" question (more misses).
+
+## 2026-10-05 — JEV shadow mode, most-likely tool lists, and an explicit egress approval
+
+Decision (owner agreed to the order: improve selection, then shadow mode):
+`decision_accelerator` gains `mode` (`active` default, or `shadow`),
+`skill_max_tools` (1 = single best; more keeps the most likely commands until
+their probability reaches the threshold) and `egress_approval`
+(`approval_ref`, scope `latest_user_message`). The Host now wires the JEV
+Skill selector when configured, but the authorizer admits a request only with
+an egress approval, so nothing is sent before the owner records one. In
+shadow mode the DecisionService asks the accelerator on a background thread
+and always answers with the baseline; `workspace/jev-shadow.jsonl` records
+what it would have chosen (tool names, probabilities, confidence, latency)
+next to the tools the model called, never message text;
+`python -m evaluation.jev_shadow_report` replays any threshold and list
+length. A second "several tasks?" question in the same Laya call was measured
+and dropped (no accuracy change, latency nearly doubled).
+
+Reason: choosing a threshold and list length from four dozen written cases is
+guesswork; shadow mode measures real requests at no cost to the person's turn.
+Rejected alternatives: going straight to active mode (a wrong narrowing hides
+the right tool); synchronous shadow calls (adds Laya's latency to every
+turn); logging message text for later review (unnecessary for the replay and
+widens what is stored).

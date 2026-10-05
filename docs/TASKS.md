@@ -1230,6 +1230,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `skills\disabled\`); corpus `skills-v3` (46 cases). Laya at 0.5: 63 % with
   fallback (baseline 22 %), 91 % of admitted choices correct. Tests:
   `tests/test_skill_selector_hints.py`.
+- [x] JEV shadow mode (2026-10-05): `decision_accelerator.mode=shadow`,
+  `skill_max_tools`, `egress_approval`; Host wiring sends nothing without the
+  approval; background shadow decisions logged to `workspace/jev-shadow.jsonl`
+  with the model's tool calls (no text); replay with
+  `python -m evaluation.jev_shadow_report`. Adapter keeps the most likely
+  tools when `skill_max_tools > 1`. Not enabled live until the owner records
+  an approval. Tests: `tests/test_jev_shadow.py`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
