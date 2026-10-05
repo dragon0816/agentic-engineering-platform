@@ -490,7 +490,8 @@ def test_a_redelivered_update_is_handled_once_and_the_batch_is_confirmed(tmp_pat
     assert second.next_offset == 13
     polls = transport.polls()
     assert "offset" not in polls[0] and polls[1]["offset"] == 12
-    assert polls[0]["allowed_updates"] == ["message"]
+    # Button taps of a Workflow question flow arrive as callback queries.
+    assert polls[0]["allowed_updates"] == ["message", "callback_query"]
 
 
 def test_non_text_and_credential_bearing_messages_are_not_forwarded(tmp_path: Path) -> None:

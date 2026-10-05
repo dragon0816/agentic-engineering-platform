@@ -362,7 +362,7 @@ class LocalAgent:
     ) -> LocalAgentOutcome:
         """Execute an exact locally selected Workflow through normal policy."""
         item = LocalWorkflowRequest.model_validate(request)
-        refusal = self.admit(item.actor, item.bridge_id)
+        refusal = self.admit(item.actor, item.bridge_id, item.on_behalf_of)
         if refusal is not None:
             return LocalAgentOutcome(
                 trace=item.trace,
@@ -387,11 +387,12 @@ class LocalAgent:
             workflow_timeout_seconds=self._wait(workflow_timeout_seconds),
             workflow_idempotency_key=item.idempotency_key,
         )
-        run, unrecorded = await self._record(item.actor, None, snapshot)
+        run, unrecorded = await self._record(item.actor, item.on_behalf_of, snapshot)
         return LocalAgentOutcome(
             trace=item.trace,
             ingress=item.ingress,
             actor=item.actor,
+            on_behalf_of=item.on_behalf_of,
             workflow=snapshot,
             run=run,
             unrecorded=unrecorded,

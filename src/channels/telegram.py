@@ -26,12 +26,20 @@ from typing import Literal, Self
 
 from pydantic import Field, JsonValue, StrictBool, field_validator, model_validator
 
-from common.assets import REDACTED, SECRET_PATTERN, SecretRef, reject_embedded_secrets
+from channels import telegram_flow
+from common.assets import (
+    REDACTED,
+    SECRET_PATTERN,
+    SecretRef,
+    WorkflowManifest,
+    reject_embedded_secrets,
+)
 from common.base import Contract, Slug, Symbol, Text
 from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
-from common.local_agent import LocalAgentRequest
+from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
+from host_runtime.schedule_policy import target_side_effect
 from models.credentials import CredentialMisconfigured, CredentialResolver
 from models.wire import (
     Transport,
@@ -59,7 +67,8 @@ SLASH_COMMAND = re.compile(
 )
 HELP = (
     "Send a skill command as /<skill> <command> [arguments], or describe the task in "
-    "words. /status shows this Bridge's state. Attachments are not accepted."
+    "words. /run <number or name> asks a Workflow's fields one by one. /status shows "
+    "this Bridge's state. Attachments are not accepted."
 )
 
 Disposition = Literal[
@@ -126,6 +135,8 @@ class TelegramDelivery(Contract):
     sender_id: int | None = Field(default=None, strict=True)
     disposition: Disposition
     reply: Text | None = None
+    # Inline keyboard rows of (label, callback data) sent with the reply.
+    buttons: tuple[tuple[tuple[Text, Text], ...], ...] = ()
     replied: StrictBool = False
     outcome: LocalAgentOutcome | None = None
     failure: Failure | None = None
@@ -159,17 +170,36 @@ class TelegramPollResult(Contract):
 
 
 class _Update:
-    def __init__(self, update_id: int, chat_id: int, sender_id: int, text: str | None) -> None:
+    def __init__(
+        self, update_id: int, chat_id: int, sender_id: int, text: str | None,
+        callback_id: str | None = None,
+    ) -> None:
         self.update_id = update_id
         self.chat_id = chat_id
         self.sender_id = sender_id
         self.text = text
+        # A tapped inline button: its data is the text, and the tap is
+        # acknowledged so the client stops showing it as pending.
+        self.callback_id = callback_id
 
 
 def _parse(raw: object) -> _Update | None:
-    """A text message with a sender, or None for anything else Telegram
-    sends (edits, channel posts, service messages, malformed items)."""
+    """A text message or a button tap with a sender, or None for anything
+    else Telegram sends (edits, channel posts, service messages, malformed items)."""
     if not isinstance(raw, dict) or type(raw.get("update_id")) is not int:
+        return None
+    callback = raw.get("callback_query")
+    if isinstance(callback, dict):
+        sender = callback.get("from")
+        message = callback.get("message")
+        chat = message.get("chat") if isinstance(message, dict) else None
+        data = callback.get("data")
+        if (
+            isinstance(sender, dict) and type(sender.get("id")) is int
+            and isinstance(chat, dict) and type(chat.get("id")) is int
+            and isinstance(data, str) and isinstance(callback.get("id"), str)
+        ):
+            return _Update(raw["update_id"], chat["id"], sender["id"], data, callback["id"])
         return None
     message = raw.get("message")
     if not isinstance(message, dict):
@@ -264,6 +294,8 @@ class TelegramIngress:
         # Within a process, a duplicate inside one response is skipped; across
         # a restart, the durable cursor is what stops a batch being replayed.
         self._seen: dict[int, None] = {}
+        # Open Workflow question flows, by (chat, sender); they expire.
+        self._flows: dict[tuple[int, int], telegram_flow.FlowState] = {}
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
@@ -295,7 +327,7 @@ class TelegramIngress:
         with the token already redacted; the offset then stays where it was."""
         payload: dict[str, JsonValue] = {
             "timeout": self.config.poll_timeout_seconds,
-            "allowed_updates": ["message"],
+            "allowed_updates": ["message", "callback_query"],
         }
         try:
             offset = await asyncio.to_thread(self.offset)
@@ -356,8 +388,12 @@ class TelegramIngress:
                 continue
             self._remember(update.update_id)
             delivery = await self._deliver_guarded(update)
+            if update.callback_id is not None:
+                await asyncio.to_thread(self._acknowledge, update.callback_id)
             if delivery.reply is not None:
-                replied = await asyncio.to_thread(self._reply, update.chat_id, delivery.reply)
+                replied = await asyncio.to_thread(
+                    self._reply, update.chat_id, delivery.reply, delivery.buttons
+                )
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
         if highest is None or highest == offset:
@@ -416,6 +452,18 @@ class TelegramIngress:
             )
         text = update.text.strip()
         parsed = slash_command(text)
+        key = (update.chat_id, update.sender_id)
+        active = self._flows.get(key)
+        if active is not None and active.expired():
+            del self._flows[key]
+            active = None
+        if active is not None and not (
+            parsed is not None and parsed[0] in ("run", "start", "help", "status")
+        ):
+            step = telegram_flow.answer(active, text)
+            return await self._flow_step(base, key, active, step, actor, update)
+        if parsed is not None and parsed[0] == "run":
+            return await self._start_flow(base, key, parsed, actor, update)
         if parsed is not None and parsed[0] in ("start", "help"):
             return TelegramDelivery(**base, disposition="answered", reply=HELP)
         if parsed is not None and parsed[0] == "status":
@@ -462,6 +510,87 @@ class TelegramIngress:
             **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
         )
 
+    def _acting(self, actor: str) -> tuple[str, str | None]:
+        """Who runs and on whose behalf, as for every other request."""
+        member = self.agent.membership.member()
+        acting = member if member is not None and member != actor else actor
+        return acting, actor if acting != actor else None
+
+    def _resolve_workflow(self, target: str) -> WorkflowManifest | str:
+        installed = self.agent.gateway.engine.workflows.manifests()
+        if not target:
+            return "Name the Workflow: /run <number or name>."
+        found = [
+            item for item in installed
+            if (target.isdigit() and item.run_alias == int(target))
+            or target in (
+                item.metadata.identity.name,
+                f"{item.metadata.identity.namespace}/{item.metadata.identity.name}",
+            )
+        ]
+        if len(found) != 1:
+            return (f"No single installed Workflow is called {target}."
+                    if not found else f"{target} names more than one Workflow; use namespace/name.")
+        return found[0]
+
+    async def _start_flow(
+        self, base: dict[str, int], key: tuple[int, int],
+        parsed: tuple[str, str | None, str | None], actor: str, update: _Update,
+    ) -> TelegramDelivery:
+        target = " ".join(part for part in parsed[1:] if part).strip()
+        manifest = self._resolve_workflow(target)
+        if isinstance(manifest, str):
+            return TelegramDelivery(**base, disposition="answered", reply=manifest)
+        effect = await asyncio.to_thread(
+            target_side_effect, self.agent, "workflow", manifest.metadata.identity, {}
+        )
+        state = telegram_flow.start(manifest, effect)
+        if isinstance(state, str):
+            return TelegramDelivery(**base, disposition="answered", reply=state)
+        return await self._flow_step(base, key, state, telegram_flow.begin(state), actor, update)
+
+    async def _flow_step(
+        self, base: dict[str, int], key: tuple[int, int], state: telegram_flow.FlowState,
+        step: telegram_flow.FlowStep, actor: str, update: _Update,
+    ) -> TelegramDelivery:
+        if step.kind == "ask" and step.prompt is not None:
+            self._flows[key] = state
+            return TelegramDelivery(
+                **base, disposition="answered", reply=scrub(step.prompt.text),
+                buttons=tuple(tuple(row) for row in step.prompt.buttons),
+            )
+        self._flows.pop(key, None)
+        if step.kind == "cancelled" or step.arguments is None:
+            return TelegramDelivery(**base, disposition="answered", reply="Cancelled.")
+        acting, on_behalf_of = self._acting(actor)
+        outcome = await self.agent.execute_workflow(LocalWorkflowRequest(
+            ingress="telegram",
+            actor=acting,
+            on_behalf_of=on_behalf_of,
+            bridge_id=self.config.bridge_id,
+            workflow=state.workflow,
+            arguments=step.arguments,
+            idempotency_key=f"telegram-{update.update_id}",
+            trace=TraceIdentifiers(
+                trace_id=f"telegram-{update.update_id}",
+                request_id=f"telegram-{update.update_id}",
+                span_id="telegram-flow",
+            ),
+        ))
+        if outcome.refusal is not None:
+            return TelegramDelivery(
+                **base, disposition="refused", reply=f"Refused: {outcome.refusal}.",
+                outcome=outcome,
+            )
+        if outcome.workflow is None:
+            reply = f"{state.workflow.name}: nothing ran."
+        else:
+            run = outcome.workflow.run
+            reply = (f"{state.workflow.name} run {run.run_id}: {run.status}, "
+                     f"{run.completed_steps} step(s)"
+                     + (f" ({run.failure.code})" if run.failure is not None else ""))
+        return TelegramDelivery(**base, disposition="routed", reply=scrub(reply), outcome=outcome)
+
     def _status(self) -> str:
         snapshot = self.agent.snapshot(observed_at=datetime.now(UTC))
         lines = [
@@ -473,17 +602,34 @@ class TelegramIngress:
         )
         return scrub("\n".join(lines))
 
-    def _reply(self, chat_id: int, text: str) -> bool:
-        """Plain text, in pieces Telegram accepts. A reply that cannot be
-        sent is reported on the delivery, never raised over the outcome."""
+    def _reply(
+        self, chat_id: int, text: str,
+        buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
+    ) -> bool:
+        """Plain text, in pieces Telegram accepts, with any inline keyboard on
+        the last piece. A reply that cannot be sent is reported on the
+        delivery, never raised over the outcome."""
         try:
-            for piece in chunks(text):
-                status, _ = self._call("sendMessage", {"chat_id": chat_id, "text": piece})
+            pieces = list(chunks(text))
+            for position, piece in enumerate(pieces):
+                payload: dict[str, JsonValue] = {"chat_id": chat_id, "text": piece}
+                if buttons and position == len(pieces) - 1:
+                    payload["reply_markup"] = {"inline_keyboard": [
+                        [{"text": label, "callback_data": data} for label, data in row]
+                        for row in buttons
+                    ]}
+                status, _ = self._call("sendMessage", payload)
                 if status != 200:
                     return False
         except Exception:  # noqa: BLE001 - the delivery records that the reply failed
             return False
         return True
+
+    def _acknowledge(self, callback_id: str) -> None:
+        try:
+            self._call("answerCallbackQuery", {"callback_query_id": callback_id})
+        except Exception:  # noqa: BLE001 - an unacknowledged tap only spins longer
+            pass
 
     async def run(self, stop: asyncio.Event, *, interval_s: float = 1.0) -> Failure | None:
         """Poll until asked to stop. A failure that will not fix itself (a

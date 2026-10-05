@@ -148,6 +148,10 @@ class InstalledWorkflows:
         manifest = self._workflows.get(identity.key)
         return manifest.model_copy(deep=True) if manifest is not None else None
 
+    def manifests(self) -> tuple[WorkflowManifest, ...]:
+        """Every installed manifest, as copies, in installation order."""
+        return tuple(item.model_copy(deep=True) for item in self._workflows.values())
+
 
 class _RunRecord:
     """Mutable run state owned by the event loop; snapshots are frozen contracts."""

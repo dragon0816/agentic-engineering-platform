@@ -1130,3 +1130,15 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   undeclared tools keep the generic object. Tool calls are refused before
   execution if they set a non-offered field or fail `validate_run_parameters`
   (defaults applied otherwise). Next: S4 Telegram question flow.
+- [x] rs_workflow_system migration S4, Telegram question flow (Claude Code,
+  2026-10-05): `/run <number or name>` asks a Workflow's telegram-channel
+  fields one at a time (`channels.telegram_flow`, generated from the
+  declaration): inline keyboards for choices and yes/no, comma/new-line lists,
+  `/skip` only for optional fields, `/cancel`, defaults shown, shared field
+  validation. A run that can change or send something, or a privileged field
+  that was set, waits for a Run tap (owner decision 1). Button taps arrive as
+  callback queries and are acknowledged. Execution uses
+  `LocalAgent.execute_workflow` with `LocalWorkflowRequest` now accepting the
+  `telegram` ingress and `on_behalf_of` (granting nothing). Required uploads
+  are refused on Telegram (attachments excluded); flow state is in memory with
+  a 15-minute expiry. Next: S5 workflow_settings store and editor.

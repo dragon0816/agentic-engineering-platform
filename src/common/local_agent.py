@@ -118,8 +118,11 @@ class LocalWorkflowRequest(Contract):
     and every Workflow step still crosses Bridge policy.
     """
 
-    ingress: Literal["local"] = "local"
+    # A Telegram question flow also starts an exact Workflow; the ingress is
+    # recorded as the channel and, like `on_behalf_of`, grants nothing.
+    ingress: Ingress = "local"
     actor: Symbol
+    on_behalf_of: Symbol | None = None
     bridge_id: Symbol
     workflow: AssetIdentity
     arguments: dict[Symbol, JsonValue] = Field(default_factory=dict)
@@ -128,5 +131,7 @@ class LocalWorkflowRequest(Contract):
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:
+        if self.on_behalf_of == self.actor:
+            raise ValueError("a request on your own behalf names nobody else")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
