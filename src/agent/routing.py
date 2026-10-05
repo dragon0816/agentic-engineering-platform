@@ -200,7 +200,12 @@ class RequestRouter:
                 return needs_input(context, "model_unavailable")
             if response.trace != context.trace or response.model_alias != self.model_alias:
                 return needs_input(context, "model_context_mismatch")
-            proposal = RouteProposal.model_validate(response.structured_output)
+            chosen = response.structured_output
+            # JSON mode cannot return a bare null, so "no route" arrives as
+            # an object with no kind; that is an answer, not a malformed one.
+            if chosen is None or (isinstance(chosen, dict) and chosen.get("kind") is None):
+                return needs_input(context, "no_matching_route")
+            proposal = RouteProposal.model_validate(chosen)
         except ValidationError:
             return needs_input(context, "invalid_model_route")
         except Exception:

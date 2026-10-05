@@ -265,3 +265,14 @@ def test_malformed_dot_command_json_is_refused_without_execution() -> None:
     result = RequestRouter(CommandRouter(skills())).route(request("run_testing.run {not-json}"))
     assert result.decision.kind == "needs_input"
     assert result.failure is not None and result.failure.code == "invalid_command_json"
+
+
+@pytest.mark.parametrize("output", [None, {"kind": None, "target": None, "arguments": None}])
+def test_a_model_finding_no_route_is_an_answer_not_a_malformed_one(output: Any) -> None:
+    """JSON mode cannot return a bare null, so "no route" arrives as an object
+    with no kind (seen on the owner's Gateway, 2026-10-05)."""
+    result = RequestRouter(CommandRouter(skills()), model=FakeModel(output)).route(
+        request("hi")
+    )
+    assert result.decision.kind == "needs_input"
+    assert result.failure is not None and result.failure.code == "no_matching_route"
