@@ -122,3 +122,19 @@ model, so precision matters more than coverage; the threshold is an owner
 decision. Weak spots: Chinese short commands (proof, checklist), knowledge
 questions confused with the market matrix, and broad/chit-chat requests that
 should keep the catalogue. Latency p95 still exceeds the 300 ms default.
+
+### Selector hints (2026-10-05)
+
+Skills now carry `selector_hint` and the adapter uses it (DECISIONS
+2026-10-05). Corpus `--corpus skills-v3` (`golden-v3-skills.json`, 46 cases:
+the 26 above plus 20 held-out paraphrases, with hints), Laya, 3 trials,
+baseline 0.217:
+
+| Threshold | Admitted | Admitted correct | With fallback | p50 / p95 |
+|---|---|---|---|---|
+| 0.9 | 15 / 138 | 100 % | 0.326 | 262 / 611 ms |
+| 0.5 | 69 / 138 | 91 % | 0.630 | 271 / 526 ms |
+
+Still weak: multi-task requests answered with one tool at high confidence,
+and SOP-to-workflow vs NCC document requests. The threshold remains an owner
+decision; latency p95 remains above the 300 ms default.

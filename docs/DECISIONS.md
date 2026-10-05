@@ -1116,3 +1116,27 @@ Decision (owner request): the merged Workflow 11 recorded above is named
 the report's own title (SDE Weekly Report). Steps, parameters, `/run 11` and
 the `weekly` Skill command are unchanged. The earlier name was never
 published beyond this install.
+
+## 2026-10-05 — Skills carry a `selector_hint` for Skill selectors
+
+Decision (owner approval): `SkillManifest.selector_hint` is an optional
+single line (at most 240 characters, English and Chinese keywords) telling a
+Skill selector such as JEV SystemOne what the Skill is for and how it differs
+from the others; `instructions` remains the model guidance. It is omitted from
+serialization when unset, so earlier manifests keep their bytes and digests.
+The Gateway passes each hinted tool's hint in `SkillCandidateRequest
+.selector_hints`; the JEV adapter uses the hint, or the tool description
+without the shared "Executes installed ..." suffix, and words its "keep the
+whole catalogue" option concretely (chat, greetings, capability questions,
+several tasks). Hints were added to the weekly report and NCC Skills and, as
+new versions, to team-tickets 2.1.0 and the company-agent knowledge,
+market-alignment, personal-proof and workflow-author Skills 1.1.0 (published
+versions are not edited in place). The checklist preview Skill and the
+Knowledge 1.4.0 candidate use the fallback.
+
+Reason: on the self-hosted Laya service the full instructions plus the shared
+suffix buried what told tools apart; short distinctive hints raised accuracy
+on 20 held-out cases from 50 % to 80 %. Rejected alternatives: rewriting
+`instructions` (they guide the model, not the selector); deriving hints
+automatically (measured worse than written ones); a two-stage "one tool?"
+then "which tool?" question (more misses).

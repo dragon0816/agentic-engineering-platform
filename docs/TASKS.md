@@ -1223,6 +1223,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   benchmark applies the confidence threshold (`--threshold`) and scores the
   live route with fallback; Laya results at 0.9 and 0.3 in
   `docs/JEV_ADAPTER_READINESS.md`.
+- [x] Skill `selector_hint` (owner approval 2026-10-05): manifest field,
+  Gateway `selector_hints`, JEV adapter uses hints and strips the shared
+  suffix, concrete preserve option; hints on weekly, NCC, team-tickets 2.1.0
+  and company-agent Skills 1.1.0 (installed live, old versions in
+  `skills\disabled\`); corpus `skills-v3` (46 cases). Laya at 0.5: 63 % with
+  fallback (baseline 22 %), 91 % of admitted choices correct. Tests:
+  `tests/test_skill_selector_hints.py`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
