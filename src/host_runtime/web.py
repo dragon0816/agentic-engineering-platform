@@ -77,6 +77,7 @@ from common.workflow_parameters import (
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
+from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
     CompanyHostConfiguration,
@@ -117,13 +118,12 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
     MessageFeedback,
 )
-from host_runtime.host import HostRuntime, load_authorization
+from host_runtime.host import HostRuntime, choice_sources, load_authorization
 from host_runtime.knowledge_observation import KnowledgeBridgeActions
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
     REFERENCE_SETS_FILE,
-    ReferenceQuery,
     ReferenceSetStore,
 )
 from host_runtime.slash_commands import (
@@ -500,7 +500,7 @@ class AgentWeb:
         return {"ok": True, "workflow": self._settings_entry(manifest)}
 
     def workflow_options(self, request: WorkflowOptionsRequest) -> dict[str, Any]:
-        """Choices for a `ref:` field given the answers so far."""
+        """Choices for a `ref:` or `fn:` field given the answers so far."""
         item = WorkflowOptionsRequest.model_validate(request)
         manifest = next(
             (
@@ -514,17 +514,22 @@ class AgentWeb:
             (candidate for candidate in manifest.parameters if candidate.name == item.field),
             None,
         )
-        if field is None or not field.choices_source:
+        if manifest is None or field is None or not field.choices_source:
             return {"ok": False, "code": "workflow_field_unknown"}
-        if not field.choices_source.startswith("ref:"):
-            return {"ok": False, "code": "choices_source_unsupported"}
-        query = ReferenceQuery(field.choices_source)
-        waiting = [name for name in query.needed() if item.answers.get(name) in (None, "")]
+        source = field.choices_source
+        waiting = [
+            name for name in ChoiceSources.needed(source) if item.answers.get(name) in (None, "")
+        ]
         if waiting:
             return {"ok": True, "choices": [], "waiting_for": waiting}
-        found = self.reference_sets.resolve(field.choices_source, item.answers)
+        found = choice_sources(self.runtime.config, self.runtime.layout).resolve(
+            manifest, source, item.answers
+        )
         if found is None:
-            return {"ok": True, "choices": [], "unavailable": True, "set": query.name}
+            return {
+                "ok": True, "choices": [], "unavailable": True,
+                "set": source.split(":", 1)[1].partition("?")[0],
+            }
         return {
             "ok": True,
             "choices": [

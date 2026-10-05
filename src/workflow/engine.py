@@ -255,7 +255,9 @@ class WorkflowEngine:
         journal: RunJournal | None = None,
         watch_queue_size: int = WATCH_QUEUE_SIZE,
         settings_provider: Callable[[WorkflowManifest], Mapping[str, JsonValue]] | None = None,
-        choices_provider: Callable[[str, Mapping[str, JsonValue]], list[str] | None]
+        choices_provider: Callable[
+            [WorkflowManifest, str, Mapping[str, JsonValue]], list[str] | None
+        ]
         | None = None,
     ) -> None:
         self.workflows = workflows
@@ -263,7 +265,8 @@ class WorkflowEngine:
         # Per-install settings (`scope: static` fields), read on every run so a
         # change on the settings page applies without a restart.
         self.settings_provider = settings_provider
-        # Current values of published reference sets (`ref:` choice sources).
+        # Current values of `ref:` sets and `fn:` functions, given the Workflow
+        # (whose settings a function reads) and the run's answers.
         self.choices_provider = choices_provider
         # Without a journal the engine behaves exactly as before: in memory only.
         self.journal = journal
@@ -460,19 +463,23 @@ class WorkflowEngine:
     def _choices(
         self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]
     ) -> str | None:
-        """A value for a `ref:` field must be in that set's current choices."""
+        """A value for a `ref:` or `fn:` field must be in its current choices."""
         for field in manifest.parameters:
             source = field.choices_source
-            if field.scope != "runtime" or not source or not source.startswith("ref:"):
+            if field.scope != "runtime" or not source:
                 continue
             value = run_arguments.get(field.name)
             if value is None:
                 continue
             allowed = (
-                self.choices_provider(source, run_arguments) if self.choices_provider else None
+                self.choices_provider(manifest, source, run_arguments)
+                if self.choices_provider else None
             )
             if allowed is None:
-                return "reference_set_unavailable"
+                return (
+                    "reference_set_unavailable" if source.startswith("ref:")
+                    else "choice_function_unavailable"
+                )
             chosen = value if isinstance(value, list) else [value]
             if any(item not in allowed for item in chosen):
                 return "workflow_choice_unavailable"

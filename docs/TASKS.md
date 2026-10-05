@@ -1183,6 +1183,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   script-tool manifest is a candidate awaiting owner publication/approval.
   Parity tests run the pinned job through Bridge policy in a real host.
   Ruff excludes vendored source directories.
+- [x] rs_workflow_system migration S6c: `fn:` choice functions
+  (`host_runtime/choice_sources.py`). A read-only host function receives the
+  Workflow's per-install settings and bound `{field}` arguments; one resolver
+  serves engine validation (`choice_function_unavailable`), Agent Web
+  `/api/workflow-options` and Telegram buttons. Tests:
+  `tests/test_choice_functions.py`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

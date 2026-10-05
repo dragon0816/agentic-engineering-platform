@@ -41,7 +41,7 @@ class FlowPrompt:
     buttons: list[list[Button]] = field(default_factory=list)
 
 
-ChoicesProvider = Callable[[str, Mapping[str, Any]], "list[str] | None"]
+ChoicesProvider = Callable[[WorkflowManifest, str, Mapping[str, Any]], "list[str] | None"]
 
 
 @dataclass
@@ -49,7 +49,7 @@ class FlowState:
     manifest: WorkflowManifest
     effect: str | None
     fields: tuple[WorkflowParameter, ...]
-    # Current values of `ref:` sets, from the same provider the engine checks.
+    # Current `ref:` / `fn:` choices, from the same provider the engine checks.
     choices: ChoicesProvider | None = None
     index: int = 0
     answers: dict[str, Any] = field(default_factory=dict)
@@ -92,9 +92,9 @@ def _title(state: FlowState) -> str:
 
 def _dynamic_values(state: FlowState, item: WorkflowParameter) -> list[str] | None:
     source = item.choices_source
-    if not source or not source.startswith("ref:") or state.choices is None:
+    if not source or state.choices is None:
         return None
-    return state.choices(source, state.answers)
+    return state.choices(state.manifest, source, state.answers)
 
 
 def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Button]]:
@@ -124,7 +124,7 @@ def prompt(state: FlowState) -> FlowPrompt:
         lines.append("Several values: separate them with commas or new lines.")
     if item.kind == "select" and (item.choices_source or item.multiple) and item.choice_values:
         lines.append("Choices: " + ", ".join(item.choice_values))
-    if item.choices_source and item.choices_source.startswith("ref:"):
+    if item.choices_source:
         dynamic = _dynamic_values(state, item)
         if dynamic is None:
             lines.append("Its choice list is not available yet; type the value.")

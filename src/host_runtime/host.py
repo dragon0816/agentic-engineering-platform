@@ -13,7 +13,7 @@ the engine decides every workflow, and the Agent decides who may ask.
 """
 
 import os
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, TypeVar
@@ -114,6 +114,7 @@ from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from dut.runtime import PhysicalDutValidationService
 from host_runtime.agent import LocalAgent
+from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
 from host_runtime.contracts import (
     CompanyHostConfiguration,
     DoctorCheck,
@@ -215,6 +216,10 @@ def _load_all(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]:
         except (OSError, ValidationError, ValueError) as error:
             raise HostError("asset_invalid", path) from error
     return tuple(items)
+
+
+#: Read-only `fn:` choice functions by name (see `host_runtime.choice_sources`).
+CHOICE_FUNCTIONS: dict[str, ChoiceFunction] = {}
 
 
 class HostRuntime:
@@ -759,6 +764,20 @@ def build_gateway(
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
     )
+    return Gateway(
+        router, bridge,
+        WorkflowEngine(
+            workflows, bridge,
+            settings_provider=workflow_settings_provider(config, layout),
+            choices_provider=choice_sources(config, layout).values,
+        ),
+    )
+
+
+def workflow_settings_provider(
+    config: CompanyHostConfiguration, layout: HostLayout
+) -> Callable[[WorkflowManifest], dict[str, JsonValue]]:
+    """A Workflow's per-install settings, read from the store on every call."""
     settings = WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE)
     legacy = legacy_workflow_settings(config)
 
@@ -772,17 +791,16 @@ def build_gateway(
             **settings.for_manifest(manifest),
         }
 
-    references = ReferenceSetStore(layout.workspace_root / REFERENCE_SETS_FILE)
+    return provide
 
-    def choices(source: str, answers: Mapping[str, JsonValue]) -> list[str] | None:
-        found = references.resolve(source, answers)
-        return None if found is None else [item.value for item in found]
 
-    return Gateway(
-        router, bridge,
-        WorkflowEngine(
-            workflows, bridge, settings_provider=provide, choices_provider=choices,
-        ),
+def choice_sources(config: CompanyHostConfiguration, layout: HostLayout) -> ChoiceSources:
+    """`ref:` sets and the read-only `fn:` choice functions this host offers;
+    the engine, Agent Web and Telegram all resolve choices through this."""
+    return ChoiceSources(
+        ReferenceSetStore(layout.workspace_root / REFERENCE_SETS_FILE),
+        workflow_settings_provider(config, layout),
+        CHOICE_FUNCTIONS,
     )
 
 

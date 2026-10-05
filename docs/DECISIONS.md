@@ -1007,3 +1007,23 @@ cheapest place to learn which tools the Agent needs. Rejected alternatives:
 generating whole Workflow code from each request; editing installed
 Workflows in place; wrapping every migrated job only as an opaque script
 (prevents reuse); trusting page text as Agent guidance.
+
+## 2026-10-05 — `fn:` choice functions read a Workflow's own settings
+
+Decision: a parameter's `choices_source` may name `fn:<name>?arg={field}`, a
+read-only host function registered in `host_runtime.host.CHOICE_FUNCTIONS`.
+It receives the Workflow's per-install settings and the bound arguments,
+never a credential, and an error it raises means "unavailable". One resolver
+(`host_runtime.choice_sources.ChoiceSources`) serves the engine (run
+validation, rejection `choice_function_unavailable`), Agent Web
+(`/api/workflow-options`) and Telegram buttons. The engine's choices provider
+now receives the manifest. First use: Workflow 14's station menu
+(`fn:ncc_plan.stations`), read from the catalogue file its settings name.
+
+Reason: some choice lists are a property of the install, not something a run
+publishes; with `ref:` the menu would be empty and the run refused until a
+separate publish run, and the settings would be configured twice. Rejected
+alternatives: a refresh Workflow that publishes `ref:nccStations` (chicken
+and egg, duplicated settings); publishing on settings save (a hook per
+Workflow); a free-text station field (loses the source's menu).
+

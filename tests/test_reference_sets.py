@@ -72,7 +72,7 @@ def _engine(handler: Handler, store: ReferenceSetStore | None) -> tuple[Workflow
     workflows = InstalledWorkflows()
     workflows.register(manifest)
 
-    def choices(source: str, answers: Any) -> list[str] | None:
+    def choices(_manifest: Any, source: str, answers: Any) -> list[str] | None:
         found = None if store is None else store.resolve(source, answers)
         return None if found is None else [item.value for item in found]
 
@@ -97,7 +97,7 @@ def test_engine_accepts_only_a_currently_published_choice(tmp_path: Path) -> Non
 def test_telegram_offers_published_choices_as_buttons(tmp_path: Path) -> None:
     store = _store(tmp_path)
 
-    def choices(source: str, answers: Any) -> list[str] | None:
+    def choices(_manifest: Any, source: str, answers: Any) -> list[str] | None:
         found = store.resolve(source, answers)
         return None if found is None else [item.value for item in found]
 
