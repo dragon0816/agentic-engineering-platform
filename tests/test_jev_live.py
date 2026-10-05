@@ -47,7 +47,7 @@ class Transport:
     ) -> Reply:
         payload = json.loads(body)
         self.calls.append((url, payload, headers, timeout_s))
-        user = payload["state"]["messages"][-1]["text"]
+        user = payload["state"]["message"]
         reply = Reply("0" if "What installed" in user else "1")
         self.replies.append(reply)
         return reply
@@ -67,8 +67,10 @@ def test_live_entry_sends_only_pinned_public_skill_cases_and_scores_abstention()
         headers["Authorization"] == "Bearer synthetic-token"
         for _, _, headers, _ in transport.calls
     )
+    # Only the user's message is sent: no system text, persona or history.
+    assert all(set(payload["state"]) == {"message"} for _, payload, _, _ in transport.calls)
     assert all(
-        payload["state"]["messages"][0]["text"].startswith("Synthetic PUBLIC")
+        "Synthetic PUBLIC" not in json.dumps(payload["state"])
         for _, payload, _, _ in transport.calls
     )
     assert all(reply.closed for reply in transport.replies)
@@ -151,3 +153,23 @@ def test_the_skills_corpus_is_pinned_and_sends_real_descriptions() -> None:
     assert len(criteria) == 9                       # preserve + eight installed commands
     assert any("SDE weekly report" in text for text in criteria.values())
     assert not any(text.startswith("Synthetic installed") for text in criteria.values())
+
+
+def test_the_confidence_threshold_decides_and_the_fallback_column_keeps_the_catalogue() -> None:
+    """A choice below the Host's threshold is not admitted; the live route
+    then keeps the whole catalogue, which the with-fallback column scores."""
+    strict = run_public_benchmark(
+        model="jev-latest", credential=lambda: "synthetic-token", transport=Transport(),
+        threshold=0.99,                              # the fake answers at 0.96
+    )
+    measured = strict["jev-systemone"]["skill_selection"]
+    assert measured["answered"] == 0
+    assert measured["fallback_reasons"] == {"low_confidence": 3, "preserve_catalog": 1}
+    fallback = strict["jev-systemone.with-fallback"]["skill_selection"]
+    baseline = strict["aep-none-baseline"]["skill_selection"]
+    assert fallback["exact_accuracy"] == baseline["exact_accuracy"]
+    admitted = run_public_benchmark(
+        model="jev-latest", credential=lambda: "synthetic-token", transport=Transport(),
+    )
+    assert admitted["jev-systemone"]["skill_selection"]["answered"] == 3
+    assert admitted["jev-systemone.with-fallback"]["skill_selection"]["exact_accuracy"] == 0.5

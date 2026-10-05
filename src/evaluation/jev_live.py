@@ -95,6 +95,7 @@ def run_public_benchmark(
     credential: Callable[[], str],
     transport: wire.Transport | None = None,
     endpoint: str = TYPESAFE_SYSTEMONE,
+    threshold: float | None = None,
 ) -> dict[str, dict[str, dict[str, object]]]:
     """Benchmark one reviewed corpus; authorization happens before credentials/network."""
     cases = _public_cases(corpus)
@@ -109,6 +110,7 @@ def run_public_benchmark(
         model_profile=model,
         timeout_ms=timeout_ms,
         enabled_decision_types=("skill_selection",),
+        **({} if threshold is None else {"confidence_threshold": threshold}),
     )
     if not credential().strip():
         raise ValueError("JEV credential is unavailable")
@@ -131,27 +133,64 @@ def run_public_benchmark(
                 result = provider.decide(_candidate(case, trial))
             except Exception:
                 # Provider exceptions can contain payloads or bearer values.
+                latency = (perf_counter() - started) * 1_000
                 observations.append(
                     DecisionObservation(
                         case_id=case.case_id,
                         provider_id="jev-systemone",
                         trial=trial,
                         status="abstained",
-                        latency_ms=(perf_counter() - started) * 1_000,
+                        latency_ms=latency,
+                        fallback_reason="provider_error",
+                    )
+                )
+                observations.append(
+                    DecisionObservation(
+                        case_id=case.case_id,
+                        provider_id="jev-systemone.with-fallback",
+                        trial=trial,
+                        status="answered",
+                        selected=case.candidates,
+                        latency_ms=latency,
                         fallback_reason="provider_error",
                     )
                 )
                 continue
+            # The DecisionService admits a candidate only at or above the
+            # configured confidence; below it, live routing keeps the baseline.
+            latency = (perf_counter() - started) * 1_000
+            answered = (
+                result.accepted
+                and result.confidence is not None
+                and result.confidence >= config.confidence_threshold
+            )
+            reason = (
+                None if answered
+                else result.reason_code if not result.accepted else "low_confidence"
+            )
             observations.append(
                 DecisionObservation(
                     case_id=case.case_id,
                     provider_id="jev-systemone",
                     trial=trial,
-                    status="answered" if result.accepted else "abstained",
-                    selected=result.value if result.accepted else (),
+                    status="answered" if answered else "abstained",
+                    selected=result.value if answered else (),
                     confidence=result.confidence,
-                    latency_ms=(perf_counter() - started) * 1_000,
-                    fallback_reason=None if result.accepted else result.reason_code,
+                    latency_ms=latency,
+                    fallback_reason=reason,
+                )
+            )
+            # What a person would get: the admitted choice, else the catalogue.
+            observations.append(
+                DecisionObservation(
+                    case_id=case.case_id,
+                    provider_id="jev-systemone.with-fallback",
+                    trial=trial,
+                    status="answered",
+                    selected=result.value if answered else case.candidates,
+                    confidence=result.confidence,
+                    latency_ms=latency,
+                    fallback_reason=reason,
                 )
             )
     return score(cases, observations)
@@ -167,6 +206,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="v1: the original four synthetic cases; skills: the live Skill catalogue",
     )
     parser.add_argument(
+        "--threshold", type=float, default=None,
+        help="confidence a choice needs to be admitted (default: the Host's 0.9)",
+    )
+    parser.add_argument(
         "--endpoint", default=TYPESAFE_SYSTEMONE,
         help="SystemOne URL: HTTPS, or http://127.0.0.1:<port>/v1/systemone through a tunnel",
     )
@@ -179,6 +222,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             credential=lambda: os.environ[KEY_ENV],
             endpoint=args.endpoint,
             corpus=SKILLS_CORPUS if args.corpus == "skills" else PUBLIC_CORPUS,
+            threshold=args.threshold,
         )
     except (OSError, ValueError, KeyError) as error:
         parser.exit(2, f"JEV benchmark unavailable: {type(error).__name__}\n")
