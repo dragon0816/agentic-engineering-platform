@@ -17,6 +17,14 @@ Updated: 2026-10-05 (Asia/Taipei), by Claude Code
   Skill `weekly-report@2.0.0`; the three old W11 Workflows and Skill 1.0.0 were
   moved to `workspace\assets\workflows\disabled\` and `skills\disabled\`.
 - Settings has a Telegram bot section (not configured yet on this machine).
+- JEV shadow mode is on (`decision_accelerator` in host.json, backup
+  `host.json.bak-20261005-204917-before-jev-shadow-gitlab`): needs the SSH
+  tunnel `ssh -N -p 2222 -L 18000:127.0.0.1:8000 openlab@172.25.228.141`;
+  log `workspace\jev-shadow.jsonl`, replay `python -m evaluation.jev_shadow_report <log>`.
+- Agent Web must be started with the user environment refreshed (AEP_* and
+  LITELLM_MASTER_KEY), or credentials set after the shell started are missing.
+- GitLab token (`AEP_GITLAB_TOKEN`, mapped as `gitlab_token`) verified for
+  `rs-wmt-projects/chipsets` (45 projects); it expires 2026-10-06.
 - Installed Knowledge Skill: candidate `company-agent/knowledge-query@1.4.0`.
   Rollback: move its JSON out of `workspace\assets\skills\` and move
   `disabled/company-agent__knowledge-query__1.3.0.json` back, then restart.

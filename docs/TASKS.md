@@ -1237,6 +1237,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `python -m evaluation.jev_shadow_report`. Adapter keeps the most likely
   tools when `skill_max_tools > 1`. Not enabled live until the owner records
   an approval. Tests: `tests/test_jev_shadow.py`.
+- [x] Telegram settings keep a token and senders saved while the bot is off
+  (owner report 2026-10-05: saving unticked discarded input and blanked the
+  form); first-time form starts ticked. JEV shadow mode enabled live (owner
+  approval `owner-approved-2026-10-05-laya-shadow`, `skill_max_tools` 3,
+  timeout 1500 ms); shadow outcome `kept_catalog` named. GitLab credential
+  mapping `gitlab_token -> AEP_GITLAB_TOKEN` added and the token verified.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
