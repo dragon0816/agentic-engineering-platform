@@ -135,7 +135,8 @@ class DecisionEnvelope(Contract, Generic[ValueT]):
 
 
 ShadowOutcome = Literal[
-    "would_select", "low_confidence", "unsupported", "error", "not_authorized", "not_installed",
+    "would_select", "kept_catalog", "low_confidence", "unsupported", "error",
+    "not_authorized", "not_installed",
 ]
 _SHADOW_OUTCOMES: dict[str | None, ShadowOutcome] = {
     None: "would_select",
@@ -230,9 +231,13 @@ class DecisionService(Generic[RequestT, ValueT]):
         started = self._clock()
         _, candidate, reason = self._accelerate(request, decision_type)
         value = None if candidate is None else candidate.value
+        outcome = _SHADOW_OUTCOMES.get(reason, "error")
+        if candidate is not None and not candidate.accepted:
+            # The accelerator itself chose to keep the whole catalogue.
+            outcome = "kept_catalog"
         record = DecisionShadow(
             decision_type=decision_type,
-            outcome=_SHADOW_OUTCOMES.get(reason, "error"),
+            outcome=outcome,
             provider_id=None if candidate is None else candidate.provider_id,
             value=list(value) if isinstance(value, tuple) else value,
             confidence=None if candidate is None else candidate.confidence,

@@ -202,3 +202,20 @@ def test_each_finished_turn_reaches_the_conversation_observer() -> None:
     app._conversation_observer = seen.append
     result = asyncio.run(app.converse(request("Hi"), (ModelMessage(role="user", text="Hi"),)))
     assert seen == [result] and result.status == "answered"
+
+
+def test_an_accelerator_keeping_the_catalogue_is_recorded_as_such() -> None:
+    class Keeping(Provider):
+        def decide(self, request: str) -> Any:
+            return super().decide(request).model_copy(update={"accepted": False})
+
+    seen: list[DecisionShadow] = []
+    service = DecisionService[str, str](
+        baseline=Provider("baseline"), config=shadowed(),
+        accelerator_factory=lambda: Keeping("jev", confidence=0.95),
+        authorize_accelerator=lambda _: True,
+        shadow_observer=lambda _r, record: seen.append(record),
+    )
+    service.decide("request", decision_type="intent_classification")
+    service.drain_shadows()
+    assert [record.outcome for record in seen] == ["kept_catalog"]
