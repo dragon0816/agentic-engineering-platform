@@ -1204,3 +1204,23 @@ Rejected alternatives: WSL (slower, separate Python to maintain); Docker
 with no isolation (secrets in the environment, writes anywhere); native
 Claude Code first (data rule allows PUBLIC context only and needs a
 classifier first).
+
+## 2026-10-06 — SOP to Workflow: fixed web targets, preview before install, authoring sessions
+
+Decision (owner): SOP or SOP PDF plus discussion produces a Workflow composed
+of building blocks, including new web and Excel blocks. Web steps replay
+targets recorded at authoring time with no model at run time. A generated
+Workflow is installed only after a preview run the owner approves (read steps
+run, write steps report what they would do). Discussion state lives in a
+dedicated authoring session. The SOP PDF is uploaded in Agent Web. Harness
+structure changes (engine preview mode, authoring session) are confirmed by
+the owner before they are built. Plan: `docs/phases/SOP_TO_WORKFLOW.md`.
+
+Reason: replaying fixed targets is reproducible and sends no page content to
+a model per run. Preview shows real data before anything is written. A
+session survives the 12-message chat window and keeps approval out of the
+model's reach. Rejected alternatives: a model choosing elements at run time
+(non-deterministic, page content leaves the machine every run); exact
+expected-output fixtures for every generated Workflow (too heavy for web and
+Excel work); chat-only discussion (limited to 12 turns and 4,000 characters per
+message); a drop folder only for PDFs.
