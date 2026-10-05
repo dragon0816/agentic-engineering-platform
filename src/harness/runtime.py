@@ -143,6 +143,10 @@ class CodingHarness:
             raise WorkspaceRefused("change_path_not_allowed")
         before = workspace.read(candidate.path)
         encoded = candidate.content.encode("utf-8")
+        if before == encoded:
+            # A real author can hand back the file it was asked to repair;
+            # that is a stop, not an empty change record.
+            raise WorkspaceRefused("change_made_no_difference")
         workspace.write(candidate.path, candidate.content)
         before_text = before.decode("utf-8") if before is not None else ""
         patch = "".join(
