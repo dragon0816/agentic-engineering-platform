@@ -1183,3 +1183,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   script-tool manifest is a candidate awaiting owner publication/approval.
   Parity tests run the pinned job through Bridge policy in a real host.
   Ruff excludes vendored source directories.
+- [ ] Natural-language Workflow authoring and modification (owner request
+  2026-10-05): direction and owner decisions in
+  `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
+  during the rs_workflow_system migration, P2-P4 follow the migration.

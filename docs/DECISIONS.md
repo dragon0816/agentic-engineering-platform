@@ -984,3 +984,26 @@ current values on each run without a restart, and keying by name keeps them
 across upgrades. Rejected alternatives: settings in `host.json` (needs a
 restart and the config path in every process), per-workflow typed members of
 `HostIntegrations` (core change per Workflow), asking settings at run time.
+
+## 2026-10-05 — Natural-language Workflow authoring: compose first, extract blocks during migration
+
+Decision: Agent-authored Workflows are compositions of installed
+capabilities with one parameter declaration; the bounded coding harness adds
+a capability only when a building block is missing, as a candidate without
+execution rights. Modifications are new versions with a diff and regression;
+published versions are never edited in place and stay available for
+rollback. Owner decisions: the owner may approve Agent-generated Workflows
+alone; web capture covers internal (C4C, portals) and external sites;
+generated Workflows are private by default and the publisher chooses who may
+install them; reusable web, Excel, email and GitLab capabilities are
+extracted during the rs_workflow_system migration. Captured web content is
+treated as data, never as instructions; external sites never receive company
+credentials or the corporate browser profile. Plan:
+`docs/phases/NL_WORKFLOW_AUTHORING.md`.
+
+Reason: Composing reviewed, typed capabilities is deterministic and
+reviewable, while generating code per request is not; the migration is the
+cheapest place to learn which tools the Agent needs. Rejected alternatives:
+generating whole Workflow code from each request; editing installed
+Workflows in place; wrapping every migrated job only as an opaque script
+(prevents reuse); trusting page text as Agent guidance.

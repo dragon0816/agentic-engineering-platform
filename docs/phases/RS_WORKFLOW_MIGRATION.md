@@ -108,3 +108,13 @@ Excel/Outlook automation in a non-elevated session; Edge persistent profile
 and auto-login for C4C and the loan portal; GitLab/Artifactory reachability
 and an isolated push; the owner's real W10 workbooks and `chipset-map.json`;
 Jira `MRT1CV` access; Telegram long polling through the corporate proxy.
+
+## Building-block extraction (owner decision 2026-10-05)
+
+Each workflow slice keeps WRAP parity and also extracts the reusable
+operations inside the job as capabilities with typed contracts, declared side
+effects and dry run, feeding `docs/phases/NL_WORKFLOW_AUTHORING.md` P1:
+W03 (C4C web capture, Excel upsert), W06/06b (portal web, Outlook draft),
+W07/W10 (Excel read/upsert), W11/W14 (Outlook draft/send), W12/W13 (GitLab
+projects, pipelines, branches, controlled push). Record each extracted
+capability and the source code it came from in the slice's SOURCE.md.
