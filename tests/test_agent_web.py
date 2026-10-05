@@ -1546,7 +1546,7 @@ def test_typed_workflow_fields_render_and_reject_invalid_run_before_agent(
     ]
     page = served.page().decode("utf-8")
     assert 'id="workflow-fields"' in page
-    assert 'field.kind === "date" ? "date"' in page
+    assert 'kind === "date" ? "date"' in page and "renderParameterForm(" in page
     request = {
         "workflow": workflow.metadata.identity.model_dump(mode="json"),
         "arguments": {"max_issues": "ten"},

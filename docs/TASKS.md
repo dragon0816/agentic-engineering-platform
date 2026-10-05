@@ -1113,3 +1113,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   fields serialize as before so published manifest bytes are unchanged.
   Owner decisions recorded in `docs/DECISIONS.md`. Full pytest: 1977 passed,
   5 skipped, 1 known pre-existing failure. Next: S2 generated forms.
+- [x] rs_workflow_system migration S2, generated forms (Claude Code,
+  2026-10-05): `common.workflow_forms.form_fields(manifest, channel)` orders
+  runtime fields (identity group first, then `order`), filters by channel and
+  normalizes choices/help/defaults; Agent Web's run form and the schedule
+  form now share one renderer (`renderParameterForm` / `collectParameterValues`)
+  covering every kind, defaults, labelled choices, confirmation of privileged
+  fields and inline validation. Dynamic `ref:`/`fn:` choices render as text
+  until S6. Browser DOM check confirmed rendering, pattern refusal and value
+  collection. Next: S3 Agent tool schema.

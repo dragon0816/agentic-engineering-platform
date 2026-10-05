@@ -304,6 +304,8 @@ tr:last-child td { border-bottom: none; }
   border-radius: 8px; background: var(--bg); }
 .action-box label { display: block; margin: 9px 0 4px; font-size: 12px; color: var(--dim); }
 .workflow-field { margin: 12px 0; }
+.field-group { margin: 16px 0 4px; font-weight: 600; color: var(--dim);
+  text-transform: uppercase; font-size: 12px; letter-spacing: .04em; }
 .workflow-field input, .workflow-field select { width: 100%; min-height: 44px; padding: 9px 10px;
   color: var(--ink); background: var(--bg); border: 1px solid var(--line);
   border-radius: 8px; font: inherit; }
@@ -1919,37 +1921,84 @@ function showWorkflowContract() {
   const typed = workflow && workflow.parameters.editor === "fields";
   el("workflow-fields").hidden = !typed;
   el("workflow-legacy").hidden = !!typed;
-  const container = el("workflow-fields"); container.replaceChildren();
-  if (!typed) return;
-  for (const field of workflow.parameters.fields) {
-    const row = document.createElement("div"); row.className = "workflow-field";
-    const id = "workflow-field-" + field.name;
-    const label = document.createElement("label"); label.htmlFor = id;
-    label.append(text(field.label + (field.required ? " *" : "")));
-    const input = field.kind === "select" ? document.createElement("select")
-      : document.createElement("input");
-    input.id = id; input.dataset.name = field.name; input.dataset.kind = field.kind;
-    if (field.kind === "select") {
+  workflowFields = typed ? workflow.parameters.fields : [];
+  renderParameterForm(el("workflow-fields"), workflowFields, "workflow-field-");
+}
+
+// -- Parameter forms ------------------------------------------------------
+// One renderer for every form generated from a Workflow's parameter
+// declaration (run form and schedule form); see common/workflow_forms.py.
+
+let workflowFields = [];
+const LIST_KINDS = ["text_list", "emails"];
+const PATH_KINDS = ["file", "folder", "upload"];
+
+function parameterControl(field, id) {
+  const kind = field.kind;
+  let input;
+  if (kind === "select" && field.choices.length) {
+    input = document.createElement("select"); input.multiple = !!field.multiple;
+    if (!field.multiple) {
       const empty = document.createElement("option"); empty.value = "";
       empty.append(text("Select " + field.label)); input.append(empty);
-      for (const value of field.options) {
-        const option = document.createElement("option"); option.value = value;
-        option.append(text(value)); input.append(option);
-      }
-    } else {
-      input.type = field.kind === "integer" ? "number"
-        : field.kind === "date" ? "date"
-        : field.kind === "boolean" ? "checkbox" : "text";
     }
-    if (field.kind === "integer") {
-      input.step = "1";
-      if (field.minimum !== null) input.min = field.minimum;
-      if (field.maximum !== null) input.max = field.maximum;
+    for (const choice of field.choices) {
+      const option = document.createElement("option"); option.value = choice.value;
+      option.append(text(choice.label));
+      const chosen = Array.isArray(field.default) ? field.default.includes(choice.value)
+        : field.default === choice.value;
+      option.selected = chosen; input.append(option);
     }
-    input.required = field.required;
+  } else if (LIST_KINDS.includes(kind) || (PATH_KINDS.includes(kind) && field.multiple)) {
+    input = document.createElement("textarea"); input.rows = 3;
+    input.placeholder = kind === "emails" ? "name@example.com (one per line)" : "One per line";
+    if (Array.isArray(field.default)) input.value = field.default.join("\n");
+  } else {
+    input = document.createElement("input");
+    input.type = kind === "integer" || kind === "number" ? "number"
+      : kind === "date" ? "date" : kind === "boolean" ? "checkbox" : "text";
+    if (kind === "integer") input.step = "1";
+    if (kind === "number") input.step = "any";
+    if (field.minimum !== null && field.minimum !== undefined) input.min = field.minimum;
+    if (field.maximum !== null && field.maximum !== undefined) input.max = field.maximum;
+    if (field.pattern) input.pattern = field.pattern;
+    if (field.min_length) input.minLength = field.min_length;
+    if (kind === "boolean") input.checked = field.default === true;
+    else if (field.default !== null && field.default !== undefined) {
+      input.value = String(field.default);
+    }
+    if (kind === "select" && field.choices_source) {
+      input.placeholder = "Choices from " + field.choices_source;
+    } else if (PATH_KINDS.includes(kind)) {
+      input.placeholder = kind === "folder" ? "Folder path" : "File path";
+    } else if (field.examples && field.examples.length) {
+      input.placeholder = "e.g. " + field.examples[0];
+    }
+  }
+  input.id = id; input.dataset.name = field.name; input.dataset.kind = kind;
+  input.required = field.required && kind !== "boolean";
+  return input;
+}
+
+function renderParameterForm(container, fields, prefix) {
+  container.replaceChildren();
+  let group = null;
+  for (const field of fields) {
+    if (field.group && field.group !== group) {
+      const heading = document.createElement("p"); heading.className = "field-group";
+      heading.append(text(field.group === "identity" ? "Identity" : field.group));
+      container.append(heading);
+    }
+    group = field.group || null;
+    const row = document.createElement("div"); row.className = "workflow-field";
+    const id = prefix + field.name;
+    const label = document.createElement("label"); label.htmlFor = id;
+    label.append(text(field.label + (field.required ? " *" : "")
+      + (field.confirm ? " (needs confirmation)" : "")));
+    const input = parameterControl(field, id);
     input.setAttribute("aria-describedby", id + "-help " + id + "-error");
     const help = document.createElement("p"); help.id = id + "-help";
-    help.className = "hint"; help.append(text(field.description || ""));
+    help.className = "hint"; help.append(text(field.help || ""));
     const error = document.createElement("p"); error.id = id + "-error";
     error.className = "field-error"; error.setAttribute("aria-live", "polite");
     input.addEventListener("input", () => {
@@ -1959,6 +2008,55 @@ function showWorkflowContract() {
   }
 }
 
+function collectParameterValues(container, fields, prefix) {
+  const values = {};
+  for (const field of fields) {
+    const input = container.querySelector("#" + CSS.escape(prefix + field.name));
+    if (!input) continue;
+    const kind = field.kind;
+    const fail = (message) => {
+      const error = container.querySelector("#" + CSS.escape(prefix + field.name + "-error"));
+      if (error) error.textContent = message;
+      input.setAttribute("aria-invalid", "true"); input.focus();
+      throw new Error(field.label + ": " + message);
+    };
+    let value;
+    if (kind === "boolean") value = input.checked;
+    else if (input.tagName === "SELECT" && input.multiple) {
+      value = [...input.selectedOptions].map(option => option.value);
+      if (!value.length) value = undefined;
+    } else if (input.tagName === "TEXTAREA") {
+      value = input.value.split("\n").map(line => line.trim()).filter(Boolean);
+      if (!value.length) value = undefined;
+    } else {
+      const raw = input.value.trim();
+      if (raw === "") value = undefined;
+      else if (kind === "integer") {
+        if (!/^-?\d+$/.test(raw) || !Number.isSafeInteger(Number(raw))) {
+          fail("Enter a whole number.");
+        }
+        value = Number(raw);
+      } else if (kind === "number") {
+        if (!Number.isFinite(Number(raw))) fail("Enter a number.");
+        value = Number(raw);
+      } else value = raw;
+    }
+    if (value === undefined) {
+      if (field.required) fail("This field is required.");
+      continue;
+    }
+    if (!input.checkValidity()) fail(input.validationMessage || "This value is not valid.");
+    if (field.confirm && value !== field.default && value !== false
+        && !confirm("Confirm " + field.label + "?")) {
+      fail("Not confirmed.");
+    }
+    values[field.name] = value;
+  }
+  return values;
+}
+
+// -- end Parameter forms
+
 function workflowArguments() {
   if (el("workflow-fields").hidden) {
     const value = JSON.parse(el("workflow-arguments").value);
@@ -1967,23 +2065,7 @@ function workflowArguments() {
     }
     return value;
   }
-  const value = {};
-  for (const input of el("workflow-fields").querySelectorAll("input, select")) {
-    const name = input.dataset.name, kind = input.dataset.kind;
-    const raw = kind === "boolean" ? input.checked : input.value.trim();
-    const invalid = kind === "integer" && raw !== ""
-      && (!/^-?\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)));
-    if ((input.required && raw === "") || invalid || !input.checkValidity()) {
-      const message = invalid ? "Enter a whole number."
-        : input.validationMessage || "This field is required.";
-      el(input.id + "-error").textContent = message;
-      input.setAttribute("aria-invalid", "true"); input.focus();
-      throw new Error(name + ": " + message);
-    }
-    if (kind !== "boolean" && raw === "") continue;
-    value[name] = kind === "integer" ? Number(raw) : raw;
-  }
-  return value;
+  return collectParameterValues(el("workflow-fields"), workflowFields, "workflow-field-");
 }
 
 el("workflow-target").addEventListener("change", showWorkflowContract);
@@ -2496,29 +2578,7 @@ function showScheduleTargetFields() {
     : "Nothing installed can be scheduled.";
   el("schedule-json-box").hidden = !target || target.typed;
   if (!target) return;
-  for (const field of target.fields) {
-    const id = "schedule-field-" + field.name;
-    const label = document.createElement("label"); label.htmlFor = id;
-    label.append(text(field.label + (field.required ? " *" : "")));
-    const input = field.kind === "select" ? document.createElement("select")
-      : document.createElement("input");
-    input.id = id; input.dataset.name = field.name; input.dataset.kind = field.kind;
-    if (field.kind === "select") {
-      const empty = document.createElement("option"); empty.value = "";
-      empty.append(text("Select " + field.label)); input.append(empty);
-      for (const value of field.options) {
-        const option = document.createElement("option"); option.value = value;
-        option.append(text(value)); input.append(option);
-      }
-    } else {
-      input.type = field.kind === "integer" ? "number" : field.kind === "date" ? "date"
-        : field.kind === "boolean" ? "checkbox" : "text";
-    }
-    input.required = field.required && field.kind !== "boolean";
-    const help = document.createElement("p"); help.className = "hint";
-    help.append(text(field.description || ""));
-    container.append(label, input, help);
-  }
+  renderParameterForm(container, target.fields, "schedule-field-");
 }
 
 function scheduleInputs() {
@@ -2530,17 +2590,8 @@ function scheduleInputs() {
     }
     return value;
   }
-  const value = {};
-  for (const input of el("schedule-fields").querySelectorAll("input, select")) {
-    const kind = input.dataset.kind;
-    const raw = kind === "boolean" ? input.checked : input.value.trim();
-    if (kind !== "boolean" && raw === "") continue;
-    if (kind === "integer" && !/^-?\d+$/.test(raw)) {
-      throw new Error(input.dataset.name + " must be a whole number");
-    }
-    value[input.dataset.name] = kind === "integer" ? Number(raw) : raw;
-  }
-  return value;
+  return collectParameterValues(el("schedule-fields"), target ? target.fields : [],
+    "schedule-field-");
 }
 
 function renderScheduleDays() {

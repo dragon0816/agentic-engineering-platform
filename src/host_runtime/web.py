@@ -67,6 +67,7 @@ from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.distribution import LocalStateError
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
+from common.workflow_forms import form_fields
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
@@ -1582,11 +1583,7 @@ class AgentWeb:
                     "input_contract": item.input_contract,
                     **(
                         {
-                            "fields": [
-                                field.model_dump(mode="json")
-                                for field in item.parameters
-                                if field.scope == "runtime"
-                            ]
+                            "fields": form_fields(item, "web")
                         }
                         if item.parameters
                         else {}

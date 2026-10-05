@@ -31,6 +31,7 @@ from common.scheduling import (
     ScheduleGrantRecord,
     ScheduleRecord,
 )
+from common.workflow_forms import form_fields
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from host_runtime.agent_tasks import AgentTaskTemplate, installed_agent_tasks
 from host_runtime.host import HostRuntime
@@ -196,11 +197,7 @@ class ScheduleControl:
                     "target": identity.model_dump(mode="json"),
                     "description": manifest.description,
                     "side_effect": target_side_effect(agent, "workflow", identity, {}),
-                    "fields": [
-                        field.model_dump(mode="json")
-                        for field in manifest.parameters
-                        if field.scope == "runtime"
-                    ],
+                    "fields": form_fields(manifest, "schedule"),
                     "typed": bool(manifest.parameters),
                 }
             )
