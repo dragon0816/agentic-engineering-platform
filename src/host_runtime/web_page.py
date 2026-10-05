@@ -552,12 +552,6 @@ tr:last-child td { border-bottom: none; }
         <div id="telegram-unknown"></div>
       </form>
     </div>
-    <h2>Workflow settings</h2>
-    <p class="note">Settings that adapt a Workflow to this computer, such as where its
-      reference data lives. They are set here once, kept across upgrades, and never asked
-      when the Workflow runs. A Workflow with a missing required setting does not start.
-      Credentials are never entered here.</p>
-    <div id="workflow-settings-list"></div>
     <h2>Capability management</h2>
     <div class="grid">
       <div class="status-card"><strong>Skills, Workflows and Knowledge</strong>
@@ -602,6 +596,14 @@ tr:last-child td { border-bottom: none; }
       <article id="capability-detail" class="cap-detail" aria-live="polite">
         <div id="capability-detail-content" class="empty">
           Reading installed capabilities&hellip;</div>
+        <details id="workflow-settings" class="action-box" hidden>
+          <summary><strong>Settings on this computer</strong></summary>
+          <p class="note">Where this Workflow finds its reference data on this computer.
+            Set once, kept across upgrades, and never asked when the Workflow runs. A
+            Workflow with a missing required setting does not start. Credentials are never
+            entered here.</p>
+          <div id="workflow-settings-list"></div>
+        </details>
         <div id="workflow-action" class="action-box" hidden>
           <strong>Run this Workflow</strong>
           <p class="note" id="workflow-contract">No installed Workflow.</p>
@@ -1625,6 +1627,7 @@ function showCapabilityDetail(item, kind) {
   const content = el("capability-detail-content"); content.className = "";
   content.replaceChildren();
   el("workflow-action").hidden = true;
+  el("workflow-settings").hidden = true;
   el("knowledge-action").hidden = true;
   if (!item) {
     content.className = "empty";
@@ -1676,6 +1679,7 @@ function showCapabilityDetail(item, kind) {
     el("workflow-target").value = JSON.stringify({namespace: item.namespace, name: item.name,
       version: item.version});
     showWorkflowContract(); el("workflow-action").hidden = false;
+    loadWorkflowSettings(item);
   } else if (kind === "knowledge") {
     appendMeta(content, [["Domain", item.domain], ["Owner", item.owner],
       ["Visibility", item.visibility], ["Location", item.location],
@@ -1837,32 +1841,35 @@ async function loadSettings() {
     target.value = activeConversation;
   }
   el("session-delete").disabled = !listed.conversations.length;
-  await loadWorkflowSettings();
 }
 
 // -- Workflow settings ------------------------------------------------------
 
-async function loadWorkflowSettings() {
-  const box = el("workflow-settings-list");
-  const listed = await call("/api/settings/workflows");
+// Shown with the selected Workflow in Capabilities, only when it declares
+// settings; the Settings page no longer repeats them (owner, 2026-10-06).
+async function loadWorkflowSettings(item) {
+  const panel = el("workflow-settings"), box = el("workflow-settings-list");
+  const selected = el("workflow-target").value;
+  panel.hidden = true; box.replaceChildren();
+  let listed;
+  try { listed = await call("/api/settings/workflows"); }
+  catch (failure) { listed = {ok: false, code: failure.message}; }
+  // Another Workflow may have been chosen while this was being read.
+  if (el("workflow-target").value !== selected) return;
   if (!listed.ok) {
-    box.replaceChildren(text("Workflow settings are unavailable: " + listed.code));
-    return;
+    box.replaceChildren(text("Settings are unavailable: " + listed.code));
+    panel.hidden = false; return;
   }
-  if (!listed.workflows.length) {
-    const empty = document.createElement("p"); empty.className = "note";
-    empty.append(text("No installed Workflow declares settings."));
-    box.replaceChildren(empty); return;
-  }
-  box.replaceChildren(...listed.workflows.map(workflowSettingsCard));
+  const entry = listed.workflows.find((candidate) =>
+    candidate.workflow.namespace === item.namespace && candidate.workflow.name === item.name);
+  if (!entry) return;
+  box.replaceChildren(workflowSettingsCard(entry, 0));
+  panel.open = entry.missing.length > 0;
+  panel.hidden = false;
 }
 
 function workflowSettingsCard(entry, index) {
-  const card = document.createElement("div"); card.className = "status-card";
-  const title = document.createElement("strong");
-  title.append(text(entry.workflow.namespace + "/" + entry.workflow.name));
-  const note = document.createElement("p"); note.className = "note";
-  note.append(text(entry.description || ""));
+  const card = document.createElement("div");
   const missing = document.createElement("p"); missing.className = "note";
   missing.setAttribute("role", "status");
   const showMissing = (names) => missing.replaceChildren(text(names.length
@@ -1895,7 +1902,7 @@ function workflowSettingsCard(entry, index) {
       result.replaceChildren(text("Not saved: " + failure.message));
     } finally { save.disabled = false; }
   });
-  card.append(title, note, missing, form, save, result);
+  card.append(missing, form, save, result);
   return card;
 }
 

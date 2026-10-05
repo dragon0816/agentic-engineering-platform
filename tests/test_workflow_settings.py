@@ -112,12 +112,17 @@ def test_engine_merges_settings_and_stops_a_run_without_them() -> None:
     assert failed.run.failure.code == "workflow_settings_unavailable"
 
 
-def test_settings_page_section_is_generated_and_safe() -> None:
+def test_settings_are_shown_with_the_workflow_in_capabilities_and_are_safe() -> None:
     for expected in (
         'id="workflow-settings-list"', 'call("/api/settings/workflows")',
         '"/api/settings/workflows"', "renderParameterForm(form, fields, prefix)",
+        "loadWorkflowSettings(item);",
     ):
         assert expected in PAGE, expected
+    # Owner, 2026-10-06: they live with the Workflow, not on the Settings page.
+    settings = PAGE.split('<section id="panel-settings">', 1)[1].split("</section>", 1)[0]
+    installed = PAGE.split('<section id="panel-installed">', 1)[1].split("</section>", 1)[0]
+    assert "workflow-settings" not in settings and 'id="workflow-settings"' in installed
     script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
     section = script.split("// -- Workflow settings", 1)[1].split(
         "// -- end Workflow settings", 1
