@@ -37,6 +37,10 @@ from capabilities.chipset_report.contracts import (
 from capabilities.chipset_report.manifest import APPLY_SPEC as CHIPSET_APPLY_SPEC
 from capabilities.chipset_report.manifest import PREVIEW_SPEC as CHIPSET_PREVIEW_SPEC
 from capabilities.chipset_report.preview import ChipsetPreviewHandler
+from capabilities.coding_change.contracts import CodingChangeResult, CodingChangeStepInput
+from capabilities.coding_change.handlers import CodingChangeHandler
+from capabilities.coding_change.manifest import CHANGE_SPEC as CODING_CHANGE_SPEC
+from capabilities.coding_change.manifest import REPOSITORIES_FUNCTION as CODING_REPOSITORIES
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
 from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
@@ -753,6 +757,24 @@ def build_gateway(
         WorkflowDraft,
         ExecutionDependencies(central_required=False),
     )
+    if config.coding is not None:
+        installed.register(
+            CODING_CHANGE_SPEC,
+            CodingChangeHandler(
+                config.coding,
+                layout.workspace_root / "coding-runs",
+                model=drafting_model,
+                model_alias=(
+                    binding.routing_alias
+                    if binding is not None and binding.routing_alias is not None
+                    else "routing"
+                ),
+                local_only=binding.require_local_model if binding is not None else False,
+            ),
+            CodingChangeStepInput,
+            CodingChangeResult,
+            ExecutionDependencies(central_required=False),
+        )
     selected_knowledge = (
         ()
         if authorization is None
@@ -863,10 +885,19 @@ def workflow_settings_provider(
 def choice_sources(config: CompanyHostConfiguration, layout: HostLayout) -> ChoiceSources:
     """`ref:` sets and the read-only `fn:` choice functions this host offers;
     the engine, Agent Web and Telegram all resolve choices through this."""
+    functions = dict(CHOICE_FUNCTIONS)
+    coding = config.coding
+    if coding is not None:
+        # The repositories come from trusted host configuration, not from a
+        # Workflow's settings, so this one is bound to the host here.
+        functions[CODING_REPOSITORIES] = lambda _settings, _arguments: [
+            ReferenceItem(value=item.name, label=f"{item.name} ({item.path})")
+            for item in coding.repositories
+        ]
     return ChoiceSources(
         ReferenceSetStore(layout.workspace_root / REFERENCE_SETS_FILE),
         workflow_settings_provider(config, layout),
-        CHOICE_FUNCTIONS,
+        functions,
     )
 
 

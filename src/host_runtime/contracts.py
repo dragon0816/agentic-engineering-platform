@@ -16,6 +16,7 @@ from pydantic import (
 from agent.data_policy import BackendDataApproval
 from agent.decisions import DecisionAcceleratorConfig
 from capabilities.chipset_report.contracts import ChipsetReportSettings
+from capabilities.coding_change.contracts import CodingHostBinding
 from capabilities.release_package.contracts import IsolatedApplySettings, ReleasePreviewSettings
 from capabilities.team_tickets.contracts import TeamTicketsSettings
 from capabilities.weekly_report.contracts import WeeklyReportSettings
@@ -476,6 +477,9 @@ class CompanyHostConfiguration(Contract):
     # Optional physical DUT boundary. The driver is fixed by trusted local
     # configuration and remains disabled until the operator explicitly opts in.
     dut: DutHostBinding | None = None
+    # Coding on the Bridge (docs/phases/CODING_ON_BRIDGE.md): which
+    # repositories may be changed and the restricted runner interpreter.
+    coding: CodingHostBinding | None = None
     # How long one capability step may run. The platform's default of thirty
     # seconds is right for a file read and wrong for a Jira search over a
     # week's tickets with their comment threads and a throttle waited out;
