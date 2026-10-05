@@ -1255,6 +1255,25 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   time and each skill as it runs and ends, then the answer (owner request
   2026-10-06). `agent.gateway.TOOL_PROGRESS`; tests in
   `tests/test_telegram_ingress.py`. Commit `abb0fd8`.
+- [x] Coding on the Bridge C1-C6 (owner decisions 2026-10-06, plan
+  `docs/phases/CODING_ON_BRIDGE.md`): restricted Windows runner (low
+  integrity, one-process Job, memory/time limits, allowlisted environment)
+  and firewall-rule check/probe (`harness/restricted_runner.py`,
+  `harness/network_block.py`); detached git worktree and restricted pytest as
+  declared commands (`harness/git_worktree.py`, `harness/pytest_commands.py`);
+  model change author (`harness/model_author.py`); `coding/change@1.0.0`
+  with Workflow `engineering/coding-change` and Skill `coding`, host binding
+  `coding`, doctor check. Harness fix: an unchanged repair is a typed stop
+  (`change_made_no_difference`). Installed live: runner CPython 3.12.14 +
+  pytest 9.1.1 under `%LOCALAPPDATA%\AgenticEngineeringPlatform\coding-runner`,
+  practice repository `C:\Users\Chi_L\Documents\aep-coding-practice`,
+  grant `owner-approved-2026-10-06-coding-practice`. Tests:
+  `test_restricted_runner.py`, `test_coding_worktree_pytest.py`,
+  `test_coding_model_author.py`, `test_coding_change_capability.py`.
+- [ ] Coding on the Bridge C7: owner creates the firewall rule (elevated, see
+  HANDOFF), then the first live run implements `format_duration` in the
+  practice repository through Agent Web or Telegram.
+- [ ] Coding on the Bridge C8: native Claude Code author for PUBLIC-only tasks.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
