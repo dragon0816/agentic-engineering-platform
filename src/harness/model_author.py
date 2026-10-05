@@ -117,7 +117,7 @@ class ModelChangeAuthor:
         ))
         if reply.failure is not None:
             raise AuthorUnavailable("author_model_failed")
-        answer = reply.structured_output
+        answer: object = reply.structured_output
         if answer is None:
             answer = _salvage(reply.text)
         if not isinstance(answer, dict):
