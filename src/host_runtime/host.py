@@ -13,6 +13,7 @@ the engine decides every workflow, and the Agent decides who may ask.
 """
 
 import os
+import subprocess
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from types import TracebackType
@@ -130,6 +131,8 @@ from common.local_agent import BridgeMembership
 from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from dut.runtime import PhysicalDutValidationService
+from harness.network_block import create_rule_command, outbound_rule_present
+from harness.restricted_runner import is_venv_launcher
 from host_runtime.agent import LocalAgent
 from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
 from host_runtime.contracts import (
@@ -1237,6 +1240,43 @@ def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
     )
 
 
+def inspect_coding(
+    config: CompanyHostConfiguration,
+    *,
+    rule_present: Callable[[Path], bool] = outbound_rule_present,
+) -> DoctorCheck:
+    """Coding on the Bridge is ready when the runner interpreter can be
+    restricted, has pytest, is cut off by a firewall rule, and every
+    configured repository is a git checkout."""
+    binding = config.coding
+    assert binding is not None
+    python = Path(binding.runner_python)
+    problems: list[str] = []
+    if not python.is_file():
+        problems.append("the runner interpreter is missing")
+    elif is_venv_launcher(python):
+        problems.append("the runner interpreter is a venv launcher; use a standalone Python")
+    else:
+        probe = subprocess.run(
+            [str(python), "-c", "import pytest"], capture_output=True, check=False, timeout=60
+        )
+        if probe.returncode != 0:
+            problems.append("pytest is not installed in the runner interpreter")
+        if binding.require_network_block and not rule_present(python):
+            problems.append(f"no outbound firewall block names the runner; run elevated: "
+                            f"{create_rule_command(python)}")
+    problems.extend(
+        f"repository {item.name} is not a git checkout"
+        for item in binding.repositories if not (Path(item.path) / ".git").exists()
+    )
+    if problems:
+        return DoctorCheck(name="coding", status="failed", detail="; ".join(problems))
+    return DoctorCheck(
+        name="coding", status="passed",
+        detail=f"restricted pytest ready for {', '.join(i.name for i in binding.repositories)}",
+    )
+
+
 def inspect_dut(config: CompanyHostConfiguration) -> DoctorCheck:
     binding = config.dut
     if binding is None:
@@ -1376,6 +1416,7 @@ def inspect_runtime(
         inspect_integrations(config),
         inspect_models(config),
         inspect_dut(config),
+        *((inspect_coding(config),) if config.coding is not None else ()),
     )
 
 

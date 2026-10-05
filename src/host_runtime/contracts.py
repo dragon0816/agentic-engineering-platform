@@ -585,6 +585,7 @@ class DoctorCheck(Contract):
         "models",
         "knowledge",
         "dut",
+        "coding",
     ]
     status: Literal["passed", "failed", "pending"]
     detail: Text

@@ -151,3 +151,22 @@ def test_a_host_with_coding_installs_the_capability_and_lists_its_repositories(
     listed = choice_sources(config, layout).functions[REPOSITORIES_FUNCTION]({}, {})
     assert [item.value for item in listed] == ["practice"]
     assert REPOSITORIES_FUNCTION not in choice_sources(plain, layout).functions
+
+
+def test_doctor_names_what_coding_still_needs(tmp_path: Path) -> None:
+    from test_host_wiring import ready
+
+    from host_runtime.host import inspect_coding
+
+    repo = repository(tmp_path)
+    plain, _ = ready(tmp_path / "host")
+    binding = {"runner_python": BASE_PYTHON, "repositories": [
+        {"name": "practice", "path": str(repo), "writable": ["src/**/*.py"]},
+        {"name": "plain", "path": str(tmp_path), "writable": ["*.py"]}]}
+    config = plain.model_copy(update={"coding": CodingHostBinding.model_validate(binding)})
+    check = inspect_coding(config, rule_present=lambda _python: False)
+    assert check.status == "failed"
+    assert "New-NetFirewallRule" in check.detail and "plain is not a git checkout" in check.detail
+    launcher = plain.model_copy(update={"coding": CodingHostBinding.model_validate(
+        {**binding, "runner_python": sys.executable})})
+    assert "venv launcher" in inspect_coding(launcher).detail
