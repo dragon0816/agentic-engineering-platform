@@ -44,9 +44,9 @@ settings editor. No n8n dependency (owner decision 2026-10-04).
 
 | Source workflow | Effect | AEP status |
 |---|---|---|
-| 90 bundle_smoke | read | not started |
+| 90 bundle_smoke | read | WRAP done: `packages/rs-workflow-system/w90-bundle-smoke/` (candidate, owner approval pending) |
 | 12 chipset_readiness | read + publish reference sets | not started |
-| 14 ncc_improvement_plan | write + Outlook draft | not started |
+| 14 ncc_improvement_plan | write + Outlook draft | ADAPT done: `src/capabilities/ncc_plan/` + `outlook.draft`; source re-import not carried yet (see its SOURCE.md) |
 | 07 jira_team_tickets | write (Excel) | read-only preview; paused on Jira `MRT1CV` access |
 | 10 sales_to_chipset | write (Excel) | rules ported, guarded preview/apply; no real-workbook parity |
 | 11 jira_weekly_report + email | write + draft (send double-gated) | preview/apply/draft; Jira-source parity open |

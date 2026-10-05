@@ -1027,3 +1027,29 @@ alternatives: a refresh Workflow that publishes `ref:nccStations` (chicken
 and egg, duplicated settings); publishing on settings save (a hook per
 Workflow); a free-text station field (loses the source's menu).
 
+## 2026-10-05 — Workflow 14 is ADAPTed, not WRAPped; `outlook.draft` is the shared email block
+
+Decision: rs_workflow_system Workflow 14 (ncc_improvement_plan) runs as an AEP
+Workflow of three capabilities: `ncc_plan.prepare` (read; resolves every
+document string from the catalogue, and is the dry run), `ncc_plan.render`
+(write; edits the template with python-docx from the `office` extra) and the
+new generic `outlook.draft` (write, draft only, file attachments, `skip` and
+`best_effort`). The source's pure rules module is carried with only its
+import line modernised and its 51 rule tests as the oracle; the docx edit and
+run are ported, and a local parity test compares the document text with the
+source job on the real template and catalogue. Per-install settings name the
+catalogue (the source's `workflow-14.json`, content sections only; `paths`,
+`params` and `ops` are not read), template, output folder and photo folder.
+Not carried yet: re-importing the station table, price PDF and template
+system list (`reimportSources`, uploads), and the hidden one-off overrides
+(`services`, `equipmentModel`, `power`, `serviceChannels`, `contractor`,
+`planYear`).
+
+Reason: the job needs python-docx/lxml, pdfplumber, requests and the source's
+ops/Bridge clients, none of which the stdlib-only `python -I -S` script-tool
+runtime provides, while AEP already ships python-docx and an Outlook draft
+writer; a typed draft step is also the building block NL authoring needs.
+Rejected alternatives: WRAP with vendored third-party wheels (compiled lxml
+per Python version inside a hash-pinned package); a script-tool runtime with
+site-packages (weakens isolation for one job); keeping the draft inside the
+NCC capability (not reusable).

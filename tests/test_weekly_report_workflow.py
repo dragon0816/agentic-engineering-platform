@@ -524,6 +524,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     ]
     assert weekly == [
             "skills/engineering__release-package-guide__1.0.0.json",
+            "skills/engineering__rs-ncc-improvement-plan-skill__1.0.0.json",
             "skills/engineering__sales-to-chipset__1.0.0.json",
         "skills/engineering__team-tickets__2.0.0.json",
         "skills/engineering__weekly-report__1.0.0.json",
@@ -533,6 +534,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
         "workflows/engineering__jira-weekly-report__1.0.0.json",
             "workflows/engineering__release-package-apply-isolated__1.0.0.json",
             "workflows/engineering__release-package-preview__1.0.0.json",
+            "workflows/engineering__rs-ncc-improvement-plan__1.0.0.json",
             "workflows/engineering__sales-to-chipset-preview__1.0.0.json",
             "workflows/engineering__sales-to-chipset__1.0.0.json",
     ]

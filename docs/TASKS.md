@@ -1193,6 +1193,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   write that saves one Outlook draft with optional file attachments, `skip`
   and `best_effort`, and has no send. `MailDraft` gained `attachments`.
   Tests: `tests/test_mail_draft_capability.py`, `tests/test_outlook_draft.py`.
+- [x] rs_workflow_system Workflow 14 (ncc_improvement_plan), ADAPT:
+  `capabilities/ncc_plan` (`prepare` read / `render` write) plus
+  `outlook.draft`, `/run 14`, station menu `fn:ncc_plan.stations`, settings
+  for catalogue/template/output/photos. Source rules carried with the
+  source's 51 rule tests as oracle; local parity test gives the same document
+  text as the source job on the real template. Not carried yet: source
+  document re-import and hidden overrides (see `capabilities/ncc_plan/SOURCE.md`).
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

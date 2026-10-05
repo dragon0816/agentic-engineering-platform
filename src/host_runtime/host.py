@@ -13,7 +13,7 @@ the engine decides every workflow, and the Agent decides who may ask.
 """
 
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, TypeVar
@@ -51,6 +51,17 @@ from capabilities.knowledge_query.handlers import (
 )
 from capabilities.mail_draft.handlers import DRAFT_SPEC as MAIL_DRAFT_SPEC
 from capabilities.mail_draft.handlers import MailDraftHandler, MailDraftRequest, MailDraftResult
+from capabilities.ncc_plan.contracts import (
+    NccPlan,
+    NccPlanStepInput,
+    NccRendered,
+    NccRenderStepInput,
+)
+from capabilities.ncc_plan.handlers import NccPrepareHandler, NccRenderHandler
+from capabilities.ncc_plan.manifest import PREPARE_SPEC as NCC_PREPARE_SPEC
+from capabilities.ncc_plan.manifest import RENDER_SPEC as NCC_RENDER_SPEC
+from capabilities.ncc_plan.manifest import STATIONS_FUNCTION as NCC_STATIONS_FUNCTION
+from capabilities.ncc_plan.planning import station_choices
 from capabilities.release_package.apply_isolated import IsolatedApplyHandler
 from capabilities.release_package.contracts import (
     IsolatedApplyOutput,
@@ -128,7 +139,7 @@ from host_runtime.contracts import (
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
 from host_runtime.profiles import ProfileError, load_active_profile
-from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceSetStore
+from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceItem, ReferenceSetStore
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
@@ -220,8 +231,18 @@ def _load_all(directory: Path, model: type[ContractT]) -> tuple[ContractT, ...]:
     return tuple(items)
 
 
+def _ncc_stations(
+    settings: Mapping[str, JsonValue], arguments: Mapping[str, str]
+) -> list[ReferenceItem]:
+    """Workflow 14's station menu, read from the catalogue its settings name."""
+    catalogue = str(settings.get("catalogue_file") or "").strip()
+    if not catalogue:
+        raise ValueError("catalogue_file is not set")
+    return [ReferenceItem(value=value, label=label) for value, label in station_choices(catalogue)]
+
+
 #: Read-only `fn:` choice functions by name (see `host_runtime.choice_sources`).
-CHOICE_FUNCTIONS: dict[str, ChoiceFunction] = {}
+CHOICE_FUNCTIONS: dict[str, ChoiceFunction] = {NCC_STATIONS_FUNCTION: _ncc_stations}
 
 
 class HostRuntime:
@@ -385,6 +406,17 @@ def build_integrations(
             IsolatedApplyHandler(),
             IsolatedApplyStepInput,
             IsolatedApplyOutput,
+            ExecutionDependencies(central_required=False),
+        )
+    # Workflow 14: its paths are per-install Workflow settings.
+    if NCC_PREPARE_SPEC.identity.key in uses:
+        installed.register(
+            NCC_PREPARE_SPEC, NccPrepareHandler(), NccPlanStepInput, NccPlan,
+            ExecutionDependencies(central_required=False),
+        )
+    if NCC_RENDER_SPEC.identity.key in uses:
+        installed.register(
+            NCC_RENDER_SPEC, NccRenderHandler(), NccRenderStepInput, NccRendered,
             ExecutionDependencies(central_required=False),
         )
     # The Outlook draft building block: installed when a Workflow uses it.

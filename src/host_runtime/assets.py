@@ -18,6 +18,8 @@ from capabilities.company_agent.manifest import (
     personal_proof_workflow,
     workflow_author_skill,
 )
+from capabilities.ncc_plan.manifest import plan_skill as ncc_plan_skill
+from capabilities.ncc_plan.manifest import plan_workflow as ncc_plan_workflow
 from capabilities.release_package.manifest import (
     isolated_apply_workflow as release_isolated_apply_workflow,
 )
@@ -44,6 +46,8 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         release_preview_skill(),
         release_preview_workflow(),
         release_isolated_apply_workflow(),
+        ncc_plan_skill(),
+        ncc_plan_workflow(),
         weekly_skill(),
         team_tickets_preview_skill(),
         workflow_author_skill(),

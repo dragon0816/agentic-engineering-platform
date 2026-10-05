@@ -4,64 +4,64 @@ Updated: 2026-10-05 (Asia/Taipei), by Claude Code
 
 ## Repository and runtime state
 
-- Branch `main`, all work committed locally, nothing pushed. `schedules-v1`
-  is merged (merge commit `605cb3d`); its worktree was removed, the branch kept.
+- Branch `main`, all work committed locally, nothing pushed.
 - Live Agent Web: `aep-host web --config %LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json --port 53583 --open --schedules`
-  started from the repo `.venv` (editable install), logs `.scratch/agent-web-18-*.log`.
-  The token changes on every restart.
-- Installed Knowledge Skill: candidate `company-agent/knowledge-query@1.4.0`
-  (`wiki_primary` citation, report answers). Rollback: move its JSON out of
-  `%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\workspace\assets\skills\`
-  and move `disabled/company-agent__knowledge-query__1.3.0.json` back, then
-  restart. Exactly one Knowledge-selectable Skill must be installed.
-- Test Vault copy `C:\Users\Chi_L\AppData\Local\AEP\rs-k` must equal the
-  staged copy `.scratch/k` (published manifest digests); a plain copy of the
-  OneDrive Vault does not match.
+  started from the repo `.venv` (editable install). The token changes on every
+  restart. It has not been restarted since Workflow 14 landed.
+- Installed Knowledge Skill: candidate `company-agent/knowledge-query@1.4.0`.
+  Rollback: move its JSON out of `workspace\assets\skills\` and move
+  `disabled/company-agent__knowledge-query__1.3.0.json` back, then restart.
+- Test Vault copy `C:\Users\Chi_L\AppData\Local\AEP\rs-k` must equal `.scratch/k`.
 
-## Done in this session (details in `docs/TASKS.md`, decisions in `docs/DECISIONS.md`)
+## Current work: rs_workflow_system migration
 
-- Knowledge: answer-salvage fixes, labeled inference `【推論】`, Wiki-primary
-  citation with Raw provenance (E2E-05 criterion 1 amended by the owner),
-  Markdown report answers, Skill 1.4.0 with high-speed communications focus.
-- Scheduled tasks v1 merged (no n8n; Workflows and Agent Tasks; Agent Web
-  Schedules panel; resident loop via `--schedules`; sending always needs
-  per-run approval; catch up once).
-- Agent Web: grouped turns with thumbs up/down/normal + reason note and
-  reply-to-exchange; right-click menu; per-session delete; backend selector
-  sync fix; Gateway model picker in Settings; concurrent sessions with
-  per-session turn queues and `BridgeExecutor.exclusive` for workflows and
-  non-read capabilities.
+Plan `docs/phases/RS_WORKFLOW_MIGRATION.md` (status table per workflow),
+building blocks feed `docs/phases/NL_WORKFLOW_AUTHORING.md` P1. Done: S1-S5,
+S6a `ref:` sets, S6c `fn:` choice functions, Workflow 90 (WRAP, candidate
+awaiting owner approval), the `outlook.draft` building block and Workflow 14
+(ADAPT; `src/capabilities/ncc_plan/SOURCE.md` lists what is not carried yet).
+Owner-agreed order next: **W12 chipset_readiness**, then **W03 C4C**.
 
-## Verification (last full run)
+### W12 notes (next)
 
-Full pytest (unsandboxed): 1955 passed, 5 skipped. Known non-regressions:
-`tests/test_local_developer_environment.py::test_loader_rejects_unknown_names_without_setting_them`
-(cp950, fails at HEAD) and intermittent `test_knowledge_stage` /
-`test_extension_runtime` / `test_application_catalog` (Windows file-lock or
-socket timing; pass on rerun). Ruff and mypy pass. Run pytest outside the
-Claude Code sandbox; inside it more file-permission failures appear.
+- Source `host-bridge/jobs/chipset_readiness.py` with `_gitlab_client.py`,
+  `_artifactory.py`, `_chipset_rules.py`; uses `requests`, so it cannot run as a
+  stdlib-only script tool unchanged. Extract GitLab (projects, pipelines,
+  branches) as capabilities on stdlib HTTP, as the plan says.
+- It publishes reference sets (chipsets, package versions) that W13's form
+  offers: implement the S6b `publishes` declaration with it.
+- Credentials (owner has the tokens): the owner sets Windows user environment
+  variables `AEP_GITLAB_TOKEN` (read_api is enough for W12) and optionally
+  `AEP_ARTIFACTORY_TOKEN`, and adds to `host.json` `credentials`
+  `{"secret": "gitlab_token", "environment_variable": "AEP_GITLAB_TOKEN"}` and
+  `{"secret": "artifactory_token", "environment_variable": "AEP_ARTIFACTORY_TOKEN"}`.
+  Values never go in files. GitLab base `https://code.rsint.net`, group
+  `rs-wmt-projects/chipsets`, header `PRIVATE-TOKEN`; Artifactory `Bearer`.
+- Owner agreed: script tools may receive only their declared SecretRefs as
+  environment variables. Not implemented yet; record it in DECISIONS when built.
 
-## In progress
+## Verification (last full run, this commit series)
 
-rs_workflow_system migration per `docs/phases/RS_WORKFLOW_MIGRATION.md`
-(owner decisions recorded in `docs/DECISIONS.md` 2026-10-05). Done: S1
-parameter declaration contract (`common/assets.py`), S2 generated Agent Web
-run and schedule forms (`common/workflow_forms.py`, `renderParameterForm`),
-S3 Agent tool schema (`agent_tool_schema`, `ModelTool.input_schema`), S4
-Telegram `/run` question flow (`channels/telegram_flow.py`). Next: S5 generic
-`workflow_settings` store and editor (move W13 `checkout_path` off
-`HostIntegrations`), S6 dynamic choices (`ref:` sets in local SQLite, then
-`fn:`), then one workflow per slice: 90, 12, 14, 07, finish 10/11/13, 03,
-06/06b. Credentials: `host.json` holds SecretRef -> environment-variable
-mappings only.
+Full pytest (unsandboxed, `--deselect tests/test_local_developer_environment.py`,
+cp950 failure at HEAD): 2074 passed, 5 skipped, 2 failed. The failures:
+`test_knowledge_stage` (known flaky, passes on rerun) and
+`test_weekly_report_workflow` export list (fixed by adding the two W14 assets,
+file rerun passes). Ruff and mypy (`src`) pass. The W14 parity test against the
+source job ran on this machine (source clone and `ncc_paper/` present) and
+passed. Run pytest outside the Claude Code sandbox.
 
 ## Open items for the owner / data team
 
+- Approve (publish) the W90 candidate package if wanted.
+- Feedback on Knowledge Skill 1.4.0 report answers in Agent Web.
 - Knowledge data gaps: CMP180 competitor comparisons (Anritsu MT8870A,
   LitePoint, Keysight), market-to-option links, more market-trend sources.
-- Owner feedback on Skill 1.4.0 report answers in Agent Web.
+- To use W14 live: export assets or install `engineering/rs-ncc-improvement-plan`,
+  add grants (`ncc-plan.prepare`, `ncc-plan.render`, `outlook.draft`), set the
+  four Workflow settings (catalogue = the source `config/workflow-14.json`).
 
 ## Next recommended action
 
-Continue with S5 (`workflow_settings`), keeping each slice narrow with tests,
-then migrate workflows one at a time with the source pytest suite as oracle.
+Start W12: read the source job and its tests, decide which GitLab and
+Artifactory operations become capabilities, implement `publishes`, then the
+script-tool secret injection if a wrapped part still needs a token.
