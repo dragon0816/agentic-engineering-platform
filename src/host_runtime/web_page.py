@@ -640,9 +640,6 @@ tr:last-child td { border-bottom: none; }
       <select id="workflow-target" disabled></select>
       <select id="knowledge-target" disabled></select>
     </div>
-    <h2>Recent runs</h2>
-    <div class="card"><div id="runs" class="empty">reading&hellip;</div></div>
-
     <div class="market">
       <div class="workspace-head">
         <div><h2>Share Platform Library</h2>
@@ -683,6 +680,10 @@ tr:last-child td { border-bottom: none; }
         <div class="card"><div id="decisions" class="empty">reading&hellip;</div></div>
       </details>
     </div>
+    <details id="recent-runs" class="card settings" style="margin-top: 14px">
+      <summary><strong>Recent runs</strong></summary>
+      <div id="runs" class="empty">reading&hellip;</div>
+    </details>
   </section>
 
   <section id="panel-schedules">
