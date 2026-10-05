@@ -48,11 +48,14 @@ def workflow_author_skill() -> SkillManifest:
                 "identity": {
                     "namespace": "company-agent",
                     "name": "workflow-author",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                 },
                 **_META,
             },
             "alias": "workflow",
+            "selector_hint": (
+                "Turn an SOP document or PDF into a workflow draft SOP 轉 workflow 草稿"
+            ),
             "instructions": (
                 "Draft a candidate workflow from one local SOP or SOP PDF. "
                 "Drafting never installs, publishes, or executes it."
@@ -72,11 +75,15 @@ def knowledge_skill() -> SkillManifest:
                 "identity": {
                     "namespace": "company-agent",
                     "name": "knowledge-query",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                 },
                 **_META,
             },
             "alias": "knowledge",
+            "selector_hint": (
+                "Answer a question about R&S instruments, specs and "
+                "markets 儀器規格與產品知識 from the knowledge base"
+            ),
             "instructions": (
                 "Ask one exact installed published Knowledge version. "
                 "Answers require Raw citations."
@@ -101,11 +108,14 @@ def market_alignment_skill() -> SkillManifest:
                 "identity": {
                     "namespace": "company-agent",
                     "name": "market-alignment",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                 },
                 **_META,
             },
             "alias": "market_alignment",
+            "selector_hint": (
+                "Market matrix 市場矩陣: R&S product families vs markets 產品線對應市場"
+            ),
             "instructions": (
                 "Map the five R&S product families against wireless communications, "
                 "aerospace/defense, automotive, AI server and semiconductor using one "
@@ -160,11 +170,12 @@ def personal_proof_skill() -> SkillManifest:
                 "identity": {
                     "namespace": "company-agent",
                     "name": "personal-proof",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                 },
                 **_META,
             },
             "alias": "personal",
+            "selector_hint": "Local proof 本機 proof test workflow on a controlled fixture",
             "instructions": (
                 "Run the installed, side-effect-free local proof workflow "
                 "against a controlled fixture."

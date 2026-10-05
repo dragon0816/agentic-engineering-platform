@@ -246,6 +246,10 @@ def weekly_skill() -> SkillManifest:
         {
             "metadata": {"identity": WEEKLY_SKILL.model_dump(), **_METADATA},
             "alias": "weekly",
+            "selector_hint": (
+                "SDE weekly report 週報: GitHub board items into the weekly Excel sheet "
+                "and mail draft"
+            ),
             "instructions": (
                 "Run the SDE weekly report (Workflow 11) for the current week, or for a named "
                 "week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch "

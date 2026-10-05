@@ -156,6 +156,9 @@ def plan_skill() -> SkillManifest:
         {
             "metadata": {"identity": SKILL.model_dump(), **_METADATA},
             "alias": "ncc",
+            "selector_hint": (
+                "NCC 改善服務規劃 improvement plan .docx for one TV transmitter station 站"
+            ),
             "instructions": (
                 "Write an NCC 改善服務規劃 for one station with Workflow 14. Ask which station, "
                 "which systems need work and who should get the draft; offer a dry run first."

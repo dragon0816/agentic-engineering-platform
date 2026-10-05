@@ -6,7 +6,7 @@ from common.assets import AssetIdentity, WorkflowManifest
 PREVIEW_WORKFLOW = AssetIdentity(
     namespace="engineering", name="jira-team-tickets-preview", version="1.0.0"
 )
-PREVIEW_SKILL = AssetIdentity(namespace="engineering", name="team-tickets", version="2.0.0")
+PREVIEW_SKILL = AssetIdentity(namespace="engineering", name="team-tickets", version="2.1.0")
 
 _METADATA = {
     "owner": {"type": "team", "id": "engineering"},
@@ -77,6 +77,7 @@ def preview_skill() -> SkillManifest:
         {
             "metadata": {"identity": PREVIEW_SKILL.model_dump(), **_METADATA},
             "alias": "tickets",
+            "selector_hint": "Jira team tickets 團隊 Jira 票: Task and Issues preview",
             "instructions": (
                 "Preview the configured company Jira project in Workflow 7's Task and "
                 "Issues format. This is read-only and reports per-ticket comment failures."
