@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import date
 
 from pydantic import JsonValue
 
-from common.assets import WorkflowManifest, WorkflowParameter
+from common.assets import WorkflowManifest, WorkflowParameter, parameter_value_problem
 
 
 class WorkflowParameterError(ValueError):
@@ -29,38 +28,21 @@ def validate_run_parameters(
     for name in arguments:
         if name not in fields:
             raise WorkflowParameterError(f"{name} is not a declared runtime parameter")
+    checked = dict(arguments)
     for name, field in fields.items():
         if name not in arguments:
             if field.required:
                 raise WorkflowParameterError(f"{name} is required")
+            if field.default is not None:
+                # A declared default is part of the contract; every channel
+                # (web, schedule, Telegram, Agent) gets the same value.
+                checked[name] = field.default
             continue
         _validate_value(field, arguments[name])
-    return dict(arguments)
+    return checked
 
 
 def _validate_value(field: WorkflowParameter, value: JsonValue) -> None:
-    name = field.name
-    if field.kind in ("text", "select"):
-        if not isinstance(value, str) or not value.strip():
-            raise WorkflowParameterError(f"{name} must be nonempty text")
-        if field.kind == "select" and value not in field.options:
-            raise WorkflowParameterError(f"{name} must be a declared option")
-    elif field.kind == "integer":
-        if type(value) is not int:
-            raise WorkflowParameterError(f"{name} must be a whole number")
-        if field.minimum is not None and value < field.minimum:
-            raise WorkflowParameterError(f"{name} is below its minimum")
-        if field.maximum is not None and value > field.maximum:
-            raise WorkflowParameterError(f"{name} is above its maximum")
-    elif field.kind == "boolean":
-        if type(value) is not bool:
-            raise WorkflowParameterError(f"{name} must be true or false")
-    elif field.kind == "date":
-        if not isinstance(value, str):
-            raise WorkflowParameterError(f"{name} must be a YYYY-MM-DD date")
-        try:
-            parsed = date.fromisoformat(value)
-        except ValueError:
-            raise WorkflowParameterError(f"{name} must be a YYYY-MM-DD date") from None
-        if parsed.isoformat() != value:
-            raise WorkflowParameterError(f"{name} must be a YYYY-MM-DD date")
+    problem = parameter_value_problem(field, value)
+    if problem:
+        raise WorkflowParameterError(f"{field.name} {problem}")

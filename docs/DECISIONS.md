@@ -935,3 +935,32 @@ serialized too. Rejected alternatives: run turns of one session in parallel
 (scrambles conversation history, owner rejected); remove the lock entirely
 (concurrent workbook writes); keep conversation turns under the exclusive
 lock (does not meet the multi-session requirement).
+
+## 2026-10-05 — rs_workflow_system migration decisions and one parameter declaration
+
+Decision: Migrate every rs_workflow_system workflow/job per
+`docs/phases/RS_WORKFLOW_MIGRATION.md`. Owner decisions: (1) Telegram runs of
+`write` / `external_side_effect` workflows require a per-run approval tap;
+(2) credentials are configured in the install path's `host.json` as SecretRef
+-> environment-variable mappings (values stay in the environment, never in
+the file or an asset); (3) published reference sets (`ref:`) live in the
+local SQLite store; (4) "occupies the machine" is a manifest field
+(`occupies_machine`); (5) customer-facing loan replies stay drafts and are
+never sent unattended. `WorkflowParameter` is extended in place with optional
+fields (`default`, `help`, `examples`, `order`, `group`, `pattern`,
+`min_length`, labelled `choices`, `choices_source` `ref:`/`fn:` with
+`{field}` placeholders, `needs`, `multiple`, `accept`, `channels`, `confirm`;
+kinds `number`, `text_list`, `emails`, `file`, `folder`, `upload`) and
+`WorkflowManifest` gains `progress_steps` and `occupies_machine`. Fields that
+are unused serialize as before, so published manifests keep their bytes and
+digests.
+
+Reason: The source's `PARAMS_SCHEMA` + `x-ui` is what lets one declaration
+drive the dashboard form and Telegram flow; AEP needs the same expressiveness
+before generators can replace the hand-written forms. Interpretation of (2):
+storing token values in `host.json` would contradict AGENTS.md rule 17 and
+the owner's security baseline, so the file holds the mapping only; the owner
+can revisit this. Rejected alternatives: a new contract version (breaks
+existing manifests), embedding raw JSON Schema (loses the closed, validated
+field set), keeping per-workflow settings in `HostIntegrations` (requires
+core changes per workflow).

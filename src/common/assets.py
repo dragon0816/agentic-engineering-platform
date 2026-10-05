@@ -1,9 +1,17 @@
 """Scoped assets, governance and explicit execution dependency metadata."""
 
 import re
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, StrictBool, StrictStr, field_validator, model_validator
+from pydantic import (
+    Field,
+    SerializerFunctionWrapHandler,
+    StrictBool,
+    StrictStr,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 
 from common.base import Contract, Sha256, Slug, Symbol, Text
 
@@ -248,34 +256,195 @@ class WorkflowStep(RegistryContract):
     retry: RetryPolicy = RetryPolicy()
 
 
+ParameterKind = Literal[
+    "text", "integer", "number", "date", "boolean", "select",
+    "text_list", "emails", "file", "folder", "upload",
+]
+ParameterChannel = Literal["web", "telegram", "schedule", "agent"]
+ALL_PARAMETER_CHANNELS: tuple[ParameterChannel, ...] = ("web", "telegram", "schedule", "agent")
+_TEXT_KINDS = frozenset({"text", "select", "file", "folder", "upload"})
+_LIST_KINDS = frozenset({"text_list", "emails"})
+_PATH_KINDS = frozenset({"file", "folder", "upload"})
+_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_LATER_PARAMETER_FIELDS = frozenset({
+    "default", "help", "examples", "order", "group", "pattern", "min_length", "choices",
+    "choices_source", "needs", "multiple", "accept", "channels", "confirm",
+})
+CHOICES_SOURCE = re.compile(r"^(ref|fn):[A-Za-z0-9_.-]+(\?[^\s]*)?$")
+_PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def _omit_unused(
+    model: Contract, handler: SerializerFunctionWrapHandler, names: frozenset[str]
+) -> dict[str, Any]:
+    """Serialize without the named later-added fields while they hold their
+    default, so manifests published before those fields keep their bytes
+    (and therefore their digests)."""
+    data: dict[str, Any] = handler(model)
+    fields = type(model).model_fields
+    for name in names:
+        if name in data and getattr(model, name) == fields[name].default:
+            del data[name]
+    return data
+
+
+class ParameterChoice(RegistryContract):
+    value: Text
+    label: Text | None = None
+
+
+class ProgressStep(Contract):
+    """One user-visible stage a Workflow reports while it runs."""
+
+    id: Symbol
+    title: Text
+    optional: StrictBool = False
+
+
 class WorkflowParameter(RegistryContract):
-    """Declarative field shared by host controls and a Workflow's run contract."""
+    """Declarative field shared by host controls and a Workflow's run contract.
+
+    One declaration generates the Agent Web and schedule forms, the Telegram
+    question flow and the Agent tool schema (rs_workflow_system `PARAMS_SCHEMA`
+    plus `x-ui`). Every field beyond the original ones is optional, so older
+    manifests keep their meaning.
+    """
 
     name: Symbol
     label: Text
-    kind: Literal["text", "integer", "date", "boolean", "select"]
+    kind: ParameterKind
     scope: Literal["static", "runtime"] = "runtime"
     description: Text | None = None
     required: StrictBool = False
     options: tuple[Text, ...] = ()
-    minimum: int | None = Field(default=None, strict=True)
-    maximum: int | None = Field(default=None, strict=True)
+    minimum: int | float | None = None
+    maximum: int | float | None = None
+    # Presentation and defaults.
+    default: Any = None
+    help: Text | None = None
+    examples: tuple[Text, ...] = Field(default=(), max_length=5)
+    order: int | None = Field(default=None, ge=0, le=99999, strict=True)
+    group: Symbol | None = None
+    # Text constraints.
+    pattern: Text | None = None
+    min_length: int | None = Field(default=None, ge=0, strict=True)
+    # Choices: static labelled values, or a published set / host function
+    # resolved at run time (`ref:<set>` or `fn:<name>?arg={field}`).
+    choices: tuple[ParameterChoice, ...] = ()
+    choices_source: Text | None = None
+    needs: tuple[Symbol, ...] = ()
+    multiple: StrictBool = False
+    accept: tuple[Text, ...] = ()
+    # Which generated interfaces show the field; () keeps it internal.
+    channels: tuple[ParameterChannel, ...] = ALL_PARAMETER_CHANNELS
+    # A privileged field: changing it needs an explicit confirmation.
+    confirm: StrictBool = False
+
+    @property
+    def choice_values(self) -> tuple[str, ...]:
+        return tuple(item.value for item in self.choices) or self.options
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        return _omit_unused(self, handler, _LATER_PARAMETER_FIELDS)
 
     @model_validator(mode="after")
     def kind_constraints(self) -> Self:
         if SECRET_FIELD.fullmatch(self.name):
             raise ValueError("credentials must be declared as SecretRef, not a parameter")
-        if self.kind == "select" and (
-            not self.options or len(set(self.options)) != len(self.options)
+        if self.options and self.choices:
+            raise ValueError("declare either options or choices, not both")
+        values = self.choice_values
+        if len(set(values)) != len(values):
+            raise ValueError("parameter choices must be distinct")
+        if self.kind == "select" and not values and self.choices_source is None:
+            raise ValueError("select parameters require choices or a choices source")
+        if self.kind not in ("select", "text_list") and (values or self.choices_source):
+            raise ValueError("only select and text_list parameters may declare choices")
+        if self.choices_source is not None and not CHOICES_SOURCE.fullmatch(self.choices_source):
+            raise ValueError("choices_source must be ref:<set> or fn:<name>")
+        if self.kind not in ("integer", "number") and (
+            self.minimum is not None or self.maximum is not None
         ):
-            raise ValueError("select parameters require distinct options")
-        if self.kind != "select" and self.options:
-            raise ValueError("only select parameters may declare options")
-        if self.kind != "integer" and (self.minimum is not None or self.maximum is not None):
-            raise ValueError("only integer parameters may declare bounds")
+            raise ValueError("only numeric parameters may declare bounds")
+        if self.kind == "integer" and any(
+            bound is not None and type(bound) is not int for bound in (self.minimum, self.maximum)
+        ):
+            raise ValueError("integer bounds must be whole numbers")
         if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
             raise ValueError("parameter minimum must not exceed maximum")
+        if (self.pattern is not None or self.min_length is not None) and self.kind not in (
+            "text", "text_list"
+        ):
+            raise ValueError("only text parameters may declare a pattern or minimum length")
+        if self.pattern is not None:
+            try:
+                re.compile(self.pattern)
+            except re.error:
+                raise ValueError("parameter pattern must be a valid expression") from None
+        if self.accept and self.kind not in _PATH_KINDS:
+            raise ValueError("only file, folder and upload parameters may declare accept")
+        if self.multiple and self.kind not in ("select", "file", "upload"):
+            raise ValueError("only select, file and upload parameters may be multiple")
+        if len(set(self.channels)) != len(self.channels):
+            raise ValueError("parameter channels must be distinct")
+        if self.default is not None:
+            problem = parameter_value_problem(self, self.default)
+            if problem:
+                raise ValueError(f"default: {problem}")
         return self
+
+
+def parameter_value_problem(field: WorkflowParameter, value: Any) -> str | None:
+    """Why `value` does not fit `field`, or None. Shared by defaults and runs."""
+    kind = field.kind
+    if field.multiple or kind in _LIST_KINDS:
+        if not isinstance(value, list | tuple) or not all(
+            isinstance(item, str) and item.strip() for item in value
+        ):
+            return "must be a list of nonempty text"
+        items: tuple[str, ...] = tuple(value)
+    elif kind in _TEXT_KINDS:
+        if not isinstance(value, str) or not value.strip():
+            return "must be nonempty text"
+        items = (value,)
+    elif kind == "integer":
+        if type(value) is not int:
+            return "must be a whole number"
+        items = ()
+    elif kind == "number":
+        if type(value) not in (int, float):
+            return "must be a number"
+        items = ()
+    elif kind == "boolean":
+        return None if type(value) is bool else "must be true or false"
+    else:  # date
+        from datetime import date
+
+        try:
+            parsed = date.fromisoformat(value) if isinstance(value, str) else None
+        except ValueError:
+            parsed = None
+        if parsed is None or parsed.isoformat() != value:
+            return "must be a YYYY-MM-DD date"
+        return None
+    if kind in ("integer", "number"):
+        if field.minimum is not None and value < field.minimum:
+            return "is below its minimum"
+        if field.maximum is not None and value > field.maximum:
+            return "is above its maximum"
+        return None
+    if kind == "emails" and not all(_EMAIL.fullmatch(item) for item in items):
+        return "must be email addresses"
+    values = field.choice_values
+    if values and field.choices_source is None and any(item not in values for item in items):
+        return "must be a declared choice"
+    for item in items:
+        if field.min_length is not None and len(item) < field.min_length:
+            return "is shorter than its minimum length"
+        if field.pattern is not None and not re.fullmatch(field.pattern, item):
+            return "does not match its pattern"
+    return None
 
 
 class WorkflowManifest(ExecutableManifest):
@@ -285,6 +454,17 @@ class WorkflowManifest(ExecutableManifest):
     run_alias: int | None = Field(default=None, ge=1, le=9999, strict=True)
     parameters: tuple[WorkflowParameter, ...] = ()
     steps: tuple[AssetIdentity | WorkflowStep, ...]
+    # Stages shown while the Workflow runs (rs_workflow_system `STEPS`).
+    progress_steps: tuple[ProgressStep, ...] = Field(default=(), max_length=12)
+    # The run occupies the machine (a browser session, Excel or Outlook UI),
+    # so it must not overlap another such run (rs_workflow_system `block`).
+    occupies_machine: StrictBool = False
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        return _omit_unused(
+            self, handler, frozenset({"progress_steps", "occupies_machine"})
+        )
 
     @field_validator("parameters")
     @classmethod
@@ -293,6 +473,31 @@ class WorkflowManifest(ExecutableManifest):
     ) -> tuple[WorkflowParameter, ...]:
         if len({item.name for item in value}) != len(value):
             raise ValueError("workflow parameter names must be unique")
+        # A field that another field depends on must exist and be asked first:
+        # by declared `order`, else by position in the manifest.
+        position = {
+            item.name: (item.order if item.order is not None else index, index)
+            for index, item in enumerate(value)
+        }
+        for item in value:
+            placeholders = (
+                _PLACEHOLDER.findall(item.choices_source) if item.choices_source else []
+            )
+            for name in placeholders:
+                if name not in position:
+                    raise ValueError(f"{item.name}: placeholder {{{name}}} names no parameter")
+            for name in (*item.needs, *placeholders):
+                if name not in position:
+                    raise ValueError(f"{item.name}: needs {name}, which is not declared")
+                if position[name] >= position[item.name]:
+                    raise ValueError(f"{item.name}: {name} must be asked before it")
+        return value
+
+    @field_validator("progress_steps")
+    @classmethod
+    def unique_progress_steps(cls, value: tuple[ProgressStep, ...]) -> tuple[ProgressStep, ...]:
+        if len({item.id for item in value}) != len(value):
+            raise ValueError("progress step ids must be unique")
         return value
 
     @field_validator("steps")

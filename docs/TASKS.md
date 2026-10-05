@@ -1106,3 +1106,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   generators (Agent Web, schedule, Telegram, Agent tool schema, settings),
   slice order and owner decisions are in
   `docs/phases/RS_WORKFLOW_MIGRATION.md`. Awaiting owner decisions before S1.
+- [x] rs_workflow_system migration S1, parameter declaration contract
+  (Claude Code, 2026-10-05): optional `WorkflowParameter` fields and kinds,
+  `progress_steps`, `occupies_machine`, cross-field order/needs/placeholder
+  validation, defaults applied by `validate_run_parameters`; unused new
+  fields serialize as before so published manifest bytes are unchanged.
+  Owner decisions recorded in `docs/DECISIONS.md`. Full pytest: 1977 passed,
+  5 skipped, 1 known pre-existing failure. Next: S2 generated forms.
