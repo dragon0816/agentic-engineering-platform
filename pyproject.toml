@@ -73,7 +73,11 @@ module = ["lxml", "lxml.*"]
 ignore_missing_imports = true
 
 # pywin32 ships no stubs and is imported lazily by the one Excel adapter,
-# which the suite never exercises (docs/TASKS.md records that).
+# which the suite never exercises (docs/TASKS.md records that), and by the
+# coding runner's restricted execution (exercised on Windows).
 [[tool.mypy.overrides]]
-module = ["win32com", "win32com.*", "pythoncom"]
+module = [
+    "win32com", "win32com.*", "pythoncom", "win32api", "win32con", "win32event",
+    "win32file", "win32job", "win32process", "win32security",
+]
 ignore_missing_imports = true
