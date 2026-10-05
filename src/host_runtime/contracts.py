@@ -176,6 +176,18 @@ class PlatformSyncRequest(Contract):
     """An explicit user action. It intentionally accepts no instruction."""
 
 
+class WorkflowSettingsUpdateRequest(Contract):
+    """One Workflow's per-install settings from the settings page."""
+
+    workflow: AssetIdentity
+    values: dict[str, JsonValue] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 class ModelSettingsUpdateRequest(Contract):
     """One local model endpoint selected by the device operator.
 

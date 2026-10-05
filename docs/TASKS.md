@@ -1142,3 +1142,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `telegram` ingress and `on_behalf_of` (granting nothing). Required uploads
   are refused on Telegram (attachments excluded); flow state is in memory with
   a 15-minute expiry. Next: S5 workflow_settings store and editor.
+- [x] rs_workflow_system migration S5, per-install Workflow settings
+  (Claude Code, 2026-10-05, owner clarified the two parameter kinds:
+  pre-run settings that adapt a Workflow to a person's computer vs run-time
+  parameters asked every run). `scope: static` fields are stored per install in
+  `<workspace>/workflow-settings.json` keyed by `namespace/name` (kept across
+  upgrades, credential-like values refused), edited on Agent Web's Settings
+  page from the declaration, and merged by `WorkflowEngine` into every run
+  from every channel; a missing required setting stops the run with
+  `workflow_settings_incomplete`, and a run can never supply a setting. Not
+  yet done: moving existing `HostIntegrations` settings (W13 first, then
+  W07/W10/W11 in their own slices). Next: S6 dynamic choices.

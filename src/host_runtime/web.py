@@ -67,8 +67,13 @@ from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.distribution import LocalStateError
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalCapabilityRequest, LocalWorkflowRequest
-from common.workflow_forms import form_fields
-from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
+from common.workflow_forms import form_fields, settings_fields
+from common.workflow_parameters import (
+    WorkflowParameterError,
+    static_fields,
+    validate_run_parameters,
+    validate_static_settings,
+)
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
@@ -86,6 +91,7 @@ from host_runtime.contracts import (
     PlatformSyncRequest,
     PlatformSyncResult,
     WorkflowLaunchRequest,
+    WorkflowSettingsUpdateRequest,
 )
 from host_runtime.contributions import (
     ContributionDraft,
@@ -119,6 +125,11 @@ from host_runtime.slash_commands import (
     SlashCommandError,
     SlashCommandInvocation,
     parse_slash_command,
+)
+from host_runtime.workflow_settings import (
+    SETTINGS_FILE,
+    WorkflowSettingsError,
+    WorkflowSettingsStore,
 )
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evidence import connected_facets, evidence_excerpt
@@ -284,6 +295,10 @@ class AgentWeb:
         self.schedule_loop: Any = None
         # Reads the configured Gateway's model list for the Settings picker.
         self.model_listing_transport: MethodTransport = UrllibTransport()
+        # Per-install Workflow settings; the engine reads the same file per run.
+        self.workflow_settings_store = WorkflowSettingsStore(
+            runtime.layout.workspace_root / SETTINGS_FILE
+        )
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -421,6 +436,58 @@ class AgentWeb:
                 "process environment and restart the Agent."
             )
         return "LLM Gateway credential is unavailable. Check its mapping in Settings."
+
+    def _settings_entry(self, manifest: WorkflowManifest) -> dict[str, Any]:
+        identity = manifest.metadata.identity
+        stored = self.workflow_settings_store.for_manifest(manifest)
+        missing = [
+            field.name for field in static_fields(manifest)
+            if field.required and stored.get(field.name) is None and field.default is None
+        ]
+        return {
+            "workflow": identity.model_dump(mode="json"),
+            "description": manifest.description,
+            "fields": settings_fields(manifest),
+            "values": stored,
+            "missing": missing,
+        }
+
+    def workflow_settings(self) -> dict[str, Any]:
+        """Every installed Workflow that declares per-install settings."""
+        try:
+            entries = [
+                self._settings_entry(manifest)
+                for manifest in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if static_fields(manifest)
+            ]
+        except WorkflowSettingsError as error:
+            return {"ok": False, "code": "workflow_settings_unavailable", "message": str(error)}
+        return {"ok": True, "workflows": entries}
+
+    def save_workflow_settings(self, request: WorkflowSettingsUpdateRequest) -> dict[str, Any]:
+        item = WorkflowSettingsUpdateRequest.model_validate(request)
+        manifest = next(
+            (
+                candidate
+                for candidate in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if candidate.metadata.identity == item.workflow
+            ),
+            None,
+        )
+        if manifest is None:
+            return {"ok": False, "code": "workflow_not_installed"}
+        try:
+            checked = validate_static_settings(manifest, item.values, complete=False)
+            # Store what the person set; declared defaults stay in the manifest.
+            self.workflow_settings_store.save(
+                item.workflow,
+                {name: value for name, value in item.values.items() if name in checked},
+            )
+        except WorkflowParameterError as error:
+            return {"ok": False, "code": "workflow_settings_invalid", "message": str(error)}
+        except WorkflowSettingsError as error:
+            return {"ok": False, "code": "workflow_settings_refused", "message": str(error)}
+        return {"ok": True, "workflow": self._settings_entry(manifest)}
 
     def available_models(self) -> dict[str, Any]:
         """List model names the configured Gateway serves, for the Settings picker.
@@ -2283,6 +2350,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.settings())
         elif parsed.path == "/api/settings/models":
             self._json(200, web.available_models())
+        elif parsed.path == "/api/settings/workflows":
+            self._json(200, web.workflow_settings())
         elif parsed.path == "/api/backends":
             self._json(200, web.conversation_backends())
         elif parsed.path == "/api/commands":
@@ -2317,6 +2386,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/workflows/run",
             "/api/knowledge/ask",
             "/api/settings/model",
+            "/api/settings/workflows",
             "/api/settings/persona",
             "/api/settings/context",
             "/api/conversations",
@@ -2350,6 +2420,15 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
             self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/settings/workflows":
+            try:
+                update = WorkflowSettingsUpdateRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not valid workflow settings"})
+                return
+            result = self.server.web.save_workflow_settings(update)
+            self._json(200 if result["ok"] else 400, result)
             return
         if path == "/api/settings/persona":
             try:

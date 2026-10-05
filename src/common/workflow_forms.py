@@ -121,3 +121,19 @@ def agent_tool_schema(manifest: WorkflowManifest) -> dict[str, Any]:
         "required": [field.name for field in fields if field.required],
         "additionalProperties": False,
     }
+
+
+def settings_fields(manifest: WorkflowManifest) -> list[dict[str, Any]]:
+    """The settings page form: `scope: static` fields in declared order.
+
+    Settings adapt a Workflow to one computer and are never asked at run time,
+    so every generated run interface leaves them out.
+    """
+    indexed = [
+        (index, field) for index, field in enumerate(manifest.parameters)
+        if field.scope == "static"
+    ]
+    indexed.sort(key=lambda item: (
+        item[1].order if item[1].order is not None else item[0], item[0],
+    ))
+    return [form_field(field) for _, field in indexed]

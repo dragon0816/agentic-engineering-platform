@@ -530,6 +530,12 @@ tr:last-child td { border-bottom: none; }
       <p><button id="session-delete" type="button">Delete selected session</button></p>
       <p id="session-manage-result" class="note" role="status"></p>
     </div>
+    <h2>Workflow settings</h2>
+    <p class="note">Settings that adapt a Workflow to this computer, such as where its
+      reference data lives. They are set here once, kept across upgrades, and never asked
+      when the Workflow runs. A Workflow with a missing required setting does not start.
+      Credentials are never entered here.</p>
+    <div id="workflow-settings-list"></div>
     <h2>Capability management</h2>
     <div class="grid">
       <div class="status-card"><strong>Skills, Workflows and Knowledge</strong>
@@ -1801,7 +1807,69 @@ async function loadSettings() {
     target.value = activeConversation;
   }
   el("session-delete").disabled = !listed.conversations.length;
+  await loadWorkflowSettings();
 }
+
+// -- Workflow settings ------------------------------------------------------
+
+async function loadWorkflowSettings() {
+  const box = el("workflow-settings-list");
+  const listed = await call("/api/settings/workflows");
+  if (!listed.ok) {
+    box.replaceChildren(text("Workflow settings are unavailable: " + listed.code));
+    return;
+  }
+  if (!listed.workflows.length) {
+    const empty = document.createElement("p"); empty.className = "note";
+    empty.append(text("No installed Workflow declares settings."));
+    box.replaceChildren(empty); return;
+  }
+  box.replaceChildren(...listed.workflows.map(workflowSettingsCard));
+}
+
+function workflowSettingsCard(entry, index) {
+  const card = document.createElement("div"); card.className = "status-card";
+  const title = document.createElement("strong");
+  title.append(text(entry.workflow.namespace + "/" + entry.workflow.name));
+  const note = document.createElement("p"); note.className = "note";
+  note.append(text(entry.description || ""));
+  const missing = document.createElement("p"); missing.className = "note";
+  missing.setAttribute("role", "status");
+  const showMissing = (names) => missing.replaceChildren(text(names.length
+    ? "Missing required settings: " + names.join(", ") + ". The Workflow will not start."
+    : "All required settings are set."));
+  showMissing(entry.missing);
+  // Stored values show in place of declared defaults.
+  const fields = entry.fields.map(field => Object.assign({}, field,
+    Object.prototype.hasOwnProperty.call(entry.values, field.name)
+      ? {default: entry.values[field.name]} : {}));
+  const form = document.createElement("div");
+  const prefix = "workflow-setting-" + index + "-";
+  renderParameterForm(form, fields, prefix);
+  const save = document.createElement("button"); save.type = "button";
+  save.className = "go"; save.append(text("Save settings"));
+  const result = document.createElement("p"); result.className = "note";
+  result.setAttribute("role", "status");
+  save.addEventListener("click", async () => {
+    let values;
+    try { values = collectParameterValues(form, fields, prefix); }
+    catch (failure) { result.replaceChildren(text(failure.message)); return; }
+    save.disabled = true;
+    try {
+      const saved = await call("/api/settings/workflows",
+        {workflow: entry.workflow, values: values});
+      if (!saved.ok) throw new Error(saved.message || saved.code);
+      showMissing(saved.workflow.missing);
+      result.replaceChildren(text("Saved. The next run uses these settings."));
+    } catch (failure) {
+      result.replaceChildren(text("Not saved: " + failure.message));
+    } finally { save.disabled = false; }
+  });
+  card.append(title, note, missing, form, save, result);
+  return card;
+}
+
+// -- end Workflow settings
 
 el("context-settings").addEventListener("submit", async (event) => {
   event.preventDefault();

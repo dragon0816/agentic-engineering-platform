@@ -10,6 +10,7 @@ import asyncio
 import functools
 import math
 import uuid
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from typing import Literal
 
@@ -41,6 +42,11 @@ from common.execution import (
     StepStateRecord,
     TraceIdentifiers,
     WorkflowRun,
+)
+from common.workflow_parameters import (
+    WorkflowParameterError,
+    static_fields,
+    validate_static_settings,
 )
 from workflow.checkpoints import CheckpointStoreError
 from workflow.dispatch import BridgeExecutor
@@ -248,9 +254,13 @@ class WorkflowEngine:
         *,
         journal: RunJournal | None = None,
         watch_queue_size: int = WATCH_QUEUE_SIZE,
+        settings_provider: Callable[[WorkflowManifest], Mapping[str, JsonValue]] | None = None,
     ) -> None:
         self.workflows = workflows
         self.bridge = bridge
+        # Per-install settings (`scope: static` fields), read on every run so a
+        # change on the settings page applies without a restart.
+        self.settings_provider = settings_provider
         # Without a journal the engine behaves exactly as before: in memory only.
         self.journal = journal
         self.watch_queue_size = watch_queue_size
@@ -334,6 +344,10 @@ class WorkflowEngine:
         # the source's load-before-create order.
         if manifest is None:
             return self._rejected(target, checked, "workflow_not_installed")
+        settings = self._settings(manifest, run_arguments)
+        if isinstance(settings, str):
+            return self._rejected(target, checked, settings, "needs_input")
+        run_arguments = {**run_arguments, **settings}
         rejection = self._preflight(manifest, run_arguments)
         if rejection is not None:
             return self._rejected(target, checked, *rejection)
@@ -414,6 +428,27 @@ class WorkflowEngine:
             if binding is None or not self.bridge.policy.authorize(context, binding.spec).allowed:
                 return False
         return True
+
+    def _settings(
+        self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]
+    ) -> dict[str, JsonValue] | str:
+        """This install's settings for the run, or why the run cannot start.
+
+        A run never supplies a setting; a missing required setting stops the
+        run before anything executes, with a code the caller can explain.
+        """
+        declared = static_fields(manifest)
+        if not declared:
+            return {}
+        if any(field.name in run_arguments for field in declared):
+            return "workflow_setting_supplied_by_run"
+        try:
+            values = dict(self.settings_provider(manifest)) if self.settings_provider else {}
+            return validate_static_settings(manifest, values, complete=True)
+        except WorkflowParameterError:
+            return "workflow_settings_incomplete"
+        except (OSError, ValueError):
+            return "workflow_settings_unavailable"
 
     def _preflight(
         self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]

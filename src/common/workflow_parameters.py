@@ -46,3 +46,34 @@ def _validate_value(field: WorkflowParameter, value: JsonValue) -> None:
     problem = parameter_value_problem(field, value)
     if problem:
         raise WorkflowParameterError(f"{field.name} {problem}")
+
+
+def static_fields(manifest: WorkflowManifest) -> tuple[WorkflowParameter, ...]:
+    """The per-install settings a Workflow declares (`scope: static`)."""
+    return tuple(field for field in manifest.parameters if field.scope == "static")
+
+
+def validate_static_settings(
+    manifest: WorkflowManifest, values: Mapping[str, JsonValue], *, complete: bool,
+) -> dict[str, JsonValue]:
+    """Check one install's settings for a Workflow and apply declared defaults.
+
+    Settings adapt a Workflow to a person's computer (for example where its
+    reference data lives); they are set once on the settings page and never
+    supplied by a run. `complete` requires every required setting, as a run
+    does; saving a partly filled page does not.
+    """
+    fields = {field.name: field for field in static_fields(manifest)}
+    for name in values:
+        if name not in fields:
+            raise WorkflowParameterError(f"{name} is not a declared setting")
+    checked: dict[str, JsonValue] = {}
+    for name, field in fields.items():
+        if name in values and values[name] is not None:
+            _validate_value(field, values[name])
+            checked[name] = values[name]
+        elif field.default is not None:
+            checked[name] = field.default
+        elif complete and field.required:
+            raise WorkflowParameterError(f"{name} is required")
+    return checked

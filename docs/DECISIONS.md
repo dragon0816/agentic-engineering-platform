@@ -964,3 +964,23 @@ can revisit this. Rejected alternatives: a new contract version (breaks
 existing manifests), embedding raw JSON Schema (loses the closed, validated
 field set), keeping per-workflow settings in `HostIntegrations` (requires
 core changes per workflow).
+
+## 2026-10-05 — Per-install Workflow settings live in the workspace, merged by the engine
+
+Decision: A Workflow's pre-run settings (`scope: static`; for example where
+its reference data lives) are stored in `<workspace>/workflow-settings.json`
+keyed by `namespace/name`, edited on Agent Web's Settings page from the
+declaration, and merged by `WorkflowEngine.execute` into every run. A missing
+required setting rejects the run before anything executes
+(`workflow_settings_incomplete`); a run that tries to supply a setting is
+rejected. Run-time parameters (`scope: runtime`) remain the only fields any
+run interface asks for. Credentials stay SecretRef mappings in `host.json`.
+
+Reason: The owner distinguishes settings that adapt a Workflow to a person's
+computer, set once, from parameters that change every run. Merging in the
+engine covers Agent Web, schedules, Telegram and Agent tool calls in one
+place. A workspace file rather than `host.json` lets every process read the
+current values on each run without a restart, and keying by name keeps them
+across upgrades. Rejected alternatives: settings in `host.json` (needs a
+restart and the config path in every process), per-workflow typed members of
+`HostIntegrations` (core change per Workflow), asking settings at run time.

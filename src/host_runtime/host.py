@@ -127,6 +127,7 @@ from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
+from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore
 from host_runtime.workspace import documents
 from integrations import excel
 from integrations.chipset_excel import ChipsetExcelWriter
@@ -737,7 +738,11 @@ def build_gateway(
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
     )
-    return Gateway(router, bridge, WorkflowEngine(workflows, bridge))
+    settings = WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE)
+    return Gateway(
+        router, bridge,
+        WorkflowEngine(workflows, bridge, settings_provider=settings.for_manifest),
+    )
 
 
 def build_knowledge_catalog(
