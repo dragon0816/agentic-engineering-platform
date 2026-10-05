@@ -176,6 +176,19 @@ class PlatformSyncRequest(Contract):
     """An explicit user action. It intentionally accepts no instruction."""
 
 
+class WorkflowOptionsRequest(Contract):
+    """Current choices for one field with a dynamic choice source."""
+
+    workflow: AssetIdentity
+    field: Symbol
+    answers: dict[str, JsonValue] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 class WorkflowSettingsUpdateRequest(Contract):
     """One Workflow's per-install settings from the settings page."""
 

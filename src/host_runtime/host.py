@@ -13,7 +13,7 @@ the engine decides every workflow, and the Agent decides who may ask.
 """
 
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, TypeVar
@@ -125,6 +125,7 @@ from host_runtime.contracts import (
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
 from host_runtime.profiles import ProfileError, load_active_profile
+from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceSetStore
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
@@ -771,8 +772,17 @@ def build_gateway(
             **settings.for_manifest(manifest),
         }
 
+    references = ReferenceSetStore(layout.workspace_root / REFERENCE_SETS_FILE)
+
+    def choices(source: str, answers: Mapping[str, JsonValue]) -> list[str] | None:
+        found = references.resolve(source, answers)
+        return None if found is None else [item.value for item in found]
+
     return Gateway(
-        router, bridge, WorkflowEngine(workflows, bridge, settings_provider=provide),
+        router, bridge,
+        WorkflowEngine(
+            workflows, bridge, settings_provider=provide, choices_provider=choices,
+        ),
     )
 
 

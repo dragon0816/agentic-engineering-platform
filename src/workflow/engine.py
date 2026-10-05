@@ -255,12 +255,16 @@ class WorkflowEngine:
         journal: RunJournal | None = None,
         watch_queue_size: int = WATCH_QUEUE_SIZE,
         settings_provider: Callable[[WorkflowManifest], Mapping[str, JsonValue]] | None = None,
+        choices_provider: Callable[[str, Mapping[str, JsonValue]], list[str] | None]
+        | None = None,
     ) -> None:
         self.workflows = workflows
         self.bridge = bridge
         # Per-install settings (`scope: static` fields), read on every run so a
         # change on the settings page applies without a restart.
         self.settings_provider = settings_provider
+        # Current values of published reference sets (`ref:` choice sources).
+        self.choices_provider = choices_provider
         # Without a journal the engine behaves exactly as before: in memory only.
         self.journal = journal
         self.watch_queue_size = watch_queue_size
@@ -348,6 +352,9 @@ class WorkflowEngine:
         if isinstance(settings, str):
             return self._rejected(target, checked, settings, "needs_input")
         run_arguments = {**run_arguments, **settings}
+        unavailable = self._choices(manifest, run_arguments)
+        if unavailable is not None:
+            return self._rejected(target, checked, unavailable, "needs_input")
         rejection = self._preflight(manifest, run_arguments)
         if rejection is not None:
             return self._rejected(target, checked, *rejection)
@@ -449,6 +456,27 @@ class WorkflowEngine:
             return "workflow_settings_incomplete"
         except (OSError, ValueError):
             return "workflow_settings_unavailable"
+
+    def _choices(
+        self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]
+    ) -> str | None:
+        """A value for a `ref:` field must be in that set's current choices."""
+        for field in manifest.parameters:
+            source = field.choices_source
+            if field.scope != "runtime" or not source or not source.startswith("ref:"):
+                continue
+            value = run_arguments.get(field.name)
+            if value is None:
+                continue
+            allowed = (
+                self.choices_provider(source, run_arguments) if self.choices_provider else None
+            )
+            if allowed is None:
+                return "reference_set_unavailable"
+            chosen = value if isinstance(value, list) else [value]
+            if any(item not in allowed for item in chosen):
+                return "workflow_choice_unavailable"
+        return None
 
     def _preflight(
         self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]

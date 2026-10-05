@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import re
 import time
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -40,11 +41,16 @@ class FlowPrompt:
     buttons: list[list[Button]] = field(default_factory=list)
 
 
+ChoicesProvider = Callable[[str, Mapping[str, Any]], "list[str] | None"]
+
+
 @dataclass
 class FlowState:
     manifest: WorkflowManifest
     effect: str | None
     fields: tuple[WorkflowParameter, ...]
+    # Current values of `ref:` sets, from the same provider the engine checks.
+    choices: ChoicesProvider | None = None
     index: int = 0
     answers: dict[str, Any] = field(default_factory=dict)
     confirming: bool = False
@@ -65,7 +71,9 @@ class FlowStep:
     arguments: dict[str, Any] | None = None
 
 
-def start(manifest: WorkflowManifest, effect: str | None) -> FlowState | str:
+def start(
+    manifest: WorkflowManifest, effect: str | None, choices: ChoicesProvider | None = None,
+) -> FlowState | str:
     """A new flow, or why this Workflow cannot be filled in from Telegram."""
     fields = ordered_fields(manifest, "telegram")
     for item in fields:
@@ -73,16 +81,29 @@ def start(manifest: WorkflowManifest, effect: str | None) -> FlowState | str:
             return (f"{item.label} needs a file upload, which Telegram does not accept here; "
                     "run this Workflow from Agent Web.")
     # Optional uploads are skipped: attachments are not accepted on this channel.
-    return FlowState(manifest, effect, tuple(item for item in fields if item.kind != "upload"))
+    return FlowState(
+        manifest, effect, tuple(item for item in fields if item.kind != "upload"), choices,
+    )
 
 
 def _title(state: FlowState) -> str:
     return state.manifest.metadata.identity.name
 
 
-def _choice_buttons(item: WorkflowParameter) -> list[list[Button]]:
+def _dynamic_values(state: FlowState, item: WorkflowParameter) -> list[str] | None:
+    source = item.choices_source
+    if not source or not source.startswith("ref:") or state.choices is None:
+        return None
+    return state.choices(source, state.answers)
+
+
+def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Button]]:
     if item.kind == "boolean":
         return [[("Yes", "yes"), ("No", "no")]]
+    dynamic = _dynamic_values(state, item)
+    if item.kind == "select" and dynamic and not item.multiple:
+        buttons = [(value, value) for value in dynamic[:MAX_BUTTONS]]
+        return [buttons[i:i + BUTTONS_PER_ROW] for i in range(0, len(buttons), BUTTONS_PER_ROW)]
     if item.kind != "select" or item.choices_source or item.multiple:
         return []
     labels = {choice.value: (choice.label or choice.value) for choice in item.choices}
@@ -103,13 +124,19 @@ def prompt(state: FlowState) -> FlowPrompt:
         lines.append("Several values: separate them with commas or new lines.")
     if item.kind == "select" and (item.choices_source or item.multiple) and item.choice_values:
         lines.append("Choices: " + ", ".join(item.choice_values))
+    if item.choices_source and item.choices_source.startswith("ref:"):
+        dynamic = _dynamic_values(state, item)
+        if dynamic is None:
+            lines.append("Its choice list is not available yet; type the value.")
+        elif item.multiple and dynamic:
+            lines.append("Choices: " + ", ".join(dynamic[:MAX_BUTTONS]))
     if item.default is not None:
         lines.append(f"Default: {item.default}")
     if item.confirm:
         lines.append("This is a privileged setting; it is confirmed before the run.")
     lines.append("/skip uses the default" if not item.required else "Required.")
     lines.append("/cancel stops.")
-    return FlowPrompt("\n".join(lines), _choice_buttons(item))
+    return FlowPrompt("\n".join(lines), _choice_buttons(state, item))
 
 
 def _confirmation(state: FlowState) -> FlowPrompt:
@@ -131,7 +158,7 @@ def needs_confirmation(state: FlowState) -> bool:
     return state.effect != "read" or privileged
 
 
-def _convert(item: WorkflowParameter, text: str) -> Any:
+def _convert(item: WorkflowParameter, text: str, dynamic: list[str] | None = None) -> Any:
     raw = text.strip()
     if item.kind == "boolean":
         lowered = raw.casefold()
@@ -151,14 +178,20 @@ def _convert(item: WorkflowParameter, text: str) -> Any:
             raise ValueError("enter a number") from None
     if item.kind in ("text_list", "emails") or item.multiple:
         values = [part.strip() for part in _SPLIT.split(raw) if part.strip()]
-        return [_match_choice(item, value) for value in values]
+        return [_match_choice(item, value, dynamic) for value in values]
     if item.kind == "select":
-        return _match_choice(item, raw)
+        return _match_choice(item, raw, dynamic)
     return raw
 
 
-def _match_choice(item: WorkflowParameter, value: str) -> str:
-    """A declared value, its label, or its 1-based position."""
+def _match_choice(item: WorkflowParameter, value: str, dynamic: list[str] | None = None) -> str:
+    """A declared or published value, its label, or its 1-based position."""
+    if dynamic is not None:
+        if value in dynamic:
+            return value
+        if value.isdigit() and 1 <= int(value) <= len(dynamic):
+            return dynamic[int(value) - 1]
+        raise ValueError("choose one of the listed values")
     if not item.choice_values or item.choices_source:
         return value
     if value in item.choice_values:
@@ -221,7 +254,7 @@ def answer(state: FlowState, text: str) -> FlowStep:
                                               prompt(state).buttons))
         return _next(state)
     try:
-        value = _convert(item, reply)
+        value = _convert(item, reply, _dynamic_values(state, item))
     except ValueError as error:
         problem: str | None = str(error)
     else:

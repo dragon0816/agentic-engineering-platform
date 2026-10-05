@@ -91,6 +91,7 @@ from host_runtime.contracts import (
     PlatformSyncRequest,
     PlatformSyncResult,
     WorkflowLaunchRequest,
+    WorkflowOptionsRequest,
     WorkflowSettingsUpdateRequest,
 )
 from host_runtime.contributions import (
@@ -120,6 +121,11 @@ from host_runtime.host import HostRuntime, load_authorization
 from host_runtime.knowledge_observation import KnowledgeBridgeActions
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
+from host_runtime.reference_sets import (
+    REFERENCE_SETS_FILE,
+    ReferenceQuery,
+    ReferenceSetStore,
+)
 from host_runtime.slash_commands import (
     COMMANDS,
     SlashCommandError,
@@ -298,6 +304,10 @@ class AgentWeb:
         # Per-install Workflow settings; the engine reads the same file per run.
         self.workflow_settings_store = WorkflowSettingsStore(
             runtime.layout.workspace_root / SETTINGS_FILE
+        )
+        # Published choice lists behind `ref:` fields; the engine reads the same file.
+        self.reference_sets = ReferenceSetStore(
+            runtime.layout.workspace_root / REFERENCE_SETS_FILE
         )
 
     @property
@@ -488,6 +498,40 @@ class AgentWeb:
         except WorkflowSettingsError as error:
             return {"ok": False, "code": "workflow_settings_refused", "message": str(error)}
         return {"ok": True, "workflow": self._settings_entry(manifest)}
+
+    def workflow_options(self, request: WorkflowOptionsRequest) -> dict[str, Any]:
+        """Choices for a `ref:` field given the answers so far."""
+        item = WorkflowOptionsRequest.model_validate(request)
+        manifest = next(
+            (
+                candidate
+                for candidate in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if candidate.metadata.identity == item.workflow
+            ),
+            None,
+        )
+        field = None if manifest is None else next(
+            (candidate for candidate in manifest.parameters if candidate.name == item.field),
+            None,
+        )
+        if field is None or not field.choices_source:
+            return {"ok": False, "code": "workflow_field_unknown"}
+        if not field.choices_source.startswith("ref:"):
+            return {"ok": False, "code": "choices_source_unsupported"}
+        query = ReferenceQuery(field.choices_source)
+        waiting = [name for name in query.needed() if item.answers.get(name) in (None, "")]
+        if waiting:
+            return {"ok": True, "choices": [], "waiting_for": waiting}
+        found = self.reference_sets.resolve(field.choices_source, item.answers)
+        if found is None:
+            return {"ok": True, "choices": [], "unavailable": True, "set": query.name}
+        return {
+            "ok": True,
+            "choices": [
+                {"value": choice.value, "label": choice.label or choice.value}
+                for choice in found
+            ],
+        }
 
     def available_models(self) -> dict[str, Any]:
         """List model names the configured Gateway serves, for the Settings picker.
@@ -2387,6 +2431,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/ask",
             "/api/settings/model",
             "/api/settings/workflows",
+            "/api/workflow-options",
             "/api/settings/persona",
             "/api/settings/context",
             "/api/conversations",
@@ -2420,6 +2465,15 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
             self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/workflow-options":
+            try:
+                options = WorkflowOptionsRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid options query"})
+                return
+            result = self.server.web.workflow_options(options)
+            self._json(200 if result["ok"] else 404, result)
             return
         if path == "/api/settings/workflows":
             try:

@@ -1990,7 +1990,9 @@ function showWorkflowContract() {
   el("workflow-fields").hidden = !typed;
   el("workflow-legacy").hidden = !!typed;
   workflowFields = typed ? workflow.parameters.fields : [];
-  renderParameterForm(el("workflow-fields"), workflowFields, "workflow-field-");
+  renderParameterForm(el("workflow-fields"), workflowFields, "workflow-field-",
+    typed ? {workflow: {namespace: workflow.namespace, name: workflow.name,
+      version: workflow.version}} : null);
 }
 
 // -- Parameter forms ------------------------------------------------------
@@ -2004,7 +2006,12 @@ const PATH_KINDS = ["file", "folder", "upload"];
 function parameterControl(field, id) {
   const kind = field.kind;
   let input;
-  if (kind === "select" && field.choices.length) {
+  if (kind === "select" && isDynamicChoice(field) && dynamicContext) {
+    input = document.createElement("select"); input.multiple = !!field.multiple;
+    const waiting = document.createElement("option"); waiting.value = "";
+    waiting.append(text("Loading choices…")); input.append(waiting);
+    input.dataset.source = field.choices_source;
+  } else if (kind === "select" && field.choices.length) {
     input = document.createElement("select"); input.multiple = !!field.multiple;
     if (!field.multiple) {
       const empty = document.createElement("option"); empty.value = "";
@@ -2048,7 +2055,22 @@ function parameterControl(field, id) {
   return input;
 }
 
-function renderParameterForm(container, fields, prefix) {
+let dynamicContext = null;
+
+function isDynamicChoice(field) {
+  return !!field.choices_source && field.choices_source.startsWith("ref:");
+}
+
+function choiceDependencies(field) {
+  const found = [...(field.needs || [])];
+  for (const match of (field.choices_source || "").matchAll(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g)) {
+    if (!found.includes(match[1])) found.push(match[1]);
+  }
+  return found;
+}
+
+function renderParameterForm(container, fields, prefix, context) {
+  dynamicContext = context || null;
   container.replaceChildren();
   let group = null;
   for (const field of fields) {
@@ -2073,6 +2095,66 @@ function renderParameterForm(container, fields, prefix) {
       error.textContent = ""; input.removeAttribute("aria-invalid");
     });
     row.append(label, input, help, error); container.append(row);
+  }
+  if (dynamicContext) wireDynamicChoices(container, fields, prefix, dynamicContext);
+  dynamicContext = null;
+}
+
+function rawAnswers(container, fields, prefix) {
+  const answers = {};
+  for (const field of fields) {
+    const input = container.querySelector("#" + CSS.escape(prefix + field.name));
+    if (!input) continue;
+    answers[field.name] = field.kind === "boolean" ? input.checked : input.value.trim();
+  }
+  return answers;
+}
+
+async function refreshChoices(container, fields, prefix, context, field) {
+  const input = container.querySelector("#" + CSS.escape(prefix + field.name));
+  if (!input) return;
+  const previous = input.value || (field.default == null ? "" : String(field.default));
+  const placeholder = (label) => {
+    const option = document.createElement("option"); option.value = "";
+    option.append(text(label)); return option;
+  };
+  let listed;
+  try {
+    listed = await call("/api/workflow-options", {
+      workflow: context.workflow, field: field.name,
+      answers: rawAnswers(container, fields, prefix),
+    });
+  } catch (failure) {
+    input.replaceChildren(placeholder("Choices unavailable: " + failure.message)); return;
+  }
+  if (listed.waiting_for && listed.waiting_for.length) {
+    input.replaceChildren(placeholder("Answer " + listed.waiting_for.join(", ") + " first"));
+    return;
+  }
+  if (listed.unavailable) {
+    input.replaceChildren(placeholder("The " + listed.set + " list has not been published yet"));
+    return;
+  }
+  const options = listed.choices.map(choice => {
+    const option = document.createElement("option"); option.value = choice.value;
+    option.append(text(choice.label)); option.selected = choice.value === previous;
+    return option;
+  });
+  input.replaceChildren(...(input.multiple ? [] : [placeholder("Select " + field.label)]),
+    ...options);
+}
+
+function wireDynamicChoices(container, fields, prefix, context) {
+  const dynamic = fields.filter(isDynamicChoice);
+  for (const field of dynamic) {
+    refreshChoices(container, fields, prefix, context, field);
+    for (const name of choiceDependencies(field)) {
+      const source = container.querySelector("#" + CSS.escape(prefix + name));
+      if (source) {
+        source.addEventListener("change",
+          () => refreshChoices(container, fields, prefix, context, field));
+      }
+    }
   }
 }
 
@@ -2646,7 +2728,8 @@ function showScheduleTargetFields() {
     : "Nothing installed can be scheduled.";
   el("schedule-json-box").hidden = !target || target.typed;
   if (!target) return;
-  renderParameterForm(container, target.fields, "schedule-field-");
+  renderParameterForm(container, target.fields, "schedule-field-",
+    target.target_kind === "workflow" ? {workflow: target.target} : null);
 }
 
 function scheduleInputs() {

@@ -544,7 +544,9 @@ class TelegramIngress:
         effect = await asyncio.to_thread(
             target_side_effect, self.agent, "workflow", manifest.metadata.identity, {}
         )
-        state = telegram_flow.start(manifest, effect)
+        state = telegram_flow.start(
+            manifest, effect, self.agent.gateway.engine.choices_provider
+        )
         if isinstance(state, str):
             return TelegramDelivery(**base, disposition="answered", reply=state)
         return await self._flow_step(base, key, state, telegram_flow.begin(state), actor, update)
