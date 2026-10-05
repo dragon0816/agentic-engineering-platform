@@ -6,8 +6,13 @@ Updated: 2026-10-05 (Asia/Taipei), by Claude Code
 
 - Branch `main`, all work committed locally, nothing pushed.
 - Live Agent Web: `aep-host web --config %LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json --port 53583 --open --schedules`
-  started from the repo `.venv` (editable install). The token changes on every
-  restart. It has not been restarted since Workflow 14 landed.
+  started from the repo `.venv` (editable install), restarted after Workflow 14
+  (logs `.scratch/agent-web-w14-*.log`). The token changes on every restart.
+- W14 is installed live: Workflow + Skill in `workspace\assets\`, grants for
+  `ncc-plan.prepare` / `ncc-plan.render` / `outlook.draft` (backup
+  `grants.json.bak-20261005-125644-before-w14`), Workflow settings pointing at
+  the source `config/workflow-14.json`, the `ncc_paper` template and photos,
+  output `C:\Users\Chi_L\Documents\NCC-plans`.
 - Installed Knowledge Skill: candidate `company-agent/knowledge-query@1.4.0`.
   Rollback: move its JSON out of `workspace\assets\skills\` and move
   `disabled/company-agent__knowledge-query__1.3.0.json` back, then restart.
@@ -56,9 +61,7 @@ passed. Run pytest outside the Claude Code sandbox.
 - Feedback on Knowledge Skill 1.4.0 report answers in Agent Web.
 - Knowledge data gaps: CMP180 competitor comparisons (Anritsu MT8870A,
   LitePoint, Keysight), market-to-option links, more market-trend sources.
-- To use W14 live: export assets or install `engineering/rs-ncc-improvement-plan`,
-  add grants (`ncc-plan.prepare`, `ncc-plan.render`, `outlook.draft`), set the
-  four Workflow settings (catalogue = the source `config/workflow-14.json`).
+- Try W14 in Agent Web (`/run 14`), dry run first.
 
 ## Next recommended action
 
