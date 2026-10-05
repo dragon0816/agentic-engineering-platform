@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "engineering",
+      "name": "rs-bundle-smoke-skill",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "private",
+    "lifecycle": "validated",
+    "contributors": [],
+    "categories": [],
+    "provenance": [],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": []
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "smoke",
+  "instructions": "Run Workflow 90 to check that this computer's bundle runs.",
+  "commands": [
+    {
+      "name": "run",
+      "kind": "workflow",
+      "target": {
+        "namespace": "engineering",
+        "name": "rs-bundle-smoke",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "rules": [],
+  "default_command": "run",
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {}
+}

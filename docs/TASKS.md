@@ -1168,3 +1168,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   waits for the panel's asynchronous target list. Full pytest: 1998 passed;
   remaining failures were known intermittent/pre-existing and passed on rerun
   except the cp950 test.
+- [x] rs_workflow_system migration S6a, dynamic `ref:` choices (Claude Code,
+  2026-10-05): published sets in `<workspace>/reference-sets.sqlite`
+  (owner decision 3) with tag filters waiting for earlier answers; engine
+  rejects unpublished sets (`reference_set_unavailable`) and stale values
+  (`workflow_choice_unavailable`); Agent Web dropdowns via
+  `/api/workflow-options`; Telegram buttons. Publishing from a Workflow run
+  (`publishes`) comes with the Workflow 12 slice; `fn:` with the first slice
+  that needs it.
+- [x] Workflow 90 bundle_smoke migrated (WRAP, Claude Code, 2026-10-05):
+  `packages/rs-workflow-system/w90-bundle-smoke/` carries the pinned job
+  byte-identical (hash-verified by `run.py`) as a governed script tool, with a
+  generated Workflow manifest (`/run 90`, `greeting`, `fail`) and skill. The
+  script-tool manifest is a candidate awaiting owner publication/approval.
+  Parity tests run the pinned job through Bridge policy in a real host.
+  Ruff excludes vendored source directories.

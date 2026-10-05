@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "engineering",
+      "name": "rs-bundle-smoke",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "private",
+    "lifecycle": "validated",
+    "contributors": [],
+    "categories": [],
+    "provenance": [],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": []
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "description": "Workflow 90: prove an installed bundle landed and can run. No Excel, Outlook, browser or file writes.",
+  "execution": {
+    "mode": "local"
+  },
+  "dependencies": {
+    "local_capabilities": [
+      "rs_workflow.bundle_smoke"
+    ],
+    "central_services": [],
+    "central_required": false
+  },
+  "secrets": [],
+  "input_contract": "engineering.rs-bundle-smoke.input.v1",
+  "output_contract": "engineering.script-tool.output.v1",
+  "kind": "workflow",
+  "run_alias": 90,
+  "parameters": [
+    {
+      "name": "greeting",
+      "label": "Greeting",
+      "kind": "text",
+      "scope": "runtime",
+      "description": null,
+      "required": false,
+      "options": [],
+      "minimum": null,
+      "maximum": null,
+      "help": "Text echoed back, so you can tell one run from another.",
+      "examples": [
+        "hello"
+      ],
+      "order": 10
+    },
+    {
+      "name": "fail",
+      "label": "Fail on purpose",
+      "kind": "boolean",
+      "scope": "runtime",
+      "description": null,
+      "required": false,
+      "options": [],
+      "minimum": null,
+      "maximum": null,
+      "default": false,
+      "help": "Raise on purpose, to see how a failing run is reported end to end.",
+      "order": 20
+    }
+  ],
+  "steps": [
+    {
+      "capability": {
+        "namespace": "engineering",
+        "name": "rs-bundle-smoke-tool",
+        "version": "1.0.0"
+      },
+      "inputs": {
+        "arguments": {
+          "source": "run",
+          "path": []
+        }
+      },
+      "retry": {
+        "max_attempts": 1,
+        "delay_ms": 100
+      }
+    }
+  ],
+  "progress_steps": [
+    {
+      "id": "smoke",
+      "title": "Run the bundle checks",
+      "optional": false
+    }
+  ]
+}

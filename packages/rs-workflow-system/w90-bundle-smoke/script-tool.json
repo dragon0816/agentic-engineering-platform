@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "engineering",
+      "name": "rs-bundle-smoke-tool",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "private",
+    "lifecycle": "validated",
+    "contributors": [],
+    "categories": [],
+    "provenance": [],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": []
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [
+        "rs-workflow.bundle-smoke.execute"
+      ],
+      "policy_refs": [
+        "script-execution-policy"
+      ],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "description": "rs_workflow_system Workflow 90 bundle smoke test, carried unchanged: reports what this computer can see and touches nothing.",
+  "runtime": "python",
+  "entrypoint": "run.py",
+  "sha256": "905ec79bc6129fa88ad2cca87cbf7509699f932ff1d086d1d121e92e14b7bb9b",
+  "timeout_seconds": 30,
+  "capability": {
+    "identity": {
+      "namespace": "engineering",
+      "name": "rs-bundle-smoke-tool",
+      "version": "1.0.0"
+    },
+    "name": "rs_workflow.bundle_smoke",
+    "description": "Run the pinned bundle_smoke job and return its report.",
+    "input_contract": "engineering.script-tool.input.v1",
+    "output_contract": "engineering.script-tool.output.v1",
+    "side_effect": "execute",
+    "policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [
+        "rs-workflow.bundle-smoke.execute"
+      ],
+      "policy_refs": [
+        "script-execution-policy"
+      ],
+      "assessment": "manual"
+    }
+  },
+  "dependencies": {
+    "local_capabilities": [],
+    "central_services": [],
+    "central_required": false
+  },
+  "secrets": []
+}

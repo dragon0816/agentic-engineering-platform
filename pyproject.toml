@@ -55,6 +55,8 @@ addopts = "-ra"
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+# Migrated source jobs are vendored byte-identical and hash-verified; never reformat them.
+extend-exclude = ["packages/*/*/vendor"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
