@@ -27,12 +27,7 @@ from capabilities.release_package.manifest import preview_skill as release_previ
 from capabilities.release_package.manifest import preview_workflow as release_preview_workflow
 from capabilities.team_tickets.manifest import preview_skill as team_tickets_preview_skill
 from capabilities.team_tickets.manifest import preview_workflow as team_tickets_preview_workflow
-from capabilities.weekly_report.manifest import (
-    mail_workflow,
-    preview_workflow,
-    report_workflow,
-    weekly_skill,
-)
+from capabilities.weekly_report.manifest import weekly_report_workflow, weekly_skill
 from common.assets import WorkflowManifest
 from host_runtime.workspace import write_atomically
 
@@ -54,10 +49,8 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         knowledge_skill(),
         market_alignment_skill(),
         personal_proof_skill(),
-        preview_workflow(),
+        weekly_report_workflow(),
         team_tickets_preview_workflow(),
-        report_workflow(),
-        mail_workflow(),
         personal_proof_workflow(),
     )
 

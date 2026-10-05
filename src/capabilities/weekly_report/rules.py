@@ -530,6 +530,28 @@ def parse_jira_datetime(value: str | None) -> _dt.datetime | None:
         return None
 
 
+#: The team writes its report times in Taiwan time.
+REPORT_TIMEZONE = _dt.timezone(_dt.timedelta(hours=8))
+
+
+def parse_report_time(value: Any, *, end: bool = False) -> _dt.datetime | None:
+    """A report window bound (source `github_weekly_report._parse_report_time`).
+
+    A date alone covers the whole local day (its last second for an end); a
+    datetime without an offset is Taiwan time."""
+    if value in (None, ""):
+        return None
+    if isinstance(value, _dt.datetime):
+        return value if value.tzinfo else value.replace(tzinfo=REPORT_TIMEZONE)
+    text = str(value).strip().replace("Z", "+00:00")
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+        day = _dt.date.fromisoformat(text)
+        moment = _dt.time.max.replace(microsecond=0) if end else _dt.time.min
+        return _dt.datetime.combine(day, moment, REPORT_TIMEZONE)
+    parsed = _dt.datetime.fromisoformat(text)
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=REPORT_TIMEZONE)
+
+
 def _comment_created(comment: Mapping[str, Any]) -> _dt.datetime | None:
     raw = comment.get("created") or comment.get("updated")
     return parse_jira_datetime(str(raw)) if raw else None

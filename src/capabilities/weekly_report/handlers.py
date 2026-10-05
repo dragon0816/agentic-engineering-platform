@@ -115,6 +115,10 @@ class ResolveWindowHandler:
             until=item.request.until,
             max_issues=item.request.max_issues,
             today=self._today(),
+            start_time=item.request.start_time,
+            end_time=item.request.end_time,
+            dry_run=item.request.dry_run,
+            draft_mail=item.request.draft_mail,
         )
 
 
@@ -130,6 +134,11 @@ class ProjectSearchInput(Contract):
     since: _dt.date
     until: _dt.date
     max_issues: int | None = Field(default=None, ge=1, strict=True)
+    # Where comments start counting (earlier with a configured look-back),
+    # and the precise bounds when the run gave them.
+    comment_since: _dt.date | None = None
+    start_time: _dt.datetime | None = None
+    end_time: _dt.datetime | None = None
 
 
 class ProjectSearchOutput(Contract):
@@ -165,35 +174,115 @@ class ProjectSearchHandler:
             if error.code in ("github_unavailable", "github_rate_limited"):
                 raise TransientCapabilityError(error.code) from None
             raise CapabilityRefused(error.code) from None
-        # A card nobody has filed as an issue has no key, no history and no
-        # comments, so it can never carry a week's work. Including it gave
-        # every such card the same key and merged them into one row.
-        tracked = [row for row in rows if row.key]
-        chosen = [row for row in tracked if _within(row.updated, item.since, item.until)]
-        capped = item.max_issues is not None and len(chosen) > item.max_issues
-        if item.max_issues is not None:
-            chosen = chosen[: item.max_issues]
-        found = tuple(_as_item(row, self.settings) for row in chosen)
+        window = _Window(item)
+        closed = {status.casefold() for status in self.settings.closed_statuses}
+        chosen: list[tuple[ProjectItem, tuple[ReportComment, ...]]] = []
+        capped = False
+        # Selection follows source Workflow 11 (`github_weekly_report.py`):
+        # a tracked key, not closed, and moved or commented inside the window.
+        for row in rows:
+            if not row.key or not _tracked(row, self.settings):
+                continue
+            status = _field(dict(row.fields), self.settings.status_fields)
+            if status.strip().casefold() in closed:
+                continue
+            active = _active_comments(row, window, self.settings)
+            if not (window.contains(row.updated) or active):
+                continue
+            if item.max_issues is not None and len(chosen) >= item.max_issues:
+                capped = True
+                break
+            chosen.append((row, active))
+        found = tuple(_as_item(row, self.settings, active) for row, active in chosen)
         truncated = tuple(
             reported.key
-            for reported, row in zip(found, chosen, strict=True)
+            for reported, (row, _) in zip(found, chosen, strict=True)
             if row.comments_truncated
         )
         return ProjectSearchOutput(items=found, capped=capped, truncated=truncated)
 
 
-def _within(stamp: str, since: _dt.date, until: _dt.date) -> bool:
-    """Whether an item moved inside the week. An item with no timestamp is
-    included: the board answered without one, and dropping a row because a
-    field was empty is how a week goes quietly missing."""
-    moment = rules.parse_jira_datetime(stamp) if stamp else None
-    if moment is None:
+class _Window:
+    """In-window by moment when the run gave times, else by day in the
+    timestamp's own offset, as the source compares them."""
+
+    def __init__(self, item: ProjectSearchInput) -> None:
+        self.since = item.since
+        self.comment_since = item.comment_since or item.since
+        self.until = item.until
+        self.start_time = item.start_time
+        self.end_time = item.end_time
+
+    def contains(self, stamp: str | None, *, comments: bool = False) -> bool:
+        moment = rules.parse_jira_datetime(stamp) if stamp else None
+        if moment is None:
+            return False
+        if self.start_time is not None or self.end_time is not None:
+            if self.start_time is not None and moment < self.start_time:
+                return False
+            return not (self.end_time is not None and moment > self.end_time)
+        start = self.comment_since if comments else self.since
+        return start <= moment.date() <= self.until
+
+
+def _tracked(row: ProjectItem, settings: WeeklyReportSettings) -> bool:
+    if settings.tracked_key_prefix is None:
         return True
-    day = moment.date()
-    return since <= day <= until
+    carried = CARRIED_KEY.match(dict(row.fields).get("Title") or row.title)
+    return carried is not None and carried.group(1).startswith(
+        f"{settings.tracked_key_prefix}-"
+    )
 
 
-def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
+#: Migrated issues keep the old Excel weekly log under this heading, as
+#: `M/D:` sections without comment timestamps.
+_MIGRATED_LOG = "## Weekly report comments"
+_LOG_DATE = re.compile(r"(?m)^\s*(\d{1,2})/(\d{1,2})\s*:\s*$")
+
+
+def _active_comments(
+    row: ProjectItem, window: _Window, settings: WeeklyReportSettings
+) -> tuple[ReportComment, ...]:
+    """The comments that count for this window (source `_comments`).
+
+    A comment edited inside the window counts at its edit time. The migrated
+    log in the issue body is used only when no real comment with a marker
+    falls in the window, so nobody has to write `M/D:` headers in comments.
+    """
+    active: list[ReportComment] = []
+    marked = False
+    for comment in row.comments:
+        stamp = comment.created
+        if comment.updated and window.contains(comment.updated, comments=True):
+            stamp = comment.updated
+        if not window.contains(stamp, comments=True):
+            continue
+        active.append(ReportComment(created=stamp or None, body=comment.body))
+        if rules.extract_marker_blocks(comment.body, settings.markers):
+            marked = True
+    if _MIGRATED_LOG in row.body and not marked:
+        log = row.body.split(_MIGRATED_LOG, 1)[1]
+        sections = list(_LOG_DATE.finditer(log))
+        for index, match in enumerate(sections):
+            try:
+                day = _dt.date(window.until.year, int(match.group(1)), int(match.group(2)))
+            except ValueError:
+                continue
+            stamp = f"{day.isoformat()}T12:00:00+08:00"
+            if not window.contains(stamp, comments=True):
+                continue
+            stop = sections[index + 1].start() if index + 1 < len(sections) else len(log)
+            chunk = log[match.end() : stop].strip()
+            if chunk:
+                active.append(ReportComment(created=stamp, body=chunk))
+    return tuple(active)
+
+
+def _as_item(
+    row: ProjectItem,
+    settings: WeeklyReportSettings,
+    comments: Sequence[ReportComment] | None = None,
+) -> ReportItem:
     """One board row as the report reads it.
 
     The board's fields are authoritative for the columns people maintain
@@ -224,7 +313,7 @@ def _as_item(row: ProjectItem, settings: WeeklyReportSettings) -> ReportItem:
         sales=_field(fields, settings.sales_fields),
         instrument=_field(fields, settings.instrument_fields),
         updated=row.updated or None,
-        comments=tuple(
+        comments=tuple(comments) if comments is not None else tuple(
             ReportComment(created=comment.created or None, body=comment.body)
             for comment in row.comments
         ),
@@ -356,6 +445,8 @@ class ApplyInput(Contract):
     against, the seed to create one from, and the site the keys link to."""
 
     plan: WeeklyReportPlan
+    # A dry run: the plan is the answer and nothing is written.
+    skip: bool = False
 
 
 class ApplyHandler:
@@ -379,6 +470,17 @@ class ApplyHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         item = ApplyInput.model_validate(inputs)
+        if item.skip:
+            return WeeklyReportApplied(
+                week=item.plan.window.week,
+                workbook=self.settings.workbook_path,
+                sheet=self.settings.temp_sheet,
+                digest_before=item.plan.sheet_digest,
+                digest_after=item.plan.sheet_digest,
+                inserted=0, updated=0, highlighted=0, new_rows_marked=0,
+                recoloured=0, prepended=0, linked=0, retired_fills=0,
+                skipped=True,
+            )
         return await asyncio.to_thread(self._apply, item.plan)
 
     def _apply(self, plan: WeeklyReportPlan) -> WeeklyReportApplied:
@@ -446,6 +548,12 @@ class MailHandler:
         return await asyncio.to_thread(self._draft, item.window, item.issues)
 
     def _draft(self, window: ReportingWindow, issues: Sequence[ReportItem]) -> WeeklyMailDrafted:
+        if window.dry_run or not window.draft_mail:
+            return WeeklyMailDrafted(
+                week=window.week,
+                subject=mail.subject(window, prefix=self.settings.mail_subject_prefix),
+                matched=0, counted=0, skipped=True,
+            )
         activity = effort.active_items(
             issues,
             window.since,

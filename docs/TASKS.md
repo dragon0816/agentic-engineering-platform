@@ -1205,6 +1205,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Web polls Telegram itself and swaps the loop on save) and Capabilities
   "Recent runs" moved to a collapsed section at the bottom. Tests:
   `tests/test_telegram_settings.py`.
+- [x] Workflow 11 merged into one Workflow `engineering/gtm-weekly-report`
+  (`/run 11`, owner request 2026-10-05): GitHub board -> plan -> workbook ->
+  mail draft, `dry_run` (default off) and `draft_mail` (default on), precise
+  `start_time`/`end_time`; board selection aligned with source
+  `github_weekly_report.py` (GTM keys only, closed skipped, comment edit time,
+  migrated body log fallback, moment window). Tests:
+  `tests/test_weekly_github_source_rules.py`, `tests/test_weekly_report_workflow.py`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

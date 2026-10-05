@@ -6,7 +6,7 @@ import datetime as _dt
 from pathlib import Path, PureWindowsPath
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, StrictBool, StringConstraints, model_validator
+from pydantic import Field, StrictBool, StringConstraints, field_validator, model_validator
 
 from capabilities.weekly_report import rules
 from common.assets import reject_embedded_secrets
@@ -40,6 +40,12 @@ class WeeklyReportSettings(Contract):
     # The key given to work that started on the board and never carried one
     # of the workbook's own, as `GH-63`.
     board_key_prefix: Symbol = "GH"
+    # Only items whose title carries `[<prefix>-n]` are reported (source
+    # Workflow 11 reads `[GTM-123]`); None also reports board-only work
+    # under `board_key_prefix`.
+    tracked_key_prefix: Symbol | None = "GTM"
+    # Project statuses that leave the report, compared case-insensitively.
+    closed_statuses: tuple[Text, ...] = ("closed", "close", "done")
     # Canonical marker -> synonyms; None means the observed defaults.
     markers: dict[Text, tuple[Text, ...]] | None = None
     bullet: Annotated[str, StringConstraints(min_length=1, max_length=4)] = "- "
@@ -98,6 +104,24 @@ class WeeklyReportRequest(Contract):
     since: _dt.date | None = None
     until: _dt.date | None = None
     max_issues: int | None = Field(default=None, ge=1, strict=True)
+    # A precise window (source `startTime`/`endTime`): a date alone is the
+    # whole day, and a time without an offset is Taiwan time.
+    start_time: _dt.datetime | None = None
+    end_time: _dt.datetime | None = None
+    # Plan only: neither the workbook nor the mail is touched.
+    dry_run: StrictBool = False
+    # Save the week's mail as a draft after writing the workbook.
+    draft_mail: StrictBool = True
+
+    @field_validator("start_time", mode="before")
+    @classmethod
+    def start_bound(cls, value: Any) -> Any:
+        return rules.parse_report_time(value)
+
+    @field_validator("end_time", mode="before")
+    @classmethod
+    def end_bound(cls, value: Any) -> Any:
+        return rules.parse_report_time(value, end=True)
 
     @model_validator(mode="before")
     @classmethod
@@ -124,6 +148,11 @@ class WeeklyReportRequest(Contract):
             name, has_value, value = word.partition("=")
             if not has_value and rules.parse_week_name(word) is not None:
                 take("week", word)
+            elif not has_value and word in ("dry-run", "dry_run", "preview"):
+                # A switch named in the text wins over a form's default.
+                filled["dry_run"] = True
+            elif not has_value and word in ("no-mail", "no_mail"):
+                filled["draft_mail"] = False
             elif has_value and name in ("since", "until"):
                 take(name, value)
             elif has_value and name in ("max", "max_issues"):
@@ -135,7 +164,7 @@ class WeeklyReportRequest(Contract):
             else:
                 raise ValueError(
                     "a request is a week such as 2026_31W, since=YYYY-MM-DD, "
-                    "until=YYYY-MM-DD or max=N"
+                    "until=YYYY-MM-DD, max=N, dry-run or no-mail"
                 )
         return filled
 
@@ -145,6 +174,11 @@ class WeeklyReportRequest(Contract):
             raise ValueError("week is a weekly sheet name such as 2026_31W")
         if self.since is not None and self.until is not None and self.since > self.until:
             raise ValueError("a window ends no earlier than it starts")
+        if (
+            self.start_time is not None and self.end_time is not None
+            and self.start_time > self.end_time
+        ):
+            raise ValueError("start_time must be earlier than or equal to end_time")
         return self
 
 
@@ -160,6 +194,12 @@ class ReportingWindow(Contract):
     comment_since: _dt.date
     stamp_date: _dt.date
     max_issues: int | None = Field(default=None, ge=1, strict=True)
+    # The precise bounds when the run gave them; comments and items are then
+    # selected by moment rather than by day.
+    start_time: _dt.datetime | None = None
+    end_time: _dt.datetime | None = None
+    dry_run: StrictBool = False
+    draft_mail: StrictBool = True
 
     @model_validator(mode="after")
     def ordered(self) -> Self:
@@ -348,6 +388,8 @@ class WeeklyReportApplied(Contract):
     linked: int = Field(ge=0, strict=True)
     retired_fills: int = Field(ge=0, strict=True)
     failures: tuple[FailedComment, ...] = ()
+    # A dry run: nothing was written and the counts are zero.
+    skipped: StrictBool = False
 
     def summary(self) -> str:
         return (
@@ -385,6 +427,8 @@ class WeeklyMailDrafted(Contract):
     activity_required: StrictBool = True
     chart_path: str = ""
     preview: str = ""
+    # A dry run, or a run asked not to draft: no draft was saved.
+    skipped: StrictBool = False
 
     @model_validator(mode="after")
     def counted_is_what_is_left(self) -> Self:

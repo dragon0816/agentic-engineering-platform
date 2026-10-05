@@ -1076,3 +1076,35 @@ model Gateway section still accepts names only. Rejected alternatives: a
 token field saved in `host.json` or `telegram.json` (secret in a file);
 Windows Credential Manager (a second secret store the rest of the host does
 not read); requiring a restart after saving.
+
+## 2026-10-05 — Workflow 11 is one Workflow that follows the GitHub source job
+
+Decision (owner request): the three Workflow 11 assets
+(`jira-weekly-report-preview`, `jira-weekly-report`, `jira-weekly-report-mail`)
+are replaced by one Workflow `engineering/gtm-weekly-report@1.0.0`
+(`/run 11`): resolve the window, read the GitHub board, read the scratch
+sheet, plan, write the workbook, save the week's mail as a draft (never
+sent), as source Workflow 11 runs report then mail in one trigger. Run
+parameters: `dry_run` (default off, owner decision; plans and touches neither
+the workbook nor the mail), `draft_mail` (default on), week, since, until,
+max_issues, `start_time`, `end_time`; command text accepts `dry-run` and
+`no-mail`. The Skill `weekly-report@2.0.0` has one command. Board selection
+follows `host-bridge/jobs/github_weekly_report.py` (untracked in the source
+after 896046e; sha256 9293c7eff57f363b57d37e496e93dcbc388396697a54fbc5893a0ba80010a1ea,
+email job 62c5220c8757f3596e55757d438e64efa03466e5bf5e5010326d821f08bf458d):
+only `[GTM-n]` items (`tracked_key_prefix`), Project status closed/close/done
+skipped (`closed_statuses`), included when the issue or an active comment is
+in the window, a comment edited inside the window counts at its edit time,
+the migrated `## Weekly report comments` body log is used only when no real
+marker comment is in the window, and `start_time`/`end_time` select by moment
+(a date alone is the whole day; no offset means Taiwan time). Assignee stays
+the GitHub Issue Assignees field with no "SDE Assignee" fallback (owner
+decision, consistent with 2026-10-03). The read-only preview manifest stays
+in code only for the marketplace's read-only default candidate.
+
+Reason: the owner does not want Workflow 11 split; the source now reads
+GitHub, and AEP lacked several of its selection rules. Rejected alternatives:
+keeping three assets with a Skill that chains them (still three things to
+install and grant); dry run on by default (the source schedule writes for
+real, and writes still need approval); following the source's assignee
+fallback (owner chose the Assignees field).

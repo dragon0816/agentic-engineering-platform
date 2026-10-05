@@ -109,6 +109,8 @@ class ProjectItem(Contract):
     created: str = ""
     updated: str = ""
     author: str = ""
+    #: The issue description; migrated issues keep the old weekly log in it.
+    body: str = ""
     #: Logins on the underlying Issue, distinct from any Project text field.
     issue_assignees: tuple[str, ...] = ()
     fields: Mapping[str, str] = {}
@@ -119,6 +121,9 @@ class ProjectItem(Contract):
 
 class ProjectComment(Contract):
     created: str = ""
+    #: When the comment was last edited; an edit inside the report window
+    #: makes it that week's update (source Workflow 11).
+    updated: str = ""
     author: str = ""
     body: str = ""
 
@@ -166,6 +171,7 @@ query($owner: String!, $number: Int!, $size: Int!, $comments: Int!, $after: Stri
               state
               createdAt
               updatedAt
+              body
               author { login }
               assignees(first: 100) {
                 pageInfo { hasNextPage }
@@ -174,7 +180,7 @@ query($owner: String!, $number: Int!, $size: Int!, $comments: Int!, $after: Stri
               repository { nameWithOwner }
               comments(first: $comments) {
                 totalCount
-                nodes { createdAt author { login } body }
+                nodes { createdAt updatedAt author { login } body }
               }
             }
           }
@@ -350,6 +356,7 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
     comments = tuple(
         ProjectComment(
             created=str(entry.get("createdAt") or ""),
+            updated=str(entry.get("updatedAt") or ""),
             author=str(((entry.get("author") or {}) or {}).get("login") or ""),
             body=str(entry.get("body") or ""),
         )
@@ -382,6 +389,7 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
         created=str(content.get("createdAt") or ""),
         updated=str(content.get("updatedAt") or ""),
         author=str(((content.get("author") or {}) or {}).get("login") or ""),
+        body=str(content.get("body") or ""),
         issue_assignees=issue_assignees,
         fields=fields,
         comments=comments,

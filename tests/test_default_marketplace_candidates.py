@@ -7,7 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from capabilities.weekly_report.handlers import PLAN_SPEC
-from capabilities.weekly_report.manifest import PREVIEW_WORKFLOW, report_workflow
+from capabilities.weekly_report.manifest import PREVIEW_WORKFLOW, weekly_report_workflow
 from common.assets import PackageMetadata, WorkflowManifest
 from common.distribution import PublishedAssetPackage
 from control_plane.distribution import InMemoryPackageRegistry
@@ -83,7 +83,7 @@ def test_shipped_candidate_snapshot_matches_source_backed_export() -> None:
 def test_candidate_refuses_source_route_or_side_effect_drift(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(default_candidates, "preview_workflow", report_workflow)
+    monkeypatch.setattr(default_candidates, "preview_workflow", weekly_report_workflow)
     with pytest.raises(ValueError, match="exact read-only preview"):
         default_candidates.workflow11_preview_candidate()
 

@@ -1,9 +1,16 @@
-"""The Skill and the Workflow that run the weekly report's preview.
+"""The Skill and the Workflow that run Workflow 11, the GTM weekly report.
+
+One Workflow does what source Workflow 11 does in one trigger: read the
+board, plan, write the workbook and save the mail draft. The read-only
+preview manifest stays defined for the marketplace's read-only default
+candidate (`host_runtime.default_candidates`); it is not shipped.
 
 Shipped as contracts so a host, a test and the Registry all take the same
 manifests; `host_runtime.assets.export_assets` writes them as the JSON files
 a workspace or a publisher takes. Pure data: nothing here touches a file.
 """
+
+from typing import Any
 
 from agent.skills import SkillManifest
 from common.assets import AssetIdentity, WorkflowManifest
@@ -11,11 +18,8 @@ from common.assets import AssetIdentity, WorkflowManifest
 PREVIEW_WORKFLOW = AssetIdentity(
     namespace="engineering", name="jira-weekly-report-preview", version="1.0.0"
 )
-REPORT_WORKFLOW = AssetIdentity(namespace="engineering", name="jira-weekly-report", version="1.0.0")
-MAIL_WORKFLOW = AssetIdentity(
-    namespace="engineering", name="jira-weekly-report-mail", version="1.0.0"
-)
-WEEKLY_SKILL = AssetIdentity(namespace="engineering", name="weekly-report", version="1.0.0")
+WEEKLY_WORKFLOW = AssetIdentity(namespace="engineering", name="gtm-weekly-report", version="1.0.0")
+WEEKLY_SKILL = AssetIdentity(namespace="engineering", name="weekly-report", version="2.0.0")
 
 _METADATA = {
     "owner": {"type": "team", "id": "engineering"},
@@ -23,7 +27,7 @@ _METADATA = {
     "lifecycle": "published",
 }
 
-_RUN_PARAMETERS = [
+_RUN_PARAMETERS: list[dict[str, Any]] = [
     {
         "name": "week",
         "label": "Report week",
@@ -123,6 +127,54 @@ def _plan_steps() -> list[dict[str, object]]:
     ]
 
 
+def _weekly_steps() -> list[dict[str, object]]:
+    """The preview's four steps, with the board read given the precise
+    window and the comment start (source `startTime`/`endTime`)."""
+    steps = _plan_steps()
+    search = dict(steps[1])
+    search["inputs"] = {
+        **dict(search["inputs"]),  # type: ignore[call-overload]
+        **{
+            name: {"source": "step", "step_index": 0, "path": [name]}
+            for name in ("comment_since", "start_time", "end_time")
+        },
+    }
+    steps[1] = search
+    return steps
+
+
+_WEEKLY_PARAMETERS: list[dict[str, Any]] = [
+    {
+        "name": "dry_run", "label": "Dry run: show the plan only", "kind": "boolean",
+        "default": False, "order": 5,
+        "help": "Plan the week and show it; the workbook and the mail are not touched.",
+    },
+    *[
+        {**item, "order": 10 * (index + 1)}
+        for index, item in enumerate(_RUN_PARAMETERS)
+        if item["name"] != "args"
+    ],
+    {
+        "name": "start_time", "label": "Window start (date or time)", "kind": "text",
+        "order": 45,
+        "help": "Optional precise start, e.g. 2026-09-21 or 2026-09-21T09:00; "
+                "times without an offset are Taiwan time.",
+    },
+    {
+        "name": "end_time", "label": "Window end (date or time)", "kind": "text",
+        "order": 46,
+        "help": "Optional precise end; a date alone means the end of that day.",
+    },
+    {
+        "name": "draft_mail", "label": "Save the weekly mail draft", "kind": "boolean",
+        "default": True, "order": 70,
+        "help": "After writing the workbook, save the week's mail as an Outlook draft "
+                "(never sent).",
+    },
+    {**_RUN_PARAMETERS[-1], "order": 90, "channels": ["telegram", "agent"]},
+]
+
+
 _PLAN_CAPABILITIES = [
     "weekly_report.resolve_window",
     "github.search_project",
@@ -131,75 +183,51 @@ _PLAN_CAPABILITIES = [
 ]
 
 
-def report_workflow() -> WorkflowManifest:
-    """The preview's four steps, then the write. Kept as its own asset so a
-    member can be given the dry run alone."""
+def weekly_report_workflow() -> WorkflowManifest:
+    """Source Workflow 11 as one run: read the GitHub board, plan against the
+    scratch sheet, write it, then save the week's mail as a draft (never
+    sent). `dry_run` stops at the plan; `draft_mail` turns the draft off."""
     return WorkflowManifest.model_validate(
         {
-            "metadata": {"identity": REPORT_WORKFLOW.model_dump(), **_METADATA},
+            "metadata": {"identity": WEEKLY_WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
-            "parameters": _RUN_PARAMETERS,
+            "run_alias": 11,
+            "parameters": _WEEKLY_PARAMETERS,
             "description": (
-                "The GTM weekly report: the week's tracked items planned against the workbook's "
-                "scratch sheet and written into it"
-            ),
-            "execution": {"mode": "local"},
-            "dependencies": {
-                "central_required": False,
-                "local_capabilities": [*_PLAN_CAPABILITIES, "weekly_report.apply"],
-            },
-            "input_contract": "engineering.jira-weekly-report.request.v1",
-            "output_contract": "weekly-report.apply.output.v1",
-            "steps": [
-                *_plan_steps(),
-                {
-                    "capability": {
-                        "namespace": "weekly-report",
-                        "name": "apply",
-                        "version": "1.0.0",
-                    },
-                    "inputs": {"plan": {"source": "step", "step_index": 3}},
-                },
-            ],
-        }
-    )
-
-
-def mail_workflow() -> WorkflowManifest:
-    """Resolve the week, read the board, draft the mail.
-
-    It does not read the workbook and does not plan: the mail reports what
-    the team worked on, which is the board's answer, and a member who may
-    draft the mail need not be one who may touch the workbook. That is why
-    this is its own asset rather than a fifth step on the report.
-    """
-    return WorkflowManifest.model_validate(
-        {
-            "metadata": {"identity": MAIL_WORKFLOW.model_dump(), **_METADATA},
-            "kind": "workflow",
-            "parameters": _RUN_PARAMETERS,
-            "description": (
-                "Draft the GTM weekly mail: the week's effort counted per member, instrument "
-                "and account, charted, and saved as a draft nobody has sent"
+                "Workflow 11, the GTM weekly report: the week's GitHub board items planned "
+                "against the workbook's scratch sheet, written into it, and the week's mail "
+                "saved as a draft nobody has sent. A dry run shows the plan and writes nothing."
             ),
             "execution": {"mode": "local"},
             "dependencies": {
                 "central_required": False,
                 "local_capabilities": [
-                    "weekly_report.resolve_window",
-                    "github.search_project",
-                    "weekly_report.mail",
+                    *_PLAN_CAPABILITIES, "weekly_report.apply", "weekly_report.mail",
                 ],
             },
-            "input_contract": "engineering.jira-weekly-report.request.v1",
+            "progress_steps": [
+                {"id": "fetch", "title": "Read the week's items from the GitHub board"},
+                {"id": "open", "title": "Read the weekly report workbook"},
+                {"id": "plan", "title": "Plan new and updated rows and comment blocks"},
+                {"id": "apply", "title": "Write the weekly report temp sheet"},
+                {"id": "mail", "title": "Save the weekly mail draft", "optional": True},
+            ],
+            "input_contract": "engineering.gtm-weekly-report.request.v1",
             "output_contract": "weekly-report.mail.output.v1",
             "steps": [
-                *_plan_steps()[:2],
+                *_weekly_steps(),
                 {
                     "capability": {
-                        "namespace": "weekly-report",
-                        "name": "mail",
-                        "version": "1.0.0",
+                        "namespace": "weekly-report", "name": "apply", "version": "1.0.0",
+                    },
+                    "inputs": {
+                        "plan": {"source": "step", "step_index": 3},
+                        "skip": {"source": "step", "step_index": 0, "path": ["dry_run"]},
+                    },
+                },
+                {
+                    "capability": {
+                        "namespace": "weekly-report", "name": "mail", "version": "1.0.0",
                     },
                     "inputs": {
                         "window": {"source": "step", "step_index": 0},
@@ -212,23 +240,20 @@ def mail_workflow() -> WorkflowManifest:
 
 
 def weekly_skill() -> SkillManifest:
-    """`weekly.preview` from a local operator or `/weekly preview` from
-    Telegram; the request is whatever follows the command."""
+    """`weekly` from a local operator or `/weekly` from Telegram; the request
+    is whatever follows the command."""
     return SkillManifest.model_validate(
         {
             "metadata": {"identity": WEEKLY_SKILL.model_dump(), **_METADATA},
             "alias": "weekly",
             "instructions": (
-                "Preview the GTM weekly report for the current week, or for a named week "
-                "such as 2026_31W; `weekly apply` writes the same plan into the workbook, "
-                "and `weekly mail` drafts the week's mail without sending it."
+                "Run the GTM weekly report (Workflow 11) for the current week, or for a named "
+                "week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch "
+                "sheet and saves the week's mail as a draft. Offer dry_run to see the plan first."
             ),
             "commands": [
-                {"name": "preview", "kind": "workflow", "target": PREVIEW_WORKFLOW.model_dump()},
-                {"name": "apply", "kind": "workflow", "target": REPORT_WORKFLOW.model_dump()},
-                {"name": "mail", "kind": "workflow", "target": MAIL_WORKFLOW.model_dump()},
+                {"name": "run", "kind": "workflow", "target": WEEKLY_WORKFLOW.model_dump()},
             ],
-            # A preview by default: writing the workbook is asked for.
-            "default_command": "preview",
+            "default_command": "run",
         }
     )

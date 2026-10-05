@@ -35,13 +35,21 @@ def resolve_window(
     until: _dt.date | None,
     max_issues: int | None,
     today: _dt.date,
+    start_time: _dt.datetime | None = None,
+    end_time: _dt.datetime | None = None,
+    dry_run: bool = False,
+    draft_mail: bool = True,
 ) -> ReportingWindow:
     """The week and its window, as the source resolved them: an explicit
     `since`/`until` wins, then the named week's range with either end
     overridable, else the week containing today. The stamp date is today
     when the run is inside the week and the week's end otherwise."""
     name = week or rules.week_name(today, settings.week_style, settings.week_suffix)
-    if since is not None and until is not None:
+    if start_time is not None or end_time is not None:
+        # A precise window wins; its days name the window (source order).
+        start = start_time.date() if start_time is not None else (since or today)
+        end = end_time.date() if end_time is not None else (until or start)
+    elif since is not None and until is not None:
         start, end = since, until
     elif week is not None:
         try:
@@ -67,6 +75,10 @@ def resolve_window(
         comment_since=comment_since,
         stamp_date=stamp,
         max_issues=cap,
+        start_time=start_time,
+        end_time=end_time,
+        dry_run=dry_run,
+        draft_mail=draft_mail,
     )
 
 

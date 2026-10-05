@@ -34,9 +34,8 @@ from capabilities.weekly_report.handlers import (
     ReadScratchSheetInput,
 )
 from capabilities.weekly_report.manifest import (
-    mail_workflow,
     preview_workflow,
-    report_workflow,
+    weekly_report_workflow,
     weekly_skill,
 )
 from common.execution import RequestContext, TraceIdentifiers
@@ -232,32 +231,26 @@ def ask(runtime: Any, message: str) -> Any:
     )
 
 
-def test_the_shipped_manifests_validate_and_export() -> None:
-    workflow = preview_workflow()
+def test_workflow_11_is_one_workflow_and_one_command() -> None:
+    workflow = weekly_report_workflow()
+    assert workflow.run_alias == 11
     assert [step.capability.name for step in workflow.steps if hasattr(step, "capability")] == [
         "resolve-window",
         "search-project",
         "read-scratch-sheet",
         "plan",
-    ]
-    full = report_workflow()
-    assert [step.capability.name for step in full.steps if hasattr(step, "capability")] == [
-        "resolve-window",
-        "search-project",
-        "read-scratch-sheet",
-        "plan",
         "apply",
+        "mail",
     ]
-    # The preview stays its own asset, so a member can be given the dry run
-    # alone; the write names the capability it needs like the rest.
-    assert "weekly_report.apply" in full.dependencies.local_capabilities
-    assert "weekly_report.apply" not in workflow.dependencies.local_capabilities
+    names = [field.name for field in workflow.parameters]
+    assert names[0] == "dry_run" and "draft_mail" in names
+    defaults = {field.name: field.default for field in workflow.parameters}
+    assert defaults["dry_run"] is False and defaults["draft_mail"] is True
     skill = weekly_skill()
-    assert skill.alias == "weekly" and skill.commands[0].target == workflow.metadata.identity
-    assert skill.default_command == "preview"
-    assert [command.name for command in skill.commands] == ["preview", "apply", "mail"]
-    assert skill.commands[1].target == full.metadata.identity
-    assert skill.commands[2].target == mail_workflow().metadata.identity
+    assert skill.alias == "weekly" and skill.default_command == "run"
+    assert [command.target for command in skill.commands] == [workflow.metadata.identity]
+    # The read-only preview stays defined for the marketplace candidate only.
+    assert preview_workflow().run_alias == 11
 
 
 def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
@@ -270,12 +263,15 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=transport,
     ) as runtime:
-        outcome = ask(runtime, "weekly.preview 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W dry-run")
         assert outcome.refusal is None and outcome.workflow is not None
         run = outcome.workflow.run
         assert run.status == "succeeded", run.failure
-        assert run.completed_steps == 4
-        plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[-1].data)
+        assert run.completed_steps == 6
+        # A dry run: the write and the draft ran as skipped steps.
+        assert outcome.workflow.step_results[4].data["skipped"] is True
+        assert outcome.workflow.step_results[5].data["skipped"] is True
+        plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[3].data)
     # The window, the fetch and the sheet.
     assert plan.window.week == "2026_31W"
     assert (plan.window.since.isoformat(), plan.window.until.isoformat()) == (
@@ -321,9 +317,9 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=ScriptedTransport(board_replies()),
     ) as runtime:
-        again = ask(runtime, "weekly.preview 2026_31W")
+        again = ask(runtime, "weekly.run 2026_31W dry-run")
         assert again.workflow is not None
-        repeat = WeeklyReportPlan.model_validate(again.workflow.step_results[-1].data)
+        repeat = WeeklyReportPlan.model_validate(again.workflow.step_results[3].data)
     assert repeat.model_copy(update={"window": plan.window}) == plan
 
 
@@ -341,9 +337,9 @@ def test_a_cap_is_reported_only_when_it_cut_the_week_short(tmp_path: Path) -> No
             resolver=StaticCredentials({"board_token": TOKEN}),
             jira_transport=transport,
         ) as runtime:
-            outcome = ask(runtime, f"weekly.preview 2026_31W {words}")
+            outcome = ask(runtime, f"weekly.run 2026_31W dry-run {words}")
             assert outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
-            plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[-1].data)
+            plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[3].data)
         assert plan.capped is expected_capped, words
         assert len(plan.rows) == expected_rows, words
         assert ("CAPPED" in plan.preview) is expected_capped
@@ -359,7 +355,7 @@ def test_a_cap_is_reported_only_when_it_cut_the_week_short(tmp_path: Path) -> No
     assert checks["integrations"].status == "failed"
     assert "needs a project board" in checks["integrations"].detail
     with build_runtime(without, layout=layout) as runtime:
-        outcome = ask(runtime, "weekly.preview 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W dry-run")
         assert outcome.workflow is not None
         assert outcome.workflow.run.status == "unavailable"
         assert outcome.workflow.run.completed_steps == 0
@@ -374,17 +370,17 @@ def test_a_jira_refusal_fails_the_run_and_claims_nothing(tmp_path: Path) -> None
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=transport,
     ) as runtime:
-        outcome = ask(runtime, "weekly.preview 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W dry-run")
         assert outcome.workflow is not None and outcome.workflow.run.status == "failed"
         assert outcome.workflow.run.completed_steps == 1
         failure = outcome.workflow.run.failure
         assert failure is not None and TOKEN not in failure.message
         # A request that is not one is refused before anything is fetched,
         # and so is a window that cannot be, with the input named as the fault.
-        refused = ask(runtime, "weekly.preview whenever")
+        refused = ask(runtime, "weekly.run whenever dry-run")
         assert refused.workflow is not None and refused.workflow.run.status == "failed"
         assert refused.workflow.run.completed_steps == 0
-        impossible = ask(runtime, "weekly.preview 2026_31W since=2026-09-01")
+        impossible = ask(runtime, "weekly.run 2026_31W dry-run since=2026-09-01")
         assert impossible.workflow is not None and impossible.workflow.run.status == "failed"
         first = impossible.workflow.step_results[0]
         assert first.failure is not None and first.failure.code == "invalid_input"
@@ -401,7 +397,7 @@ def test_cli_exits_nonzero_and_preserves_failed_preview_evidence(tmp_path: Path)
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=transport,
     ) as runtime:
-        assert _ask(runtime, "weekly.preview 2026_31W", None, None, True, output) == 1
+        assert _ask(runtime, "weekly.run 2026_31W dry-run", None, None, True, output) == 1
     result = json.loads(output.read_text(encoding="utf-8"))
     assert result["workflow"]["run"]["status"] == "failed"
     assert result["workflow"]["run"]["failure"]["code"] == "github_auth"
@@ -527,11 +523,9 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
             "skills/engineering__rs-ncc-improvement-plan-skill__1.0.0.json",
             "skills/engineering__sales-to-chipset__1.0.0.json",
         "skills/engineering__team-tickets__2.0.0.json",
-        "skills/engineering__weekly-report__1.0.0.json",
+        "skills/engineering__weekly-report__2.0.0.json",
+        "workflows/engineering__gtm-weekly-report__1.0.0.json",
         "workflows/engineering__jira-team-tickets-preview__1.0.0.json",
-        "workflows/engineering__jira-weekly-report-mail__1.0.0.json",
-        "workflows/engineering__jira-weekly-report-preview__1.0.0.json",
-        "workflows/engineering__jira-weekly-report__1.0.0.json",
             "workflows/engineering__release-package-apply-isolated__1.0.0.json",
             "workflows/engineering__release-package-preview__1.0.0.json",
             "workflows/engineering__rs-ncc-improvement-plan__1.0.0.json",
@@ -540,31 +534,20 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     ]
     assert "wrote" in capsys.readouterr().out
     exported = json.loads(
-        (out / "workflows/engineering__jira-weekly-report-preview__1.0.0.json").read_text(
+        (out / "workflows/engineering__gtm-weekly-report__1.0.0.json").read_text(
             encoding="utf-8"
         )
     )
-    assert exported["metadata"]["identity"]["name"] == "jira-weekly-report-preview"
-    drafts = json.loads(
-        (out / "workflows/engineering__jira-weekly-report-mail__1.0.0.json").read_text(
-            encoding="utf-8"
-        )
-    )
-    assert drafts["metadata"]["identity"]["name"] == "jira-weekly-report-mail"
-    # The mail reads the board and drafts; it never touches the workbook.
-    assert [step["capability"]["name"] for step in drafts["steps"]] == [
-        "resolve-window",
-        "search-project",
-        "mail",
-    ]
+    assert exported["metadata"]["identity"]["name"] == "gtm-weekly-report"
+    assert [step["capability"]["name"] for step in exported["steps"]][-2:] == ["apply", "mail"]
     # A host without the secret mapped will not be built.
     with pytest.raises(Exception, match="credential_unmapped"):
         build_runtime(unmapped, layout=layout)
 
 
 def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Path) -> None:
-    """The five steps end to end on a real host: the workbook read, the plan
-    made, and the plan written through a recording writer."""
+    """The run end to end on a real host: the workbook read, the plan made,
+    and the plan written through a recording writer (mail turned off)."""
     from test_weekly_report_apply import RecordingWriter
 
     config, layout, workbook = host(tmp_path)
@@ -577,12 +560,13 @@ def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Pat
         jira_transport=ScriptedTransport(board_replies()),
         writer=lambda: writer,
     ) as runtime:
-        outcome = ask(runtime, "weekly.apply 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W no-mail")
         assert outcome.refusal is None and outcome.workflow is not None
         run = outcome.workflow.run
         assert run.status == "succeeded", run.failure
-        assert run.completed_steps == 5
-        applied = WeeklyReportApplied.model_validate(outcome.workflow.step_results[-1].data)
+        assert run.completed_steps == 6
+        applied = WeeklyReportApplied.model_validate(outcome.workflow.step_results[4].data)
+        assert outcome.workflow.step_results[5].data["skipped"] is True, "no-mail"
     # The plan reached the writer: a new row, a refreshed one, blocks in red.
     assert (applied.inserted, applied.updated) == (2, 1)
     assert applied.prepended == 2 and applied.failures == ()
@@ -594,10 +578,11 @@ def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Pat
     assert "upsert" in writer.names and writer.closed_saving is True
 
 
-def test_the_mail_drafts_end_to_end_and_never_touches_the_workbook(tmp_path: Path) -> None:
-    """Three steps on a real host: the week resolved, the board read, a draft
-    saved. The workbook is not opened at all, which is why the mail is its
-    own asset rather than a fifth step on the report."""
+def test_one_run_writes_the_workbook_then_drafts_the_mail(tmp_path: Path) -> None:
+    """Source Workflow 11 in one trigger: the report is written, then the
+    week's mail is saved as a draft (never sent)."""
+    from test_weekly_report_apply import RecordingWriter
+
     from integrations.outlook_draft import RecordingDraftWriter
 
     config, layout, workbook = host(
@@ -607,20 +592,24 @@ def test_the_mail_drafts_end_to_end_and_never_touches_the_workbook(tmp_path: Pat
     )
     before = workbook.read_bytes()
     drafter = RecordingDraftWriter()
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
     with build_runtime(
         config,
         layout=layout,
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=ScriptedTransport(board_replies()),
         drafter=lambda: drafter,
+        writer=lambda: writer,
     ) as runtime:
-        outcome = ask(runtime, "weekly.mail 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W")
         assert outcome.refusal is None and outcome.workflow is not None
         run = outcome.workflow.run
         assert run.status == "succeeded", run.failure
-        assert run.completed_steps == 3
+        assert run.completed_steps == 6
+        applied = WeeklyReportApplied.model_validate(outcome.workflow.step_results[4].data)
         drafted = WeeklyMailDrafted.model_validate(outcome.workflow.step_results[-1].data)
-    assert workbook.read_bytes() == before, "the mail read no workbook and wrote none"
+    assert applied.skipped is False and "upsert" in writer.names
+    assert workbook.read_bytes() == before, "the recorder wrote nothing to disk"
     assert len(drafter.drafts) == 1, "one draft, saved, not sent"
     saved = drafter.drafts[0]
     assert saved.to == ("owner@example.com",)
@@ -647,6 +636,8 @@ def test_the_mail_drafts_end_to_end_and_never_touches_the_workbook(tmp_path: Pat
 def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
     """A draft changes the member's own mailbox, so it is a write like the
     workbook's and is refused the same way without an approval."""
+    from test_weekly_report_apply import RecordingWriter
+
     from integrations.outlook_draft import RecordingDraftWriter
 
     assert MAIL_SPEC.side_effect == "write"
@@ -660,17 +651,19 @@ def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
     ]
     layout.grants.write_text(json.dumps(unapproved), encoding="utf-8")
     drafter = RecordingDraftWriter()
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
     with build_runtime(
         config,
         layout=layout,
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=ScriptedTransport(board_replies()),
         drafter=lambda: drafter,
+        writer=lambda: writer,
     ) as runtime:
-        outcome = ask(runtime, "weekly.mail 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W")
         assert outcome.workflow is not None
         assert outcome.workflow.run.status == "failed"
-        assert outcome.workflow.run.completed_steps == 2, "the board was read, nothing was drafted"
+        assert outcome.workflow.run.completed_steps == 5, "written, but nothing was drafted"
         failure = outcome.workflow.step_results[-1].failure
         assert failure is not None and failure.code == "permission_denied"
     assert drafter.drafts == []
@@ -679,20 +672,24 @@ def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
 def test_a_host_without_outlook_says_so_rather_than_failing_to_assemble(tmp_path: Path) -> None:
     """The drafter is built per run, so a machine without Outlook still
     installs the capability and refuses at the draft with its own code."""
+    from test_weekly_report_apply import RecordingWriter
+
     from integrations.outlook_draft import DraftError
 
     def missing() -> Any:
         raise DraftError("outlook_missing")
 
     config, layout, _ = host(tmp_path)
+    writer = RecordingWriter(existing_rows={"GTM-688": 2})
     with build_runtime(
         config,
         layout=layout,
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=ScriptedTransport(board_replies()),
         drafter=missing,
+        writer=lambda: writer,
     ) as runtime:
-        outcome = ask(runtime, "weekly.mail 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W")
         assert outcome.workflow is not None
         assert outcome.workflow.run.status == "failed"
         failure = outcome.workflow.step_results[-1].failure
@@ -722,7 +719,7 @@ def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:
         jira_transport=ScriptedTransport(board_replies()),
         writer=lambda: writer,
     ) as runtime:
-        outcome = ask(runtime, "weekly.apply 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W no-mail")
         assert outcome.workflow is not None
         assert outcome.workflow.run.status == "failed"
         assert outcome.workflow.run.completed_steps == 4, "the plan was made, the write was not"
@@ -746,7 +743,7 @@ def test_a_workbook_that_cannot_be_written_names_its_own_refusal(tmp_path: Path)
         jira_transport=ScriptedTransport(board_replies()),
         writer=lambda: writer,
     ) as runtime:
-        outcome = ask(runtime, "weekly.apply 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W no-mail")
         assert outcome.workflow is not None and outcome.workflow.run.status == "failed"
         failure = outcome.workflow.step_results[-1].failure
         assert failure is not None and failure.code == "workbook_open"
@@ -811,8 +808,8 @@ def test_a_card_nobody_filed_as_an_issue_is_not_a_row(tmp_path: Path) -> None:
         resolver=StaticCredentials({"board_token": TOKEN}),
         jira_transport=transport,
     ) as runtime:
-        outcome = ask(runtime, "weekly.preview 2026_31W")
+        outcome = ask(runtime, "weekly.run 2026_31W dry-run")
         assert outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
-        plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[-1].data)
+        plan = WeeklyReportPlan.model_validate(outcome.workflow.step_results[3].data)
     assert all(not row.key.endswith("GH") for row in plan.rows), "no row is the bare prefix"
     assert len(plan.rows) == len({row.key for row in plan.rows}), "no two cards share a row"
