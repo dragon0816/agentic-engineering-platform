@@ -18,7 +18,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, TypeVar
 
-from pydantic import ValidationError
+from pydantic import JsonValue, ValidationError
 
 from agent.backends.gateway import GatewayModelBackend
 from agent.contracts import AgentProfile
@@ -56,7 +56,9 @@ from capabilities.release_package.contracts import (
     ReleasePreview,
     ReleasePreviewStepInput,
 )
+from capabilities.release_package.manifest import ISOLATED_APPLY as ISOLATED_APPLY_WORKFLOW
 from capabilities.release_package.manifest import ISOLATED_APPLY_SPEC
+from capabilities.release_package.manifest import PREVIEW as RELEASE_PREVIEW_WORKFLOW
 from capabilities.release_package.manifest import PREVIEW_SPEC as RELEASE_PREVIEW_SPEC
 from capabilities.release_package.preview import ReleasePreviewHandler
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
@@ -102,7 +104,7 @@ from capabilities.weekly_report.handlers import (
 from capabilities.workflow_author.contracts import DraftWorkflowRequest, WorkflowDraft
 from capabilities.workflow_author.handlers import DRAFT_SPEC, DraftWorkflowHandler
 from channels.telegram import TelegramIngress, TelegramIngressConfig
-from common.assets import ExecutionDependencies, WorkflowManifest
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest, WorkflowStep
 from common.authorization import DeviceAuthorization
 from common.base import Contract
 from common.distribution import LocalStateError
@@ -127,7 +129,7 @@ from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
-from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore
+from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
 from host_runtime.workspace import documents
 from integrations import excel
 from integrations.chipset_excel import ChipsetExcelWriter
@@ -326,6 +328,10 @@ def _decided_grants(
     return tuple(grants)
 
 
+def _target_name(step: AssetIdentity | WorkflowStep) -> tuple[str, str, str]:
+    return (step.capability if isinstance(step, WorkflowStep) else step).key
+
+
 def build_integrations(
     config: CompanyHostConfiguration,
     installed: InstalledCapabilities,
@@ -343,6 +349,36 @@ def build_integrations(
     not at the first fetch. The weekly report's steps that need no board are
     installed whenever its settings are, so a preview against the workbook
     alone still runs."""
+    # Workflow 13's paths are per-install Workflow settings now; a run without
+    # them is stopped by the engine, and the Bridge grant still decides use.
+    # Its capabilities exist when this host installed a Workflow that uses
+    # them, or still configures them the old way in host.json.
+    uses = {
+        _target_name(step)
+        for workflow in _load_all(layout.workflows, WorkflowManifest)
+        for step in workflow.steps
+    }
+    legacy = config.integrations
+    if RELEASE_PREVIEW_SPEC.identity.key in uses or (
+        legacy is not None and legacy.release_package is not None
+    ):
+        installed.register(
+            RELEASE_PREVIEW_SPEC,
+            ReleasePreviewHandler(),
+            ReleasePreviewStepInput,
+            ReleasePreview,
+            ExecutionDependencies(central_required=False),
+        )
+    if ISOLATED_APPLY_SPEC.identity.key in uses or (
+        legacy is not None and legacy.isolated_release_apply is not None
+    ):
+        installed.register(
+            ISOLATED_APPLY_SPEC,
+            IsolatedApplyHandler(),
+            IsolatedApplyStepInput,
+            IsolatedApplyOutput,
+            ExecutionDependencies(central_required=False),
+        )
     integrations = config.integrations
     if integrations is None:
         return
@@ -367,22 +403,6 @@ def build_integrations(
             ),
             ChipsetApplyInput,
             ChipsetApplied,
-            ExecutionDependencies(central_required=False),
-        )
-    if integrations.release_package is not None:
-        installed.register(
-            RELEASE_PREVIEW_SPEC,
-            ReleasePreviewHandler(integrations.release_package),
-            ReleasePreviewStepInput,
-            ReleasePreview,
-            ExecutionDependencies(central_required=False),
-        )
-    if integrations.isolated_release_apply is not None:
-        installed.register(
-            ISOLATED_APPLY_SPEC,
-            IsolatedApplyHandler(integrations.isolated_release_apply),
-            IsolatedApplyStepInput,
-            IsolatedApplyOutput,
             ExecutionDependencies(central_required=False),
         )
     if integrations.github_project is not None:
@@ -739,10 +759,39 @@ def build_gateway(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
     )
     settings = WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE)
+    legacy = legacy_workflow_settings(config)
+
+    def provide(manifest: WorkflowManifest) -> dict[str, JsonValue]:
+        # Values set on the settings page win over a host.json written before
+        # Workflow settings existed, which keeps an existing install working.
+        fallback = legacy.get(settings_key(manifest.metadata.identity), {})
+        declared = {field.name for field in manifest.parameters if field.scope == "static"}
+        return {
+            **{name: value for name, value in fallback.items() if name in declared},
+            **settings.for_manifest(manifest),
+        }
+
     return Gateway(
-        router, bridge,
-        WorkflowEngine(workflows, bridge, settings_provider=settings.for_manifest),
+        router, bridge, WorkflowEngine(workflows, bridge, settings_provider=provide),
     )
+
+
+def legacy_workflow_settings(config: CompanyHostConfiguration) -> dict[str, dict[str, JsonValue]]:
+    """Workflow settings a host.json carried as `integrations` members before
+    per-install Workflow settings existed (Workflow 13's checkout and inbox)."""
+    integrations = config.integrations
+    found: dict[str, dict[str, JsonValue]] = {}
+    if integrations is None:
+        return found
+    if integrations.release_package is not None:
+        found[settings_key(RELEASE_PREVIEW_WORKFLOW)] = integrations.release_package.model_dump(
+            mode="json"
+        )
+    if integrations.isolated_release_apply is not None:
+        found[settings_key(ISOLATED_APPLY_WORKFLOW)] = (
+            integrations.isolated_release_apply.model_dump(mode="json")
+        )
+    return found
 
 
 def build_knowledge_catalog(

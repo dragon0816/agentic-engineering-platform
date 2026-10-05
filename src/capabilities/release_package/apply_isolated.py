@@ -165,12 +165,15 @@ def apply_request_isolated(
 
 
 class IsolatedApplyHandler:
-    def __init__(self, settings: IsolatedApplySettings) -> None:
-        self.settings = IsolatedApplySettings.model_validate(settings)
+    """Settings arrive with each run from this install's Workflow settings."""
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-        request = IsolatedApplyStepInput.model_validate(inputs).request
+        step = IsolatedApplyStepInput.model_validate(inputs)
         try:
-            return await asyncio.to_thread(apply_request_isolated, self.settings, request)
+            settings = step.isolated_settings()
+        except ValueError:
+            raise CapabilityRefused("release_settings_invalid") from None
+        try:
+            return await asyncio.to_thread(apply_request_isolated, settings, step.request)
         except IsolatedApplyError as error:
             raise CapabilityRefused(str(error)) from None

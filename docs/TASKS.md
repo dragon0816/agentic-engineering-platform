@@ -1153,3 +1153,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `workflow_settings_incomplete`, and a run can never supply a setting. Not
   yet done: moving existing `HostIntegrations` settings (W13 first, then
   W07/W10/W11 in their own slices). Next: S6 dynamic choices.
+- [x] Workflow 13 settings moved to per-install Workflow settings (Claude
+  Code, 2026-10-05). Fixes a regression S5 introduced: W13 declared
+  `checkout_path` / `inbox_path` / `allowed_root` as required static fields, so
+  the engine refused it with `workflow_settings_incomplete` while the values
+  still lived in `HostIntegrations` (S5 was committed after a subset run that
+  missed `test_release_package.py`). W13 steps now select those settings from
+  the run by path and the handlers build their settings per run;
+  `ReleasePreviewRequest` ignores non-run fields. Old host.json
+  `release_package` / `isolated_release_apply` values are fallback settings
+  (settings-page values win). W13 capabilities register when an installed
+  Workflow uses them or the old host.json still configures them, so an
+  unrelated host does not advertise them. A real-browser schedule test now
+  waits for the panel's asynchronous target list. Full pytest: 1998 passed;
+  remaining failures were known intermittent/pre-existing and passed on rerun
+  except the cp950 test.

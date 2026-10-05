@@ -357,10 +357,22 @@ def test_read_only_preview_refuses_wrong_branch_and_handler_maps_code(tmp_path: 
         actor="engineer", namespace="engineering", message="preview", channel="local",
     )
     with pytest.raises(CapabilityRefused) as error:
-        asyncio.run(ReleasePreviewHandler(settings)(
-            context, ReleasePreviewStepInput(request=_preview_request())
+        # The install's settings arrive with the run, not at construction.
+        asyncio.run(ReleasePreviewHandler()(
+            context, ReleasePreviewStepInput(
+                request=_preview_request(), checkout_path=str(checkout),
+                inbox_path=str(tmp_path),
+            )
         ))
     assert error.value.code == "wrong_branch"
+    with pytest.raises(CapabilityRefused) as invalid:
+        asyncio.run(ReleasePreviewHandler()(
+            context, ReleasePreviewStepInput(
+                request=_preview_request(), checkout_path="relative/path",
+                inbox_path=str(tmp_path),
+            )
+        ))
+    assert invalid.value.code == "release_settings_invalid"
 
 
 def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_repo(
@@ -431,6 +443,73 @@ def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_re
             str(path.relative_to(checkout)): path.read_bytes()
             for path in checkout.rglob("*") if path.is_file()
         } == before
+
+
+def test_workflow_13_runs_from_settings_page_values_without_host_integrations(
+    tmp_path: Path,
+) -> None:
+    from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore
+
+    checkout = tmp_path / "release"
+    (checkout / ".git").mkdir(parents=True)
+    (checkout / ".git" / "HEAD").write_text("ref: refs/heads/Foxconn_kt326\n", encoding="utf-8")
+    (checkout / "release.yaml").write_text("VERSION: 0.0.15\n", encoding="utf-8")
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "testplan.json").write_text("{}", encoding="utf-8")
+    grant = {
+        "actor": "engineer",
+        "asset": PREVIEW_SPEC.identity.model_dump(mode="json"),
+        "permissions": list(PREVIEW_SPEC.policy.required_permissions),
+        "policy_refs": list(PREVIEW_SPEC.policy.policy_refs),
+        "approval_ref": "release-preview-approval",
+    }
+    config, layout = workspace(
+        tmp_path / "host", membership=membership_record(), grants=[grant], assets=False,
+    )
+    export_assets(layout.workspace_root / "assets")
+    request = LocalWorkflowRequest(
+        actor="engineer", bridge_id=config.device.bridge_id,
+        workflow=preview_workflow().metadata.identity,
+        arguments={
+            "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT160",
+            "chipsetVersion": "2.0.18", "generalTestcaseVersion": "2.1.2",
+        },
+        idempotency_key="release-preview-settings",
+        trace=TraceIdentifiers(trace_id="w13-settings", request_id="preview", span_id="test"),
+    )
+    with build_runtime(config, layout=layout) as runtime:
+        unset = asyncio.run(runtime.agent.execute_workflow(request))
+        assert unset.workflow is not None and unset.workflow.run.failure is not None
+        assert unset.workflow.run.failure.code == "workflow_settings_incomplete"
+        WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE).save(
+            preview_workflow().metadata.identity,
+            {"checkout_path": str(checkout), "inbox_path": str(inbox)},
+        )
+        ran = asyncio.run(runtime.agent.execute_workflow(
+            request.model_copy(update={"idempotency_key": "release-preview-settings-2"})
+        ))
+        assert ran.workflow is not None
+        assert ran.workflow.run.status == "succeeded", ran.workflow.run.failure
+
+
+def test_settings_page_values_win_over_legacy_host_integrations(tmp_path: Path) -> None:
+    from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore
+
+    legacy = {"checkout_path": str(tmp_path / "old"), "inbox_path": str(tmp_path / "in")}
+    config, layout = workspace(
+        tmp_path / "host", membership=membership_record(), assets=False,
+        config_changes={"integrations": {"release_package": legacy}},
+    )
+    manifest = preview_workflow()
+    with build_runtime(config, layout=layout) as runtime:
+        provider = runtime.agent.gateway.engine.settings_provider
+        assert provider is not None
+        assert provider(manifest) == legacy
+        WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE).save(
+            manifest.metadata.identity, {"checkout_path": str(tmp_path / "new")}
+        )
+        assert provider(manifest) == {**legacy, "checkout_path": str(tmp_path / "new")}
 
 
 def _isolated_checkout(tmp_path: Path) -> tuple[IsolatedApplySettings, Path, Path]:

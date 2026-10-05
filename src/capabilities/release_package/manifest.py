@@ -89,7 +89,11 @@ def preview_workflow() -> WorkflowManifest:
             "steps": [
                 {
                     "capability": PREVIEW_SPEC.identity.model_dump(),
-                    "inputs": {"request": {"source": "run"}},
+                    "inputs": {
+                        "request": {"source": "run"},
+                        "checkout_path": {"source": "run", "path": ["checkout_path"]},
+                        "inbox_path": {"source": "run", "path": ["inbox_path"]},
+                    },
                 }
             ],
         }
@@ -144,7 +148,12 @@ def isolated_apply_workflow() -> WorkflowManifest:
             "steps": [
                 {
                     "capability": ISOLATED_APPLY_SPEC.identity.model_dump(),
-                    "inputs": {"request": {"source": "run"}},
+                    "inputs": {
+                        "request": {"source": "run"},
+                        "checkout_path": {"source": "run", "path": ["checkout_path"]},
+                        "inbox_path": {"source": "run", "path": ["inbox_path"]},
+                        "allowed_root": {"source": "run", "path": ["allowed_root"]},
+                    },
                 }
             ],
         }

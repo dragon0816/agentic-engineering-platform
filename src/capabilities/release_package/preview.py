@@ -120,12 +120,15 @@ def build_preview(
 
 
 class ReleasePreviewHandler:
-    def __init__(self, settings: ReleasePreviewSettings) -> None:
-        self.settings = ReleasePreviewSettings.model_validate(settings)
+    """Settings arrive with each run from this install's Workflow settings."""
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-        request = ReleasePreviewStepInput.model_validate(inputs).request
+        step = ReleasePreviewStepInput.model_validate(inputs)
         try:
-            return await asyncio.to_thread(build_preview, self.settings, request)
+            settings = step.settings()
+        except ValueError:
+            raise CapabilityRefused("release_settings_invalid") from None
+        try:
+            return await asyncio.to_thread(build_preview, settings, step.request)
         except ReleasePreviewError as error:
             raise CapabilityRefused(str(error)) from None

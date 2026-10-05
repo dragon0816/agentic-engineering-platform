@@ -42,9 +42,14 @@ class IsolatedApplySettings(ReleasePreviewSettings):
 
 
 class ReleasePreviewRequest(Contract):
-    """Original W13 runtime names; a version is mandatory in this preview slice."""
+    """Original W13 runtime names; a version is mandatory in this preview slice.
 
-    model_config = ConfigDict(populate_by_name=True)
+    The step receives the whole run, which also carries this install's
+    settings (merged by the engine), so fields that are not run names are
+    ignored here; run fields were validated against the declaration upstream.
+    """
+
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     company_name: Text = Field(alias="companyName")
     chipset_id: Text = Field(alias="chipsetId")
@@ -77,11 +82,24 @@ class ReleasePreviewRequest(Contract):
 
 
 class ReleasePreviewStepInput(Contract):
+    """The run's request plus this install's settings, selected by name."""
+
     request: ReleasePreviewRequest
+    checkout_path: Text
+    inbox_path: Text
+
+    def settings(self) -> ReleasePreviewSettings:
+        return ReleasePreviewSettings(checkout_path=self.checkout_path, inbox_path=self.inbox_path)
 
 
-class IsolatedApplyStepInput(Contract):
-    request: ReleasePreviewRequest
+class IsolatedApplyStepInput(ReleasePreviewStepInput):
+    allowed_root: Text
+
+    def isolated_settings(self) -> IsolatedApplySettings:
+        return IsolatedApplySettings(
+            checkout_path=self.checkout_path, inbox_path=self.inbox_path,
+            allowed_root=self.allowed_root,
+        )
 
 
 class ReleaseSelectedFile(Contract):

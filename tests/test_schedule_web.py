@@ -170,9 +170,15 @@ def test_schedules_panel_loads_and_creates_in_a_real_browser(
         assert "Scheduled tasks" in opened.text
         assert "Waiting for your approval" in opened.text
         assert browser._evaluate('document.getElementById("boot-error").hidden') is True
-        assert browser._evaluate(
-            'document.getElementById("schedule-target").options.length'
-        ) == 1
+        # The panel fills its target list asynchronously after the click.
+        for _ in range(100):
+            options = browser._evaluate(
+                'document.getElementById("schedule-target").options.length'
+            )
+            if options:
+                break
+            threading.Event().wait(0.05)
+        assert options == 1
         browser._evaluate(
             'document.getElementById("schedule-id").value = "browser-read";'
             'document.getElementById("schedule-kind").value = "daily";'
