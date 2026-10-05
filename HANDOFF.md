@@ -13,7 +13,7 @@ Updated: 2026-10-05 (Asia/Taipei), by Claude Code
   `grants.json.bak-20261005-125644-before-w14`), Workflow settings pointing at
   the source `config/workflow-14.json`, the `ncc_paper` template and photos,
   output `C:\Users\Chi_L\Documents\NCC-plans`.
-- W11 is installed live as one Workflow `engineering/gtm-weekly-report` with
+- W11 is installed live as one Workflow `engineering/sde-weekly-report` with
   Skill `weekly-report@2.0.0`; the three old W11 Workflows and Skill 1.0.0 were
   moved to `workspace\assets\workflows\disabled\` and `skills\disabled\`.
 - Settings has a Telegram bot section (not configured yet on this machine).

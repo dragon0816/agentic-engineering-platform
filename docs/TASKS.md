@@ -1212,6 +1212,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `github_weekly_report.py` (GTM keys only, closed skipped, comment edit time,
   migrated body log fallback, moment window). Tests:
   `tests/test_weekly_github_source_rules.py`, `tests/test_weekly_report_workflow.py`.
+- [x] Workflow 11 renamed `engineering/gtm-weekly-report` ->
+  `engineering/sde-weekly-report` (owner request 2026-10-05); same steps and
+  parameters, `/run 11` unchanged.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

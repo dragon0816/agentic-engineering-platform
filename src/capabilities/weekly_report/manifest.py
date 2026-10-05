@@ -1,4 +1,4 @@
-"""The Skill and the Workflow that run Workflow 11, the GTM weekly report.
+"""The Skill and the Workflow that run Workflow 11, the SDE weekly report.
 
 One Workflow does what source Workflow 11 does in one trigger: read the
 board, plan, write the workbook and save the mail draft. The read-only
@@ -18,7 +18,7 @@ from common.assets import AssetIdentity, WorkflowManifest
 PREVIEW_WORKFLOW = AssetIdentity(
     namespace="engineering", name="jira-weekly-report-preview", version="1.0.0"
 )
-WEEKLY_WORKFLOW = AssetIdentity(namespace="engineering", name="gtm-weekly-report", version="1.0.0")
+WEEKLY_WORKFLOW = AssetIdentity(namespace="engineering", name="sde-weekly-report", version="1.0.0")
 WEEKLY_SKILL = AssetIdentity(namespace="engineering", name="weekly-report", version="2.0.0")
 
 _METADATA = {
@@ -194,7 +194,7 @@ def weekly_report_workflow() -> WorkflowManifest:
             "run_alias": 11,
             "parameters": _WEEKLY_PARAMETERS,
             "description": (
-                "Workflow 11, the GTM weekly report: the week's GitHub board items planned "
+                "Workflow 11, the SDE weekly report: the week's GitHub board items planned "
                 "against the workbook's scratch sheet, written into it, and the week's mail "
                 "saved as a draft nobody has sent. A dry run shows the plan and writes nothing."
             ),
@@ -212,7 +212,7 @@ def weekly_report_workflow() -> WorkflowManifest:
                 {"id": "apply", "title": "Write the weekly report temp sheet"},
                 {"id": "mail", "title": "Save the weekly mail draft", "optional": True},
             ],
-            "input_contract": "engineering.gtm-weekly-report.request.v1",
+            "input_contract": "engineering.sde-weekly-report.request.v1",
             "output_contract": "weekly-report.mail.output.v1",
             "steps": [
                 *_weekly_steps(),
@@ -247,7 +247,7 @@ def weekly_skill() -> SkillManifest:
             "metadata": {"identity": WEEKLY_SKILL.model_dump(), **_METADATA},
             "alias": "weekly",
             "instructions": (
-                "Run the GTM weekly report (Workflow 11) for the current week, or for a named "
+                "Run the SDE weekly report (Workflow 11) for the current week, or for a named "
                 "week such as 2026_31W: it reads the GitHub board, writes the workbook's scratch "
                 "sheet and saves the week's mail as a draft. Offer dry_run to see the plan first."
             ),

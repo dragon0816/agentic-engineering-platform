@@ -524,21 +524,21 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
             "skills/engineering__sales-to-chipset__1.0.0.json",
         "skills/engineering__team-tickets__2.0.0.json",
         "skills/engineering__weekly-report__2.0.0.json",
-        "workflows/engineering__gtm-weekly-report__1.0.0.json",
         "workflows/engineering__jira-team-tickets-preview__1.0.0.json",
             "workflows/engineering__release-package-apply-isolated__1.0.0.json",
             "workflows/engineering__release-package-preview__1.0.0.json",
             "workflows/engineering__rs-ncc-improvement-plan__1.0.0.json",
             "workflows/engineering__sales-to-chipset-preview__1.0.0.json",
             "workflows/engineering__sales-to-chipset__1.0.0.json",
+            "workflows/engineering__sde-weekly-report__1.0.0.json",
     ]
     assert "wrote" in capsys.readouterr().out
     exported = json.loads(
-        (out / "workflows/engineering__gtm-weekly-report__1.0.0.json").read_text(
+        (out / "workflows/engineering__sde-weekly-report__1.0.0.json").read_text(
             encoding="utf-8"
         )
     )
-    assert exported["metadata"]["identity"]["name"] == "gtm-weekly-report"
+    assert exported["metadata"]["identity"]["name"] == "sde-weekly-report"
     assert [step["capability"]["name"] for step in exported["steps"]][-2:] == ["apply", "mail"]
     # A host without the secret mapped will not be built.
     with pytest.raises(Exception, match="credential_unmapped"):

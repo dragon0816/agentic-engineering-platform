@@ -1108,3 +1108,11 @@ keeping three assets with a Skill that chains them (still three things to
 install and grant); dry run on by default (the source schedule writes for
 real, and writes still need approval); following the source's assignee
 fallback (owner chose the Assignees field).
+
+## 2026-10-05 — Workflow 11 is named `sde-weekly-report`
+
+Decision (owner request): the merged Workflow 11 recorded above is named
+`engineering/sde-weekly-report@1.0.0` instead of `gtm-weekly-report`, matching
+the report's own title (SDE Weekly Report). Steps, parameters, `/run 11` and
+the `weekly` Skill command are unchanged. The earlier name was never
+published beyond this install.
