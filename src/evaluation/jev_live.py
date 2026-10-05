@@ -30,12 +30,19 @@ from models.contracts import ModelMessage, ModelRequest, ModelRequirements, Mode
 
 PUBLIC_CORPUS = Path(__file__).resolve().parents[2] / "evaluation" / "jev" / "golden-v1.json"
 PUBLIC_CORPUS_SHA256 = "4e0192921913d44073c4fdfffa2998c37a3e0f85c67556c5171b6d983a764b9b"
+#: Skill selection over the live install's eight Skill commands, English and
+#: Chinese, with their real descriptions (2026-10-05, owner request).
+SKILLS_CORPUS = PUBLIC_CORPUS.with_name("golden-v2-skills.json")
+REVIEWED_CORPORA = {
+    PUBLIC_CORPUS.name: PUBLIC_CORPUS_SHA256,
+    SKILLS_CORPUS.name: "286d59d42628ebf75368eade78c4d2f95ff4f7493f156b32c1b680ddd98af196",
+}
 TYPESAFE_SYSTEMONE = "https://api.typesafe.ai/v1/systemone"
 KEY_ENV = "AEP_JEV_API_KEY"
 
 
 def _public_cases(path: Path) -> tuple[GoldenDecisionCase, ...]:
-    if hashlib.sha256(path.read_bytes()).hexdigest() != PUBLIC_CORPUS_SHA256:
+    if hashlib.sha256(path.read_bytes()).hexdigest() != REVIEWED_CORPORA.get(path.name):
         raise ValueError("PUBLIC benchmark corpus does not match its reviewed digest")
     cases = load_cases(path)
     if any(case.classification != "PUBLIC" for case in cases):
@@ -68,7 +75,9 @@ def _candidate(case: GoldenDecisionCase, trial: int) -> SkillCandidateRequest:
             tools=tuple(
                 ModelTool(
                     name=name,
-                    description=f"Synthetic installed command {name}",
+                    description=case.candidate_descriptions.get(
+                        name, f"Synthetic installed command {name}"
+                    ),
                     input_contract="synthetic.command.v1",
                 )
                 for name in case.candidates
@@ -154,6 +163,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--timeout-ms", type=int, default=3_000)
     parser.add_argument(
+        "--corpus", choices=("v1", "skills"), default="v1",
+        help="v1: the original four synthetic cases; skills: the live Skill catalogue",
+    )
+    parser.add_argument(
         "--endpoint", default=TYPESAFE_SYSTEMONE,
         help="SystemOne URL: HTTPS, or http://127.0.0.1:<port>/v1/systemone through a tunnel",
     )
@@ -165,6 +178,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             timeout_ms=args.timeout_ms,
             credential=lambda: os.environ[KEY_ENV],
             endpoint=args.endpoint,
+            corpus=SKILLS_CORPUS if args.corpus == "skills" else PUBLIC_CORPUS,
         )
     except (OSError, ValueError, KeyError) as error:
         parser.exit(2, f"JEV benchmark unavailable: {type(error).__name__}\n")

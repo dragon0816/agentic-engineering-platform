@@ -39,6 +39,9 @@ class GoldenDecisionCase(Contract):
     request: Text
     candidates: tuple[Symbol, ...] = Field(min_length=2)
     expected: tuple[Symbol, ...] = Field(min_length=1)
+    # What the selector is told each candidate does, as the installed Skill
+    # describes it; a candidate without one gets a placeholder.
+    candidate_descriptions: dict[Symbol, Text] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def closed_labels(self) -> Self:
@@ -52,6 +55,8 @@ class GoldenDecisionCase(Contract):
             raise ValueError("expected labels must be unique installed candidates")
         if self.decision_type != "skill_selection" and len(self.expected) != 1:
             raise ValueError("classification cases require exactly one label")
+        if not set(self.candidate_descriptions) <= set(self.candidates):
+            raise ValueError("descriptions name only candidates")
         return self
 
 

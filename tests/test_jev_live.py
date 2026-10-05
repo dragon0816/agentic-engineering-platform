@@ -135,3 +135,19 @@ def test_a_tunnelled_self_hosted_endpoint_is_used_and_plain_lan_http_is_refused(
             model="laya-rl-agent", credential=forbidden_credential, transport=Transport(),
             endpoint="http://172.25.228.141:8000/v1/systemone",
         )
+
+
+def test_the_skills_corpus_is_pinned_and_sends_real_descriptions() -> None:
+    from evaluation.jev_live import SKILLS_CORPUS
+
+    transport = Transport()
+    run_public_benchmark(
+        corpus=SKILLS_CORPUS, model="laya-rl-agent", credential=lambda: "synthetic-token",
+        transport=transport,
+    )
+    assert len(transport.calls) == 26
+    _, payload, _, _ = transport.calls[0]
+    criteria = payload["questions"]["skill_candidate"]["criteria"]
+    assert len(criteria) == 9                       # preserve + eight installed commands
+    assert any("SDE weekly report" in text for text in criteria.values())
+    assert not any(text.startswith("Synthetic installed") for text in criteria.values())
