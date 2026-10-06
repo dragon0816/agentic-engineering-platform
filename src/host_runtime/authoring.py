@@ -185,7 +185,7 @@ class AuthoringStudio:
             model_alias=self.model_alias, local_only=self.local_only,
             trace=TraceIdentifiers(trace_id=f"authoring-{session_id}",
                                    request_id=f"authoring-{len(turns)}", span_id="authoring"),
-            namespace=self.namespace,
+            namespace=self.namespace, owner=actor,
         )
         reply = answer.reply + (
             "\n" + "\n".join(f"- {question}" for question in answer.questions)

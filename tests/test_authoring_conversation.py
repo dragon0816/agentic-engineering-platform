@@ -95,3 +95,28 @@ def test_an_unusable_model_stops_with_the_problems_named() -> None:
     assert answer.workflow is None and answer.attempts == 3 and answer.problems
     failed = turn(Scripted(Failure(code="model_unavailable", message="down")))
     assert failed.problems == ("model_unavailable",)
+
+
+def test_the_host_fills_in_what_the_model_may_not_decide() -> None:
+    from capabilities.workflow_author.conversation import assemble
+
+    raw = {"name": "Daily Shipment Tracking", "description": "追蹤出貨",
+           "metadata": {"visibility": "public", "lifecycle": "published",
+                        "owner": {"type": "team", "id": "everyone"}},
+           "parameters": [{"name": "customer", "label": "哪個客戶？", "kind": "text",
+                           "scope": "runtime", "required": True}],
+           "steps": [{"capability": "web/read@1.0.0", "name": "ignored",
+                      "inputs": {"actions": {"source": "fixed", "value": [
+                          {"do": "open", "url": "{site}/"}]},
+                                 "values": {"source": "run", "path": []}}}]}
+    built = assemble(raw, namespace="engineering", owner="leo.chi", installed=installed())
+    from common.assets import WorkflowManifest
+
+    workflow = WorkflowManifest.model_validate(built)
+    assert workflow.metadata.identity.name == "daily-shipment-tracking"
+    assert workflow.metadata.visibility == "private" and workflow.metadata.lifecycle == "draft"
+    assert workflow.metadata.owner.id == "leo.chi"
+    assert workflow.dependencies.local_capabilities == ("web.read",)
+    model = Scripted({"reply": "好了", "questions": [], "workflow": raw})
+    answer = turn(model)
+    assert answer.workflow is not None and answer.attempts == 1

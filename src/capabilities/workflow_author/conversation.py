@@ -11,6 +11,7 @@ never installs, approves or runs anything.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Literal
 
 from pydantic import Field, ValidationError
@@ -32,7 +33,16 @@ You are discussing one SOP with its owner, turn by turn, to produce one
 Workflow. Answer with a single JSON object:
 {"reply": what you tell the owner (short, in their language),
  "questions": [what you still need to know],
- "workflow": the whole Workflow document, or null while you cannot write it}
+ "workflow": null while you cannot write it, otherwise exactly
+   {"name": "<kebab-case>", "description": "<one or two sentences>",
+    "parameters": [<declared fields>],
+    "steps": [{"capability": "<namespace>/<name>@<version>",
+               "inputs": {"<input name>": <source>}}]}}
+The host fills in everything else (owner, visibility, lifecycle, execution,
+dependencies, contracts); do not write those.
+A parameter is {"name": "<snake_case>", "label": "<question>", "kind":
+"text"|"select"|"integer"|"boolean"|"file"|"folder"|"date", "scope":
+"runtime"|"static", "required": true|false}.
 
 How values enter a step (every rule is checked):
 - Something the SOP fixes (a URL path, a field label, a button text, a sheet
@@ -111,6 +121,62 @@ def _messages(
     )
 
 
+def _slug(value: object) -> str:
+    text = re.sub(r"[^a-z0-9]+", "-", str(value or "").lower()).strip("-")
+    return text or "sop-workflow"
+
+
+def _capability(value: object) -> dict[str, str] | None:
+    if isinstance(value, dict):
+        return {key: str(value.get(key, "")) for key in ("namespace", "name", "version")}
+    match = re.fullmatch(r"([a-z0-9-]+)/([a-z0-9-]+)@([0-9][0-9A-Za-z.+-]*)", str(value or ""))
+    if match is None:
+        return None
+    return {"namespace": match.group(1), "name": match.group(2), "version": match.group(3)}
+
+
+def assemble(
+    raw: dict[str, Any], *, namespace: str, owner: str, installed: InstalledCapabilities
+) -> dict[str, Any]:
+    """The model's semantic part plus what the host decides. Whatever the
+    model wrote about owner, visibility, lifecycle or execution is replaced:
+    a draft is private to its author, local and unpublished."""
+    identity = (raw.get("metadata") or {}).get("identity") or {}
+    name = _slug(raw.get("name") or identity.get("name"))
+    steps = []
+    used: list[str] = []
+    for step in raw.get("steps") or []:
+        if not isinstance(step, dict):
+            continue
+        target = _capability(step.get("capability"))
+        assembled: dict[str, Any] = {"capability": target, "inputs": step.get("inputs") or {}}
+        if "retry" in step:
+            assembled["retry"] = step["retry"]
+        steps.append(assembled)
+        if target is not None:
+            for spec in installed.discover():
+                if spec.identity.model_dump() == target and spec.name not in used:
+                    used.append(spec.name)
+    return {
+        "metadata": {
+            "identity": {"namespace": namespace, "name": name,
+                         "version": str(raw.get("version") or identity.get("version")
+                                        or "1.0.0")},
+            "owner": {"type": "user", "id": owner},
+            "visibility": "private",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": str(raw.get("description") or name),
+        "execution": {"mode": "local"},
+        "dependencies": {"central_required": False, "local_capabilities": used},
+        "parameters": raw.get("parameters") or [],
+        "input_contract": f"{namespace}.{name}.input.v1",
+        "output_contract": f"{namespace}.{name}.output.v1",
+        "steps": steps,
+    }
+
+
 def _salvage(text: str) -> Any:
     start, end = text.find("{"), text.rfind("}")
     if start < 0 or end <= start:
@@ -131,6 +197,7 @@ def author_turn(
     model_alias: str,
     trace: TraceIdentifiers,
     namespace: str,
+    owner: str = "owner",
     local_only: bool = False,
     max_attempts: int = 3,
 ) -> AuthoringAnswer:
@@ -158,8 +225,12 @@ def author_turn(
         raw = answer.get("workflow")
         if raw is None:
             return AuthoringAnswer(reply=answer["reply"], questions=questions, attempts=attempt)
+        if not isinstance(raw, dict):
+            problems = ("`workflow` must be an object or null",)
+            continue
         try:
-            workflow = WorkflowManifest.model_validate(raw)
+            workflow = WorkflowManifest.model_validate(
+                assemble(raw, namespace=namespace, owner=owner, installed=installed))
         except (ValidationError, ValueError) as invalid:
             problems = review.contract_problems(invalid) if isinstance(
                 invalid, ValidationError) else (str(invalid),)
