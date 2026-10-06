@@ -1361,10 +1361,22 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   install/run), G5 (no subprocess in the runner).
 - [ ] coding_v1 D3 fix (conversation output cap) awaits the owner: it changes
   every conversation turn, including Knowledge asking.
-- [ ] D3 (output cap 8000, `length` reported as its own failure), G3 (8 tool
-  calls per turn) and G4 (install/run a drafted Workflow from chat) approved
-  by the owner 2026-10-06; the edit to `src/agent/gateway.py` was refused by
-  Claude Code's permission check, so not implemented (see `HANDOFF.md`).
+- [x] D3 (8000-token conversation output cap, `model_output_truncated`) and
+  G3 (8 tool calls per turn), `fea13ff`, after the owner allowed the edit.
+- [x] G4 conversational authoring: `authoring__draft/preview/run/install/list_workflows`
+  host tools, owner approval buttons in Agent Web (`/api/approvals`), run
+  values for run-python scripts (`d8cbad9`, `0d8b943`). Telegram buttons: open.
+- [x] Lab gaps L1-L3: `browser/operate` + `browser__operate` (Edge, allowed
+  origins, downloads), `desktop/operate` + `desktop__operate` (UI Automation
+  helper, registered apps only), run-python child processes (max 4);
+  live: lab origin, `desktop.applications` (Expense), grants owner-approved.
+- [x] coding_v1 validators 1.1-1.3 (T20 fault evidence, T12 any table format,
+  T09/T13 measured when the program ran); fix-run-003 15/20, -004 16/20,
+  -005 18/20, **fix-run-006 20/20**.
+- [x] Lab fix-001: 4 PASS of 16 (W03, C03, C04, C04 exit-2); grader 1.1.
+- [ ] Lab: owner decision on a larger tool budget for long business tasks and
+  on carrying tool results into the conversation history; then fix-002.
+- [ ] Telegram approval buttons (A5 second half); A1-A3, A7, A8.
 - [x] Business workflow lab (owner request 2026-10-06):
   `benchmarks/business_workflow_lab/` with an SAP-like site, a Tk desktop
   Expense app, a quote CLI, 4 Excel templates, 15 prompts, expected answers,

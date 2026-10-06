@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-06 (Asia/Taipei), by Claude Code
+Updated: 2026-10-07 (Asia/Taipei), by Claude Code
 
 ## Repository and runtime state
 
@@ -81,46 +81,56 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
   the owner installs it from Agent Web (Capabilities, "Create a Workflow from
   an SOP"), then restarts Agent Web.
 
-## Business workflow lab (2026-10-06)
+## Current work: coding_v1 and the business workflow lab (2026-10-07)
 
-- `benchmarks/business_workflow_lab/` (README has every command): SAP-like
-  site (port 8810), Tk Expense desktop app, `quote_cli`, 4 templates, 15
-  prompts, expected answers, grader with self-test, `operator/run_lab.py`.
-- host.json `coding.workspace_roots` now also lists
-  `benchmarks\business_workflow_lab\runs` (backup `host.json.bak-before-lab`);
-  Agent Web was restarted for it (token in the newest `.scratch/agent-web-*.out.log`).
-- `baseline-001` (AEP `2193cc3`): 16/16 BLOCKED; mocks 42/42 smoke checks.
-  Findings and gap list L1-L7: `runs/baseline-001/findings.md`. Scripts read
-  mock internals when the desktop app could not be operated.
-- `smoke.py --browser` needs the system Python (Playwright is not in `.venv`).
+**coding_v1.** fix-run-006 passed 20 of 20, with validator 1.3. Run it with:
 
-## Approved but not done: D3, G3, G4
+    .venv\Scripts\python benchmarks\coding_v1
+un.py --run-id <new> --tasks all
 
-The owner approved (2026-10-06, "你提的1~3我覺得沒問題，可以執行"):
-1. D3: conversation output cap 1024 → 8000 in `agent/gateway.py`
-   (`_converse`, both `ModelRequest(max_output_tokens=1024)`), and report a
-   provider `finish_reason == "length"` as its own failure (for example
-   `model_output_truncated` in `models/openai_compatible.py` `_answer`).
-2. G3: tool calls per turn 4 → 8 (the `len(evidence) >= 4` break, turn limit
-   5 → 9 in `gateway.py` and `agent/backend_contracts.py`; update
-   `tests/test_gateway.py::test_conversation_cannot_execute_an_invented_tool_and_stops`).
-3. G4: install and run a drafted Workflow from chat (conversational authoring
-   A4-A6 in `docs/phases/CONVERSATIONAL_AUTHORING.md`).
-Claude Code's auto-mode permission check refused the edit to
-`src/agent/gateway.py` as a change to a shared core module, so nothing was
-changed. It needs the owner to allow that edit, or a person or another agent
-to make it. After it: rerun Knowledge asking, W14 dry run and run-task, then
-coding_v1 and the lab under new run IDs.
+The operator script does three things for the owner, and records each as an intervention:
+- it presses the owner's approve button for the Agent's run and install requests;
+- it runs T09's always_fail scenario;
+- it injects T20's write fault by holding `failures.xlsx` open.
+
+**Lab.** `benchmarks/business_workflow_lab/`, with grader 1.1. Run it with:
+
+    .venv\Scripts\python benchmarksusiness_workflow_lab\operator
+un_lab.py --run-id <new> --tasks all
+
+- Mocks: 59/59 on `python ...\operator\smoke.py --browser`. Use the system Python, which has Playwright.
+- fix-001 passed 4 of 16. Most failures stop on the 8-call tool budget. A follow-up turn cannot continue, because Agent Web keeps only each turn's text.
+
+**Live host.** The changes below each have a `.bak-*` backup next to the file:
+- host.json:
+  - `web.allowed_origins` has `http://127.0.0.1:8810`;
+  - `desktop.applications` registers `expense`, pointing at `benchmarksusiness_workflow_lab\expense_desktop_mockin\ExpenseApp.exe`, which is built by `build.cmd`;
+  - `coding.workspace_roots` includes the lab's runs folder.
+- grants.json has grants for `browser/operate` and `desktop/operate`.
+- Skill `engineering/coding@1.3.0` is installed; older versions are in `disabled/`.
+- Agent Web was restarted from `src` with the repo `.venv`. The token is in the newest `.scratch/agent-web-*.out.log`.
+
+**New platform pieces.** Decisions are in `docs/DECISIONS.md`, 2026-10-06:
+- `agent.backend_contracts`: the conversation limits (8000 tokens, 8 calls, 9 turns).
+- `Gateway.host_tools` with `HostTool` and `HostToolOutcome`.
+- `host_runtime/chat_authoring.py`: G4.
+- `host_runtime/bridge_tools.py`: `browser__operate` and `desktop__operate`, both dispatched through the Bridge.
+- `capabilities/browser_session`, `capabilities/desktop_session`, `integrations/desktop(.py, _uia.cs)`.
+- run-python `AEP_WORKFLOW_PARAMS` and `coding.run_python_max_processes`.
+- Agent Web `/api/approvals` and `/api/approvals/decide`, with approval cards on the page.
+
+## Verification
+
+ruff and mypy (`src`) pass. In the full pytest, only these fail:
+- `test_local_developer_environment` (cp950), which is excluded;
+- `test_knowledge_stage`, `test_browser::test_the_whole_flow_the_owner_described` and `test_sop_practice::test_the_sop_pdf_carries_the_routine_as_text`, which fail only now and then inside the full run under load and pass alone.
+
+The last full run: 2235 passed.
+
+Live checks after every Gateway change, all unchanged: Knowledge direct and in chat (no coding or authoring tool used), the W14 dry run and `run-task`.
 
 ## Next recommended action
 
-1. Owner: allow the D3/G3 edit (see above), then implement, verify, and run
-   coding_v1 `fix-run-003` and lab `fix-001`.
-2. Owner: decide the lab gaps L1-L3 (browser, desktop, process tool for the
-   Agent, including whether the Agent may sign in with test credentials) and
-   L7 (mock data isolation: another account or machine).
-3. Owner: approve and install the practice Workflow, restart Agent Web, run
-   it (customer C001), check the workbook and `http://127.0.0.1:8766/state.json`.
-4. One real SOP chosen by the owner (its sites go into `web.allowed_origins`).
-5. W9 business cards (Gateway vision approval and data-approval record first).
-6. Coding C7 live run on the practice repository (runner ready).
+1. Owner: decide on the lab's tool budget and on carrying tool results across turns (`runs/fix-001/findings.md`). Then implement it, run the live checks, and run lab fix-002 and coding_v1 again.
+2. Telegram approval buttons (A5); then A1-A3, A7, A8.
+3. The practice SOP Workflow install, a real SOP, W9 business cards, coding C7 (unchanged from before).
