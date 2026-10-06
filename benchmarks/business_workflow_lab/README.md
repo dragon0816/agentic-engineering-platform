@@ -16,7 +16,7 @@ Nothing under this folder changes the AEP product runtime.
 
 | Path | What | Agent may see |
 |---|---|---|
-| `sap_mock/server.py` | SAP-like query site (login, Customers / Sales Orders / Invoices, filters, 10-row pages, detail, CSV export) | URL and manual only |
+| `sap_mock/server.py` | SAP-like query site (SSO-style one-click sign-in, Customers / Sales Orders / Invoices, filters, 10-row pages, detail, CSV export) | URL and manual only |
 | `expense_desktop_mock/expense_app.py` | Native Tk desktop Expense app (8-row pages, detail dialog, Save As export) | launch command and manual only |
 | `quote_cli_mock/` | `quote_cli` (`quote_cli.cmd` or `run_quote_cli.py`) | command and `--help` |
 | `templates/` | 4 Excel templates, their generator, `fx_rates.csv` (fixed test rates) | yes (copied per task) |
@@ -56,7 +56,7 @@ data; the `.xlsx` bytes differ by their timestamps only.
 | Expense app | `python benchmarks\business_workflow_lab\expense_desktop_mock\expense_app.py` | close the window | needs an interactive Windows desktop |
 | Quote CLI | `benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd --help` | n/a | `QUOTE_CLI_DATA` may point at another data file |
 
-Test account for the site: `lab.analyst` / `Lab#2026` (synthetic, local only).
+Sign-in to the site is simulated company single sign-on: the login page has one button, "使用公司帳號登入 Continue with company account", and no password (owner, 2026-10-06).
 
 ## Fault scenarios and reset
 

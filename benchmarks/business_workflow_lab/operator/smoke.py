@@ -59,8 +59,8 @@ class Site:
         with self.opener.open(self.base + path, timeout=30) as reply:
             return reply.geturl(), reply.read().decode("utf-8-sig")
 
-    def login(self, password: str = "Lab#2026") -> tuple[str, str]:
-        body = urllib.parse.urlencode({"username": "lab.analyst", "password": password, "next": "/orders"})
+    def login(self, sso: str = "company") -> tuple[str, str]:
+        body = urllib.parse.urlencode({"sso": sso, "next": "/orders"})
         with self.opener.open(self.base + "/login", data=body.encode(), timeout=30) as reply:
             return reply.geturl(), reply.read().decode("utf-8")
 
@@ -86,8 +86,8 @@ def smoke_sap(browser: bool) -> None:
         site = Site(base)
         url, _ = site.get("/orders")
         record("SAP: unauthenticated request goes to login", "/login" in url, url)
-        url, page = site.login("wrong")
-        record("SAP: wrong password is refused", "login-error" in page)
+        url, page = site.login("forged")
+        record("SAP: a sign-in without the company account is refused", "login-error" in page)
         url, _ = site.login()
         record("SAP: login works", url.endswith("/orders"), url)
         sept = expected("W01")
@@ -140,8 +140,6 @@ def smoke_browser(base: str) -> None:
         browser = play.chromium.launch(channel="msedge", headless=True)
         page = browser.new_page(accept_downloads=True)
         page.goto(base + "/orders")
-        page.fill("#username", "lab.analyst")
-        page.fill("#password", "Lab#2026")
         page.click("#login-submit")
         page.fill("#f-from", "2026-09-01")
         page.fill("#f-to", "2026-09-30")

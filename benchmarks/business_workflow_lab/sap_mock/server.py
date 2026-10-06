@@ -40,7 +40,7 @@ DATA = LAB / "operator" / "data" / "source.json"
 STATE = LAB / "operator" / "state"
 FAULT = STATE / "sap_fault.json"
 EVENTS = STATE / "sap_events.jsonl"
-USERNAME, PASSWORD = "lab.analyst", "Lab#2026"
+USERNAME = "lab.analyst"  # the simulated signed-in Windows user
 PAGE_SIZE = 10
 LOCK = threading.Lock()
 
@@ -241,7 +241,9 @@ class Handler(BaseHTTPRequestHandler):
             target = form.get("next") or "/orders"
             if not target.startswith("/") or target.startswith("//"):
                 target = "/orders"
-            if form.get("username") == USERNAME and form.get("password") == PASSWORD:
+            # Company single sign-on, simulated (owner, 2026-10-06): the
+            # signed-in Windows user continues with one click, no password.
+            if form.get("sso") == "company":
                 token = secrets.token_hex(16)
                 SESSIONS[token] = USERNAME
                 event("login", ok=True, ua=self._client())
@@ -260,13 +262,13 @@ class Handler(BaseHTTPRequestHandler):
         if query.get("expired"):
             notes += "<p class='msg error' id='session-expired'>工作階段已逾時，請重新登入。 (Session expired)</p>"
         if query.get("failed"):
-            notes += "<p class='msg error' id='login-error'>帳號或密碼錯誤。 (Invalid user or password)</p>"
-        body = (f"{notes}<form method='post' action='/login' id='login-form'>"
+            notes += "<p class='msg error' id='login-error'>登入失敗，請再試一次。 (Sign-in failed)</p>"
+        body = (f"{notes}<p>此系統使用公司帳號自動登入。 This site uses your company account.</p>"
+                "<form method='post' action='/login' id='login-form'>"
                 f"<input type='hidden' name='next' value='{html.escape(query.get('next', '/orders'))}'>"
-                "<p><label for='username'>User</label><br><input id='username' name='username'></p>"
-                "<p><label for='password'>Password</label><br>"
-                "<input id='password' name='password' type='password'></p>"
-                "<button type='submit' id='login-submit'>Sign in</button></form>")
+                "<input type='hidden' name='sso' value='company'>"
+                "<button type='submit' id='login-submit'>使用公司帳號登入 Continue with company account"
+                "</button></form>")
         self._send(200, page("Sign in", body))
 
     def _list(self, name: str, query: dict[str, str], user: str) -> None:

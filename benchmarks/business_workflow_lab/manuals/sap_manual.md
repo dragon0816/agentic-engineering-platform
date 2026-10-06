@@ -3,8 +3,7 @@
 > 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
 
 - 網址：{SAP_URL}
-- 測試帳號：`lab.analyst`，密碼：`Lab#2026`（僅限本機測試）
-- 登入頁：`{SAP_URL}login`，欄位 User（`#username`）、Password（`#password`），按 **Sign in**。
+- 登入：公司帳號自動登入（SSO）。開啟網址後若出現登入頁，按 **使用公司帳號登入 Continue with company account** 即可，不需要輸入帳號或密碼。
 - 登出：右上角 **Log out**。
 
 ## 查詢頁
@@ -30,5 +29,5 @@
   - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
   - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
 - 文件編號有前導零（例如 0045000101），請當成文字處理。
-- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，重新登入後即可繼續。
+- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，再按一次 **使用公司帳號登入** 即可繼續。
 - 金額為原幣；不同幣別不可直接相加。
