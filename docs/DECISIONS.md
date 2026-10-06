@@ -1524,3 +1524,26 @@ Rejected alternatives:
 - keeping full tool output in history: page and file content would flow into every later turn.
 
 Knowledge turns normally end after one or two calls.
+
+## 2026-10-07: Tool and runtime fixes from lab fix-002 and fix-003
+
+**Several tool calls in one reply run in order.** Each call counts against the turn's budget, and each gets its tool message back. The Gateway used to end the turn with `multiple_tool_calls_not_supported` (X02).
+- Rejected: running the calls in parallel. Two calls may touch the same browser or the same workspace.
+
+**Telegram approval buttons (A5).**
+- A chat reply carries approve and reject buttons for each request the Agent made in that chat.
+- Only the Bridge owner's tap decides. A sender acting on the owner's behalf is refused.
+- Telegram history keeps the same tool record as Agent Web.
+
+**Leftover Edge on the Agent's profile.** `browser/operate` uses a profile no person signs in to. A browser holding that profile can only be one that an earlier host process left behind. The handler asks that browser to close over DevTools, which keeps the profile intact, and then starts again. `HostRuntime.close` ends the Edge and the desktop applications it started.
+- Rejected: killing every `msedge.exe`. That could close a person's own windows.
+
+**Workflow steps for interfaces.**
+- The draft guide shows `browser/operate` and `desktop/operate` as Workflow steps.
+- `desktop/operate` fills `{placeholders}` from run values.
+- coding 1.4.0 says a system the person signs in to or operates is used through these tools and never fetched by a script.
+- Desktop app names match regardless of case, and the tool text lists the registered apps.
+
+**Lab template Instructions.** Two rules are now stated in the Instructions: layout stays as is, and missing values stay blank. Grading had relied on both without the templates saying so.
+
+**Coding runner gains `tzdata`.** It was installed offline from a wheel downloaded by the system Python. Apache-2.0, maintained by Python core developers.
