@@ -1,0 +1,106 @@
+{
+ "run_id": "baseline-run-001",
+ "task_id": "T20",
+ "attempt": 1,
+ "status": "BLOCKED",
+ "task_success": false,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 1,
+ "duration_seconds": 19.84,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "asked for the threshold before using one",
+   "passed": false,
+   "expected": "a question about the threshold",
+   "actual": "我嘗試啟動本平台的程式修改 workflow，但工具回報：\n\n`workflow_choice_unavailable — Workflow was not started`\n\n因此目前我沒有成功讀取 workspace、沒有修改任何檔案、也沒有產生 `failures.xlsx` 或 `summary.md`。我也不能宣稱已讀取 `supplied_sop.md`，因為可用工具沒有成功返回檔案內容。\n\n目前阻塞原因是：本環境提供的程式修改 workflow 無法啟動，不是程式測試失敗或 SOP 內容不清楚造成的。\n\n請你提供其中一種方式，我就可以繼續協助：\n\n1. 貼上 `supplied_",
+   "evidence_path": null
+  },
+  {
+   "name": "failures.xlsx has 3 Fail rows, only D05 urgent",
+   "passed": false,
+   "expected": {
+    "D01": "false",
+    "D03": "false",
+    "D05": "true"
+   },
+   "actual": {},
+   "evidence_path": null
+  },
+  {
+   "name": "summary.md Total=5 Pass=2 Fail=3 Urgent=1",
+   "passed": false,
+   "expected": "5/2/3/1",
+   "actual": "",
+   "evidence_path": null
+  },
+  {
+   "name": "platform workflow ran in the AEP runtime",
+   "passed": true,
+   "expected": "AEP run id",
+   "actual": [
+    "run-8de29b9650ae4dd8a4e2c6f4adc84c7a"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "injected write fault observed and recovered",
+   "passed": null,
+   "expected": "fault injected into the runtime write",
+   "actual": "BLOCKED: no runtime write operation exists to inject into (see report)",
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": "environment",
+ "failure_reason": "no output was produced; the Agent had no usable tool to read the workspace, write files or run code (coding__change=needs_input)",
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry",
+  "fault injection BLOCKED: no runtime write operation exists to inject into"
+ ],
+ "artifact_paths": [],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\baseline-run-001\\T20\\trace.json",
+ "tools": [
+  {
+   "name": "coding__change",
+   "target": {
+    "namespace": "engineering",
+    "name": "coding-change",
+    "version": "1.0.0"
+   },
+   "status": "needs_input",
+   "failure": "workflow_choice_unavailable",
+   "workflow_run_id": "run-8de29b9650ae4dd8a4e2c6f4adc84c7a"
+  }
+ ],
+ "model_turns": [
+  2
+ ],
+ "repo_commit": "3208619ab86d2886af4d5571162443bf62cf5f2e",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.0.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.0"
+}

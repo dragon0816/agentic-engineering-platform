@@ -198,6 +198,33 @@ def save(run_dir: Path, results: dict[str, dict[str, Any]]) -> None:
     (run_dir / "results.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def observed_cause(trace_path: str | None) -> str:
+    """What the trace shows happened, as a gap or defect code (see report)."""
+    if not trace_path or not Path(trace_path).is_file():
+        return "not run"
+    trace = json.loads(Path(trace_path).read_text(encoding="utf-8"))
+    causes: list[str] = []
+    for exchange in trace.get("exchanges", []):
+        answer = (exchange.get("reply") or {}).get("answer") or {}
+        outcome = answer.get("outcome") or {}
+        target = ((outcome.get("decision") or {}).get("target") or {})
+        convo = outcome.get("conversation") or {}
+        failure = (convo.get("failure") or {}).get("code")
+        tools = tools_of(exchange)
+        if target.get("namespace") == "knowledge-query":
+            causes.append("D1 routed to the Knowledge harness; the model never saw the task")
+        elif failure == "empty_model_answer":
+            causes.append("D3 the Gateway model returned an empty answer")
+        elif any(t["name"] == "coding__change" for t in tools):
+            codes = {t["failure"] for t in tools if t["name"] == "coding__change"}
+            causes.append(f"G2 tried coding/change, refused ({', '.join(sorted(map(str, codes)))}): "
+                          "it only changes a configured repository against existing pytest tests")
+        elif not tools:
+            causes.append("G1 no tool to read the workspace, write files or run code; the reply "
+                          "explained this and offered code for a person to run")
+    return "; ".join(dict.fromkeys(causes)) or "see trace"
+
+
 def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta: dict[str, Any]) -> None:
     counts = {s: sum(1 for r in results.values() if r["status"] == s)
               for s in ("PASS", "FAIL", "BLOCKED", "TIMEOUT", "NOT_RUN")}
@@ -206,7 +233,11 @@ def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta:
     calls = [r["tool_calls"] for r in results.values() if r.get("tool_calls") is not None]
     lines = [
         f"# coding_v1 report — {run_id}", "",
-        f"Generated {datetime.now(UTC).isoformat(timespec='seconds')} from `results.jsonl`.", "",
+        f"Generated {datetime.now(UTC).isoformat(timespec='seconds')} from `results.jsonl`."
+        + (" Defects, gaps and priorities: [findings.md](findings.md)."
+           if (run_dir / "findings.md").is_file() else ""), "",
+        "Evidence per task: `T??/prompt.md`, `T??/trace.json`, `T??/result.json`, `T??/workspace/`. "
+        "Rerun: `python benchmarks/coding_v1/run.py --run-id <new-id> --tasks all` (see README.md).", "",
         "## Setup", "",
         f"- Repository commit: `{meta['repo_commit']}`",
         f"- Entry point: Agent Web chat (`/api/conversations/turn`), one new session per task",
@@ -214,14 +245,14 @@ def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta:
         f"- Fixture manifest SHA-256: `{meta['fixture_manifest_sha256']}`; validator {VALIDATOR_VERSION}",
         f"- Budget: {TIME_LIMIT_S} s per task; tool calls bounded by the Gateway loop (4 per turn)", "",
         "## Results", "",
-        "| Task | Status | Tool calls | Seconds | Interventions | Reason |", "|---|---|---|---|---|---|",
+        "| Task | Status | Tool calls | Seconds | Interventions | Observed cause |", "|---|---|---|---|---|---|",
     ]
     for task in ALL:
         r = results.get(task)
         if r is None:
             lines.append(f"| {task} | NOT_RUN | | | | |")
             continue
-        reason = (r.get("failure_reason") or "").replace("|", "/")[:160]
+        reason = observed_cause(r.get("trace_path")).replace("|", "/")
         lines.append(f"| {task} | {r['status']} | {r.get('tool_calls') if r.get('tool_calls') is not None else ''} | "
                      f"{r.get('duration_seconds') if r.get('duration_seconds') is not None else ''} | "
                      f"{r.get('human_interventions') if r.get('human_interventions') is not None else ''} | {reason} |")
@@ -244,10 +275,16 @@ def main() -> int:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--tasks", default="pilot")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--report-only", action="store_true",
+                        help="rebuild report.md from results.jsonl without running anything")
     args = parser.parse_args()
     tasks = PILOT if args.tasks == "pilot" else ALL if args.tasks == "all" else args.tasks.split(",")
     run_dir = HERE / "runs" / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    if args.report_only:
+        stored = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+        report(run_dir, args.run_id, load(run_dir), stored)
+        return 0
     base, token = agent_web()
     meta = {"run_id": args.run_id, "repo_commit": repo_commit(), "model": host_model(),
             "skills": installed_skills(), "agent_web": base,
