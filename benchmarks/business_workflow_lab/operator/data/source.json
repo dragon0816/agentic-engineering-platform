@@ -1,0 +1,2903 @@
+{
+ "seed": 20261006,
+ "period": {
+  "from": "2026-08-01",
+  "to": "2026-10-31"
+ },
+ "customers": [
+  {
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "Country": "DE"
+  },
+  {
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C005",
+   "CustomerName": "Pacific Test Systems Inc.",
+   "Country": "US"
+  },
+  {
+   "CustomerID": "C006",
+   "CustomerName": "Helios Optics B.V.",
+   "Country": "NL"
+  },
+  {
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C008",
+   "CustomerName": "新竹量測科技",
+   "Country": "TW"
+  }
+ ],
+ "employees": [
+  {
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)"
+  },
+  {
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber"
+  },
+  {
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明"
+  },
+  {
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos"
+  },
+  {
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華"
+  },
+  {
+   "EmployeeID": "E006",
+   "EmployeeName": "Kenji Sato"
+  }
+ ],
+ "projects": [
+  {
+   "ProjectID": "P001",
+   "ProjectName": "5G RF 驗證平台",
+   "CustomerID": "C001",
+   "OwnerEmployeeID": "E001"
+  },
+  {
+   "ProjectID": "P002",
+   "ProjectName": "Wafer Probe Upgrade",
+   "CustomerID": "C002",
+   "OwnerEmployeeID": "E003"
+  },
+  {
+   "ProjectID": "P003",
+   "ProjectName": "Acme 產線自動化",
+   "CustomerID": "C001",
+   "OwnerEmployeeID": "E002"
+  },
+  {
+   "ProjectID": "P004",
+   "ProjectName": "EMC Chamber Retrofit",
+   "CustomerID": "C003",
+   "OwnerEmployeeID": "E004"
+  },
+  {
+   "ProjectID": "P005",
+   "ProjectName": "Acme Limited 校正服務",
+   "CustomerID": "C007",
+   "OwnerEmployeeID": "E005"
+  }
+ ],
+ "sales_orders": [
+  {
+   "OrderID": "0045000101",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P001",
+   "OrderDate": "2026-08-03",
+   "Status": "Closed",
+   "Currency": "TWD",
+   "NetAmount": "95895.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E002",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 3,
+     "UnitPrice": "2565.00",
+     "LineAmount": "7695.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 3,
+     "UnitPrice": "29400.00",
+     "LineAmount": "88200.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000102",
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "ProjectID": "P002",
+   "OrderDate": "2026-08-07",
+   "Status": "Closed",
+   "Currency": "USD",
+   "NetAmount": "4095.00",
+   "CustomerContact": "張美玲 <mei@tw-precision.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E005",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 2,
+     "UnitPrice": "1250.00",
+     "LineAmount": "2500.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1008",
+     "Quantity": 1,
+     "UnitPrice": "95.00",
+     "LineAmount": "95.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 1,
+     "UnitPrice": "1500.00",
+     "LineAmount": "1500.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000103",
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "ProjectID": "P004",
+   "OrderDate": "2026-08-12",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "958.95",
+   "CustomerContact": "Jonas Krüger <jk@northwind.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E002",
+   "Lines": [
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 1,
+     "UnitPrice": "882.00",
+     "LineAmount": "882.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 1,
+     "UnitPrice": "76.95",
+     "LineAmount": "76.95",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000104",
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "ProjectID": "",
+   "OrderDate": "2026-08-15",
+   "Status": "Cancelled",
+   "Currency": "TWD",
+   "NetAmount": "25200.00",
+   "CustomerContact": "",
+   "PaymentTerms": "NET0",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 2,
+     "UnitPrice": "12600.00",
+     "LineAmount": "25200.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000105",
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "ProjectID": "P005",
+   "OrderDate": "2026-08-19",
+   "Status": "Closed",
+   "Currency": "TWD",
+   "NetAmount": "227850.00",
+   "CustomerContact": "Peter Ho <peter.ho@acme-limited.example>",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E002",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 6,
+     "UnitPrice": "37500.00",
+     "LineAmount": "225000.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1008",
+     "Quantity": 1,
+     "UnitPrice": "2850.00",
+     "LineAmount": "2850.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000106",
+   "CustomerID": "C005",
+   "CustomerName": "Pacific Test Systems Inc.",
+   "ProjectID": "",
+   "OrderDate": "2026-08-22",
+   "Status": "Open",
+   "Currency": "USD",
+   "NetAmount": "4942.00",
+   "CustomerContact": "Sam Patel <sam@pacifictest.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E003",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 4,
+     "UnitPrice": "85.50",
+     "LineAmount": "342.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 2,
+     "UnitPrice": "2300.00",
+     "LineAmount": "4600.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000107",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P003",
+   "OrderDate": "2026-08-27",
+   "Status": "Closed",
+   "Currency": "USD",
+   "NetAmount": "6250.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 5,
+     "UnitPrice": "1250.00",
+     "LineAmount": "6250.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000108",
+   "CustomerID": "C006",
+   "CustomerName": "Helios Optics B.V.",
+   "ProjectID": "",
+   "OrderDate": "2026-08-31",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "3028.95",
+   "CustomerContact": "Eva de Vries <eva@helios.example>",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E004",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 1,
+     "UnitPrice": "2070.00",
+     "LineAmount": "2070.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 1,
+     "UnitPrice": "882.00",
+     "LineAmount": "882.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 1,
+     "UnitPrice": "76.95",
+     "LineAmount": "76.95",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000109",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P003",
+   "OrderDate": "2026-09-01",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "150000.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET10",
+   "SalesRep": "E001",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 4,
+     "UnitPrice": "37500.00",
+     "LineAmount": "150000.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000110",
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "ProjectID": "P002",
+   "OrderDate": "2026-09-02",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "293572.50",
+   "CustomerContact": "張美玲 <mei@tw-precision.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E004",
+   "Lines": [
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 3,
+     "UnitPrice": "29400.00",
+     "LineAmount": "88200.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1005",
+     "Quantity": 3,
+     "UnitPrice": "18457.50",
+     "LineAmount": "55372.50",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 4,
+     "UnitPrice": "37500.00",
+     "LineAmount": "150000.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000111",
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "ProjectID": "P004",
+   "OrderDate": "2026-09-03",
+   "Status": "Closed",
+   "Currency": "EUR",
+   "NetAmount": "2250.00",
+   "CustomerContact": "Jonas Krüger <jk@northwind.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E001",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 2,
+     "UnitPrice": "1125.00",
+     "LineAmount": "2250.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000112",
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "ProjectID": "P005",
+   "OrderDate": "2026-09-04",
+   "Status": "Open",
+   "Currency": "USD",
+   "NetAmount": "12311.00",
+   "CustomerContact": "Peter Ho <peter.ho@acme-limited.example>",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E001",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 2,
+     "UnitPrice": "85.50",
+     "LineAmount": "171.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 4,
+     "UnitPrice": "2300.00",
+     "LineAmount": "9200.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 3,
+     "UnitPrice": "980.00",
+     "LineAmount": "2940.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000113",
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "ProjectID": "",
+   "OrderDate": "2026-09-05",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "15390.00",
+   "CustomerContact": "",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E005",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 6,
+     "UnitPrice": "2565.00",
+     "LineAmount": "15390.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000114",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P001",
+   "OrderDate": "2026-09-08",
+   "Status": "Cancelled",
+   "Currency": "USD",
+   "NetAmount": "11956.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET5",
+   "SalesRep": "E005",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 2,
+     "UnitPrice": "85.50",
+     "LineAmount": "171.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 5,
+     "UnitPrice": "2300.00",
+     "LineAmount": "11500.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1008",
+     "Quantity": 3,
+     "UnitPrice": "95.00",
+     "LineAmount": "285.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000115",
+   "CustomerID": "C005",
+   "CustomerName": "Pacific Test Systems Inc.",
+   "ProjectID": "",
+   "OrderDate": "2026-09-09",
+   "Status": "Open",
+   "Currency": "USD",
+   "NetAmount": "6391.00",
+   "CustomerContact": "Sam Patel <sam@pacifictest.example>",
+   "PaymentTerms": "NET20",
+   "SalesRep": "E004",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 2,
+     "UnitPrice": "85.50",
+     "LineAmount": "171.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 1,
+     "UnitPrice": "2300.00",
+     "LineAmount": "2300.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 4,
+     "UnitPrice": "980.00",
+     "LineAmount": "3920.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000116",
+   "CustomerID": "C008",
+   "CustomerName": "新竹量測科技",
+   "ProjectID": "",
+   "OrderDate": "2026-09-10",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "29400.00",
+   "CustomerContact": "李建宏 <jh.lee@hsinchu-metrology.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E005",
+   "Lines": [
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 1,
+     "UnitPrice": "29400.00",
+     "LineAmount": "29400.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000117",
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "ProjectID": "P002",
+   "OrderDate": "2026-09-11",
+   "Status": "Closed",
+   "Currency": "TWD",
+   "NetAmount": "90000.00",
+   "CustomerContact": "張美玲 <mei@tw-precision.example>",
+   "PaymentTerms": "NET10",
+   "SalesRep": "E002",
+   "Lines": [
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 2,
+     "UnitPrice": "45000.00",
+     "LineAmount": "90000.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000118",
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "ProjectID": "P004",
+   "OrderDate": "2026-09-14",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "17484.75",
+   "CustomerContact": "Jonas Krüger <jk@northwind.example>",
+   "PaymentTerms": "NET0",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 5,
+     "UnitPrice": "76.95",
+     "LineAmount": "384.75",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 5,
+     "UnitPrice": "2070.00",
+     "LineAmount": "10350.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 5,
+     "UnitPrice": "1350.00",
+     "LineAmount": "6750.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000119",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P001",
+   "OrderDate": "2026-09-15",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "8775.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E004",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 3,
+     "UnitPrice": "1125.00",
+     "LineAmount": "3375.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 4,
+     "UnitPrice": "1350.00",
+     "LineAmount": "5400.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000120",
+   "CustomerID": "C006",
+   "CustomerName": "Helios Optics B.V.",
+   "ProjectID": "",
+   "OrderDate": "2026-09-16",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "461.70",
+   "CustomerContact": "Eva de Vries <eva@helios.example>",
+   "PaymentTerms": "NET10",
+   "SalesRep": "E003",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 6,
+     "UnitPrice": "76.95",
+     "LineAmount": "461.70",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000121",
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "ProjectID": "P005",
+   "OrderDate": "2026-09-18",
+   "Status": "Closed",
+   "Currency": "TWD",
+   "NetAmount": "299400.00",
+   "CustomerContact": "Peter Ho <peter.ho@acme-limited.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E001",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "Quantity": 4,
+     "UnitPrice": "2850.00",
+     "LineAmount": "11400.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 2,
+     "UnitPrice": "69000.00",
+     "LineAmount": "138000.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 4,
+     "UnitPrice": "37500.00",
+     "LineAmount": "150000.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000122",
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "ProjectID": "P002",
+   "OrderDate": "2026-09-21",
+   "Status": "Open",
+   "Currency": "USD",
+   "NetAmount": "4141.00",
+   "CustomerContact": "張美玲 <mei@tw-precision.example>",
+   "PaymentTerms": "NET5",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 4,
+     "UnitPrice": "420.00",
+     "LineAmount": "1680.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1005",
+     "Quantity": 4,
+     "UnitPrice": "615.25",
+     "LineAmount": "2461.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000123",
+   "CustomerID": "C005",
+   "CustomerName": "Pacific Test Systems Inc.",
+   "ProjectID": "",
+   "OrderDate": "2026-09-22",
+   "Status": "Cancelled",
+   "Currency": "USD",
+   "NetAmount": "1260.00",
+   "CustomerContact": "Sam Patel <sam@pacifictest.example>",
+   "PaymentTerms": "NET10",
+   "SalesRep": "E004",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 3,
+     "UnitPrice": "420.00",
+     "LineAmount": "1260.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000124",
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "ProjectID": "",
+   "OrderDate": "2026-09-24",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "45000.00",
+   "CustomerContact": "",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E003",
+   "Lines": [
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 1,
+     "UnitPrice": "45000.00",
+     "LineAmount": "45000.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000125",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P001",
+   "OrderDate": "2026-09-25",
+   "Status": "Closed",
+   "Currency": "TWD",
+   "NetAmount": "386445.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET0",
+   "SalesRep": "E002",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "Quantity": 2,
+     "UnitPrice": "2850.00",
+     "LineAmount": "5700.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1005",
+     "Quantity": 6,
+     "UnitPrice": "18457.50",
+     "LineAmount": "110745.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 6,
+     "UnitPrice": "45000.00",
+     "LineAmount": "270000.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000126",
+   "CustomerID": "C008",
+   "CustomerName": "新竹量測科技",
+   "ProjectID": "",
+   "OrderDate": "2026-09-28",
+   "Status": "Open",
+   "Currency": "USD",
+   "NetAmount": "9171.00",
+   "CustomerContact": "李建宏 <jh.lee@hsinchu-metrology.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E003",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 2,
+     "UnitPrice": "85.50",
+     "LineAmount": "171.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 6,
+     "UnitPrice": "1500.00",
+     "LineAmount": "9000.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000127",
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "ProjectID": "P005",
+   "OrderDate": "2026-09-30",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "2214.92",
+   "CustomerContact": "Peter Ho <peter.ho@acme-limited.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1005",
+     "Quantity": 4,
+     "UnitPrice": "553.73",
+     "LineAmount": "2214.92",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000128",
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "ProjectID": "P004",
+   "OrderDate": "2026-09-30",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "104160.00",
+   "CustomerContact": "Jonas Krüger <jk@northwind.example>",
+   "PaymentTerms": "NET5",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 2,
+     "UnitPrice": "2565.00",
+     "LineAmount": "5130.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1005",
+     "Quantity": 4,
+     "UnitPrice": "18457.50",
+     "LineAmount": "73830.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 2,
+     "UnitPrice": "12600.00",
+     "LineAmount": "25200.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000129",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P001",
+   "OrderDate": "2026-10-01",
+   "Status": "Open",
+   "Currency": "USD",
+   "NetAmount": "1602.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 3,
+     "UnitPrice": "420.00",
+     "LineAmount": "1260.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1002",
+     "Quantity": 4,
+     "UnitPrice": "85.50",
+     "LineAmount": "342.00",
+     "LineNo": 20
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000130",
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "ProjectID": "P002",
+   "OrderDate": "2026-10-02",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "367800.00",
+   "CustomerContact": "張美玲 <mei@tw-precision.example>",
+   "PaymentTerms": "NET5",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1007",
+     "Quantity": 4,
+     "UnitPrice": "45000.00",
+     "LineAmount": "180000.00",
+     "LineNo": 10
+    },
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 3,
+     "UnitPrice": "12600.00",
+     "LineAmount": "37800.00",
+     "LineNo": 20
+    },
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 4,
+     "UnitPrice": "37500.00",
+     "LineAmount": "150000.00",
+     "LineNo": 30
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000131",
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "ProjectID": "P004",
+   "OrderDate": "2026-10-06",
+   "Status": "Closed",
+   "Currency": "EUR",
+   "NetAmount": "2768.65",
+   "CustomerContact": "Jonas Krüger <jk@northwind.example>",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E002",
+   "Lines": [
+    {
+     "ProductID": "MAT-1005",
+     "Quantity": 5,
+     "UnitPrice": "553.73",
+     "LineAmount": "2768.65",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000132",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P003",
+   "OrderDate": "2026-10-09",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "50400.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "",
+   "SalesRep": "E004",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "Quantity": 4,
+     "UnitPrice": "12600.00",
+     "LineAmount": "50400.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000133",
+   "CustomerID": "C006",
+   "CustomerName": "Helios Optics B.V.",
+   "ProjectID": "",
+   "OrderDate": "2026-10-14",
+   "Status": "Cancelled",
+   "Currency": "USD",
+   "NetAmount": "9200.00",
+   "CustomerContact": "Eva de Vries <eva@helios.example>",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E001",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "Quantity": 4,
+     "UnitPrice": "2300.00",
+     "LineAmount": "9200.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000134",
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "ProjectID": "P005",
+   "OrderDate": "2026-10-20",
+   "Status": "Open",
+   "Currency": "TWD",
+   "NetAmount": "2850.00",
+   "CustomerContact": "Peter Ho <peter.ho@acme-limited.example>",
+   "PaymentTerms": "NET15",
+   "SalesRep": "E006",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "Quantity": 1,
+     "UnitPrice": "2850.00",
+     "LineAmount": "2850.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000135",
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "ProjectID": "",
+   "OrderDate": "2026-10-27",
+   "Status": "Closed",
+   "Currency": "TWD",
+   "NetAmount": "176400.00",
+   "CustomerContact": "",
+   "PaymentTerms": "NET30",
+   "SalesRep": "E005",
+   "Lines": [
+    {
+     "ProductID": "MAT-1006",
+     "Quantity": 6,
+     "UnitPrice": "29400.00",
+     "LineAmount": "176400.00",
+     "LineNo": 10
+    }
+   ]
+  },
+  {
+   "OrderID": "0045000136",
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "ProjectID": "P001",
+   "OrderDate": "2026-10-31",
+   "Status": "Open",
+   "Currency": "EUR",
+   "NetAmount": "2250.00",
+   "CustomerContact": "Grace Lin <grace.lin@acme-precision.example>",
+   "PaymentTerms": "NET5",
+   "SalesRep": "E001",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "Quantity": 2,
+     "UnitPrice": "1125.00",
+     "LineAmount": "2250.00",
+     "LineNo": 10
+    }
+   ]
+  }
+ ],
+ "invoices": [
+  {
+   "InvoiceID": "0090000201",
+   "OrderID": "0045000101",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "InvoiceDate": "2026-08-06",
+   "DueDate": "2026-08-21",
+   "Currency": "TWD",
+   "Amount": "95895.00",
+   "PaidAmount": "47947.50",
+   "Balance": "47947.50"
+  },
+  {
+   "InvoiceID": "0090000202",
+   "OrderID": "0045000102",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "InvoiceDate": "2026-08-10",
+   "DueDate": "2026-09-09",
+   "Currency": "USD",
+   "Amount": "4095.00",
+   "PaidAmount": "4095.00",
+   "Balance": "0.00"
+  },
+  {
+   "InvoiceID": "0090000203",
+   "OrderID": "0045000105",
+   "CustomerID": "C007",
+   "ProjectID": "P005",
+   "InvoiceDate": "2026-08-20",
+   "DueDate": "2026-09-04",
+   "Currency": "TWD",
+   "Amount": "227850.00",
+   "PaidAmount": "113925.00",
+   "Balance": "113925.00"
+  },
+  {
+   "InvoiceID": "0090000204",
+   "OrderID": "0045000103",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "InvoiceDate": "2026-08-25",
+   "DueDate": "2026-09-24",
+   "Currency": "EUR",
+   "Amount": "958.95",
+   "PaidAmount": "0.00",
+   "Balance": "958.95"
+  },
+  {
+   "InvoiceID": "0090000205",
+   "OrderID": "0045000107",
+   "CustomerID": "C001",
+   "ProjectID": "P003",
+   "InvoiceDate": "2026-08-29",
+   "DueDate": "2026-09-28",
+   "Currency": "USD",
+   "Amount": "6250.00",
+   "PaidAmount": "6250.00",
+   "Balance": "0.00"
+  },
+  {
+   "InvoiceID": "0090000206",
+   "OrderID": "0045000106",
+   "CustomerID": "C005",
+   "ProjectID": "",
+   "InvoiceDate": "2026-08-31",
+   "DueDate": "2026-09-30",
+   "Currency": "USD",
+   "Amount": "4942.00",
+   "PaidAmount": "0.00",
+   "Balance": "4942.00"
+  },
+  {
+   "InvoiceID": "0090000207",
+   "OrderID": "0045000108",
+   "CustomerID": "C006",
+   "ProjectID": "",
+   "InvoiceDate": "2026-09-01",
+   "DueDate": "2026-09-16",
+   "Currency": "EUR",
+   "Amount": "3028.95",
+   "PaidAmount": "0.00",
+   "Balance": "3028.95"
+  },
+  {
+   "InvoiceID": "0090000208",
+   "OrderID": "0045000109",
+   "CustomerID": "C001",
+   "ProjectID": "P003",
+   "InvoiceDate": "2026-09-02",
+   "DueDate": "2026-09-12",
+   "Currency": "TWD",
+   "Amount": "150000.00",
+   "PaidAmount": "150000.00",
+   "Balance": "0.00"
+  },
+  {
+   "InvoiceID": "0090000209",
+   "OrderID": "0045000112",
+   "CustomerID": "C007",
+   "ProjectID": "P005",
+   "InvoiceDate": "2026-09-05",
+   "DueDate": "2026-09-20",
+   "Currency": "USD",
+   "Amount": "12311.00",
+   "PaidAmount": "4924.40",
+   "Balance": "7386.60"
+  },
+  {
+   "InvoiceID": "0090000210",
+   "OrderID": "0045000111",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "InvoiceDate": "2026-09-08",
+   "DueDate": "2026-10-08",
+   "Currency": "EUR",
+   "Amount": "2250.00",
+   "PaidAmount": "0.00",
+   "Balance": "2250.00"
+  },
+  {
+   "InvoiceID": "0090000211",
+   "OrderID": "0045000115",
+   "CustomerID": "C005",
+   "ProjectID": "",
+   "InvoiceDate": "2026-09-10",
+   "DueDate": "2026-09-30",
+   "Currency": "USD",
+   "Amount": "6391.00",
+   "PaidAmount": "0.00",
+   "Balance": "6391.00"
+  },
+  {
+   "InvoiceID": "0090000212",
+   "OrderID": "0045000117",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "InvoiceDate": "2026-09-12",
+   "DueDate": "2026-09-22",
+   "Currency": "TWD",
+   "Amount": "90000.00",
+   "PaidAmount": "0.00",
+   "Balance": "90000.00"
+  },
+  {
+   "InvoiceID": "0090000213",
+   "OrderID": "0045000113",
+   "CustomerID": "C004",
+   "ProjectID": "",
+   "InvoiceDate": "2026-09-15",
+   "DueDate": "2026-09-30",
+   "Currency": "TWD",
+   "Amount": "15390.00",
+   "PaidAmount": "3847.50",
+   "Balance": "11542.50"
+  },
+  {
+   "InvoiceID": "0090000214",
+   "OrderID": "0045000119",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "InvoiceDate": "2026-09-16",
+   "DueDate": "2026-10-16",
+   "Currency": "EUR",
+   "Amount": "8775.00",
+   "PaidAmount": "8775.00",
+   "Balance": "0.00"
+  },
+  {
+   "InvoiceID": "0090000215",
+   "OrderID": "0045000120",
+   "CustomerID": "C006",
+   "ProjectID": "",
+   "InvoiceDate": "2026-09-18",
+   "DueDate": "2026-09-28",
+   "Currency": "EUR",
+   "Amount": "461.70",
+   "PaidAmount": "461.70",
+   "Balance": "0.00"
+  },
+  {
+   "InvoiceID": "0090000216",
+   "OrderID": "0045000116",
+   "CustomerID": "C008",
+   "ProjectID": "",
+   "InvoiceDate": "2026-09-20",
+   "DueDate": "2026-10-20",
+   "Currency": "TWD",
+   "Amount": "29400.00",
+   "PaidAmount": "17640.00",
+   "Balance": "11760.00"
+  },
+  {
+   "InvoiceID": "0090000217",
+   "OrderID": "0045000122",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "InvoiceDate": "2026-09-22",
+   "DueDate": "2026-09-27",
+   "Currency": "USD",
+   "Amount": "4141.00",
+   "PaidAmount": "2070.50",
+   "Balance": "2070.50"
+  },
+  {
+   "InvoiceID": "0090000218",
+   "OrderID": "0045000124",
+   "CustomerID": "C004",
+   "ProjectID": "",
+   "InvoiceDate": "2026-09-25",
+   "DueDate": "2026-10-25",
+   "Currency": "TWD",
+   "Amount": "45000.00",
+   "PaidAmount": "0.00",
+   "Balance": "45000.00"
+  },
+  {
+   "InvoiceID": "0090000219",
+   "OrderID": "0045000125",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "InvoiceDate": "2026-09-30",
+   "DueDate": "2026-09-30",
+   "Currency": "TWD",
+   "Amount": "386445.00",
+   "PaidAmount": "0.00",
+   "Balance": "386445.00"
+  },
+  {
+   "InvoiceID": "0090000220",
+   "OrderID": "0045000129",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "InvoiceDate": "2026-10-02",
+   "DueDate": "2026-11-01",
+   "Currency": "USD",
+   "Amount": "1602.00",
+   "PaidAmount": "0.00",
+   "Balance": "1602.00"
+  },
+  {
+   "InvoiceID": "0090000221",
+   "OrderID": "0045000131",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "InvoiceDate": "2026-10-07",
+   "DueDate": "2026-10-22",
+   "Currency": "EUR",
+   "Amount": "2768.65",
+   "PaidAmount": "2768.65",
+   "Balance": "0.00"
+  },
+  {
+   "InvoiceID": "0090000222",
+   "OrderID": "0045000110",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "InvoiceDate": "2026-10-12",
+   "DueDate": "2026-11-11",
+   "Currency": "TWD",
+   "Amount": "293572.50",
+   "PaidAmount": "0.00",
+   "Balance": "293572.50"
+  },
+  {
+   "InvoiceID": "0090000223",
+   "OrderID": "0045000132",
+   "CustomerID": "C001",
+   "ProjectID": "P003",
+   "InvoiceDate": "2026-10-20",
+   "DueDate": "2026-10-30",
+   "Currency": "TWD",
+   "Amount": "50400.00",
+   "PaidAmount": "25200.00",
+   "Balance": "25200.00"
+  },
+  {
+   "InvoiceID": "0090000224",
+   "OrderID": "0045000135",
+   "CustomerID": "C004",
+   "ProjectID": "",
+   "InvoiceDate": "2026-10-28",
+   "DueDate": "2026-11-27",
+   "Currency": "TWD",
+   "Amount": "176400.00",
+   "PaidAmount": "0.00",
+   "Balance": "176400.00"
+  }
+ ],
+ "expenses": [
+  {
+   "ExpenseID": "EXP-00035",
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos",
+   "ProjectID": "P004",
+   "ExpenseDate": "2026-08-01",
+   "Category": "Hotel",
+   "Currency": "EUR",
+   "Amount": "95.00",
+   "Status": "Approved",
+   "ReceiptID": "RC264701",
+   "Description": "出差住宿\n(含早餐)",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00029",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-08-03",
+   "Category": "Travel",
+   "Currency": "USD",
+   "Amount": "210.00",
+   "Status": "Approved",
+   "ReceiptID": "RC421572",
+   "Description": "機票 TPE-FRA\n含行李費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00030",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-08-11",
+   "Category": "Hotel",
+   "Currency": "TWD",
+   "Amount": "3600.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC631696",
+   "Description": "客戶驗收住宿 2 晚",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00033",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-08-14",
+   "Category": "Travel",
+   "Currency": "TWD",
+   "Amount": "2100.00",
+   "Status": "Approved",
+   "ReceiptID": "RC505042",
+   "Description": "機票 TPE-FRA\n含行李費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00031",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P005",
+   "ExpenseDate": "2026-08-20",
+   "Category": "Meals",
+   "Currency": "EUR",
+   "Amount": "48.00",
+   "Status": "Approved",
+   "ReceiptID": "",
+   "Description": "加班餐費",
+   "MissingReceipt": true
+  },
+  {
+   "ExpenseID": "EXP-00034",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-08-28",
+   "Category": "Meals",
+   "Currency": "USD",
+   "Amount": "22.00",
+   "Status": "Rejected",
+   "ReceiptID": "RC460933",
+   "Description": "加班餐費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00032",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-08-31",
+   "Category": "Supplies",
+   "Currency": "TWD",
+   "Amount": "455.00",
+   "Status": "Draft",
+   "ReceiptID": "RC373179",
+   "Description": "RF 接頭與轉接器\nSMA x4",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00001",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-01",
+   "Category": "Travel",
+   "Currency": "TWD",
+   "Amount": "1280.00",
+   "Status": "Approved",
+   "ReceiptID": "RC702658",
+   "Description": "高鐵 台北-新竹 往返",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00002",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-02",
+   "Category": "Hotel",
+   "Currency": "USD",
+   "Amount": "200.00",
+   "Status": "Approved",
+   "ReceiptID": "RC138828",
+   "Description": "客戶驗收住宿 2 晚",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00003",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-03",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "450.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC162210",
+   "Description": "加班餐費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00014",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-04",
+   "Category": "Hotel",
+   "Currency": "EUR",
+   "Amount": "180.00",
+   "Status": "Approved",
+   "ReceiptID": "RC852962",
+   "Description": "客戶驗收住宿 2 晚",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00004",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-05",
+   "Category": "Supplies",
+   "Currency": "EUR",
+   "Amount": "42.50",
+   "Status": "Approved",
+   "ReceiptID": "RC358881",
+   "Description": "治具耗材",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00019",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-09-06",
+   "Category": "Travel",
+   "Currency": "TWD",
+   "Amount": "8800.00",
+   "Status": "Approved",
+   "ReceiptID": "RC448459",
+   "Description": "機票 TPE-FRA\n含行李費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00023",
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos",
+   "ProjectID": "P004",
+   "ExpenseDate": "2026-09-07",
+   "Category": "Hotel",
+   "Currency": "USD",
+   "Amount": "156.25",
+   "Status": "Approved",
+   "ReceiptID": "RC973534",
+   "Description": "Hotel near Hsinchu Science Park",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00005",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-08",
+   "Category": "Travel",
+   "Currency": "USD",
+   "Amount": "88.40",
+   "Status": "Draft",
+   "ReceiptID": "RC920686",
+   "Description": "Taxi to customer site",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00015",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-09",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "380.00",
+   "Status": "Submitted",
+   "ReceiptID": "",
+   "Description": "加班餐費",
+   "MissingReceipt": true
+  },
+  {
+   "ExpenseID": "EXP-00006",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-10",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "620.00",
+   "Status": "Approved",
+   "ReceiptID": "",
+   "Description": "Team dinner after install",
+   "MissingReceipt": true
+  },
+  {
+   "ExpenseID": "EXP-00026",
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華",
+   "ProjectID": "P005",
+   "ExpenseDate": "2026-09-11",
+   "Category": "Supplies",
+   "Currency": "TWD",
+   "Amount": "1880.00",
+   "Status": "Approved",
+   "ReceiptID": "RC233694",
+   "Description": "治具耗材",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00007",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-12",
+   "Category": "Hotel",
+   "Currency": "EUR",
+   "Amount": "155.00",
+   "Status": "Rejected",
+   "ReceiptID": "RC483886",
+   "Description": "出差住宿\n(含早餐)",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00020",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-09-13",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "760.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC789988",
+   "Description": "Team dinner after install",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00008",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-15",
+   "Category": "Supplies",
+   "Currency": "TWD",
+   "Amount": "2399.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC301050",
+   "Description": "RF 接頭與轉接器\nSMA x4",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00016",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P005",
+   "ExpenseDate": "2026-09-16",
+   "Category": "Travel",
+   "Currency": "USD",
+   "Amount": "142.00",
+   "Status": "Approved",
+   "ReceiptID": "RC871984",
+   "Description": "高鐵 台北-新竹 往返",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00009",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-17",
+   "Category": "Travel",
+   "Currency": "TWD",
+   "Amount": "3150.00",
+   "Status": "Approved",
+   "ReceiptID": "RC254438",
+   "Description": "機票 TPE-FRA\n含行李費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00024",
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-18",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "5000.00",
+   "Status": "Approved",
+   "ReceiptID": "RC809392",
+   "Description": "客戶餐敘",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00010",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-19",
+   "Category": "Meals",
+   "Currency": "USD",
+   "Amount": "35.75",
+   "Status": "Draft",
+   "ReceiptID": "RC939068",
+   "Description": "加班餐費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00021",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P004",
+   "ExpenseDate": "2026-09-20",
+   "Category": "Hotel",
+   "Currency": "USD",
+   "Amount": "120.00",
+   "Status": "Approved",
+   "ReceiptID": "RC934220",
+   "Description": "Hotel near Hsinchu Science Park",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00017",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P005",
+   "ExpenseDate": "2026-09-21",
+   "Category": "Supplies",
+   "Currency": "TWD",
+   "Amount": "999.00",
+   "Status": "Draft",
+   "ReceiptID": "RC340594",
+   "Description": "RF 接頭與轉接器\nSMA x4",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00027",
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-09-22",
+   "Category": "Travel",
+   "Currency": "USD",
+   "Amount": "64.90",
+   "Status": "Submitted",
+   "ReceiptID": "RC106706",
+   "Description": "高鐵 台北-新竹 往返",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00011",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-23",
+   "Category": "Hotel",
+   "Currency": "TWD",
+   "Amount": "4200.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC551107",
+   "Description": "客戶驗收住宿 2 晚",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00025",
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-24",
+   "Category": "Travel",
+   "Currency": "EUR",
+   "Amount": "143.00",
+   "Status": "Approved",
+   "ReceiptID": "RC220246",
+   "Description": "Taxi to customer site",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00012",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P001",
+   "ExpenseDate": "2026-09-26",
+   "Category": "Supplies",
+   "Currency": "USD",
+   "Amount": "12.30",
+   "Status": "Rejected",
+   "ReceiptID": "RC129370",
+   "Description": "RF 接頭與轉接器\nSMA x4",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00022",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-09-27",
+   "Category": "Supplies",
+   "Currency": "EUR",
+   "Amount": "18.20",
+   "Status": "Submitted",
+   "ReceiptID": "RC976630",
+   "Description": "USB-C adapters",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00018",
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-29",
+   "Category": "Travel",
+   "Currency": "TWD",
+   "Amount": "5000.01",
+   "Status": "Rejected",
+   "ReceiptID": "RC227941",
+   "Description": "高鐵 台北-新竹 往返",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00013",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-09-30",
+   "Category": "Travel",
+   "Currency": "EUR",
+   "Amount": "60.00",
+   "Status": "Approved",
+   "ReceiptID": "RC126979",
+   "Description": "高鐵 台北-新竹 往返",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00028",
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-09-30",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "300.00",
+   "Status": "Approved",
+   "ReceiptID": "RC906299",
+   "Description": "加班餐費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00036",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-10-01",
+   "Category": "Travel",
+   "Currency": "TWD",
+   "Amount": "1500.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC571604",
+   "Description": "機票 TPE-FRA\n含行李費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00038",
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華",
+   "ProjectID": "P005",
+   "ExpenseDate": "2026-10-08",
+   "Category": "Meals",
+   "Currency": "TWD",
+   "Amount": "520.00",
+   "Status": "Approved",
+   "ReceiptID": "RC169343",
+   "Description": "Team dinner after install",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00037",
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)",
+   "ProjectID": "P003",
+   "ExpenseDate": "2026-10-15",
+   "Category": "Hotel",
+   "Currency": "USD",
+   "Amount": "175.00",
+   "Status": "Approved",
+   "ReceiptID": "RC458117",
+   "Description": "Hotel near Hsinchu Science Park",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00039",
+   "EmployeeID": "E006",
+   "EmployeeName": "Kenji Sato",
+   "ProjectID": "P002",
+   "ExpenseDate": "2026-10-20",
+   "Category": "Travel",
+   "Currency": "EUR",
+   "Amount": "310.00",
+   "Status": "Submitted",
+   "ReceiptID": "RC959621",
+   "Description": "機票 TPE-FRA\n含行李費",
+   "MissingReceipt": false
+  },
+  {
+   "ExpenseID": "EXP-00040",
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明",
+   "ProjectID": "P004",
+   "ExpenseDate": "2026-10-31",
+   "Category": "Supplies",
+   "Currency": "TWD",
+   "Amount": "640.00",
+   "Status": "Draft",
+   "ReceiptID": "RC114086",
+   "Description": "治具耗材",
+   "MissingReceipt": false
+  }
+ ],
+ "quotes": [
+  {
+   "QuoteID": "Q0001",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-08-04",
+   "ValidUntil": "2026-09-03",
+   "Status": "Accepted",
+   "Currency": "TWD",
+   "Subtotal": "69000.00",
+   "DiscountPercent": "0",
+   "NetAmount": "69000.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 1,
+     "UnitPrice": "69000.00",
+     "LineAmount": "69000.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0002",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-08-06",
+   "ValidUntil": "2026-09-05",
+   "Status": "Expired",
+   "Currency": "USD",
+   "Subtotal": "8965.00",
+   "DiscountPercent": "5",
+   "NetAmount": "8516.75",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 2,
+     "UnitPrice": "1250.00",
+     "LineAmount": "2500.00"
+    },
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 4,
+     "UnitPrice": "420.00",
+     "LineAmount": "1680.00"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 3,
+     "UnitPrice": "1500.00",
+     "LineAmount": "4500.00"
+    },
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 3,
+     "UnitPrice": "95.00",
+     "LineAmount": "285.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0003",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "QuoteDate": "2026-08-11",
+   "ValidUntil": "2026-09-10",
+   "Status": "Accepted",
+   "Currency": "EUR",
+   "Subtotal": "9463.96",
+   "DiscountPercent": "10",
+   "NetAmount": "8517.56",
+   "Lines": [
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 6,
+     "UnitPrice": "1350.00",
+     "LineAmount": "8100.00"
+    },
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 3,
+     "UnitPrice": "85.50",
+     "LineAmount": "256.50"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 2,
+     "UnitPrice": "553.73",
+     "LineAmount": "1107.46"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0004",
+   "CustomerID": "C005",
+   "ProjectID": "",
+   "QuoteDate": "2026-08-14",
+   "ValidUntil": "2026-09-13",
+   "Status": "Sent",
+   "Currency": "USD",
+   "Subtotal": "4046.50",
+   "DiscountPercent": "0",
+   "NetAmount": "4046.50",
+   "Lines": [
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 1,
+     "UnitPrice": "1500.00",
+     "LineAmount": "1500.00"
+    },
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 1,
+     "UnitPrice": "85.50",
+     "LineAmount": "85.50"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 4,
+     "UnitPrice": "615.25",
+     "LineAmount": "2461.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0005",
+   "CustomerID": "C001",
+   "ProjectID": "P003",
+   "QuoteDate": "2026-08-18",
+   "ValidUntil": "2026-09-17",
+   "Status": "Accepted",
+   "Currency": "TWD",
+   "Subtotal": "101482.50",
+   "DiscountPercent": "5",
+   "NetAmount": "96408.38",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 4,
+     "UnitPrice": "2850.00",
+     "LineAmount": "11400.00"
+    },
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 5,
+     "UnitPrice": "2565.00",
+     "LineAmount": "12825.00"
+    },
+    {
+     "ProductID": "MAT-1006",
+     "ProductName": "Power Sensor",
+     "Quantity": 2,
+     "UnitPrice": "29400.00",
+     "LineAmount": "58800.00"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 1,
+     "UnitPrice": "18457.50",
+     "LineAmount": "18457.50"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0006",
+   "CustomerID": "C007",
+   "ProjectID": "P005",
+   "QuoteDate": "2026-08-21",
+   "ValidUntil": "2026-09-20",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "783982.50",
+   "DiscountPercent": "0",
+   "NetAmount": "783982.50",
+   "Lines": [
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 5,
+     "UnitPrice": "18457.50",
+     "LineAmount": "92287.50"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 6,
+     "UnitPrice": "45000.00",
+     "LineAmount": "270000.00"
+    },
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 3,
+     "UnitPrice": "2565.00",
+     "LineAmount": "7695.00"
+    },
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 6,
+     "UnitPrice": "69000.00",
+     "LineAmount": "414000.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0007",
+   "CustomerID": "C004",
+   "ProjectID": "",
+   "QuoteDate": "2026-08-25",
+   "ValidUntil": "2026-09-24",
+   "Status": "Expired",
+   "Currency": "TWD",
+   "Subtotal": "63000.00",
+   "DiscountPercent": "10",
+   "NetAmount": "56700.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 5,
+     "UnitPrice": "12600.00",
+     "LineAmount": "63000.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0008",
+   "CustomerID": "C007",
+   "ProjectID": "P005",
+   "QuoteDate": "2026-08-28",
+   "ValidUntil": "2026-09-27",
+   "Status": "Accepted",
+   "Currency": "EUR",
+   "Subtotal": "3650.65",
+   "DiscountPercent": "5",
+   "NetAmount": "3468.12",
+   "Lines": [
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 5,
+     "UnitPrice": "553.73",
+     "LineAmount": "2768.65"
+    },
+    {
+     "ProductID": "MAT-1006",
+     "ProductName": "Power Sensor",
+     "Quantity": 1,
+     "UnitPrice": "882.00",
+     "LineAmount": "882.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0009",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-08-31",
+   "ValidUntil": "2026-09-30",
+   "Status": "Sent",
+   "Currency": "USD",
+   "Subtotal": "2461.00",
+   "DiscountPercent": "0",
+   "NetAmount": "2461.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 4,
+     "UnitPrice": "615.25",
+     "LineAmount": "2461.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0010",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-01",
+   "ValidUntil": "2026-09-20",
+   "Status": "Sent",
+   "Currency": "TWD",
+   "Subtotal": "218557.50",
+   "DiscountPercent": "5",
+   "NetAmount": "207629.63",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 1,
+     "UnitPrice": "12600.00",
+     "LineAmount": "12600.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 5,
+     "UnitPrice": "37500.00",
+     "LineAmount": "187500.00"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 1,
+     "UnitPrice": "18457.50",
+     "LineAmount": "18457.50"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0011",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-03",
+   "ValidUntil": "2026-10-03",
+   "Status": "Accepted",
+   "Currency": "USD",
+   "Subtotal": "11500.00",
+   "DiscountPercent": "10",
+   "NetAmount": "10350.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 5,
+     "UnitPrice": "2300.00",
+     "LineAmount": "11500.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0012",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-09-04",
+   "ValidUntil": "2026-09-30",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "267825.00",
+   "DiscountPercent": "0",
+   "NetAmount": "267825.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 5,
+     "UnitPrice": "2565.00",
+     "LineAmount": "12825.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 2,
+     "UnitPrice": "37500.00",
+     "LineAmount": "75000.00"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 4,
+     "UnitPrice": "45000.00",
+     "LineAmount": "180000.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0013",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-09-07",
+   "ValidUntil": "2026-10-07",
+   "Status": "Accepted",
+   "Currency": "EUR",
+   "Subtotal": "2930.85",
+   "DiscountPercent": "5",
+   "NetAmount": "2784.31",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 3,
+     "UnitPrice": "76.95",
+     "LineAmount": "230.85"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 2,
+     "UnitPrice": "1350.00",
+     "LineAmount": "2700.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0014",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-09",
+   "ValidUntil": "2026-09-28",
+   "Status": "Expired",
+   "Currency": "EUR",
+   "Subtotal": "18072.00",
+   "DiscountPercent": "0",
+   "NetAmount": "18072.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 4,
+     "UnitPrice": "2070.00",
+     "LineAmount": "8280.00"
+    },
+    {
+     "ProductID": "MAT-1006",
+     "ProductName": "Power Sensor",
+     "Quantity": 6,
+     "UnitPrice": "882.00",
+     "LineAmount": "5292.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 4,
+     "UnitPrice": "1125.00",
+     "LineAmount": "4500.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0015",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "QuoteDate": "2026-09-11",
+   "ValidUntil": "2026-09-25",
+   "Status": "Accepted",
+   "Currency": "TWD",
+   "Subtotal": "313500.00",
+   "DiscountPercent": "10",
+   "NetAmount": "282150.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 4,
+     "UnitPrice": "69000.00",
+     "LineAmount": "276000.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 1,
+     "UnitPrice": "37500.00",
+     "LineAmount": "37500.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0016",
+   "CustomerID": "C005",
+   "ProjectID": "",
+   "QuoteDate": "2026-09-14",
+   "ValidUntil": "2026-10-14",
+   "Status": "Sent",
+   "Currency": "USD",
+   "Subtotal": "256.50",
+   "DiscountPercent": "5",
+   "NetAmount": "243.68",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 3,
+     "UnitPrice": "85.50",
+     "LineAmount": "256.50"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0017",
+   "CustomerID": "C007",
+   "ProjectID": "P005",
+   "QuoteDate": "2026-09-17",
+   "ValidUntil": "2026-09-29",
+   "Status": "Sent",
+   "Currency": "TWD",
+   "Subtotal": "433800.00",
+   "DiscountPercent": "0",
+   "NetAmount": "433800.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1006",
+     "ProductName": "Power Sensor",
+     "Quantity": 3,
+     "UnitPrice": "29400.00",
+     "LineAmount": "88200.00"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 6,
+     "UnitPrice": "45000.00",
+     "LineAmount": "270000.00"
+    },
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 6,
+     "UnitPrice": "12600.00",
+     "LineAmount": "75600.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0018",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-21",
+   "ValidUntil": "2026-10-21",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "572130.00",
+   "DiscountPercent": "10",
+   "NetAmount": "514917.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 6,
+     "UnitPrice": "37500.00",
+     "LineAmount": "225000.00"
+    },
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 2,
+     "UnitPrice": "2565.00",
+     "LineAmount": "5130.00"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 3,
+     "UnitPrice": "45000.00",
+     "LineAmount": "135000.00"
+    },
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 3,
+     "UnitPrice": "69000.00",
+     "LineAmount": "207000.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0019",
+   "CustomerID": "C004",
+   "ProjectID": "",
+   "QuoteDate": "2026-09-24",
+   "ValidUntil": "2026-10-24",
+   "Status": "Sent",
+   "Currency": "USD",
+   "Subtotal": "256.50",
+   "DiscountPercent": "0",
+   "NetAmount": "256.50",
+   "Lines": [
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 3,
+     "UnitPrice": "85.50",
+     "LineAmount": "256.50"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0020",
+   "CustomerID": "C006",
+   "ProjectID": "",
+   "QuoteDate": "2026-09-28",
+   "ValidUntil": "2026-10-28",
+   "Status": "Accepted",
+   "Currency": "EUR",
+   "Subtotal": "5126.42",
+   "DiscountPercent": "5",
+   "NetAmount": "4870.10",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 5,
+     "UnitPrice": "85.50",
+     "LineAmount": "427.50"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 4,
+     "UnitPrice": "553.73",
+     "LineAmount": "2214.92"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 1,
+     "UnitPrice": "1350.00",
+     "LineAmount": "1350.00"
+    },
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 3,
+     "UnitPrice": "378.00",
+     "LineAmount": "1134.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0021",
+   "CustomerID": "C008",
+   "ProjectID": "",
+   "QuoteDate": "2026-09-30",
+   "ValidUntil": "2026-10-30",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "129600.00",
+   "DiscountPercent": "0",
+   "NetAmount": "129600.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 6,
+     "UnitPrice": "2850.00",
+     "LineAmount": "17100.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 3,
+     "UnitPrice": "37500.00",
+     "LineAmount": "112500.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0022",
+   "CustomerID": "C001",
+   "ProjectID": "P003",
+   "QuoteDate": "2026-10-01",
+   "ValidUntil": "2026-10-31",
+   "Status": "Accepted",
+   "Currency": "TWD",
+   "Subtotal": "29400.00",
+   "DiscountPercent": "0",
+   "NetAmount": "29400.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1006",
+     "ProductName": "Power Sensor",
+     "Quantity": 1,
+     "UnitPrice": "29400.00",
+     "LineAmount": "29400.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0023",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "QuoteDate": "2026-10-05",
+   "ValidUntil": "2026-11-04",
+   "Status": "Sent",
+   "Currency": "EUR",
+   "Subtotal": "2250.00",
+   "DiscountPercent": "5",
+   "NetAmount": "2137.50",
+   "Lines": [
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 2,
+     "UnitPrice": "1125.00",
+     "LineAmount": "2250.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0024",
+   "CustomerID": "C001",
+   "ProjectID": "P003",
+   "QuoteDate": "2026-10-08",
+   "ValidUntil": "2026-11-07",
+   "Status": "Accepted",
+   "Currency": "USD",
+   "Subtotal": "13000.00",
+   "DiscountPercent": "10",
+   "NetAmount": "11700.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 5,
+     "UnitPrice": "2300.00",
+     "LineAmount": "11500.00"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 1,
+     "UnitPrice": "1500.00",
+     "LineAmount": "1500.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0025",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-10-12",
+   "ValidUntil": "2026-11-11",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "140700.00",
+   "DiscountPercent": "0",
+   "NetAmount": "140700.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 3,
+     "UnitPrice": "45000.00",
+     "LineAmount": "135000.00"
+    },
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 2,
+     "UnitPrice": "2850.00",
+     "LineAmount": "5700.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0026",
+   "CustomerID": "C007",
+   "ProjectID": "P005",
+   "QuoteDate": "2026-10-15",
+   "ValidUntil": "2026-11-14",
+   "Status": "Accepted",
+   "Currency": "TWD",
+   "Subtotal": "444300.00",
+   "DiscountPercent": "5",
+   "NetAmount": "422085.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 4,
+     "UnitPrice": "2850.00",
+     "LineAmount": "11400.00"
+    },
+    {
+     "ProductID": "MAT-1007",
+     "ProductName": "Software License (1y)",
+     "Quantity": 6,
+     "UnitPrice": "45000.00",
+     "LineAmount": "270000.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 3,
+     "UnitPrice": "37500.00",
+     "LineAmount": "112500.00"
+    },
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 4,
+     "UnitPrice": "12600.00",
+     "LineAmount": "50400.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0027",
+   "CustomerID": "C005",
+   "ProjectID": "",
+   "QuoteDate": "2026-10-19",
+   "ValidUntil": "2026-11-18",
+   "Status": "Expired",
+   "Currency": "USD",
+   "Subtotal": "12496.25",
+   "DiscountPercent": "0",
+   "NetAmount": "12496.25",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 6,
+     "UnitPrice": "420.00",
+     "LineAmount": "2520.00"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 5,
+     "UnitPrice": "615.25",
+     "LineAmount": "3076.25"
+    },
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 3,
+     "UnitPrice": "2300.00",
+     "LineAmount": "6900.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0028",
+   "CustomerID": "C004",
+   "ProjectID": "",
+   "QuoteDate": "2026-10-22",
+   "ValidUntil": "2026-11-21",
+   "Status": "Sent",
+   "Currency": "TWD",
+   "Subtotal": "384247.50",
+   "DiscountPercent": "10",
+   "NetAmount": "345822.75",
+   "Lines": [
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 2,
+     "UnitPrice": "2850.00",
+     "LineAmount": "5700.00"
+    },
+    {
+     "ProductID": "MAT-1004",
+     "ProductName": "Shielding Box",
+     "Quantity": 4,
+     "UnitPrice": "69000.00",
+     "LineAmount": "276000.00"
+    },
+    {
+     "ProductID": "MAT-1005",
+     "ProductName": "Test Fixture 治具",
+     "Quantity": 5,
+     "UnitPrice": "18457.50",
+     "LineAmount": "92287.50"
+    },
+    {
+     "ProductID": "MAT-1002",
+     "ProductName": "RF Cable Set",
+     "Quantity": 4,
+     "UnitPrice": "2565.00",
+     "LineAmount": "10260.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0029",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-10-26",
+   "ValidUntil": "2026-11-25",
+   "Status": "Accepted",
+   "Currency": "USD",
+   "Subtotal": "1670.00",
+   "DiscountPercent": "0",
+   "NetAmount": "1670.00",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 1,
+     "UnitPrice": "420.00",
+     "LineAmount": "420.00"
+    },
+    {
+     "ProductID": "MAT-1001",
+     "ProductName": "Signal Analyzer Module",
+     "Quantity": 1,
+     "UnitPrice": "1250.00",
+     "LineAmount": "1250.00"
+    }
+   ]
+  },
+  {
+   "QuoteID": "Q0030",
+   "CustomerID": "C006",
+   "ProjectID": "",
+   "QuoteDate": "2026-10-30",
+   "ValidUntil": "2026-11-29",
+   "Status": "Draft",
+   "Currency": "EUR",
+   "Subtotal": "4797.00",
+   "DiscountPercent": "5",
+   "NetAmount": "4557.15",
+   "Lines": [
+    {
+     "ProductID": "MAT-1003",
+     "ProductName": "校正服務 (Calibration)",
+     "Quantity": 2,
+     "UnitPrice": "378.00",
+     "LineAmount": "756.00"
+    },
+    {
+     "ProductID": "MAT-1008",
+     "ProductName": "現場安裝工時",
+     "Quantity": 6,
+     "UnitPrice": "85.50",
+     "LineAmount": "513.00"
+    },
+    {
+     "ProductID": "MAT-1006",
+     "ProductName": "Power Sensor",
+     "Quantity": 4,
+     "UnitPrice": "882.00",
+     "LineAmount": "3528.00"
+    }
+   ]
+  }
+ ]
+}
