@@ -18,6 +18,9 @@ Updated: 2026-10-06 (Asia/Taipei), by Claude Code
 - Installed live: W14 (`engineering/rs-ncc-improvement-plan`), W11 as one
   Workflow `engineering/sde-weekly-report`, and now `engineering/coding-change`
   with Skill `engineering/coding` (see below).
+- Knowledge: host.json binds `engineering/rs-knowledge@1.0.1` (purpose
+  written, boundaries empty); chat offers it as `knowledge__rs-knowledge`.
+  Rollback: set the binding back to 1.0.0 and restart.
 - JEV shadow mode is on (`decision_accelerator`), needs the SSH tunnel
   `ssh -N -p 2222 -L 18000:127.0.0.1:8000 openlab@172.25.228.141`; log
   `workspace\jev-shadow.jsonl`, replay `python -m evaluation.jev_shadow_report <log>`.

@@ -1312,11 +1312,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   vault bound by the host. Live: the chat question that used to fail with
   `invalid_input` now answers with the vault's evidence. Commit `e5c0207`;
   tests `tests/test_knowledge_vault_tools.py`.
-- [ ] `engineering/rs-knowledge@1.0.1` with a written purpose: deferred by the
-  owner (2026-10-06). Boundaries stay empty; the vault keeps the current
-  description derived from its domain ("the engineering knowledge domain").
-  Publish 1.0.1 only with the owner's approval of the text; a published
-  1.0.0 is not edited in place.
+- [x] `engineering/rs-knowledge@1.0.1` published (owner approval
+  `owner-approved-2026-10-06-rs-knowledge-1.0.1-purpose`): 1.0.0's content
+  (all three digests re-verified against the vault) plus the owner-approved
+  purpose; boundaries empty by the owner's choice. host.json binds 1.0.1
+  (backup `host.json.bak-20261006-163601-before-rs-knowledge-1.0.1`); 1.0.0
+  stays installed for rollback. Live: the chat tool `knowledge__rs-knowledge`
+  carries the purpose and answered with evidence.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
