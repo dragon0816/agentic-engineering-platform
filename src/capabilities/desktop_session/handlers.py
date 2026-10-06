@@ -55,7 +55,7 @@ SPEC = CapabilitySpec.model_validate({
 MAX_LOOK_CHARS = 8_000
 
 ActionKind = Literal["set", "invoke", "select_row", "read", "read_table", "dialog", "dismiss",
-                     "save_as", "wait_dialog", "wait"]
+                     "save_as", "wait_dialog", "wait", "clear_dialogs"]
 _NEEDS: dict[str, tuple[str, ...]] = {
     "set": ("id", "value"),
     "invoke": ("id",),

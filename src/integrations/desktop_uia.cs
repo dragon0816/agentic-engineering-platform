@@ -302,6 +302,7 @@ namespace AepDesktop
                 case "read_table": ReadTable(Str(action, "id"), Str(action, "save_as")); break;
                 case "dialog": DialogAction(Str(action, "save_as"), Num(action, "seconds", 5)); break;
                 case "dismiss": Dismiss(Str(action, "button"), Num(action, "seconds", 5)); break;
+                case "clear_dialogs": ClearDialogs(); break;
                 case "save_as": SaveAs(Str(action, "path"), Num(action, "seconds", 15)); break;
                 case "wait_dialog": WaitDialog(Str(action, "title"), Num(action, "seconds", 10)); break;
                 case "wait": Thread.Sleep((int)(Math.Min(Math.Max(Num(action, "seconds", 1), 0), 60) * 1000)); break;
@@ -540,6 +541,44 @@ namespace AepDesktop
             InvokeElement(target, "dialog button");
             if (!WaitClosed(dialog, 10))
                 throw new Refusal("dialog_still_open", "the dialog did not close");
+        }
+
+        // Close whatever dialogs are open (a leftover message box or detail form
+        // from an earlier run), innermost first; nothing open is not an error.
+        private void ClearDialogs()
+        {
+            for (int round = 0; round < 6; round++)
+            {
+                List<AutomationElement> open = Dialogs();
+                if (open.Count == 0) return;
+                AutomationElement dialog = open[0];
+                object window = Pattern(dialog, WindowPattern.Pattern);
+                bool closed = false;
+                try
+                {
+                    if (window != null)
+                    {
+                        ((WindowPattern)window).Close();
+                        closed = WaitClosed(dialog, 5);
+                    }
+                    if (!closed)
+                    {
+                        Condition button = new PropertyCondition(
+                            AutomationElement.ControlTypeProperty, ControlType.Button);
+                        AutomationElement first = dialog.FindFirst(TreeScope.Children, button);
+                        if (first != null)
+                        {
+                            InvokeElement(first, "dialog button");
+                            closed = WaitClosed(dialog, 5);
+                        }
+                    }
+                }
+                catch (ElementNotAvailableException)
+                {
+                    closed = true;
+                }
+                if (!closed) throw new Refusal("dialog_still_open", "a dialog would not close");
+            }
         }
 
         private void SaveAs(string path, double seconds)
