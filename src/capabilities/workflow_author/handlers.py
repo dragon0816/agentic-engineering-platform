@@ -20,6 +20,7 @@ from capabilities.runtime import InstalledCapabilities
 from capabilities.workflow_author.contracts import DraftWorkflowRequest, WorkflowDraft
 from capabilities.workflow_author.draft import draft_workflow
 from common.base import Contract
+from common.cjk_text import fold_cjk_lookalikes
 from common.execution import RequestContext
 from models.contracts import ModelClient
 
@@ -107,6 +108,7 @@ class DraftWorkflowHandler:
             from pypdf import PdfReader
 
             text = "\n\n".join(page.extract_text() or "" for page in PdfReader(path).pages).strip()
-            return text if text else None
+            # 客⼾ -> 客戶: printed PDFs map some glyphs to look-alike radicals.
+            return fold_cjk_lookalikes(text) if text else None
         except (ImportError, OSError, ValueError):
             return None
