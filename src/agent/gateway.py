@@ -582,32 +582,9 @@ class Gateway:
                 return self._conversation_failure(
                     context, "empty_model_answer", turn, tuple(evidence)
                 )
-            if len(response.tool_calls) != 1:
-                return self._conversation_failure(
-                    context, "multiple_tool_calls_not_supported", turn, tuple(evidence)
-                )
-            call = response.tool_calls[0]
-            binding = bindings.get(call.name)
-            if call.name in host:
-                _tool_progress(call.name, "running")
-                item = await self._execute_host_tool(context, call, host[call.name])
-                _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
-            elif binding is None:
-                item = ConversationToolExecution(
-                    call_id=call.call_id,
-                    name=call.name,
-                    failure=Failure(
-                        code="uninstalled_tool",
-                        message="The model named a tool that is not installed",
-                    ),
-                )
-            else:
-                _tool_progress(call.name, "running")
-                item = await self._execute_conversation_tool(
-                    context, call, binding, bound.get(call.name)
-                )
-                _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
-            evidence.append(item)
+            # A reply may carry several calls; each runs in order and counts
+            # against the turn's budget. Every call gets a tool message back,
+            # as the provider requires, even one the budget no longer allows.
             messages.append(
                 ModelMessage(
                     role="assistant",
@@ -615,22 +592,50 @@ class Gateway:
                     tool_calls=response.tool_calls,
                 )
             )
-            observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
-            if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
-                observation = json.dumps(
-                    {
-                        "truncated": True,
-                        "preview": observation[:MAX_TOOL_OBSERVATION_CHARS],
-                    },
-                    ensure_ascii=False,
+            for call in response.tool_calls:
+                if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
+                    messages.append(ModelMessage(
+                        role="tool", tool_call_id=call.call_id,
+                        text=json.dumps({"skipped": "the turn's tool budget is used up"}),
+                    ))
+                    continue
+                binding = bindings.get(call.name)
+                if call.name in host:
+                    _tool_progress(call.name, "running")
+                    item = await self._execute_host_tool(context, call, host[call.name])
+                    _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
+                elif binding is None:
+                    item = ConversationToolExecution(
+                        call_id=call.call_id,
+                        name=call.name,
+                        failure=Failure(
+                            code="uninstalled_tool",
+                            message="The model named a tool that is not installed",
+                        ),
+                    )
+                else:
+                    _tool_progress(call.name, "running")
+                    item = await self._execute_conversation_tool(
+                        context, call, binding, bound.get(call.name)
+                    )
+                    _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
+                evidence.append(item)
+                observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
+                if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
+                    observation = json.dumps(
+                        {
+                            "truncated": True,
+                            "preview": observation[:MAX_TOOL_OBSERVATION_CHARS],
+                        },
+                        ensure_ascii=False,
+                    )
+                messages.append(
+                    ModelMessage(
+                        role="tool",
+                        tool_call_id=call.call_id,
+                        text=observation,
+                    )
                 )
-            messages.append(
-                ModelMessage(
-                    role="tool",
-                    tool_call_id=call.call_id,
-                    text=observation,
-                )
-            )
             if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
                 break
         return self._conversation_failure(

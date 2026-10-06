@@ -123,6 +123,8 @@ def instructions(book: Workbook, rows: list[tuple[str, str, str]]) -> None:
         ("All detail sheets", "Row 4", "欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。"),
         ("All detail sheets", "Formats", "ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。"),
         ("All sheets", "-", "不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。"),
+        ("All sheets", "Layout", "欄寬、凍結窗格、自動篩選、字型與填色保留模板設定，不要調整或自動調整欄寬。"),
+        ("All detail sheets", "Missing values", "來源沒有的值留空（空白儲存格），不要填 N/A、0 或自行推測的值。"),
         ("All sheets", "AmountTWD", "原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。"),
     ]
     for offset, (sheet_name, cell_ref, rule) in enumerate(common + rows, 4):

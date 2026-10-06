@@ -628,3 +628,30 @@ def test_a_failing_host_tool_is_an_observation_and_a_task_scope_hides_it() -> No
     asyncio.run(scoped.converse(request("d"), (ModelMessage(role="user", text="d"),),
                                 allowed_tools=frozenset({"other__tool"})))
     assert all(t.name != "authoring__draft_workflow" for t in model.calls[0].tools)
+
+
+def test_several_calls_in_one_reply_run_in_order_and_each_gets_an_answer() -> None:
+    """Lab fix-002 X02: a reply with parallel calls ended the turn; now each runs."""
+    from agent.gateway import HostTool, HostToolOutcome
+    from models.contracts import ModelTool
+
+    ran: list[str] = []
+
+    async def note(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        ran.append(str(arguments["n"]))
+        return HostToolOutcome(status="succeeded", data={"n": arguments["n"]})
+
+    tool = HostTool(ModelTool(name="authoring__list_workflows", description="l",
+                              input_contract="x.v1"), note)
+    both = ModelResponse(
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        tool_calls=tuple(
+            ModelToolCall(call_id=call_id, name="authoring__list_workflows", arguments={"n": n})
+            for call_id, n in (("a", 1), ("b", 2))),
+    )
+    built, model = _host_gateway([tool], [both, _text("done")])
+    history = (ModelMessage(role="user", text="go"),)
+    result = asyncio.run(built.converse(request("go"), history))
+    assert result.status == "answered" and ran == ["1", "2"] and len(result.tools) == 2
+    answered = [m.tool_call_id for m in model.calls[1].messages if m.role == "tool"]
+    assert answered == ["a", "b"]

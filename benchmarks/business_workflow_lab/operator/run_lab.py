@@ -49,14 +49,15 @@ SYSTEMS = {"W01": ["sap"], "W02": ["sap"], "W03": ["sap"], "W04": ["sap"],
            "X01": ["sap", "expense", "quote"], "X02": ["sap", "expense", "quote"], "X03": ["sap", "expense", "quote"]}
 MANUAL = {"sap": "sap_manual.md", "expense": "expense_manual.md", "quote": "quote_cli_manual.md"}
 RERUN = {
-    "W01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：起訖日期 2026-08-01 到 2026-08-31、status 改為 "
-            "Closed，輸出到 output\\rerun\\august_closed_orders.xlsx。", "rerun"),
-    "D01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31，"
-            "輸出到 output\\rerun\\E002_august_expenses.xlsx。", "rerun"),
-    "C01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 2026-10-31，"
-            "輸出到 output\\rerun\\C002_quotes.xlsx。", "rerun"),
-    "X01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31，"
-            "輸出到 output\\rerun\\august_projects.xlsx。", "rerun"),
+    # New values only: the output name is the Workflow's own; the operator takes the
+    # workbook the rerun wrote (owner spec §9: rerun the same Workflow, no code change).
+    "W01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：起訖日期 2026-08-01 到 2026-08-31、"
+            "status 改為 Closed。", "rerun"),
+    "D01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31。",
+            "rerun"),
+    "C01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 "
+            "2026-10-31。", "rerun"),
+    "X01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。", "rerun"),
 }
 X02_ANSWER = ("費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 "
               "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。")
@@ -298,8 +299,13 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     first_runs = authored_runs(session.exchanges, decided)
     rerun_checks: list[dict[str, Any]] | None = None
     workflow_same: bool | None = None
-    if task in RERUN and variant_override is None and find_workbook(output, task) is not None:
+    # The first result is kept as it stands now: a rerun may overwrite a fixed file name.
+    first_book = find_workbook(output, task)
+    if first_book is not None:
+        shutil.copy2(first_book, folder / "first_result.xlsx")
+    if task in RERUN and variant_override is None and first_book is not None:
         message, variant = RERUN[task]
+        rerun_started = time.time()
         interventions.append({"kind": "operator rerun request (spec §9 second parameter set)", "text": message})
         mark = len(session.exchanges)
         session.send(message, max(60.0, deadline - time.monotonic()))
@@ -310,7 +316,12 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
         digests = {r["digest"] for r in first_runs if r.get("digest")}
         # Same Workflow code: the rerun used a digest the first runs used, and succeeded.
         workflow_same = bool(rerun_runs) and all(r.get("digest") in digests for r in rerun_runs)
-        rerun_book = find_workbook(output, task, "rerun")
+        # The rerun's workbook: the newest one written after the rerun was asked for.
+        fresh = [p for p in output.rglob("*.xlsx") if not p.name.startswith("~$")
+                 and p.stat().st_mtime >= rerun_started]
+        rerun_book = max(fresh, key=lambda p: p.stat().st_mtime) if fresh else None
+        if rerun_book is not None:
+            shutil.copy2(rerun_book, folder / "rerun_result.xlsx")
         rerun_checks = grade_workbook(task, variant, rerun_book, answer_text(session.exchanges[-1]), output)
     duration = time.monotonic() - started
     task_events = {s: events(s, offsets[s]) for s in ("sap", "expense", "quote")}
@@ -321,7 +332,7 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     used, evidence = interfaces(task_events, runs, bypass)
     replies = "\n".join(answer_text(x) for x in session.exchanges)
     variant = variant_override or "main"
-    book = find_workbook(output, task)
+    book = folder / "first_result.xlsx" if first_book is not None else None
     checks = grade_workbook(task, variant, book, replies, output)
     if task == "W04":
         sap = evidence.get("sap", {})
