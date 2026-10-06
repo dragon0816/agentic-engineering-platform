@@ -1,0 +1,56 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X01\workspace
+TOP FILES
+.aep-run dir
+input dir
+output dir
+
+OUTPUT FILES
+output\downloads\sap_invoices.csv 1142
+output\downloads\sap_orders.csv 1616
+output\exceptions.csv 943
+output\expense_approved.csv 1843
+output\expenses_normalized.csv 981
+output\invoices_normalized.csv 743
+output\orders_normalized.csv 817
+output\project_summary.csv 282
+output\quotes_normalized.csv 302
+
+INPUT FILES
+input\expense_manual.md 2007
+input\fx_rates.csv 276
+  headers/sample: [['Currency', 'RateToTWD', 'Note'], ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)'], ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']]
+input\project_template.xlsx 14209
+input\quote_cli_manual.md 2303
+input\sap_manual.md 2077
+
+AEP RUNS
+.aep-run\run-001\output.txt 10272
+.aep-run\run-001\script.py 993
+  first 800 chars: "from pathlib import Path\nimport csv, json\nfrom openpyxl import load_workbook\nbase=Path('.')\nprint('CWD', Path.cwd())\nprint('input files:')\nfor p in sorted((base/'input').iterdir()):\n    print('-', p.name, p.stat().st_size)\n\nfx=base/'input'/'fx_rates.csv'\nprint('\\nfx_rates.csv sample:')\nwith fx.open(newline='', encoding='utf-8-sig') as f:\n    r=csv.reader(f)\n    for i,row in zip(range(8), r):\n        print(i, row)\n\nxlsx=base/'input'/'project_template.xlsx'\nwb=load_workbook(xlsx, data_only=False)\nprint('\\nWorkbook sheets:')\nfor ws in wb.worksheets:\n    print(ws.title, ws.max_row, ws.max_column)\n    for row in ws.iter_rows(min_row=1, max_row=min(ws.max_row,8), values_only=True):\n        print(' ', row)\n\nfor name in ['sap_manual.md','expense_manual.md','quote_cli_manual.md']:\n    p=base/'input"
+.aep-run\run-002\output.txt 1290
+.aep-run\run-002\script.py 13269
+  first 800 chars: "import csv, json, os, subprocess, sys, re\\nfrom pathlib import Path\\nfrom decimal import Decimal, ROUND_HALF_UP\\nfrom datetime import datetime, timezone, timedelta\\nfrom openpyxl import load_workbook\\n\\nparams=json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\\nFROM=params['from_date']\\nTO=params['to_date']\\nworkspace=Path.cwd()\\ninp=workspace/'input'\\nout=workspace/'output'\\ndownloads=out/'downloads'\\nout.mkdir(exist_ok=True)\\n\\nprint('Workspace:', workspace)\\nprint('Inputs:', sorted(p.name for p in inp.iterdir()))\\nprint('Output existing:', sorted(p.name for p in out.iterdir()))\\nprint('Downloads:', sorted(p.name for p in downloads.iterdir()) if downloads.exists() else [])\\n\\nTW=timezone(timedelta(hours=8))\\nD2=Decimal('0.01')\\n\\ndef money(x):\\n    if x is None or str(x"
+.aep-run\run-003\output.txt 7111
+.aep-run\run-003\script.py 654
+  first 800 chars: "from pathlib import Path\nimport csv\nbase=Path('.')\nprint('input files:', sorted(str(p) for p in (base/'input').iterdir()))\nfor name in ['sap_manual.md','expense_manual.md','quote_cli_manual.md']:\n    p=base/'input'/name\n    print('\\n---', name, '---')\n    print(p.read_text(encoding='utf-8', errors='replace')[:2500])\nfor name in ['fx_rates.csv']:\n    p=base/'input'/name\n    print('\\n---', name, '---')\n    with p.open(newline='', encoding='utf-8-sig') as f:\n        r=csv.reader(f)\n        for i,row in zip(range(10), r): print(row)\nprint('\\nexisting output files:', sorted(str(p) for p in (base/'output').rglob('*') if p.is_file())[:20])"
+.aep-run\run-004\output.txt 9871
+.aep-run\run-004\script.py 1387
+  first 800 chars: "from pathlib import Path\nimport csv, json, subprocess, sys\nfrom openpyxl import load_workbook\nbase=Path('.')\nprint('output files:', sorted(str(p) for p in (base/'output').rglob('*') if p.is_file()))\nfor rel in ['output/downloads/sap_orders.csv','output/downloads/sap_invoices.csv','output/expense_approved.csv','input/fx_rates.csv']:\n    p=base/rel\n    print('\\n---', rel, 'exists=', p.exists(), '---')\n    if p.exists():\n        with p.open(newline='', encoding='utf-8-sig') as f:\n            r=csv.DictReader(f)\n            print('fieldnames:', r.fieldnames)\n            for i,row in zip(range(5), r): print(row)\nwb=load_workbook(base/'input'/'project_template.xlsx')\nprint('\\nWorkbook sheets:', wb.sheetnames)\nfor ws in wb.worksheets:\n    print('Sheet', ws.title, 'size', ws.max_row, ws.max_column"
+.aep-run\run-005\output.txt 4547
+.aep-run\run-005\script.py 1073
+  first 800 chars: "from pathlib import Path\nimport csv, json\nfrom openpyxl import load_workbook\nws=Path.cwd()\nprint('WORKSPACE', ws)\nfor p in sorted((ws/'input').glob('*')):\n    print('INPUT', p.name, p.stat().st_size)\nprint('OUTPUT FILES')\nfor p in sorted((ws/'output').rglob('*')):\n    if p.is_file(): print(str(p.relative_to(ws)), p.stat().st_size)\nfor fn in ['output/downloads/sap_orders.csv','output/downloads/sap_invoices.csv','output/expense_approved.csv','input/fx_rates.csv']:\n    p=ws/fn\n    print('\\nFILE', fn, 'exists=', p.exists())\n    if p.exists() and p.suffix.lower()=='.csv':\n        with p.open(newline='', encoding='utf-8-sig') as f:\n            r=csv.reader(f); rows=[]\n            for i,row in zip(range(4),r): rows.append(row)\n        print('sample', rows)\nwb=load_workbook(ws/'input'/'project_tem"
+.aep-run\run-006\output.txt 6484
+.aep-run\run-006\script.py 216
+  first 800 chars: "from pathlib import Path\nws=Path.cwd()\nfor fn in ['sap_manual.md','expense_manual.md','quote_cli_manual.md']:\n    p=ws/'input'/fn\n    print('\\n====', fn, '====')\n    print(p.read_text(encoding='utf-8')[:4000])\n"
+.aep-run\run-007\output.txt 2583
+.aep-run\run-007\script.py 394
+  first 800 chars: "from pathlib import Path\nfrom openpyxl import load_workbook\nws=Path.cwd(); wb=load_workbook(ws/'input'/'project_template.xlsx', data_only=False)\nfor s in ['Orders','Invoices','Expenses','Quotes','Summary','Exceptions','Report']:\n    sh=wb[s]\n    print('\\n',s)\n    for r in range(1, min(sh.max_row,8)+1):\n        print(r, [sh.cell(r,c).value for c in range(1, min(sh.max_column,12)+1)])\n"
+.aep-run\run-008\output.txt 55
+.aep-run\run-008\script.py 583
+  first 800 chars: "import os\nfrom pathlib import Path\nws=Path.cwd()\n# Clean only workflow-owned generated files so desktop export and workbook creation are rerunnable.\nfor rel in [\n    'output/expense_approved.csv',\n    'output/project_integration_report.xlsx',\n    'output/project_summary.csv',\n    'output/orders_normalized.csv',\n    'output/invoices_normalized.csv',\n    'output/expenses_normalized.csv',\n    'output/quotes_normalized.csv',\n    'output/exceptions.csv',\n]:\n    p=ws/rel\n    if p.exists():\n        p.unlink()\n        print('deleted', rel)\nprint('cleanup complete')\n"
+.aep-run\run-009\output.txt 1549
+.aep-run\run-009\script.py 11717
+  first 800 chars: "import csv, json, os, subprocess, sys\nfrom pathlib import Path\nfrom decimal import Decimal, ROUND_HALF_UP\nfrom datetime import datetime, timezone, timedelta\nfrom openpyxl import load_workbook\n\nparams=json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\nFROM=params['from_date']; TO=params['to_date']\nws=Path.cwd(); input_dir=ws/'input'; output_dir=ws/'output'; output_dir.mkdir(exist_ok=True)\n\ndef read_csv(path):\n    with open(path, newline='', encoding='utf-8-sig') as f:\n        return list(csv.DictReader(f))\n\ndef dec(x):\n    if x is None or str(x).strip()=='': return Decimal('0')\n    return Decimal(str(x).strip())\n\ndef money(x):\n    return dec(x).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n\n# FX rates from the attachment. Some notes contain commas, so only the first tw"
+.aep-run\run-010\output.txt 0
+.aep-run\run-010\script.py 1135
+  first 800 chars: "from pathlib import Path\nimport os, json, csv\nws=Path.cwd()\nprint('WORKSPACE', ws)\nprint('TOP FILES')\nfor p in sorted(ws.iterdir()):\n    print(p.name, 'dir' if p.is_dir() else p.stat().st_size)\nprint('\\nOUTPUT FILES')\nout=ws/'output'\nfor p in sorted(out.rglob('*')):\n    if p.is_file():\n        print(p.relative_to(ws), p.stat().st_size)\nprint('\\nINPUT FILES')\ninp=ws/'input'\nfor p in sorted(inp.rglob('*')):\n    if p.is_file():\n        print(p.relative_to(ws), p.stat().st_size)\n        if p.suffix.lower()=='.csv':\n            with p.open(newline='', encoding='utf-8-sig') as f:\n                rows=list(csv.reader(f))\n            print('  headers/sample:', rows[:3])\nprint('\\nAEP RUNS')\nrunroot=ws/'.aep-run'\nif runroot.exists():\n    for p in sorted(runroot.rglob('*')):\n        if p.is_file() an"

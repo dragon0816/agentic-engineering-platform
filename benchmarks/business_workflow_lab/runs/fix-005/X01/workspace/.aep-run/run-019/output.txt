@@ -1,0 +1,38 @@
+workspace output exists: True
+output/downloads/sap_invoices.csv 587
+  csv rows incl header: 7 headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+  sample: ['0090000201', '0045000101', 'C001', 'P001', '2026-08-06', '2026-08-21', 'TWD', '95895.00', '47947.50', '47947.50']
+output/downloads/sap_orders.csv 697
+  csv rows incl header: 9 headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+  sample: ['0045000101', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-08-03', 'Closed', 'TWD', '95895.00']
+output/exceptions.csv 315
+  csv rows incl header: 5 headers: ['Source', 'DocumentID', 'ProjectID', 'Reason']
+  sample: ['Orders', '0045000104', '', 'Cancelled order; excluded from project summary']
+output/expense_approved.csv 562
+  csv rows incl header: 5 headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+  sample: ['EXP-00035', 'E004', 'Maria Santos', 'P004', '2026-08-01', 'Hotel', 'EUR', '95.00', 'Approved', 'RC264701', '出差住宿\n(含早餐)', 'False']
+output/expenses_normalized.csv 319
+  csv rows incl header: 5 headers: ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+  sample: ['EXP-00035', 'P004', 'E004', '2026-08-01', 'Approved', 'EUR', '95.00', '3325.00']
+output/invoices_normalized.csv 560
+  csv rows incl header: 6 headers: ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+  sample: ['0090000201', '0045000101', 'P001', 'C001', '2026-08-06', '2026-08-21', 'TWD', '95895.00', '47947.50', '47947.50', '47947.50']
+output/orders_normalized.csv 387
+  csv rows incl header: 6 headers: ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+  sample: ['0045000101', 'P001', 'C001', '2026-08-03', 'Closed', 'TWD', '95895.00', '95895.00']
+output/project_integration_report.xlsx 15782
+  xlsx sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+    Report rows: 20 cols: 6
+    Orders rows: 9 cols: 8
+    Invoices rows: 9 cols: 11
+    Expenses rows: 8 cols: 8
+    Quotes rows: 8 cols: 9
+    Summary rows: 9 cols: 5
+    Exceptions rows: 8 cols: 4
+    Instructions rows: 56 cols: 3
+output/project_summary.csv 273
+  csv rows incl header: 6 headers: ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+  sample: ['P001', '95895.00', '47947.50', '0.00', '0.00']
+output/quotes_normalized.csv 370
+  csv rows incl header: 5 headers: ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+  sample: ['Q0001', 'P002', 'C002', '2026-08-04', '2026-09-03', 'Accepted', 'TWD', '69000.00', '69000.00']

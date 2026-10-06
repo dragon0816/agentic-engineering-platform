@@ -1,0 +1,18 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\W03\workspace
+Input files: ['fx_rates.csv', 'project_template.xlsx', 'sap_manual.md']
+Downloaded files: ['invoices_2026_09.csv']
+fx header: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+invoice csv headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+invoice row count: 13
+invoice sample rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+Saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\W03\workspace\output\project_report_2026-09_invoices.xlsx
+Validation OK
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\W03\workspace\output\project_report_2026-09_invoices.xlsx
+Invoices rows saved: 13
+Invoice IDs: ['0090000207', '0090000208', '0090000209', '0090000210', '0090000211', '0090000212', '0090000213', '0090000214', '0090000215', '0090000216', '0090000217', '0090000218', '0090000219']
+Overdue exceptions: 4 [('Invoices', '0090000207', None, 'Overdue'), ('Invoices', '0090000209', 'P005', 'Overdue'), ('Invoices', '0090000212', 'P002', 'Overdue'), ('Invoices', '0090000217', 'P002', 'Overdue')]
+Due on 2026-09-30 with balance, not overdue: ['0090000211', '0090000213', '0090000219']
+Summary rows: 5 {'P001': '386445.00', 'P002': '156256.00', 'P003': '0.00', 'P004': '78750.00', 'P005': '236371.20'}
+Other source sheets blank below row 4: Orders, Expenses, Quotes
+Summary total InvoiceBalanceTWD: 857822.20

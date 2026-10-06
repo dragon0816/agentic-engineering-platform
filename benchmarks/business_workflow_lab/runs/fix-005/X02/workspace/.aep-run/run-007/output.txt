@@ -1,0 +1,23 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace
+REPORT C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\project_C001_2026-09_report.xlsx exists= True bytes= 16738
+FILE output\downloads\orders_C001_2026-09.csv exists= True bytes= 402
+FILE output\downloads\invoices_C001_2026-09.csv exists= True bytes= 346
+FILE output\expenses_P001_2026-09.csv exists= True bytes= 1059
+FILE output\expenses_P003_2026-09.csv exists= True bytes= 1312
+FILE output\quotes_C001_2026-09.csv exists= True bytes= 391
+FILE output\quotes_C001_2026-09.json exists= True bytes= 1323
+FILE output\project_C001_2026-09_report.xlsx exists= True bytes= 16738
+SOURCE_COUNTS {'orders': 4, 'invoices': 3, 'expenses': 18, 'quotes_csv': 4, 'quotes_json': 'non-list'}
+SOURCE_HEADERS {'orders': ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'], 'invoices': ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'], 'expenses': ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'], 'quotes': ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount']}
+SHEETS ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+SHEET_DATA Orders header_row= 4 rows= 4 headers= ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+SHEET_DATA Invoices header_row= 4 rows= 3 headers= ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+SHEET_DATA Expenses header_row= 4 rows= 18 headers= ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+SHEET_DATA Quotes header_row= 4 rows= 4 headers= ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+SUMMARY_PROJECT_IDS ['P001', 'P003']
+TYPE_CHECKS passed
+EXCEPTION_EXPECTED_COUNT 32 WORKBOOK_EXCEPTION_ROWS 16 headers= ['Source', 'DocumentID', 'ProjectID', 'Reason']
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\.aep-run\run-007\script.py", line 150, in <module>
+    raise AssertionError(f'Exceptions row count {len(rows)} != expected {len(exceptions)}')
+AssertionError: Exceptions row count 16 != expected 32

@@ -1,0 +1,13 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\W03\workspace
+Input files: ['fx_rates.csv', 'project_template.xlsx', 'sap_manual.md']
+Downloaded files: ['invoices_2026_09.csv']
+fx header: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+invoice csv headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+invoice row count: 13
+invoice sample rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+Saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\W03\workspace\output\project_report_2026-09_invoices.xlsx
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\W03\workspace\.aep-run\run-002\script.py", line 219, in <module>
+    raise AssertionError(f'Exceptions mismatch. saved={saved_excs}, expected={expected_excs}')
+AssertionError: Exceptions mismatch. saved=[('Invoices', '0090000207', None, 'Overdue'), ('Invoices', '0090000209', 'P005', 'Overdue'), ('Invoices', '0090000212', 'P002', 'Overdue'), ('Invoices', '0090000217', 'P002', 'Overdue')], expected=[('Invoices', '0090000207', '', 'Overdue'), ('Invoices', '0090000209', 'P005', 'Overdue'), ('Invoices', '0090000212', 'P002', 'Overdue'), ('Invoices', '0090000217', 'P002', 'Overdue')]

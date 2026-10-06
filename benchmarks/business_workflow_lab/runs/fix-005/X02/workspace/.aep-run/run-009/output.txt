@@ -1,0 +1,45 @@
+FINAL RESULT CHECK
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace
+file: output\downloads\orders_C001_2026-09.csv exists: True bytes: 402
+file: output\downloads\invoices_C001_2026-09.csv exists: True bytes: 346
+file: output\expenses_P001_2026-09.csv exists: True bytes: 1059
+file: output\expenses_P003_2026-09.csv exists: True bytes: 1312
+file: output\quotes_C001_2026-09.csv exists: True bytes: 391
+file: output\quotes_C001_2026-09.json exists: True bytes: 1323
+file: output\project_C001_2026-09_report.xlsx exists: True bytes: 16738
+source counts: {'orders': 4, 'invoices': 3, 'expenses': 18, 'quotes': 4}
+quotes_json top-level: dict keys: ['schema_version', 'items', 'count']
+workbook sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Orders headers: ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] rows: 4
+Invoices headers: ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD'] rows: 3
+Expenses headers: ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD'] rows: 18
+Quotes headers: ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] rows: 4
+detail sheet checks passed
+summary values passed: {'P001': {'OrderTWD': 1076162.0, 'InvoiceBalanceTWD': 386445.0, 'ApprovedExpenseTWD': 18305.0, 'AcceptedQuoteTWD': 331200.0}, 'P003': {'OrderTWD': 150000.0, 'InvoiceBalanceTWD': 0.0, 'ApprovedExpenseTWD': 13037.5, 'AcceptedQuoteTWD': 0.0}}
+Exceptions headers: ['Source', 'DocumentID', 'ProjectID', 'Reason'] rows: 16
+exception: Orders 0045000114 P001 Cancelled order
+exception: Invoices 0090000219 P001 Overdue unpaid balance; DueDate 2026-09-30; BalanceTWD 386445.00
+exception: Expenses EXP-00005 P001 Expense status Draft
+exception: Expenses EXP-00006 P001 Missing receipt
+exception: Expenses EXP-00010 P001 Expense status Draft
+exception: Expenses EXP-00012 P001 Expense status Rejected
+exception: Expenses EXP-00003 P003 Expense status Submitted
+exception: Expenses EXP-00015 P003 Expense status Submitted
+exception: Expenses EXP-00015 P003 Missing receipt
+exception: Expenses EXP-00007 P003 Expense status Rejected
+exception: Expenses EXP-00008 P003 Expense status Submitted
+exception: Expenses EXP-00011 P003 Expense status Submitted
+exception: Expenses EXP-00018 P003 Expense status Rejected
+exception: Quotes Q0010 P001 Quote not accepted and expired on 2026-09-20
+exception: Quotes Q0014 P001 Quote status Expired
+exception: Quotes Q0018 P001 Quote status Draft
+exception traceability passed
+expected attention documents: 15 [('Expenses', 'EXP-00003'), ('Expenses', 'EXP-00005'), ('Expenses', 'EXP-00006'), ('Expenses', 'EXP-00007'), ('Expenses', 'EXP-00008'), ('Expenses', 'EXP-00010'), ('Expenses', 'EXP-00011'), ('Expenses', 'EXP-00012'), ('Expenses', 'EXP-00015'), ('Expenses', 'EXP-00018'), ('Invoices', '0090000219'), ('Orders', '0045000114'), ('Quotes', 'Q0010'), ('Quotes', 'Q0014'), ('Quotes', 'Q0018')]
+actual exception documents: 15 [('Expenses', 'EXP-00003'), ('Expenses', 'EXP-00005'), ('Expenses', 'EXP-00006'), ('Expenses', 'EXP-00007'), ('Expenses', 'EXP-00008'), ('Expenses', 'EXP-00010'), ('Expenses', 'EXP-00011'), ('Expenses', 'EXP-00012'), ('Expenses', 'EXP-00015'), ('Expenses', 'EXP-00018'), ('Invoices', '0090000219'), ('Orders', '0045000114'), ('Quotes', 'Q0010'), ('Quotes', 'Q0014'), ('Quotes', 'Q0018')]
+all attention documents represented; duplicate rows are separate reasons for the same document if present
+highlight: Orders 1 of 1 ['0045000114']
+highlight: Invoices 1 of 1 ['0090000219']
+highlight: Expenses 10 of 10 ['EXP-00003', 'EXP-00005', 'EXP-00006', 'EXP-00007', 'EXP-00008', 'EXP-00010', 'EXP-00011', 'EXP-00012', 'EXP-00015', 'EXP-00018']
+highlight: Quotes 3 of 3 ['Q0010', 'Q0014', 'Q0018']
+highlight checks passed
+FINAL_CHECK_COMPLETE: workbook and exported source files are readable, counts match, TWD numeric fields and text IDs are preserved, summary totals match, and all attention documents are represented/highlighted.

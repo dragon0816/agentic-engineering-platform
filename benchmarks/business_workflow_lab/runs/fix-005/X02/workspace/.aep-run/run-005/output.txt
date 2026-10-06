@@ -1,0 +1,36 @@
+Using files:
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\input\project_template.xlsx exists= True bytes= 14209
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\input\fx_rates.csv exists= True bytes= 276
+ sample: [['Currency', 'RateToTWD', 'Note'], ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)'], ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']]
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\downloads\orders_C001_2026-09.csv exists= True bytes= 402
+ sample: [['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'], ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00'], ['0045000114', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-08', 'Cancelled', 'USD', '11956.00']]
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\downloads\invoices_C001_2026-09.csv exists= True bytes= 346
+ sample: [['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'], ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00'], ['0090000214', '0045000119', 'C001', 'P001', '2026-09-16', '2026-10-16', 'EUR', '8775.00', '8775.00', '0.00']]
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\expenses_P001_2026-09.csv exists= True bytes= 1059
+ sample: [['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'], ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False'], ['EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'False']]
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\expenses_P003_2026-09.csv exists= True bytes= 1312
+ sample: [['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'], ['EXP-00003', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-03', 'Meals', 'TWD', '450.00', 'Submitted', 'RC162210', '加班餐費', 'False'], ['EXP-00014', 'E002', 'Daniel Weber', 'P003', '2026-09-04', 'Hotel', 'EUR', '180.00', 'Approved', 'RC852962', '客戶驗收住宿 2 晚', 'False']]
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\quotes_C001_2026-09.csv exists= True bytes= 391
+ sample: [['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount'], ['Q0010', 'C001', 'P001', '2026-09-01', '2026-09-20', 'Sent', 'TWD', '218557.50', '5', '207629.63'], ['Q0011', 'C001', 'P001', '2026-09-03', '2026-10-03', 'Accepted', 'USD', '11500.00', '10', '10350.00']]
+FX: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\output\project_C001_2026-09_report.xlsx
+Counts orders invoices expenses quotes exceptions projects: 4 3 18 4 16 2
+Summary: {'P003': {'OrderTWD': '150000.00', 'InvoiceBalanceTWD': '0.00', 'ApprovedExpenseTWD': '13037.50', 'AcceptedQuoteTWD': '0'}, 'P001': {'OrderTWD': '1076162.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}}
+Exceptions:
+('Orders', '0045000114', 'P001', 'Cancelled order')
+('Invoices', '0090000219', 'P001', 'Overdue unpaid balance; DueDate 2026-09-30; BalanceTWD 386445.00')
+('Expenses', 'EXP-00005', 'P001', 'Expense status Draft')
+('Expenses', 'EXP-00006', 'P001', 'Missing receipt')
+('Expenses', 'EXP-00010', 'P001', 'Expense status Draft')
+('Expenses', 'EXP-00012', 'P001', 'Expense status Rejected')
+('Expenses', 'EXP-00003', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00015', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00015', 'P003', 'Missing receipt')
+('Expenses', 'EXP-00007', 'P003', 'Expense status Rejected')
+('Expenses', 'EXP-00008', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00011', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00018', 'P003', 'Expense status Rejected')
+('Quotes', 'Q0010', 'P001', 'Quote not accepted and expired on 2026-09-20')
+('Quotes', 'Q0014', 'P001', 'Quote status Expired')
+('Quotes', 'Q0018', 'P001', 'Quote status Draft')
+VERIFIED output workbook headers, row counts, text IDs, numeric money formats, summary formulas, exceptions count

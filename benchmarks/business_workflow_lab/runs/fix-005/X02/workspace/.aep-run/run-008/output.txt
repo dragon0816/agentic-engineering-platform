@@ -1,0 +1,26 @@
+=== FILE INVENTORY ===
+output\downloads\invoices_C001_2026-09.csv 346
+output\downloads\orders_C001_2026-09.csv 402
+output\expenses_P001_2026-09.csv 1059
+output\expenses_P003_2026-09.csv 1312
+output\project_C001_2026-09_report.xlsx 16738
+output\quotes_C001_2026-09.csv 391
+output\quotes_C001_2026-09.json 1323
+REQUIRED_FILES_CHECK passed
+SOURCE_COUNTS {'orders': 4, 'invoices': 3, 'expenses': 18, 'quotes_csv': 4, 'quotes_json_type': 'dict'}
+WORKBOOK_SHEETS ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+TABLE Orders header_row 4 rows 4 headers ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+TABLE Invoices header_row 4 rows 3 headers ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+TABLE Expenses header_row 4 rows 18 headers ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+TABLE Quotes header_row 4 rows 4 headers ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+ROW_COUNT_AND_TYPE_CHECK passed
+SUMMARY_ROWS {'P001': {'ProjectID': 'P001', 'OrderTWD': 1076162, 'InvoiceBalanceTWD': 386445, 'ApprovedExpenseTWD': 18305, 'AcceptedQuoteTWD': 331200, '__row__': 5}, 'P003': {'ProjectID': 'P003', 'OrderTWD': 150000, 'InvoiceBalanceTWD': 0, 'ApprovedExpenseTWD': 13037.5, 'AcceptedQuoteTWD': 0, '__row__': 6}}
+SUMMARY_VALUE_CHECK passed
+EXPECTED_EXCEPTION_COUNT_UNIQUE_DOCS 15
+ACTUAL_EXCEPTION_ROWS 16
+ACTUAL_EXCEPTION_KEYS [('Expenses', 'EXP-00003'), ('Expenses', 'EXP-00005'), ('Expenses', 'EXP-00006'), ('Expenses', 'EXP-00007'), ('Expenses', 'EXP-00008'), ('Expenses', 'EXP-00010'), ('Expenses', 'EXP-00011'), ('Expenses', 'EXP-00012'), ('Expenses', 'EXP-00015'), ('Expenses', 'EXP-00018'), ('Invoices', '0090000219'), ('Orders', '0045000114'), ('Quotes', 'Q0010'), ('Quotes', 'Q0014'), ('Quotes', 'Q0018')]
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X02\workspace\.aep-run\run-008\script.py", line 131, in <module>
+    assert len(e_rows) == len(expected_keys), f'Exceptions: {len(e_rows)} != {len(expected_keys)}'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exceptions: 16 != 15

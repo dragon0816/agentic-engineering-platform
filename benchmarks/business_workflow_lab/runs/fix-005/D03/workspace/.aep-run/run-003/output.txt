@@ -1,0 +1,19 @@
+Inputs:
+ - output\expense_export.csv exists=True size=1843
+ - input\expense_template.xlsx exists=True size=10969
+ - input\fx_rates.csv exists=True size=276
+FX header: ['Currency', 'RateToTWD', 'Note']
+Rates loaded: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+Export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Export row count: 15
+Export sample: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}]
+Wrote: output\expense_report_2026-09_approved.xlsx
+Verification OK
+{
+  "details_rows": 15,
+  "summary_rows": 14,
+  "exceptions_rows": 1,
+  "needs_review_true": 4,
+  "total_twd": "55706.50",
+  "output_file": "output\\expense_report_2026-09_approved.xlsx"
+}

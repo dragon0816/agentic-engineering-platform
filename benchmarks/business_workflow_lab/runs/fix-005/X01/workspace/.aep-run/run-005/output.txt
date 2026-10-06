@@ -1,0 +1,56 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X01\workspace
+INPUT expense_manual.md 2007
+INPUT fx_rates.csv 276
+INPUT project_template.xlsx 14209
+INPUT quote_cli_manual.md 2303
+INPUT sap_manual.md 2077
+OUTPUT FILES
+output\downloads\sap_invoices.csv 1142
+output\downloads\sap_orders.csv 1616
+output\expense_approved.csv 1843
+
+FILE output/downloads/sap_orders.csv exists= True
+sample [['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'], ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00'], ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', '293572.50'], ['0045000111', 'C003', 'Northwind Components GmbH', 'P004', '2026-09-03', 'Closed', 'EUR', '2250.00']]
+
+FILE output/downloads/sap_invoices.csv exists= True
+sample [['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'], ['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95'], ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00'], ['0090000209', '0045000112', 'C007', 'P005', '2026-09-05', '2026-09-20', 'USD', '12311.00', '4924.40', '7386.60']]
+
+FILE output/expense_approved.csv exists= True
+sample [['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'], ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False'], ['EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'False'], ['EXP-00014', 'E002', 'Daniel Weber', 'P003', '2026-09-04', 'Hotel', 'EUR', '180.00', 'Approved', 'RC852962', '客戶驗收住宿 2 晚', 'False']]
+
+FILE input/fx_rates.csv exists= True
+sample [['Currency', 'RateToTWD', 'Note'], ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)'], ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)'], ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']]
+
+TEMPLATE SHEETS ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+SHEET Report max 20 6
+  ('Project Integration Report 專案整合報表', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('起始日期 From', None, '結束日期 To', None, None, None)
+SHEET Orders max 4 8
+  ('Sales orders by project', None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None)
+SHEET Invoices max 4 11
+  ('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None, None, None)
+SHEET Expenses max 4 8
+  ('Expenses by project', None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None)
+SHEET Quotes max 4 9
+  ('Quotes by project', None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None)
+SHEET Summary max 4 5
+  ('Project summary (TWD)', None, None, None, None)
+  ('總計 TWD Totals', '=SUM(B5:B5)', '=SUM(C5:C5)', '=SUM(D5:D5)', '=SUM(E5:E5)')
+  (None, None, None, None, None)
+SHEET Exceptions max 4 4
+  ('Exceptions 例外與關注項目', None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+  (None, None, None, None)
+SHEET Instructions max 56 3
+  ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+  (None, None, None)
+  ('Sheet', 'Cell / Range', 'Content and rule')

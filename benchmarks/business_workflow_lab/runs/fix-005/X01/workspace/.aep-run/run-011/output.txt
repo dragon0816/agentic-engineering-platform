@@ -1,0 +1,77 @@
+RUN-009 OUTPUT EXISTS True bytes 1549
+FX {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+raw counts 20 13 15
+quotes count 4
+wrote orders_normalized.csv 12
+wrote invoices_normalized.csv 7
+wrote expenses_normalized.csv 15
+wrote quotes_normalized.csv 3
+wrote exceptions.csv 13
+wrote project_summary.csv 5
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-005\X01\workspace\.aep-run\run-009\script.py", line 167, in <module>
+    report['A8']='SAP Sales Orders'; report['C8']=report['B5']; report['A9']='SAP Invoices'; report['C9']=report['B5']; report['A10']='Expense Viewer'; report['C10']=report['B5']; report['A11']='quote_cli'; report['C11']=report['B5']
+                                     ~~~~~~^^^^^^
+  File "C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\Lib\site-packages\openpyxl\worksheet\worksheet.py", line 317, in __setitem__
+    self[key].value = value
+    ^^^^^^^^^^^^^^^
+  File "C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\Lib\site-packages\openpyxl\cell\cell.py", line 218, in value
+    self._bind_value(value)
+  File "C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\Lib\site-packages\openpyxl\cell\cell.py", line 187, in _bind_value
+    raise ValueError("Cannot convert {0!r} to Excel".format(value))
+ValueError: Cannot convert <Cell 'Report'.B5> to Excel
+
+
+CSV SUMMARIES
+
+--- output/project_summary.csv exists True bytes 282
+fieldnames dict_keys(['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD'])
+row_count 5
+{'ProjectID': 'P001', 'OrderTWD': '693570.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}
+{'ProjectID': 'P002', 'OrderTWD': '516084.50', 'InvoiceBalanceTWD': '156256.00', 'ApprovedExpenseTWD': '9100.00', 'AcceptedQuoteTWD': '97450.85'}
+{'ProjectID': 'P003', 'OrderTWD': '150000.00', 'InvoiceBalanceTWD': '0.00', 'ApprovedExpenseTWD': '13037.50', 'AcceptedQuoteTWD': '0.00'}
+{'ProjectID': 'P004', 'OrderTWD': '794876.25', 'InvoiceBalanceTWD': '78750.00', 'ApprovedExpenseTWD': '8840.00', 'AcceptedQuoteTWD': '282150.00'}
+{'ProjectID': 'P005', 'OrderTWD': '770874.20', 'InvoiceBalanceTWD': '236371.20', 'ApprovedExpenseTWD': '6424.00', 'AcceptedQuoteTWD': '0.00'}
+
+--- output/orders_normalized.csv exists True bytes 817
+fieldnames dict_keys(['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD'])
+row_count 12
+{'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00', 'AmountTWD': '150000.00'}
+{'OrderID': '0045000110', 'ProjectID': 'P002', 'CustomerID': 'C002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50', 'AmountTWD': '293572.50'}
+{'OrderID': '0045000111', 'ProjectID': 'P004', 'CustomerID': 'C003', 'OrderDate': '2026-09-03', 'Status': 'Closed', 'Currency': 'EUR', 'NetAmount': '2250.00', 'AmountTWD': '78750.00'}
+{'OrderID': '0045000112', 'ProjectID': 'P005', 'CustomerID': 'C007', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00', 'AmountTWD': '393952.00'}
+{'OrderID': '0045000117', 'ProjectID': 'P002', 'CustomerID': 'C002', 'OrderDate': '2026-09-11', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '90000.00', 'AmountTWD': '90000.00'}
+
+--- output/invoices_normalized.csv exists True bytes 743
+fieldnames dict_keys(['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD'])
+row_count 7
+{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00', 'BalanceTWD': '0.00'}
+{'InvoiceID': '0090000209', 'OrderID': '0045000112', 'ProjectID': 'P005', 'CustomerID': 'C007', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60', 'BalanceTWD': '236371.20'}
+{'InvoiceID': '0090000210', 'OrderID': '0045000111', 'ProjectID': 'P004', 'CustomerID': 'C003', 'InvoiceDate': '2026-09-08', 'DueDate': '2026-10-08', 'Currency': 'EUR', 'Amount': '2250.00', 'PaidAmount': '0.00', 'Balance': '2250.00', 'BalanceTWD': '78750.00'}
+{'InvoiceID': '0090000212', 'OrderID': '0045000117', 'ProjectID': 'P002', 'CustomerID': 'C002', 'InvoiceDate': '2026-09-12', 'DueDate': '2026-09-22', 'Currency': 'TWD', 'Amount': '90000.00', 'PaidAmount': '0.00', 'Balance': '90000.00', 'BalanceTWD': '90000.00'}
+{'InvoiceID': '0090000214', 'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'InvoiceDate': '2026-09-16', 'DueDate': '2026-10-16', 'Currency': 'EUR', 'Amount': '8775.00', 'PaidAmount': '8775.00', 'Balance': '0.00', 'BalanceTWD': '0.00'}
+
+--- output/expenses_normalized.csv exists True bytes 981
+fieldnames dict_keys(['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD'])
+row_count 15
+{'ExpenseID': 'EXP-00001', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': '2026-09-01', 'Status': 'Approved', 'Currency': 'TWD', 'Amount': '1280.00', 'AmountTWD': '1280.00'}
+{'ExpenseID': 'EXP-00002', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': '2026-09-02', 'Status': 'Approved', 'Currency': 'USD', 'Amount': '200.00', 'AmountTWD': '6400.00'}
+{'ExpenseID': 'EXP-00014', 'ProjectID': 'P003', 'EmployeeID': 'E002', 'ExpenseDate': '2026-09-04', 'Status': 'Approved', 'Currency': 'EUR', 'Amount': '180.00', 'AmountTWD': '6300.00'}
+{'ExpenseID': 'EXP-00004', 'ProjectID': 'P003', 'EmployeeID': 'E001', 'ExpenseDate': '2026-09-05', 'Status': 'Approved', 'Currency': 'EUR', 'Amount': '42.50', 'AmountTWD': '1487.50'}
+{'ExpenseID': 'EXP-00019', 'ProjectID': 'P002', 'EmployeeID': 'E003', 'ExpenseDate': '2026-09-06', 'Status': 'Approved', 'Currency': 'TWD', 'Amount': '8800.00', 'AmountTWD': '8800.00'}
+
+--- output/quotes_normalized.csv exists True bytes 302
+fieldnames dict_keys(['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD'])
+row_count 3
+{'QuoteID': 'Q0011', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'NetAmount': '10350.00', 'AmountTWD': '331200.00'}
+{'QuoteID': 'Q0013', 'ProjectID': 'P002', 'CustomerID': 'C002', 'QuoteDate': '2026-09-07', 'ValidUntil': '2026-10-07', 'Status': 'Accepted', 'Currency': 'EUR', 'NetAmount': '2784.31', 'AmountTWD': '97450.85'}
+{'QuoteID': 'Q0015', 'ProjectID': 'P004', 'CustomerID': 'C003', 'QuoteDate': '2026-09-11', 'ValidUntil': '2026-09-25', 'Status': 'Accepted', 'Currency': 'TWD', 'NetAmount': '282150.00', 'AmountTWD': '282150.00'}
+
+--- output/exceptions.csv exists True bytes 943
+fieldnames dict_keys(['Source', 'DocumentID', 'ProjectID', 'Reason'])
+row_count 13
+{'Source': 'Orders', 'DocumentID': '0045000113', 'ProjectID': '', 'Reason': 'Missing ProjectID; excluded from project summary'}
+{'Source': 'Orders', 'DocumentID': '0045000115', 'ProjectID': '', 'Reason': 'Missing ProjectID; excluded from project summary'}
+{'Source': 'Orders', 'DocumentID': '0045000116', 'ProjectID': '', 'Reason': 'Missing ProjectID; excluded from project summary'}
+{'Source': 'Orders', 'DocumentID': '0045000120', 'ProjectID': '', 'Reason': 'Missing ProjectID; excluded from project summary'}
+{'Source': 'Orders', 'DocumentID': '0045000124', 'ProjectID': '', 'Reason': 'Missing ProjectID; excluded from project summary'}
