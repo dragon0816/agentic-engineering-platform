@@ -12,6 +12,7 @@ interpreter, created once by the owner with administrator rights. Two checks:
 
 from __future__ import annotations
 
+import os
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -20,8 +21,12 @@ from harness.restricted_runner import RestrictedRunner
 
 RULE_NAME = "AEP coding runner - block outbound"
 
+# The program path arrives in an environment variable: arguments after
+# `-Command` are appended to the script text, not bound to `$args`, which
+# made the first version of this check look up an empty path.
+_PROGRAM_VARIABLE = "AEP_RUNNER_PROGRAM"
 _RULE_SCRIPT = (
-    "$p = $args[0]; "
+    f"$p = $env:{_PROGRAM_VARIABLE}; "
     "$r = Get-NetFirewallApplicationFilter -Program $p -ErrorAction SilentlyContinue "
     "| Get-NetFirewallRule | Where-Object { $_.Enabled -eq 'True' -and "
     "$_.Direction -eq 'Outbound' -and $_.Action -eq 'Block' }; "
@@ -33,8 +38,9 @@ Run = Callable[..., subprocess.CompletedProcess[str]]
 
 def outbound_rule_present(python: Path, run: Run = subprocess.run) -> bool:
     result = run(
-        ["powershell", "-NoProfile", "-NonInteractive", "-Command", _RULE_SCRIPT, str(python)],
+        ["powershell", "-NoProfile", "-NonInteractive", "-Command", _RULE_SCRIPT],
         capture_output=True, text=True, timeout=60, check=False,
+        env={**os.environ, _PROGRAM_VARIABLE: str(python)},
     )
     return result.returncode == 0 and result.stdout.strip().endswith("blocked")
 

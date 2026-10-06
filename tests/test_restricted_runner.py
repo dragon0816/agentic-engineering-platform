@@ -99,8 +99,10 @@ def test_the_firewall_rule_check_reads_powershell_and_names_the_program() -> Non
     seen: list[list[str]] = []
 
     def answering(text: str):  # noqa: ANN202 - test double
-        def run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
-            seen.append(args)
+        def run(args: list[str], **options: object) -> subprocess.CompletedProcess[str]:
+            env = options["env"]
+            assert isinstance(env, dict)
+            seen.append([*args, env["AEP_RUNNER_PROGRAM"]])
             return subprocess.CompletedProcess(args, 0, stdout=text + "\n", stderr="")
         return run
 
@@ -128,3 +130,18 @@ def test_the_probe_reports_a_reachable_host_as_not_blocked(tmp_path: Path) -> No
         assert not probe_blocked(runner(), "127.0.0.1", server.getsockname()[1], tmp_path / "p")
     finally:
         server.close()
+
+
+def test_the_rule_check_finds_a_real_rule_on_this_machine() -> None:
+    """Regression: the first version passed the path after `-Command`, where
+    PowerShell does not bind it, and reported a present rule as missing."""
+    import os
+
+    from harness.network_block import outbound_rule_present
+
+    runner_python = Path(os.environ.get("LOCALAPPDATA", "")) / (
+        "AgenticEngineeringPlatform/coding-runner/cpython-3.12.14-windows-x86_64-none/python.exe")
+    if not runner_python.is_file():
+        pytest.skip("the live coding runner is not installed on this machine")
+    assert outbound_rule_present(runner_python)
+    assert not outbound_rule_present(BASE_PYTHON)
