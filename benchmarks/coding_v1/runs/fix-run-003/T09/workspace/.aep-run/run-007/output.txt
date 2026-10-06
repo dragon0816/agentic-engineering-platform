@@ -1,0 +1,152 @@
+"""Product gate E2E-02: SOP -> validated deterministic Workflow."""
+
+import asyncio
+import json
+from collections import Counter
+from collections.abc import Iterator
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from agent.gateway import Gateway
+from agent.routing import CommandRouter, RequestRouter
+from agent.skills import SkillManifest, SkillRegistry
+from capabilities.contracts import CapabilitySpec
+from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+from capabilities.workflow_author.contracts import (
+    DraftWorkflowRequest,
+    WorkflowAcceptanceOutcome,
+    WorkflowAcceptanceRequest,
+    WorkflowDraft,
+    WorkflowFixture,
+    WorkflowValidationEvidence,
+)
+from capabilities.workflow_author.handlers import DRAFT_SPEC, DraftWorkflowHandler
+from common.assets import (
+    AssetIdentity,
+    BusinessApproval,
+    ExecutionDependencies,
+)
+from common.base import Contract
+from common.enrollment import BridgeBinding, BridgeDevice
+from common.execution import RequestContext, TraceIdentifiers
+from common.local_agent import BridgeMembership, LocalAgentRequest
+from host_runtime.agent import LocalAgent
+from host_runtime.state import SqliteLocalState
+from host_runtime.workflow_author import PersonalWorkflowAuthor, publish_validated_workflow
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import InstalledWorkflows, WorkflowEngine
+
+ROOT = Path(__file__).resolve().parent
+FIXTURE = json.loads(
+    (ROOT / "fixtures" / "e2e_02" / "sop-workflow.json").read_text(encoding="utf-8")
+)
+TRACE = TraceIdentifiers(trace_id="e2e02-trace", request_id="e2e02-request", span_id="e2e02-span")
+NORMALIZE = AssetIdentity(namespace="demo", name="normalize-categories", version="1.0.0")
+COUNT = AssetIdentity(namespace="demo", name="count-categories", version="1.0.0")
+
+
+class NormalizeInput(Contract):
+    records: tuple[str, ...]
+
+
+class NormalizeOutput(Contract):
+    categories: tuple[str, ...]
+
+
+class CountInput(Contract):
+    categories: tuple[str, ...]
+
+
+class CountOutput(Contract):
+    counts: dict[str, int]
+
+
+async def normalize(context: RequestContext, inputs: Contract) -> Contract:
+    item = NormalizeInput.model_validate(inputs)
+    return NormalizeOutput(categories=tuple(value.strip().lower() for value in item.records))
+
+
+async def count(context: RequestContext, inputs: Contract) -> Contract:
+    item = CountInput.model_validate(inputs)
+    return CountOutput(counts=dict(sorted(Counter(item.categories).items())))
+
+
+def capability(
+    identity: AssetIdentity, name: str, input_name: str, output_name: str
+) -> CapabilitySpec:
+    return CapabilitySpec.model_validate(
+        {
+            "identity": identity.model_dump(),
+            "name": name,
+            "description": name,
+            "input_contract": input_name,
+            "output_contract": output_name,
+            "side_effect": "read",
+            "policy": {
+                "required_permissions": [f"{name}.use"],
+                "policy_refs": ["e2e-02-policy"],
+            },
+        }
+    )
+
+
+NORMALIZE_SPEC = capability(
+    NORMALIZE, "demo.normalize", "demo.normalize.input.v1", "demo.normalize.output.v1"
+)
+COUNT_SPEC = capability(COUNT, "demo.count", "demo.count.input.v1", "demo.count.output.v1")
+
+
+def manifest(*, omit_count: bool = False) -> dict[str, Any]:
+    steps: list[dict[str, Any]] = [
+        {
+            "capability": NORMALIZE.model_dump(),
+            "inputs": {"records": {"source": "run", "path": ["records"]}},
+        }
+    ]
+    if not omit_count:
+        steps.append(
+            {
+                "capability": COUNT.model_dump(),
+                "inputs": {
+                    "categories": {
+                        "source": "step",
+                        "step_index": 0,
+                        "path": ["categories"],
+                    }
+                },
+            }
+        )
+    return {
+        "metadata": {
+            "identity": {
+                "namespace": "engineering",
+                "name": "category-summary",
+                "version": "1.0.0",
+            },
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "team",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": "Normalize categories and count records by category.",
+        "execution": {"mode": "local"},
+        "dependencies": {
+            "central_required": False,
+            "local_capabilities": [
+                "demo.normalize",
+                *([] if omit_count else ["demo.count"]),
+            ],
+        },
+        "input_contract": "engineering.category-summary.input.v1",
+        "output_contract": ("demo.normalize.output.v1" if omit_count else "demo.count.output.v1"),
+        "steps": steps,
+    }
+
+
+class ScriptedModel:
+    """Routes the user request, then supplies candidate documents in order."""
+
+    def __init__(self, draft: DraftWo

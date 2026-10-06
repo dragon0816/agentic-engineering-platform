@@ -1,0 +1,141 @@
+
+==== benchmarks/coding_v1/evaluator/validators.py ====
+         ["USB;LAN", "LAN", "USB"], [iface(by.get(m, {})) for m in ("RX-100", "RX-200", "RX-300")]),
+        _sources_unchanged(ctx),
+    ]
+
+
+# -- T08 ----------------------------------------------------------------------
+
+T08 = [
+    {"device_id": "D001", "test_name": "TxPower", "status": "Pass", "value": 12.5, "unit": "dBm"},
+    {"device_id": "D002", "test_name": "TxPower", "status": "Fail", "value": None, "unit": "dBm"},
+    {"device_id": "D003", "test_name": "EVM", "status": "Pass", "value": -35.2, "unit": "dB"},
+    {"device_id": "D004", "test_name": "EVM", "status": "Fail", "value": -20.1, "unit": None},
+    {"device_id": "D005", "test_name": "Sensitivity", "status": "Pass", "value": -90, "unit": "dBm"},
+    {"device_id": "D006", "test_name": "Sensitivity", "status": "Fail", "value": -70, "unit": "dBm"},
+]
+
+
+def t08(ctx: Ctx) -> list[dict[str, Any]]:
+    path = _find(ctx, "reports.json")
+    if path is None:
+        return _missing("reports.json") + [_sources_unchanged(ctx)]
+    items = _list_in(_json(path)) or []
+    keys_ok = all(isinstance(i, dict) and set(i) == set(T08[0]) for i in items)
+    types_ok = all(isinstance(i.get("device_id"), str) and (i.get("value") is None or (
+        isinstance(i.get("value"), (int, float)) and not isinstance(i.get("value"), bool))) for i in items)
+
+    def norm(i: dict[str, Any]) -> tuple[Any, ...]:
+        v = i.get("value")
+        return (i.get("device_id"), i.get("test_name"), i.get("status"),
+                None if v is None else round(float(v), 6), i.get("unit"))
+
+    got = sorted(norm(i) for i in items if isinstance(i, dict))
+    want = sorted(norm(i) for i in T08)
+    return [
+        check("six records", len(items) == 6, 6, len(items)),
+        check("exact schema keys", keys_ok, sorted(T08[0]), None),
+        check("types: id text, value number or null", types_ok, "str / number|null", None),
+        check("each record matches the manifest", got == want, want, got),
+        _sources_unchanged(ctx),
+    ]
+
+
+# -- T09 ----------------------------------------------------------------------
+
+def t09(ctx: Ctx) -> list[dict[str, Any]]:
+    runs = ctx.extra.get("t09_runs", {})
+    ok_run = runs.get("succeed_third")
+    fail_run = runs.get("always_fail")
+    data_path = _find(ctx, "data.json")
+    data_ok = data_path is not None and _json(data_path) == {"items": [{"id": "A1", "value": 42}, {"id": "A2", "value": 7}]}
+    runtime = ctx.extra.get("aep_workflow_runs") or []
+    return [
+        check("a platform workflow ran in the AEP runtime", bool(runtime) or None, "AEP run id",
+              runtime or "no AEP workflow run in the trace"),
+        check("success scenario: 3 logins, 1 data", None if ok_run is None else
+              (ok_run["login"] == 3 and ok_run["data"] == 1), {"login": 3, "data": 1}, ok_run),
+        check("data.json written with the service data", data_ok if data_path else False,
+              "service payload", str(data_path) if data_path else None),
+        check("failure scenario: 3 logins, 0 data, reason reported", None if fail_run is None else
+              (fail_run["login"] == 3 and fail_run["data"] == 0 and fail_run.get("reported")),
+              {"login": 3, "data": 0}, fail_run),
+        _sources_unchanged(ctx),
+    ]
+
+
+# -- T10-T13 ------------------------------------------------------------------
+
+def _hits(ctx: Ctx, path: str) -> int:
+    return sum(1 for r in ctx.requests(path) if r["path"].split("?")[0] == path)
+
+
+CURRENCY = {"TWD": {"TWD", "NTD", "NT$"}, "USD": {"USD", "US$", "$"}, "EUR": {"EUR", "€"}}
+
+
+def _currency(value: Any, code: str) -> bool:
+    return str(value or "").strip().upper() in {c.upper() for c in CURRENCY[code]}
+
+
+def t10(ctx: Ctx) -> list[dict[str, Any]]:
+    path = _find(ctx, "products.xlsx")
+    if path is None:
+        return _missing("products.xlsx") + [check("catalog fetched", _hits(ctx, "/t10/catalog") > 0, ">0",
+                                                  _hits(ctx, "/t10/catalog")), _sources_unchanged(ctx)]
+    rows = _records(path) or []
+    want = [("Router A", 1299, "/p/router-a"), ("Switch B", 2450, "/p/switch-b"), ("Cable C", 99, "/p/cable-c"),
+            ("Adapter D", 560, "/p/adapter-d"), ("Antenna E", 12000, "/p/antenna-e")]
+
+    def col(r: dict[str, Any], *names: str) -> Any:
+        for k, v in r.items():
+            if k.lower().replace(" ", "") in names:
+                return v
+        return None
+
+    got = [(col(r, "name", "productname", "產品名稱", "名稱"), col(r, "price", "價格"),
+            col(r, "currency", "幣別"), col(r, "url", "producturl", "產品網址", "網址")) for r in rows]
+    return [
+        check("exactly five catalog products, no ads", [g[0] for g in got] == [w[0] for w in want],
+              [w[0] for w in want], [g[0] for g in got]),
+        check("prices are numbers", all(_close(g[1], w[1]) and not isinstance(g[1], str)
+                                        for g, w in zip(got, want, strict=False)) and len(got) == 5,
+              [w[1] for w in want], [g[1] for g in got]),
+        check("currency TWD", len(got) == 5 and all(_currency(g[2], "TWD") for g in got), "TWD", [g[2] for g in got]),
+        check("full product URLs", len(got) == 5 and all(str(g[3]) == ctx.base_url + w[2] for g, w in zip(got, want, strict=False)),
+              [ctx.base_url + w[2] for w in want], [g[3] for g in got]),
+        check("catalog fetched from the fixture server", _hits(ctx, "/t10/catalog") > 0, ">0", _hits(ctx, "/t10/catalog")),
+        _sources_unchanged(ctx),
+    ]
+
+
+def t11(ctx: Ctx) -> list[dict[str, Any]]:
+    visits = {n: _hits(ctx, f"/t11/item/{n}") for n in range(1, 5)}
+    path = _find(ctx, "details.xlsx")
+    if path is None:
+        return _missing("details.xlsx") + [check("4 detail pages visited", all(visits.values()), "all", visits)]
+    rows = _records(path) or []
+    want = [("Laptop 13", 32900, "Intel i5-1340P", 16, "/t11/item/1"), ("Laptop 15", 45500, "Intel i7-1360P", 32, "/t11/item/2"),
+            ("Mini PC", 18800, None, 16, "/t11/item/3"), ("Tablet 11", 12300, "ARM A78", 8, "/t11/item/4")]
+    ok = len(rows) == 4 and all(
+        r.get("Name") == n and _close(r.get("Price"), p) and _currency(r.get("Currency"), "TWD")
+        and ((_blank(r.get("CPU")) if c is None else r.get("CPU") == c)) and _close(r.get("MemoryGB"), m)
+        and str(r.get("URL")) == ctx.base_url + u for r, (n, p, c, m, u) in zip(rows, want, strict=False))
+    return [
+        check("four rows matching the detail pages", ok, want, rows),
+        check("missing CPU left blank", len(rows) == 4 and _blank(rows[2].get("CPU")), "blank",
+              rows[2].get("CPU") if len(rows) > 2 else None),
+        check("4 detail pages visited (access log)", all(visits.values()), "all >0", visits),
+    ]
+
+
+def t12(ctx: Ctx) -> list[dict[str, Any]]:
+    path = _find(ctx, "products.xlsx") or next(iter(sorted(ctx.output.glob("*.xlsx"))), None) if ctx.output.is_dir() else None
+    if path is None:
+        return [check("an output workbook", False, "*.xlsx", None)]
+    rows 
+
+==== benchmarks/coding_v1/evaluator ====
+benchmarks\coding_v1\evaluator\selftest.py
+benchmarks\coding_v1\evaluator\validators.py
+benchmarks\coding_v1\evaluator\__pycache__\validators.cpython-312.pyc

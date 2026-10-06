@@ -1,0 +1,2006 @@
+
+=====  docs/CONTRACTS.md =====
+
+  Namespace and name use lowercase slugs. Versions include prerelease/build metadata;
+  no implicit latest-version resolution. Owner and visibility are independent fields.
+- `AssetMetadata`: identity, owner, contributors, lifecycle, provenance, package
+  dependencies, compatibility, separate business review and technical policy,
+  evaluation/validation references, and optional deprecation/replacement metadata.
+  Review records are descriptive claims, not verified signatures or permission grants.
+- `ExecutionDependencies`: local capability names, central services with explicit
+  required flags, and required `central_required`, equal to whether any service is
+  required. Local execution may still require a central service. No resolver exists.
+- `SecretRef`: symbolic name only. No values, credentials or backend configuration.
+  Closed schemas reject secret-bearing extra fields; Registry assets recursively reject
+  common credential assignments, bearer tokens and private-key markers in text.
+  This is practical validation, not a guarantee of detecting arbitrary secrets hidden
+  in prose. Callers must never submit secrets; errors should not be logged with inputs.
+- `TaskManifest` and `WorkflowManifest`: metadata plus execution requirements,
+  schema references and scoped capability/step identities. No embedded scripts.
+- `CapabilitySpec`: scoped identity, input/output contract references and explicit
+  read/write/execute/external_side_effect classification with policy requirements.
+- `RequestContext`, `RouteDecision`, `CapabilityResult`, `WorkflowRun`,
+  `ApprovalRequest`: traced typed boundary messages. Runtime execution authorization
+  is a separate default-deny `ExecutionAuthorization`, never inferred from publication.
+- `KnowledgeSource`: immutable source reference/checksum and page/slide provenance.
+- `AgentProfile`: governed profile with allowed capabilities, Skills, Knowledge,
+  delegation extension points, policy constraints and bounded model requirements.
+  Only an engineering profile is supplied; no runtime loop or specialist is built.
+- Model requests/responses use logical aliases, typed messages, tool calls and image
+  references. Generation, selection and streaming are protocols without adapters.
+- Evaluation cases declare requests, expected routes and forbidden side effects.
+- Bridge registration advertises installed Tasks/capabilities and local resources;
+  it neither downloads assets nor authorizes or executes them.
+
+`TaskRegistry` stores validated/published Task manifests and supports exact get and
+explicit discovery filters. The in-memory adapter only exposes published records to
+discovery, rejects duplicate identities, and returns stable ordering. Visibility is
+filter metadata, **not access enforcement**: this fixture must not be exposed as a
+multi-user service. Authentication, review verification, transition workflows, RBAC,
+availability checks and compatibility resolution are deferred.
+
+`DeterministicRouter.resolve` returns a known route or `None`; callers must try it
+before model selection. It has no model dependency. A route is intent, not authority.
+No source command parser or runtime is migrated in Phase 1.
+
+## Phase 2 installed routing and execution boundaries
+
+- `AttachmentRef` adds optional opaque file context to `RequestContext`. No path
+  resolution, upload or automatic attachment inclusion in model prompts occurs.
+- `SkillManifest` holds governed procedure text, command bindings, ordered keyword
+  rules and an explicit default. `SkillRegistry` accepts host-installed manifests;
+  one alias per namespace selects an exact version. Regex rules are trusted install
+  configuration, not arbitrary untrusted Regist
+
+---SNIP---
+ences, and optional deprecation/replacement metadata.
+  Review records are descriptive claims, not verified signatures or permission grants.
+- `ExecutionDependencies`: local capability names, central services with explicit
+  required flags, and required `central_required`, equal to whether any service is
+  required. Local execution may still require a central service. No resolver exists.
+- `SecretRef`: symbolic name only. No values, credentials or backend configuration.
+  Closed schemas reject secret-bearing extra fields; Registry assets recursively reject
+  common credential assignments, bearer tokens and private-key markers in text.
+  This is practical validation, not a guarantee of detecting arbitrary secrets hidden
+  in prose. Callers must never submit secrets; errors should not be logged with inputs.
+- `TaskManifest` and `WorkflowManifest`: metadata plus execution requirements,
+  schema references and scoped capability/step identities. No embedded scripts.
+- `CapabilitySpec`: scoped identity, input/output contract references and explicit
+  read/write/execute/external_side_effect classification with policy requirements.
+- `RequestContext`, `RouteDecision`, `CapabilityResult`, `WorkflowRun`,
+  `ApprovalRequest`: traced typed boundary messages. Runtime execution authorization
+  is a separate default-deny `ExecutionAuthorization`, never inferred from publication.
+- `KnowledgeSource`: immutable source reference/checksum and page/slide provenance.
+- `AgentProfile`: governed profile with allowed capabilities, Skills, Knowledge,
+  delegation extension points, policy constraints and bounded model requirements.
+  Only an engineering profile is supplied; no runtime loop or specialist is built.
+- Model requests/responses use logical aliases, typed messages, tool calls and image
+  references. Generation, selection and streaming are protocols without adapters.
+- Evaluation cases declare requests, expected routes and forbidden side effects.
+- Bridge registration advertises installed Tasks/capabilities and local resources;
+  it neither downloads assets nor authorizes or executes them.
+
+`TaskRegistry` stores validated/published Task manifests and supports exact get and
+explicit discovery filters. The in-memory adapter only exposes published records to
+discovery, rejects duplicate identities, and returns stable ordering. Visibility is
+filter metadata, **not access enforcement**: this fixture must not be exposed as a
+multi-user service. Authentication, review verification, transition workflows, RBAC,
+availability checks and compatibility resolution are deferred.
+
+`DeterministicRouter.resolve` returns a known route or `None`; callers must try it
+before model selection. It has no model dependency. A route is intent, not authority.
+No source command parser or runtime is migrated in Phase 1.
+
+## Phase 2 installed routing and execution boundaries
+
+- `AttachmentRef` adds optional opaque file context to `RequestContext`. No path
+  resolution, upload or automatic attachment inclusion in model prompts occurs.
+- `SkillManifest` holds governed procedure text, command bindings, ordered keyword
+  rules and an explicit default. `SkillRegistry` accepts host-installed manifests;
+  one alias per namespace selects an exact version. Regex rules are trusted install
+  configuration, not arbitrary untrusted Registry/model input. They require review
+  for excessive matching cost; no regex sandbox is provided.
+- `CommandRouter.match/resolve` applies source dot-command/keyword precedence;
+  `direct` uses the named Skill's rules/default. `RequestRouter.route` uses at most
+  one `ModelClient.generate` on unmatched text and validates the proposed target
+  against the instal
+
+---SNIP---
+default-deny `ExecutionAuthorization`, never inferred from publication.
+- `KnowledgeSource`: immutable source reference/checksum and page/slide provenance.
+- `AgentProfile`: governed profile with allowed capabilities, Skills, Knowledge,
+  delegation extension points, policy constraints and bounded model requirements.
+  Only an engineering profile is supplied; no runtime loop or specialist is built.
+- Model requests/responses use logical aliases, typed messages, tool calls and image
+  references. Generation, selection and streaming are protocols without adapters.
+- Evaluation cases declare requests, expected routes and forbidden side effects.
+- Bridge registration advertises installed Tasks/capabilities and local resources;
+  it neither downloads assets nor authorizes or executes them.
+
+`TaskRegistry` stores validated/published Task manifests and supports exact get and
+explicit discovery filters. The in-memory adapter only exposes published records to
+discovery, rejects duplicate identities, and returns stable ordering. Visibility is
+filter metadata, **not access enforcement**: this fixture must not be exposed as a
+multi-user service. Authentication, review verification, transition workflows, RBAC,
+availability checks and compatibility resolution are deferred.
+
+`DeterministicRouter.resolve` returns a known route or `None`; callers must try it
+before model selection. It has no model dependency. A route is intent, not authority.
+No source command parser or runtime is migrated in Phase 1.
+
+## Phase 2 installed routing and execution boundaries
+
+- `AttachmentRef` adds optional opaque file context to `RequestContext`. No path
+  resolution, upload or automatic attachment inclusion in model prompts occurs.
+- `SkillManifest` holds governed procedure text, command bindings, ordered keyword
+  rules and an explicit default. `SkillRegistry` accepts host-installed manifests;
+  one alias per namespace selects an exact version. Regex rules are trusted install
+  configuration, not arbitrary untrusted Registry/model input. They require review
+  for excessive matching cost; no regex sandbox is provided.
+- `CommandRouter.match/resolve` applies source dot-command/keyword precedence;
+  `direct` uses the named Skill's rules/default. `RequestRouter.route` uses at most
+  one `ModelClient.generate` on unmatched text and validates the proposed target
+  against the installed catalog. Workflow results are route intent; the Phase 3
+  Gateway dispatches them to the workflow engine. A route has no authority to execute.
+- `InstalledCapabilities.register` binds a reviewed `CapabilitySpec`, async handler,
+  input/output model classes and explicit dependencies. No module loading or code
+  supplied by a Registry asset is accepted. This is an execution-plane catalog,
+  separate from the Team Platform's `InMemoryTaskRegistry`.
+- `LocalPolicy` uses trusted host-configured actor/asset `CapabilityGrant` records.
+  Permission and policy references must cover the capability's declared requirements;
+  required execution approval needs a separate host approval reference. The host
+  authenticates the context actor; this in-process policy is not an authentication
+  server, signed approval verifier or security boundary against hostile Python code.
+  Grants must never be parsed from tool arguments, model output or published metadata.
+- `BridgeExecutor.execute` revalidates invocation context, enforces policy, checks
+  declared local/central availability, then validates typed inputs and invokes the
+  handler. Missing secrets fail as unavailable (no resolver). Host-supplied service
+  availability is a snapshot, not an active probe. There are no automatic retries.
+  Async timeout uses c
+
+---SNIP---
+n workflows, RBAC,
+availability checks and compatibility resolution are deferred.
+
+`DeterministicRouter.resolve` returns a known route or `None`; callers must try it
+before model selection. It has no model dependency. A route is intent, not authority.
+No source command parser or runtime is migrated in Phase 1.
+
+## Phase 2 installed routing and execution boundaries
+
+- `AttachmentRef` adds optional opaque file context to `RequestContext`. No path
+  resolution, upload or automatic attachment inclusion in model prompts occurs.
+- `SkillManifest` holds governed procedure text, command bindings, ordered keyword
+  rules and an explicit default. `SkillRegistry` accepts host-installed manifests;
+  one alias per namespace selects an exact version. Regex rules are trusted install
+  configuration, not arbitrary untrusted Registry/model input. They require review
+  for excessive matching cost; no regex sandbox is provided.
+- `CommandRouter.match/resolve` applies source dot-command/keyword precedence;
+  `direct` uses the named Skill's rules/default. `RequestRouter.route` uses at most
+  one `ModelClient.generate` on unmatched text and validates the proposed target
+  against the installed catalog. Workflow results are route intent; the Phase 3
+  Gateway dispatches them to the workflow engine. A route has no authority to execute.
+- `InstalledCapabilities.register` binds a reviewed `CapabilitySpec`, async handler,
+  input/output model classes and explicit dependencies. No module loading or code
+  supplied by a Registry asset is accepted. This is an execution-plane catalog,
+  separate from the Team Platform's `InMemoryTaskRegistry`.
+- `LocalPolicy` uses trusted host-configured actor/asset `CapabilityGrant` records.
+  Permission and policy references must cover the capability's declared requirements;
+  required execution approval needs a separate host approval reference. The host
+  authenticates the context actor; this in-process policy is not an authentication
+  server, signed approval verifier or security boundary against hostile Python code.
+  Grants must never be parsed from tool arguments, model output or published metadata.
+- `BridgeExecutor.execute` revalidates invocation context, enforces policy, checks
+  declared local/central availability, then validates typed inputs and invokes the
+  handler. Missing secrets fail as unavailable (no resolver). Host-supplied service
+  availability is a snapshot, not an active probe. There are no automatic retries.
+  Async timeout uses cooperative cancellation; it cannot undo a side effect or
+  preempt blocking/suppressed-cancellation code. The one shipped production handler
+  (`filesystem/read-file`) therefore offloads its blocking filesystem I/O to a worker
+  thread and confines reads to a host-configured root; any future production handler
+  must do the equivalent.
+- `ExecutionEvent` stores trace/target/status/error code only, never arguments,
+  attachment content, provider errors or returned data. Results retain caller traces.
+- `MCPAdapter` wraps a host-supplied `MCPClient` with bounded discovery and explicit
+  per-tool binding. Wire transport/session/auth configuration remains outside platform
+  contracts. `MCPTool.input_schema` is remote metadata; the host selects reviewed local
+  model classes for validation rather than executing or trusting remote schemas.
+  Callbacks run only through authorized Bridge dispatch. Client errors are sanitized.
+
+All changes are additive to Phase 1. Source fidelity and intentional security changes
+are documented in `PHASE_2_MIGRATION.md`; production source paths remain active.
+
+## Phase 3 workflow inputs
+
+`InstalledWorkflows` installs exact scoped versions, independently of 
+
+---SNIP---
+.
+
+`DeterministicRouter.resolve` returns a known route or `None`; callers must try it
+before model selection. It has no model dependency. A route is intent, not authority.
+No source command parser or runtime is migrated in Phase 1.
+
+## Phase 2 installed routing and execution boundaries
+
+- `AttachmentRef` adds optional opaque file context to `RequestContext`. No path
+  resolution, upload or automatic attachment inclusion in model prompts occurs.
+- `SkillManifest` holds governed procedure text, command bindings, ordered keyword
+  rules and an explicit default. `SkillRegistry` accepts host-installed manifests;
+  one alias per namespace selects an exact version. Regex rules are trusted install
+  configuration, not arbitrary untrusted Registry/model input. They require review
+  for excessive matching cost; no regex sandbox is provided.
+- `CommandRouter.match/resolve` applies source dot-command/keyword precedence;
+  `direct` uses the named Skill's rules/default. `RequestRouter.route` uses at most
+  one `ModelClient.generate` on unmatched text and validates the proposed target
+  against the installed catalog. Workflow results are route intent; the Phase 3
+  Gateway dispatches them to the workflow engine. A route has no authority to execute.
+- `InstalledCapabilities.register` binds a reviewed `CapabilitySpec`, async handler,
+  input/output model classes and explicit dependencies. No module loading or code
+  supplied by a Registry asset is accepted. This is an execution-plane catalog,
+  separate from the Team Platform's `InMemoryTaskRegistry`.
+- `LocalPolicy` uses trusted host-configured actor/asset `CapabilityGrant` records.
+  Permission and policy references must cover the capability's declared requirements;
+  required execution approval needs a separate host approval reference. The host
+  authenticates the context actor; this in-process policy is not an authentication
+  server, signed approval verifier or security boundary against hostile Python code.
+  Grants must never be parsed from tool arguments, model output or published metadata.
+- `BridgeExecutor.execute` revalidates invocation context, enforces policy, checks
+  declared local/central availability, then validates typed inputs and invokes the
+  handler. Missing secrets fail as unavailable (no resolver). Host-supplied service
+  availability is a snapshot, not an active probe. There are no automatic retries.
+  Async timeout uses cooperative cancellation; it cannot undo a side effect or
+  preempt blocking/suppressed-cancellation code. The one shipped production handler
+  (`filesystem/read-file`) therefore offloads its blocking filesystem I/O to a worker
+  thread and confines reads to a host-configured root; any future production handler
+  must do the equivalent.
+- `ExecutionEvent` stores trace/target/status/error code only, never arguments,
+  attachment content, provider errors or returned data. Results retain caller traces.
+- `MCPAdapter` wraps a host-supplied `MCPClient` with bounded discovery and explicit
+  per-tool binding. Wire transport/session/auth configuration remains outside platform
+  contracts. `MCPTool.input_schema` is remote metadata; the host selects reviewed local
+  model classes for validation rather than executing or trusting remote schemas.
+  Callbacks run only through authorized Bridge dispatch. Client errors are sanitized.
+
+All changes are additive to Phase 1. Source fidelity and intentional security changes
+are documented in `PHASE_2_MIGRATION.md`; production source paths remain active.
+
+## Phase 3 workflow inputs
+
+`InstalledWorkflows` installs exact scoped versions, independently of Registry
+publication. `WorkflowEngine` dispatches ordered steps through `BridgeE
+
+---SNIP---
+
+=====  docs/WORKFLOW_CHECKPOINTS.md =====
+# Workflow checkpoint contract — Phase 3 slice 9
+
+Status: contract/reference-model slice, approved scope 2026-09-21. No disk backend
+or WorkflowEngine integration is included. The running platform remains in-memory.
+
+## Requirement and plan
+
+Define single-Bridge, single-writer restart evidence for manual recovery. Preserve
+the current workflow/Bridge policy path and ResumePolicy. Add serializable contracts
+in `common/checkpoints.py`, a store protocol and bounded in-memory reference model
+in `workflow/checkpoints.py`, then validation and fault-window tests. Run the full
+verification baseline, commit, open a PR and leave a reproducible handoff.
+
+Architecture check: this is private execution-plane state, never a Registry asset,
+an execution grant, a model route, or an n8n-specific runtime. No automatic recovery,
+multi-worker leases, federation, production database, transport or secret resolver.
+
+## Retained data and compatibility
+
+RunCheckpoint v1 retains run ID, actor/namespace ownership, trace, exact manifest
+snapshot, runtime compatibility identifier, intent fingerprint, ordered step
+evidence, revision, and parent/continuation links. A stored manifest is provenance,
+not authority: a future recovery coordinator must compare it and runtime compatibility
+against installed definitions, revalidate input/output schemas and dependencies,
+and obtain current authorization at preflight and each Bridge dispatch.
+
+Arguments and completed results use PayloadRef (opaque local ID, SHA-256 and
+contract identifier); no inline data, exception text, messages or credentials.
+The host must store validated, secret-free payloads under owner access controls,
+verify their digest and schema on retrieval, and refuse recovery if missing,
+corrupt, incompatible or disallowed. A reference does not grant access. SecretRef
+requirements in the manifest remain unresolved metadata. Arbitrary secret detection
+is not claimed: even opaque identifiers must not be populated with credentials.
+
+No TTL or silent eviction is defined. At capacity, reject new runs. Idempotency
+mappings and continuation links are retained for the store lifetime; the only
+deletion is the explicit `retire` in "Retention (slice 14)" below, and a retired
+run's key stays bound as a tombstone, so deleting history never silently makes a
+used key executable again. A durable backend must retain all of this across
+restarts. Payload cleanup still needs its own policy.
+The memory reference defaults to 50 total records (including cont
+
+---SNIP---
+# Workflow checkpoint contract — Phase 3 slice 9
+
+Status: contract/reference-model slice, approved scope 2026-09-21. No disk backend
+or WorkflowEngine integration is included. The running platform remains in-memory.
+
+## Requirement and plan
+
+Define single-Bridge, single-writer restart evidence for manual recovery. Preserve
+the current workflow/Bridge policy path and ResumePolicy. Add serializable contracts
+in `common/checkpoints.py`, a store protocol and bounded in-memory reference model
+in `workflow/checkpoints.py`, then validation and fault-window tests. Run the full
+verification baseline, commit, open a PR and leave a reproducible handoff.
+
+Architecture check: this is private execution-plane state, never a Registry asset,
+an execution grant, a model route, or an n8n-specific runtime. No automatic recovery,
+multi-worker leases, federation, production database, transport or secret resolver.
+
+## Retained data and compatibility
+
+RunCheckpoint v1 retains run ID, actor/namespace ownership, trace, exact manifest
+snapshot, runtime compatibility identifier, intent fingerprint, ordered step
+evidence, revision, and parent/continuation links. A stored manifest is provenance,
+not authority: a future recovery coordinator must compare it and runtime compatibility
+against installed definitions, revalidate input/output schemas and dependencies,
+and obtain current authorization at preflight and each Bridge dispatch.
+
+Arguments and completed results use PayloadRef (opaque local ID, SHA-256 and
+contract identifier); no inline data, exception text, messages or credentials.
+The host must store validated, secret-free payloads under owner access controls,
+verify their digest and schema on retrieval, and refuse recovery if missing,
+corrupt, incompatible or disallowed. A reference does not grant access. SecretRef
+requirements in the manifest remain unresolved metadata. Arbitrary secret detection
+is not claimed: even opaque identifiers must not be populated with credentials.
+
+No TTL or silent eviction is defined. At capacity, reject new runs. Idempotency
+mappings and continuation links are retained for the store lifetime; the only
+deletion is the explicit `retire` in "Retention (slice 14)" below, and a retired
+run's key stays bound as a tombstone, so deleting history never silently makes a
+used key executable again. A durable backend must retain all of this across
+restarts. Payload cleanup still needs its own policy.
+The memory reference defaults to 50 total records (including continuations), with
+a configurable positive capacity. This is independent of the existing engine's
+history/key limits; wiring or changing
+
+---SNIP---
+# Workflow checkpoint contract — Phase 3 slice 9
+
+Status: contract/reference-model slice, approved scope 2026-09-21. No disk backend
+or WorkflowEngine integration is included. The running platform remains in-memory.
+
+## Requirement and plan
+
+Define single-Bridge, single-writer restart evidence for manual recovery. Preserve
+the current workflow/Bridge policy path and ResumePolicy. Add serializable contracts
+in `common/checkpoints.py`, a store protocol and bounded in-memory reference model
+in `workflow/checkpoints.py`, then validation and fault-window tests. Run the full
+verification baseline, commit, open a PR and leave a reproducible handoff.
+
+Architecture check: this is private execution-plane state, never a Registry asset,
+an execution grant, a model route, or an n8n-specific runtime. No automatic recovery,
+multi-worker leases, federation, production database, transport or secret resolver.
+
+## Retained data and compatibility
+
+RunCheckpoint v1 retains run ID, actor/namespace ownership, trace, exact manifest
+snapshot, runtime compatibility identifier, intent fingerprint, ordered step
+evidence, revision, and parent/continuation links. A stored manifest is provenance,
+not authority: a future recovery coordinator must compare it and runtime compatibility
+against installed definitions, revalidate input/output schemas and dependencies,
+and obtain current authorization at preflight and each Bridge dispatch.
+
+Arguments and completed results use PayloadRef (opaque local ID, SHA-256 and
+contract identifier); no inline data, exception text, messages or credentials.
+The host must store validated, secret-free payloads under owner access controls,
+verify their digest and schema on retrieval, and refuse recovery if missing,
+corrupt, incompatible or disallowed. A reference does not grant access. SecretRef
+requirements in the manifest remain unresolved metadata. Arbitrary secret detection
+is not claimed: even opaque identifiers must not be populated with credentials.
+
+No TTL or silent eviction is defined. At capacity, reject new runs. Idempotency
+mappings and continuation links are retained for the store lifetime; the only
+deletion is the explicit `retire` in "Retention (slice 14)" below, and a retired
+run's key stays bound as a tombstone, so deleting history never silently makes a
+used key executable again. A durable backend must retain all of this across
+restarts. Payload cleanup still needs its own policy.
+The memory reference defaults to 50 total records (including continuations), with
+a configurable positive capacity. This is independent of the existing engine's
+history/key limits; wiring or changing those limits is not part of this slice.
+
+## State and write ordering
+
+1. Complete static preflight and payload preparation before creating a record.
+   Atomically create the run and its optional actor
+
+---SNIP---
+# Workflow checkpoint contract — Phase 3 slice 9
+
+Status: contract/reference-model slice, approved scope 2026-09-21. No disk backend
+or WorkflowEngine integration is included. The running platform remains in-memory.
+
+## Requirement and plan
+
+Define single-Bridge, single-writer restart evidence for manual recovery. Preserve
+the current workflow/Bridge policy path and ResumePolicy. Add serializable contracts
+in `common/checkpoints.py`, a store protocol and bounded in-memory reference model
+in `workflow/checkpoints.py`, then validation and fault-window tests. Run the full
+verification baseline, commit, open a PR and leave a reproducible handoff.
+
+Architecture check: this is private execution-plane state, never a Registry asset,
+an execution grant, a model route, or an n8n-specific runtime. No automatic recovery,
+multi-worker leases, federation, production database, transport or secret resolver.
+
+## Retained data and compatibility
+
+RunCheckpoint v1 retains run ID, actor/namespace ownership, trace, exact manifest
+snapshot, runtime compatibility identifier, intent fingerprint, ordered step
+evidence, revision, and parent/continuation links. A stored manifest is provenance,
+not authority: a future recovery coordinator must compare it and runtime compatibility
+against installed definitions, revalidate input/output schemas and dependencies,
+and obtain current authorization at preflight and each Bridge dispatch.
+
+Arguments and completed results use PayloadRef (opaque local ID, SHA-256 and
+contract identifier); no inline data, exception text, messages or credentials.
+The host must store validated, secret-free payloads under owner access controls,
+verify their digest and schema on retrieval, and refuse recovery if missing,
+corrupt, incompatible or disallowed. A reference does not grant access. SecretRef
+requirements in the manifest remain unresolved metadata. Arbitrary secret detection
+is not claimed: even opaque identifiers must not be populated with credentials.
+
+No TTL or silent eviction is defined. At capacity, reject new runs. Idempotency
+mappings and continuation links are retained for the store lifetime; the only
+deletion is the explicit `retire` in "Retention (slice 14)" below, and a retired
+run's key stays bound as a tombstone, so deleting history never silently makes a
+used key executable again. A durable backend must retain all of this across
+restarts. Payload cleanup still needs its own policy.
+The memory reference defaults to 50 total records (including continuations), with
+a configurable positive capacity. This is independent of the existing engine's
+history/key limits; wiring or changing those limits is not part of this slice.
+
+## State and write ordering
+
+1. Complete static preflight and payload preparation before creating a record.
+   Atomically create the run and its optional actor/namespace-scoped key binding.
+2. Durably acknowledge `started` for the next step **before** Bridge dispatch.
+   A failed or ambiguous acknowledgment forbids di
+
+---SNIP---
+ledges it, so a crash before that acknowledgment still classifies the
+   step as uncertain without walking the parent chain. Keep the original key
+   pointing to the original run.
+7. `recovery_plan` reports a `running` record as `running` (its process may be
+   alive) and only a `suspended` record as `needs_input`; `succeeded` is terminal.
+
+The reference store checks linear progress, immutable intent and completed results,
+revision compare-and-swap, owner isolation and atomic key/continuation relationships.
+It is a trusted internal persistence boundary, not an authentication or policy server.
+Only a future authorized coordinator may call its write methods. Its recovery_plan
+is metadata-only evidence and grants no permission to dispatch.
+
+Checkpoint persistence is correctness-critical and fails closed; it must not use
+the best-effort progress/log reporting hook. Existing reporting remains best-effort.
+
+## Store outcomes and fault acceptance
+
+`create` returns the existing run for the same scoped key when the fingerprint
+**and** the intent fields (manifest, runtime contract, arguments reference) match;
+anything else is `key_conflict`. The caller must derive the fingerprint from exact
+workflow, arguments and all non-trace RequestContext fields, as the current engine
+does; it is not accepted from an untrusted submission. No key means a new run.
+Run identifiers are scoped by owner: one owner can neither observe nor block
+another owner's identifiers. `replace` is a compare-and-swap on the expected
+revision; successful updates increment the stored revision once.
+`continue_run` atomically updates parent and creates child; repeated reservation is
+`already_continued` and the owner can inspect the existing link.
+
+CheckpointStoreError carries only a closed code (conflict, missing, capacity,
+invalid_transition, key_conflict, already_continued, unavailable, commit_unknown).
+Unavailable means known no commit; commit_unknown means read back before proceeding.
+After any ambiguous outcome, never repeat a capability or choose a new run/key as
+an automatic fallback. There are no automatic store retries in this slice.
+
+Tests cover JSON version/shape validation; invalid step order; no inline payloads;
+owner isolation; stale writers; immutable success/intent; key conflicts and capacity;
+atomic continuation; failure before start persistence; effect before completion
+persistence; lost commit acknowledgment; and metadata-only recovery classification.
+Memory tests simulate these windows; they do not prove filesystem crash durability.
+
+Next slice: choose and review a local payload/storage backend, implement actual
+transaction durability and restart tests, then wire the existing engine to this
+boundary with fresh policy checks. Do not treat this reference model as deployment.
+
+## SQLite backend (slice 10)
+
+`workflow.checkpoints_sqlite.SqliteCheckpointStore(path, capacity=50)` is the
+first durable backend: one local SQLite file per Bridge, standard library only,
+single process and single owning thread. The path is host configuration and must
+never point inside the project tree. The transition rules are the shared
+functions in `workflow.checkpoints`, so the memory reference model and the SQLite
+backend pass the same contract suite and cannot drift.
+
+Each `create`, `replace` and `continue_run` is one `BEGIN IMMEDIATE` … `COMMIT`
+transaction with `synchronous=FULL`; the call returns only after `COMMIT`
+returned. Outcomes:
+
+- `unavailable`: known not committed — the transaction could not start (for
+  example a second writer holds the file), the file is closed, the schema version
+  is unknown, a stored record no longer decodes, a statement failed before commit
+  and w
+
+---SNIP---
+
+=====  docs/ARCHITECTURE.md =====
+# Agentic Engineering Platform — Architecture
+
+Status: Approved architecture baseline; Phases 1–6 implemented, Phase 7 and product E2E gates active
+
+## 1. Purpose
+
+This repository unifies the proven capabilities currently spread across five source repositories without blindly merging their implementations. The target is an engineering platform in which AI reasoning is used where judgement is needed, while deterministic execution remains deterministic.
+
+Core rule:
+
+> Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. n8n coordinates **WHEN**. Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
+
+## 2. Core requirements
+
+### Multi-user and contribution-driven platform
+
+The platform is designed as a **multi-user, contribution-driven engineering automation platform**. Team members can develop, validate, publish, discover, reuse and evolve **Tasks, Workflows, Skills, Knowledge and Agent profiles**. Platform capability grows through team contributions **without requiring changes to the core runtime**.
+
+The platform therefore provides shared mechanisms for ownership, versioning, validation, review and approval, publishing, discovery, dependency management, permissions and lifecycle management.
+
+A contribution is developed and validated in an isolated workspace before it becomes a shared platform asset:
+
+```text
+Engineer A        Engineer B        Engineer C
+    |                 |                 |
+    +------- develop / contribute ------+
+                      |
+                      v
+              Platform Registry
+        +-------------+-------------+
+        |             |             |
+        v             v             v
+      Tasks       Workflows       Skills
+        |             |             |
+        +-------------+-------------+
+                      |
+             Knowledge / Agents
+                      |
+                      v
+                Shared Platform
+                      |
+          +-----------+-----------+
+          |           |           |
+          v           v           v
+       Bridge A    Bridge B    Bridge C
+```
+
+The **Platform Registry** is the shared control plane for published assets and their metadata. It is distinct from execution. A **Host Bridge / worker** advertises installed capabilities and local resources and executes Tasks/Workflows close to Windows COM, browsers, DUTs, instruments, files or other local dependencies.
+
+Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
+
+**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should in
+
+---SNIP---
+# Agentic Engineering Platform — Architecture
+
+Status: Approved architecture baseline; Phases 1–6 implemented, Phase 7 and product E2E gates active
+
+## 1. Purpose
+
+This repository unifies the proven capabilities currently spread across five source repositories without blindly merging their implementations. The target is an engineering platform in which AI reasoning is used where judgement is needed, while deterministic execution remains deterministic.
+
+Core rule:
+
+> Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. n8n coordinates **WHEN**. Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
+
+## 2. Core requirements
+
+### Multi-user and contribution-driven platform
+
+The platform is designed as a **multi-user, contribution-driven engineering automation platform**. Team members can develop, validate, publish, discover, reuse and evolve **Tasks, Workflows, Skills, Knowledge and Agent profiles**. Platform capability grows through team contributions **without requiring changes to the core runtime**.
+
+The platform therefore provides shared mechanisms for ownership, versioning, validation, review and approval, publishing, discovery, dependency management, permissions and lifecycle management.
+
+A contribution is developed and validated in an isolated workspace before it becomes a shared platform asset:
+
+```text
+Engineer A        Engineer B        Engineer C
+    |                 |                 |
+    +------- develop / contribute ------+
+                      |
+                      v
+              Platform Registry
+        +-------------+-------------+
+        |             |             |
+        v             v             v
+      Tasks       Workflows       Skills
+        |             |             |
+        +-------------+-------------+
+                      |
+             Knowledge / Agents
+                      |
+                      v
+                Shared Platform
+                      |
+          +-----------+-----------+
+          |           |           |
+          v           v           v
+       Bridge A    Bridge B    Bridge C
+```
+
+The **Platform Registry** is the shared control plane for published assets and their metadata. It is distinct from execution. A **Host Bridge / worker** advertises installed capabilities and local resources and executes Tasks/Workflows close to Windows COM, browsers, DUTs, instruments, files or other local dependencies.
+
+Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
+
+**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
+
+### Personal engineering workspace and capability growth
+
+Each engineer works through a **Personal Engineering Workspace** composed of the engineer, a Personal AI Agent and a Host Bridge/worker. The Bridge is the engineer's local executable toolbox: it can expose personal/team Tools and Tasks plus local resources such as files, shells, browsers, Office/COM automation, DUTs and instruments. The Personal AI Agent reasons over the engineer
+
+---SNIP---
+lities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
+
+## 2. Core requirements
+
+### Multi-user and contribution-driven platform
+
+The platform is designed as a **multi-user, contribution-driven engineering automation platform**. Team members can develop, validate, publish, discover, reuse and evolve **Tasks, Workflows, Skills, Knowledge and Agent profiles**. Platform capability grows through team contributions **without requiring changes to the core runtime**.
+
+The platform therefore provides shared mechanisms for ownership, versioning, validation, review and approval, publishing, discovery, dependency management, permissions and lifecycle management.
+
+A contribution is developed and validated in an isolated workspace before it becomes a shared platform asset:
+
+```text
+Engineer A        Engineer B        Engineer C
+    |                 |                 |
+    +------- develop / contribute ------+
+                      |
+                      v
+              Platform Registry
+        +-------------+-------------+
+        |             |             |
+        v             v             v
+      Tasks       Workflows       Skills
+        |             |             |
+        +-------------+-------------+
+                      |
+             Knowledge / Agents
+                      |
+                      v
+                Shared Platform
+                      |
+          +-----------+-----------+
+          |           |           |
+          v           v           v
+       Bridge A    Bridge B    Bridge C
+```
+
+The **Platform Registry** is the shared control plane for published assets and their metadata. It is distinct from execution. A **Host Bridge / worker** advertises installed capabilities and local resources and executes Tasks/Workflows close to Windows COM, browsers, DUTs, instruments, files or other local dependencies.
+
+Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
+
+**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
+
+### Personal engineering workspace and capability growth
+
+Each engineer works through a **Personal Engineering Workspace** composed of the engineer, a Personal AI Agent and a Host Bridge/worker. The Bridge is the engineer's local executable toolbox: it can expose personal/team Tools and Tasks plus local resources such as files, shells, browsers, Office/COM automation, DUTs and instruments. The Personal AI Agent reasons over the engineer's request and may combine local Bridge capabilities with shared Skills, Workflows and Knowledge discovered from the Platform Registry.
+
+~~~text
+                              Team Platform
+                    +---------------------------+
+                    |     Platform Registry     |
+                    | Tasks / Workflows / Skills|
+                    | Knowledge / Agent profiles|
+                    +-------------^-------------+
+                                  |
+                         publish / discover
+                                  |
+          +-----------------------+-----------------------+
+          |                       |                       |
++---------+---------+   +---------+---------+   +---------+---------+
+| Engineer A        |   | Engineer B        |   | Engineer C        
+
+---SNIP---
+ and approval, publishing, discovery, dependency management, permissions and lifecycle management.
+
+A contribution is developed and validated in an isolated workspace before it becomes a shared platform asset:
+
+```text
+Engineer A        Engineer B        Engineer C
+    |                 |                 |
+    +------- develop / contribute ------+
+                      |
+                      v
+              Platform Registry
+        +-------------+-------------+
+        |             |             |
+        v             v             v
+      Tasks       Workflows       Skills
+        |             |             |
+        +-------------+-------------+
+                      |
+             Knowledge / Agents
+                      |
+                      v
+                Shared Platform
+                      |
+          +-----------+-----------+
+          |           |           |
+          v           v           v
+       Bridge A    Bridge B    Bridge C
+```
+
+The **Platform Registry** is the shared control plane for published assets and their metadata. It is distinct from execution. A **Host Bridge / worker** advertises installed capabilities and local resources and executes Tasks/Workflows close to Windows COM, browsers, DUTs, instruments, files or other local dependencies.
+
+Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
+
+**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
+
+### Personal engineering workspace and capability growth
+
+Each engineer works through a **Personal Engineering Workspace** composed of the engineer, a Personal AI Agent and a Host Bridge/worker. The Bridge is the engineer's local executable toolbox: it can expose personal/team Tools and Tasks plus local resources such as files, shells, browsers, Office/COM automation, DUTs and instruments. The Personal AI Agent reasons over the engineer's request and may combine local Bridge capabilities with shared Skills, Workflows and Knowledge discovered from the Platform Registry.
+
+~~~text
+                              Team Platform
+                    +---------------------------+
+                    |     Platform Registry     |
+                    | Tasks / Workflows / Skills|
+                    | Knowledge / Agent profiles|
+                    +-------------^-------------+
+                                  |
+                         publish / discover
+                                  |
+          +-----------------------+-----------------------+
+          |                       |                       |
++---------+---------+   +---------+---------+   +---------+---------+
+| Engineer A        |   | Engineer B        |   | Engineer C        |
+| Personal AI Agent |   | Personal AI Agent |   | Personal AI Agent |
+|        <->        |   |        <->        |   |        <->        |
+| Bridge A          |   | Bridge B          |   | Bridge C          |
+| Tools / Tasks     |   | Tools / Tasks     |   | Tools / Tasks     |
+| Local resources  |   | Local resources  |   | Local resources  |
++-------------------+   +-------------------+   +-------------------+
+~~~
+
+The engineer/agent/Bridge relationship is intentionally local while reusable capability is intentionally shareable. A Bridge may contain capabilities that remain private to one engineer, capabilities installed from
+
+---SNIP---
+v             v
+      Tasks       Workflows       Skills
+        |             |             |
+        +-------------+-------------+
+                      |
+             Knowledge / Agents
+                      |
+                      v
+                Shared Platform
+                      |
+          +-----------+-----------+
+          |           |           |
+          v           v           v
+       Bridge A    Bridge B    Bridge C
+```
+
+The **Platform Registry** is the shared control plane for published assets and their metadata. It is distinct from execution. A **Host Bridge / worker** advertises installed capabilities and local resources and executes Tasks/Workflows close to Windows COM, browsers, DUTs, instruments, files or other local dependencies.
+
+Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
+
+**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
+
+### Personal engineering workspace and capability growth
+
+Each engineer works through a **Personal Engineering Workspace** composed of the engineer, a Personal AI Agent and a Host Bridge/worker. The Bridge is the engineer's local executable toolbox: it can expose personal/team Tools and Tasks plus local resources such as files, shells, browsers, Office/COM automation, DUTs and instruments. The Personal AI Agent reasons over the engineer's request and may combine local Bridge capabilities with shared Skills, Workflows and Knowledge discovered from the Platform Registry.
+
+~~~text
+                              Team Platform
+                    +---------------------------+
+                    |     Platform Registry     |
+                    | Tasks / Workflows / Skills|
+                    | Knowledge / Agent profiles|
+                    +-------------^-------------+
+                                  |
+                         publish / discover
+                                  |
+          +-----------------------+-----------------------+
+          |                       |                       |
++---------+---------+   +---------+---------+   +---------+---------+
+| Engineer A        |   | Engineer B        |   | Engineer C        |
+| Personal AI Agent |   | Personal AI Agent |   | Personal AI Agent |
+|        <->        |   |        <->        |   |        <->        |
+| Bridge A          |   | Bridge B          |   | Bridge C          |
+| Tools / Tasks     |   | Tools / Tasks     |   | Tools / Tasks     |
+| Local resources  |   | Local resources  |   | Local resources  |
++-------------------+   +-------------------+   +-------------------+
+~~~
+
+The engineer/agent/Bridge relationship is intentionally local while reusable capability is intentionally shareable. A Bridge may contain capabilities that remain private to one engineer, capabilities installed from the team registry, and capabilities being developed for later publication.
+
+### Continuous capability learning / Engineering Capability Flywheel
+
+Real work is a source of reusable engineering capability. During problem solving, an engineer and Personal AI Agent may discover a repeatable procedure, automation or decision pattern. The platform should be able to capture this as a **candidate asset** rather than losing it in a chat transcript or one-off script.
+
+~~~text
+Engineer work
+     |
+     v
+Personal AI Agent <-> Bridge
+
+---SNIP---
+
+=====  tests/test_engine.py =====
+import asyncio
+from typing import Any
+
+import pytest
+from test_dispatch import Handler, Input, Output, grant, spec
+
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
+from common.execution import RequestContext, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import (
+    MAX_LOG_LINES,
+    MAX_RUNS_KEPT,
+    InstalledWorkflows,
+    WorkflowEngine,
+    _RunRecord,
+)
+
+
+def manifest(steps: list[AssetIdentity], **changes: Any) -> WorkflowManifest:
+    data: dict[str, Any] = {
+        "metadata": {
+            "identity": {"namespace": "sample", "name": "count-twice", "version": "1.0.0"},
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "private",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": "Inert two-step count fixture",
+        "execution": {"mode": "local"},
+        "dependencies": {"central_required": False},
+        "input_contract": "count.input.v1",
+        "output_contract": "count.output.v1",
+        "steps": [step.model_dump() for step in steps],
+        **changes,
+    }
+    return WorkflowManifest.model_validate(data)
+
+
+def context() -> RequestContext:
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
+        actor="engineer",
+        namespace="sample",
+        channel="test",
+        message="run the workflow",
+    )
+
+
+def engine(
+    handler: Handler | None = None,
+    *,
+    steps: int = 2,
+    granted: bool = True,
+    install_capability: bool = True,
+) -> tuple[WorkflowEngine, WorkflowManifest]:
+    installed = InstalledCapabilities()
+    if install_capability:
+        installed.register(
+            spec(),
+            handler if handler is not None else Handler(),
+            Input,
+            Output,
+            ExecutionDependencies(central_required=False),
+        )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant(),) if granted else ()))
+    workflows = InstalledWorkflows()
+    flow = manifest([spec().identity] * steps)
+    workflows.register(flow)
+    return WorkflowEngine(workflows, bridge), flow
+
+
+def test_sequential_steps_dispatch_through_bridge_policy() -> None:
+    handler = Handler()
+    runner, flow = engine(handler)
+    snapshot = asyncio.run(
+        runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
+    )
+    assert snapshot.run.status == "succeeded"
+    assert snapshot.run.completed_steps == 2
+    assert len(handler.calls) == 2
+    assert [result.status for result in snapshot.step_results] == ["succeeded", "succeeded"]
+    assert snapshot.
+
+---SNIP---
+import asyncio
+from typing import Any
+
+import pytest
+from test_dispatch import Handler, Input, Output, grant, spec
+
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
+from common.execution import RequestContext, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import (
+    MAX_LOG_LINES,
+    MAX_RUNS_KEPT,
+    InstalledWorkflows,
+    WorkflowEngine,
+    _RunRecord,
+)
+
+
+def manifest(steps: list[AssetIdentity], **changes: Any) -> WorkflowManifest:
+    data: dict[str, Any] = {
+        "metadata": {
+            "identity": {"namespace": "sample", "name": "count-twice", "version": "1.0.0"},
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "private",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": "Inert two-step count fixture",
+        "execution": {"mode": "local"},
+        "dependencies": {"central_required": False},
+        "input_contract": "count.input.v1",
+        "output_contract": "count.output.v1",
+        "steps": [step.model_dump() for step in steps],
+        **changes,
+    }
+    return WorkflowManifest.model_validate(data)
+
+
+def context() -> RequestContext:
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
+        actor="engineer",
+        namespace="sample",
+        channel="test",
+        message="run the workflow",
+    )
+
+
+def engine(
+    handler: Handler | None = None,
+    *,
+    steps: int = 2,
+    granted: bool = True,
+    install_capability: bool = True,
+) -> tuple[WorkflowEngine, WorkflowManifest]:
+    installed = InstalledCapabilities()
+    if install_capability:
+        installed.register(
+            spec(),
+            handler if handler is not None else Handler(),
+            Input,
+            Output,
+            ExecutionDependencies(central_required=False),
+        )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant(),) if granted else ()))
+    workflows = InstalledWorkflows()
+    flow = manifest([spec().identity] * steps)
+    workflows.register(flow)
+    return WorkflowEngine(workflows, bridge), flow
+
+
+def test_sequential_steps_dispatch_through_bridge_policy() -> None:
+    handler = Handler()
+    runner, flow = engine(handler)
+    snapshot = asyncio.run(
+        runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
+    )
+    assert snapshot.run.status == "succeeded"
+    assert snapshot.run.completed_steps == 2
+    assert len(handler.calls) == 2
+    assert [result.status for result in snapshot.step_results] == ["succeeded", "succeeded"]
+    assert snapshot.log[0] == "start workflow sample/count-twice@1.0.0"
+    assert snapshot.log[1] == "s
+
+---SNIP---
+import asyncio
+from typing import Any
+
+import pytest
+from test_dispatch import Handler, Input, Output, grant, spec
+
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
+from common.execution import RequestContext, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import (
+    MAX_LOG_LINES,
+    MAX_RUNS_KEPT,
+    InstalledWorkflows,
+    WorkflowEngine,
+    _RunRecord,
+)
+
+
+def manifest(steps: list[AssetIdentity], **changes: Any) -> WorkflowManifest:
+    data: dict[str, Any] = {
+        "metadata": {
+            "identity": {"namespace": "sample", "name": "count-twice", "version": "1.0.0"},
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "private",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": "Inert two-step count fixture",
+        "execution": {"mode": "local"},
+        "dependencies": {"central_required": False},
+        "input_contract": "count.input.v1",
+        "output_contract": "count.output.v1",
+        "steps": [step.model_dump() for step in steps],
+        **changes,
+    }
+    return WorkflowManifest.model_validate(data)
+
+
+def context() -> RequestContext:
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
+        actor="engineer",
+        namespace="sample",
+        channel="test",
+        message="run the workflow",
+    )
+
+
+def engine(
+    handler: Handler | None = None,
+    *,
+    steps: int = 2,
+    granted: bool = True,
+    install_capability: bool = True,
+) -> tuple[WorkflowEngine, WorkflowManifest]:
+    installed = InstalledCapabilities()
+    if install_capability:
+        installed.register(
+            spec(),
+            handler if handler is not None else Handler(),
+            Input,
+            Output,
+            ExecutionDependencies(central_required=False),
+        )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant(),) if granted else ()))
+    workflows = InstalledWorkflows()
+    flow = manifest([spec().identity] * steps)
+    workflows.register(flow)
+    return WorkflowEngine(workflows, bridge), flow
+
+
+def test_sequential_steps_dispatch_through_bridge_policy() -> None:
+    handler = Handler()
+    runner, flow = engine(handler)
+    snapshot = asyncio.run(
+        runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
+    )
+    assert snapshot.run.status == "succeeded"
+    assert snapshot.run.completed_steps == 2
+    assert len(handler.calls) == 2
+    assert [result.status for result in snapshot.step_results] == ["succeeded", "succeeded"]
+    assert snapshot.log[0] == "start workflow sample/count-twice@1.0.0"
+    assert snapshot.log[1] == "step 1 sample/count@1.0.0 succeeded"
+    asser
+
+---SNIP---
+import asyncio
+from typing import Any
+
+import pytest
+from test_dispatch import Handler, Input, Output, grant, spec
+
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
+from common.execution import RequestContext, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import (
+    MAX_LOG_LINES,
+    MAX_RUNS_KEPT,
+    InstalledWorkflows,
+    WorkflowEngine,
+    _RunRecord,
+)
+
+
+def manifest(steps: list[AssetIdentity], **changes: Any) -> WorkflowManifest:
+    data: dict[str, Any] = {
+        "metadata": {
+            "identity": {"namespace": "sample", "name": "count-twice", "version": "1.0.0"},
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "private",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": "Inert two-step count fixture",
+        "execution": {"mode": "local"},
+        "dependencies": {"central_required": False},
+        "input_contract": "count.input.v1",
+        "output_contract": "count.output.v1",
+        "steps": [step.model_dump() for step in steps],
+        **changes,
+    }
+    return WorkflowManifest.model_validate(data)
+
+
+def context() -> RequestContext:
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
+        actor="engineer",
+        namespace="sample",
+        channel="test",
+        message="run the workflow",
+    )
+
+
+def engine(
+    handler: Handler | None = None,
+    *,
+    steps: int = 2,
+    granted: bool = True,
+    install_capability: bool = True,
+) -> tuple[WorkflowEngine, WorkflowManifest]:
+    installed = InstalledCapabilities()
+    if install_capability:
+        installed.register(
+            spec(),
+            handler if handler is not None else Handler(),
+            Input,
+            Output,
+            ExecutionDependencies(central_required=False),
+        )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant(),) if granted else ()))
+    workflows = InstalledWorkflows()
+    flow = manifest([spec().identity] * steps)
+    workflows.register(flow)
+    return WorkflowEngine(workflows, bridge), flow
+
+
+def test_sequential_steps_dispatch_through_bridge_policy() -> None:
+    handler = Handler()
+    runner, flow = engine(handler)
+    snapshot = asyncio.run(
+        runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
+    )
+    assert snapshot.run.status == "succeeded"
+    assert snapshot.run.completed_steps == 2
+    assert len(handler.calls) == 2
+    assert [result.status for result in snapshot.step_results] == ["succeeded", "succeeded"]
+    assert snapshot.log[0] == "start workflow sample/count-twice@1.0.0"
+    assert snapshot.log[1] == "step 1 sample/count@1.0.0 succeeded"
+    assert snapshot.log[-1] == "workflow succeeded"
+    assert runner.get(snapshot.ru
+
+---SNIP---
+import asyncio
+from typing import Any
+
+import pytest
+from test_dispatch import Handler, Input, Output, grant, spec
+
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
+from common.execution import RequestContext, TraceIdentifiers
+from workflow.dispatch import BridgeExecutor
+from workflow.engine import (
+    MAX_LOG_LINES,
+    MAX_RUNS_KEPT,
+    InstalledWorkflows,
+    WorkflowEngine,
+    _RunRecord,
+)
+
+
+def manifest(steps: list[AssetIdentity], **changes: Any) -> WorkflowManifest:
+    data: dict[str, Any] = {
+        "metadata": {
+            "identity": {"namespace": "sample", "name": "count-twice", "version": "1.0.0"},
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "private",
+            "lifecycle": "draft",
+        },
+        "kind": "workflow",
+        "description": "Inert two-step count fixture",
+        "execution": {"mode": "local"},
+        "dependencies": {"central_required": False},
+        "input_contract": "count.input.v1",
+        "output_contract": "count.output.v1",
+        "steps": [step.model_dump() for step in steps],
+        **changes,
+    }
+    return WorkflowManifest.model_validate(data)
+
+
+def context() -> RequestContext:
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
+        actor="engineer",
+        namespace="sample",
+        channel="test",
+        message="run the workflow",
+    )
+
+
+def engine(
+    handler: Handler | None = None,
+    *,
+    steps: int = 2,
+    granted: bool = True,
+    install_capability: bool = True,
+) -> tuple[WorkflowEngine, WorkflowManifest]:
+    installed = InstalledCapabilities()
+    if install_capability:
+        installed.register(
+            spec(),
+            handler if handler is not None else Handler(),
+            Input,
+            Output,
+            ExecutionDependencies(central_required=False),
+        )
+    bridge = BridgeExecutor(installed, LocalPolicy((grant(),) if granted else ()))
+    workflows = InstalledWorkflows()
+    flow = manifest([spec().identity] * steps)
+    workflows.register(flow)
+    return WorkflowEngine(workflows, bridge), flow
+
+
+def test_sequential_steps_dispatch_through_bridge_policy() -> None:
+    handler = Handler()
+    runner, flow = engine(handler)
+    snapshot = asyncio.run(
+        runner.execute(context(), flow.metadata.identity, {"count": 1}, timeout_seconds=10)
+    )
+    assert snapshot.run.status == "succeeded"
+    assert snapshot.run.completed_steps == 2
+    assert len(handler.calls) == 2
+    assert [result.status for result in snapshot.step_results] == ["succeeded", "succeeded"]
+    assert snapshot.log[0] == "start workflow sample/count-twice@1.0.0"
+    assert snapshot.log[1] == "step 1 sample/count@1.0.0 succeeded"
+    assert snapshot.log[-1] == "workflow succeeded"
+    assert runner.get(snapshot.run.run_id) == sn
+
+---SNIP---
+
+=====  tests/test_gateway_task_execution.py =====
+ion_failed"]
+
+
+def test_task_scope_refuses_unknown_or_write_capability_before_model(tmp_path: Path) -> None:
+    model = AnswerModel()
+    service, state = executor(tmp_path, model, approved())
+    unknown = AssetIdentity(namespace="engineering", name="missing", version="1.0.0")
+    with state:
+        with pytest.raises(TaskScopeError, match="task_capability_not_installed"):
+            asyncio.run(service.run(task(allowed=(unknown,))))
+        write = capability_spec().model_copy(
+            update={
+                "identity": AssetIdentity(
+                    namespace="engineering", name="write-report", version="1.0.0"
+                ),
+                "side_effect": "write",
+            }
+        )
+        installed: InstalledCapabilities = service.backend.gateway.bridge.installed
+        installed.register(
+            write, Handler(), Probe, Report, ExecutionDependencies(central_required=False)
+        )
+        with pytest.raises(TaskScopeError, match="task_capability_not_read_only"):
+            asyncio.run(service.run(task(allowed=(write.identity,))))
+        assert state.task_runs("engineer") == ()
+    assert model.calls == []
+
+
+def test_read_capability_scope_hides_workflow_tools(tmp_path: Path) -> None:
+    class ScopedModel(AnswerModel):
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            assert [tool.name for tool in request.tools] == ["release__check"]
+            return super().generate(request)
+
+    model = ScopedModel()
+    service, state = executor(tmp_path, model, approved())
+    with state:
+        outcome = asyncio.run(service.run(task(allowed=(capability_spec().identity,))))
+        assert outcome.status == "validated"
+    assert len(model.calls) == 1
+
+
+def test_successful_read_tool_records_bounded_step_evidence(tmp_path: Path) -> None:
+    class ToolModel(AnswerModel):
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            assert [tool.name for tool in request.tools] == ["release__check"]
+            if not self.calls:
+                self.calls.append(request)
+                return ModelResponse(
+                    trace=request.trace,
+                    model_alias=request.model_alias,
+                    tool_calls=(
+                        ModelToolCall(call_id="read-check", name="release__check", arguments={}),
+                    ),
+                )
+            assert request.messages[-1].role == "tool"
+            return super().generate(request)
+
+    model = ToolModel()
+    service, state = executor(tmp_path, model, approved())
+    with state:
+        outcome = asyncio.run(service.run(task(allowed=(capability_spec().identity,))))
+        assert outcome.status == "validated"
+        assert outcome.run is not None
+        assert [(step.step_id, step.evidence_ref) for step in outcome.run.completed_steps] == [
+            ("read-check", "read-check")
+        ]
+        assert [event.code for event in outcome.run.observations] == ["tool_succeeded"]
+        assert outcome.run.errors == ()
+    assert len(model.calls) == 2
+
+
+def test_hidden_workflow_tool_cannot_execute_or_complete_task(tmp_path: Path) -> None:
+    class HiddenToolModel(AnswerModel):
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            assert [tool.name for tool in request.tools] == ["release__check"]
+            if not self.calls:
+                self.calls.append(request)
+                return ModelResponse(
+                    trace=request.trace,
+                    model_alias=request.model_alias,
+                    tool_calls=(
+                        ModelToolCall(
+                            call_id="hidden-workflow", name="release__package", argu
+
+---SNIP---
+lf, request: ModelRequest) -> ModelResponse:
+            assert [tool.name for tool in request.tools] == ["release__check"]
+            if not self.calls:
+                self.calls.append(request)
+                return ModelResponse(
+                    trace=request.trace,
+                    model_alias=request.model_alias,
+                    tool_calls=(
+                        ModelToolCall(call_id="read-check", name="release__check", arguments={}),
+                    ),
+                )
+            assert request.messages[-1].role == "tool"
+            return super().generate(request)
+
+    model = ToolModel()
+    service, state = executor(tmp_path, model, approved())
+    with state:
+        outcome = asyncio.run(service.run(task(allowed=(capability_spec().identity,))))
+        assert outcome.status == "validated"
+        assert outcome.run is not None
+        assert [(step.step_id, step.evidence_ref) for step in outcome.run.completed_steps] == [
+            ("read-check", "read-check")
+        ]
+        assert [event.code for event in outcome.run.observations] == ["tool_succeeded"]
+        assert outcome.run.errors == ()
+    assert len(model.calls) == 2
+
+
+def test_hidden_workflow_tool_cannot_execute_or_complete_task(tmp_path: Path) -> None:
+    class HiddenToolModel(AnswerModel):
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            assert [tool.name for tool in request.tools] == ["release__check"]
+            if not self.calls:
+                self.calls.append(request)
+                return ModelResponse(
+                    trace=request.trace,
+                    model_alias=request.model_alias,
+                    tool_calls=(
+                        ModelToolCall(
+                            call_id="hidden-workflow", name="release__package", arguments={}
+                        ),
+                    ),
+                )
+            return super().generate(request)
+
+    model = HiddenToolModel()
+    service, state = executor(tmp_path, model, approved())
+    with state:
+        outcome = asyncio.run(service.run(task(allowed=(capability_spec().identity,))))
+        assert outcome.status == "failed" and outcome.code == "task_tool_failed"
+        assert outcome.run is not None
+        assert [issue.code for issue in outcome.run.errors] == ["task_tool_failed"]
+        assert outcome.run.completed_steps == ()
+    assert not (tmp_path / "task-artifacts").exists()
+
+
+def test_local_agent_admission_precedes_task_policy_and_backend(tmp_path: Path) -> None:
+    model = AnswerModel()
+    service, state = executor(tmp_path, model, approved())
+    resident = LocalAgent(company(), service.backend.gateway, state, task_executor=service)
+    with state:
+        denied = asyncio.run(resident.run_task(task(), bridge_id="wrong-bridge"))
+        assert denied.refusal is not None and denied.execution is None
+        assert state.task_runs("engineer") == ()
+        assert model.calls == []
+        admitted = asyncio.run(resident.run_task(task(), bridge_id="bridge-company"))
+        assert admitted.refusal is None
+        assert admitted.execution is not None and admitted.execution.status == "validated"
+
+
+def test_prompt_cli_builds_a_text_only_task_with_host_identity() -> None:
+    args = _parser().parse_args(
+        ["run-task", "--config", "host.json", "--prompt", "What can you do?"]
+    )
+    assert args.prompt == "What can you do?" and args.task is None
+    runtime = MagicMock()
+    runtime.actor = "engineer"
+    runtime.config.namespace = "engineering"
+    generated = _prompt_task(runtime, args.prompt, None)
+    assert generated is not None
+    assert generated.actor == "engineer" and generated.namespace == "
+
+---SNIP---
+r().generate(request)
+
+    model = ToolModel()
+    service, state = executor(tmp_path, model, approved())
+    with state:
+        outcome = asyncio.run(service.run(task(allowed=(capability_spec().identity,))))
+        assert outcome.status == "validated"
+        assert outcome.run is not None
+        assert [(step.step_id, step.evidence_ref) for step in outcome.run.completed_steps] == [
+            ("read-check", "read-check")
+        ]
+        assert [event.code for event in outcome.run.observations] == ["tool_succeeded"]
+        assert outcome.run.errors == ()
+    assert len(model.calls) == 2
+
+
+def test_hidden_workflow_tool_cannot_execute_or_complete_task(tmp_path: Path) -> None:
+    class HiddenToolModel(AnswerModel):
+        def generate(self, request: ModelRequest) -> ModelResponse:
+            assert [tool.name for tool in request.tools] == ["release__check"]
+            if not self.calls:
+                self.calls.append(request)
+                return ModelResponse(
+                    trace=request.trace,
+                    model_alias=request.model_alias,
+                    tool_calls=(
+                        ModelToolCall(
+                            call_id="hidden-workflow", name="release__package", arguments={}
+                        ),
+                    ),
+                )
+            return super().generate(request)
+
+    model = HiddenToolModel()
+    service, state = executor(tmp_path, model, approved())
+    with state:
+        outcome = asyncio.run(service.run(task(allowed=(capability_spec().identity,))))
+        assert outcome.status == "failed" and outcome.code == "task_tool_failed"
+        assert outcome.run is not None
+        assert [issue.code for issue in outcome.run.errors] == ["task_tool_failed"]
+        assert outcome.run.completed_steps == ()
+    assert not (tmp_path / "task-artifacts").exists()
+
+
+def test_local_agent_admission_precedes_task_policy_and_backend(tmp_path: Path) -> None:
+    model = AnswerModel()
+    service, state = executor(tmp_path, model, approved())
+    resident = LocalAgent(company(), service.backend.gateway, state, task_executor=service)
+    with state:
+        denied = asyncio.run(resident.run_task(task(), bridge_id="wrong-bridge"))
+        assert denied.refusal is not None and denied.execution is None
+        assert state.task_runs("engineer") == ()
+        assert model.calls == []
+        admitted = asyncio.run(resident.run_task(task(), bridge_id="bridge-company"))
+        assert admitted.refusal is None
+        assert admitted.execution is not None and admitted.execution.status == "validated"
+
+
+def test_prompt_cli_builds_a_text_only_task_with_host_identity() -> None:
+    args = _parser().parse_args(
+        ["run-task", "--config", "host.json", "--prompt", "What can you do?"]
+    )
+    assert args.prompt == "What can you do?" and args.task is None
+    runtime = MagicMock()
+    runtime.actor = "engineer"
+    runtime.config.namespace = "engineering"
+    generated = _prompt_task(runtime, args.prompt, None)
+    assert generated is not None
+    assert generated.actor == "engineer" and generated.namespace == "engineering"
+    assert generated.objective == "What can you do?"
+    assert generated.allowed_capabilities == ()
+    assert generated.expected_outputs[0].output_id == "answer"
+
+
+---SNIP---
+
+=====  tests/test_run_python.py =====
+"""`coding/run-python`: a conversation task's script under restricted execution."""
+
+from __future__ import annotations
+
+import sys
+import sysconfig
+from pathlib import Path
+
+import pytest
+
+pytestmark = pytest.mark.skipif(sys.platform != "win32", reason="Windows execution limits")
+
+from capabilities.coding_change.contracts import CodingHostBinding  # noqa: E402
+from capabilities.coding_change.manifest import coding_skill, run_python_workflow  # noqa: E402
+from capabilities.coding_change.run_python import RunPythonHandler, RunPythonRequest  # noqa: E402
+from capabilities.runtime import CapabilityRefused  # noqa: E402
+
+BASE_PYTHON = str(Path(getattr(sys, "_base_executable", sys.executable)))
+SITE = {"PYTHONPATH": sysconfig.get_paths()["purelib"]}
+
+
+def handler(root: Path) -> RunPythonHandler:
+    binding = CodingHostBinding.model_validate({
+        "runner_python": BASE_PYTHON, "timeout_seconds": 60,
+        "repositories": [{"name": "x", "path": str(root), "writable": ["*.py"]}],
+        "workspace_roots": [str(root)],
+    })
+    return RunPythonHandler(binding, rule_present=lambda _python: True, extra_env=SITE)
+
+
+def task(tmp_path: Path) -> Path:
+    workspace = tmp_path / "tasks" / "T01"
+    (workspace / "input").mkdir(parents=True)
+    (workspace / "input" / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+    return workspace
+
+
+def test_a_script_reads_input_writes_output_and_its_result_comes_back(tmp_path: Path) -> None:
+    workspace = task(tmp_path)
+    run = handler(tmp_path / "tasks").run(RunPythonRequest(workspace=str(workspace), script=(
+        "from openpyxl import Workbook\n"
+        "rows = open('input/data.csv', encoding='utf-8').read().split()\n"
+        "book = Workbook(); book.active.append(rows); book.save('output/out.xlsx')\n"
+        "print('rows', len(rows))\n")))
+    assert run.exit_code == 0 and "rows 2" in run.output
+    assert [item.path for item in run.files] == ["output/out.xlsx"]
+    assert (workspace / run.script_path).is_file()
+
+
+def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_path: Path) -> None:
+    workspace = task(tmp_path)
+    outside = tmp_path / "outside.txt"
+    run = handler(tmp_path / "tasks").run(RunPythonRequest(workspace=str(workspace), script=(
+        "import pathlib\n"
+        "for target in ('input/data.csv', r'" + str(outside) + "'):\n"
+        "    try:\n"
+        "        pathlib.Path(target).write_text('x')\n"
+        "        print('wrote', target)\n"
+        "    except PermissionError:\n"
+        "        print('refused', target)\n"
+        "raise SystemExit(3)\n")))
+    assert run.exit_code == 3 and run.output.count("refused") == 2
+    assert (workspace / "input" / "data.csv").read_text(encoding="utf-8") == "a,b\n1,2\n"
+    assert not outside.exists()
+
+
+def test_only_workspaces_under_an_allowed_root(tmp_path: Path) -> None:
+    (tmp_path / "elsewhere").mkdir()
+    for raw, code in ((str(tmp_pa
+
+---SNIP---
+get)\n"
+        "    except PermissionError:\n"
+        "        print('refused', target)\n"
+        "raise SystemExit(3)\n")))
+    assert run.exit_code == 3 and run.output.count("refused") == 2
+    assert (workspace / "input" / "data.csv").read_text(encoding="utf-8") == "a,b\n1,2\n"
+    assert not outside.exists()
+
+
+def test_only_workspaces_under_an_allowed_root(tmp_path: Path) -> None:
+    (tmp_path / "elsewhere").mkdir()
+    for raw, code in ((str(tmp_path / "elsewhere"), "coding_workspace_not_allowed"),
+                      ("relative/path", "coding_workspace_not_absolute"),
+                      (str(tmp_path / "tasks" / "missing"), "coding_workspace_missing")):
+        (tmp_path / "tasks").mkdir(exist_ok=True)
+        with pytest.raises(CapabilityRefused) as refused:
+            handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))
+        assert refused.value.code == code
+
+
+def test_the_skill_says_when_not_to_use_it() -> None:
+    skill = coding_skill()
+    assert {command.name for command in skill.commands} == {"change", "run"}
+    assert "Never use it to answer a question" in skill.instructions
+    names = [field.name for field in run_python_workflow().parameters]
+    assert names == ["workspace", "script"]
+
+
+---SNIP---
+
+=====  README.md =====
+# Agentic Engineering Platform
+
+Unified engineering automation platform for agentic reasoning, deterministic workflows, enterprise knowledge, tools/MCP capabilities, and evaluation.
+
+The product direction is defined in [Product Vision](docs/PRODUCT_VISION.md).
+The required product gates and implementation order are defined in
+[Product Acceptance Tests](docs/PRODUCT_ACCEPTANCE_TESTS.md).
+The approved [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
+compares that vision with the implemented architecture and fixes the incremental
+product gate order.
+
+Phase 7 is active with invitation-only platform enrollment and separate Bridge
+device identity as its first slice. Production-like validation will run on an
+enrolled company Agent + Bridge, beginning with the GTM weekly report (source workflow 11) and release
+package workflow 13; CI and this shared-platform host remain side-effect-free.
+
+Phase 1 provides validated contracts and an in-memory Task discovery / Bridge
+advertisement proof. Phase 2 adds deterministic-first routing, installed Skills,
+permission-checked local dispatch and an injected MCP client adapter. No production
+handler, transport, model provider or service is installed by default.
+
+## Development
+
+Python 3.11 or newer:
+
+```sh
+python -m venv .venv
+# Activate .venv (Windows: .venv\Scripts\Activate.ps1; POSIX: source .venv/bin/activate)
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy
+python -m build
+python -m pip check
+```
+
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
+CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
+compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
+`workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
+loads the sample manifest and Bridge fixture and exercises the complete chain.
+
+The first product gate, E2E-02, proves that a Personal Agent can turn a bounded
+SOP into a typed draft Workflow, validate it through the normal
+Gateway/Workflow/Bridge path against an independent fixture, and replay an
+approved installation deterministically with the model disabled. It has no
+production side effects. Reproduce the full positive and negative gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_02.py -q
+```
+
+See [the E2E-02 implementat
+
+---SNIP---
+# Agentic Engineering Platform
+
+Unified engineering automation platform for agentic reasoning, deterministic workflows, enterprise knowledge, tools/MCP capabilities, and evaluation.
+
+The product direction is defined in [Product Vision](docs/PRODUCT_VISION.md).
+The required product gates and implementation order are defined in
+[Product Acceptance Tests](docs/PRODUCT_ACCEPTANCE_TESTS.md).
+The approved [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
+compares that vision with the implemented architecture and fixes the incremental
+product gate order.
+
+Phase 7 is active with invitation-only platform enrollment and separate Bridge
+device identity as its first slice. Production-like validation will run on an
+enrolled company Agent + Bridge, beginning with the GTM weekly report (source workflow 11) and release
+package workflow 13; CI and this shared-platform host remain side-effect-free.
+
+Phase 1 provides validated contracts and an in-memory Task discovery / Bridge
+advertisement proof. Phase 2 adds deterministic-first routing, installed Skills,
+permission-checked local dispatch and an injected MCP client adapter. No production
+handler, transport, model provider or service is installed by default.
+
+## Development
+
+Python 3.11 or newer:
+
+```sh
+python -m venv .venv
+# Activate .venv (Windows: .venv\Scripts\Activate.ps1; POSIX: source .venv/bin/activate)
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy
+python -m build
+python -m pip check
+```
+
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
+CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
+compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
+`workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
+loads the sample manifest and Bridge fixture and exercises the complete chain.
+
+The first product gate, E2E-02, proves that a Personal Agent can turn a bounded
+SOP into a typed draft Workflow, validate it through the normal
+Gateway/Workflow/Bridge path against an independent fixture, and replay an
+approved installation deterministically with the model disabled. It has no
+production side effects. Reproduce the full positive and negative gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_02.py -q
+```
+
+See [the E2E-02 implementation record](docs/phases/E2E_02_SOP_WORKFLOW.md).
+
+E2E-03 adds a bounded Coding Harness behind the same resident Agent, Gateway and
+Bridge path. Its first parser/transformation proof pins the workspace revision,
+records the plan and actual patch separately, runs only an injected declared
+validator, repairs one rejected candidate within budget, and requires both new
+and regression cases to pass. It never commits, pushes or publishes. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_03.py -q
+```
+
+See [the E2E-03 implementation record](docs/phases/E2E_03_CODING_HARNESS.md).
+
+E2E-05 proves the first governed Knowledge improvement loop. A Personal Agent
+queries an exact published version with Ra
+
+---SNIP---
+# Agentic Engineering Platform
+
+Unified engineering automation platform for agentic reasoning, deterministic workflows, enterprise knowledge, tools/MCP capabilities, and evaluation.
+
+The product direction is defined in [Product Vision](docs/PRODUCT_VISION.md).
+The required product gates and implementation order are defined in
+[Product Acceptance Tests](docs/PRODUCT_ACCEPTANCE_TESTS.md).
+The approved [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
+compares that vision with the implemented architecture and fixes the incremental
+product gate order.
+
+Phase 7 is active with invitation-only platform enrollment and separate Bridge
+device identity as its first slice. Production-like validation will run on an
+enrolled company Agent + Bridge, beginning with the GTM weekly report (source workflow 11) and release
+package workflow 13; CI and this shared-platform host remain side-effect-free.
+
+Phase 1 provides validated contracts and an in-memory Task discovery / Bridge
+advertisement proof. Phase 2 adds deterministic-first routing, installed Skills,
+permission-checked local dispatch and an injected MCP client adapter. No production
+handler, transport, model provider or service is installed by default.
+
+## Development
+
+Python 3.11 or newer:
+
+```sh
+python -m venv .venv
+# Activate .venv (Windows: .venv\Scripts\Activate.ps1; POSIX: source .venv/bin/activate)
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy
+python -m build
+python -m pip check
+```
+
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
+CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
+compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
+`workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
+loads the sample manifest and Bridge fixture and exercises the complete chain.
+
+The first product gate, E2E-02, proves that a Personal Agent can turn a bounded
+SOP into a typed draft Workflow, validate it through the normal
+Gateway/Workflow/Bridge path against an independent fixture, and replay an
+approved installation deterministically with the model disabled. It has no
+production side effects. Reproduce the full positive and negative gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_02.py -q
+```
+
+See [the E2E-02 implementation record](docs/phases/E2E_02_SOP_WORKFLOW.md).
+
+E2E-03 adds a bounded Coding Harness behind the same resident Agent, Gateway and
+Bridge path. Its first parser/transformation proof pins the workspace revision,
+records the plan and actual patch separately, runs only an injected declared
+validator, repairs one rejected candidate within budget, and requires both new
+and regression cases to pass. It never commits, pushes or publishes. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_03.py -q
+```
+
+See [the E2E-03 implementation record](docs/phases/E2E_03_CODING_HARNESS.md).
+
+E2E-05 proves the first governed Knowledge improvement loop. A Personal Agent
+queries an exact published version with Raw citations, captures incomplete-
+
+---SNIP---
+ning with the GTM weekly report (source workflow 11) and release
+package workflow 13; CI and this shared-platform host remain side-effect-free.
+
+Phase 1 provides validated contracts and an in-memory Task discovery / Bridge
+advertisement proof. Phase 2 adds deterministic-first routing, installed Skills,
+permission-checked local dispatch and an injected MCP client adapter. No production
+handler, transport, model provider or service is installed by default.
+
+## Development
+
+Python 3.11 or newer:
+
+```sh
+python -m venv .venv
+# Activate .venv (Windows: .venv\Scripts\Activate.ps1; POSIX: source .venv/bin/activate)
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy
+python -m build
+python -m pip check
+```
+
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
+CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
+compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
+`workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
+loads the sample manifest and Bridge fixture and exercises the complete chain.
+
+The first product gate, E2E-02, proves that a Personal Agent can turn a bounded
+SOP into a typed draft Workflow, validate it through the normal
+Gateway/Workflow/Bridge path against an independent fixture, and replay an
+approved installation deterministically with the model disabled. It has no
+production side effects. Reproduce the full positive and negative gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_02.py -q
+```
+
+See [the E2E-02 implementation record](docs/phases/E2E_02_SOP_WORKFLOW.md).
+
+E2E-03 adds a bounded Coding Harness behind the same resident Agent, Gateway and
+Bridge path. Its first parser/transformation proof pins the workspace revision,
+records the plan and actual patch separately, runs only an injected declared
+validator, repairs one rejected candidate within budget, and requires both new
+and regression cases to pass. It never commits, pushes or publishes. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_03.py -q
+```
+
+See [the E2E-03 implementation record](docs/phases/E2E_03_CODING_HARNESS.md).
+
+E2E-05 proves the first governed Knowledge improvement loop. A Personal Agent
+queries an exact published version with Raw citations, captures incomplete-answer
+feedback, and creates a separately approved candidate workspace through the
+Bridge. The candidate must keep Raw byte-identical and pass the new question plus
+existing regressions before a domain owner can approve a new version. The prior
+version remains queryable for rollback. Reproduce the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_05.py -q
+```
+
+See [the E2E-05 implementation record](docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md).
+
+E2E-04 proves governed Software evolution without moving source code into the
+Share Platform. A user reports a failure against an exact Software version; the
+platform derives its owner and repository, reproduces the failure before any
+change, invokes the bounded Coding Harness, requires the issue case and existing
+regressions to pass, and prepares an inert PR/MR review artifact. Human review,
+merge, release and platform republish remain explicit transitions. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_04.py -q
+```
+
+See [the E2E-04 implementation record](docs/phases/E2E_04_SOFTWARE_EVOLUTION.md).
+
+E2E-01 adds the provider-neutral device/
+
+---SNIP---
+inistic-first routing, installed Skills,
+permission-checked local dispatch and an injected MCP client adapter. No production
+handler, transport, model provider or service is installed by default.
+
+## Development
+
+Python 3.11 or newer:
+
+```sh
+python -m venv .venv
+# Activate .venv (Windows: .venv\Scripts\Activate.ps1; POSIX: source .venv/bin/activate)
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy
+python -m build
+python -m pip check
+```
+
+Developer credentials can be kept in a Git-ignored, machine-local file and
+loaded explicitly into the current PowerShell session. See
+[local developer credentials](.env/README.md). Runtime code and GitHub Actions
+do not read this file automatically.
+
+CI verifies on Windows with Python 3.12. The package still declares Python 3.11+
+compatibility; the narrower CI target is an explicit owner decision. The pure proof is in
+`workflow.proof.advertise_sample`; `tests/test_registry.py::test_vertical_proof`
+loads the sample manifest and Bridge fixture and exercises the complete chain.
+
+The first product gate, E2E-02, proves that a Personal Agent can turn a bounded
+SOP into a typed draft Workflow, validate it through the normal
+Gateway/Workflow/Bridge path against an independent fixture, and replay an
+approved installation deterministically with the model disabled. It has no
+production side effects. Reproduce the full positive and negative gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_02.py -q
+```
+
+See [the E2E-02 implementation record](docs/phases/E2E_02_SOP_WORKFLOW.md).
+
+E2E-03 adds a bounded Coding Harness behind the same resident Agent, Gateway and
+Bridge path. Its first parser/transformation proof pins the workspace revision,
+records the plan and actual patch separately, runs only an injected declared
+validator, repairs one rejected candidate within budget, and requires both new
+and regression cases to pass. It never commits, pushes or publishes. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_03.py -q
+```
+
+See [the E2E-03 implementation record](docs/phases/E2E_03_CODING_HARNESS.md).
+
+E2E-05 proves the first governed Knowledge improvement loop. A Personal Agent
+queries an exact published version with Raw citations, captures incomplete-answer
+feedback, and creates a separately approved candidate workspace through the
+Bridge. The candidate must keep Raw byte-identical and pass the new question plus
+existing regressions before a domain owner can approve a new version. The prior
+version remains queryable for rollback. Reproduce the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_05.py -q
+```
+
+See [the E2E-05 implementation record](docs/phases/E2E_05_KNOWLEDGE_EVOLUTION.md).
+
+E2E-04 proves governed Software evolution without moving source code into the
+Share Platform. A user reports a failure against an exact Software version; the
+platform derives its owner and repository, reproduces the failure before any
+change, invokes the bounded Coding Harness, requires the issue case and existing
+regressions to pass, and prepares an inert PR/MR review artifact. Human review,
+merge, release and platform republish remain explicit transitions. Reproduce
+the gate with:
+
+```sh
+python -m pytest tests/test_product_e2e_04.py -q
+```
+
+See [the E2E-04 implementation record](docs/phases/E2E_04_SOFTWARE_EVOLUTION.md).
+
+E2E-01 adds the provider-neutral device/chipset development boundary. The
+existing Coding Harness performs a bounded change and a simulator independently
+checks the new case plus regressions. Physical validation is a separate,
+high-risk Bridge capability installed only from trusted company-host
+configu
+
+---SNIP---

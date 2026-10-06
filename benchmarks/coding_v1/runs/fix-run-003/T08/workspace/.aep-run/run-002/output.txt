@@ -1,0 +1,76 @@
+
+--- report_a.csv ---
+DUT,Item,Result,Measurement,Unit
+D001,TxPower,OK,12.5,dBm
+D002,TxPower,NG,,dBm
+
+
+--- report_b.json ---
+[
+  {
+    "device": "D003",
+    "test": "EVM",
+    "outcome": "PASS",
+    "value": -35.2,
+    "unit": "dB"
+  },
+  {
+    "device": "D004",
+    "test": "EVM",
+    "outcome": "FAIL",
+    "value": -20.1
+  }
+]
+
+--- report_c.md ---
+| Device | Test | Status | Value | Unit |
+|---|---|---|---|---|
+| D005 | Sensitivity | OK | -90 | dBm |
+| D006 | Sensitivity | FAIL | -70 | dBm |
+
+
+--- current output ---
+[
+  {
+    "device_id": null,
+    "test_name": null,
+    "status": "Pass",
+    "value": "12.5",
+    "unit": "dBm"
+  },
+  {
+    "device_id": null,
+    "test_name": null,
+    "status": "Fail",
+    "value": null,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D003",
+    "test_name": "EVM",
+    "status": null,
+    "value": -35.2,
+    "unit": "dB"
+  },
+  {
+    "device_id": "D004",
+    "test_name": "EVM",
+    "status": null,
+    "value": -20.1,
+    "unit": null
+  },
+  {
+    "device_id": "D005",
+    "test_name": "Sensitivity",
+    "status": "Pass",
+    "value": "-90",
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D006",
+    "test_name": "Sensitivity",
+    "status": "Fail",
+    "value": "-70",
+    "unit": "dBm"
+  }
+]
