@@ -23,7 +23,9 @@ from typing import Any
 # 1.1 (2026-10-06): T20's fault-injection check reads the operator's injection
 # evidence now that a platform Workflow run exists (G4); every other check and
 # every expected answer is unchanged from 1.0.
-VALIDATOR_VERSION = "1.1"
+# 1.2 (2026-10-06): T12 reads the merged rows from a workbook, CSV or JSON file;
+# the owner's acceptance for T12 names rows and values, not a file format.
+VALIDATOR_VERSION = "1.2"
 
 
 @dataclass
@@ -471,11 +473,28 @@ def t11(ctx: Ctx) -> list[dict[str, Any]]:
     ]
 
 
+def _table_rows(path: Path) -> list[dict[str, Any]]:
+    """Rows of a workbook, a CSV file or a JSON list (or {"...": [rows]})."""
+    if path.suffix.lower() == ".xlsx":
+        return _records(path) or []
+    if path.suffix.lower() == ".csv":
+        import csv
+
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            return list(csv.DictReader(handle))
+    data = _list_in(_json(path))
+    return [row for row in data or [] if isinstance(row, dict)]
+
+
 def t12(ctx: Ctx) -> list[dict[str, Any]]:
-    path = _find(ctx, "products.xlsx") or next(iter(sorted(ctx.output.glob("*.xlsx"))), None) if ctx.output.is_dir() else None
+    found = (sorted(ctx.output.glob("*.xlsx")) + sorted(ctx.output.glob("*.csv"))
+             + sorted(ctx.output.glob("*.json"))) if ctx.output.is_dir() else []
+    preferred = _find(ctx, "products.xlsx")
+    candidates = ([preferred] if preferred else []) + found
+    path = next((p for p in candidates if len(_table_rows(p)) > 0), None)
     if path is None:
-        return [check("an output workbook", False, "*.xlsx", None)]
-    rows = _records(path) or []
+        return [check("an output table (xlsx, csv or json)", False, "a table of rows", None)]
+    rows = _table_rows(path)
     want = [("NX-1", 12000, "TWD", 16, "/t12/a"), ("NX-2", 8500, "TWD", 8, "/t12/a"),
             ("NX-1", 399.5, "USD", 16, "/t12/b"), ("NX-3", 1250, "USD", 32, "/t12/b"),
             ("NX-4", 499, "EUR", 4, "/t12/c"), ("NX-5", 1299, "EUR", 64, "/t12/c")]

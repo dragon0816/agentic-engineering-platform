@@ -246,6 +246,15 @@ def run() -> int:
         make(ws / "output", ws)
         expect(f"{task} {label}", validate(task, ctx_for(task, ws, **kw)), False)
 
+    t12_csv = workspace("T12")
+    with (t12_csv / "output").joinpath("merged.csv").open("w", encoding="utf-8", newline="") as handle:
+        handle.write("Model,Price,Currency,MemoryGB,SourceURL\n" + "".join(
+            f"{m},{p},{c},{g},{BASE}{u}\n" for m, p, c, g, u in (
+                ("NX-1", 12000, "TWD", 16, "/t12/a"), ("NX-2", 8500, "TWD", 8, "/t12/a"),
+                ("NX-1", 399.5, "USD", 16, "/t12/b"), ("NX-3", 1250, "USD", 32, "/t12/b"),
+                ("NX-4", 499, "EUR", 4, "/t12/c"), ("NX-5", 1299, "EUR", 64, "/t12/c"))))
+    expect("T12 correct rows as CSV", validate("T12", ctx_for("T12", t12_csv)), True)
+
     wrong("T20", "write fault not recovered", SAMPLES["T20"], aep_workflow_runs=["run-x"],
           t20_fault={"injected": True, "first_failed": True, "recovered": False})
 
