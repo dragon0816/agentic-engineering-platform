@@ -126,7 +126,9 @@ def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
 
 DRAFT_GUIDE = (
     "Draft or revise a Workflow from this conversation so it can be previewed, run and reused. "
-    "Use when the person asks for a reusable Workflow or for a task to run on the platform. "
+    "Use it whenever the person asks for a Workflow for this platform, a reusable Workflow, or "
+    "a run on the platform runtime; a workflow file written by a script is not one, and never "
+    "say something ran on the platform unless authoring__run_workflow ran it. "
     "`workflow` is {\"name\": kebab-case, \"description\": one sentence, \"parameters\": "
     "[{\"name\": snake_case, \"label\": question, \"kind\": \"text\"|\"date\"|\"integer\"|"
     "\"boolean\"|\"folder\"|\"file\", \"scope\": \"runtime\", \"required\": true|false}], "
@@ -545,7 +547,10 @@ class ChatAuthoring:
                 name="authoring__run_workflow",
                 description="Run a drafted or installed Workflow once with run values. A Workflow "
                             "whose steps only read runs now and returns its result; otherwise it "
-                            "waits for the person's approval button and nothing runs yet.",
+                            "waits for the person's approval button and nothing runs yet. If a "
+                            "platform run failed, fix the cause (revise the candidate when its "
+                            "steps were wrong) and run it again here; do not redo the work "
+                            "outside the Workflow.",
                 input_contract="host.authoring.run.v1",
                 input_schema={"type": "object", "properties": {**candidate, **values},
                               "required": ["candidate_id"]},

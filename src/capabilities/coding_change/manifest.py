@@ -10,7 +10,7 @@ from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.2.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.3.0")
 RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
@@ -140,9 +140,14 @@ def coding_skill() -> SkillManifest:
                 "named workspace. Before answering, run a check that reopens every output file "
                 "and confirms each requirement the person stated (file and column names, value "
                 "types such as text IDs and numeric values, placeholders for missing data, row "
-                "counts); keep the source's column names unless told otherwise. Fix and run "
-                "again until every requirement holds, then say what was checked. Outputs go to "
-                "the workspace's output folder and input files are never changed. `change`: "
+                "counts); keep the source's column names unless told otherwise. Check from the "
+                "saved outputs: a limit the person set on requests to a service counts for the "
+                "whole conversation, so do not request it again to verify. Fix and run again "
+                "until every requirement holds, then say what was checked. Outputs go to the "
+                "workspace's output folder and input files are never changed. A Workflow for "
+                "this platform, or a run on the platform runtime, is not this tool's job: draft "
+                "and run it with the authoring tools; a workflow file a script writes is not a "
+                "platform Workflow. `change`: "
                 "change one file in a configured repository against existing pytest tests; "
                 "never committed."
             ),
