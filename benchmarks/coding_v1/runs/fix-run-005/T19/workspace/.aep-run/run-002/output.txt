@@ -1,0 +1,32 @@
+wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-005\T19\workspace\output\converted.xlsx
+input rows including header: 7
+headers: ['Device ID', '名稱', '備註', 'Value']
+all source rows:
+1 ['Device ID', '名稱', '備註', 'Value']
+2 ['0001', '測試機甲', '正常', '10']
+3 ['0002', '測試機乙', '含, 逗號', '20']
+4 ['0003', '測試機丙', '第一行\n第二行', '']
+5 ['0001', '測試機甲', '正常', '10']
+6 ['0005', '', '', '50']
+7 ['0006', '測試機己', '說明', '60']
+verification:
+- output file exists: True
+- sheet name is mixed: True
+- row count preserved: True
+- column count preserved: True
+- headers/order preserved: True
+- all rows/order/duplicates/values preserved: True
+- Device ID values are strings where not blank: True
+- Device ID leading zeros preserved: True
+- Device ID cells use text format: True
+- empty CSV fields saved as blank cells: True
+- empty source fields are blank in workbook: True
+saved rows from workbook:
+1 ['Device ID', '名稱', '備註', 'Value']
+2 ['0001', '測試機甲', '正常', 10]
+3 ['0002', '測試機乙', '含, 逗號', 20]
+4 ['0003', '測試機丙', '第一行\n第二行', '']
+5 ['0001', '測試機甲', '正常', 10]
+6 ['0005', '', '', 50]
+7 ['0006', '測試機己', '說明', 60]
+Device ID cell types/formats: [('0001', 'str', '@'), ('0002', 'str', '@'), ('0003', 'str', '@'), ('0001', 'str', '@'), ('0005', 'str', '@'), ('0006', 'str', '@')]

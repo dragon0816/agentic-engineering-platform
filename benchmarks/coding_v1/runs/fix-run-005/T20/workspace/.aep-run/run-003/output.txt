@@ -1,0 +1,36 @@
+INSPECTING INPUTS
+workspace=C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-005\T20\workspace
+input_dir_exists=True output_dir_exists=True
+input_files=data, manifest.json, supplied_sop.md
+sop_first_lines:
+# 測試失敗追蹤 SOP
+
+1. 讀取測試結果 results.csv（欄位：Device ID、Status、Value）。
+2. 挑出 Status 為 Fail 的資料，輸出 failures.xlsx，保留 Device ID、Status、Value，並加上 Urgent 欄位。
+3. 超過門檻的 Fail 列標記需立即處理（Urgent）。
+4. 產生 summary.md，列出 Total、Pass、Fail、Urgent 的數量。
+5. 原始資料不可修改。
+manifest.json:
+{
+  "results.csv": "input/data/test_results.csv"
+}
+materialized_csv=output\_materialized_results.csv
+csv_candidates=input\data\test_results.csv, output\_materialized_results.csv
+candidate input\data\test_results.csv headers=['Device ID', 'Status', 'Value'] sample_rows=[{'Device ID': 'D01', 'Status': 'Fail', 'Value': '10'}, {'Device ID': 'D02', 'Status': 'Pass', 'Value': '5'}, {'Device ID': 'D03', 'Status': 'Fail', 'Value': '20'}]
+selected_csv=input\data\test_results.csv rows=5
+VERIFYING OUTPUTS
+xlsx_headers=['Device ID', 'Status', 'Value', 'Urgent']
+xlsx_failure_rows=3
+summary.md:
+# Summary
+
+- Total: 5
+- Pass: 2
+- Fail: 3
+- Urgent: 1
+
+Source CSV: `input\data\test_results.csv`
+Urgent rule: `Value > 20`
+
+DONE
+created=output\failures.xlsx, output\summary.md

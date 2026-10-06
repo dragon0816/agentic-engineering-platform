@@ -1,0 +1,8 @@
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-005\T15\workspace\output\parsed.json
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-005\T15\workspace\output\warnings.json
+Non-empty source lines: 9
+Parsed rows: 6
+Warning rows: 3
+Parsed sample: [{'timestamp': '2026-01-05T08:00:00', 'device_id': 'DUT-01', 'test_name': 'TxPower', 'status': 'Pass'}, {'timestamp': '2026-01-05T08:00:05', 'device_id': 'DUT-01', 'test_name': 'EVM', 'status': 'Fail'}]
+Warnings: [{'line_number': 5, 'line': '[2026-01-05T08:01:05][DUT-02][EVM]PASS]', 'reason': 'Line does not match [TIME][DEVICE][TEST][RESULT] format'}, {'line_number': 7, 'line': '[2026-01-05T08:02:05][DUT-03][PASS]', 'reason': 'Line does not match [TIME][DEVICE][TEST][RESULT] format'}, {'line_number': 9, 'line': '[2026-01-05T08:03:05][DUT-04][EVM][SKIP]', 'reason': "Invalid RESULT 'SKIP'; expected PASS or FAIL"}]
+Verification passed: output files exist, JSON arrays load, parsed fields/status values are correct, warning fields/types are correct, and every non-empty input line is accounted for.

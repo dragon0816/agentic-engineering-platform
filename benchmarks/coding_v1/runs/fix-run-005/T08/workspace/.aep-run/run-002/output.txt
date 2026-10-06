@@ -1,0 +1,57 @@
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-005\T08\workspace\output\reports.json
+Rows: 6
+Preview:
+[
+  {
+    "device_id": "D001",
+    "test_name": "TxPower",
+    "status": "Pass",
+    "value": 12.5,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D002",
+    "test_name": "TxPower",
+    "status": "Fail",
+    "value": null,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D003",
+    "test_name": "EVM",
+    "status": "Pass",
+    "value": -35.2,
+    "unit": "dB"
+  },
+  {
+    "device_id": "D004",
+    "test_name": "EVM",
+    "status": "Fail",
+    "value": -20.1,
+    "unit": null
+  },
+  {
+    "device_id": "D005",
+    "test_name": "Sensitivity",
+    "status": "Pass",
+    "value": -90,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D006",
+    "test_name": "Sensitivity",
+    "status": "Fail",
+    "value": -70,
+    "unit": "dBm"
+  }
+]
+Checks:
+- output_exists: True
+- row_count_6: True
+- fields_exact: True
+- device_ids_are_text: True
+- statuses_normalized: True
+- missing_value_null_csv_D002: True
+- missing_unit_null_json_D004: True
+- all_records_preserved: True
+- only_unified_fields: True

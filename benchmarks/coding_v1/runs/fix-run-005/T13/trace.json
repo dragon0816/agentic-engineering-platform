@@ -1,0 +1,457 @@
+{
+ "session_id": "conversation-106fa15dda46499e96b5bab729161ec9",
+ "exchanges": [
+  {
+   "sent": "從提供的列表收集五個產品資料，輸出 robust_products.xlsx，欄位為 Name、Price、Currency、CPU、URL、FetchStatus。缺價格或規格填 N/A；detail page HTTP 500 最多嘗試 3 次，仍失敗時保留列表名稱與 URL，其他未知欄位填 N/A，FetchStatus 設為 error。另輸出 warnings.json，成功頁設為 ok。\n\n產品列表 URL：http://127.0.0.1:49758/t13/list\n\n---\n工作目錄：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\n題目中的相對路徑以工作目錄為準，輸入檔在 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\input。\n請把所有輸出檔寫到 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output。不要修改 input 下的任何檔案。\n",
+   "http_status": 200,
+   "seconds": 61.484,
+   "timed_out": false,
+   "reply": {
+    "ok": true,
+    "conversation": {
+     "session_id": "conversation-106fa15dda46499e96b5bab729161ec9",
+     "actor": "leo.chi",
+     "title": "從提供的列表收集五個產品資料，輸出 robust_products.xlsx，欄位為 Name、Price、Currency、CPU、URL、F…",
+     "backend": "gateway",
+     "data_classification": "UNCLASSIFIED",
+     "classified_by": null,
+     "created_at": "2026-10-06T15:31:20.142862Z",
+     "updated_at": "2026-10-06T15:32:21.628176Z",
+     "messages": [
+      {
+       "message_id": "message-8cd1b47e34144143b6e358531a6d7871",
+       "role": "user",
+       "text": "從提供的列表收集五個產品資料，輸出 robust_products.xlsx，欄位為 Name、Price、Currency、CPU、URL、FetchStatus。缺價格或規格填 N/A；detail page HTTP 500 最多嘗試 3 次，仍失敗時保留列表名稱與 URL，其他未知欄位填 N/A，FetchStatus 設為 error。另輸出 warnings.json，成功頁設為 ok。\n\n產品列表 URL：http://127.0.0.1:49758/t13/list\n\n---\n工作目錄：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\n題目中的相對路徑以工作目錄為準，輸入檔在 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\input。\n請把所有輸出檔寫到 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output。不要修改 input 下的任何檔案。\n",
+       "created_at": "2026-10-06T15:31:20.154010Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null
+      },
+      {
+       "message_id": "message-078b8eea741d4a6b947ab078ee7e54b9",
+       "role": "assistant",
+       "text": "已完成，輸出檔已寫到指定資料夾：\n\n- `C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\robust_products.xlsx`\n- `C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\warnings.json`\n\n已檢查：\n- `robust_products.xlsx` 存在\n- 欄位精確為 `Name、Price、Currency、CPU、URL、FetchStatus`\n- 共 5 筆產品資料\n- 缺價格或規格填入 `N/A`\n- 成功頁 `FetchStatus` 為 `ok`\n- HTTP 500 detail page 最多嘗試 3 次；Phone E 嘗試 3 次後仍失敗，保留列表名稱與 URL，其他未知欄位為 `N/A`，`FetchStatus` 為 `error`\n- `warnings.json` 存在，且包含 5 筆產品狀態記錄\n\n產出的資料列為：\n- Phone A — 9900 TWD — CPU: Snap 7 — ok\n- Phone B — 12900 TWD — CPU: Snap 8 — ok\n- Phone C — Price/Currency: N/A — CPU: Dim 9 — ok\n- Phone D — 7500 TWD — CPU: N/A — ok\n- Phone E — Price/Currency/CPU: N/A — error",
+       "created_at": "2026-10-06T15:32:21.628176Z",
+       "status": "answered",
+       "trace": {
+        "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+        "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+        "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null
+      }
+     ]
+    },
+    "answer": {
+     "ok": true,
+     "answer": "已完成，輸出檔已寫到指定資料夾：\n\n- `C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\robust_products.xlsx`\n- `C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\warnings.json`\n\n已檢查：\n- `robust_products.xlsx` 存在\n- 欄位精確為 `Name、Price、Currency、CPU、URL、FetchStatus`\n- 共 5 筆產品資料\n- 缺價格或規格填入 `N/A`\n- 成功頁 `FetchStatus` 為 `ok`\n- HTTP 500 detail page 最多嘗試 3 次；Phone E 嘗試 3 次後仍失敗，保留列表名稱與 URL，其他未知欄位為 `N/A`，`FetchStatus` 為 `error`\n- `warnings.json` 存在，且包含 5 筆產品狀態記錄\n\n產出的資料列為：\n- Phone A — 9900 TWD — CPU: Snap 7 — ok\n- Phone B — 12900 TWD — CPU: Snap 8 — ok\n- Phone C — Price/Currency: N/A — CPU: Dim 9 — ok\n- Phone D — 7500 TWD — CPU: N/A — ok\n- Phone E — Price/Currency/CPU: N/A — error",
+     "status": "answered",
+     "outcome": {
+      "trace": {
+       "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+       "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+       "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+       "parent_span_id": null
+      },
+      "ingress": "local",
+      "actor": "leo.chi",
+      "refusal": null,
+      "conversation": {
+       "trace": {
+        "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+        "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+        "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+        "parent_span_id": null
+       },
+       "status": "answered",
+       "text": "已完成，輸出檔已寫到指定資料夾：\n\n- `C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\robust_products.xlsx`\n- `C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\warnings.json`\n\n已檢查：\n- `robust_products.xlsx` 存在\n- 欄位精確為 `Name、Price、Currency、CPU、URL、FetchStatus`\n- 共 5 筆產品資料\n- 缺價格或規格填入 `N/A`\n- 成功頁 `FetchStatus` 為 `ok`\n- HTTP 500 detail page 最多嘗試 3 次；Phone E 嘗試 3 次後仍失敗，保留列表名稱與 URL，其他未知欄位為 `N/A`，`FetchStatus` 為 `error`\n- `warnings.json` 存在，且包含 5 筆產品狀態記錄\n\n產出的資料列為：\n- Phone A — 9900 TWD — CPU: Snap 7 — ok\n- Phone B — 12900 TWD — CPU: Snap 8 — ok\n- Phone C — Price/Currency: N/A — CPU: Dim 9 — ok\n- Phone D — 7500 TWD — CPU: N/A — ok\n- Phone E — Price/Currency/CPU: N/A — error",
+       "model_turns": 4,
+       "tools": [
+        {
+         "call_id": "call_TWXn6BqUZwa4csK4mitJwsFc",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-cf8b1d6176c34f7ea9448ace2ff270ee",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+            "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+            "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+             "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+             "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "workspace: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\ninput files:\nfetch list: http://127.0.0.1:49758/t13/list\nstatus: 200 content-type: text/html; charset=utf-8\nmarkup sample:\n<!doctype html><html><head><meta charset=\"utf-8\"></head><body><ul id=\"products\"><li><a href=\"/t13/item/1\">Phone A</a></li><li><a href=\"/t13/item/2\">Phone B</a></li><li><a href=\"/t13/item/3\">Phone C</a></li><li><a href=\"/t13/item/4\">Phone D</a></li><li><a href=\"/t13/item/5\">Phone E</a></li></ul></body></html>\n",
+             "files": [],
+             "script_path": ".aep-run/run-001/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_J7ofu5bg94gbhlWFYkmRdPkY",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-1d94d89c1eea4c92a33984918c0f590f",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+            "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+            "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+             "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+             "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "workspace: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\ninput files:\nlist status: 200\nlist markup sample: <!doctype html><html><head><meta charset=\"utf-8\"></head><body><ul id=\"products\"><li><a href=\"/t13/item/1\">Phone A</a></li><li><a href=\"/t13/item/2\">Phone B</a></li><li><a href=\"/t13/item/3\">Phone C</a></li><li><a href=\"/t13/item/4\">Phone D</a></li><li><a href=\"/t13/item/5\">Phone E</a></li></ul></body></html>\nlist items: [{'Name': 'Phone A', 'URL': 'http://127.0.0.1:49758/t13/item/1'}, {'Name': 'Phone B', 'URL': 'http://127.0.0.1:49758/t13/item/2'}, {'Name': 'Phone C', 'URL': 'http://127.0.0.1:49758/t13/item/3'}, {'Name': 'Phone D', 'URL': 'http://127.0.0.1:49758/t13/item/4'}, {'Name': 'Phone E', 'URL': 'http://127.0.0.1:49758/t13/item/5'}]\ndetail text sample for Phone A : Phone A | Price | NT$9,900 | CPU | Snap 7\ndetail text sample for Phone B : Phone B | Price | NT$12,900 | CPU | Snap 8\ndetail text sample for Phone C : Phone C | CPU | Dim 9\ndetail text sample for Phone D : Phone D | Price | NT$7,500\nchecking outputs from saved files...\nwrote: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\robust_products.xlsx\nwrote: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\warnings.json\nchecked: robust_products.xlsx exists, exact headers, 5 rows, URLs/statuses/placeholders/types; warnings.json exists, 5 product entries, ok/error statuses, HTTP 500 attempts <= 3\nfinal rows:\n('Phone A', 9900, 'USD', 'N/A', 'http://127.0.0.1:49758/t13/item/1', 'ok')\n('Phone B', 12900, 'USD', 'N/A', 'http://127.0.0.1:49758/t13/item/2', 'ok')\n('Phone C', 'N/A', 'N/A', 'N/A', 'http://127.0.0.1:49758/t13/item/3', 'ok')\n('Phone D', 7500, 'USD', 'N/A', 'http://127.0.0.1:49758/t13/item/4', 'ok')\n('Phone E', 'N/A', 'N/A', 'N/A', 'http://127.0.0.1:49758/t13/item/5', 'error')\nwarnings: {\"source_list_url\": \"http://127.0.0.1:49758/t13/list\", \"products\": [{\"Name\": \"Phone A\", \"URL\": \"http://127.0.0.1:49758/t13/item/1\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone B\", \"URL\": \"http://127.0.0.1:49758/t13/item/2\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone C\", \"URL\": \"http://127.0.0.1:49758/t13/item/3\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone D\", \"URL\": \"http://127.0.0.1:49758/t13/item/4\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone E\", \"URL\": \"http://127.0.0.1:49758/t13/item/5\", \"FetchStatus\": \"error\", \"attempts\": 3, \"status_code\": 500, \"warning\": \"HTTP 500\"}]}\n",
+             "files": [
+              {
+               "path": "output/robust_products.xlsx",
+               "bytes": 5095
+              },
+              {
+               "path": "output/warnings.json",
+               "bytes": 1051
+              }
+             ],
+             "script_path": ".aep-run/run-002/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_mEFefFeS5UWVk6tzT1dqgau3",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-444f8e389c4c4b4281d5ded7e08a172c",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+            "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+            "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-e7427beb39cb4046b87d274f949841b1",
+             "request_id": "request-e7427beb39cb4046b87d274f949841b1",
+             "span_id": "span-e7427beb39cb4046b87d274f949841b1",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "workspace: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\ninput files:\nlist status: 200\nlist markup sample: <!doctype html><html><head><meta charset=\"utf-8\"></head><body><ul id=\"products\"><li><a href=\"/t13/item/1\">Phone A</a></li><li><a href=\"/t13/item/2\">Phone B</a></li><li><a href=\"/t13/item/3\">Phone C</a></li><li><a href=\"/t13/item/4\">Phone D</a></li><li><a href=\"/t13/item/5\">Phone E</a></li></ul></body></html>\nlist items: [{'Name': 'Phone A', 'URL': 'http://127.0.0.1:49758/t13/item/1'}, {'Name': 'Phone B', 'URL': 'http://127.0.0.1:49758/t13/item/2'}, {'Name': 'Phone C', 'URL': 'http://127.0.0.1:49758/t13/item/3'}, {'Name': 'Phone D', 'URL': 'http://127.0.0.1:49758/t13/item/4'}, {'Name': 'Phone E', 'URL': 'http://127.0.0.1:49758/t13/item/5'}]\ndetail text parts for Phone A : ['Phone A', 'Price', 'NT$9,900', 'CPU', 'Snap 7']\ndetail text parts for Phone B : ['Phone B', 'Price', 'NT$12,900', 'CPU', 'Snap 8']\ndetail text parts for Phone C : ['Phone C', 'CPU', 'Dim 9']\ndetail text parts for Phone D : ['Phone D', 'Price', 'NT$7,500']\nchecking outputs from saved files...\nwrote: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\robust_products.xlsx\nwrote: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-005\\T13\\workspace\\output\\warnings.json\nchecked: robust_products.xlsx exists, exact headers, 5 rows, URLs/statuses/placeholders/types; warnings.json exists, 5 product entries, ok/error statuses, HTTP 500 attempts <= 3\nfinal rows:\n('Phone A', 9900, 'TWD', 'Snap 7', 'http://127.0.0.1:49758/t13/item/1', 'ok')\n('Phone B', 12900, 'TWD', 'Snap 8', 'http://127.0.0.1:49758/t13/item/2', 'ok')\n('Phone C', 'N/A', 'N/A', 'Dim 9', 'http://127.0.0.1:49758/t13/item/3', 'ok')\n('Phone D', 7500, 'TWD', 'N/A', 'http://127.0.0.1:49758/t13/item/4', 'ok')\n('Phone E', 'N/A', 'N/A', 'N/A', 'http://127.0.0.1:49758/t13/item/5', 'error')\nwarnings: {\"source_list_url\": \"http://127.0.0.1:49758/t13/list\", \"products\": [{\"Name\": \"Phone A\", \"URL\": \"http://127.0.0.1:49758/t13/item/1\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone B\", \"URL\": \"http://127.0.0.1:49758/t13/item/2\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone C\", \"URL\": \"http://127.0.0.1:49758/t13/item/3\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone D\", \"URL\": \"http://127.0.0.1:49758/t13/item/4\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"status_code\": 200, \"warning\": null}, {\"Name\": \"Phone E\", \"URL\": \"http://127.0.0.1:49758/t13/item/5\", \"FetchStatus\": \"error\", \"attempts\": 3, \"status_code\": 500, \"warning\": \"HTTP 500\"}]}\n",
+             "files": [
+              {
+               "path": "output/robust_products.xlsx",
+               "bytes": 5107
+              },
+              {
+               "path": "output/warnings.json",
+               "bytes": 1051
+              }
+             ],
+             "script_path": ".aep-run/run-003/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        }
+       ],
+       "failure": null
+      },
+      "runs": [
+       {
+        "run_id": "run-cf8b1d6176c34f7ea9448ace2ff270ee",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-06T15:32:21.606221Z"
+       },
+       {
+        "run_id": "run-1d94d89c1eea4c92a33984918c0f590f",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-06T15:32:21.615251Z"
+       },
+       {
+        "run_id": "run-444f8e389c4c4b4281d5ded7e08a172c",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-06T15:32:21.620260Z"
+       }
+      ],
+      "unrecorded": []
+     }
+    },
+    "draft": null,
+    "approvals": []
+   }
+  }
+ ],
+ "fixture_requests": [
+  {
+   "t": 1791300686.9045665,
+   "method": "GET",
+   "path": "/t13/list",
+   "status": 200
+  },
+  {
+   "t": 1791300714.1165464,
+   "method": "GET",
+   "path": "/t13/list",
+   "status": 200
+  },
+  {
+   "t": 1791300714.122064,
+   "method": "GET",
+   "path": "/t13/item/1",
+   "status": 200
+  },
+  {
+   "t": 1791300714.128764,
+   "method": "GET",
+   "path": "/t13/item/2",
+   "status": 200
+  },
+  {
+   "t": 1791300714.1352825,
+   "method": "GET",
+   "path": "/t13/item/3",
+   "status": 200
+  },
+  {
+   "t": 1791300714.1587133,
+   "method": "GET",
+   "path": "/t13/item/4",
+   "status": 200
+  },
+  {
+   "t": 1791300714.1741831,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791300714.277682,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791300714.3815732,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791300736.570158,
+   "method": "GET",
+   "path": "/t13/list",
+   "status": 200
+  },
+  {
+   "t": 1791300736.5982058,
+   "method": "GET",
+   "path": "/t13/item/1",
+   "status": 200
+  },
+  {
+   "t": 1791300736.6143088,
+   "method": "GET",
+   "path": "/t13/item/2",
+   "status": 200
+  },
+  {
+   "t": 1791300736.6450624,
+   "method": "GET",
+   "path": "/t13/item/3",
+   "status": 200
+  },
+  {
+   "t": 1791300736.6508608,
+   "method": "GET",
+   "path": "/t13/item/4",
+   "status": 200
+  },
+  {
+   "t": 1791300736.6562152,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791300736.7609758,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791300736.8755574,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  }
+ ]
+}
