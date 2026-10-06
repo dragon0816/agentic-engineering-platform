@@ -119,3 +119,34 @@ def test_the_conversation_tool_goes_through_the_bridge_and_its_grants(tmp_path: 
     done = asyncio.run(granted.handler(context, args))
     assert done.status == "succeeded" and browser.visited == [SITE + "/orders"]
     assert bridge_tools(BridgeExecutor(InstalledCapabilities(), LocalPolicy(()))) == []
+
+
+def test_a_browser_left_on_the_agents_profile_is_asked_to_close_then_replaced(
+    tmp_path: Path,
+) -> None:
+    """Lab fix-003: a host stopped hard left Edge holding the profile."""
+
+    class Held(Exception):
+        code = "profile_in_use"
+
+    made: list[FakeBrowser] = []
+    closed: list[bool] = []
+
+    class Leftover(FakeBrowser):
+        def start(self) -> None:
+            if not made[1:]:
+                raise Held()
+            super().start()
+
+        def close_leftover(self) -> bool:
+            closed.append(True)
+            return True
+
+    def factory() -> FakeBrowser:
+        made.append(Leftover())
+        return made[-1]
+
+    run = BrowserSessionHandler((SITE,), tmp_path / "profile", headless=True, timeout_s=5,
+                                workspace_roots=(), browser_factory=factory)
+    run.run(BrowserRequest.model_validate({"actions": [], "look": False}))
+    assert closed == [True] and len(made) == 2 and made[1].started == 1

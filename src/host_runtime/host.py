@@ -324,6 +324,15 @@ class HostRuntime:
         return self.config.device.registered_by
 
     def close(self) -> None:
+        # The Agent's own Edge and launched desktop applications end with the host.
+        for spec in (BROWSER_SPEC, DESKTOP_SPEC):
+            binding = self.agent.gateway.bridge.installed.get(spec.identity)
+            closing = getattr(binding.handler, "close", None) if binding is not None else None
+            if closing is not None:
+                try:
+                    closing()
+                except Exception:  # noqa: BLE001 - shutting down continues regardless
+                    pass
         self.state.close()
 
     def __enter__(self) -> Self:

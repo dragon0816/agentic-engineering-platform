@@ -281,6 +281,21 @@ class Browser:
             raise BrowserError("browser_would_not_start", type(failure).__name__) from None
         self._port = self._published_port()
 
+    def close_leftover(self) -> bool:
+        """Ask a browser still running on this profile to close itself, and
+        wait until the profile is free. Only for a profile this host owns
+        alone: there, a running browser can only be one an earlier host
+        process started and never stopped (it was killed). Never used on a
+        profile a person signs in to by hand."""
+        marker = self.profile / PORT_FILE
+        try:
+            port = int(marker.read_text(encoding="utf-8").splitlines()[0])
+        except (OSError, ValueError, IndexError):
+            return False
+        if not self._ask_it_to_close(port):
+            return False
+        return self._await_profile_release()
+
     def _profile_locked(self) -> bool:
         return any((self.profile / name).exists() for name in PROFILE_LOCK_FILES)
 

@@ -111,7 +111,18 @@ class BrowserSessionHandler:
             except Exception:  # noqa: BLE001 - a lost browser is started again
                 self._browser = None
         browser = self._factory()
-        browser.start()
+        try:
+            browser.start()
+        except Exception as error:
+            # This profile is the Agent's alone, so a browser holding it was
+            # left by an earlier host process that was stopped hard: ask it
+            # to close (keeping the profile intact) and start once more.
+            leftover = getattr(browser, "close_leftover", None)
+            in_use = getattr(error, "code", None) == "profile_in_use"
+            if not in_use or leftover is None or not leftover():
+                raise
+            browser = self._factory()
+            browser.start()
         self._browser = browser
         return browser
 
