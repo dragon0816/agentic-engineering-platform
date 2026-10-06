@@ -3,9 +3,11 @@
   python operator/smoke.py [--browser]
 
 Checks the SAP-like site over HTTP (and, with --browser, in a real Edge
-window through Playwright), the quote CLI through real subprocesses, and the
-Expense desktop app through its own Tk widgets. Every expected count comes
-from `expected.py`, not from the mocks.
+window through Playwright), the quote CLI through real subprocesses, the Tk
+Expense desktop app through its own Tk widgets and, unless --no-window, the
+WinForms Expense app (expense_desktop_mock/bin/ExpenseApp.exe) driven only
+through Windows UI Automation from Windows PowerShell 5.1. Every expected
+count comes from `expected.py`, not from the mocks.
 """
 
 from __future__ import annotations
@@ -287,6 +289,327 @@ def smoke_window() -> None:
         proc.wait(10)
 
 
+WINFORMS = LAB / "expense_desktop_mock"
+WINFORMS_EXE = WINFORMS / "bin" / "ExpenseApp.exe"
+
+# Drives ExpenseApp.exe through System.Windows.Automation only and prints one
+# JSON object per observation ({"step", "value", "ms"}); smoke_winforms() judges
+# them against expected.py. The UI Automation quirks it works around are
+# commented inline.
+UIA_SCRIPT = r'''param([int]$AppPid, [string]$CsvPath, [string]$Employee, [string]$DateFrom, [string]$DateTo)
+$ErrorActionPreference = 'Stop'
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+# Quirk: System.Windows.Automation loads its Win32/WinForms client-side proxies on
+# first use by walking the call stack for the calling assembly. A PowerShell
+# script frame is a DynamicMethod with no ReflectedType, so that walk throws a
+# swallowed NullReferenceException and every control degrades to a nameless
+# "Pane" without patterns. Making the first call from compiled code fixes it.
+Add-Type -ReferencedAssemblies UIAutomationClient, UIAutomationTypes -TypeDefinition @'
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Windows.Automation;
+public static class UiaBoot {
+    public static readonly ConcurrentQueue<string> Errors = new ConcurrentQueue<string>();
+    // InvokePattern.Invoke on a WinForms button blocks until its Click handler
+    // returns, i.e. while a modal message box or dialog it opened is up. Fire it
+    // on a worker thread instead and let the script carry on.
+    public static void InvokeAsync(AutomationElement element) {
+        ThreadPool.QueueUserWorkItem(delegate {
+            try { ((InvokePattern)element.GetCurrentPattern(InvokePattern.Pattern)).Invoke(); }
+            catch (Exception e) { Errors.Enqueue(element.Current.AutomationId + ": " + e.Message); }
+        });
+    }
+    public static AutomationElement Root() {
+        AutomationElement root = AutomationElement.RootElement;
+        root.FindAll(TreeScope.Children, Condition.TrueCondition);
+        return root;
+    }
+}
+'@
+$Root = [UiaBoot]::Root()
+$AE = [System.Windows.Automation.AutomationElement]
+$CT = [System.Windows.Automation.ControlType]
+$TS = [System.Windows.Automation.TreeScope]
+
+$Clock = [Diagnostics.Stopwatch]::StartNew()
+function Emit($step, $value) {
+    [Console]::Out.WriteLine((@{ step = $step; value = $value; ms = $Clock.ElapsedMilliseconds } | ConvertTo-Json -Compress -Depth 4))
+}
+
+function Cond($property, $value) { New-Object System.Windows.Automation.PropertyCondition($property, $value) }
+function AndCond($a, $b) { New-Object System.Windows.Automation.AndCondition($a, $b) }
+
+function Wait-Until([scriptblock]$probe, [string]$what, [int]$seconds = 15) {
+    $deadline = (Get-Date).AddSeconds($seconds)
+    while ((Get-Date) -lt $deadline) {
+        $found = & $probe
+        if ($found) { return $found }
+        Start-Sleep -Milliseconds 150
+    }
+    throw "timed out waiting for $what"
+}
+
+function Find-ById($parent, [string]$id, [int]$seconds = 10) {
+    # WinForms: AutomationId is the control's Name (via WM_GETCONTROLNAME).
+    Wait-Until { $parent.FindFirst($TS::Descendants, (Cond $AE::AutomationIdProperty $id)) } "element $id" $seconds
+}
+
+# Windows of the app with this exact title. Owned windows (message boxes, the
+# modal detail form, the Save As dialog) show up in the UIA tree as children of
+# their owner window rather than of the desktop, so look one level below each
+# top-level window of the process as well. A full Descendants search works but
+# costs seconds per probe through the MSAA bridge.
+function Find-WindowNow([string]$title) {
+    $c = AndCond (Cond $AE::ProcessIdProperty $AppPid) (Cond $AE::ControlTypeProperty $CT::Window)
+    foreach ($w in $Root.FindAll($TS::Children, $c)) {
+        if ($w.Current.Name -eq $title) { return $w }
+        foreach ($inner in $w.FindAll($TS::Children, (Cond $AE::ControlTypeProperty $CT::Window))) {
+            if ($inner.Current.Name -eq $title) { return $inner }
+            foreach ($deeper in $inner.FindAll($TS::Children, (Cond $AE::ControlTypeProperty $CT::Window))) {
+                if ($deeper.Current.Name -eq $title) { return $deeper }
+            }
+        }
+    }
+    return $null
+}
+
+function Find-Window([string]$title, [int]$seconds = 15) {
+    Wait-Until { Find-WindowNow $title } "window '$title'" $seconds
+}
+
+function Pattern($element, $pattern) { $element.GetCurrentPattern($pattern) }
+
+function Invoke-Async($element) {
+    Wait-Until { $element.Current.IsEnabled } "$($element.Current.AutomationId) to be enabled" 10 | Out-Null
+    [UiaBoot]::InvokeAsync($element)
+}
+
+function Message-Text($dialog) {
+    $texts = $dialog.FindAll($TS::Descendants, (Cond $AE::ControlTypeProperty $CT::Text))
+    ($texts | ForEach-Object { $_.Current.Name }) -join ' '
+}
+
+function Wait-Closed([string]$title) {
+    Wait-Until { -not (Find-WindowNow $title) } "'$title' to close" 10 | Out-Null
+}
+
+# Dismiss a message box by its first button (OK). Button names are localized by
+# the OS UI language, so do not search for "OK".
+function Dismiss($dialog, [string]$buttonName = '') {
+    $title = $dialog.Current.Name
+    $buttons = $dialog.FindAll($TS::Descendants, (Cond $AE::ControlTypeProperty $CT::Button))
+    $target = $buttons[0]
+    if ($buttonName) { foreach ($b in $buttons) { if ($b.Current.Name -eq $buttonName) { $target = $b } } }
+    Invoke-Async $target
+    # The owner stays disabled (IsEnabled false) until the box is really gone;
+    # invoking a disabled button raises ElementNotEnabledException, whose message
+    # on this machine reads "Hot key is already registered".
+    Wait-Closed $title
+}
+
+function Select-ComboItem($combo, [string]$item) {
+    # A DropDownList combobox has no ValuePattern. Its ListItems are already in
+    # the UIA tree while collapsed, and SelectionItemPattern.Select() on one sets
+    # the selection without expanding (Expand/Collapse work too but cost seconds).
+    $li = Wait-Until { $combo.FindFirst($TS::Descendants,
+        (AndCond (Cond $AE::ControlTypeProperty $CT::ListItem) (Cond $AE::NameProperty $item))) } "list item $item"
+    (Pattern $li ([System.Windows.Automation.SelectionItemPattern]::Pattern)).Select()
+    $sel = (Pattern $combo ([System.Windows.Automation.SelectionPattern]::Pattern)).Current.GetSelection()
+    ($sel | ForEach-Object { $_.Current.Name }) -join ','
+}
+
+function Set-Text($element, [string]$text) {
+    (Pattern $element ([System.Windows.Automation.ValuePattern]::Pattern)).SetValue($text)
+    (Pattern $element ([System.Windows.Automation.ValuePattern]::Pattern)).Current.Value
+}
+
+function Value($element) {
+    # A multi-line Win32 edit exposes TextPattern but no ValuePattern.
+    $vp = $null
+    if ($element.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$vp)) { return $vp.Current.Value }
+    (Pattern $element ([System.Windows.Automation.TextPattern]::Pattern)).DocumentRange.GetText(-1)
+}
+
+function Rows($list) {
+    # A Details-view ListView is a DataGrid whose rows are DataItem (not ListItem).
+    $list.FindAll($TS::Children, (Cond $AE::ControlTypeProperty $CT::DataItem))
+}
+
+try {
+    $main = Find-Window 'Expense Viewer (synthetic lab)' 20
+    Emit 'window' $main.Current.Name
+    $names = @('EmployeeFilter', 'ProjectFilter', 'DateFrom', 'DateTo', 'StatusFilter', 'QueryButton', 'ResultsList',
+               'PreviousButton', 'NextButton', 'CountLabel', 'DetailsButton', 'ExportCsvButton', 'ExportExcelButton')
+    # One Descendants walk, then reuse the elements: every UIA round trip through
+    # the MSAA bridge costs tens of milliseconds, a FindFirst over the window ~1 s.
+    $ctl = @{}
+    foreach ($e in $main.FindAll($TS::Descendants, [System.Windows.Automation.Condition]::TrueCondition)) {
+        $id = $e.Current.AutomationId
+        if ($id -and -not $ctl.ContainsKey($id)) { $ctl[$id] = $e }
+    }
+    $seen = @{}
+    foreach ($n in $names) {
+        $e = $ctl[$n]
+        $seen[$n] = if ($e) { "$($e.Current.ControlType.ProgrammaticName)|$($e.Current.Name)" } else { $null }
+    }
+    Emit 'controls' $seen
+
+    Emit 'employee' (Select-ComboItem $ctl['EmployeeFilter'] $Employee)
+    Emit 'date_from' (Set-Text $ctl['DateFrom'] $DateFrom)
+    Emit 'date_to' (Set-Text $ctl['DateTo'] $DateTo)
+
+    Invoke-Async $ctl['QueryButton']
+    $box = Find-Window '查詢完成 Query complete'
+    Emit 'query_message' (Message-Text $box)
+    Dismiss $box
+    $count = $ctl['CountLabel']
+    Emit 'count_page1' (Wait-Until { $v = Value $count; if ($v -like 'Total * Page 1 /*') { $v } } 'page 1 count')
+    $list = $ctl['ResultsList']
+    Emit 'rows_page1' (Rows $list).Count
+
+    Invoke-Async $ctl['NextButton']
+    Emit 'count_page2' (Wait-Until { $v = Value $count; if ($v -like '* Page 2 /*') { $v } } 'page 2 count')
+    $rows = Rows $list
+    Emit 'rows_page2' $rows.Count
+
+    $first = $rows[0]
+    (Pattern $first ([System.Windows.Automation.SelectionItemPattern]::Pattern)).Select()
+    Emit 'selected' $first.Current.Name
+    Invoke-Async $ctl['DetailsButton']
+    $detail = Find-Window "Expense detail $($first.Current.Name)"
+    Emit 'detail_title' $detail.Current.Name
+    Emit 'detail_receipt' (Value (Find-ById $detail 'DetailReceiptID'))
+    Emit 'detail_description' (Value (Find-ById $detail 'DetailDescription'))
+    Invoke-Async (Find-ById $detail 'CloseButton')
+    Wait-Closed "Expense detail $($first.Current.Name)"
+    Emit 'detail_closed' $true
+
+    Invoke-Async $ctl['ExportCsvButton']
+    $save = Find-Window 'Save As 另存新檔'
+    # Common item dialog: the file name box is the Edit with AutomationId 1001
+    # inside the "File name" combobox; the Save button has AutomationId 1.
+    $fileName = Find-ById $save '1001'
+    Emit 'save_default_name' (Value $fileName)
+    Emit 'save_name' (Set-Text $fileName $CsvPath)
+    $saveCond = AndCond (Cond $AE::AutomationIdProperty '1') (Cond $AE::ControlTypeProperty $CT::Button)
+    Invoke-Async ($save.FindFirst($TS::Children, $saveCond))
+    $done = Find-Window '匯出完成 Export complete'
+    Emit 'export_message' (Message-Text $done)
+    Dismiss $done
+    Emit 'finished' $true
+}
+catch {
+    Emit 'error' ($_.Exception.Message + ' @ ' + $_.InvocationInfo.PositionMessage)
+    exit 1
+}
+finally {
+    $err = $null
+    while ([UiaBoot]::Errors.TryDequeue([ref]$err)) { Emit 'invoke_error' $err }
+}
+exit 0
+'''
+
+
+def build_winforms() -> bool:
+    """Build ExpenseApp.exe with build.cmd when it is missing or older than its source."""
+    source = WINFORMS / "ExpenseApp.cs"
+    if WINFORMS_EXE.exists() and WINFORMS_EXE.stat().st_mtime >= source.stat().st_mtime:
+        return True
+    run = subprocess.run(["cmd", "/c", str(WINFORMS / "build.cmd")], capture_output=True, text=True, timeout=120)
+    record("Expense WinForms: build.cmd compiles ExpenseApp.exe", run.returncode == 0 and WINFORMS_EXE.exists(),
+           (run.stdout + run.stderr).strip()[-160:])
+    return WINFORMS_EXE.exists()
+
+
+def smoke_winforms() -> None:
+    """Operate the WinForms Expense app only through Windows UI Automation."""
+    if not build_winforms():
+        return
+    want = expected("D01")
+    ids = want["ids"]
+    pages = -(-len(ids) // 8)
+    offsets = reset(label="smoke-winforms")
+    proc = subprocess.Popen([str(WINFORMS_EXE)])
+    steps: dict[str, Any] = {}
+    try:
+        with tempfile.TemporaryDirectory() as folder:
+            script = Path(folder) / "drive_expense.ps1"
+            script.write_text(UIA_SCRIPT, encoding="utf-8-sig")  # PowerShell 5.1 needs the BOM for non-ASCII
+            target = Path(folder) / "with space" / "expenses uia.csv"
+            target.parent.mkdir()
+            run = subprocess.run(
+                ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", str(script),
+                 "-AppPid", str(proc.pid), "-CsvPath", str(target), "-Employee", "E001",
+                 "-DateFrom", "2026-09-01", "-DateTo", "2026-09-30"],
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
+            for line in run.stdout.splitlines():
+                if line.startswith("{"):
+                    item = json.loads(line)
+                    steps[item["step"]] = item["value"]
+            record("Expense WinForms: UI Automation script ran to the end", run.returncode == 0 and "finished" in steps,
+                   steps.get("error") or steps.get("invoke_error") or run.stderr.strip()[-160:])
+            record("Expense WinForms: window title", steps.get("window") == "Expense Viewer (synthetic lab)",
+                   steps.get("window"))
+            controls = steps.get("controls") or {}
+            missing = [n for n, v in controls.items() if not v or v.split("|")[1] != n]
+            record("Expense WinForms: every control has its stable UIA name", len(controls) == 13 and not missing,
+                   missing or controls.get("ResultsList"))
+            record("Expense WinForms: EmployeeFilter set to E001 (SelectionItem)", steps.get("employee") == "E001",
+                   steps.get("employee"))
+            record("Expense WinForms: DateFrom / DateTo set (ValuePattern)",
+                   (steps.get("date_from"), steps.get("date_to")) == ("2026-09-01", "2026-09-30"),
+                   (steps.get("date_from"), steps.get("date_to")))
+            record("Expense WinForms: Query message box reports the expected count",
+                   steps.get("query_message") == f"查詢完成，共 {len(ids)} 筆。", steps.get("query_message"))
+            record("Expense WinForms: CountLabel shows the expected total",
+                   steps.get("count_page1") == f"Total {len(ids)} rows · Page 1 / {pages}", steps.get("count_page1"))
+            record("Expense WinForms: page 1 shows 8 rows", steps.get("rows_page1") == min(8, len(ids)),
+                   steps.get("rows_page1"))
+            record("Expense WinForms: Next shows page 2 with the rest",
+                   steps.get("count_page2") == f"Total {len(ids)} rows · Page 2 / {pages}"
+                   and steps.get("rows_page2") == len(ids) - 8, (steps.get("count_page2"), steps.get("rows_page2")))
+            chosen = steps.get("selected", "")
+            values = want["values"].get(chosen, {})
+            record("Expense WinForms: Details opens the selected expense",
+                   chosen in ids and steps.get("detail_title") == f"Expense detail {chosen}", steps.get("detail_title"))
+            record("Expense WinForms: DetailReceiptID matches the source",
+                   bool(values) and steps.get("detail_receipt") == values["ReceiptID"], steps.get("detail_receipt"))
+            record("Expense WinForms: DetailDescription keeps the line break",
+                   bool(values) and steps.get("detail_description") == values["Description"].replace("\n", "\r\n"),
+                   steps.get("detail_description"))
+            record("Expense WinForms: Save As offers expenses_export.csv",
+                   steps.get("save_default_name") == "expenses_export.csv", steps.get("save_default_name"))
+            record("Expense WinForms: export message reports every filtered row",
+                   steps.get("export_message") == f"已匯出 {len(ids)} 筆至\n{target}", steps.get("export_message"))
+            with open(target, encoding="utf-8-sig", newline="") if target.exists() else io.StringIO() as handle:
+                rows = list(csv.DictReader(handle))
+            record("Expense WinForms: CSV export has every filtered row",
+                   sorted(r["ExpenseID"] for r in rows) == sorted(ids), len(rows))
+            # Byte for byte what the Tk edition writes: utf-8-sig, csv.writer, CRLF records
+            # (a newline inside a quoted Description stays a bare LF, as with Python's csv).
+            source = json.loads((HERE / "data" / "source.json").read_text(encoding="utf-8"))["expenses"]
+            chosen_rows = sorted((e for e in source if e["ExpenseID"] in ids),
+                                 key=lambda e: (e["ExpenseDate"], e["ExpenseID"]))
+            columns = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category", "Currency",
+                       "Amount", "Status", "ReceiptID", "Description", "MissingReceipt")
+            buffer = io.StringIO(newline="")
+            writer = csv.writer(buffer, lineterminator="\r\n")
+            writer.writerow(columns)
+            writer.writerows([[row[c] for c in columns] for row in chosen_rows])
+            raw = target.read_bytes() if target.exists() else b""
+            record("Expense WinForms: CSV bytes match the Tk edition (BOM, CRLF, quoting)",
+                   raw == buffer.getvalue().encode("utf-8-sig"), raw[:20])
+    finally:
+        proc.kill()
+        proc.wait(10)
+    kinds = [e["event"] for e in events("expense", offsets["expense"])]
+    record("Expense WinForms: events are logged", {"app_started", "query", "page", "detail", "export"} <= set(kinds),
+           kinds)
+    reset(label="smoke-winforms-done")
+
+
 def smoke_templates() -> None:
     for name in ("sales", "expense", "quote", "project"):
         path = LAB / "templates" / f"{name}_template.xlsx"
@@ -297,7 +620,7 @@ def smoke_templates() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--browser", action="store_true", help="also drive the site in a real Edge window")
-    parser.add_argument("--no-window", action="store_true", help="skip opening the real Expense window")
+    parser.add_argument("--no-window", action="store_true", help="skip opening the real Expense windows (Tk and WinForms)")
     args = parser.parse_args()
     smoke_templates()
     smoke_sap(args.browser)
@@ -305,6 +628,7 @@ def main() -> int:
     smoke_expense()
     if not args.no_window:
         smoke_window()
+        smoke_winforms()
     failed = [r for r in RESULTS if not r[1]]
     print(f"\n{len(RESULTS) - len(failed)}/{len(RESULTS)} smoke checks passed")
     out = LAB / "operator" / "state" / "smoke.json"
