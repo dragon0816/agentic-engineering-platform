@@ -103,12 +103,21 @@ class DraftWorkflowHandler:
         try:
             path = Path(raw_path).resolve()
             path.relative_to(self.workspace_root)
-            if path.suffix.lower() != ".pdf" or not path.is_file():
-                return None
-            from pypdf import PdfReader
-
-            text = "\n\n".join(page.extract_text() or "" for page in PdfReader(path).pages).strip()
-            # 客⼾ -> 客戶: printed PDFs map some glyphs to look-alike radicals.
-            return fold_cjk_lookalikes(text) if text else None
-        except (ImportError, OSError, ValueError):
+        except (OSError, ValueError):
             return None
+        return sop_pdf_text(path)
+
+
+def sop_pdf_text(path: Path) -> str | None:
+    """The text of one SOP PDF, or None when it cannot be read. Text only:
+    tables arrive in reading order and pictures are not read."""
+    try:
+        if path.suffix.lower() != ".pdf" or not path.is_file():
+            return None
+        from pypdf import PdfReader
+
+        text = "\n\n".join(page.extract_text() or "" for page in PdfReader(path).pages).strip()
+    except (ImportError, OSError, ValueError):
+        return None
+    # 客⼾ -> 客戶: printed PDFs map some glyphs to look-alike radicals.
+    return fold_cjk_lookalikes(text) if text else None
