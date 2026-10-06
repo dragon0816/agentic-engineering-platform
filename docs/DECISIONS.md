@@ -1507,3 +1507,20 @@ Owner:
 - the mocks do not move to another computer, because the lab tests whether the Agent can operate each kind of application.
 
 Bypass detection (`bypass_signals`) stays in the results.
+
+## 2026-10-07: 20 tool calls per turn, and a tool record carried across turns
+
+Decision (owner, after lab fix-001):
+- **Budget.** Every conversation turn may make 20 tool calls, which is 21 model turns.
+- **Tool record.** Each Agent Web answer keeps a compact record of the tools it used: the tool, the outcome, the files written, and the candidate, approval and run ids. It never holds page text, file content or scripts.
+- **The next turn.** Later turns give the model that record with the answer's text, so a stopped turn can be continued.
+- **A stopped turn.** It says how far it got and that 繼續 continues it.
+- **Benchmarks.** The lab operator replies 繼續 at most three times per task when a turn stops at the budget, and records each reply as an intervention.
+
+Reason: in lab fix-001, 8 of 16 runs ended with `tool_loop_limit` before a workbook existed. The next turn could not continue, because history kept only text.
+
+Rejected alternatives:
+- raising the budget only when coding or interface tools are present: harder to reason about, and the owner chose one rule;
+- keeping full tool output in history: page and file content would flow into every later turn.
+
+Knowledge turns normally end after one or two calls.

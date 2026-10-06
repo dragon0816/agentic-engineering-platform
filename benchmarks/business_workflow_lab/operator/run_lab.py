@@ -156,6 +156,28 @@ def settle(session: AgentWebSession, deadline: float, interventions: list[dict[s
         session.send(FOLLOW_UP, max(60.0, deadline - time.monotonic()))
 
 
+CONTINUE = "繼續"
+
+
+def stopped_at_budget(exchange: dict[str, Any]) -> bool:
+    convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+        "conversation") or {}
+    return (convo.get("failure") or {}).get("code") == "tool_loop_limit"
+
+
+def keep_going(session: AgentWebSession, deadline: float, interventions: list[dict[str, Any]],
+               decided: list[dict[str, Any]]) -> None:
+    """A person answers 繼續 when a turn ran out of tool calls (at most 3 times, each recorded)."""
+    for _ in range(3):
+        turns = [x for x in session.exchanges if "decided" not in x]
+        if not turns or not stopped_at_budget(turns[-1]) or time.monotonic() > deadline - 60:
+            return
+        interventions.append({"kind": "operator replied 繼續 after the turn's tool budget ran out",
+                              "text": CONTINUE})
+        session.send(CONTINUE, max(60.0, deadline - time.monotonic()))
+        settle(session, deadline, interventions, decided)
+
+
 def authored_runs(exchanges: list[dict[str, Any]], decided: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Platform Workflow runs: read-only runs the host did at once, and approved runs."""
     out = []
@@ -272,6 +294,7 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     decided: list[dict[str, Any]] = []
     if not session.exchanges[-1]["timed_out"]:
         settle(session, deadline, interventions, decided)
+        keep_going(session, deadline, interventions, decided)
     first_runs = authored_runs(session.exchanges, decided)
     rerun_checks: list[dict[str, Any]] | None = None
     workflow_same: bool | None = None
@@ -281,6 +304,7 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
         mark = len(session.exchanges)
         session.send(message, max(60.0, deadline - time.monotonic()))
         settle(session, deadline, interventions, decided)
+        keep_going(session, deadline, interventions, decided)
         rerun_runs = [r for r in authored_runs(session.exchanges[mark:], decided)
                       if r not in first_runs]
         digests = {r["digest"] for r in first_runs if r.get("digest")}
