@@ -19,6 +19,7 @@ from capabilities.chipset_report.contracts import ChipsetReportSettings
 from capabilities.coding_change.contracts import CodingHostBinding
 from capabilities.release_package.contracts import IsolatedApplySettings, ReleasePreviewSettings
 from capabilities.team_tickets.contracts import TeamTicketsSettings
+from capabilities.web.handlers import WebHostBinding
 from capabilities.weekly_report.contracts import WeeklyReportSettings
 from common.assets import AssetIdentity, SecretRef, reject_embedded_secrets
 from common.base import Contract, Slug, Symbol, Text
@@ -480,6 +481,9 @@ class CompanyHostConfiguration(Contract):
     # Coding on the Bridge (docs/phases/CODING_ON_BRIDGE.md): which
     # repositories may be changed and the restricted runner interpreter.
     coding: CodingHostBinding | None = None
+    # Web steps of generated Workflows (docs/phases/SOP_TO_WORKFLOW.md W2):
+    # the origins they may open and the browser profile they use.
+    web: WebHostBinding | None = None
     # How long one capability step may run. The platform's default of thirty
     # seconds is right for a file read and wrong for a Jira search over a
     # week's tickets with their comment threads and a throttle waited out;

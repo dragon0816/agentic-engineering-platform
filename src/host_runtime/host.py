@@ -91,6 +91,10 @@ from capabilities.team_tickets.handlers import (
     PREVIEW_SPEC as TEAM_TICKETS_PREVIEW_SPEC,
 )
 from capabilities.team_tickets.handlers import TeamTicketsPreviewHandler, TeamTicketsPreviewInput
+from capabilities.web.handlers import ACT_SPEC as WEB_ACT_SPEC
+from capabilities.web.handlers import READ_SPEC as WEB_READ_SPEC
+from capabilities.web.handlers import SELECT_SPEC as DATA_SELECT_SPEC
+from capabilities.web.handlers import SelectHandler, SelectRequest, SelectResult, WebScriptHandler
 from capabilities.weekly_report.contracts import (
     ReportingWindow,
     SheetState,
@@ -166,6 +170,7 @@ from integrations.github_project import GitHubProjectClient
 from integrations.jira import JiraClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
+from integrations.web_script import WebScript, WebScriptResult
 from knowledge.evolution import (
     KnowledgeAnswerRecord,
     KnowledgeCatalog,
@@ -425,6 +430,22 @@ def build_integrations(
     if NCC_RENDER_SPEC.identity.key in uses:
         installed.register(
             NCC_RENDER_SPEC, NccRenderHandler(), NccRenderStepInput, NccRendered,
+            ExecutionDependencies(central_required=False),
+        )
+    # Web and data building blocks for generated Workflows.
+    if config.web is not None:
+        profile = (
+            Path(config.web.profile_dir) if config.web.profile_dir
+            else layout.workspace_root / "web-profile"
+        )
+        for spec, mode in ((WEB_READ_SPEC, "read"), (WEB_ACT_SPEC, "act")):
+            installed.register(
+                spec, WebScriptHandler(config.web, profile, mode),  # type: ignore[arg-type]
+                WebScript, WebScriptResult, ExecutionDependencies(central_required=False),
+            )
+    if config.web is not None or DATA_SELECT_SPEC.identity.key in uses:
+        installed.register(
+            DATA_SELECT_SPEC, SelectHandler(), SelectRequest, SelectResult,
             ExecutionDependencies(central_required=False),
         )
     # The Outlook draft building block: installed when a Workflow uses it.
