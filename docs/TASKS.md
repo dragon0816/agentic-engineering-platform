@@ -1284,7 +1284,30 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Knowledge PDF ingestion (`knowledge/office.py` `PdfExtractor`) has the
   same look-alike radical problem; folding there changes extracted text and
   therefore Vault evidence digests, so it needs a re-ingestion plan first.
-- [ ] SOP to Workflow W2-W8, then W9 business cards (see the plan).
+- [x] SOP to Workflow W2-W7 (plan `docs/phases/SOP_TO_WORKFLOW.md`):
+  fixed step inputs (`{"source": "fixed"}`, owner decision); recorded web
+  procedures (`integrations/web_script.py`) as `web/read` (refuses clicks
+  that could change a site) and `web/act`; `data/select`; `excel/read-sheet`
+  and `excel/upsert-rows` (never deletes, refuses open workbooks and
+  workbooks with drawings, backs up, has `preview`); `WorkflowEngine.preview`
+  (design A); authoring sessions (`host_runtime/authoring.py`, design B) with
+  the conversational drafter (`workflow_author/conversation.py`; the host
+  fills fixed manifest fields, the model writes steps); Agent Web
+  "Create a Workflow from an SOP" panel and `/api/authoring/*`. Tests:
+  `test_fixed_step_input.py`, `test_web_script.py`, `test_web_capabilities.py`,
+  `test_excel_blocks.py`, `test_workflow_preview.py`,
+  `test_authoring_conversation.py`, `test_authoring_sessions.py`,
+  `test_authoring_web.py`. Full pytest 2198 passed, 1 failed (the known cp950
+  test).
+- [x] SOP to Workflow W8 live, up to preview: the practice SOP PDF was
+  uploaded, the Gateway model asked for the site, workbook, table and button
+  details, and after the answers it drafted
+  `engineering/daily-shipment-tracking` (web read, Excel upsert, select,
+  web act). The preview read the practice site, planned the Excel changes and
+  the two notifications, and changed nothing. Installing waits for the owner
+  (Agent Web, session `sop-20261006-094136-07236f`).
+- [ ] SOP to Workflow: owner approves and installs the practice Workflow, runs
+  it, then one real SOP chosen by the owner; then W9 business cards.
 - [x] Regression check after coding and SOP W1 (owner question 2026-10-06):
   full pytest 2162 passed, 1 failed (`test_local_developer_environment`, the
   cp950 stderr decoding failure that predates this work). Live Agent Web:

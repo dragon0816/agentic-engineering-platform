@@ -69,13 +69,22 @@ decoding, fails the same at the earlier HEAD), `test_agent_web` header test
 `test_coding_model_author.py`, `test_coding_change_capability.py`, plus
 E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 
+## SOP to Workflow state (2026-10-06)
+
+- W1-W7 done and committed; W8 done up to preview (see docs/TASKS.md).
+- host.json has `web` (allowed origin `http://127.0.0.1:8766`, backup
+  `host.json.bak-20261006-174008-before-web`). That origin is the practice
+  site, started with `python -m evaluation.sop_practice serve --port 8766`
+  (run from `src` with the repo venv); it does not survive a reboot.
+- Practice files: `C:\Users\Chi_L\Documents\aep-sop-practice` (workbook and
+  SOP PDF). Authoring session `sop-20261006-094136-07236f` is `previewed`;
+  the owner installs it from Agent Web (Capabilities, "Create a Workflow from
+  an SOP"), then restarts Agent Web.
+
 ## Next recommended action
 
-1. C7 live run: in Agent Web or Telegram, ask the Agent to implement
-   `format_duration` in `practice`, file `src/practice/formatting.py`, tests
-   `tests/test_formatting.py`. Check the diff in the worktree and that the
-   practice repo's own checkout is untouched. Record results in TASKS.
-2. SOP to Workflow W2-W3 (plan `docs/phases/SOP_TO_WORKFLOW.md`; W1 done),
-   then W4/W5 (approved harness designs A/B), W6-W8, then W9 business cards.
-3. Then decide C8 (Claude Code author, PUBLIC only) or return to W12
-   chipset_readiness (notes in `docs/phases/RS_WORKFLOW_MIGRATION.md`).
+1. Owner: approve and install the practice Workflow, restart Agent Web, run
+   it (customer C001), check the workbook and `http://127.0.0.1:8766/state.json`.
+2. One real SOP chosen by the owner (its sites go into `web.allowed_origins`).
+3. W9 business cards (Gateway vision approval and data-approval record first).
+4. Coding C7 live run on the practice repository (runner ready).
