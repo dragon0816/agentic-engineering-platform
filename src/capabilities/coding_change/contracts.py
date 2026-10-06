@@ -66,6 +66,9 @@ class CodingHostBinding(Contract):
     # Folders a conversation task may run Python in (`coding/run-python`); a
     # workspace must lie under one of them. Empty: the capability is not installed.
     workspace_roots: tuple[Text, ...] = ()
+    # Processes a `coding/run-python` script may have alive at once, itself
+    # included, so it can run a command-line tool. `coding/change` stays at one.
+    run_python_max_processes: int = Field(default=4, ge=1, le=16, strict=True)
 
     def repository(self, name: str) -> CodingRepository | None:
         return next((item for item in self.repositories if item.name == name), None)

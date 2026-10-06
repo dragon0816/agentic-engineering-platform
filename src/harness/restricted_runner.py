@@ -5,8 +5,9 @@ wrote, so the process gets no more than the run needs:
 
 - a low-integrity token: it can read what the account reads, but can write
   only where the run folder was labelled low;
-- a Job object with one active process, a memory cap and kill-on-close, so it
-  cannot start another (unblocked) interpreter and dies with the run;
+- a Job object with a small active-process limit (one unless the caller
+  allows more), a memory cap per process and kill-on-close, so every process
+  it starts inherits the token and dies with the run;
 - an environment rebuilt from an allowlist, so no token or key reaches it;
 - a wall-clock timeout that terminates the whole Job.
 
@@ -50,6 +51,11 @@ class RunnerError(Exception):
 class RunnerLimits(Contract):
     timeout_seconds: int = Field(default=120, ge=5, le=1800, strict=True)
     memory_mb: int = Field(default=1024, ge=128, le=8192, strict=True)
+    # Processes alive at once in the Job, the script included. One forbids
+    # child processes; more lets a script run a CLI. A child is not covered by
+    # the firewall rule on the runner interpreter unless it is that
+    # interpreter (owner decision 2026-10-06, docs/DECISIONS.md).
+    max_processes: int = Field(default=1, ge=1, le=16, strict=True)
 
 
 @dataclass(frozen=True)
@@ -149,7 +155,7 @@ class RestrictedRunner:
             | win32job.JOB_OBJECT_LIMIT_PROCESS_MEMORY
             | win32job.JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
         )
-        limits["BasicLimitInformation"]["ActiveProcessLimit"] = 1
+        limits["BasicLimitInformation"]["ActiveProcessLimit"] = self.limits.max_processes
         limits["ProcessMemoryLimit"] = self.limits.memory_mb * 1024 * 1024
         win32job.SetInformationJobObject(job, win32job.JobObjectExtendedLimitInformation, limits)
 

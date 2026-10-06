@@ -10,8 +10,11 @@ Bounds: the workspace must lie under a folder listed in the host's
 `coding.workspace_roots`; the script can write only to the workspace's
 `output/` and its own run folder (low integrity labels only those two);
 `input/` and everything else stay read-only to it; no credential reaches it;
-direct outbound network is blocked by the runner's firewall rule; one process,
-memory cap and timeout as for every coding run. Each script is kept under
+direct outbound network is blocked by the runner's firewall rule; memory cap
+and timeout as for every coding run. Unlike `coding/change`, the script may
+start a few child processes (`coding.run_python_max_processes`, default 4) so
+it can run a command-line tool; they inherit the low-integrity token and die
+with the run (owner decision 2026-10-06, lab gap L3). Each script is kept under
 `.aep-run/` in the workspace as evidence.
 """
 
@@ -108,7 +111,8 @@ class RunPythonHandler:
         python = Path(self.binding.runner_python)
         try:
             runner = RestrictedRunner(python, RunnerLimits(
-                timeout_seconds=self.binding.timeout_seconds, memory_mb=self.binding.memory_mb))
+                timeout_seconds=self.binding.timeout_seconds, memory_mb=self.binding.memory_mb,
+                max_processes=self.binding.run_python_max_processes))
         except RunnerError as error:
             raise CapabilityRefused(error.code) from None
         if self.binding.require_network_block and not self.rule_present(python):

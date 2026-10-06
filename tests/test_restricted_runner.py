@@ -66,6 +66,33 @@ def test_it_cannot_start_another_process(tmp_path: Path) -> None:
     assert code == 0 and "child refused" in output
 
 
+def test_allowed_child_processes_run_with_the_same_low_token(tmp_path: Path) -> None:
+    """Lab gap L3: a script may run a CLI, but the child gets no more than the script."""
+    outside = tmp_path / "outside.txt"
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    child = (
+        "import pathlib\n"
+        "try:\n"
+        f"    open(r'{outside}', 'w').write('x'); print('child wrote outside')\n"
+        "except PermissionError:\n"
+        "    print('child refused outside')\n"
+        "pathlib.Path('child.txt').write_text('ok')\n"
+    )
+    code = (
+        "import subprocess, sys\n"
+        f"done = subprocess.run([sys.executable, '-c', {child!r}],\n"
+        "                      capture_output=True, text=True)\n"
+        "print(done.returncode, done.stdout.strip())\n"
+    )
+    limits = RunnerLimits(timeout_seconds=30, max_processes=3)
+    result = RestrictedRunner(BASE_PYTHON, limits).run(["-c", code], cwd=run_dir, run_dir=run_dir)
+    assert result.exit_code == 0, result.output
+    assert "0 child refused outside" in result.output
+    assert (run_dir / "child.txt").read_text() == "ok"
+    assert not outside.exists()
+
+
 def test_the_timeout_ends_the_run(tmp_path: Path) -> None:
     code, timed_out, _ = run_code(tmp_path, "import time; time.sleep(60)", timeout=5)
     assert timed_out and code is None
