@@ -1285,6 +1285,25 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   same look-alike radical problem; folding there changes extracted text and
   therefore Vault evidence digests, so it needs a re-ingestion plan first.
 - [ ] SOP to Workflow W2-W8, then W9 business cards (see the plan).
+- [x] Regression check after coding and SOP W1 (owner question 2026-10-06):
+  full pytest 2162 passed, 1 failed (`test_local_developer_environment`, the
+  cp950 stderr decoding failure that predates this work). Live Agent Web:
+  direct Knowledge ask answered; chat routed a Knowledge question to
+  `knowledge__ask` and never to `coding__change`; Workflow 14 dry run
+  succeeded and wrote nothing; `aep-host run-task --prompt` validated.
+- [x] Reverted my 2026-10-05 live install of
+  `company-agent/knowledge-query@1.1.0` (selector hint). It reused a version
+  that already existed with different content (the owner's earlier 1.1.0,
+  disabled and superseded by 1.4.0) and added a second `knowledge` alias. Moved to
+  `assets/skills/disabled/company-agent__knowledge-query__1.1.0.selector-hint-20261005.json`.
+  The repo still ships that identity (`company_agent/manifest.py`): its
+  version needs an owner decision.
+- [ ] Knowledge asked in chat fails before and after this work (A/B checked
+  live): capability tools reach the model with no input schema, so the model
+  guesses `question`/`query`/`q` and never sends the required `asset`;
+  every call is refused `invalid_input`. The fix changes how conversation
+  tools are built (harness), so it waits for the owner (options in the
+  2026-10-06 chat; record the choice in DECISIONS).
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
