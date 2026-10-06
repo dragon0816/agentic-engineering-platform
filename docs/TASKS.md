@@ -1350,6 +1350,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   configured repository with existing tests); defects D1 (Knowledge intent
   routing captures web/spec tasks, 5 tasks) and D3 (`empty_model_answer`,
   2 tasks). See `runs/baseline-run-001/report.md` and `findings.md`.
+- [x] coding_v1 fixes G1 (`coding/run-python`, Workflow `engineering/run-python`,
+  Skill `engineering/coding@1.1.0`), D1 (local-work messages skip the
+  Knowledge intent route) and a Skill-selector guard (JEV can never narrow to
+  coding); live checks: Knowledge asking, W14 dry run and run-task unchanged.
+  `fix-run-001` invalid (runner folder ACL left by the AppContainer probe; the
+  doctor now probes the runner restricted). `fix-run-002`: 7 PASS, 13
+  BLOCKED; remaining D3 (1024-token conversation output cap truncates tool
+  calls, 11 tasks), G3 (4 tool calls per turn), G4 (no chat Workflow
+  install/run), G5 (no subprocess in the runner).
+- [ ] coding_v1 D3 fix (conversation output cap) awaits the owner: it changes
+  every conversation turn, including Knowledge asking.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
