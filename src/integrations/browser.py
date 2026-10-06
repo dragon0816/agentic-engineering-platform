@@ -492,6 +492,11 @@ class Browser:
             raise BrowserError("navigation_failed", "the page could not be read")
         return result.get("value")
 
+    def evaluate(self, expression: str) -> Any:
+        """Run one expression on the page and return its JSON value; for
+        callers that replay recorded steps (`integrations.web_script`)."""
+        return self._evaluate(expression)
+
     def navigate(self, url: str, *, settle_s: float = 1.0) -> None:
         page = self.page()
         try:
