@@ -1,0 +1,7 @@
+# 測試失敗追蹤 SOP
+
+1. 讀取測試結果 results.csv（欄位：Device ID、Status、Value）。
+2. 挑出 Status 為 Fail 的資料，輸出 failures.xlsx，保留 Device ID、Status、Value，並加上 Urgent 欄位。
+3. 超過門檻的 Fail 列標記需立即處理（Urgent）。
+4. 產生 summary.md，列出 Total、Pass、Fail、Urgent 的數量。
+5. 原始資料不可修改。

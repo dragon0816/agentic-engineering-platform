@@ -1,0 +1,118 @@
+WORKSPACE: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-007\T18\workspace
+INPUT FILES:
+ - DEPENDENCIES.txt size= 22
+ - export.py size= 1082
+ - input.csv size= 39
+
+DEPENDENCIES.txt:
+Python 3.12, openpyxl
+
+
+CSV INSPECTION:
+headers: ['Model', 'Value']
+sample_rows: [
+  {
+    "Model": "M1",
+    "Value": "10"
+  },
+  {
+    "Model": "M1",
+    "Value": "20"
+  },
+  {
+    "Model": "M1",
+    "Value": ""
+  },
+  {
+    "Model": "M2",
+    "Value": "5"
+  },
+  {
+    "Model": "M2",
+    "Value": "15"
+  }
+]
+
+ORIGINAL export.py:
+"""Average Value per Model from input.csv into summary.xlsx.
+
+Usage: python export.py --input input.csv --output summary.xlsx
+Requires: openpyxl
+"""
+
+import argparse
+import csv
+
+from openpyxl import Workbook
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", required=True)
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+    totals = {}
+    counts = {}
+    with open(args.input, newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            model = row["DeviceModel"]
+            value = row["Value"]
+            if value == "":
+                continue
+            totals[model] = totals.get(model, "") + value
+            counts[model] = counts.get(model, 0) + 1
+    book = Workbook()
+    sheet = book.active
+    sheet.title = "summary"
+    sheet.append(["Model", "Average", "ValidCount"])
+    for model in sorted(totals):
+        sheet.append([model, totals[model] / counts[model], counts[model]])
+    book.save(args.output)
+
+
+if __name__ == "__main__":
+    main()
+
+
+EXPECTED SUMMARY: [
+  {
+    "Model": "M1",
+    "Average": 15.0,
+    "ValidCount": 2
+  },
+  {
+    "Model": "M2",
+    "Average": 10.0,
+    "ValidCount": 2
+  }
+]
+
+WROTE: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-007\T18\workspace\output\export.py size= 2880
+
+RUNNING: C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\python.exe output\export.py --input input\input.csv --output output\summary.xlsx
+returncode: 0
+stdout: 
+stderr: 
+
+OUTPUT SHEET: summary
+OUTPUT HEADERS: ['Model', 'Average', 'ValidCount']
+OUTPUT ROWS: [
+  {
+    "Model": "M1",
+    "Average": 15,
+    "ValidCount": 2
+  },
+  {
+    "Model": "M2",
+    "Average": 10,
+    "ValidCount": 2
+  }
+]
+
+VERIFICATION PASSED:
+ - output/export.py exists and preserves --input/--output CLI
+ - command executed from workspace: python output\export.py --input input\input.csv --output output\summary.xlsx
+ - summary.xlsx reopened successfully
+ - headers exactly Model, Average, ValidCount
+ - row count and per-Model averages/ValidCount match input.csv with blank Value excluded
+ - Average cells are numeric when count > 0; ValidCount cells are integers

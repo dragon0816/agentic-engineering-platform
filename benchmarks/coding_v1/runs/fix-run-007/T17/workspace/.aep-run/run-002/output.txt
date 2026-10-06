@@ -1,0 +1,21 @@
+Converted frequency strings: 3
+Numeric frequency values preserved: 1
+Warnings recorded: 1
+Input unchanged: True
+Wrote: output\testplan.json
+Wrote: output\warnings.json
+Warning sample: [
+  {
+    "path": "$.sub.nested[1].frequency",
+    "value": "100kHz",
+    "message": "Unknown frequency unit; value left unchanged"
+  }
+]
+Verification passed:
+ - output/testplan.json re-opened and recursive object/array structure checked
+ - only frequency strings with GHz/MHz were converted to MHz numbers
+ - frequency_unit: MHz inserted after converted frequency fields
+ - numeric frequency values preserved with original numeric type
+ - other fields/values and array lengths/order checked unchanged
+ - warnings.json re-opened; warning count: 1
+ - input/testplan.json SHA-256 unchanged: 5ae34d44b6aa811e51991ca4f85abbefe45860be44005bf7019804fd70783f02

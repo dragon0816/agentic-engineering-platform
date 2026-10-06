@@ -1,0 +1,56 @@
+{
+  "source": "http://127.0.0.1:57997/t13/list",
+  "count": 5,
+  "warnings": [
+    {
+      "name": "Phone A",
+      "url": "http://127.0.0.1:57997/t13/item/1",
+      "http_status": 200,
+      "attempts": 1,
+      "fetchStatus": "ok",
+      "missing": []
+    },
+    {
+      "name": "Phone B",
+      "url": "http://127.0.0.1:57997/t13/item/2",
+      "http_status": 200,
+      "attempts": 1,
+      "fetchStatus": "ok",
+      "missing": []
+    },
+    {
+      "name": "Phone C",
+      "url": "http://127.0.0.1:57997/t13/item/3",
+      "http_status": 200,
+      "attempts": 1,
+      "fetchStatus": "ok",
+      "missing": [
+        "Price",
+        "Currency"
+      ]
+    },
+    {
+      "name": "Phone D",
+      "url": "http://127.0.0.1:57997/t13/item/4",
+      "http_status": 200,
+      "attempts": 1,
+      "fetchStatus": "ok",
+      "missing": [
+        "CPU"
+      ]
+    },
+    {
+      "name": "Phone E",
+      "url": "http://127.0.0.1:57997/t13/item/5",
+      "http_status": 500,
+      "attempts": 3,
+      "fetchStatus": "error",
+      "error": "HTTP 500 Internal Server Error",
+      "missing": [
+        "Price",
+        "Currency",
+        "CPU"
+      ]
+    }
+  ]
+}
