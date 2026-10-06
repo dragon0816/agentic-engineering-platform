@@ -1436,3 +1436,74 @@ operation); moving the mock data to another Windows account now (it needs
 the owner's machine setup, so it is recorded as gap L7 instead); treating
 model-gateway 503s as task results (they are kept as evidence and the tasks
 were rerun once).
+
+## 2026-10-06: Conversation output cap 8000 and 8 tool calls per turn (D3, G3)
+
+Decision (owner: "你提的1~3我覺得沒問題，可以執行"):
+- Every conversation request asks for up to 8000 output tokens (was 1024).
+- A turn may make 8 tool calls, which is 9 model turns (was 4 calls and 5 turns).
+- A provider reply that stopped at the output limit with nothing usable is `model_output_truncated`, not an empty answer. A text answer at the limit is still returned.
+- The limits live in `agent.backend_contracts`, so the chat request default, the loop and the result contract agree.
+
+Reason: coding_v1 fix-run-002 had 11 tasks stop on truncated tool calls and one on the 4-call budget. Rejected alternatives:
+- raising the cap only for coding turns: the model decides on a tool within the same turn, so the cap must be in place before that choice;
+- unlimited calls: the loop must stay bounded (AGENTS.md rule 9).
+
+Live checks after the change were the same as before: Knowledge asking direct and in chat, the W14 dry run and `run-task`.
+
+## 2026-10-06: Workflows drafted, run and installed from a conversation (G4)
+
+Decision (owner approval of G4, and of conversational authoring A4 to A6):
+- **Authoring tools.** The host offers conversation tools `authoring__draft/preview/run/install/list_workflows`. A draft is a private candidate under `<workspace>/authoring/chat/`.
+- **When a run needs approval.** A run whose steps only read runs at once. Any other run, and every install, becomes an approval request. Only the owner's button decides it: Agent Web `POST /api/approvals/decide`. The model has no approving tool.
+- **What a run uses.** Runs go through the Bridge with exactly the grants the candidate's steps need.
+- **Install.** It writes the Workflow published, with the owner as business approver, and adds the grants it needs.
+- **The decision in the conversation.** The decision and its result join the conversation as one turn, so the model reads the outcome next.
+- **Run values for scripts.** `coding/run-python` takes a step's run values as `params.json` (`AEP_WORKFLOW_PARAMS`). A saved script reruns with new values and the same digest.
+
+For coding_v1 and the lab, the operator script presses the button and records each press as a human intervention.
+
+Rejected alternatives:
+- an approve tool for the model: owner decision 1 forbids it;
+- a restart-only install: a conversation must be able to rerun what it installed.
+
+Telegram buttons are a follow-up.
+
+## 2026-10-06: Agent tools for browser, desktop and CLI (lab gaps L1 to L3)
+
+Owner decisions:
+- **L1, Edge.** The company uses Edge for SAP, and IT signs people in automatically, so signing in is clicking through.
+  - Built: `browser/operate@1.0.0` keeps one Edge open and replays web-script actions on `web.allowed_origins`. It adds `download` into a task workspace and `read_record`. It returns a look at the page.
+  - Built: conversation tool `browser__operate`.
+- **L2, Windows UI Automation with built-in .NET.**
+  - Built: `desktop/operate@1.0.0`. A C# helper is compiled by the Framework's csc on first use.
+  - It starts only applications registered in `host.json desktop.applications`, touches only that process's windows, and saves files only under a task workspace's `output/`.
+  - Built: conversation tool `desktop__operate`. The lab's Expense mock was rewritten in WinForms, because Tk exposes nothing to UI Automation.
+- **L3, relax the runner.** `coding/run-python` may have 4 processes alive (`coding.run_python_max_processes`); `coding/change` stays at 1.
+  - Residual risk, accepted with the decision: a child other than the runner interpreter is not covered by its firewall rule.
+
+Both interface tools are host conversation tools that dispatch a `CapabilityInvocation` through the Bridge, so the actor's grant decides (grants recorded as owner-approved 2026-10-06). Drafted Workflows can use the same capabilities as steps.
+
+Rejected alternatives:
+- screenshots with coordinates: less stable, and they need vision;
+- a host allowlisted-command tool for the CLI: the owner chose to relax the runner;
+- letting runner scripts drive Edge over DevTools: that would bypass the origin allowlist and the runner's network block.
+
+## 2026-10-06: coding_v1 validators 1.1 to 1.3
+
+Each change makes a check follow the owner's written acceptance or when it is measured; no expected answer changed. Every version is recorded in each run's metadata.
+- **1.1:** T20's fault check reads the operator's injection evidence. While no platform write existed, it was fixed to BLOCKED.
+- **1.2:** T12 accepts xlsx, CSV or JSON. The acceptance names six rows and their values, not a format.
+- **1.3:** T09's `data.json` is checked as the success scenario left it. T13 counts the 500 page's requests during the delivered program's final run, with the session total reported beside it.
+
+Rejected alternatives:
+- changing prompts or expected answers;
+- accepting FAILs that came from the operator's own measurement defects.
+
+## 2026-10-06: Lab environment, SSO sign-in and no separate isolation
+
+Owner:
+- the lab's SAP-like site signs in like company SSO, with one button and no password;
+- the mocks do not move to another computer, because the lab tests whether the Agent can operate each kind of application.
+
+Bypass detection (`bypass_signals`) stays in the results.
