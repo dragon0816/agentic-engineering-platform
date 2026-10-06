@@ -258,7 +258,8 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     loops = sum(1 for r in runs[:-1] if r["exit_code"] not in (0, None)) if runs else None
     rerun_ok: bool | None = None
     if task in RERUN and variant_override is None:
-        rerun_ok = bool(workflow_same) and verdict(rerun_checks or []) is True if rerun_checks is not None else False
+        # None when no rerun was asked for: the first turn left nothing to rerun.
+        rerun_ok = bool(workflow_same) and verdict(rerun_checks) is True if rerun_checks is not None else None
     status, layer, reason = classify(task, variant, timed_out, excel_ok, evidence, used, bypass, runs,
                                      conversation_failures(session.exchanges), rerun_ok, book)
     record = {
@@ -339,6 +340,8 @@ def reclassify(record: dict[str, Any], folder: Path) -> dict[str, Any]:
                                      conversation_failures(trace["exchanges"]), record["workflow_rerun_succeeded"],
                                      book)
     updated = dict(record, status=status, blocked_layer=layer, failure_reason=reason)
+    if record.get("rerun_checks") is None:
+        updated["workflow_rerun_succeeded"] = None
     (folder / "result.json").write_text(json.dumps(updated, ensure_ascii=False, indent=1, default=str),
                                         encoding="utf-8")
     return updated
@@ -458,7 +461,10 @@ def main() -> int:
         try:
             host = json.loads((Path.home() / "AppData/Local/AgenticEngineeringPlatform/preview-0.1.0/host.json")
                               .read_text(encoding="utf-8-sig"))
-            meta["model"] = (host.get("model") or {}).get("model") or (host.get("model") or {}).get("alias")
+            models = host.get("models") or {}
+            alias = models.get("routing_alias")
+            endpoints = (models.get("catalog") or {}).get("endpoints") or []
+            meta["model"] = next((e.get("model") for e in endpoints if e.get("alias") == alias), alias)
         except (OSError, ValueError):
             meta["model"] = None
         meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
