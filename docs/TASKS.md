@@ -1342,6 +1342,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   (backup `host.json.bak-20261006-163601-before-rs-knowledge-1.0.1`); 1.0.0
   stays installed for rollback. Live: the chat tool `knowledge__rs-knowledge`
   carries the purpose and answered with evidence.
+- [x] coding_v1 benchmark and baseline (owner request 2026-10-06):
+  `benchmarks/coding_v1/` (frozen fixtures with SHA-256 manifest, prompts,
+  validators with self-test, fixture HTTP server, Agent Web chat adapter,
+  runner). `baseline-run-001`: 20/20 BLOCKED, 0 PASS, no false completion
+  claims. Gaps G1 (no file/code tool in chat), G2 (coding/change only for a
+  configured repository with existing tests); defects D1 (Knowledge intent
+  routing captures web/spec tasks, 5 tasks) and D3 (`empty_model_answer`,
+  2 tasks). See `runs/baseline-run-001/report.md` and `findings.md`.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
