@@ -22,15 +22,24 @@ deferral of generated-code execution for this one path, behind these limits:
 | Limit | How |
 |---|---|
 | No write outside the run | the test process runs at low integrity; only the run folder (worktree and temp) is labelled low |
-| No network | an outbound firewall block on a dedicated runner interpreter; the host refuses to run when the rule is missing |
+| No direct network | an outbound firewall block on a dedicated runner interpreter; the host refuses to run when the rule is missing. Traffic through the company's Zscaler proxy on loopback is allowed and governed by IT (owner, 2026-10-06) |
 | No second process | a Job object allows one active process, so the code cannot start an unblocked interpreter |
 | Bounded resources | the Job object caps memory and kills the process tree at the timeout |
 | No credentials | the environment is rebuilt from an allowlist; no `AEP_*`, tokens or keys |
 | Golden tests stay golden | the author may write only the declared file; `tests/` and `test_*.py` are never writable |
 | Nothing leaves the worktree | the change lives in a detached git worktree; never committed, pushed or merged |
 
-Residual risk accepted by the owner: the process can still read files the
-Windows account can read.
+Residual risks accepted by the owner: the process can still read files the
+Windows account can read; it can reach the network through the company's
+Zscaler proxy (127.0.0.1:9000) and other loopback services, because Windows
+Firewall does not filter loopback. Zscaler routing is company IT's
+configuration and is treated as legitimate (owner, 2026-10-06).
+
+Verified live on 2026-10-06: the rule exists and blocks direct connections
+(code.rsint.net, 172.25.228.141, www.google.com and 1.1.1.1 are reachable
+from AEP's interpreter and unreachable from the runner). An AppContainer
+prototype that would also block loopback and personal-file reads works
+without admin rights; the owner chose not to adopt it.
 
 ## Slices
 

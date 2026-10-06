@@ -1261,3 +1261,19 @@ the same Gateway through Hermes. Rejected alternatives: local-only OCR (lower
 accuracy); local first with per-card escalation (more steps for the owner);
 sharing Hermes' database file (it would tie AEP to Hermes' location and
 schema); de-duplicated upserts (they lose job and company changes).
+
+## 2026-10-06 — Coding runner may use the company Zscaler proxy; AppContainer not adopted
+
+Decision (owner): Zscaler routing is company IT's configuration and is treated
+as legitimate. Code under test in the coding runner may reach the network
+through it. The runner keeps restricted Windows execution (low integrity,
+one-process Job object, allowlisted environment, timeout). The firewall rule
+stays and blocks direct outbound connections.
+
+Context: a live probe showed the firewall rule blocks direct egress, but
+loopback is not filtered by Windows Firewall, so the runner reaches the
+Zscaler proxy on 127.0.0.1:9000 (and n8n and the Laya tunnel). An
+AppContainer prototype blocked all of that and personal-file reads without
+admin rights. Rejected alternatives: AppContainer (owner prefers IT
+governance of egress over a stricter sandbox); AppContainer with network
+allowed but reads blocked (most complex, weakest exfiltration protection).
