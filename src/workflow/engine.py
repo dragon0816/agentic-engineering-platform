@@ -8,15 +8,16 @@ explicitly installed manifests and every step is authorized by the Bridge.
 
 import asyncio
 import functools
+import json
 import math
 import uuid
 from collections.abc import Callable, Mapping
 from copy import deepcopy
 from typing import Literal
 
-from pydantic import JsonValue, TypeAdapter, ValidationError
+from pydantic import Field, JsonValue, TypeAdapter, ValidationError
 
-from capabilities.runtime import CapabilityInvocation
+from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.assets import (
     AssetIdentity,
     FixedInput,
@@ -38,6 +39,7 @@ from common.execution import (
     ResumePolicy,
     RunProgress,
     RunStatus,
+    SideEffect,
     StepAttempt,
     StepState,
     StepStateRecord,
@@ -241,6 +243,39 @@ def _select(value: JsonValue, path: tuple[PathPart, ...]) -> JsonValue:
     return deepcopy(value)
 
 
+class PreviewStep(Contract):
+    """One step of a preview: `ran` (a read step, for real), `planned` (not
+    dispatched; `output` holds what its handler computed it would do, if it
+    can say), `blocked` (its input comes from a step that did not run),
+    `failed` or `not_permitted`."""
+
+    index: int = Field(ge=0, strict=True)
+    capability: AssetIdentity
+    side_effect: SideEffect | None = None
+    state: Literal["ran", "planned", "blocked", "failed", "not_permitted"]
+    inputs: JsonValue = None
+    output: JsonValue = None
+    failure: Failure | None = None
+
+
+class WorkflowPreview(Contract):
+    workflow: AssetIdentity
+    status: Literal["previewed", "failed", "needs_input", "unavailable"]
+    steps: tuple[PreviewStep, ...] = ()
+    failure: Failure | None = None
+
+
+def _preview_failure(code: str) -> Failure:
+    return Failure(code=code, message="The preview stopped at this step")
+
+
+def _preview_stopped(target: AssetIdentity, code: str, status: str) -> WorkflowPreview:
+    final = status if status in ("needs_input", "unavailable") else "failed"
+    return WorkflowPreview.model_validate(
+        {"workflow": target, "status": final, "failure": _preview_failure(code)}
+    )
+
+
 def _target(step: AssetIdentity | WorkflowStep) -> AssetIdentity:
     return step.capability if isinstance(step, WorkflowStep) else step
 
@@ -405,6 +440,114 @@ class WorkflowEngine:
             timeout_seconds,
             opening=f"start workflow {_step_label(target)}",
         )
+
+    async def preview(
+        self,
+        context: RequestContext,
+        workflow: AssetIdentity,
+        arguments: dict[str, JsonValue] | None = None,
+    ) -> WorkflowPreview:
+        """Show what a run would do, changing nothing (owner design A,
+        2026-10-06). A `read` step runs for real through the Bridge, under the
+        same grants as a run. Any other step is not dispatched: it is listed
+        with the inputs it would receive and, when its handler offers
+        `preview(inputs)`, with what it computes it would do. A step whose
+        input comes from a step that did not run is blocked. Nothing is
+        journaled and no run exists afterwards."""
+        checked = RequestContext.model_validate(context)
+        target = AssetIdentity.model_validate(workflow)
+        manifest = self.workflows.get(target)
+        if manifest is None:
+            return _preview_stopped(target, "workflow_not_installed", "unavailable")
+        run_arguments = deepcopy(arguments or {})
+        settings = self._settings(manifest, run_arguments)
+        if isinstance(settings, str):
+            return _preview_stopped(target, settings, "needs_input")
+        run_arguments = {**run_arguments, **settings}
+        unavailable = self._choices(manifest, run_arguments)
+        if unavailable is not None:
+            return _preview_stopped(target, unavailable, "needs_input")
+        rejection = self._preflight(manifest, run_arguments)
+        if rejection is not None:
+            return _preview_stopped(target, *rejection)
+        effects = [
+            binding.spec.side_effect
+            for binding in (self.bridge.installed.get(_target(step)) for step in manifest.steps)
+            if binding is not None
+        ]
+        if "read" not in effects:
+            return _preview_stopped(target, "preview_has_no_read_step", "unavailable")
+        outputs: dict[int, JsonValue] = {}
+        steps: list[PreviewStep] = []
+        for index, step in enumerate(manifest.steps):
+            steps.append(await self._preview_step(checked, index, step, run_arguments, outputs))
+        failed = any(item.state in ("failed", "not_permitted") for item in steps)
+        return WorkflowPreview(
+            workflow=target, status="failed" if failed else "previewed", steps=tuple(steps)
+        )
+
+    async def _preview_step(
+        self,
+        context: RequestContext,
+        index: int,
+        step: AssetIdentity | WorkflowStep,
+        arguments: dict[str, JsonValue],
+        outputs: dict[int, JsonValue],
+    ) -> PreviewStep:
+        identity = _target(step)
+        binding = self.bridge.installed.get(identity)
+        if binding is None or not isinstance(step, WorkflowStep):
+            return PreviewStep(index=index, capability=identity, state="blocked",
+                               failure=_preview_failure("preview_step_not_previewable"))
+        effect = binding.spec.side_effect
+        inputs: dict[str, JsonValue] = {}
+        for name, ref in step.inputs.items():
+            if isinstance(ref, FixedInput):
+                inputs[name] = deepcopy(ref.value)
+                continue
+            if isinstance(ref, StepInput) and ref.step_index not in outputs:
+                return PreviewStep(index=index, capability=identity, side_effect=effect,
+                                   state="blocked",
+                                   failure=_preview_failure("preview_input_from_unrun_step"))
+            try:
+                inputs[name] = _select(
+                    arguments if isinstance(ref, RunInput) else outputs[ref.step_index], ref.path
+                )
+            except _MissingInput:
+                return PreviewStep(index=index, capability=identity, side_effect=effect,
+                                   state="failed",
+                                   failure=_preview_failure("workflow_input_missing"))
+        if effect == "read":
+            result = await self.bridge.execute(
+                CapabilityInvocation(context=context, target=identity, arguments=deepcopy(inputs))
+            )
+            if result.status != "succeeded":
+                return PreviewStep(index=index, capability=identity, side_effect=effect,
+                                   state="failed", inputs=inputs, failure=result.failure)
+            outputs[index] = result.data
+            return PreviewStep(index=index, capability=identity, side_effect=effect,
+                               state="ran", inputs=inputs, output=result.data)
+        if not self.bridge.policy.authorize(context, binding.spec).allowed:
+            return PreviewStep(index=index, capability=identity, side_effect=effect,
+                               state="not_permitted", inputs=inputs,
+                               failure=_preview_failure("permission_denied"))
+        planner = getattr(binding.handler, "preview", None)
+        if not callable(planner):
+            return PreviewStep(index=index, capability=identity, side_effect=effect,
+                               state="planned", inputs=inputs)
+        try:
+            model = binding.input_model.model_validate_json(json.dumps(inputs), strict=True)
+            planned = await asyncio.to_thread(planner, model)
+        except (ValidationError, TypeError, ValueError):
+            return PreviewStep(index=index, capability=identity, side_effect=effect,
+                               state="failed", inputs=inputs,
+                               failure=_preview_failure("invalid_input"))
+        except CapabilityRefused as refused:
+            return PreviewStep(index=index, capability=identity, side_effect=effect,
+                               state="failed", inputs=inputs,
+                               failure=_preview_failure(refused.code))
+        return PreviewStep(index=index, capability=identity, side_effect=effect, state="planned",
+                           inputs=inputs, output=planned.model_dump(mode="json"))
 
     async def _launch(
         self,

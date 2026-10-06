@@ -1330,3 +1330,20 @@ output, so SOP to Workflow had nowhere to put what it recorded. Rejected
 alternatives: hidden per-install Workflow settings (what runs would not be in
 the approved manifest and could be edited on the Settings page); a separate
 procedure file referenced by path (a second artifact to version and approve).
+
+## 2026-10-06 — Preview runs are a separate engine method
+
+Implementation of the approved design A: `WorkflowEngine.preview(context,
+workflow, arguments)` returns a `WorkflowPreview` of `PreviewStep`s (`ran`,
+`planned`, `blocked`, `failed`, `not_permitted`) instead of adding a mode and
+a `previewed` status to `execute` and `RunStatus`. Behaviour is as approved:
+read steps run through the Bridge under the actor's grants; other steps are
+not dispatched and show their resolved inputs plus, when the handler has
+`preview(inputs)`, what it computes it would do (`excel/upsert-rows` does);
+nothing is journaled. A Workflow without a read step is refused
+(`preview_has_no_read_step`).
+
+Reason: `RunStatus` and the run journal are shared by every execution path
+(Agent Web, Telegram, schedules, recovery); a separate result type changes
+none of them. Rejected alternative: a `mode` on `execute` with a new run
+status, which every consumer of run status would have to learn.
