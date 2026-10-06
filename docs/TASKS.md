@@ -1298,12 +1298,23 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `assets/skills/disabled/company-agent__knowledge-query__1.1.0.selector-hint-20261005.json`.
   The repo still ships that identity (`company_agent/manifest.py`): its
   version needs an owner decision.
-- [ ] Knowledge asked in chat fails before and after this work (A/B checked
+- [x] Knowledge asked in chat fails before and after this work (A/B checked
   live): capability tools reach the model with no input schema, so the model
   guesses `question`/`query`/`q` and never sends the required `asset`;
   every call is refused `invalid_input`. The fix changes how conversation
   tools are built (harness), so it waits for the owner (options in the
   2026-10-06 chat; record the choice in DECISIONS).
+- [x] One conversation tool per Knowledge vault (owner decision 2026-10-06):
+  `KnowledgeManifest` gains `purpose`/`boundaries` (omitted when unset);
+  the Gateway offers a Skill command that names the Knowledge query
+  capability once per queryable vault (`<alias>__<vault>`), described by the
+  vault's purpose and boundaries, with only `question` for the model and the
+  vault bound by the host. Live: the chat question that used to fail with
+  `invalid_input` now answers with the vault's evidence. Commit `e5c0207`;
+  tests `tests/test_knowledge_vault_tools.py`.
+- [ ] `engineering/rs-knowledge@1.0.1`: same content, with the purpose and
+  boundaries the owner approves; publishing it needs the owner's approval
+  (a published 1.0.0 is not edited in place).
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

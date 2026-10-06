@@ -1292,3 +1292,26 @@ candidate). The hinted 1.1.0 changed a published version and re-enabled a
 superseded Skill under a second `knowledge` alias. Later versions come from
 Knowledge evolution, not from the shipped manifest. Rejected alternative:
 an unused 1.5.0, which would sort above the 1.4.0 candidate and look newer.
+
+## 2026-10-06 — Each Knowledge vault is its own conversation tool, described by the vault's manifest
+
+Decision (owner): a Knowledge vault's purpose and boundaries are written in
+the vault's own manifest (`KnowledgeManifest.purpose`, `.boundaries`), not in
+host.json. The Gateway offers a Skill command that names the Knowledge query
+capability once per queryable vault, as `<alias>__<vault name>`. The tool's
+description is the vault's purpose and boundaries, its only field is
+`question`, and the host binds the vault, so the model cannot redirect a tool
+to another vault. The model, or a Skill selector such as JEV, therefore
+chooses the vault when it chooses the tool, and adding a vault adds a tool. A
+vault published before these fields is described by its domain until a new
+version says more.
+
+Reason: chat Knowledge questions always failed. The single `knowledge__ask`
+tool had no schema, so the model never sent the required `asset` (checked
+live, before and after the 2026-10-05 Skill changes). The vault location was
+already in host.json; the gap was telling the model which vaults exist and
+what each covers. Rejected alternatives: a generic schema for every
+capability tool (the model would still have to spell exact asset identities);
+an automatic default when only one vault exists (a special case that breaks
+at the second vault); descriptions in host.json (they would not travel with a
+shared vault).
