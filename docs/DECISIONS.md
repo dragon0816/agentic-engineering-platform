@@ -1399,3 +1399,18 @@ tool without a schema (the model cannot fill its fields; a Workflow gives the
 tool its schema without a Gateway change); per-run approval buttons for
 script runs (conversational authoring A5 is not built yet; writes are
 confined to the workspace's output folder instead).
+
+## 2026-10-06 — A Skill selector never narrows the tools to coding
+
+Decision (owner: "don't let JEV turn every task into the coding harness"):
+the Gateway refuses an accelerator (JEV) narrowing that contains a tool of an
+excluded Skill alias; the host excludes `coding`. Such a narrowing falls back
+to the whole catalogue and the model chooses. Narrowings without coding tools
+apply as before.
+
+Reason: live shadow records after `coding/run-python` was installed showed
+JEV ranking `coding__run` first for a Knowledge question (low confidence, so
+it had no effect in shadow mode). In active mode that would leave the model
+only coding tools. Rejected alternatives: relying on the selector hint alone
+(the hint was already narrow); removing coding from JEV's candidate list
+(shadow evaluation would lose the signal).

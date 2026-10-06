@@ -78,7 +78,8 @@ def tools_offered(picked: tuple[str, ...], excluded: frozenset[str]) -> list[str
 
 
 def test_a_narrowing_to_coding_falls_back_to_every_tool() -> None:
-    assert tools_offered(("coding__ask",), frozenset({"coding"})) == ["coding__ask", "knowledge__ask"]
+    offered = tools_offered(("coding__ask",), frozenset({"coding"}))
+    assert offered == ["coding__ask", "knowledge__ask"]
 
 
 def test_a_narrowing_without_coding_still_applies() -> None:
