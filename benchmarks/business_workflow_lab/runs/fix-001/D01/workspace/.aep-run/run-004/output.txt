@@ -1,0 +1,22 @@
+Inputs:
+input\expense_template.xlsx True 10787
+input\fx_rates.csv True 276
+output\E001_september_expenses_export.xlsx True 6178
+Export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Export row count: 13
+First rows: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00003', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-03', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '450.00', 'Status': 'Submitted', 'ReceiptID': 'RC162210', 'Description': '加班餐費', 'MissingReceipt': False}]
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Wrote output\E001_september_expenses.xlsx
+CHECK PASSED
+Output file: output\E001_september_expenses.xlsx
+Details rows: 13
+Summary groups:
+('Approved', 'EUR') amount 102.50 amount_twd 3587.50 count 2
+('Approved', 'TWD') amount 5050.00 amount_twd 5050.00 count 3
+('Approved', 'USD') amount 200.00 amount_twd 6400.00 count 1
+('Draft', 'USD') amount 124.15 amount_twd 3972.80 count 2
+('Rejected', 'EUR') amount 155.00 amount_twd 5425.00 count 1
+('Rejected', 'USD') amount 12.30 amount_twd 393.60 count 1
+('Submitted', 'TWD') amount 7049.00 amount_twd 7049.00 count 3
+Exceptions rows: 5
+TWD total: 31877.90

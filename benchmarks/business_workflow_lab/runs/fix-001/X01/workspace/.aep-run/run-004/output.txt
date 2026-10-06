@@ -1,0 +1,533 @@
+
+### expense_desktop_mock/expense_app.py 12553
+1: """Synthetic Expense desktop application (a real Tk window, not a web page).
+5: count; Details (or double-click a row) opens a detail dialog; Export CSV and
+6: Export Excel open the native Save As dialog and write every filtered row,
+8: results and export failures.
+10: The fault mode is read from `operator/state/expense_fault.json`:
+12:   export_fail_once  the first export shows "暫時無法寫入，請重試" and writes
+13:                     no file; the next export works
+15: Events go to `operator/state/expense_events.jsonl` (operator evidence only).
+17: Run:  python expense_desktop_mock/expense_app.py
+22: import csv
+31: DATA = LAB / "operator" / "data" / "source.json"
+33: FAULT = STATE / "expense_fault.json"
+34: EVENTS = STATE / "expense_events.jsonl"
+36: STATUSES = ("", "Draft", "Submitted", "Approved", "Rejected")
+37: COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
+39: EXPORT_COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
+50: def export_should_fail() -> bool:
+55:     if state.get("mode") == "export_fail_once" and not state.get("fired"):
+70: class ExpenseApp:
+73:         root.title("Expense Viewer (synthetic lab)")
+76:         self.expenses: list[dict[str, Any]] = data["expenses"]
+78:         self.projects = [""] + [p["ProjectID"] for p in data["projects"]]
+112:         ttk.Button(bar, text="Export Excel 匯出 Excel", command=lambda: self.export("xlsx")).pack(side="right")
+113:         ttk.Button(bar, text="Export CSV 匯出 CSV", command=lambda: self.export("csv")).pack(side="right", padx=4)
+146:             e for e in self.expenses
+148:             and (not chosen["project"] or e["ProjectID"] == chosen["project"])
+150:             and (not chosen["from"] or e["ExpenseDate"] >= chosen["from"])
+151:             and (not chosen["to"] or e["ExpenseDate"] <= chosen["to"])
+153:         self.rows.sort(key=lambda e: (e["ExpenseDate"], e["ExpenseID"]))
+174:             self.tree.insert("", "end", iid=row["ExpenseID"], values=[row[c] for c in COLUMNS])
+185:         row = next(e for e in self.expenses if e["ExpenseID"] == selected[0])
+186:         event("detail", id=row["ExpenseID"])
+188:         dialog.title(f"Expense detail {row['ExpenseID']}")
+192:         fields = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
+210:     def export(self, kind: str) -> None:
+212:             if not messagebox.askyesno("匯出 Export", "目前結果為 0 筆，仍要匯出只有表頭的檔案嗎？"):
+214:         extension = ".csv" if kind == "csv" else ".xlsx"
+217:             initialfile=f"expenses_export{extension}",
+218:             filetypes=[("CSV", "*.csv")] if kind == "csv" else [("Excel workbook", "*.xlsx")])
+220:             event("export_cancelled", kind=kind)
+222:         if export_should_fail():
+223:             event("export_failed_injected", kind=kind, path=path)
+224:             messagebox.showerror("匯出失敗 Export failed", "暫時無法寫入，請重試。 (Temporary write failure, retry)")
+227:             if kind == "csv":
+229:                     writer = csv.writer(handle, lineterminator="\r\n")
+230:                     writer.writerow(EXPORT_COLUMNS)
+232:                         writer.writerow([row[c] for c in EXPORT_COLUMNS])
+238:                 sheet.title = "Expenses"
+239:                 sheet.append(list(EXPORT_COLUMNS))
+241:                     sheet.append([row[c] for c in EXPORT_COLUMNS])
+246:             event("export_failed", kind=kind, path=path, error=str(error))
+247:             messagebox.showerror("匯出失敗 Export failed", f"無法寫入檔案：{error}")
+249:         event("export", kind=kind, path=path, rows=len(self.rows))
+250:         messagebox.showinfo("匯出完成 Export complete", f"已匯出 {len(self.rows)} 筆至\n{path}")
+255:     ExpenseApp(root)
+--- head ---
+"""Synthetic Expense desktop application (a real Tk window, not a web page).
+
+Main window: Employee, Project, Date from / Date to, Status and a Query
+button; a result table of 8 rows per page with Previous / Next and a total
+count; Details (or double-click a row) opens a detail dialog; Export CSV and
+Export Excel open the native Save As dialog and write every filtered row,
+not only the visible page. Message boxes report query completion, empty
+results and export failures.
+
+The fault mode is read from `operator/state/expense_fault.json`:
+  normal            nothing injected
+  export_fail_once  the first export shows "暫時無法寫入，請重試" and writes
+                    no file; the next export works
+
+Events go to `operator/state/expense_events.jsonl` (operator evidence only).
+
+Run:  python expense_desktop_mock/expense_app.py
+"""
+
+from __future__ import annotations
+
+import csv
+import json
+import tkinter as tk
+from datetime import date, datetime
+from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
+from typing import Any
+
+LAB = Path(__file__).resolve().parents[1]
+DATA = LAB / "operator" / "data" / "source.json"
+STATE = LAB / "operator" / "state"
+FAULT = STATE / "expense_fault.json"
+EVENTS = STATE / "expense_events.jsonl"
+PAGE_SIZE = 8
+STATUSES = ("", "Draft", "Submitted", "Approved", "Rejected")
+COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
+           "Currency", "Amount", "Status")
+EXPORT_COLUMNS = ("ExpenseID", "Employee
+
+### operator/data/source.json 68622
+77:    "ProjectID": "P001",
+83:    "ProjectID": "P002",
+89:    "ProjectID": "P003",
+95:    "ProjectID": "P004",
+101:    "ProjectID": "P005",
+112:    "ProjectID": "P001",
+141:    "ProjectID": "P002",
+177:    "ProjectID": "P004",
+206:    "ProjectID": "",
+228:    "ProjectID": "P005",
+257:    "ProjectID": "",
+286:    "ProjectID": "P003",
+308:    "ProjectID": "",
+344:    "ProjectID": "P003",
+366:    "ProjectID": "P002",
+402:    "ProjectID": "P004",
+424:    "ProjectID": "P005",
+460:    "ProjectID": "",
+482:    "ProjectID": "P001",
+518:    "ProjectID": "",
+554:    "ProjectID": "",
+576:    "ProjectID": "P002",
+598:    "ProjectID": "P004",
+634:    "ProjectID": "P001",
+663:    "ProjectID": "",
+685:    "ProjectID": "P005",
+721:    "ProjectID": "P002",
+750:    "ProjectID": "",
+772:    "ProjectID": "",
+794:    "ProjectID": "P001",
+830:    "ProjectID": "",
+859:    "ProjectID": "P005",
+881:    "ProjectID": "P004",
+917:    "ProjectID": "P001",
+946:    "ProjectID": "P002",
+982:    "ProjectID": "P004",
+1004:    "ProjectID": "P003",
+1026:    "ProjectID": "",
+1048:    "ProjectID": "P005",
+1070:    "ProjectID": "",
+1092:    "ProjectID": "P001",
+1116:    "ProjectID": "P001",
+1128:    "ProjectID": "P002",
+1140:    "ProjectID": "P005",
+1152:    "ProjectID": "P004",
+1164:    "ProjectID": "P003",
+1176:    "ProjectID": "",
+1188:    "ProjectID": "",
+1200:    "ProjectID": "P003",
+1212:    "ProjectID": "P005",
+1224:    "ProjectID": "P004",
+1236:    "ProjectID": "",
+1248:    "ProjectID": "P002",
+1260:    "ProjectID": "",
+1272:    "ProjectID": "P001",
+1284:    "ProjectID": "",
+1296:    "ProjectID": "",
+1308:    "ProjectID": "P002",
+1320:    "ProjectID": "",
+1332:    "ProjectID": "P001",
+1344:    "ProjectID": "P001",
+1356:    "ProjectID": "P004",
+1368:    "ProjectID": "P002",
+1380:    "ProjectID": "P003",
+1392:    "ProjectID": "",
+1401:  "expenses": [
+1403:    "ExpenseID": "EXP-00035",
+1406:    "ProjectID": "P004",
+1407:    "ExpenseDate": "2026-08-01",
+1411:    "Status": "Approved",
+1417:    "ExpenseID": "EXP-00029",
+1420:    "ProjectID": "P003",
+1421:    "ExpenseDate": "2026-08-03",
+1425:    "Status": "Approved",
+1431:    "ExpenseID": "EXP-00030",
+1434:    "ProjectID": "P003",
+1435:    "ExpenseDate": "2026-08-11",
+1445:    "ExpenseID": "EXP-00033",
+1448:    "ProjectID": "P002",
+1449:    "ExpenseDate": "2026-08-14",
+1453:    "Status": "Approved",
+1459:    "ExpenseID": "EXP-00031",
+1462:    "ProjectID": "P005",
+1463:    "ExpenseDate": "2026-08-20",
+1467:    "Status": "Approved",
+1473:    "ExpenseID": "EXP-00034",
+1476:    "ProjectID": "P002",
+1477:    "ExpenseDate": "2026-08-28",
+1487:    "ExpenseID": "EXP-00032",
+1490:    "ProjectID": "P003",
+1491:    "ExpenseDate": "2026-08-31",
+1501:    "ExpenseID": "EXP-00001",
+1504:    "ProjectID": "P001",
+1505:    "ExpenseDate": "2026-09-01",
+1509:    "Status": "Approved",
+1515:    "ExpenseID": "EXP-00002",
+1518:    "ProjectID": "P001",
+1519:    "ExpenseDate": "2026-09-02",
+1523:    "Status": "Approved",
+1529:    "ExpenseID": "EXP-00003",
+1532:    "ProjectID": "P003",
+1533:    "ExpenseDate": "2026-09-03",
+1543:    "ExpenseID": "EXP-00014",
+1546:    "ProjectID": "P003",
+1547:    "ExpenseDate": "2026-09-04",
+1551:    "Status": "Approved",
+1557:    "ExpenseID": "EXP-00004",
+1560:    "ProjectID": "P003",
+1561:    "ExpenseDate": "2026-09-05",
+1565:    "Status": "Approved",
+1571:    "ExpenseID": "EXP-00019",
+1574:    "ProjectID": "P002",
+1575:    "ExpenseDate": "2026-09-06",
+1579:    "Status": "Approved",
+1585:    "ExpenseID": "EXP-00023",
+1588:    "ProjectID": "P004",
+1589:    "ExpenseDate": "2026-09-07",
+1593:    "Status": "Approved",
+1599:    "ExpenseID": "EXP-00005",
+1602:    "ProjectID": "P001",
+1603:    "ExpenseDate": "2026-09-08",
+1613:    "ExpenseID": "EXP-00015",
+1616:    "ProjectID": "P003",
+1617:    "ExpenseDate": "2026-09-09",
+1627:    "ExpenseID": "EXP-00006",
+1630:    "ProjectID": "P001",
+1631:    "ExpenseDate": "2026-09-10",
+1635:    "Status": "Approved",
+1641:    "ExpenseID": "EXP-00026",
+1644:    "ProjectID": "P005",
+1645:    "ExpenseDate": "2026-09-11",
+1649:    "Status": "Approved",
+1655:    "ExpenseID": "EXP-00007",
+1658:    "ProjectID": "P003",
+1659:    "ExpenseDate": "2026-09-12",
+1669:    "ExpenseID": "EXP-00020",
+1672:    "ProjectID": "P002",
+1673:    "ExpenseDate": "2026-09-13",
+1683:    "ExpenseID": "EXP-00008",
+1686:    "ProjectID": "P003",
+1687:    "ExpenseDate": "2026-09-15",
+1697:    "ExpenseID": "EXP-00016",
+1700:    "ProjectID": "P005",
+1701:    "ExpenseDate": "2026-09-16",
+1705:    "Status": "Approved",
+1711:    "ExpenseID": "EXP-00009",
+1714:    "ProjectID": "P003",
+1715:    "ExpenseDate": "2026-09-17",
+1719:    "Status": "Approved",
+1725:    "ExpenseID": "EXP-00024",
+1728:    "ProjectID": "P001",
+1729:    "ExpenseDate": "2026-09-18",
+1733:    "Status": "Approved",
+1739:    "ExpenseID": "EXP-00010",
+1742:    "ProjectID": "P001",
+1743:    "ExpenseDate": "2026-09-19",
+1753:    "ExpenseID": "EXP-00021",
+1756:    "ProjectID": "P004",
+1757:    "ExpenseDate": "2026-09-20",
+1761:    "Status": "Approved",
+1767:    "ExpenseID": "EXP-00017",
+1770:    "ProjectID": "P005",
+1771:    "ExpenseDate": "2026-09-21",
+1781:    "ExpenseID": "EXP-00027",
+1784:    "ProjectID": "P002",
+1785:    "ExpenseDate": "2026-09-22",
+1795:    "ExpenseID": "EXP-00011",
+1798:    "ProjectID": "P003",
+1799:    "ExpenseDate": "2026-09-23",
+1809:    "ExpenseID": "EXP-00025",
+1812:    "ProjectID": "P001",
+1813:    "ExpenseDate": "2026-09-24",
+1817:    "Status": "Approved",
+1823:    "ExpenseID": "EXP-00012",
+1826:    "ProjectID": "P001",
+1827:    "ExpenseDate": "2026-09-26",
+1837:    "ExpenseID": "EXP-00022",
+1840:    "ProjectID": "P002",
+1841:    "ExpenseDate": "2026-09-27",
+1851:    "ExpenseID": "EXP-00018",
+1854:    "ProjectID": "P003",
+1855:    "ExpenseDate": "2026-09-29",
+1865:    "ExpenseID": "EXP-00013",
+1868:    "ProjectID": "P003",
+1869:    "ExpenseDate": "2026-09-30",
+1873:    "Status": "Approved",
+1879:    "ExpenseID": "EXP-00028",
+1882:    "ProjectID": "P002",
+1883:    "ExpenseDate": "2026-09-30",
+1887:    "Status": "Approved",
+1893:    "ExpenseID": "EXP-00036",
+1896:    "ProjectID": "P003",
+1897:    "ExpenseDate": "2026-10-01",
+1907:    "ExpenseID": "EXP-00038",
+1910:    "ProjectID": "P005",
+1911:    "ExpenseDate": "2026-10-08",
+1915:    "Status": "Approved",
+1921:    "ExpenseID": "EXP-00037",
+1924:    "ProjectID": "P003",
+1925:    "ExpenseDate": "2026-10-15",
+1929:    "Status": "Approved",
+1935:    "ExpenseID": "EXP-00039",
+1938:    "ProjectID": "P002",
+1939:    "ExpenseDate": "2026-10-20",
+1949:    "ExpenseID": "EXP-00040",
+1952:    "ProjectID": "P004",
+1953:    "ExpenseDate": "2026-10-31",
+1967:    "ProjectID": "P002",
+1988:    "ProjectID": "P001",
+2030:    "ProjectID": "P004",
+2065:    "ProjectID": "",
+2100:    "ProjectID": "P003",
+2142:    "ProjectID": "P005",
+2184:    "ProjectID": "",
+2205:    "ProjectID": "P005",
+2233:    "ProjectID": "P002",
+2254:    "ProjectID": "P001",
+2289:    "ProjectID": "P001",
+2310:    "ProjectID": "P002",
+2345:    "ProjectID": "P002",
+2373:    "ProjectID": "P001",
+2408:    "ProjectID": "P004",
+2436:    "ProjectID": "",
+2457:    "ProjectID": "P005",
+2492:    "ProjectID": "P001",
+2534:    "ProjectID": "",
+2555:    "ProjectID": "",
+2597:    "ProjectID": "",
+2625:    "ProjectID": "P003",
+2646:    "ProjectID": "P004",
+2667:    "ProjectID": "P003",
+2695:    "ProjectID": "P002",
+2723:    "ProjectID": "P005",
+2765:    "ProjectID": "",
+2800:    "ProjectID": "",
+2842:    "ProjectID": "P002",
+2870:    "ProjectID": "",
+--- head ---
+{
+ "seed": 20261006,
+ "period": {
+  "from": "2026-08-01",
+  "to": "2026-10-31"
+ },
+ "customers": [
+  {
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "Country": "DE"
+  },
+  {
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C005",
+   "CustomerName": "Pacific Test Systems Inc.",
+   "Country": "US"
+  },
+  {
+   "CustomerID": "C006",
+   "CustomerName": "Helios Optics B.V.",
+   "Country": "NL"
+  },
+  {
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C008",
+   "CustomerName": "新竹量測科技",
+   "Country": "TW"
+  }
+ ],
+ "employees": [
+  {
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)"
+  },
+  {
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber"
+  },
+  {
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明"
+  },
+  {
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos"
+  },
+  {
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華"
+  },
+  {
+   "EmployeeID": "E006",
+   "EmployeeName": "Kenji Sato"
+  }
+ ],
+ "projects": [
+  {
+   "ProjectID": "P001",
+   "ProjectName": "5G RF 驗證平台",
+   "CustomerID": "C001",
+   "OwnerEmployeeID": "E001"
+  },
+  {
+   "ProjectID": "P002",
+   "ProjectName": "Wafer Probe Upgrade",
+   "CustomerID": "C002",
+  
+
+### expense_desktop_mock/ExpenseApp.cs 33826
+1: // Synthetic Expense desktop application, Windows Forms edition.
+3: // Same data, rules, messages, fault modes and events as expense_app.py (the
+8: // Layout on disk (the exe lives in expense_desktop_mock/bin/):
+9: //   ../export_xlsx.py                     helper that writes .xlsx with openpyxl
+10: //   ../../operator/data/source.json       synthetic data
+11: //   ../../operator/state/expense_fault.json   {"mode": "normal"|"export_fail_once", "fired": bool}
+12: //   ../../operator/state/expense_events.jsonl operator evidence (JSON lines)
+28: namespace ExpenseLab
+35:         public static readonly string DataFile = Path.Combine(LabDir, "operator", "data", "source.json");
+37:         public static readonly string FaultFile = Path.Combine(StateDir, "expense_fault.json");
+38:         public static readonly string EventsFile = Path.Combine(StateDir, "expense_events.jsonl");
+39:         public static readonly string XlsxHelper = Path.Combine(AppDir, "export_xlsx.py");
+42:         public static readonly string[] Statuses = { "", "Draft", "Submitted", "Approved", "Rejected" };
+43:         public static readonly string[] Columns = { "ExpenseID", "EmployeeID", "EmployeeName", "ProjectID",
+44:             "ExpenseDate", "Category", "Currency", "Amount", "Status" };
+46:         public static readonly string[] ExportColumns = { "ExpenseID", "EmployeeID", "EmployeeName", "ProjectID",
+47:             "ExpenseDate", "Category", "Currency", "Amount", "Status", "ReceiptID", "Description", "MissingReceipt" };
+48:         public static readonly string[] DetailFields = { "ExpenseID", "EmployeeID", "EmployeeName", "ProjectID",
+49:             "ExpenseDate", "Category", "Currency", "Amount", "Status", "ReceiptID", "Description", "MissingReceipt" };
+129:         public static bool ExportShouldFail()
+147:             if ("export_fail_once".Equals(mode) && !alreadyFired)
+170:         public static string CsvField(string text)
+192:         private readonly List<Dictionary<string, object>> expenses = new List<Dictionary<string, object>>();
+207:         private Button exportCsvButton;
+208:         private Button exportExcelButton;
+214:             foreach (object item in (IEnumerable)data["expenses"])
+215:                 expenses.Add((Dictionary<string, object>)item);
+221:                 projects.Add((string)((Dictionary<string, object>)item)["ProjectID"]);
+223:             Text = "Expense Viewer (synthetic lab)";
+224:             Name = "ExpenseViewer";
+225:             AccessibleName = "Expense Viewer (synthetic lab)";
+287:             // Bottom bar: Previous / Next / count on the left, Details and exports on the right
+334:             exportCsvButton = MakeButton("Export CSV 匯出 CSV", "ExportCsvButton", 1);
+335:             exportCsvButton.Click += delegate { Export("csv"); };
+336:             exportExcelButton = MakeButton("Export Excel 匯出 Excel", "ExportExcelButton", 2);
+337:             exportExcelButton.Click += delegate { Export("xlsx"); };
+339:             right.Controls.Add(exportCsvButton);
+340:             right.Controls.Add(exportExcelButton);
+459:             rows = expenses.Where(e =>
+461:                     && (proj.Length == 0 || Lab.Field(e, "ProjectID") == proj)
+463:                     && (from.Length == 0 || string.CompareOrdinal(Lab.Field(e, "ExpenseDate"), from) >= 0)
+464:                     && (to.Length == 0 || string.CompareOrdinal(Lab.Field(e, "ExpenseDate"), to) <= 0))
+465:                 .OrderBy(e => Lab.Field(e, "ExpenseDate"), StringComparer.Ordinal)
+466:                 .ThenBy(e => Lab.Field(e, "ExpenseID"), StringComparer.Ordinal)
+499:                 item.Name = Lab.Field(row, "ExpenseID");
+519:             Dictionary<string, object> row = expenses.First(e => Lab.Field(e, "ExpenseID") == id);
+527:         private void Export(string kind)
+531:                 DialogResult answer = MessageBox.Show(this, "目前結果為 0 筆，仍要匯出只有表頭的檔案嗎？", "匯出 Export",
+535:             string extension = kind == "csv" ? ".csv" : ".xlsx";
+540:                 save.FileName = "expenses_export" + extension;
+543:                 save.Filter = kind == "csv" ? "CSV (*.csv)|*.csv" : "Excel workbook (*.xlsx)|*.xlsx";
+546:                     Lab.Event("export_cancelled", Lab.P("kind", kind));
+551:             if (Lab.ExportShouldFail())
+553:                 Lab.Event("export_failed_injected", Lab.P("kind", kind), Lab.P("path", path));
+554:                 MessageBox.Show(this, "暫時無法寫入，請重試。 (Temporary write failure, retry)", "匯出失敗 Export failed",
+558:             string error = kind == "csv" ? WriteCsv(path) : WriteXlsx(path);
+561:                 Lab.Event("export_failed", Lab.P("kind", kind), Lab.P("path", path), Lab.P("error", error));
+562:                 MessageBox.Show(this, "無法寫入檔案：" + error, "匯出失敗 Export failed",
+566:             Lab.Event("export", Lab.P("kind", kind), Lab.P("path", path), Lab.P("rows", rows.Count));
+567:             MessageBox.Show(this, "已匯出 " + rows.Count + " 筆至\n" + path, "匯出完成 Export complete",
+571:         // UTF-8 with BOM, CRLF line ends, minimal quoting (like Python's csv module).
+572:         private string WriteCsv(string path)
+577:                 text.Append(string.Join(",", Lab.ExportColumns.Select(Lab.CsvField))).Append("\r\n");
+579:                     text.Append(string.Join(",", Lab.ExportColumns.Select(c => Lab.CsvField(Lab.Field(row, c)))))
+593:         // Delegates to export_xlsx.py (system python + openpyxl) through a temporary JSON file.
+596:             string request = Path.Combine(Path.GetTempPath(), "expense_export_" + Guid.NewGuid().ToString("N") + ".json");
+603:                     foreach (string column in Lab.ExportColumns)
+613:                 payload["columns"] = Lab.ExportColumns;
+663:             string id = Lab.Field(row, "ExpenseID");
+664:             Text = "Expense detail " + id;
+665:             Name = "ExpenseDetail";
+666:             AccessibleName = "Expense detail " + id;
+--- head ---
+// Synthetic Expense desktop application, Windows Forms edition.
+//
+// Same data, rules, messages, fault modes and events as expense_app.py (the
+// Tk edition), but every control is a native Win32/WinForms control with a
+// stable Name (UIA AutomationId) and AccessibleName (UIA Name), so Windows UI
+// Automation can see and operate all of it.
+//
+// Layout on disk (the exe lives in expense_desktop_mock/bin/):
+//   ../export_xlsx.py                     helper that writes .xlsx with openpyxl
+//   ../../operator/data/source.json       synthetic data
+//   ../../operator/state/expense_fault.json   {"mode": "normal"|"export_fail_once", "fired": bool}
+//   ../../operator/state/expense_events.jsonl operator evidence (JSON lines)
+//
+// Build: build.cmd (C# 5, .NET Framework 4.x csc.exe).
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Web.Script.Serialization;
+using System.Windows.Forms;
+
+namespace ExpenseLab
+{
+    internal static class Lab
+    {
+        public static readonly string ExeDir = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string AppDir = Path.GetFullPath(Path.Combine(ExeDir, ".."));
+        public static readonly string LabDir = Path.GetFullPath(Path.Combine(ExeDir, "..", ".."));
+        public static readonly string DataFile = Path.Combine(LabDir, "operator", "data", "source.js

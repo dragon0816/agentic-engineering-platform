@@ -1,0 +1,20 @@
+Quotes rows:
+4 ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount', 'NetAmountTWD'] ['General', 'General', 'General']
+5 ['Q0010', 'C001', 'P001', '2026-09-01', '2026-09-20', 'Sent', 'TWD', 218557.5, 5, 207629.63, 207629.63] ['@', '@', '@']
+6 ['Q0016', 'C005', None, '2026-09-14', '2026-10-14', 'Sent', 'USD', 256.5, 5, 243.68, 7797.76] ['@', '@', '@']
+7 ['Q0017', 'C007', 'P005', '2026-09-17', '2026-09-29', 'Sent', 'TWD', 433800, 0, 433800, 433800] ['@', '@', '@']
+8 ['Q0019', 'C004', None, '2026-09-24', '2026-10-24', 'Sent', 'USD', 256.5, 0, 256.5, 8208] ['@', '@', '@']
+Lines rows:
+4 ['QuoteID', 'ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount'] ['General', 'General']
+5 ['Q0010', 'MAT-1001', 'Signal Analyzer Module', 5, 37500, 187500] ['@', '@']
+6 ['Q0010', 'MAT-1003', '校正服務 (Calibration)', 1, 12600, 12600] ['@', '@']
+7 ['Q0010', 'MAT-1005', 'Test Fixture 治具', 1, 18457.5, 18457.5] ['@', '@']
+8 ['Q0016', 'MAT-1002', 'RF Cable Set', 3, 85.5, 256.5] ['@', '@']
+9 ['Q0017', 'MAT-1003', '校正服務 (Calibration)', 6, 12600, 75600] ['@', '@']
+10 ['Q0017', 'MAT-1006', 'Power Sensor', 3, 29400, 88200] ['@', '@']
+11 ['Q0017', 'MAT-1007', 'Software License (1y)', 6, 45000, 270000] ['@', '@']
+12 ['Q0019', 'MAT-1002', 'RF Cable Set', 3, 85.5, 256.5] ['@', '@']
+Summary B2 =SUM(Quotes!K5:K8)
+4 ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+5 ['Status', 'Sent', 'TWD', 641429.63, 641429.63, 2]
+6 ['Status', 'Sent', 'USD', 500.18, 16005.76, 2]

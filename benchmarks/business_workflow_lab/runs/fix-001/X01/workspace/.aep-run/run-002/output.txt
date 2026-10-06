@@ -1,0 +1,124 @@
+downloads:
+- sap_invoices_sep2026.csv 1142
+  ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+  ['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95']
+  ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']
+  ['0090000209', '0045000112', 'C007', 'P005', '2026-09-05', '2026-09-20', 'USD', '12311.00', '4924.40', '7386.60']
+  ['0090000210', '0045000111', 'C003', 'P004', '2026-09-08', '2026-10-08', 'EUR', '2250.00', '0.00', '2250.00']
+  ['0090000211', '0045000115', 'C005', '', '2026-09-10', '2026-09-30', 'USD', '6391.00', '0.00', '6391.00']
+- sap_orders_sep2026.csv 1616
+  ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+  ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+  ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', '293572.50']
+  ['0045000111', 'C003', 'Northwind Components GmbH', 'P004', '2026-09-03', 'Closed', 'EUR', '2250.00']
+  ['0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', '12311.00']
+  ['0045000113', 'C004', '藍海電子有限公司', '', '2026-09-05', 'Open', 'TWD', '15390.00']
+
+template sheets/cells:
+SHEET Report max 20 6
+('Project Integration Report 專案整合報表', None, None, None, None, None)
+(None, None, None, None, None, None)
+('起始日期 From', None, '結束日期 To', None, None, None)
+('條件 Condition', None, None, None, None, None)
+('產出時間 Generated at', None, None, None, None, None)
+(None, None, None, None, None, None)
+('資料來源 Source', None, '取得時間 Fetched at', None, None, None)
+(None, None, None, None, None, None)
+SHEET Orders max 4 8
+('Sales orders by project', None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None)
+('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+SHEET Invoices max 4 11
+('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None, None, None)
+('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')
+SHEET Expenses max 4 8
+('Expenses by project', None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None)
+('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')
+SHEET Quotes max 4 9
+('Quotes by project', None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None)
+('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+SHEET Summary max 4 5
+('Project summary (TWD)', None, None, None, None)
+('總計 TWD Totals', '=SUM(B5:B5)', '=SUM(C5:C5)', '=SUM(D5:D5)', '=SUM(E5:E5)')
+(None, None, None, None, None)
+('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')
+SHEET Exceptions max 4 4
+('Exceptions 例外與關注項目', None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+(None, None, None, None)
+('Source', 'DocumentID', 'ProjectID', 'Reason')
+SHEET Instructions max 54 3
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+
+quote cli test:
+return 0
+stdout {
+ "schema_version": 1,
+ "items": [
+  {
+   "QuoteID": "Q0011",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-03",
+   "ValidUntil": "2026-10-03",
+   "Status": "Accepted",
+   "Currency": "USD",
+   "Subtotal": "11500.00",
+   "DiscountPercent": "10",
+   "NetAmount": "10350.00"
+  },
+  {
+   "QuoteID": "Q0013",
+   "CustomerID": "C002",
+   "ProjectID": "P002",
+   "QuoteDate": "2026-09-07",
+   "ValidUntil": "2026-10-07",
+   "Status": "Accepted",
+   "Currency": "EUR",
+   "Subtotal": "2930.85",
+   "DiscountPercent": "5",
+   "NetAmount": "2784.31"
+  },
+  {
+   "QuoteID": "Q0015",
+   "CustomerID": "C003",
+   "ProjectID": "P004",
+   "QuoteDate": "2026-09-11",
+   "ValidUntil": "2026-09-25",
+   "Status": "Accepted",
+   "Currency": "TWD",
+   "Subtotal": "313500.00",
+   "DiscountPercent": "10",
+   "NetAmount": "282150.00"
+  },
+  {
+   "QuoteID": "Q0020",
+   "CustomerID": "C006",
+   "ProjectID": "",
+   "QuoteDate": "2026-09-28",
+   "ValidUntil": "2026-10-28",
+   "Status": "Accepted",
+   "Currency": "EUR",
+   "Subtotal": "5126.42",
+   "DiscountPercent": "5",
+   "NetAmount": "4870.10"
+  }
+ ],
+ "count": 4
+}
+
+stderr 

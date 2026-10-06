@@ -1,0 +1,35 @@
+Final rebuild and verification
+Input files and samples:
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-001\W03\workspace\input\project_template.xlsx exists= True size= 14021
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-001\W03\workspace\input\fx_rates.csv exists= True size= 276
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-001\W03\workspace\output\downloads\invoices_2026-09.csv exists= True size= 1142
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates used: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+Invoice CSV headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice CSV row count: 13
+Invoice CSV sample rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+Saved output workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-001\W03\workspace\output\project_report_2026-09_invoices.xlsx
+
+Verification checks from saved output:
+- Output file exists: PASS actual=True expected=True
+- Invoices row count: PASS actual=13 expected=13
+- Orders remains blank below header: PASS actual=0 expected=0
+- Expenses remains blank below header: PASS actual=0 expected=0
+- Quotes remains blank below header: PASS actual=0 expected=0
+- Invoices columns/header names: PASS actual=['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD'] expected=['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+- Summary columns/header names: PASS actual=['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD'] expected=['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+- Exceptions columns/header names: PASS actual=['Source', 'DocumentID', 'ProjectID', 'Reason'] expected=['Source', 'DocumentID', 'ProjectID', 'Reason']
+- All invoices are in September 2026: PASS actual=True expected=True
+- Invoice IDs and Order IDs saved as text: PASS actual=True expected=True
+- Amount, PaidAmount, Balance, BalanceTWD are numeric: PASS actual=True expected=True
+- Per-invoice BalanceTWD conversion: PASS actual={'0090000207': Decimal('106013.25'), '0090000208': Decimal('0.00'), '0090000209': Decimal('236371.20'), '0090000210': Decimal('78750.00'), '0090000211': Decimal('204512.00'), '0090000212': Decimal('90000.00'), '0090000213': Decimal('11542.50'), '0090000214': Decimal('0.00'), '0090000215': Decimal('0.00'), '0090000216': Decimal('11760.00'), '0090000217': Decimal('66256.00'), '0090000218': Decimal('45000.00'), '0090000219': Decimal('386445.00')} expected={'0090000207': Decimal('106013.25'), '0090000208': Decimal('0.00'), '0090000209': Decimal('236371.20'), '0090000210': Decimal('78750.00'), '0090000211': Decimal('204512.00'), '0090000212': Decimal('90000.00'), '0090000213': Decimal('11542.50'), '0090000214': Decimal('0.00'), '0090000215': Decimal('0.00'), '0090000216': Decimal('11760.00'), '0090000217': Decimal('66256.00'), '0090000218': Decimal('45000.00'), '0090000219': Decimal('386445.00')}
+- Exceptions are Balance > 0 and DueDate < 2026-09-30 only: PASS actual=[['Invoices', '0090000207', '', 'Overdue'], ['Invoices', '0090000209', 'P005', 'Overdue'], ['Invoices', '0090000212', 'P002', 'Overdue'], ['Invoices', '0090000217', 'P002', 'Overdue']] expected=[['Invoices', '0090000207', '', 'Overdue'], ['Invoices', '0090000209', 'P005', 'Overdue'], ['Invoices', '0090000212', 'P002', 'Overdue'], ['Invoices', '0090000217', 'P002', 'Overdue']]
+- Invoices due exactly 2026-09-30 not overdue: PASS actual=True expected=True
+- Summary project IDs: PASS actual=['P001', 'P002', 'P003', 'P004', 'P005'] expected=['P001', 'P002', 'P003', 'P004', 'P005']
+- Summary InvoiceBalanceTWD by project: PASS actual={'P001': Decimal('386445.00'), 'P002': Decimal('156256.00'), 'P003': Decimal('0.00'), 'P004': Decimal('78750.00'), 'P005': Decimal('236371.20')} expected={'P003': Decimal('0.00'), 'P005': Decimal('236371.20'), 'P004': Decimal('78750.00'), 'P002': Decimal('156256.00'), 'P001': Decimal('386445.00')}
+- Summary other source TWD columns zero: PASS actual=True expected=True
+- Summary total formulas set: PASS actual=['=SUM(B5:B9)', '=SUM(C5:C9)', '=SUM(D5:D9)', '=SUM(E5:E9)'] expected=['=SUM(B5:B9)', '=SUM(C5:C9)', '=SUM(D5:D9)', '=SUM(E5:E9)']
+
+Computed summary: {'P001': '386445.00', 'P002': '156256.00', 'P003': '0.00', 'P004': '78750.00', 'P005': '236371.20'}
+Computed exceptions: [['Invoices', '0090000207', '', 'Overdue'], ['Invoices', '0090000209', 'P005', 'Overdue'], ['Invoices', '0090000212', 'P002', 'Overdue'], ['Invoices', '0090000217', 'P002', 'Overdue']]
+All verification checks passed.
