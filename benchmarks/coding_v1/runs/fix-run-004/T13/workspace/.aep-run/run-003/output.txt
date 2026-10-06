@@ -1,0 +1,71 @@
+Collected product links: [{'name': 'Phone A', 'url': 'http://127.0.0.1:58649/t13/item/1'}, {'name': 'Phone B', 'url': 'http://127.0.0.1:58649/t13/item/2'}, {'name': 'Phone C', 'url': 'http://127.0.0.1:58649/t13/item/3'}, {'name': 'Phone D', 'url': 'http://127.0.0.1:58649/t13/item/4'}, {'name': 'Phone E', 'url': 'http://127.0.0.1:58649/t13/item/5'}]
+Rows written:
+['Phone A', 9900, 'NT$', 'Snap 7', 'http://127.0.0.1:58649/t13/item/1', 'ok']
+['Phone B', 12900, 'NT$', 'Snap 8', 'http://127.0.0.1:58649/t13/item/2', 'ok']
+['Phone C', 'N/A', 'N/A', 'Dim 9', 'http://127.0.0.1:58649/t13/item/3', 'ok']
+['Phone D', 7500, 'NT$', 'N/A', 'http://127.0.0.1:58649/t13/item/4', 'ok']
+['Phone E', 'N/A', 'N/A', 'N/A', 'http://127.0.0.1:58649/t13/item/5', 'error']
+Warnings JSON:
+[
+  {
+    "name": "Phone A",
+    "url": "http://127.0.0.1:58649/t13/item/1",
+    "status": "ok",
+    "http_status": 200,
+    "attempts": 1,
+    "warnings": []
+  },
+  {
+    "name": "Phone B",
+    "url": "http://127.0.0.1:58649/t13/item/2",
+    "status": "ok",
+    "http_status": 200,
+    "attempts": 1,
+    "warnings": []
+  },
+  {
+    "name": "Phone C",
+    "url": "http://127.0.0.1:58649/t13/item/3",
+    "status": "ok",
+    "http_status": 200,
+    "attempts": 1,
+    "warnings": [
+      "missing_price"
+    ]
+  },
+  {
+    "name": "Phone D",
+    "url": "http://127.0.0.1:58649/t13/item/4",
+    "status": "ok",
+    "http_status": 200,
+    "attempts": 1,
+    "warnings": [
+      "missing_cpu"
+    ]
+  },
+  {
+    "name": "Phone E",
+    "url": "http://127.0.0.1:58649/t13/item/5",
+    "status": "error",
+    "http_status": 500,
+    "attempts": 3,
+    "warnings": [
+      "HTTP 500: internal error"
+    ]
+  }
+]
+Checks:
+- xlsx exists: True
+- warnings exists: True
+- headers exact: True
+- five data rows: True
+- all names and urls present: True
+- missing fields use N/A: True
+- fetch status only ok/error: True
+- successful pages status ok: True
+- error page retried 3: True
+- warnings has five entries: True
+- Phone C missing price/currency N/A: True
+- Phone D missing cpu N/A: True
+- Phone E error preserved: True
+Output files: output\robust_products.xlsx output\warnings.json

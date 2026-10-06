@@ -1,0 +1,38 @@
+{
+  "name": "t09-login-download-data",
+  "description": "Login with up to 3 attempts and download /data to output/data.json only after successful login.",
+  "parameters": [
+    {
+      "name": "workspace",
+      "label": "Workspace folder",
+      "kind": "folder",
+      "scope": "runtime",
+      "required": true
+    },
+    {
+      "name": "base_url",
+      "label": "Service base URL",
+      "kind": "text",
+      "scope": "runtime",
+      "required": true
+    }
+  ],
+  "steps": [
+    {
+      "capability": "coding/run-python@1.0.0",
+      "inputs": {
+        "request": {
+          "source": "fixed",
+          "value": {
+            "workspace": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T09\\workspace",
+            "script": "Read input/login_sop.md; POST /login with bench credentials up to 3 times waiting 0.1s after failures; if ok true, GET /data with Bearer token and write output/data.json; if all login attempts fail, stop without GET /data and report reason."
+          }
+        },
+        "arguments": {
+          "source": "run",
+          "path": []
+        }
+      }
+    }
+  ]
+}

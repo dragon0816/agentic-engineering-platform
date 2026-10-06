@@ -1,0 +1,35 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T12\workspace
+Input files:
+
+Fetched http://127.0.0.1:58649/t12/a
+  status: 200 content-type: text/html; charset=utf-8
+  sample: <!doctype html><html><head><meta charset="utf-8"></head><body><table id="p"><tr><th>型號</th><th>價格</th><th>記憶體</th></tr><tr><td>NX-1</td><td>NT$12,000</td><td>16 GB</td></tr><tr><td>NX-2</td><td>NT$8,500</td><td>8192 MB</
+
+Fetched http://127.0.0.1:58649/t12/b
+  status: 200 content-type: text/html; charset=utf-8
+  sample: <!doctype html><html><head><meta charset="utf-8"></head><body><div class="item"><h2>NX-1</h2><p class="price">USD 399.50</p><p class="mem">Memory: 16384 MB</p></div><div class="item"><h2>NX-3</h2><p class="price">USD 1,2
+
+Fetched http://127.0.0.1:58649/t12/c
+  status: 200 content-type: text/html; charset=utf-8
+  sample: <!doctype html><html><head><meta charset="utf-8"></head><body><ul><li data-model="NX-4">NX-4 — €499.00 — 4096 MB</li><li data-model="NX-5">NX-5 — €1.299,00 — 64 GB</li></ul></body></html>
+
+Wrote outputs:
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T12\workspace\output\merged_catalog.csv
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T12\workspace\output\merged_catalog.json
+
+Verified:
+ - output files reopen successfully
+ - columns exactly: ['Model', 'Price', 'Currency', 'MemoryGB', 'SourceURL']
+ - row count: 6
+ - duplicate model NX-1 retained from different SourceURL values
+ - Price values are numeric after removing currency symbols/thousands separators
+ - Currency values retained without FX conversion
+ - MemoryGB converted with 1024 MB = 1 GB
+
+CSV preview:
+{'Model': 'NX-1', 'Price': '12000.0', 'Currency': 'NT$', 'MemoryGB': '16.0', 'SourceURL': 'http://127.0.0.1:58649/t12/a'}
+{'Model': 'NX-2', 'Price': '8500.0', 'Currency': 'NT$', 'MemoryGB': '8.0', 'SourceURL': 'http://127.0.0.1:58649/t12/a'}
+{'Model': 'NX-1', 'Price': '399.5', 'Currency': 'USD', 'MemoryGB': '16.0', 'SourceURL': 'http://127.0.0.1:58649/t12/b'}
+{'Model': 'NX-3', 'Price': '1250.0', 'Currency': 'USD', 'MemoryGB': '32.0', 'SourceURL': 'http://127.0.0.1:58649/t12/b'}
+{'Model': 'NX-4', 'Price': '499.0', 'Currency': '€', 'MemoryGB': '4.0', 'SourceURL': 'http://127.0.0.1:58649/t12/c'}
+{'Model': 'NX-5', 'Price': '1299.0', 'Currency': '€', 'MemoryGB': '64.0', 'SourceURL': 'http://127.0.0.1:58649/t12/c'}

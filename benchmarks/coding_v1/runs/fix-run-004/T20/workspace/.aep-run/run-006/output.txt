@@ -1,0 +1,19 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T20\workspace
+Input files:
+ - input\data dir
+ - input\data\test_results.csv 81 bytes
+ - input\manifest.json 50 bytes
+ - input\supplied_sop.md 395 bytes
+SOP exists: True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T20\workspace\input\supplied_sop.md
+CSV exists: True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T20\workspace\input\data\test_results.csv
+CSV sample:
+  ['Device ID', 'Status', 'Value']
+  ['D01', 'Fail', '10']
+  ['D02', 'Pass', '5']
+  ['D03', 'Fail', '20']
+  ['D04', 'Pass', '7']
+  ['D05', 'Fail', '30']
+Created outputs:
+ - output\failures.xlsx 4949 bytes
+ - output\summary.md 60 bytes
+Validation passed: failures.xlsx has headers Device ID/Status/Value/Urgent, 3 Fail rows, numeric Values, boolean Urgent values with Value > 20 rule; summary.md has Total=5, Pass=2, Fail=3, Urgent=1.

@@ -1,0 +1,29 @@
+INSPECT: workspace = C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T01\workspace
+INSPECT: input_texts exists = True is_dir = True
+INSPECT: first-level entries:
+  FILE: a.txt
+  FILE: b.txt
+  FILE: empty.txt
+  FILE: ignore.csv
+  DIR: nested
+INSPECT: first-level .txt files to merge: ['a.txt', 'b.txt', 'empty.txt']
+INSPECT: sample a.txt: '第一行中文內容\\n第二行：測試資料', chars=16
+INSPECT: sample b.txt: 'Hello world\\n\\nThe line above is blank.\\n', chars=38
+INSPECT: sample empty.txt: '', chars=0
+WROTE: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-004\T01\workspace\output\combined.md
+WROTE files merged: ['a.txt', 'b.txt', 'empty.txt']
+WROTE chars: 80
+VERIFY: input file count (unchanged by script; no input writes performed): 5
+VERIFY: output file: combined.md
+VERIFY: output chars: 80
+VERIFY: merged count: 3
+CHECK: output file exists PASS
+CHECK: output content equals expected merge PASS
+CHECK: source sorted by filename PASS
+CHECK: only first-level .txt considered PASS
+CHECK: heading for a.txt PASS
+CHECK: exact content included for a.txt PASS
+CHECK: heading for b.txt PASS
+CHECK: exact content included for b.txt PASS
+CHECK: heading for empty.txt PASS
+CHECK: exact content included for empty.txt PASS

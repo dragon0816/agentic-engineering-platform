@@ -1,0 +1,26 @@
+Recursive input listing:
+DIR  input\data size= 0
+FILE input\data\test_results.csv size= 81
+--- preview test_results.csv ---
+Device ID,Status,Value
+D01,Fail,10
+D02,Pass,5
+D03,Fail,20
+D04,Pass,7
+D05,Fail,30
+
+FILE input\manifest.json size= 50
+--- preview manifest.json ---
+{
+  "results.csv": "input/data/test_results.csv"
+}
+FILE input\supplied_sop.md size= 395
+--- preview supplied_sop.md ---
+# 測試失敗追蹤 SOP
+
+1. 讀取測試結果 results.csv（欄位：Device ID、Status、Value）。
+2. 挑出 Status 為 Fail 的資料，輸出 failures.xlsx，保留 Device ID、Status、Value，並加上 Urgent 欄位。
+3. 超過門檻的 Fail 列標記需立即處理（Urgent）。
+4. 產生 summary.md，列出 Total、Pass、Fail、Urgent 的數量。
+5. 原始資料不可修改。
+

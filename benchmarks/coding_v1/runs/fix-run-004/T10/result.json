@@ -1,0 +1,158 @@
+{
+ "run_id": "fix-run-004",
+ "task_id": "T10",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 25.48,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "exactly five catalog products, no ads",
+   "passed": true,
+   "expected": [
+    "Router A",
+    "Switch B",
+    "Cable C",
+    "Adapter D",
+    "Antenna E"
+   ],
+   "actual": [
+    "Router A",
+    "Switch B",
+    "Cable C",
+    "Adapter D",
+    "Antenna E"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "prices are numbers",
+   "passed": true,
+   "expected": [
+    1299,
+    2450,
+    99,
+    560,
+    12000
+   ],
+   "actual": [
+    1299,
+    2450,
+    99,
+    560,
+    12000
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "currency TWD",
+   "passed": true,
+   "expected": "TWD",
+   "actual": [
+    "NT$",
+    "NT$",
+    "NT$",
+    "NT$",
+    "NT$"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "full product URLs",
+   "passed": true,
+   "expected": [
+    "http://127.0.0.1:58649/p/router-a",
+    "http://127.0.0.1:58649/p/switch-b",
+    "http://127.0.0.1:58649/p/cable-c",
+    "http://127.0.0.1:58649/p/adapter-d",
+    "http://127.0.0.1:58649/p/antenna-e"
+   ],
+   "actual": [
+    "http://127.0.0.1:58649/p/router-a",
+    "http://127.0.0.1:58649/p/switch-b",
+    "http://127.0.0.1:58649/p/cable-c",
+    "http://127.0.0.1:58649/p/adapter-d",
+    "http://127.0.0.1:58649/p/antenna-e"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "catalog fetched from the fixture server",
+   "passed": true,
+   "expected": ">0",
+   "actual": 2,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T10\\workspace\\output\\products.xlsx"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T10\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-07ac48f532764ef6ac28c5ccca8871b1",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-000b9b8a6c1a46e782fe823e51df2714",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "3b0bfc6623ea37e1520a4c1f8e00448835735b1a",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.2.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.1"
+}

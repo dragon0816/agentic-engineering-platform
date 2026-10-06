@@ -1,0 +1,9 @@
+Processing input file: input\testplan.json
+Input size: 638 characters
+Top-level type: dict
+Wrote: output\testplan.json
+Wrote: output\warnings.json
+Converted frequency paths: ['$.bands[0].frequency', '$.bands[1].frequency', '$.bands[2].frequency']
+Numeric frequency paths preserved: ['$.sub.nested[0].frequency']
+Warnings: [{'path': '$.sub.nested[1].frequency', 'value': '100kHz', 'warning': 'frequency string was not converted because the unit is not GHz or MHz', 'unit': 'kHz'}]
+Verification passed: output JSON reopened; recursive conversion, inserted frequency_unit, preserved numeric/unknown values, warning count, object key order, array lengths/order, and non-frequency fields checked.

@@ -1,0 +1,137 @@
+{
+ "run_id": "fix-run-004",
+ "task_id": "T13",
+ "attempt": 1,
+ "status": "FAIL",
+ "task_success": false,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 3,
+ "duration_seconds": 46.06,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "five rows kept",
+   "passed": true,
+   "expected": 5,
+   "actual": 5,
+   "evidence_path": null
+  },
+  {
+   "name": "complete pages correct",
+   "passed": true,
+   "expected": "Phone A/B with price, CPU, ok",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "missing values are N/A",
+   "passed": true,
+   "expected": "Phone C price N/A, Phone D CPU N/A",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "500 page kept as error with N/A",
+   "passed": true,
+   "expected": "error, N/A, URL kept",
+   "actual": {
+    "Name": "Phone E",
+    "Price": "N/A",
+    "Currency": "N/A",
+    "CPU": "N/A",
+    "URL": "http://127.0.0.1:58649/t13/item/5",
+    "FetchStatus": "error"
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "500 page tried exactly 3 times",
+   "passed": false,
+   "expected": 3,
+   "actual": 6,
+   "evidence_path": null
+  },
+  {
+   "name": "warnings.json locates the failed URL",
+   "passed": true,
+   "expected": "/t13/item/5",
+   "actual": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T13\\workspace\\output\\warnings.json",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": "coding",
+ "failure_reason": "failed checks: 500 page tried exactly 3 times",
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T13\\workspace\\output\\robust_products.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T13\\workspace\\output\\warnings.json"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T13\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-cecf8adc8bec4b99bc535f87799a9347",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-48c6d5d98b5942f2a7b15b117c71fe4b",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-61ff12007ad94008a1917800df0e1e47",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  4
+ ],
+ "repo_commit": "3b0bfc6623ea37e1520a4c1f8e00448835735b1a",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.2.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.1"
+}

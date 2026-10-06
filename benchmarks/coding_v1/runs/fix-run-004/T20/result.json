@@ -1,0 +1,202 @@
+{
+ "run_id": "fix-run-004",
+ "task_id": "T20",
+ "attempt": 1,
+ "status": "FAIL",
+ "task_success": false,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 7,
+ "duration_seconds": 100.88,
+ "clarification_wait_seconds": 0.0,
+ "human_interventions": 2,
+ "intervention_details": [
+  {
+   "kind": "scripted clarification",
+   "text": "門檻是 20，使用 Value > 20，輸出至本題 workspace 的 output/；所有 Fail 都保留，超過門檻的 Urgent 為 true，其餘為 false。"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261006-151420-7a3030",
+   "summary": "Run engineering/test-failure-tracking-sop@1.0.0 once with {\"threshold\": 20} — steps: coding/run-python@1.0.0"
+  }
+ ],
+ "checks": [
+  {
+   "name": "asked for the threshold before using one",
+   "passed": true,
+   "expected": "a question about the threshold",
+   "actual": "",
+   "evidence_path": null
+  },
+  {
+   "name": "failures.xlsx has 3 Fail rows, only D05 urgent",
+   "passed": true,
+   "expected": {
+    "D01": "false",
+    "D03": "false",
+    "D05": "true"
+   },
+   "actual": {
+    "D01": "false",
+    "D03": "false",
+    "D05": "true"
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "summary.md Total=5 Pass=2 Fail=3 Urgent=1",
+   "passed": true,
+   "expected": "5/2/3/1",
+   "actual": "# Summary\n\n- Total: 5\n- Pass: 2\n- Fail: 3\n- Urgent: 1\n",
+   "evidence_path": null
+  },
+  {
+   "name": "platform workflow ran in the AEP runtime",
+   "passed": true,
+   "expected": "AEP run id",
+   "actual": [
+    "run-36e010bf0b3d4786b811bee90bb98242"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "injected write fault observed and recovered",
+   "passed": false,
+   "expected": "first approved run fails on the locked output, a later run succeeds",
+   "actual": {
+    "injected": true,
+    "path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T20\\workspace\\output\\failures.xlsx",
+    "first_failed": true,
+    "recovered": false
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": "coding",
+ "failure_reason": "failed checks: injected write fault observed and recovered",
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T20\\workspace\\output\\failures.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T20\\workspace\\output\\summary.md"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-004\\T20\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-143eda769e384cb29b844297e78fc64b",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-454b6b291be541fb924c53328e9d86e2",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-ac33f24f2d594f02974ab730bbd4d004",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "authoring__draft_workflow",
+   "target": null,
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": null,
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "authoring__run_workflow",
+   "target": null,
+   "status": "awaiting_approval",
+   "failure": null,
+   "workflow_run_id": null,
+   "authored_run_id": null,
+   "approval_id": "ap-20261006-151420-7a3030"
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-861cf32a8db84cd69bce4394c5f99f91",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-6fcb7f73ab9a4aafac55832ec564f8b7",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3,
+  4,
+  null,
+  3
+ ],
+ "repo_commit": "3b0bfc6623ea37e1520a4c1f8e00448835735b1a",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.2.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.1"
+}
