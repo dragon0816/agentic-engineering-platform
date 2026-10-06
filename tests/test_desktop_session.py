@@ -215,3 +215,22 @@ def test_live_the_lab_expense_app_is_queried_and_exported(tmp_path: Path) -> Non
             assert len(list(csv.DictReader(handle))) == 13
     finally:
         run.close()
+
+
+def test_run_values_fill_placeholders_so_a_step_replays_with_new_values(tmp_path: Path) -> None:
+    fakes = Fakes()
+    run = handler(tmp_path, fakes)
+    out = tmp_path / "tasks" / "D01" / "output"
+    request = DesktopRequest.model_validate({
+        "app": "expense", "values": {"employee": "E002", "month": "2026-08"},
+        "actions": [{"do": "set", "id": "EmployeeFilter", "value": "{employee}"},
+                    {"do": "save_as", "path": str(out / "{employee}_{month}.csv")}]})
+    run.run(request)
+    sent = fakes.requests[-1]["actions"]
+    assert sent[0]["value"] == "E002"
+    assert sent[1]["path"].endswith("E002_2026-08.csv")
+    missing = DesktopRequest.model_validate({
+        "app": "expense", "actions": [{"do": "set", "id": "DateFrom", "value": "{start}"}]})
+    with pytest.raises(CapabilityRefused) as refused:
+        run.run(missing)
+    assert refused.value.code == "desktop_value_missing"

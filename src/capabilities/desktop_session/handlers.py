@@ -23,6 +23,7 @@ caller, never instructions.
 from __future__ import annotations
 
 import asyncio
+import re
 import subprocess
 import threading
 from collections.abc import Callable
@@ -116,6 +117,9 @@ class DesktopRequest(Contract):
     # Start the application if it is not running (it is started on demand anyway).
     launch: bool = False
     actions: tuple[DesktopAction, ...] = Field(default=(), max_length=50)
+    # Run values for `{placeholders}` in an action's value, name, path or title,
+    # so a Workflow step replays the same actions with new values.
+    values: dict[Symbol, JsonValue] = Field(default_factory=dict)
     look: bool = True
 
 
@@ -211,8 +215,11 @@ class DesktopSessionHandler:
         actions: list[dict[str, Any]] = []
         for action in request.actions:
             item = action.model_dump(exclude_none=True)
-            if action.do == "save_as" and action.path is not None:
-                item["path"] = self._save_path(action.path)
+            for field in ("value", "name", "path", "title"):
+                if isinstance(item.get(field), str):
+                    item[field] = _fill(item[field], request.values)
+            if action.do == "save_as" and isinstance(item.get("path"), str):
+                item["path"] = self._save_path(item["path"])
             actions.append(item)
         with self._lock:
             process = self._process(app)
@@ -232,6 +239,19 @@ class DesktopSessionHandler:
             data=data if isinstance(data, dict) else {},
             look=described(look) if request.look and isinstance(look, dict) else "",
         )
+
+
+_PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def _fill(text: str, values: dict[str, JsonValue]) -> str:
+    def replace(match: re.Match[str]) -> str:
+        name = match.group(1)
+        if name not in values or values[name] is None:
+            raise CapabilityRefused("desktop_value_missing")
+        return str(values[name])
+
+    return _PLACEHOLDER.sub(replace, text)
 
 
 def _popen(command: list[str]) -> Process:

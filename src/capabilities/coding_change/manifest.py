@@ -10,7 +10,7 @@ from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.3.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.4.0")
 RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
@@ -144,7 +144,11 @@ def coding_skill() -> SkillManifest:
                 "saved outputs: a limit the person set on requests to a service counts for the "
                 "whole conversation, so do not request it again to verify. Fix and run again "
                 "until every requirement holds, then say what was checked. Outputs go to the "
-                "workspace's output folder and input files are never changed. A Workflow for "
+                "workspace's output folder and input files are never changed. A system the "
+                "person signs in to or operates (an enterprise web system, a desktop "
+                "application) is used through browser__operate or desktop__operate, never "
+                "fetched or read by a script; a script works on what those tools saved. "
+                "A Workflow for "
                 "this platform, or a run on the platform runtime, is not this tool's job: draft "
                 "and run it with the authoring tools; a workflow file a script writes is not a "
                 "platform Workflow. `change`: "
