@@ -10,7 +10,7 @@ from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.4.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.5.0")
 RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
@@ -134,7 +134,10 @@ def coding_skill() -> SkillManifest:
                 "Use only when the person asks you to process local files or to write and run a "
                 "program in a folder they name, or to change code in a configured repository. "
                 "Never use it to answer a question, to look something up in Knowledge, or for "
-                "work an installed Workflow already does. `run`: first run a short script that "
+                "work an installed Workflow already does. Before starting, list the rules the "
+                "request leaves open (which records count, what to flag, which period or "
+                "status); when one would change the result, ask instead of assuming. "
+                "`run`: first run a short script that "
                 "prints what the inputs really are (file names, headers, sample rows, page "
                 "markup), then write a complete Python script for the task and run it in the "
                 "named workspace. Before answering, run a check that reopens every output file "

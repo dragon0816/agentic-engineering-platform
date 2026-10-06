@@ -519,7 +519,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
         path for path in written if path.startswith(("skills/engineering", "workflows/engineering"))
     ]
     assert weekly == [
-            "skills/engineering__coding__1.4.0.json",
+            "skills/engineering__coding__1.5.0.json",
             "skills/engineering__release-package-guide__1.0.0.json",
             "skills/engineering__rs-ncc-improvement-plan-skill__1.0.0.json",
             "skills/engineering__sales-to-chipset__1.0.0.json",
