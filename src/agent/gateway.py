@@ -269,6 +269,7 @@ class Gateway:
         conversation_observer: Callable[[GatewayConversationResult], None] | None = None,
         knowledge_vaults: Callable[[], Sequence[KnowledgeVaultTool]] | None = None,
         knowledge_capability: AssetIdentity | None = None,
+        accelerator_excluded_aliases: frozenset[str] = frozenset(),
     ):
         self.router = router
         self.bridge = bridge
@@ -278,7 +279,16 @@ class Gateway:
             config=router.decisions.config,
             accelerator_factory=skill_accelerator,
             authorize_accelerator=skill_authorizer,
-            accept_accelerator=_valid_skill_subset,
+            # A Skill selector (JEV) may narrow the tools, but never to a set
+            # holding an excluded Skill's tools (coding, owner 2026-10-06):
+            # such a narrowing falls back to the whole catalogue and the model
+            # chooses, so the selector alone never turns a task into coding.
+            accept_accelerator=lambda request, candidate: _valid_skill_subset(
+                request, candidate
+            ) and not any(
+                name.split("__", 1)[0] in accelerator_excluded_aliases
+                for name in candidate.value
+            ),
             observer=decision_observer,
             shadow_observer=skill_shadow_observer,
         )

@@ -42,6 +42,7 @@ from capabilities.coding_change.contracts import CodingChangeResult, CodingChang
 from capabilities.coding_change.handlers import CodingChangeHandler
 from capabilities.coding_change.manifest import CHANGE_SPEC as CODING_CHANGE_SPEC
 from capabilities.coding_change.manifest import REPOSITORIES_FUNCTION as CODING_REPOSITORIES
+from capabilities.coding_change.manifest import coding_skill
 from capabilities.coding_change.run_python import RUN_SPEC as CODING_RUN_SPEC
 from capabilities.coding_change.run_python import (
     RunPythonHandler,
@@ -923,6 +924,7 @@ def build_gateway(
             None if knowledge_catalog is None else _vault_tools(knowledge_catalog)
         ),
         knowledge_capability=KNOWLEDGE_QUERY_SPEC.identity,
+        accelerator_excluded_aliases=frozenset({coding_skill().alias}),
     )
 
 
