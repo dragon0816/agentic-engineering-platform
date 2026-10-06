@@ -1274,6 +1274,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   HANDOFF), then the first live run implements `format_duration` in the
   practice repository through Agent Web or Telegram.
 - [ ] Coding on the Bridge C8: native Claude Code author for PUBLIC-only tasks.
+- [x] SOP to Workflow W1 (plan `docs/phases/SOP_TO_WORKFLOW.md`, owner
+  decisions and approval of harness designs A/B 2026-10-06): practice
+  shipment site, tracking workbook and SOP PDF
+  (`python -m evaluation.sop_practice prepare|serve`). Found: pypdf returns
+  Kangxi radicals for some glyphs in printed PDFs (客⼾ for 客戶); the
+  Workflow author now folds them (`common/cjk_text.py`). Tests:
+  `test_sop_practice.py`, `test_cjk_text.py`.
+- [ ] Knowledge PDF ingestion (`knowledge/office.py` `PdfExtractor`) has the
+  same look-alike radical problem; folding there changes extracted text and
+  therefore Vault evidence digests, so it needs a re-ingestion plan first.
+- [ ] SOP to Workflow W2-W8, then W9 business cards (see the plan).
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
