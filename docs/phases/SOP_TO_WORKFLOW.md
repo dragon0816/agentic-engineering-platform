@@ -16,7 +16,7 @@ started before the rs_workflow_system migration ends, at the owner's request.
    chat history.
 4. The SOP PDF is uploaded in Agent Web.
 5. Harness structure changes are discussed with the owner before they are
-   built (designs A and B below wait for that).
+   built. Designs A and B below were approved by the owner on 2026-10-06.
 
 ## What exists (2026-10-06)
 
@@ -30,7 +30,7 @@ started before the rs_workflow_system migration ends, at the owner's request.
   Workflow-specific.
 - `PersonalWorkflowAuthor` / `publish_validated_workflow`: used only by tests.
 
-## Harness structure changes (for owner confirmation)
+## Harness structure changes (approved 2026-10-06)
 
 ### A. Preview run in the Workflow engine
 
@@ -72,3 +72,24 @@ in Agent Web, may approve and install. That action writes the manifest to
 | W6 | Drafter: parameters, clarification questions, missing capability as `needs_input`, recording web targets | no |
 | W7 | Agent Web: PDF upload, authoring panel (discussion, draft steps, preview, approve and install) | no |
 | W8 | Live run on the practice target, then one real SOP chosen by the owner | no |
+| W9 | Business cards (after W1-W8): photo -> local OCR -> confirmed fields -> contacts database -> org chart | no (new capabilities; channel rule change below) |
+
+## Business cards (W9, owner decisions 2026-10-06)
+
+- Photos come from Agent Web upload or Telegram. Telegram accepts photos only
+  from allowed senders; every other attachment is still refused. This changes
+  the channel rule that refused all attachments.
+- Recognition and field extraction stay on this computer: Windows OCR
+  (`zh-Hant-TW` and `en-US` are installed) plus rules. Nothing goes to the
+  Gateway, because cards hold customers' personal data and the Gateway is
+  approved for UNCLASSIFIED only.
+- The fields (name, company, department, title, phones, email, address) are
+  confirmed by the owner in the preview before they are saved. Saved to a
+  local SQLite database in the workspace, with duplicates found by email or
+  phone; the photo stays local.
+- The org chart is drawn per company from department and title as a draft
+  that the owner corrects ("reports to"), because hierarchy inferred from
+  titles is a guess. Shown in Agent Web and exportable as an image.
+- The cards are the second generation target, used to check that SOP to
+  Workflow works for more than the first case.
+

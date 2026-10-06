@@ -1224,3 +1224,20 @@ model's reach. Rejected alternatives: a model choosing elements at run time
 expected-output fixtures for every generated Workflow (too heavy for web and
 Excel work); chat-only discussion (limited to 12 turns and 4,000 characters per
 message); a drop folder only for PDFs.
+
+## 2026-10-06 — Owner approves engine preview mode and authoring sessions; business cards stay local
+
+Decision (owner): designs A (engine preview run) and B (Workflow authoring
+session) in `docs/phases/SOP_TO_WORKFLOW.md` are approved. Today's harness
+additions for coding (Gateway `TOOL_PROGRESS`, the
+`change_made_no_difference` stop, the new `src/harness/` modules) are
+accepted as they are. Business cards (W9, after SOP to Workflow): OCR and
+field extraction run only on this computer (Windows OCR plus rules), the
+owner confirms the fields before they are saved, and Telegram accepts photos
+from allowed senders only.
+
+Reason: cards are customers' personal data and the Gateway is approved for
+UNCLASSIFIED data only. Rejected alternatives: Gateway field structuring of
+OCR text, and Gateway vision on the photo, both of which would send personal
+data to the Gateway; Agent Web upload only, which loses taking a photo on the
+phone.
