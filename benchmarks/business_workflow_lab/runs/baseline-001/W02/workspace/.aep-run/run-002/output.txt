@@ -1,0 +1,60 @@
+GET / 200 http://127.0.0.1:8810/login?next=/orders
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sign in - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong></header><
+GET /login 200 http://127.0.0.1:8810/login
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sign in - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong></header><
+POST login 200 http://127.0.0.1:8810/orders
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sales Orders - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Sales Orders</h1><form class='filters' method='get' action='/orders' id='filter-form'><label for='f-customer'>Customer ID<input id='f-customer' name='customer' value=''></label><label for='f-project'>Project
+ERR get /sales-orders <HTTPError 404: 'Not Found'>
+ERR get /sales_orders <HTTPError 404: 'Not Found'>
+
+GET /orders 200 http://127.0.0.1:8810/orders
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sales Orders - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Sales Orders</h1><form class='filters' method='get' action='/orders' id='filter-form'><label for='f-customer'>Customer ID<input id='f-customer' name='customer' value=''></label><label for='f-project'>Project<input id='f-project' name='project' value=''></label><label for='f-from'>Date from (YYYY-MM-DD)<input id='f-from' name='from' value=''></label><label for='f-to'>Date to (YYYY-MM-DD)<input id='f-to' name='to' value=''></label><label for='f-status'>Status<select id='f-status' name='status'><option value=''>(all)</option><option value='Open'>Open</option><option value='Closed'>Closed</option><option value='Cancelled'>Cancelled</option></select></label><label for='f-sort'>Sort by<select id='f-sort'
+ERR get /sales-orders?customer_id=C001&date_from=2026-08-01&date_to=2026-10-31 <HTTPError 404: 'Not Found'>

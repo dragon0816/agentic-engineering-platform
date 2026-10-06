@@ -1,0 +1,212 @@
+[
+ {
+  "check": "Template sales: checker accepts the pristine template",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "check": "Template expense: checker accepts the pristine template",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "check": "Template quote: checker accepts the pristine template",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "check": "Template project: checker accepts the pristine template",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "check": "SAP: unauthenticated request goes to login",
+  "ok": true,
+  "detail": "http://127.0.0.1:51721/login?next=/orders"
+ },
+ {
+  "check": "SAP: wrong password is refused",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP: login works",
+  "ok": true,
+  "detail": "http://127.0.0.1:51721/orders"
+ },
+ {
+  "check": "SAP: Sept Open total matches expected",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "check": "SAP: two pages give every ID once",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "check": "SAP: order detail shows CustomerContact and PaymentTerms",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP: CSV export has all filtered rows",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "check": "SAP: Sept invoices span two pages",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "check": "SAP: empty query is a normal zero-row page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP: expire_session_once sends the next request to login",
+  "ok": true,
+  "detail": "http://127.0.0.1:51721/login?expired=1&next=/orders%3Ffrom%3D2026-09-01%26to%3D2026-09-30%26status%3DOpen%26page%3D2"
+ },
+ {
+  "check": "SAP: re-login recovers",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP: expiry is in the event log",
+  "ok": true,
+  "detail": "['login', 'query', 'session_expired_injected', 'login', 'query', 'query']"
+ },
+ {
+  "check": "SAP: delay_once delays the first list",
+  "ok": true,
+  "detail": "4.02"
+ },
+ {
+  "check": "SAP (Edge): filter shows the expected total",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP (Edge): next page works",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP (Edge): detail opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "SAP (Edge): CSV download has every filtered row",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "check": "CLI: --help exits 0",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "CLI: list C001 Sept matches expected",
+  "ok": true,
+  "detail": "['Q0010', 'Q0011', 'Q0014', 'Q0018']"
+ },
+ {
+  "check": "CLI: stderr is clean on success",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "CLI: get has header and line_items",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "CLI: unknown quote exits 3 with stderr only",
+  "ok": true,
+  "detail": "quote_cli: error: quote Q9999 not found\n"
+ },
+ {
+  "check": "CLI: bad status exits 2",
+  "ok": true,
+  "detail": "tus: invalid choice: 'Open' (choose from 'Draft', 'Sent', 'Accepted', 'Expired')"
+ },
+ {
+  "check": "CLI: empty result exits 0 with zero items",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "CLI: export to a path with spaces",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "check": "CLI: transient_once exits 4 then 0",
+  "ok": true,
+  "detail": "(4, 0)"
+ },
+ {
+  "check": "CLI: force_exit2 exits 2 with a stderr reason",
+  "ok": true,
+  "detail": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)"
+ },
+ {
+  "check": "Expense: E001 Sept total matches expected",
+  "ok": true,
+  "detail": "Total 13 rows · Page 1 / 2"
+ },
+ {
+  "check": "Expense: first page shows 8 rows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "Expense: page 2 shows the rest",
+  "ok": true,
+  "detail": "Total 13 rows · Page 2 / 2"
+ },
+ {
+  "check": "Expense: detail dialog opens",
+  "ok": true,
+  "detail": "Expense detail EXP-00009"
+ },
+ {
+  "check": "Expense: CSV export has every filtered row",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "check": "Expense: Excel export has every filtered row",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "check": "Expense: export_fail_once writes no file",
+  "ok": true,
+  "detail": "ERROR 匯出失敗 Export failed: 暫時無法寫入，請重試。 (Temporary write failure, retry)"
+ },
+ {
+  "check": "Expense: the retry writes the file",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "Expense: empty query reports zero rows",
+  "ok": true,
+  "detail": "查無資料 No results: 查無符合條件的資料（0 筆）。"
+ },
+ {
+  "check": "Expense: events are logged",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "Expense: a real desktop window appears",
+  "ok": true,
+  "detail": "Expense Viewer (synthetic lab)"
+ }
+]

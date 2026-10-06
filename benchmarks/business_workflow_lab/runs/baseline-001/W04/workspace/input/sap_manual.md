@@ -1,0 +1,34 @@
+# Lab ERP（模擬 SAP 類查詢網頁）使用說明
+
+> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
+
+- 網址：http://127.0.0.1:8810/
+- 測試帳號：`lab.analyst`，密碼：`Lab#2026`（僅限本機測試）
+- 登入頁：`http://127.0.0.1:8810/login`，欄位 User（`#username`）、Password（`#password`），按 **Sign in**。
+- 登出：右上角 **Log out**。
+
+## 查詢頁
+
+上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。
+
+篩選欄位（輸入後按 **Search**）：
+
+| 欄位 | 說明 |
+|---|---|
+| Customer ID | 客戶代碼，完全相符，例如 C001 |
+| Project | 專案代碼，完全相符，例如 P001 |
+| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |
+| Status | 只在 Sales Orders：Open、Closed、Cancelled |
+| Sort by / Order | 排序欄位與 asc / desc |
+
+- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。
+- 沒有符合資料時顯示「查無資料（0 筆）」。
+- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：
+  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。
+- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。
+- 列表欄位：
+  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
+  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
+- 文件編號有前導零（例如 0045000101），請當成文字處理。
+- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，重新登入後即可繼續。
+- 金額為原幣；不同幣別不可直接相加。

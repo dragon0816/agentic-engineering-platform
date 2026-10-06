@@ -1,0 +1,53 @@
+CWD C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\baseline-001\C04-force_exit2\workspace
+Tree input:
+input\fx_rates.csv 276
+input\quote_cli_manual.md 2303
+input\quote_template.xlsx 10803
+
+--- quote_cli_manual.md ---
+# quote_cli（模擬報價系統 CLI）使用說明
+
+> 合成測試資料。
+
+- Windows 執行：`"C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd" <command>`
+- 跨平台執行：`python "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py" <command>`
+- `quote_cli --help` 的內容如下：
+
+```text
+usage: quote_cli [-h] {customers,quotes} ...
+
+quote_cli: the synthetic quote system's public command line.
+
+Contract (stable, schema_version 1):
+  quote_cli --help
+  quote_cli customers list --format json
+  quote_cli quotes list [--customer C001] [--project P001] [--from YYYY-MM-DD]
+                        [--to YYYY-MM-DD] [--status Draft|Sent|Accepted|Expired]
+                        [--format json|table]
+  quote_cli quotes get Q0001 [--format json|table]
+  quote_cli quotes export [filters as list] --output quotes.csv
+
+Every filter is optional and filters combine with AND; dates include both
+ends. stdout carries only the result (JSON or table); errors and diagnostics
+go to stderr. Money is a decimal string in JSON ("1234.50"): parse it with a
+decimal type, not a float. Nothing here creates or changes a quote.
+
+Exit codes: 0 success (zero rows included), 2 invalid arguments, 3 document
+not found, 4 temporary service error (retry later).
+
+positional arguments:
+  {customers,quotes}
+    customers         customer master data
+    quotes            quotes
+
+options:
+  -h, --help          show this help message and exit
+```
+
+補充：
+- `quotes list` 回傳 `{"schema_version": 1, "items": [...], "count": N}`；`items` 只有表頭欄位。
+- `quotes get Q0001 --format json` 回傳 `{"schema_version": 1, "header": {...}, "line_items": [...]}`，line items 欄位：ProductID、ProductName、Quantity、UnitPrice、LineAmount。
+- 表頭欄位：QuoteID、CustomerID、ProjectID、QuoteDate、ValidUntil、Status、Currency、Subtotal、DiscountPercent、NetAmount。
+- NetAmount = Subtotal × (1 − DiscountPercent / 100)，四捨五入（ROUND_HALF_UP）至兩位小數；LineAmount = Quantity × UnitPrice。
+- 只有 exit code 0 時 stdout 才是正式資料；錯誤訊息在 stderr。
+

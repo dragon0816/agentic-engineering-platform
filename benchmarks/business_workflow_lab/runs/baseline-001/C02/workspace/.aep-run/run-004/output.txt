@@ -1,0 +1,22 @@
+True [WindowsPath('C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/benchmarks/business_workflow_lab/quote_cli_mock/quote_cli'), WindowsPath('C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/benchmarks/business_workflow_lab/quote_cli_mock/quote_cli.cmd'), WindowsPath('C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/benchmarks/business_workflow_lab/quote_cli_mock/run_quote_cli.py')]
+
+--- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli ---
+
+--- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd ---
+@echo off
+rem Runs the synthetic quote CLI: quote_cli.cmd --help
+set "PYTHONPATH=%~dp0;%PYTHONPATH%"
+python -m quote_cli %*
+
+
+--- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py ---
+"""Cross-platform launcher: python quote_cli_mock/run_quote_cli.py --help"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quote_cli.cli import main  # noqa: E402
+
+raise SystemExit(main())
+

@@ -1,0 +1,132 @@
+
+--- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py ---
+"""Cross-platform launcher: python quote_cli_mock/run_quote_cli.py --help"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quote_cli.cli import main  # noqa: E402
+
+raise SystemExit(main())
+
+
+--- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd ---
+@echo off
+rem Runs the synthetic quote CLI: quote_cli.cmd --help
+set "PYTHONPATH=%~dp0;%PYTHONPATH%"
+python -m quote_cli %*
+
+
+source exists True 68622
+{
+ "seed": 20261006,
+ "period": {
+  "from": "2026-08-01",
+  "to": "2026-10-31"
+ },
+ "customers": [
+  {
+   "CustomerID": "C001",
+   "CustomerName": "Acme Precision Taiwan Ltd.",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C002",
+   "CustomerName": "台灣精密股份有限公司",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C003",
+   "CustomerName": "Northwind Components GmbH",
+   "Country": "DE"
+  },
+  {
+   "CustomerID": "C004",
+   "CustomerName": "藍海電子有限公司",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C005",
+   "CustomerName": "Pacific Test Systems Inc.",
+   "Country": "US"
+  },
+  {
+   "CustomerID": "C006",
+   "CustomerName": "Helios Optics B.V.",
+   "Country": "NL"
+  },
+  {
+   "CustomerID": "C007",
+   "CustomerName": "Acme Precision Taiwan Limited",
+   "Country": "TW"
+  },
+  {
+   "CustomerID": "C008",
+   "CustomerName": "新竹量測科技",
+   "Country": "TW"
+  }
+ ],
+ "employees": [
+  {
+   "EmployeeID": "E001",
+   "EmployeeName": "陳怡君 (Yi-Chun Chen)"
+  },
+  {
+   "EmployeeID": "E002",
+   "EmployeeName": "Daniel Weber"
+  },
+  {
+   "EmployeeID": "E003",
+   "EmployeeName": "林志明"
+  },
+  {
+   "EmployeeID": "E004",
+   "EmployeeName": "Maria Santos"
+  },
+  {
+   "EmployeeID": "E005",
+   "EmployeeName": "王小華"
+  },
+  {
+   "EmployeeID": "E006",
+   "EmployeeName": "Kenji Sato"
+  }
+ ],
+ "projects": [
+  {
+   "ProjectID": "P001",
+   "ProjectName": "5G RF 驗證平台",
+   "CustomerID": "C001",
+   "OwnerEmployeeID": "E001"
+  },
+  {
+   "ProjectID": "P002",
+   "ProjectName": "Wafer Probe Upgrade",
+   "CustomerID": "C002",
+   "OwnerEmployeeID": "E003"
+  },
+  {
+   "ProjectID": "P003",
+   "ProjectName": "Acme 產線自動化",
+   "CustomerID": "C001",
+   "OwnerEmployeeID": "E002"
+  },
+  {
+   "ProjectID": "P004",
+   "ProjectName": "EMC Chamber Retrofit",
+   "CustomerID": "C003",
+   "OwnerEmployeeID": "E004"
+  },
+  {
+   "ProjectID": "P005",
+   "ProjectName": "Acme Limited 校正服務",
+   "CustomerID": "C007",
+   "OwnerEmployeeID": "E005"
+  }
+ ],
+ "sales_orders": [
+  {
+   "OrderID": "0045000101",
+   "CustomerID": "C001",
+   "CustomerNam

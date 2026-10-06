@@ -1,0 +1,73 @@
+login status 200 http://127.0.0.1:8810/login
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sign in - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong></header><main><h1>Sign in</h1><form method='post' action='/login' id='login-form'><input type='hidden' name='next' value='/orders'><p><label for='username'>User</label><br><input id='username' name='username'></p><p><label for='password'>Password</label><br><input id='password' name='password' type='password'></p><button type='submit' id='login-submit'>Sign in</button></form></main><script>document.querySelectorAll('form.filters').forEach(f=>f.addEventListener('submit',()=>{document.getElementById('loading').style.display='block'}))</script></body></html>
+post status 200 http://127.0.0.1:8810/orders
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sales Orders - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Sales Orders</h1><form class='filters' method='get' action='/orders' id='filter-form'><label for='f-customer'>Customer ID<input id='f-customer' name='customer' value=''></label><label for='f-project'>Project<input id='f-project' name='project' value=''></label><label for='f-from'>Date from (YYYY-MM-DD)<input id='f-from' name='from' value=''></label><label for='f-to'>Date to (YYYY-MM-DD)<input id='f-to' name='to' value=''></label><label for='f-status'>Status<select id='f-status' name='status'><option value=''>(all)</option><option value='Open'>Open</option><option value='Closed'>Closed</option><option value='Cancelled'>Cancelled</option></select></label><label for='f-sort'>Sort by<select id='f-sort'
+
+PATH /invoices 200 http://127.0.0.1:8810/invoices text/html; charset=utf-8
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Invoices - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Invoices</h1><form class='filters' method='get' action='/invoices' id='filter-form'><label for='f-customer'>Customer ID<input id='f-customer' name='customer' value=''></label><label for='f-project'>Project<input id='f-project' name='project' value=''></label><label for='f-from'>Date from (YYYY-MM-DD)<input id='f-from' name='from' value=''></label><label for='f-to'>Date to (YYYY-MM-DD)<input id='f-to' name='to' value=''></label><label for='f-sort'>Sort by<select id='f-sort' name='sort'><option value='InvoiceID'>InvoiceID</option><option value='OrderID'>OrderID</option><option value='CustomerID'>CustomerID</option><option value='ProjectID'>ProjectID</option><option value='InvoiceDate'>InvoiceDate</option><option value='DueDate'>DueDate</option><option value='Currency'>Currency</option><option value='Amount'>Amount</option><option value='PaidAmount'>PaidAmount</option><option value='Balance'>Balance</option></select></label><label for='f-dir'>Order<select id='f-dir' name='dir'><option value='asc'>asc</option><option value='desc'>desc</option></select></label><button type='submit' id='search'>Search</button></form><div id='loading'>Loading… 查詢中</div><p><a id='export-csv' href='/invoices/export.csv?'>Export CSV (all filtered rows)</a></p><p id='result-count'>Total: <strong>24</strong> rows · Page 1 of 3</p><table id='results'><thead><tr><th data-field='InvoiceID'>InvoiceID</th><th data-field='OrderID'>OrderID</th><th data-field='CustomerID'>CustomerID</th><th data-field='ProjectID'>ProjectID</th><th data-field='InvoiceDate'>InvoiceDate</th><th data-field='DueDate'>DueDate</th><th data-field='Currency'>Currency</th><th data-field='Amount'>Amount</th><th data-field='PaidAmount'>PaidAmount<
+
+PATH /invoices?date_from=2026-09-01&date_to=2026-09-30 200 http://127.0.0.1:8810/invoices?date_from=2026-09-01&date_to=2026-09-30 text/html; charset=utf-8
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Invoices - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Invoices</h1><form class='filters' method='get' action='/invoices' id='filter-form'><label for='f-customer'>Customer ID<input id='f-customer' name='customer' value=''></label><label for='f-project'>Project<input id='f-project' name='project' value=''></label><label for='f-from'>Date from (YYYY-MM-DD)<input id='f-from' name='from' value=''></label><label for='f-to'>Date to (YYYY-MM-DD)<input id='f-to' name='to' value=''></label><label for='f-sort'>Sort by<select id='f-sort' name='sort'><option value='InvoiceID'>InvoiceID</option><option value='OrderID'>OrderID</option><option value='CustomerID'>CustomerID</option><option value='ProjectID'>ProjectID</option><option value='InvoiceDate'>InvoiceDate</option><option value='DueDate'>DueDate</option><option value='Currency'>Currency</option><option value='Amount'>Amount</option><option value='PaidAmount'>PaidAmount</option><option value='Balance'>Balance</option></select></label><label for='f-dir'>Order<select id='f-dir' name='dir'><option value='asc'>asc</option><option value='desc'>desc</option></select></label><button type='submit' id='search'>Search</button></form><div id='loading'>Loading… 查詢中</div><p><a id='export-csv' href='/invoices/export.csv?date_from=2026-09-01&date_to=2026-09-30'>Export CSV (all filtered rows)</a></p><p id='result-count'>Total: <strong>24</strong> rows · Page 1 of 3</p><table id='results'><thead><tr><th data-field='InvoiceID'>InvoiceID</th><th data-field='OrderID'>OrderID</th><th data-field='CustomerID'>CustomerID</th><th data-field='ProjectID'>ProjectID</th><th data-field='InvoiceDate'>InvoiceDate</th><th data-field='DueDate'>DueDate</th><th data-field='Currency'>Currency</th><th data-field='Amount'>Amount</th>
+
+PATH /invoices?Date%20from=2026-09-01&Date%20to=2026-09-30 200 http://127.0.0.1:8810/invoices?Date%20from=2026-09-01&Date%20to=2026-09-30 text/html; charset=utf-8
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Invoices - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Invoices</h1><form class='filters' method='get' action='/invoices' id='filter-form'><label for='f-customer'>Customer ID<input id='f-customer' name='customer' value=''></label><label for='f-project'>Project<input id='f-project' name='project' value=''></label><label for='f-from'>Date from (YYYY-MM-DD)<input id='f-from' name='from' value=''></label><label for='f-to'>Date to (YYYY-MM-DD)<input id='f-to' name='to' value=''></label><label for='f-sort'>Sort by<select id='f-sort' name='sort'><option value='InvoiceID'>InvoiceID</option><option value='OrderID'>OrderID</option><option value='CustomerID'>CustomerID</option><option value='ProjectID'>ProjectID</option><option value='InvoiceDate'>InvoiceDate</option><option value='DueDate'>DueDate</option><option value='Currency'>Currency</option><option value='Amount'>Amount</option><option value='PaidAmount'>PaidAmount</option><option value='Balance'>Balance</option></select></label><label for='f-dir'>Order<select id='f-dir' name='dir'><option value='asc'>asc</option><option value='desc'>desc</option></select></label><button type='submit' id='search'>Search</button></form><div id='loading'>Loading… 查詢中</div><p><a id='export-csv' href='/invoices/export.csv?Date+from=2026-09-01&Date+to=2026-09-30'>Export CSV (all filtered rows)</a></p><p id='result-count'>Total: <strong>24</strong> rows · Page 1 of 3</p><table id='results'><thead><tr><th data-field='InvoiceID'>InvoiceID</th><th data-field='OrderID'>OrderID</th><th data-field='CustomerID'>CustomerID</th><th data-field='ProjectID'>ProjectID</th><th data-field='InvoiceDate'>InvoiceDate</th><th data-field='DueDate'>DueDate</th><th data-field='Currency'>Currency</th><th data-field='Amount'>Amount</th>

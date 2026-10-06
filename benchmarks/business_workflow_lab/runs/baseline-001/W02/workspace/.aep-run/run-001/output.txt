@@ -1,0 +1,105 @@
+cwd C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\baseline-001\W02\workspace
+tree:
+.aep-run
+.aep-run\run-001
+.aep-run\run-001\home
+.aep-run\run-001\output.txt
+.aep-run\run-001\script.py
+.aep-run\run-001\tmp
+input
+input\fx_rates.csv
+input\sales_template.xlsx
+input\sap_manual.md
+output
+
+manual preview
+# Lab ERP（模擬 SAP 類查詢網頁）使用說明
+
+> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
+
+- 網址：http://127.0.0.1:8810/
+- 測試帳號：`lab.analyst`，密碼：`Lab#2026`（僅限本機測試）
+- 登入頁：`http://127.0.0.1:8810/login`，欄位 User（`#username`）、Password（`#password`），按 **Sign in**。
+- 登出：右上角 **Log out**。
+
+## 查詢頁
+
+上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。
+
+篩選欄位（輸入後按 **Search**）：
+
+| 欄位 | 說明 |
+|---|---|
+| Customer ID | 客戶代碼，完全相符，例如 C001 |
+| Project | 專案代碼，完全相符，例如 P001 |
+| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |
+| Status | 只在 Sales Orders：Open、Closed、Cancelled |
+| Sort by / Order | 排序欄位與 asc / desc |
+
+- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。
+- 沒有符合資料時顯示「查無資料（0 筆）」。
+- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：
+  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。
+- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。
+- 列表欄位：
+  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
+  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
+- 文件編號有前導零（例如 0045000101），請當成文字處理。
+- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，重新登入後即可繼續。
+- 金額為原幣；不同幣別不可直接相加。
+
+
+fx
+﻿Currency,RateToTWD,Note
+TWD,1,測試固定匯率，非真實行情 (fixed test rate, not a market quote)
+USD,32,測試固定匯率，非真實行情 (fixed test rate, not a market quote)
+EUR,35,測試固定匯率，非真實行情 (fixed test rate, not a market quote)
+
+
+workbook sheets/cells
+SHEET Report 20 6
+('Sales Order Report 銷售訂單報表', None, None, None, None, None)
+(None, None, None, None, None, None)
+('起始日期 From', None, '結束日期 To', None, None, None)
+('條件 Condition', None, None, None, None, None)
+('產出時間 Generated at', None, None, None, None, None)
+(None, None, None, None, None, None)
+('資料來源 Source', None, '取得時間 Fetched at', None, None, None)
+(None, None, None, None, None, None)
+('備註 Notes', None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+merged [<MergedCellRange A1:F1>]
+SHEET Details 4 11
+('Sales order details', None, None, None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None, None, None)
+('OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms')
+merged []
+SHEET Summary 4 6
+('Sales summary', None, None, None, None, None)
+('總計 TWD Totals', '=SUM(Details!I5:I5)', None, None, None, None)
+(None, None, None, None, None, None)
+('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+merged []
+SHEET Instructions 27 3
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+('Report', 'B9', '備註：缺少的資料、例外或限制。')
+('Report', 'A20 與頁尾', '固定 footer，保留不改。')
+('All detail sheets', 'Row 4', '欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。')
+('All detail sheets', 'Formats', 'ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。')
+('All sheets', '-', '不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。')
+('All sheets', 'AmountTWD', '原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。')
+('Details', 'A4', 'OrderID: text (文字，保留前導零)')
+merged []

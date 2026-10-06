@@ -1,0 +1,58 @@
+{
+ "task_id": "D04",
+ "status": "BLOCKED",
+ "code_generated": true,
+ "execution_succeeded": true,
+ "excel_correct": false,
+ "workflow_rerun_succeeded": null,
+ "elapsed_seconds": 45.3,
+ "repair_loops": 0,
+ "human_interventions": 0,
+ "interfaces_used": [
+  "coding execution (restricted runner)",
+  "direct read of mock internals (bypass)"
+ ],
+ "failure_reason": "the Expense desktop app was never operated; conversation stopped: model_http_error; scripts read mock internals instead of using the interface: .aep-run/run-002/script.py: expense_app",
+ "blocked_layer": "harness: no native desktop (GUI automation) tool in the AEP conversation or Bridge",
+ "artifact_paths": [],
+ "evidence_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\baseline-001\\D04\\trace.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\baseline-001\\D04\\events.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\baseline-001\\D04\\workspace\\.aep-run\\run-001\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\baseline-001\\D04\\workspace\\.aep-run\\run-002\\script.py"
+ ],
+ "script_runs": [
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-001/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-002/script.py",
+   "refused": null
+  }
+ ],
+ "conversation_failures": [
+  "model_http_error"
+ ],
+ "bypass_signals": [
+  ".aep-run/run-002/script.py: expense_app"
+ ],
+ "interventions": [],
+ "workflow_files": [],
+ "workflow_unchanged_on_rerun": null,
+ "checks": [
+  {
+   "name": "an Excel deliverable exists",
+   "ok": false,
+   "detail": "no .xlsx in output/"
+  }
+ ],
+ "rerun_checks": null,
+ "session_id": "conversation-64327b41ea8642a8b1c9d6820cd42e2a",
+ "model_turns": [
+  3
+ ],
+ "tool_calls": 2
+}

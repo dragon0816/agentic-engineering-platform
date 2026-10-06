@@ -1,0 +1,117 @@
+True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\expense_desktop_mock\expense_app.py
+"""Synthetic Expense desktop application (a real Tk window, not a web page).
+
+Main window: Employee, Project, Date from / Date to, Status and a Query
+button; a result table of 8 rows per page with Previous / Next and a total
+count; Details (or double-click a row) opens a detail dialog; Export CSV and
+Export Excel open the native Save As dialog and write every filtered row,
+not only the visible page. Message boxes report query completion, empty
+results and export failures.
+
+The fault mode is read from `operator/state/expense_fault.json`:
+  normal            nothing injected
+  export_fail_once  the first export shows "暫時無法寫入，請重試" and writes
+                    no file; the next export works
+
+Events go to `operator/state/expense_events.jsonl` (operator evidence only).
+
+Run:  python expense_desktop_mock/expense_app.py
+"""
+
+from __future__ import annotations
+
+import csv
+import json
+import tkinter as tk
+from datetime import date, datetime
+from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
+from typing import Any
+
+LAB = Path(__file__).resolve().parents[1]
+DATA = LAB / "operator" / "data" / "source.json"
+STATE = LAB / "operator" / "state"
+FAULT = STATE / "expense_fault.json"
+EVENTS = STATE / "expense_events.jsonl"
+PAGE_SIZE = 8
+STATUSES = ("", "Draft", "Submitted", "Approved", "Rejected")
+COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
+           "Currency", "Amount", "Status")
+EXPORT_COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
+                  "Currency", "Amount", "Status", "ReceiptID", "Description", "MissingReceipt")
+
+
+def event(name: str, **detail: Any) -> None:
+    STATE.mkdir(parents=True, exist_ok=True)
+    line = {"at": datetime.now().isoformat(timespec="milliseconds"), "event": name, **detail}
+    with EVENTS.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(line, ensure_ascii=False) + "\n")
+
+
+def export_should_fail() -> bool:
+    try:
+        state = json.loads(FAULT.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    if state.get("mode") == "export_fail_once" and not state.get("fired"):
+        state["fired"] = True
+        FAULT.write_text(json.dumps(state), encoding="utf-8")
+        return True
+    return False
+
+
+def valid_date(text: str) -> bool:
+    try:
+        date.fromisoformat(text)
+        return True
+    except ValueError:
+        return False
+
+
+class ExpenseApp:
+    def __init__(self, root: tk.Tk) -> None:
+        self.root = root
+        root.title("Expense Viewer (synthetic lab)")
+        root.geometry("1040x520")
+        data = json.loads(DATA.read_text(encoding="utf-8"))
+        self.expenses: list[dict[str, Any]] = data["expenses"]
+        self.employees = [""] + [e["EmployeeID"] for e in data["employees"]]
+        self.projects = [""] + [p["ProjectID"] for p in data["projects"]]
+        self.rows: list[dict[str, Any]] = []
+        self.page = 1
+
+        filters = ttk.LabelFrame(root, text="查詢條件 Filters", padding=8)
+        filters.pack(fill="x", padx=8, pady=6)
+        self.employee = self._combo(filters, "Employee 員工", self.employees, 0)
+        self.project = self._combo(filters, "Project 專案", self.projects, 2)
+        self.date_from = self._entry(filters, "Date from 起 (YYYY-MM-DD)", 4)
+        self.date_to = self._entry(filters, "Date to 迄 (YYYY-MM-DD)", 6)
+        self.status = self._combo(filters, "Status 狀態", list(STATUSES), 8)
+        self.query_button = ttk.Button(filters, text="Query 查詢", command=self.query)
+        self.query_button.grid(row=0, column=10, padx=8)
+        root.bind("<Return>", lambda _e: self.query())
+
+        table = ttk.Frame(root)
+        table.pack(fill="both", expand=True, padx=8)
+        self.tree = ttk.Treeview(table, columns=COLUMNS, show="headings", height=PAGE_SIZE,
+                                 selectmode="browse")
+        widths = (90, 70, 170, 70, 95, 80, 70, 100, 90)
+        for column, width in zip(COLUMNS, widths, strict=True):
+            self.tree.heading(column, text=column)
+            self.tree.column(column, width=width, anchor="e" if column == "Amount" else "w")
+        self.tree.pack(fill="both", expand=True)
+        self.tree.bind("<Double-1>", lambda _e: self.details())
+
+        bar = ttk.Frame(root, padding=6)
+        bar.pack(fill="x", padx=8)
+        self.prev_button = ttk.Button(bar, text="◀ Previous 上一頁", command=lambda: self.turn(-1))
+        self.prev_button.pack(side="left")
+        self.next_button = ttk.Button(bar, text="Next 下一頁 ▶", command=lambda: self.turn(1))
+        self.next_button.pack(side="left", padx=4)
+        self.count_label = ttk.Label(bar, text="Total 0 rows · Page 0 / 0")
+        self.count_label.pack(side="left", padx=12)
+        ttk.Button(bar, text="Export Excel 匯出 Excel", command=lambda: self.export("xlsx")).pack(side="right")
+        ttk.Button(bar, text="Export CSV 匯出 CSV", command=lambda: self.export("csv")).pack(side="right", p
+len 11976
+expense_app.py 12553
+__pycache__ dir

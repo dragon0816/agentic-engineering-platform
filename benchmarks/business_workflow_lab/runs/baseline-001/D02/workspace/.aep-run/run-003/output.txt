@@ -1,0 +1,53 @@
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+('Report', 'B9', '備註：缺少的資料、例外或限制。')
+('Report', 'A20 與頁尾', '固定 footer，保留不改。')
+('All detail sheets', 'Row 4', '欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。')
+('All detail sheets', 'Formats', 'ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。')
+('All sheets', '-', '不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。')
+('All sheets', 'AmountTWD', '原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。')
+('Details', 'A4', 'ExpenseID: text (文字，保留前導零)')
+('Details', 'B4', 'EmployeeID: text (文字，保留前導零)')
+('Details', 'C4', 'EmployeeName: text')
+('Details', 'D4', 'ProjectID: text (文字，保留前導零)')
+('Details', 'E4', 'ExpenseDate: date YYYY-MM-DD')
+('Details', 'F4', 'Category: text')
+('Details', 'G4', 'Currency: text')
+('Details', 'H4', 'Amount: number, 2 decimals (0.00)')
+('Details', 'I4', 'AmountTWD: number, 2 decimals (0.00)')
+('Details', 'J4', 'Status: text')
+('Details', 'K4', 'ReceiptID: text (文字，保留前導零)')
+('Details', 'L4', 'Description: text')
+('Details', 'M4', 'MissingReceipt: text')
+('Details', 'N4', 'NeedsReview: text')
+('Details', 'M / N', 'MissingReceipt、NeedsReview 填 true 或 false（布林值或文字 true/false）。')
+('Summary', 'B2', '公式 =SUM(Details!I5:I{最後資料列})：Details 的 AmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 I5:I5。')
+('Summary', 'A4:F4 / row 5+', '彙總表：Group、SubGroup 為分組鍵（依題目要求，例如 Status、Currency、EmployeeID、Category；不用時留空），Currency 為原幣，Amount 為該組原幣合計，AmountTWD 為該組 TWD 合計，Count 為筆數；全部 TWD 總額不得混加不同原幣。')
+('Exceptions', 'A4:D4 / row 5+', '例外清單：原始 ExpenseID、EmployeeID、ExpenseDate 與原因；列入例外的費用仍須保留在 Details。')
+
+source exists True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\operator\data\source.json
+<class 'dict'> dict_keys(['seed', 'period', 'customers', 'employees', 'projects', 'sales_orders', 'invoices', 'expenses', 'quotes'])
+key seed type <class 'int'> len 
+20261006
+key period type <class 'dict'> len 2
+{'from': '2026-08-01', 'to': '2026-10-31'}
+key customers type <class 'list'> len 8
+[{'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'Country': 'TW'}, {'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'Country': 'TW'}, {'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'Country': 'DE'}, {'CustomerID': 'C004', 'CustomerName': '藍海電子有限公司', 'Country': 'TW'}, {'CustomerID': 'C005', 'CustomerName': 'Pacific Test Systems Inc.', 'Country': 'US'}, {'CustomerID': 'C006', 'CustomerName': 'Helios Optics B.V.', 'Country': 'NL'}, {'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'Country': 'TW'}, {'CustomerID': 'C008', 'CustomerName': '新竹量測科技', 'Country': 'TW'}]
+key employees type <class 'list'> len 6
+[{'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)'}, {'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber'}, {'EmployeeID': 'E003', 'EmployeeName': '林志明'}, {'EmployeeID': 'E004', 'EmployeeName': 'Maria Santos'}, {'EmployeeID': 'E005', 'EmployeeName': '王小華'}, {'EmployeeID': 'E006', 'EmployeeName': 'Kenji Sato'}]
+key projects type <class 'list'> len 5
+[{'ProjectID': 'P001', 'ProjectName': '5G RF 驗證平台', 'CustomerID': 'C001', 'OwnerEmployeeID': 'E001'}, {'ProjectID': 'P002', 'ProjectName': 'Wafer Probe Upgrade', 'CustomerID': 'C002', 'OwnerEmployeeID': 'E003'}, {'ProjectID': 'P003', 'ProjectName': 'Acme 產線自動化', 'CustomerID': 'C001', 'OwnerEmployeeID': 'E002'}, {'ProjectID': 'P004', 'ProjectName': 'EMC Chamber Retrofit', 'CustomerID': 'C003', 'OwnerEmployeeID': 'E004'}, {'ProjectID': 'P005', 'ProjectName': 'Acme Limited 校正服務', 'CustomerID': 'C007', 'OwnerEmployeeID': 'E005'}]
+key sales_orders type <class 'list'> len 36
+[{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00', 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET15', 'SalesRep': 'E002', 'Lines': [{'ProductID': 'MAT-1002', 'Quantity': 3, 'UnitPrice': '2565.00', 'LineAmount': '7695.00', 'LineNo': 10}, {'ProductID': 'MAT-1006', 'Quantity': 3, 'UnitPrice': '29400.00', 'LineAmount': '88200.00', 'LineNo': 20}]}, {'OrderID': '0045000102', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-08-07', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '4095.00', 'CustomerContact': '張美玲 <mei@tw-precision.example>', 'PaymentTerms': 'NET30', 'SalesRep': 'E005', 'Lines': [{'ProductID': 'MAT-1001', 'Quantity': 2, 'UnitPrice': '1250.00', 'LineAmount': '2500.00', 'LineNo': 10}, {'ProductID': 'MAT-1008', 'Quantity': 1, 'UnitPrice': '
+key invoices type <class 'list'> len 24
+[{'InvoiceID': '0090000201', 'OrderID': '0045000101', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-08-06', 'DueDate': '2026-08-21', 'Currency': 'TWD', 'Amount': '95895.00', 'PaidAmount': '47947.50', 'Balance': '47947.50'}, {'InvoiceID': '0090000202', 'OrderID': '0045000102', 'CustomerID': 'C002', 'ProjectID': 'P002', 'InvoiceDate': '2026-08-10', 'DueDate': '2026-09-09', 'Currency': 'USD', 'Amount': '4095.00', 'PaidAmount': '4095.00', 'Balance': '0.00'}, {'InvoiceID': '0090000203', 'OrderID': '0045000105', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-08-20', 'DueDate': '2026-09-04', 'Currency': 'TWD', 'Amount': '227850.00', 'PaidAmount': '113925.00', 'Balance': '113925.00'}, {'InvoiceID': '0090000204', 'OrderID': '0045000103', 'CustomerID': 'C003', 'ProjectID': 'P004', 'InvoiceDate': '2026-08-25', 'DueDate': '2026-09-24', 'Currency': 'EUR', 'Amount': '958.95', 'PaidAmount': '0.00', 'Balance': '958.95'}, {'InvoiceID': '0090000205', 'OrderID': '004500
+key expenses type <class 'list'> len 40
+[{'ExpenseID': 'EXP-00035', 'EmployeeID': 'E004', 'EmployeeName': 'Maria Santos', 'ProjectID': 'P004', 'ExpenseDate': '2026-08-01', 'Category': 'Hotel', 'Currency': 'EUR', 'Amount': '95.00', 'Status': 'Approved', 'ReceiptID': 'RC264701', 'Description': '出差住宿\n(含早餐)', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00029', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-08-03', 'Category': 'Travel', 'Currency': 'USD', 'Amount': '210.00', 'Status': 'Approved', 'ReceiptID': 'RC421572', 'Description': '機票 TPE-FRA\n含行李費', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00030', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-08-11', 'Category': 'Hotel', 'Currency': 'TWD', 'Amount': '3600.00', 'Status': 'Submitted', 'ReceiptID': 'RC631696', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00033', 'EmployeeID': 'E003', 'EmployeeName': '林志明', 'ProjectID': 'P002', 'ExpenseDate': '20
+key quotes type <class 'list'> len 30
+[{'QuoteID': 'Q0001', 'CustomerID': 'C002', 'ProjectID': 'P002', 'QuoteDate': '2026-08-04', 'ValidUntil': '2026-09-03', 'Status': 'Accepted', 'Currency': 'TWD', 'Subtotal': '69000.00', 'DiscountPercent': '0', 'NetAmount': '69000.00', 'Lines': [{'ProductID': 'MAT-1004', 'ProductName': 'Shielding Box', 'Quantity': 1, 'UnitPrice': '69000.00', 'LineAmount': '69000.00'}]}, {'QuoteID': 'Q0002', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-08-06', 'ValidUntil': '2026-09-05', 'Status': 'Expired', 'Currency': 'USD', 'Subtotal': '8965.00', 'DiscountPercent': '5', 'NetAmount': '8516.75', 'Lines': [{'ProductID': 'MAT-1001', 'ProductName': 'Signal Analyzer Module', 'Quantity': 2, 'UnitPrice': '1250.00', 'LineAmount': '2500.00'}, {'ProductID': 'MAT-1003', 'ProductName': '校正服務 (Calibration)', 'Quantity': 4, 'UnitPrice': '420.00', 'LineAmount': '1680.00'}, {'ProductID': 'MAT-1007', 'ProductName': 'Software License (1y)', 'Quantity': 3, 'UnitPrice': '1500.00', 'LineAmount': '4500.00'},
