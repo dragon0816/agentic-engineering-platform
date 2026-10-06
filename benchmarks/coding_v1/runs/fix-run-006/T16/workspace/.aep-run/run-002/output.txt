@@ -1,0 +1,23 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-006\T16\workspace
+Input directory: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-006\T16\workspace\input exists= True
+Input files: ['logs\\run_a.log', 'logs\\run_b.log', 'logs\\run_c.log']
+
+INSPECT logs\run_a.log size= 131 lines= 3
+  1: [2026-02-01T10:00:00][DUT-11][TxPower][PASS]
+  2: [2026-02-01T10:00:05][DUT-11][EVM][FAIL]
+  3: [2026-02-01T10:01:00][DUT-12][TxPower][PASS]
+
+INSPECT logs\run_b.log size= 252 lines= 3
+  1: {"ts": "2026-02-02T09:00:00", "dut": "DUT-21", "case": "Sensitivity", "result": "PASS"}
+  2: {"ts": "2026-02-02T09:00:10", "dut": "DUT-21", "case": "EVM", "result": "FAIL"}
+  3: {"ts": "2026-02-02T09:01:00", "dut": "DUT-22", "case": "TxPower", "result": "PASS"}
+
+INSPECT logs\run_c.log size= 76 lines= 2
+  1: 2026/02/03 11:00 DUT-31 TxPower => PASS
+  2: 2026/02/03 11:01 DUT-31 EVM => FAIL
+
+WROTE output\unified.json records= 6
+WROTE output\warnings.json warnings= 2
+Verified unified.json keys/order, text fields, Pass/Fail statuses, V1/V2 format versions, and warnings schema.
+Sample unified records: [{"timestamp": "2026-02-01T10:00:00", "device_id": "DUT-11", "test_name": "TxPower", "status": "Pass", "source_file": "logs/run_a.log", "format_version": "V1"}, {"timestamp": "2026-02-01T10:00:05", "device_id": "DUT-11", "test_name": "EVM", "status": "Fail", "source_file": "logs/run_a.log", "format_version": "V1"}, {"timestamp": "2026-02-01T10:01:00", "device_id": "DUT-12", "test_name": "TxPower", "status": "Pass", "source_file": "logs/run_a.log", "format_version": "V1"}]
+Sample warnings: [{"source_file": "logs/run_c.log", "line_number": 1, "line": "2026/02/03 11:00 DUT-31 TxPower => PASS", "warning": "unknown log format"}, {"source_file": "logs/run_c.log", "line_number": 2, "line": "2026/02/03 11:01 DUT-31 EVM => FAIL", "warning": "unknown log format"}]

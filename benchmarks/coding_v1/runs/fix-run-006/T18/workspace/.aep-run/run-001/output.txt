@@ -1,0 +1,77 @@
+WORKSPACE: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-006\T18\workspace
+INPUT FILES:
+ - DEPENDENCIES.txt size= 22
+ - export.py size= 1082
+ - input.csv size= 39
+
+DEPENDENCIES.txt:
+Python 3.12, openpyxl
+
+
+Original export.py first 200 lines:
+001: """Average Value per Model from input.csv into summary.xlsx.
+002: 
+003: Usage: python export.py --input input.csv --output summary.xlsx
+004: Requires: openpyxl
+005: """
+006: 
+007: import argparse
+008: import csv
+009: 
+010: from openpyxl import Workbook
+011: 
+012: 
+013: def main() -> None:
+014:     parser = argparse.ArgumentParser()
+015:     parser.add_argument("--input", required=True)
+016:     parser.add_argument("--output", required=True)
+017:     args = parser.parse_args()
+018:     totals = {}
+019:     counts = {}
+020:     with open(args.input, newline="", encoding="utf-8") as handle:
+021:         for row in csv.DictReader(handle):
+022:             model = row["DeviceModel"]
+023:             value = row["Value"]
+024:             if value == "":
+025:                 continue
+026:             totals[model] = totals.get(model, "") + value
+027:             counts[model] = counts.get(model, 0) + 1
+028:     book = Workbook()
+029:     sheet = book.active
+030:     sheet.title = "summary"
+031:     sheet.append(["Model", "Average", "ValidCount"])
+032:     for model in sorted(totals):
+033:         sheet.append([model, totals[model] / counts[model], counts[model]])
+034:     book.save(args.output)
+035: 
+036: 
+037: if __name__ == "__main__":
+038:     main()
+
+input.csv headers/sample:
+headers= ['Model', 'Value']
+1 {'Model': 'M1', 'Value': '10'}
+2 {'Model': 'M1', 'Value': '20'}
+3 {'Model': 'M1', 'Value': ''}
+4 {'Model': 'M2', 'Value': '5'}
+5 {'Model': 'M2', 'Value': '15'}
+
+Expected rows (sorted by Model):
+('M1', 15.0, 2)
+('M2', 10.0, 2)
+
+Wrote repaired script: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-006\T18\workspace\output\export.py
+
+Running requested command equivalent:
+python output\export.py --input input\input.csv --output output\summary.xlsx
+returncode= 0
+
+Verification:
+output/export.py exists: True size= 2763
+output/summary.xlsx exists: True size= 4901
+workbook sheet: Summary
+headers: ['Model', 'Average', 'ValidCount']
+actual rows:
+('M1', 15, 2)
+('M2', 10, 2)
+All checks passed: CLI ran, output files reopen, headers match, blank Values excluded, averages/counts match CSV.
