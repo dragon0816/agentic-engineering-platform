@@ -156,6 +156,11 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
   margin: 8px 0 0; line-height: 1.65; overflow-wrap: anywhere;
 }
 .said.bad { color: var(--bad); }
+.approval-card { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--accent);
+  border-radius: 8px; background: var(--accent-soft); }
+.approval-card p { margin: 6px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.approval-card button { margin-right: 8px; }
+.approval-note { font-size: 13px; }
 .said > :first-child { margin-top: 0; }
 .said > :last-child { margin-bottom: 0; }
 .said p { margin: 0 0 12px; white-space: pre-wrap; }
@@ -1064,6 +1069,43 @@ function renderConversation(record) {
     }
   }
   renderPendingTurns(record.session_id);
+  renderApprovals(record.session_id).catch(() => {});
+}
+
+// -- Approvals (G4): only the owner's button runs or installs ---------------
+
+async function renderApprovals(session) {
+  const listed = await call("/api/approvals?session_id=" + encodeURIComponent(session));
+  if (session !== activeConversation) return;
+  for (const old of log.querySelectorAll(".approval-card")) old.remove();
+  for (const item of listed.approvals) {
+    const card = document.createElement("div"); card.className = "approval-card";
+    card.dataset.approvalId = item.approval_id;
+    const title = document.createElement("strong");
+    title.textContent = item.kind === "install" ? "安裝請求" : "執行請求";
+    const summary = document.createElement("p"); summary.textContent = item.summary;
+    const approve = document.createElement("button"); approve.type = "button";
+    approve.className = "approve"; approve.textContent = "核准";
+    const reject = document.createElement("button"); reject.type = "button";
+    reject.className = "reject"; reject.textContent = "拒絕";
+    const note = document.createElement("span"); note.className = "approval-note";
+    const decide = async (decision) => {
+      approve.disabled = reject.disabled = true;
+      note.textContent = decision === "approve" ? "執行中…" : "";
+      try {
+        const done = await call("/api/approvals/decide",
+          {approval_id: item.approval_id, decision: decision});
+        if (!done.ok) throw new Error(done.code || "approval failed");
+        await loadConversations(session);
+      } catch (failure) {
+        note.textContent = failure.message; approve.disabled = reject.disabled = false;
+      }
+    };
+    approve.addEventListener("click", () => decide("approve"));
+    reject.addEventListener("click", () => decide("reject"));
+    card.append(title, summary, approve, reject, note);
+    log.append(card);
+  }
 }
 
 // -- Turn groups ----------------------------------------------------------

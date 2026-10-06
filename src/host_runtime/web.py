@@ -81,6 +81,7 @@ from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
+from host_runtime.chat_authoring import ApprovalRequest, ChatAuthoringError
 from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
@@ -178,6 +179,33 @@ AUTHORING_ROUTES = (
 BEARER = "Bearer "
 #: The only addresses this ever binds to or answers for.
 LOOPBACK = ("127.0.0.1", "localhost", "[::1]", "::1")
+
+
+def approval_text(item: ApprovalRequest) -> str:
+    """What the conversation shows, and the Agent reads, after a decision."""
+    if item.status == "rejected":
+        return f"【已拒絕】{item.summary}。沒有執行任何動作。"
+    result = item.result if isinstance(item.result, dict) else {}
+    if item.status == "failed":
+        return f"【未執行】{item.summary}。原因：{result.get('failure')}"
+    if item.kind == "install":
+        return (f"【已核准安裝】{result.get('installed_as')}（digest {result.get('digest')}）。"
+                "之後可以在對話中用新的參數重跑它。")
+    lines = [f"【已核准並執行】{item.workflow}（候選 {item.candidate_id}，digest "
+             f"{result.get('digest')}）結果：{result.get('status')}"]
+    failure = result.get("failure")
+    if failure:
+        lines.append(f"失敗：{json.dumps(failure, ensure_ascii=False)}")
+    steps = result.get("steps")
+    for step in steps if isinstance(steps, list) else []:
+        if not isinstance(step, dict):
+            continue
+        data = step.get("data")
+        detail = json.dumps(data, ensure_ascii=False)
+        lines.append(f"步驟 {step.get('index')}：{step.get('status')}"
+                     + (f"（{step.get('failure')}）" if step.get("failure") else "")
+                     + f"\n{detail[:2500]}")
+    return "\n".join(lines)
 
 
 def _trace() -> TraceIdentifiers:
@@ -362,6 +390,60 @@ class AgentWeb:
     @property
     def request_lock(self) -> threading.RLock:
         return self._one_at_a_time
+
+    # -- Conversation approvals (G4, CONVERSATIONAL_AUTHORING A5) -----------
+
+    def approvals(self, session_id: str | None = None) -> dict[str, Any]:
+        """Pending run and install requests the Agent made; only the owner's
+        button decides them."""
+        chat = self.runtime.chat_authoring
+        if chat is None:
+            return {"approvals": []}
+        return {"approvals": [
+            {"approval_id": item.approval_id, "kind": item.kind, "workflow": item.workflow,
+             "candidate_id": item.candidate_id, "summary": item.summary,
+             "arguments": item.arguments, "session_id": item.session_id,
+             "created_at": item.created_at}
+            for item in chat.approvals(self.runtime.actor, session_id=session_id)
+        ]}
+
+    def decide_approval(self, approval_id: str, decision: str) -> dict[str, Any]:
+        """The owner pressed approve or reject. The result is added to the
+        conversation so the Agent sees it on the next turn."""
+        chat = self.runtime.chat_authoring
+        if chat is None or decision not in {"approve", "reject"}:
+            return {"ok": False, "code": "approval_request_invalid"}
+        try:
+            with self._one_at_a_time:
+                decided = chat.decide(approval_id, self.runtime.actor, decision == "approve")
+        except ChatAuthoringError as error:
+            return {"ok": False, "code": error.code}
+        text = approval_text(decided)
+        message = None
+        if decided.session_id:
+            with self._record_lock(decided.session_id):
+                record = self.runtime.state.conversation(decided.session_id, self.runtime.actor)
+                if record is not None:
+                    now = datetime.now(UTC)
+                    # A pair, as every turn is: the owner's decision, then its result.
+                    said = ConversationMessage(
+                        message_id=f"message-{uuid.uuid4().hex}", role="user",
+                        text=("【核准】" if decision == "approve" else "【拒絕】")
+                        + decided.summary,
+                        created_at=now, status="submitted",
+                    )
+                    added = ConversationMessage(
+                        message_id=f"message-{uuid.uuid4().hex}", role="assistant", text=text,
+                        created_at=now,
+                        status="answered" if decided.status != "failed" else "failed",
+                    )
+                    self.runtime.state.save_conversation(record.model_copy(update={
+                        "updated_at": max(now, record.updated_at),
+                        "messages": (record.messages + (said, added))[-MAX_STORED_MESSAGES:],
+                    }))
+                    message = json.loads(added.model_dump_json())
+        return {"ok": True, "approval": json.loads(decided.model_dump_json()),
+                "text": text, "message": message}
 
     # -- SOP to Workflow authoring --------------------------------------------
 
@@ -1459,6 +1541,7 @@ class AgentWeb:
             "conversation": json.loads(saved.model_dump_json()),
             "answer": answer,
             "draft": draft,
+            "approvals": self.approvals(item.session_id)["approvals"],
         }
 
     def _named_knowledge(self, message: str) -> dict[str, Any] | None:
@@ -2584,6 +2667,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.available_models())
         elif parsed.path == "/api/authoring":
             self._json(200, web.authoring_sessions())
+        elif parsed.path == "/api/approvals":
+            session_id = parse_qs(parsed.query).get("session_id", [None])[0]
+            self._json(200, web.approvals(session_id))
         elif parsed.path == "/api/settings/workflows":
             self._json(200, web.workflow_settings())
         elif parsed.path == "/api/backends":
@@ -2632,6 +2718,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/conversations/backend",
             "/api/backends/authenticate",
             "/api/contributions",
+            "/api/approvals/decide",
             *AUTHORING_ROUTES,
         ):
             self._json(404, {"error": "no such page"})
@@ -2649,6 +2736,14 @@ class _Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
         except (ValueError, TypeError):
             self._json(400, {"error": "the request was not valid JSON"})
+            return
+        if path == "/api/approvals/decide":
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "approval_request_invalid"})
+                return
+            result = self.server.web.decide_approval(
+                str(body.get("approval_id") or ""), str(body.get("decision") or ""))
+            self._json(200 if result.get("ok") else 409, result)
             return
         if path in AUTHORING_ROUTES:
             if not isinstance(body, dict):
