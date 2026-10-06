@@ -115,7 +115,12 @@ def bridge_tools(bridge: BridgeExecutor) -> Sequence[HostTool]:
     if bridge.installed.get(BROWSER_SPEC.identity) is not None:
         tools.append(_tool(bridge, "browser__operate", BROWSER_GUIDE,
                            BROWSER_SPEC.identity, _schema()))
-    if bridge.installed.get(DESKTOP_SPEC.identity) is not None:
-        tools.append(_tool(bridge, "desktop__operate", DESKTOP_GUIDE,
+    desktop = bridge.installed.get(DESKTOP_SPEC.identity)
+    if desktop is not None:
+        binding = getattr(desktop.handler, "binding", None)
+        apps = ", ".join(f"{app.name} ({app.window_title or 'its main window'})"
+                         for app in getattr(binding, "applications", ()))
+        guide = DESKTOP_GUIDE + (f" Registered applications: {apps}." if apps else "")
+        tools.append(_tool(bridge, "desktop__operate", guide,
                            DESKTOP_SPEC.identity, _desktop_schema()))
     return tools

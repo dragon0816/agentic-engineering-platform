@@ -84,7 +84,9 @@ class DesktopHostBinding(Contract):
     workspace_roots: tuple[Text, ...] = ()
 
     def application(self, name: str) -> DesktopApplication | None:
-        return next((item for item in self.applications if item.name == name), None)
+        """The registered application; its name matches regardless of case."""
+        wanted = name.strip().casefold()
+        return next((item for item in self.applications if item.name.casefold() == wanted), None)
 
 
 class DesktopAction(Contract):

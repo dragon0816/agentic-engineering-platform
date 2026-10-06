@@ -234,3 +234,20 @@ def test_run_values_fill_placeholders_so_a_step_replays_with_new_values(tmp_path
     with pytest.raises(CapabilityRefused) as refused:
         run.run(missing)
     assert refused.value.code == "desktop_value_missing"
+
+
+def test_an_app_name_matches_regardless_of_case_and_the_tool_lists_the_apps(tmp_path: Path) -> None:
+    from capabilities.desktop_session.handlers import DesktopResult
+    from capabilities.runtime import InstalledCapabilities, LocalPolicy
+    from common.assets import ExecutionDependencies
+    from host_runtime.bridge_tools import bridge_tools
+    from workflow.dispatch import BridgeExecutor
+
+    fakes = Fakes()
+    run = handler(tmp_path, fakes)
+    assert run.run(DesktopRequest.model_validate({"app": "Expense"})).app == "expense"
+    installed = InstalledCapabilities()
+    installed.register(SPEC, run, DesktopRequest, DesktopResult,
+                       ExecutionDependencies(central_required=False))
+    (tool,) = bridge_tools(BridgeExecutor(installed, LocalPolicy(())))
+    assert "Registered applications: expense (Expense Viewer)" in tool.tool.description
