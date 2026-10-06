@@ -1,0 +1,62 @@
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Invoice CSV headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice rows downloaded: 13
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W03\workspace\output\project_report_2026-09_invoices.xlsx
+Summary totals: {'P001': '386445.00', 'P002': '156256.00', 'P003': '0.00', 'P004': '78750.00', 'P005': '236371.20'}
+Exceptions: [['Invoices', '0090000207', None, 'Overdue'], ['Invoices', '0090000209', 'P005', 'Overdue'], ['Invoices', '0090000212', 'P002', 'Overdue'], ['Invoices', '0090000217', 'P002', 'Overdue']]
+CHECK PASSED
+{
+  "output": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\W03\\workspace\\output\\project_report_2026-09_invoices.xlsx",
+  "invoice_rows": 13,
+  "summary_projects": [
+    "P001",
+    "P002",
+    "P003",
+    "P004",
+    "P005"
+  ],
+  "summary_totals_twd": {
+    "P001": "386445.00",
+    "P002": "156256.00",
+    "P003": "0.00",
+    "P004": "78750.00",
+    "P005": "236371.20"
+  },
+  "exceptions_count": 4,
+  "exceptions": [
+    [
+      "Invoices",
+      "0090000207",
+      null,
+      "Overdue"
+    ],
+    [
+      "Invoices",
+      "0090000209",
+      "P005",
+      "Overdue"
+    ],
+    [
+      "Invoices",
+      "0090000212",
+      "P002",
+      "Overdue"
+    ],
+    [
+      "Invoices",
+      "0090000217",
+      "P002",
+      "Overdue"
+    ]
+  ],
+  "due_on_asof_not_overdue": [
+    "0090000211",
+    "0090000213",
+    "0090000219"
+  ],
+  "other_source_sheets_blank": [
+    "Orders",
+    "Expenses",
+    "Quotes"
+  ]
+}

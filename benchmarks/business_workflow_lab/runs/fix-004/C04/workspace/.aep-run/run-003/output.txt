@@ -1,0 +1,64 @@
+Output workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\C04\workspace\output\sent_quotes_2026-09_report.xlsx
+Quote rows: 4
+Line rows: 8
+Summary rows: 2
+CLI attempts:
+- quotes list Sent Sep 2026 attempt 1 exit 4 stderr='quote_cli: error: quote service temporarily unavailable, retry later' stdout_length=0
+- quotes list Sent Sep 2026 attempt 2 exit 0 stderr='' stdout_length=1105
+- quotes get Q0010 attempt 1 exit 0 stderr='' stdout_length=766
+- quotes get Q0016 attempt 1 exit 0 stderr='' stdout_length=441
+- quotes get Q0017 attempt 1 exit 0 stderr='' stdout_length=762
+- quotes get Q0019 attempt 1 exit 0 stderr='' stdout_length=441
+Checks:
+- OK Workbook exists C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\C04\workspace\output\sent_quotes_2026-09_report.xlsx
+- OK Sheet names preserved ['Report', 'Quotes', 'Lines', 'Summary', 'Instructions']
+- OK Report period from '2026-09-01'
+- OK Report period to '2026-09-30'
+- OK Quotes header row preserved 
+- OK Lines header row preserved 
+- OK Summary header row preserved 
+- OK Quote row count saved=4 expected=4
+- OK Line row count saved=8 expected=8
+- OK Summary row count saved=2 expected=2
+- OK Quote IDs text format row 5 ['@', '@', '@']
+- OK Quote numeric types row 5 ['float', 'int', 'float', 'float']
+- OK Quote status Sent row 5 'Sent'
+- OK Quote date in Sep 2026 row 5 datetime.datetime(2026, 9, 1, 0, 0)
+- OK Quote IDs text format row 6 ['@', '@', '@']
+- OK Quote numeric types row 6 ['float', 'int', 'float', 'float']
+- OK Quote status Sent row 6 'Sent'
+- OK Quote date in Sep 2026 row 6 datetime.datetime(2026, 9, 14, 0, 0)
+- OK Quote IDs text format row 7 ['@', '@', '@']
+- OK Quote numeric types row 7 ['int', 'int', 'int', 'int']
+- OK Quote status Sent row 7 'Sent'
+- OK Quote date in Sep 2026 row 7 datetime.datetime(2026, 9, 17, 0, 0)
+- OK Quote IDs text format row 8 ['@', '@', '@']
+- OK Quote numeric types row 8 ['float', 'int', 'float', 'int']
+- OK Quote status Sent row 8 'Sent'
+- OK Quote date in Sep 2026 row 8 datetime.datetime(2026, 9, 24, 0, 0)
+- OK Line IDs text format row 5 ['@', '@']
+- OK Line numeric types row 5 ['int', 'int', 'int']
+- OK Line IDs text format row 6 ['@', '@']
+- OK Line numeric types row 6 ['int', 'int', 'int']
+- OK Line IDs text format row 7 ['@', '@']
+- OK Line numeric types row 7 ['int', 'float', 'float']
+- OK Line IDs text format row 8 ['@', '@']
+- OK Line numeric types row 8 ['int', 'float', 'float']
+- OK Line IDs text format row 9 ['@', '@']
+- OK Line numeric types row 9 ['int', 'int', 'int']
+- OK Line IDs text format row 10 ['@', '@']
+- OK Line numeric types row 10 ['int', 'int', 'int']
+- OK Line IDs text format row 11 ['@', '@']
+- OK Line numeric types row 11 ['int', 'int', 'int']
+- OK Line IDs text format row 12 ['@', '@']
+- OK Line numeric types row 12 ['int', 'float', 'float']
+- OK Summary B2 formula extended '=SUM(Quotes!K5:K8)'
+- OK QuoteID order Q0010 'Q0010'
+- OK NetAmountTWD Q0010 saved=207629.63 expected=207629.63
+- OK QuoteID order Q0016 'Q0016'
+- OK NetAmountTWD Q0016 saved=7797.76 expected=7797.76
+- OK QuoteID order Q0017 'Q0017'
+- OK NetAmountTWD Q0017 saved=433800 expected=433800.00
+- OK QuoteID order Q0019 'Q0019'
+- OK NetAmountTWD Q0019 saved=8208 expected=8208.00
+VERIFICATION PASSED

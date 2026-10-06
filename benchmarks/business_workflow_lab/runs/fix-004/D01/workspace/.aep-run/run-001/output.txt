@@ -1,0 +1,65 @@
+workspace C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\D01\workspace
+input files: ['expense_manual.md', 'expense_template.xlsx', 'fx_rates.csv']
+template sheets: ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+SHEET Report max_row 20 max_col 6
+('Expense Report 費用報表', None, None, None, None, None)
+(None, None, None, None, None, None)
+('起始日期 From', None, '結束日期 To', None, None, None)
+('條件 Condition', None, None, None, None, None)
+('產出時間 Generated at', None, None, None, None, None)
+(None, None, None, None, None, None)
+('資料來源 Source', None, '取得時間 Fetched at', None, None, None)
+(None, None, None, None, None, None)
+SHEET Details max_row 4 max_col 14
+('Expense details', None, None, None, None, None, None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None, None, None, None, None, None)
+('ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview')
+SHEET Summary max_row 4 max_col 6
+('Expense summary', None, None, None, None, None)
+('總計 TWD Totals', '=SUM(Details!I5:I5)', None, None, None, None)
+(None, None, None, None, None, None)
+('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+SHEET Exceptions max_row 4 max_col 4
+('Exceptions 例外', None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+(None, None, None, None)
+('ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason')
+SHEET Instructions max_row 34 max_col 3
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+fx ['Currency', 'RateToTWD', 'Note']
+fx ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+fx ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+fx ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+manual sample:
+# Expense Viewer（模擬原生桌面費用程式）使用說明
+
+> 合成測試資料。這是 Windows 桌面視窗程式（WinForms），不是網頁。
+
+- 在 AEP 中已登記為桌面應用程式 `expense`（由平台啟動，需要已登入的互動式 Windows 桌面）。
+- 視窗標題：`Expense Viewer (synthetic lab)`
+- 控制項名稱（UI Automation id）：EmployeeFilter、ProjectFilter、DateFrom、DateTo、StatusFilter、QueryButton、ResultsList、PreviousButton、NextButton、CountLabel、DetailsButton、ExportCsvButton、ExportExcelButton；明細視窗為 Detail<欄位>（例如 DetailReceiptID）與 CloseButton。
+
+## 主視窗
+
+| 控制項 | 說明 |
+|---|---|
+| Employee 員工 | 下拉選單 E001～E006，空白代表全部 |
+| Project 專案 | 下拉選單 P001～P005，空白代表全部 |
+| Date from 起 / Date to 迄 | YYYY-MM-DD，含起訖兩日（ExpenseDate） |
+| Status 狀態 | Draft、Submitted、Approved、Rejected，空白代表全部 |
+| Query 查詢 | 執行查詢，完成後跳出「查詢完成，共 N 筆」或「查無資料（0 筆）」 |
+
+- 結果表格每頁 8 筆，下方顯示 `Total N rows · Page x / y`，用 **Previous 上一頁** / **Next 下一頁** 換頁。
+- 表格欄位：ExpenseID、EmployeeID、EmployeeName、ProjectID、ExpenseDate、Category、Currency、Amount、Status。
+- 選一列後按 **Details 明細**（或雙擊該列）開啟明細視窗，內含 ReceiptID、Category、Description（可能含中文與換行）、MissingReceipt；按 **Close 返回** 關閉。
+- **Export CSV 匯出 CSV**、**Export Excel 匯出 Excel**：開啟 Windows「另存新檔」對話框，匯出目前篩選條件的全部結果（不只目前這一頁），欄位包含 ReceiptID、Description、MissingReceipt。
+- 匯出若顯示「暫時無法寫入，請重試」，表示這次沒有產生檔案，可以再按一次匯出。
+- 程式沒有其他資料介面；請透過視窗操作與匯出取得資料。

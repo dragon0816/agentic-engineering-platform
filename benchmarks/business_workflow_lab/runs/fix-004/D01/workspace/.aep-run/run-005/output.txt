@@ -1,0 +1,27 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\D01\workspace
+INPUT FILES
+ - expense_manual.md 2007
+ - expense_template.xlsx 10969
+ - fx_rates.csv 276
+OUTPUT FILES
+ - E001_september_expenses.xlsx 12735
+ - expense_export_E001_2026-09.xlsx 6179
+EXPECTED_REPORT_EXISTS True
+EXPECTED_EXPORT_EXISTS True
+SHEETS ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+SHEET_DIM Report 20 6
+SAMPLE Report [["Expense Report 費用報表", null, null, null, null, null], [null, null, null, null, null, null], ["起始日期 From", "2026-09-01", "結束日期 To", "2026-09-30", null, null], ["條件 Condition", "EmployeeID=E001; ExpenseDate 2026-09-01 to 2026-09-30; all statuses", null, null, null, null], ["產出時間 Generated at", "2026-10-07T05:02:41+08:00", null, null, null, null], [null, null, null, null, null, null], ["資料來源 Source", "Expense Viewer (synthetic lab) export", "取得時間 Fetched at", "2026-10-07T05:02:41+08:00", null, null], [null, null, null, null, null, null]]
+SHEET_DIM Details 17 14
+SAMPLE Details [["Expense details", null, null, null, null, null, null, null, null, null, null, null, null, null], ["第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。", null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null], ["ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category", "Currency", "Amount", "AmountTWD", "Status", "ReceiptID", "Description", "MissingReceipt", "NeedsReview"], ["EXP-00001", "E001", "陳怡君 (Yi-Chun Chen)", "P001", "2026-09-01", "Travel", "TWD", 1280, 1280, "Approved", "RC702658", "高鐵 台北-新竹 往返", "false", "false"], ["EXP-00002", "E001", "陳怡君 (Yi-Chun Chen)", "P001", "2026-09-02", "Hotel", "USD", 200, 6400, "Approved", "RC138828", "客戶驗收住宿 2 晚", "false", "false"], ["EXP-00003", "E001", "陳怡君 (Yi-Chun Chen)", "P003", "2026-09-03", "Meals", "TWD", 450, 450, "Submitted", "RC162210", "加班餐費", "false", "false"], ["EXP-00004", "E001", "陳怡君 (Yi-Chun Chen)", "P003", "2026-09-05", "Supplies", "EUR", 42.5, 1487.5, "Approved", "RC358881", "治具耗材", "false", "false"]]
+SHEET_DIM Summary 11 6
+SAMPLE Summary [["Expense summary", null, null, null, null, null], ["總計 TWD Totals", "=SUM(Details!I5:I17)", null, null, null, null], [null, null, null, null, null, null], ["Group", "SubGroup", "Currency", "Amount", "AmountTWD", "Count"], ["Status", "Approved", "EUR", 102.5, 3587.5, 2], ["Status", "Approved", "TWD", 5050, 5050, 3], ["Status", "Approved", "USD", 200, 6400, 1], ["Status", "Draft", "USD", 124.15, 3972.8, 2]]
+SHEET_DIM Exceptions 5 4
+SAMPLE Exceptions [["Exceptions 例外", null, null, null], ["第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。", null, null, null], [null, null, null, null], ["ExpenseID", "EmployeeID", "ExpenseDate", "Reason"], ["EXP-00006", "E001", "2026-09-10", "MissingReceipt=true; ReceiptID blank"]]
+SHEET_DIM Instructions 34 3
+SAMPLE Instructions [["填寫說明 Instructions（請勿修改本工作表）", null, null], [null, null, null], ["Sheet", "Cell / Range", "Content and rule"], ["Report", "A1:F1", "合併儲存格標題，保留不改。"], ["Report", "B3 / D3", "查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。"], ["Report", "B4", "本次查詢條件的文字說明。"], ["Report", "B5", "產出時間（ISO 8601）。"], ["Report", "B7 / D7", "資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。"]]
+DETAILS_HEADER_ROW 4
+DETAILS_HEADERS ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\D01\workspace\.aep-run\run-005\script.py", line 57, in <module>
+    raise AssertionError(f'Missing Details columns: {missing_cols}')
+AssertionError: Missing Details columns: ['Date']

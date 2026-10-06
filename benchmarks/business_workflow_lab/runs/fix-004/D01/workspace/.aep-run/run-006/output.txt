@@ -1,0 +1,23 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\D01\workspace
+INPUT FILES
+ - expense_manual.md 2007
+ - expense_template.xlsx 10969
+ - fx_rates.csv 276
+OUTPUT FILES
+ - E001_september_expenses.xlsx 12735
+ - expense_export_E001_2026-09.xlsx 6179
+SHEETS ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+DETAILS_HEADERS ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+DETAILS_ROW_COUNT 13
+DETAILS_SAMPLE [{"ExpenseID": "EXP-00001", "EmployeeID": "E001", "EmployeeName": "陳怡君 (Yi-Chun Chen)", "ProjectID": "P001", "ExpenseDate": "2026-09-01", "Category": "Travel", "Currency": "TWD", "Amount": 1280, "AmountTWD": 1280, "Status": "Approved", "ReceiptID": "RC702658", "Description": "高鐵 台北-新竹 往返", "MissingReceipt": "false", "NeedsReview": "false"}, {"ExpenseID": "EXP-00002", "EmployeeID": "E001", "EmployeeName": "陳怡君 (Yi-Chun Chen)", "ProjectID": "P001", "ExpenseDate": "2026-09-02", "Category": "Hotel", "Currency": "USD", "Amount": 200, "AmountTWD": 6400, "Status": "Approved", "ReceiptID": "RC138828", "Description": "客戶驗收住宿 2 晚", "MissingReceipt": "false", "NeedsReview": "false"}, {"ExpenseID": "EXP-00003", "EmployeeID": "E001", "EmployeeName": "陳怡君 (Yi-Chun Chen)", "ProjectID": "P003", "ExpenseDate": "2026-09-03", "Category": "Meals", "Currency": "TWD", "Amount": 450, "AmountTWD": 450, "Status": "Submitted", "ReceiptID": "RC162210", "Description": "加班餐費", "MissingReceipt": "false", "NeedsReview": "false"}]
+REPORT_B3_D3_B4_B5_B7_D7 2026-09-01 2026-09-30 EmployeeID=E001; ExpenseDate 2026-09-01 to 2026-09-30; all statuses 2026-10-07T05:02:41+08:00 Expense Viewer (synthetic lab) export 2026-10-07T05:02:41+08:00
+SUMMARY_TOTAL_FORMULA_B2 =SUM(Details!I5:I17)
+SUMMARY_HEADERS ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+SUMMARY_ROWS [{"Group": "Status", "SubGroup": "Approved", "Currency": "EUR", "Amount": 102.5, "AmountTWD": 3587.5, "Count": 2}, {"Group": "Status", "SubGroup": "Approved", "Currency": "TWD", "Amount": 5050, "AmountTWD": 5050, "Count": 3}, {"Group": "Status", "SubGroup": "Approved", "Currency": "USD", "Amount": 200, "AmountTWD": 6400, "Count": 1}, {"Group": "Status", "SubGroup": "Draft", "Currency": "USD", "Amount": 124.15, "AmountTWD": 3972.8, "Count": 2}, {"Group": "Status", "SubGroup": "Rejected", "Currency": "EUR", "Amount": 155, "AmountTWD": 5425, "Count": 1}, {"Group": "Status", "SubGroup": "Rejected", "Currency": "USD", "Amount": 12.3, "AmountTWD": 393.6, "Count": 1}, {"Group": "Status", "SubGroup": "Submitted", "Currency": "TWD", "Amount": 7049, "AmountTWD": 7049, "Count": 3}]
+TWD_TOTAL 31877.9
+EXCEPTION_HEADERS ['ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason']
+EXCEPTION_ROWS [{"ExpenseID": "EXP-00006", "EmployeeID": "E001", "ExpenseDate": "2026-09-10", "Reason": "MissingReceipt=true; ReceiptID blank"}]
+EXPORT_SHEETS ['Expenses']
+EXPORT_DIM 14 12
+EXPORT_HEADERS ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+VALIDATION_OK

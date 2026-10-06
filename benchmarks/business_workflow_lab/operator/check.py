@@ -208,9 +208,13 @@ def summary_rows(path: Path) -> list[tuple[set[str], set[Decimal]]]:
 def grouped_summary_check(path: Path, summary: dict[str, dict[str, Any]], need_amount: bool) -> dict[str, Any]:
     rows = summary_rows(path)
     missing = []
+    def has(strings: set[str], part: str) -> bool:
+        # A key may sit inside a label such as "E001 陳怡君" (grader 1.2).
+        return any(part == cell or part in re.split(r"[\s|/(),:;]+", cell) for cell in strings)
+
     for key, value in summary.items():
         parts = {p for p in key.split("|") if p}
-        hit = any(parts <= strings and dec(value["twd"]) in numbers
+        hit = any(all(has(strings, part) for part in parts) and dec(value["twd"]) in numbers
                   and (not need_amount or dec(value["amount"]) in numbers) for strings, numbers in rows)
         if not hit:
             missing.append(f"{key}: amount {value['amount']}, TWD {value['twd']}")

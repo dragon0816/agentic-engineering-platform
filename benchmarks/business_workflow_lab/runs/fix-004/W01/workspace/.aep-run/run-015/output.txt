@@ -1,0 +1,58 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace
+output files: ['output\\downloads\\sales_orders_raw.csv', 'output\\downloads\\september_open_orders_raw.csv', 'output\\september_open_orders.xlsx']
+RAW headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+RAW rows: 14
+RAW orderids: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+RAW rows full:
+{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+{'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}
+{'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00'}
+{'OrderID': '0045000113', 'CustomerID': 'C004', 'CustomerName': '藍海電子有限公司', 'ProjectID': '', 'OrderDate': '2026-09-05', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '15390.00'}
+{'OrderID': '0045000115', 'CustomerID': 'C005', 'CustomerName': 'Pacific Test Systems Inc.', 'ProjectID': '', 'OrderDate': '2026-09-09', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '6391.00'}
+{'OrderID': '0045000116', 'CustomerID': 'C008', 'CustomerName': '新竹量測科技', 'ProjectID': '', 'OrderDate': '2026-09-10', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '29400.00'}
+{'OrderID': '0045000118', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-14', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '17484.75'}
+{'OrderID': '0045000119', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-15', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '8775.00'}
+{'OrderID': '0045000120', 'CustomerID': 'C006', 'CustomerName': 'Helios Optics B.V.', 'ProjectID': '', 'OrderDate': '2026-09-16', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '461.70'}
+{'OrderID': '0045000122', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-21', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '4141.00'}
+{'OrderID': '0045000124', 'CustomerID': 'C004', 'CustomerName': '藍海電子有限公司', 'ProjectID': '', 'OrderDate': '2026-09-24', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '45000.00'}
+{'OrderID': '0045000126', 'CustomerID': 'C008', 'CustomerName': '新竹量測科技', 'ProjectID': '', 'OrderDate': '2026-09-28', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '9171.00'}
+{'OrderID': '0045000127', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-30', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '2214.92'}
+{'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-30', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '104160.00'}
+RAW calc total TWD: 2674743.45
+RAW by currency: {'TWD': [6, '637522.50', '637522.50'], 'USD': [4, '32014.00', '1024448.00'], 'EUR': [4, '28936.37', '1012772.95']}
+sheets: ['Report', 'Details', 'Summary', 'Instructions']
+Details headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'RateToTWD', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+Details row count: 14
+DETAIL {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'RateToTWD': 1, 'NetAmountTWD': 150000, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': datetime.datetime(2026, 9, 2, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 293572.5, 'RateToTWD': 1, 'NetAmountTWD': 293572.5, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': datetime.datetime(2026, 9, 4, 0, 0), 'Status': 'Open', 'Currency': 'USD', 'NetAmount': 12311, 'RateToTWD': 32, 'NetAmountTWD': 393952, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000113', 'CustomerID': 'C004', 'CustomerName': '藍海電子有限公司', 'ProjectID': None, 'OrderDate': datetime.datetime(2026, 9, 5, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 15390, 'RateToTWD': 1, 'NetAmountTWD': 15390, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000115', 'CustomerID': 'C005', 'CustomerName': 'Pacific Test Systems Inc.', 'ProjectID': None, 'OrderDate': datetime.datetime(2026, 9, 9, 0, 0), 'Status': 'Open', 'Currency': 'USD', 'NetAmount': 6391, 'RateToTWD': 32, 'NetAmountTWD': 204512, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000116', 'CustomerID': 'C008', 'CustomerName': '新竹量測科技', 'ProjectID': None, 'OrderDate': datetime.datetime(2026, 9, 10, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 29400, 'RateToTWD': 1, 'NetAmountTWD': 29400, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000118', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': datetime.datetime(2026, 9, 14, 0, 0), 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 17484.75, 'RateToTWD': 35, 'NetAmountTWD': 611966.25, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000119', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': datetime.datetime(2026, 9, 15, 0, 0), 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 8775, 'RateToTWD': 35, 'NetAmountTWD': 307125, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000120', 'CustomerID': 'C006', 'CustomerName': 'Helios Optics B.V.', 'ProjectID': None, 'OrderDate': datetime.datetime(2026, 9, 16, 0, 0), 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 461.7, 'RateToTWD': 35, 'NetAmountTWD': 16159.5, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000122', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': datetime.datetime(2026, 9, 21, 0, 0), 'Status': 'Open', 'Currency': 'USD', 'NetAmount': 4141, 'RateToTWD': 32, 'NetAmountTWD': 132512, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000124', 'CustomerID': 'C004', 'CustomerName': '藍海電子有限公司', 'ProjectID': None, 'OrderDate': datetime.datetime(2026, 9, 24, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 45000, 'RateToTWD': 1, 'NetAmountTWD': 45000, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000126', 'CustomerID': 'C008', 'CustomerName': '新竹量測科技', 'ProjectID': None, 'OrderDate': datetime.datetime(2026, 9, 28, 0, 0), 'Status': 'Open', 'Currency': 'USD', 'NetAmount': 9171, 'RateToTWD': 32, 'NetAmountTWD': 293472, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000127', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': datetime.datetime(2026, 9, 30, 0, 0), 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 2214.92, 'RateToTWD': 35, 'NetAmountTWD': 77522.2, 'CustomerContact': None, 'PaymentTerms': None}
+DETAIL {'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': datetime.datetime(2026, 9, 30, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 104160, 'RateToTWD': 1, 'NetAmountTWD': 104160, 'CustomerContact': None, 'PaymentTerms': None}
+blank_contacts: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+blank_payment_terms: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+Report A1:F8: [['Sales Orders Report', None, None, None, None, None], ['2026-09-01 to 2026-09-30 / Open', None, None, None, None, None], ['Grand Total TWD', 2674743.45, '結束日期 To', None, None, None], ['條件 Condition', None, None, None, None, None], ['產出時間 Generated at', None, None, None, None, None], [None, None, None, None, None, None], ['資料來源 Source', None, '取得時間 Fetched at', None, None, None], [None, None, None, None, None, None]]
+Summary all: [['Sales summary', None, None, None, None, None], ['DateFrom', '2026-09-01', None, None, None, None], ['DateTo', '2026-09-30', None, None, None, None], ['Status', 'Open', None, None, None, None], [None, None, None, None, None, None], ['Currency', 'Amount', 'RateToTWD', 'AmountTWD', 'Count', None], ['EUR', 28936.37, 35, 1012772.95, 4, None], ['TWD', 637522.5, 1, 637522.5, 6, None], ['USD', 32014, 32, 1024448, 4, None], ['Grand Total TWD', None, None, 2674743.45, 14, None]]
+summary_total: 2674743.45 details_total: 2674743.45
+PASS csv row count 14
+PASS details row count 14
+PASS status Open
+PASS date range
+PASS order asc
+PASS OrderID text-like preserved
+PASS headers exact
+PASS rates and NetAmountTWD
+PASS details total matches raw
+FAIL CustomerContact not all blank
+FAIL PaymentTerms not all blank
+PASS Summary grand total matches Details
+PASS Report grand total matches Details
+VALIDATION FAILED

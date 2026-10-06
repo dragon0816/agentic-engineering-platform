@@ -336,8 +336,12 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     checks = grade_workbook(task, variant, book, replies, output)
     if task == "W04":
         sap = evidence.get("sap", {})
+        sap_events = [e["event"] for e in task_events["sap"]]
+        expired_at = sap_events.index("session_expired_injected") if "session_expired_injected" in sap_events \
+            else None
+        relogged = expired_at is not None and "login" in sap_events[expired_at:]
         checks.append({"name": "W04: the injected session expiry happened and the Agent signed in again",
-                       "ok": sap.get("session_expired", 0) >= 1 and sap.get("logins", 0) >= 2, "detail": sap})
+                       "ok": relogged, "detail": {**sap, "signed_in_after_expiry": relogged}})
     if task == "W02":
         details = set(evidence.get("sap", {}).get("details", []))
         from expected import expected
@@ -399,6 +403,11 @@ def classify(task: str, variant: str, timed_out: bool, excel_ok: bool | None, ev
         notes.append("scripts read mock internals instead of using the interface: " + "; ".join(bypass[:3]))
     systems = SYSTEMS[task]
     tools = agent_tools()
+    # Reading the mocks' data behind their interfaces is never a pass (spec §5);
+    # `operator/` holds only source data, answers and operator state.
+    data_read = [b for b in bypass if re.search(r"source\.json|operator", b, re.I)]
+    if data_read:
+        return "FAIL", None, "; ".join(["scripts read the mocks' data behind the interface", *notes])
     # A tool that exists but was not used is the Agent's failure, not a missing tool.
     if "expense" in systems and "expense" not in evidence:
         reason = "; ".join(["the Expense desktop app was never operated", *notes])

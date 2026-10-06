@@ -1,0 +1,29 @@
+{
+  "from_date": "2026-09-01",
+  "to_date": "2026-09-30",
+  "generated_at": "2026-10-07T05:22:37+08:00",
+  "fx_rates": {
+    "TWD": "1",
+    "USD": "32",
+    "EUR": "35"
+  },
+  "source_files": {
+    "orders": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\X01\\workspace\\output\\downloads\\sap_orders.csv",
+    "invoices": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\X01\\workspace\\output\\downloads\\sap_invoices.csv",
+    "expenses": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\X01\\workspace\\output\\expense_approved.csv",
+    "quotes": "quote_cli quotes list"
+  },
+  "counts": {
+    "orders_non_cancelled": 18,
+    "invoices": 13,
+    "approved_expenses": 15,
+    "accepted_quotes": 4,
+    "exceptions": 15,
+    "summary_projects": 5
+  },
+  "rules": [
+    "ProjectID is the only integration key",
+    "Cancelled orders excluded",
+    "Orders and quotes summarized in separate columns"
+  ]
+}

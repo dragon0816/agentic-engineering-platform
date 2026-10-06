@@ -1,0 +1,33 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace
+output files: ['output\\downloads\\sales_orders_raw.csv', 'output\\downloads\\september_open_orders_raw.csv', 'output\\september_open_orders.xlsx']
+
+CSV: output/downloads/sales_orders_raw.csv exists True
+headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+row_count: 14
+all_statuses: ['Open']
+date_min_max: 2026-09-01 2026-09-30
+
+CSV: output/downloads/september_open_orders_raw.csv exists True
+headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+row_count: 14
+all_statuses: ['Open']
+date_min_max: 2026-09-01 2026-09-30
+
+Workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\output\september_open_orders.xlsx exists True
+sheets: ['Report', 'Details', 'Summary', 'Instructions']
+
+Details headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'RateToTWD', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+Details row_count: 14
+first_detail: {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'RateToTWD': 1, 'NetAmountTWD': 150000, 'CustomerContact': None, 'PaymentTerms': None}
+last_detail: {'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': datetime.datetime(2026, 9, 30, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 104160, 'RateToTWD': 1, 'NetAmountTWD': 104160, 'CustomerContact': None, 'PaymentTerms': None}
+blank CustomerContact IDs: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+blank PaymentTerms IDs: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+Details total TWD: 2674743.45
+
+Summary headers: ['Currency', 'Amount', 'RateToTWD', 'AmountTWD', 'Count', None]
+Summary rows: [{'Currency': 'EUR', 'Amount': 28936.37, 'RateToTWD': 35, 'AmountTWD': 1012772.95, 'Count': 4, None: None}, {'Currency': 'TWD', 'Amount': 637522.5, 'RateToTWD': 1, 'AmountTWD': 637522.5, 'Count': 6, None: None}, {'Currency': 'USD', 'Amount': 32014, 'RateToTWD': 32, 'AmountTWD': 1024448, 'Count': 4, None: None}, {'Currency': 'Grand Total TWD', 'Amount': None, 'RateToTWD': None, 'AmountTWD': 2674743.45, 'Count': 14, None: None}]
+Summary total TWD: 5349486.90
+
+Report B3 grand total: 2674743.45
+
+FINAL_CHECK_ERRORS: ['CustomerContact is unexpectedly blank for most/all orders', 'PaymentTerms has blanks', 'Summary total 5349486.90 != Details total 2674743.45']

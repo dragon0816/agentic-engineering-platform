@@ -1,0 +1,12 @@
+Inputs:
+ raw_csv C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\output\downloads\september_open_orders_raw.csv True
+ template C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\input\sales_template.xlsx True
+ fx_file C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\input\fx_rates.csv True
+fx header ['Currency', 'RateToTWD', 'Note']
+rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+csv columns ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+raw row count 14
+sample rows [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}, {'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00'}]
+saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\output\september_open_orders.xlsx 11425
+summary rows: [['Currency', 'EUR', 'EUR', 28936.37, 1012772.95, 4], ['Currency', 'TWD', 'TWD', 637522.5, 637522.5, 6], ['Currency', 'USD', 'USD', 32014, 1024448, 4], ['Total', 'All currencies', None, None, 2674743.45, 14]]
+CHECK PASSED: output workbook reopened; headers, 14 detail rows, sorted text OrderID values, date/status filters, numeric amounts, FX conversions, Summary currency rows and TWD total, and report metadata verified.

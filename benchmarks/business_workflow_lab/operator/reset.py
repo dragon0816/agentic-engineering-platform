@@ -33,7 +33,10 @@ def reset(sap: str = "normal", expense: str = "normal", quote: str = "normal", l
     for system, mode in {"sap": sap, "expense": expense, "quote": quote}.items():
         if mode not in MODES[system]:
             raise ValueError(f"{system}: unknown mode {mode}")
-        (STATE / f"{system}_fault.json").write_text(json.dumps({"mode": mode}), encoding="utf-8")
+        # A new epoch signs everybody out of the SAP-like site: each task starts fresh.
+        (STATE / f"{system}_fault.json").write_text(
+            json.dumps({"mode": mode, "epoch": datetime.now().isoformat(timespec="microseconds")}),
+            encoding="utf-8")
         log = STATE / f"{system}_events.jsonl"
         with log.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps({"at": datetime.now().isoformat(timespec="milliseconds"),

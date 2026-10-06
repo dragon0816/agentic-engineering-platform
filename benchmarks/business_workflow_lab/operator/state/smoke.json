@@ -22,7 +22,7 @@
  {
   "check": "SAP: unauthenticated request goes to login",
   "ok": true,
-  "detail": "http://127.0.0.1:56964/login?next=/orders"
+  "detail": "http://127.0.0.1:58081/login?next=/orders"
  },
  {
   "check": "SAP: a sign-in without the company account is refused",
@@ -32,7 +32,7 @@
  {
   "check": "SAP: login works",
   "ok": true,
-  "detail": "http://127.0.0.1:56964/orders"
+  "detail": "http://127.0.0.1:58081/orders"
  },
  {
   "check": "SAP: Sept Open total matches expected",
@@ -67,7 +67,7 @@
  {
   "check": "SAP: expire_session_once sends the next request to login",
   "ok": true,
-  "detail": "http://127.0.0.1:56964/login?expired=1&next=/orders%3Ffrom%3D2026-09-01%26to%3D2026-09-30%26status%3DOpen%26page%3D2"
+  "detail": "http://127.0.0.1:58081/login?expired=1&next=/orders%3Ffrom%3D2026-09-01%26to%3D2026-09-30%26status%3DOpen%26page%3D2"
  },
  {
   "check": "SAP: re-login recovers",
@@ -82,27 +82,7 @@
  {
   "check": "SAP: delay_once delays the first list",
   "ok": true,
-  "detail": "4.05"
- },
- {
-  "check": "SAP (Edge): filter shows the expected total",
-  "ok": true,
-  "detail": ""
- },
- {
-  "check": "SAP (Edge): next page works",
-  "ok": true,
-  "detail": ""
- },
- {
-  "check": "SAP (Edge): detail opens",
-  "ok": true,
-  "detail": ""
- },
- {
-  "check": "SAP (Edge): CSV download has every filtered row",
-  "ok": true,
-  "detail": "14"
+  "detail": "4.06"
  },
  {
   "check": "CLI: --help exits 0",
@@ -203,95 +183,5 @@
   "check": "Expense: events are logged",
   "ok": true,
   "detail": ""
- },
- {
-  "check": "Expense: a real desktop window appears",
-  "ok": true,
-  "detail": "Expense Viewer (synthetic lab)"
- },
- {
-  "check": "Expense WinForms: UI Automation script ran to the end",
-  "ok": true,
-  "detail": ""
- },
- {
-  "check": "Expense WinForms: window title",
-  "ok": true,
-  "detail": "Expense Viewer (synthetic lab)"
- },
- {
-  "check": "Expense WinForms: every control has its stable UIA name",
-  "ok": true,
-  "detail": "ControlType.DataGrid|ResultsList"
- },
- {
-  "check": "Expense WinForms: EmployeeFilter set to E001 (SelectionItem)",
-  "ok": true,
-  "detail": "E001"
- },
- {
-  "check": "Expense WinForms: DateFrom / DateTo set (ValuePattern)",
-  "ok": true,
-  "detail": "('2026-09-01', '2026-09-30')"
- },
- {
-  "check": "Expense WinForms: Query message box reports the expected count",
-  "ok": true,
-  "detail": "查詢完成，共 13 筆。"
- },
- {
-  "check": "Expense WinForms: CountLabel shows the expected total",
-  "ok": true,
-  "detail": "Total 13 rows · Page 1 / 2"
- },
- {
-  "check": "Expense WinForms: page 1 shows 8 rows",
-  "ok": true,
-  "detail": "8"
- },
- {
-  "check": "Expense WinForms: Next shows page 2 with the rest",
-  "ok": true,
-  "detail": "('Total 13 rows · Page 2 / 2', 5)"
- },
- {
-  "check": "Expense WinForms: Details opens the selected expense",
-  "ok": true,
-  "detail": "Expense detail EXP-00009"
- },
- {
-  "check": "Expense WinForms: DetailReceiptID matches the source",
-  "ok": true,
-  "detail": "RC254438"
- },
- {
-  "check": "Expense WinForms: DetailDescription keeps the line break",
-  "ok": true,
-  "detail": "機票 TPE-FRA\r\n含行李費"
- },
- {
-  "check": "Expense WinForms: Save As offers expenses_export.csv",
-  "ok": true,
-  "detail": "expenses_export.csv"
- },
- {
-  "check": "Expense WinForms: export message reports every filtered row",
-  "ok": true,
-  "detail": "已匯出 13 筆至\nC:\\Users\\Chi_L\\AppData\\Local\\Temp\\tmpjugmm5et\\with space\\expenses uia.csv"
- },
- {
-  "check": "Expense WinForms: CSV export has every filtered row",
-  "ok": true,
-  "detail": "13"
- },
- {
-  "check": "Expense WinForms: CSV bytes match the Tk edition (BOM, CRLF, quoting)",
-  "ok": true,
-  "detail": "b'\\xef\\xbb\\xbfExpenseID,Employe'"
- },
- {
-  "check": "Expense WinForms: events are logged",
-  "ok": true,
-  "detail": "['app_started', 'query', 'page', 'detail', 'export']"
  }
 ]

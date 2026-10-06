@@ -82,7 +82,7 @@ def event(kind: str, **detail: Any) -> None:
         handle.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
-SESSIONS: dict[str, str] = {}
+SESSIONS: dict[str, tuple[str, object]] = {}
 
 STYLE = """
 body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
@@ -178,9 +178,14 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _session(self) -> tuple[str | None, str | None]:
+        """The signed-in user, if the session was made since the operator's
+        last reset: every task starts signed out, as a fresh day would."""
         cookie = SimpleCookie(self.headers.get("Cookie", ""))
         token = cookie["labsid"].value if "labsid" in cookie else None
-        return token, SESSIONS.get(token or "")
+        held = SESSIONS.get(token or "")
+        if held is None or held[1] != fault().get("epoch"):
+            return token, None
+        return token, held[0]
 
     def _form(self) -> dict[str, str]:
         length = int(self.headers.get("Content-Length") or 0)
@@ -245,7 +250,7 @@ class Handler(BaseHTTPRequestHandler):
             # signed-in Windows user continues with one click, no password.
             if form.get("sso") == "company":
                 token = secrets.token_hex(16)
-                SESSIONS[token] = USERNAME
+                SESSIONS[token] = (USERNAME, fault().get("epoch"))
                 event("login", ok=True, ua=self._client())
                 return self._redirect(target, f"labsid={token}; HttpOnly; Path=/; SameSite=Lax")
             event("login", ok=False, ua=self._client())

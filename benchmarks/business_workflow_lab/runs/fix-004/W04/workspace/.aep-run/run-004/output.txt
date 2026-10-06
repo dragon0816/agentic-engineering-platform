@@ -1,0 +1,49 @@
+input files: ['fx_rates.csv', 'sales_template.xlsx', 'sap_manual.md']
+output files: ['output\\downloads\\sept_open_orders.csv']
+download exists output\downloads\sept_open_orders.csv
+rows 15
+header ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+sample [['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00'], ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', '293572.50'], ['0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', '12311.00'], ['0045000113', 'C004', '藍海電子有限公司', '', '2026-09-05', 'Open', 'TWD', '15390.00'], ['0045000115', 'C005', 'Pacific Test Systems Inc.', '', '2026-09-09', 'Open', 'USD', '6391.00']]
+template sheets ['Report', 'Details', 'Summary', 'Instructions']
+sheet Report max 20 6 headers ['Sales Order Report 銷售訂單報表', None, None, None, None, None]
+sheet Details max 4 11 headers ['Sales order details', None, None, None, None, None, None, None, None, None, None]
+sheet Summary max 4 6 headers ['Sales summary', None, None, None, None, None]
+sheet Instructions max 29 3 headers ['填寫說明 Instructions（請勿修改本工作表）', None, None]
+fx sample
+['Currency', 'RateToTWD', 'Note']
+['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+manual first 1200:
+# Lab ERP（模擬 SAP 類查詢網頁）使用說明
+
+> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
+
+- 網址：http://127.0.0.1:8810/
+- 登入：公司帳號自動登入（SSO）。開啟網址後若出現登入頁，按 **使用公司帳號登入 Continue with company account** 即可，不需要輸入帳號或密碼。
+- 登出：右上角 **Log out**。
+
+## 查詢頁
+
+上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。
+
+篩選欄位（輸入後按 **Search**）：
+
+| 欄位 | 說明 |
+|---|---|
+| Customer ID | 客戶代碼，完全相符，例如 C001 |
+| Project | 專案代碼，完全相符，例如 P001 |
+| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |
+| Status | 只在 Sales Orders：Open、Closed、Cancelled |
+| Sort by / Order | 排序欄位與 asc / desc |
+
+- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。
+- 沒有符合資料時顯示「查無資料（0 筆）」。
+- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：
+  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。
+- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。
+- 列表欄位：
+  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
+  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
+- 文件編號有前導零（例如 0045000101），請當成文字處理。
+- 工作階段可能逾

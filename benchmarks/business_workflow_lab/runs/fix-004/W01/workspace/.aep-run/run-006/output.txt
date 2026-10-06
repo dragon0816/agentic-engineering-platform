@@ -1,0 +1,18 @@
+workspace= C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace
+input files= ['fx_rates.csv', 'sales_template.xlsx', 'sap_manual.md']
+output files= ['output\\downloads\\september_open_orders_raw.csv', 'output\\september_open_orders.xlsx']
+fx headers= ['Currency', 'RateToTWD', 'Note']
+fx= {'TWD': 1.0, 'USD': 32.0, 'EUR': 35.0}
+raw headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+raw row count= 14
+raw first row= {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+sheets= ['Report', 'Details', 'Summary', 'Instructions']
+details headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+details row count= 14
+order ids= ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+missing template headers= []
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\.aep-run\run-006\script.py", line 77, in <module>
+    assert all(r['CustomerContact'] not in (None,'') for r in rows), 'blank CustomerContact'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: blank CustomerContact

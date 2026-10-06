@@ -1,0 +1,53 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace
+input files: ['fx_rates.csv', 'sales_template.xlsx', 'sap_manual.md']
+output files: ['output\\downloads\\sales_orders_raw.csv', 'output\\downloads\\september_open_orders_raw.csv', 'output\\september_open_orders.xlsx']
+
+CSV output/downloads/sales_orders_raw.csv exists= True
+ headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+ row_count: 14
+ sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}, {'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00'}]
+
+CSV output/downloads/september_open_orders_raw.csv exists= True
+ headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+ row_count: 14
+ sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}, {'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00'}]
+
+Workbook exists= True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\output\september_open_orders.xlsx
+sheets: ['Report', 'Details', 'Summary', 'Instructions']
+
+Sheet Report: max_row=20, max_col=6
+1 ['Sales Orders Report', None, None, None, None, None]
+2 ['2026-09-01 to 2026-09-30 / Open', None, None, None, None, None]
+3 ['Grand Total TWD', 2674743.45, '結束日期 To', None, None, None]
+4 ['條件 Condition', None, None, None, None, None]
+5 ['產出時間 Generated at', None, None, None, None, None]
+6 [None, None, None, None, None, None]
+
+Sheet Details: max_row=18, max_col=12
+1 ['Sales order details', None, None, None, None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None, None, None, None]
+4 ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'RateToTWD', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+5 ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', datetime.datetime(2026, 9, 1, 0, 0), 'Open', 'TWD', 150000, 1, 150000, None, None]
+6 ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', datetime.datetime(2026, 9, 2, 0, 0), 'Open', 'TWD', 293572.5, 1, 293572.5, None, None]
+
+Sheet Summary: max_row=10, max_col=6
+1 ['Sales summary', None, None, None, None, None]
+2 ['DateFrom', '2026-09-01', None, None, None, None]
+3 ['DateTo', '2026-09-30', None, None, None, None]
+4 ['Status', 'Open', None, None, None, None]
+5 [None, None, None, None, None, None]
+6 ['Currency', 'Amount', 'RateToTWD', 'AmountTWD', 'Count', None]
+
+Details parsed headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'RateToTWD', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+Details parsed row_count: 14
+Details first: {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'RateToTWD': 1, 'NetAmountTWD': 150000, 'CustomerContact': None, 'PaymentTerms': None}
+Details last: {'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': datetime.datetime(2026, 9, 30, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 104160, 'RateToTWD': 1, 'NetAmountTWD': 104160, 'CustomerContact': None, 'PaymentTerms': None}
+blank_contacts: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+detail_total_twd: 2674743.45
+Summary parsed headers: []
+Summary parsed rows: []
+summary_total_twd: 0
+Report non-empty values: ['Sales Orders Report', '2026-09-01 to 2026-09-30 / Open', 'Grand Total TWD', 2674743.45, '結束日期 To', '條件 Condition', '產出時間 Generated at', '資料來源 Source', '取得時間 Fetched at', '備註 Notes', '合成測試資料 Synthetic lab data · template v1 · 請勿修改本行']
+
+CHECK_ERRORS: ['missing Details column SalesRep', 'some OrderDate values are outside September 2026', "unexpected blank CustomerContact IDs ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']", 'some PaymentTerms values are blank', 'could not parse Summary rows', 'Summary total 0 != Details total 2674743.45']

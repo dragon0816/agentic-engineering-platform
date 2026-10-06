@@ -1,0 +1,37 @@
+RUN RESULT
+{
+  "status": "cli_error",
+  "output_workbook": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\C04-force_exit2\\workspace\\output\\quote_report_2026-09_Sent.xlsx",
+  "error": {
+    "command": "quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json",
+    "exit_code": 2,
+    "stderr": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)",
+    "attempts": 1
+  },
+  "log": [
+    {
+      "command": "quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json",
+      "attempt": 1,
+      "exit_code": 2,
+      "stderr": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)",
+      "stdout_length": 0
+    }
+  ]
+}
+
+VERIFY OUTPUTS
+json status: cli_error
+cli attempts: [('quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json', 1, 2)]
+workbook exists: True quote_report_2026-09_Sent.xlsx
+Report B3/D3/B4/B5/B7/D7/B9: 2026-09-01 2026-09-30 Status=Sent; QuoteDate 2026-09-01..2026-09-30 2026-10-06T09:00:00+08:00 quote_cli 2026-10-06T09:00:00+08:00 CLI 查詢失敗，未填入報價資料。exit code 2; stderr: quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)
+Quotes row4 headers: ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount', 'NetAmountTWD']
+Lines row4 headers: ['QuoteID', 'ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount']
+Summary row4 headers: ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+Quotes max_row: 4 nonempty_data_rows: 0
+Lines max_row: 4 nonempty_data_rows: 0
+Summary max_row: 4 nonempty_data_rows: 0
+error command: quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json
+error exit code: 2
+error stderr: quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)
+error attempts: 1
+checked: CLI retry policy, stderr capture, workbook reopened, metadata, preserved headers, data row counts, output JSON reopened.

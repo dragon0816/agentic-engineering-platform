@@ -1,0 +1,9 @@
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Project IDs from C001 docs: ['P001', 'P003']
+Row counts before writing: {'orders': 4, 'invoices': 3, 'expenses_filtered': 18, 'quotes': 4}
+Wrote output\project_report_C001_2026-09.xlsx
+Verified output workbook:
+ row_counts= {'Orders': 4, 'Invoices': 3, 'Expenses': 18, 'Quotes': 4, 'Summary': 2, 'Exceptions': 18}
+ summary= {'P001': {'OrderTWD': '1076162.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}, 'P003': {'OrderTWD': '150000.00', 'InvoiceBalanceTWD': '0.00', 'ApprovedExpenseTWD': '13037.50', 'AcceptedQuoteTWD': '0'}}
+ exceptions= 18
+ formulas= ['=SUM(B5:B6)', '=SUM(C5:C6)', '=SUM(D5:D6)', '=SUM(E5:E6)']

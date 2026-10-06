@@ -1,0 +1,23 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace
+input files: ['fx_rates.csv', 'sales_template.xlsx', 'sap_manual.md']
+download files: ['sales_orders_raw.csv', 'september_open_orders_raw.csv']
+raw headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+raw row count: 14
+raw sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}, {'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00'}]
+fx headers: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+detail cache entries: 14
+Details header row: 4
+Details headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+saved workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\output\september_open_orders.xlsx
+saved raw copy: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\W01\workspace\output\downloads\september_open_orders_raw.csv
+VALIDATION: {
+  "workbook": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\W01\\workspace\\output\\september_open_orders.xlsx",
+  "raw_csv": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\W01\\workspace\\output\\downloads\\september_open_orders_raw.csv",
+  "download_csv": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-004\\W01\\workspace\\output\\downloads\\sales_orders_raw.csv",
+  "rows": 14,
+  "missing_customer_contact_order_ids": [
+    "0045000113",
+    "0045000124"
+  ]
+}

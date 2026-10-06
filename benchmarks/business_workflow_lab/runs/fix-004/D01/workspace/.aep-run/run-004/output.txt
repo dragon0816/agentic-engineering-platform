@@ -1,0 +1,29 @@
+Inputs:
+expense_template.xlsx True 10969
+fx_rates.csv True 276
+expense_export_E001_2026-09.xlsx True 6179
+FX header: ['Currency', 'RateToTWD']
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Export row count: 13
+Sample rows: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00003', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-03', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '450.00', 'Status': 'Submitted', 'ReceiptID': 'RC162210', 'Description': '加班餐費', 'MissingReceipt': False}]
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-004\D01\workspace\output\E001_september_expenses.xlsx
+Summary rows:
+('Status', 'Approved', 'EUR', 102.5, 3587.5, 2)
+('Status', 'Approved', 'TWD', 5050.0, 5050.0, 3)
+('Status', 'Approved', 'USD', 200.0, 6400.0, 1)
+('Status', 'Draft', 'USD', 124.15, 3972.8, 2)
+('Status', 'Rejected', 'EUR', 155.0, 5425.0, 1)
+('Status', 'Rejected', 'USD', 12.3, 393.6, 1)
+('Status', 'Submitted', 'TWD', 7049.0, 7049.0, 3)
+Exceptions: 1 [('EXP-00006', 'E001', '2026-09-10', 'MissingReceipt=true; ReceiptID blank')]
+
+VERIFY
+Sheets: ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+Details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+Summary B2 formula: =SUM(Details!I5:I17)
+Summary rows count: 7
+TWD total from Details: 31877.90
+TWD total from Summary rows: 31877.90
+Exceptions rows: 1
+Output file: E001_september_expenses.xlsx bytes 12735

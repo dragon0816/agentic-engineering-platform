@@ -1,0 +1,79 @@
+FILES
+output\downloads\invoices_C001_2026-09.csv 346
+output\downloads\orders_C001_2026-09.csv 402
+output\expenses_2026-09_all_projects.csv 3341
+output\project_report_C001_2026-09.xlsx 16745
+output\quotes_C001_2026-09.json 1185
+QUOTE_JSON_TYPE dict
+QUOTE_JSON_KEYS ['schema_version', 'items', 'count']
+KEY schema_version TYPE int LEN None
+KEY items TYPE list LEN 4
+SAMPLE {'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}
+KEY count TYPE int LEN None
+
+SHEET Orders max 8 8
+1 ['Sales orders by project', None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None]
+4 ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+5 ['0045000109', 'P003', 'C001', datetime.datetime(2026, 9, 1, 0, 0), 'Open', 'TWD', 150000, 150000]
+6 ['0045000114', 'P001', 'C001', datetime.datetime(2026, 9, 8, 0, 0), 'Cancelled', 'USD', 11956, 382592]
+7 ['0045000119', 'P001', 'C001', datetime.datetime(2026, 9, 15, 0, 0), 'Open', 'EUR', 8775, 307125]
+8 ['0045000125', 'P001', 'C001', datetime.datetime(2026, 9, 25, 0, 0), 'Closed', 'TWD', 386445, 386445]
+
+SHEET Invoices max 7 11
+1 ['Invoices by project', None, None, None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None, None, None]
+4 ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+5 ['0090000208', '0045000109', 'P003', 'C001', datetime.datetime(2026, 9, 2, 0, 0), datetime.datetime(2026, 9, 12, 0, 0), 'TWD', 150000, 150000, 0, 0]
+6 ['0090000214', '0045000119', 'P001', 'C001', datetime.datetime(2026, 9, 16, 0, 0), datetime.datetime(2026, 10, 16, 0, 0), 'EUR', 8775, 8775, 0, 0]
+7 ['0090000219', '0045000125', 'P001', 'C001', datetime.datetime(2026, 9, 30, 0, 0), datetime.datetime(2026, 9, 30, 0, 0), 'TWD', 386445, 0, 386445, 386445]
+
+SHEET Expenses max 22 8
+1 ['Expenses by project', None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None]
+4 ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+5 ['EXP-00001', 'P001', 'E001', datetime.datetime(2026, 9, 1, 0, 0), 'Approved', 'TWD', 1280, 1280]
+6 ['EXP-00002', 'P001', 'E001', datetime.datetime(2026, 9, 2, 0, 0), 'Approved', 'USD', 200, 6400]
+7 ['EXP-00003', 'P003', 'E001', datetime.datetime(2026, 9, 3, 0, 0), 'Submitted', 'TWD', 450, 450]
+8 ['EXP-00014', 'P003', 'E002', datetime.datetime(2026, 9, 4, 0, 0), 'Approved', 'EUR', 180, 6300]
+9 ['EXP-00004', 'P003', 'E001', datetime.datetime(2026, 9, 5, 0, 0), 'Approved', 'EUR', 42.5, 1487.5]
+10 ['EXP-00005', 'P001', 'E001', datetime.datetime(2026, 9, 8, 0, 0), 'Draft', 'USD', 88.4, 2828.8]
+
+SHEET Quotes max 8 9
+1 ['Quotes by project', None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None]
+4 ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+5 ['Q0010', 'P001', 'C001', datetime.datetime(2026, 9, 1, 0, 0), datetime.datetime(2026, 9, 20, 0, 0), 'Sent', 'TWD', 207629.63, 207629.63]
+6 ['Q0011', 'P001', 'C001', datetime.datetime(2026, 9, 3, 0, 0), datetime.datetime(2026, 10, 3, 0, 0), 'Accepted', 'USD', 10350, 331200]
+7 ['Q0014', 'P001', 'C001', datetime.datetime(2026, 9, 9, 0, 0), datetime.datetime(2026, 9, 28, 0, 0), 'Expired', 'EUR', 18072, 632520]
+8 ['Q0018', 'P001', 'C001', datetime.datetime(2026, 9, 21, 0, 0), datetime.datetime(2026, 10, 21, 0, 0), 'Draft', 'TWD', 514917, 514917]
+
+SHEET Summary max 6 5
+1 ['Project summary (TWD)', None, None, None, None]
+2 ['總計 TWD Totals', '=SUM(B5:B6)', '=SUM(C5:C6)', '=SUM(D5:D6)', '=SUM(E5:E6)']
+3 [None, None, None, None, None]
+4 ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+5 ['P001', 1076162, 386445, 18305, 331200]
+6 ['P003', 150000, 0, 13037.5, 0]
+
+SHEET Exceptions max 22 4
+1 ['Exceptions 例外與關注項目', None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None]
+3 [None, None, None, None]
+4 ['Source', 'DocumentID', 'ProjectID', 'Reason']
+5 ['Orders', '0045000109', 'P003', 'Order status is Open']
+6 ['Orders', '0045000114', 'P001', 'Order status is Cancelled']
+7 ['Orders', '0045000119', 'P001', 'Order status is Open']
+8 ['Invoices', '0090000219', 'P001', 'Overdue unpaid balance TWD 386445.00 due 2026-09-30']
+9 ['Expenses', 'EXP-00003', 'P003', 'Expense status is Submitted']
+10 ['Expenses', 'EXP-00005', 'P001', 'Expense status is Draft']
+INFERRED Orders header_row 4 data_rows 4
+INFERRED Invoices header_row 4 data_rows 3
+INFERRED Expenses header_row 4 data_rows 18
+INFERRED Quotes header_row 4 data_rows 4
+INFERRED Summary header_row 4 data_rows 2
+INFERRED Exceptions header_row 4 data_rows 18

@@ -34,7 +34,10 @@ from openpyxl import load_workbook
 # one (W01 currency, D01 status and currency, D03 employee and category, C01
 # status and currency, C03 project); 1.0 also demanded it of W02, W04, D02,
 # D04, C02 and C04, whose requests name no grouping.
-GRADER_VERSION = "1.1"
+# 1.2 (2026-10-07): W04 counts a sign-in after the injected expiry (1.1 wanted two
+# sign-ins, but a task could start signed in); the site now signs everybody out at
+# each reset. A grouping key may also sit inside a label cell ("E001 陳怡君").
+GRADER_VERSION = "1.2"
 GROUPED_SUMMARY = {"W01", "D01", "D03", "C01", "C03"}
 
 TEMPLATE = {"W01": "sales", "W02": "sales", "W04": "sales", "W03": "project",
