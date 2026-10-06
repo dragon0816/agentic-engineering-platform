@@ -58,6 +58,20 @@ class AgentWebSession:
         self.session_id = session
         return session
 
+    def approvals(self) -> list[dict[str, Any]]:
+        """Run and install requests the Agent made in this session (G4)."""
+        return list(self._call(f"/api/approvals?session_id={self.session_id}")[1].get("approvals") or [])
+
+    def decide(self, approval_id: str, decision: str, timeout_s: float) -> dict[str, Any]:
+        """The owner's button, pressed by the operator and recorded as an intervention."""
+        started = time.monotonic()
+        status, reply = self._call("/api/approvals/decide",
+                                   {"approval_id": approval_id, "decision": decision}, timeout=timeout_s)
+        self.exchanges.append({"sent": f"[operator {decision}s {approval_id}]", "timed_out": False,
+                               "decided": approval_id, "decision": decision, "http_status": status,
+                               "seconds": round(time.monotonic() - started, 3), "reply": reply})
+        return reply
+
     def send(self, message: str, timeout_s: float) -> dict[str, Any]:
         started = time.monotonic()
         try:
@@ -87,13 +101,20 @@ def tools_of(exchange: dict[str, Any]) -> list[dict[str, Any]]:
         capability = tool.get("capability") or {}
         workflow = tool.get("workflow") or {}
         run = workflow.get("run") or {}
-        failure = tool.get("failure") or capability.get("failure") or run.get("failure") or {}
+        host = tool.get("host") or {}
+        host_data = host.get("data") if isinstance(host.get("data"), dict) else {}
+        failure = (tool.get("failure") or capability.get("failure") or run.get("failure")
+                   or host.get("failure") or {})
         out.append({
             "name": tool.get("name"),
             "target": (tool.get("decision") or {}).get("target"),
-            "status": capability.get("status") or run.get("status") or ("refused" if tool.get("failure") else None),
+            "status": (capability.get("status") or run.get("status") or host.get("status")
+                       or ("refused" if tool.get("failure") else None)),
             "failure": failure.get("code"),
             "workflow_run_id": run.get("run_id"),
+            # A Workflow drafted in the conversation and run by the host (G4).
+            "authored_run_id": host_data.get("run_id"),
+            "approval_id": host_data.get("approval_id"),
         })
     return out
 

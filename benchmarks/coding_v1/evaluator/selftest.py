@@ -231,13 +231,13 @@ def run() -> int:
             failures.append(f"{label}: expected {'pass' if should_pass else 'fail'}; not passed: {bad}")
 
     full_runtime = {"aep_workflow_runs": ["run-x"], "t09_runs": {
-        "succeed_third": {"login": 3, "data": 1}, "always_fail": {"login": 3, "data": 0, "reported": True}}}
+        "succeed_third": {"login": 3, "data": 1}, "always_fail": {"login": 3, "data": 0, "reported": True}},
+        "t20_fault": {"injected": True, "first_failed": True, "recovered": True}}
     for task, sample in SAMPLES.items():
         ws = workspace(task)
         sample(ws / "output", ws)
         checks = validate(task, ctx_for(task, ws, **(full_runtime if task in ("T09", "T20") else {})))
-        # T20's fault-injection sub-check is BLOCKED by design, so its correct sample cannot fully pass.
-        expect(f"{task} correct sample", checks if task != "T20" else [c for c in checks if "fault" not in c["name"]], True)
+        expect(f"{task} correct sample", checks, True)
         empty = workspace(task)
         expect(f"{task} empty output", validate(task, ctx_for(task, empty)), False)
 
@@ -245,6 +245,9 @@ def run() -> int:
         ws = workspace(task)
         make(ws / "output", ws)
         expect(f"{task} {label}", validate(task, ctx_for(task, ws, **kw)), False)
+
+    wrong("T20", "write fault not recovered", SAMPLES["T20"], aep_workflow_runs=["run-x"],
+          t20_fault={"injected": True, "first_failed": True, "recovered": False})
 
     wrong("T01", "nested file merged", lambda o, w: write(o / "combined.md",
           "## a\n第一行中文內容\n第二行：測試資料\n\n## b\nHello world\n\nThe line above is blank.\n\n## c\nnested file must not be merged\n\n## empty\n"))

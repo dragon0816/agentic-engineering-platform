@@ -100,6 +100,51 @@ def classify(checks: list[dict[str, Any]], produced: bool, reply: str, timed_out
     return "FAIL", "coding", "failed checks: " + "; ".join(failed)
 
 
+FOLLOW_UP = ("（操作者已按下核准，執行結果已附在對話中。）請檢查結果並繼續；"
+             "完成時說明產出了哪些檔案。")
+T09_AGAIN = "請用同一個 workflow 再執行一次，並回報這次的結果。"
+
+
+def lock_output(path: Path) -> Any:
+    """Hold the file open with no sharing, as Excel does with an open workbook."""
+    import win32file
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return win32file.CreateFile(str(path), win32file.GENERIC_WRITE, 0, None,
+                                win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
+
+
+def step_exit_codes(result: dict[str, Any]) -> list[Any]:
+    return [((s.get("data") or {}) if isinstance(s.get("data"), dict) else {}).get("exit_code")
+            for s in result.get("steps") or [] if isinstance(s, dict)]
+
+
+def settle(session: AgentWebSession, deadline: float, interventions: list[dict[str, Any]],
+           decided: list[dict[str, Any]], before: Any = None) -> None:
+    """Press the owner's approve button for every request the Agent made, then
+    tell it the results are in the conversation; repeat while it asks again.
+    `before(item)` runs just before a decision and may return a cleanup."""
+    for _ in range(6):
+        pending = session.approvals()
+        if not pending or time.monotonic() > deadline:
+            return
+        for item in pending:
+            cleanup = before(item) if before is not None else None
+            reply = session.decide(item["approval_id"], "approve",
+                                   max(60.0, deadline - time.monotonic()))
+            if cleanup is not None:
+                cleanup()
+            approval = reply.get("approval") or {}
+            result = approval.get("result") if isinstance(approval.get("result"), dict) else {}
+            decided.append({"approval_id": item["approval_id"], "kind": item["kind"],
+                            "status": approval.get("status"), "run_id": result.get("run_id"),
+                            "run_status": result.get("status"), "exit_codes": step_exit_codes(result),
+                            "text": str(reply.get("text") or "")[:800]})
+            interventions.append({"kind": "operator pressed the owner's approve button",
+                                  "approval_id": item["approval_id"], "summary": item["summary"]})
+        session.send(FOLLOW_UP, max(60.0, deadline - time.monotonic()))
+
+
 def run_task(task: str, run_id: str, run_dir: Path, server: FixtureServer, base: str, token: str,
              meta: dict[str, Any]) -> dict[str, Any]:
     workspace, prompt = prepare(task, run_dir, server.url)
@@ -124,16 +169,76 @@ def run_task(task: str, run_id: str, run_dir: Path, server: FixtureServer, base:
             interventions.append({"kind": "scripted clarification", "text": T20_ANSWER})
             remaining = max(30.0, TIME_LIMIT_S - (time.monotonic() - started))
             session.send(T20_ANSWER, remaining)
+    # G4: approve what the Agent asked to run or install, as the owner would.
+    deadline = started + TIME_LIMIT_S
+    decided: list[dict[str, Any]] = []
+    fault: dict[str, Any] = {"injected": False}
+    t09_ranges: dict[str, list[tuple[int, int]]] = {"succeed_third": [], "always_fail": []}
+    phase = {"name": "succeed_third"}
+
+    def before_decision(item: dict[str, Any]) -> Any:
+        if task == "T09" and item["kind"] == "run":
+            if phase["name"] == "succeed_third":
+                server.set_scenario("succeed_third")
+            start = len(server.log)
+            return lambda: t09_ranges[phase["name"]].append((start, len(server.log)))
+        if task == "T20" and item["kind"] == "run" and not fault["injected"]:
+            target = workspace / "output" / "failures.xlsx"
+            handle = lock_output(target)
+            fault.update(injected=True, approval_id=item["approval_id"], path=str(target))
+
+            def release() -> None:
+                handle.Close()
+                if target.exists() and target.stat().st_size == 0:
+                    target.unlink()
+            return release
+        return None
+
+    if not session.exchanges[-1]["timed_out"]:
+        settle(session, deadline, interventions, decided, before_decision)
+    if task == "T09" and t09_ranges["succeed_third"] and time.monotonic() < deadline:
+        server.set_scenario("always_fail")
+        phase["name"] = "always_fail"
+        interventions.append({"kind": "operator asked for a second run (always_fail scenario)",
+                              "text": T09_AGAIN})
+        session.send(T09_AGAIN, max(60.0, deadline - time.monotonic()))
+        settle(session, deadline, interventions, decided, before_decision)
     duration = time.monotonic() - started
     timed_out = any(x["timed_out"] for x in session.exchanges) or duration > TIME_LIMIT_S
     tools = [t for x in session.exchanges for t in tools_of(x)]
-    runs = [t["workflow_run_id"] for t in tools if t.get("workflow_run_id")]
+    # Only a Workflow the Agent drafted and the host ran counts as a platform
+    # Workflow run; the coding tool's own runs do not.
+    runs = [t["authored_run_id"] for t in tools if t.get("authored_run_id")]
+    runs += [d["run_id"] for d in decided if d.get("run_id")]
     log = server.log[mark:]
-    extra: dict[str, Any] = {"aep_workflow_runs": runs}
+    extra: dict[str, Any] = {"aep_workflow_runs": runs, "approvals": decided}
     if task == "T09":
-        extra["t09_runs"] = {"succeed_third": {
-            "login": sum(1 for r in log if r["path"].startswith("/t09/login")),
-            "data": sum(1 for r in log if r["path"].startswith("/t09/data") and r["status"] == 200)}} if runs else {}
+        def counted(ranges: list[tuple[int, int]]) -> dict[str, Any] | None:
+            if not ranges:
+                return None
+            start, end = ranges[-1]
+            part = server.log[start:end]
+            return {"login": sum(1 for r in part if r["path"].startswith("/t09/login")),
+                    "data": sum(1 for r in part if r["path"].startswith("/t09/data") and r["status"] == 200)}
+        extra["t09_runs"] = {}
+        ok_counts = counted(t09_ranges["succeed_third"])
+        if ok_counts is not None:
+            extra["t09_runs"]["succeed_third"] = ok_counts
+        fail_counts = counted(t09_ranges["always_fail"])
+        if fail_counts is not None:
+            last = answer_text(next((x for x in reversed(session.exchanges) if "decided" not in x), {}))
+            fail_counts["reported"] = bool(re.search(r"(失敗|拒絕|無法|原因|fail|denied|reason)", last, re.I))
+            extra["t09_runs"]["always_fail"] = fail_counts
+    if task == "T20":
+        first = next((d for d in decided if d["approval_id"] == fault.get("approval_id")), None)
+        later = [d for d in decided if first is not None and d is not first and d["kind"] == "run"]
+        extra["t20_fault"] = {
+            "injected": fault["injected"], "path": fault.get("path"),
+            "first_failed": None if first is None else (
+                first["run_status"] != "succeeded" or any(c not in (0, None) for c in first["exit_codes"])),
+            "recovered": any(d["run_status"] == "succeeded" and all(c in (0, None) for c in d["exit_codes"])
+                             for d in later),
+        }
     convo = {"first_reply": answer_text(first), "asked_threshold": asked,
              "turns": [{"sent": x["sent"], "reply": answer_text(x)} for x in session.exchanges]}
     ctx = Ctx(task=task, workspace=workspace, base_url=server.url,
@@ -152,8 +257,8 @@ def run_task(task: str, run_id: str, run_dir: Path, server: FixtureServer, base:
         "calls per turn, not program edits or reruns",
         "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry",
     ]
-    if task == "T20":
-        limitations.append("fault injection BLOCKED: no runtime write operation exists to inject into")
+    if task == "T20" and not fault["injected"]:
+        limitations.append("fault injection not reached: the Agent never asked to run a platform Workflow")
     record = {
         "run_id": run_id, "task_id": task, "attempt": 1, "status": status,
         "task_success": status == "PASS",
@@ -215,7 +320,7 @@ def observed_cause(trace_path: str | None) -> str:
         failure = (convo.get("failure") or {}).get("code")
         tools = tools_of(exchange)
         if failure == "tool_loop_limit":
-            causes.append("G3 the conversation loop's tool budget (4 calls per turn) ended the turn")
+            causes.append("G3 the conversation loop's per-turn tool budget ended the turn")
         if target.get("namespace") == "knowledge-query":
             causes.append("D1 routed to the Knowledge harness; the model never saw the task")
         elif failure == "empty_model_answer":
@@ -283,7 +388,7 @@ def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta:
         f"- Entry point: Agent Web chat (`/api/conversations/turn`), one new session per task",
         f"- Model: {meta['model']}",
         f"- Fixture manifest SHA-256: `{meta['fixture_manifest_sha256']}`; validator {VALIDATOR_VERSION}",
-        f"- Budget: {TIME_LIMIT_S} s per task; tool calls bounded by the Gateway loop (4 per turn)", "",
+        f"- Budget: {TIME_LIMIT_S} s per task; tool calls bounded by the Gateway loop (4 per turn before commit fea13ff, 8 from it on: fix-run-003 and later)", "",
         "## Results", "",
         "| Task | Status | Tool calls | Script runs (exit codes) | Derived repair loops | Seconds "
         "| Interventions | Observed cause |", "|---|---|---|---|---|---|---|---|",

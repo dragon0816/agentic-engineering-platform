@@ -20,7 +20,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-VALIDATOR_VERSION = "1.0"
+# 1.1 (2026-10-06): T20's fault-injection check reads the operator's injection
+# evidence now that a platform Workflow run exists (G4); every other check and
+# every expected answer is unchanged from 1.0.
+VALIDATOR_VERSION = "1.1"
 
 
 @dataclass
@@ -694,6 +697,15 @@ def t19(ctx: Ctx) -> list[dict[str, Any]]:
 
 # -- T20 ----------------------------------------------------------------------
 
+def _fault_recovered(ctx: Ctx) -> bool | None:
+    """The operator locked failures.xlsx during the first approved platform
+    run, as an open workbook would; None when no platform run was asked for."""
+    fault = ctx.extra.get("t20_fault") or {}
+    if not fault.get("injected"):
+        return None
+    return bool(fault.get("first_failed")) and bool(fault.get("recovered"))
+
+
 def t20(ctx: Ctx) -> list[dict[str, Any]]:
     convo = ctx.conversation
     asked = bool(convo.get("asked_threshold"))
@@ -714,8 +726,9 @@ def t20(ctx: Ctx) -> list[dict[str, Any]]:
               {"D01": "false", "D03": "false", "D05": "true"}, urgent),
         check("summary.md Total=5 Pass=2 Fail=3 Urgent=1", summary_ok, "5/2/3/1", text[:300]),
         check("platform workflow ran in the AEP runtime", bool(runtime) or None, "AEP run id", runtime or None),
-        check("injected write fault observed and recovered", None, "fault injected into the runtime write",
-              "BLOCKED: no runtime write operation exists to inject into (see report)"),
+        check("injected write fault observed and recovered", _fault_recovered(ctx),
+              "first approved run fails on the locked output, a later run succeeds",
+              ctx.extra.get("t20_fault")),
         _sources_unchanged(ctx),
     ]
 
