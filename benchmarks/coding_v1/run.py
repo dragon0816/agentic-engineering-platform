@@ -116,7 +116,10 @@ def run_task(task: str, run_id: str, run_dir: Path, server: FixtureServer, base:
     clarification_wait = 0.0
     if task == "T20" and not first["timed_out"]:
         reply = answer_text(first)
-        asked = bool(re.search(r"(門檻|閾值|threshold)", reply, re.I) and re.search(r"[?？]", reply))
+        # A request for the value counts as asking even without a question mark
+        # (fix-run-003 T20 asked "請提供 ... 門檻" and ended with a full stop).
+        asked = bool(re.search(r"(門檻|閾值|threshold)", reply, re.I)
+                     and re.search(r"[?？]|請提供|請問|請確認|請告訴|please (provide|confirm)", reply, re.I))
         if asked:
             interventions.append({"kind": "scripted clarification", "text": T20_ANSWER})
             remaining = max(30.0, TIME_LIMIT_S - (time.monotonic() - started))
