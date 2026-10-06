@@ -1374,9 +1374,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   T09/T13 measured when the program ran); fix-run-003 15/20, -004 16/20,
   -005 18/20, **fix-run-006 20/20**.
 - [x] Lab fix-001: 4 PASS of 16 (W03, C03, C04, C04 exit-2); grader 1.1.
-- [ ] Lab: owner decision on a larger tool budget for long business tasks and
-  on carrying tool results into the conversation history; then fix-002.
-- [ ] Telegram approval buttons (A5 second half); A1-A3, A7, A8.
+- [x] Owner 2026-10-07: 20 tool calls per turn and a tool record carried
+  across turns (`3532c3d`); several calls per reply run in order; Telegram
+  approval buttons (A5 done); Edge profile recovery; desktop `clear_dialogs`
+  and placeholders; coding Skill 1.5.0; runner `tzdata`.
+- [x] Lab fix-002 5/16, fix-003 invalid (leftover Edge), fix-004 9/16
+  (grader 1.2 would add D03 and W04); grader 1.2.
+- [ ] Lab fix-005 (running) and coding_v1 re-verification on the current build.
+- [ ] Conversational authoring A1-A3, A7, A8.
 - [x] Business workflow lab (owner request 2026-10-06):
   `benchmarks/business_workflow_lab/` with an SAP-like site, a Tk desktop
   Expense app, a quote CLI, 4 Excel templates, 15 prompts, expected answers,

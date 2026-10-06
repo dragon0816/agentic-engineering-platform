@@ -83,41 +83,41 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 
 ## Current work: coding_v1 and the business workflow lab (2026-10-07)
 
-**coding_v1.** fix-run-006 passed 20 of 20, with validator 1.3. Run it with:
+**coding_v1.**
+- fix-run-006 passed 20/20 with validator 1.3.
+- The build has changed since then: 20 calls per turn, the tool record, several calls per reply, Edge and desktop fixes, and coding 1.5.0. Re-verify with a new run ID once lab fix-005 is done.
+- Run it with:
 
-    .venv\Scripts\python benchmarks\coding_v1
-un.py --run-id <new> --tasks all
+    .venv\Scripts\python benchmarks\coding_v1un.py --run-id <new> --tasks all
 
-The operator script does three things for the owner, and records each as an intervention:
-- it presses the owner's approve button for the Agent's run and install requests;
-- it runs T09's always_fail scenario;
-- it injects T20's write fault by holding `failures.xlsx` open.
+**Lab.** `benchmarks/business_workflow_lab/`, grader 1.2.
+- Run it with:
 
-**Lab.** `benchmarks/business_workflow_lab/`, with grader 1.1. Run it with:
+    .venv\Scripts\python benchmarksusiness_workflow_lab\operatorun_lab.py --run-id <new> --tasks all
 
-    .venv\Scripts\python benchmarksusiness_workflow_lab\operator
-un_lab.py --run-id <new> --tasks all
+- Mocks: run `python ...\operator\smoke.py --browser` with the system Python.
+- Results so far: fix-001 4/16, fix-002 5/16, fix-003 invalid, fix-004 9/16, fix-005 running. Each run's `findings.md` lists its causes and the fixes that followed.
+- The operator presses approval buttons, replies 繼續 at most 3 times when a turn stops at the budget, and asks for the spec's reruns. Each of these is recorded as an intervention.
 
-- Mocks: 59/59 on `python ...\operator\smoke.py --browser`. Use the system Python, which has Playwright.
-- fix-001 passed 4 of 16. Most failures stop on the 8-call tool budget. A follow-up turn cannot continue, because Agent Web keeps only each turn's text.
-
-**Live host.** The changes below each have a `.bak-*` backup next to the file:
+**Live host.** The changes below each have a `.bak-*` backup next to the file.
 - host.json:
   - `web.allowed_origins` has `http://127.0.0.1:8810`;
-  - `desktop.applications` registers `expense`, pointing at `benchmarksusiness_workflow_lab\expense_desktop_mockin\ExpenseApp.exe`, which is built by `build.cmd`;
+  - `desktop.applications` registers `expense`, pointing at `...\expense_desktop_mockin\ExpenseApp.exe`;
   - `coding.workspace_roots` includes the lab's runs folder.
 - grants.json has grants for `browser/operate` and `desktop/operate`.
-- Skill `engineering/coding@1.3.0` is installed; older versions are in `disabled/`.
-- Agent Web was restarted from `src` with the repo `.venv`. The token is in the newest `.scratch/agent-web-*.out.log`.
+- Skill `engineering/coding@1.5.0` is installed.
+- The coding runner Python has `tzdata`.
+- Agent Web runs from `src` with the repo `.venv`. Restarting it with `Stop-Process` leaves its Edge running. The next start now recovers from that, but closing Agent Web normally is cleaner.
 
-**New platform pieces.** Decisions are in `docs/DECISIONS.md`, 2026-10-06:
-- `agent.backend_contracts`: the conversation limits (8000 tokens, 8 calls, 9 turns).
-- `Gateway.host_tools` with `HostTool` and `HostToolOutcome`.
-- `host_runtime/chat_authoring.py`: G4.
-- `host_runtime/bridge_tools.py`: `browser__operate` and `desktop__operate`, both dispatched through the Bridge.
-- `capabilities/browser_session`, `capabilities/desktop_session`, `integrations/desktop(.py, _uia.cs)`.
-- run-python `AEP_WORKFLOW_PARAMS` and `coding.run_python_max_processes`.
-- Agent Web `/api/approvals` and `/api/approvals/decide`, with approval cards on the page.
+**Platform pieces.** The decisions are in `docs/DECISIONS.md`, 2026-10-06 and 2026-10-07:
+- `agent.backend_contracts` sets the limits: 8000 tokens and 20 calls per turn.
+- `Gateway.host_tools`; several calls in one reply run in order.
+- `host_runtime/chat_authoring.py`: G4, plus `approval_text`.
+- `host_runtime/bridge_tools.py`: `browser__operate` and `desktop__operate`, which list the registered apps.
+- `host_runtime/turn_summary.py`: the tool record.
+- Agent Web `/api/approvals` and Telegram approval buttons.
+- `capabilities/browser_session` (leftover recovery) and `capabilities/desktop_session` (placeholders, `clear_dialogs`); `integrations/desktop(.py, _uia.cs)`.
+- run-python `AEP_WORKFLOW_PARAMS` and child processes.
 
 ## Verification
 
@@ -131,6 +131,6 @@ Live checks after every Gateway change, all unchanged: Knowledge direct and in c
 
 ## Next recommended action
 
-1. Owner: decide on the lab's tool budget and on carrying tool results across turns (`runs/fix-001/findings.md`). Then implement it, run the live checks, and run lab fix-002 and coding_v1 again.
-2. Telegram approval buttons (A5); then A1-A3, A7, A8.
-3. The practice SOP Workflow install, a real SOP, W9 business cards, coding C7 (unchanged from before).
+1. Read lab fix-005's results and fix what they show, then rerun the lab and coding_v1 on the same build under new run IDs.
+2. Conversational authoring A1-A3, A7, A8.
+3. The practice SOP Workflow install, a real SOP, W9 business cards, coding C7 (unchanged).
