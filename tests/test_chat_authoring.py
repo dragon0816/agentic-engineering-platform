@@ -1,0 +1,173 @@
+"""Conversational authoring G4: draft, preview, run and install from a conversation.
+
+The model never approves: a Workflow whose steps only read runs directly,
+anything else becomes an approval request only the owner's decision runs.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from capabilities.contracts import CapabilitySpec
+from capabilities.runtime import InstalledCapabilities, LocalPolicy
+from common.assets import ExecutionDependencies
+from common.base import Contract
+from common.execution import RequestContext, TraceIdentifiers
+from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, digest
+from workflow.dispatch import BridgeExecutor
+
+
+class Echo(Contract):
+    value: str = ""
+
+
+class Out(Contract):
+    echoed: str
+
+
+def spec(name: str, side_effect: str) -> CapabilitySpec:
+    policy: dict[str, Any] = {"risk": "low", "required_permissions": [f"lab.{name}"],
+                              "policy_refs": ["lab-policy"]}
+    if side_effect != "read":
+        policy["approval_required"] = True
+    return CapabilitySpec.model_validate({
+        "identity": {"namespace": "lab", "name": name, "version": "1.0.0"},
+        "name": f"lab.{name}", "description": name,
+        "input_contract": f"lab.{name}.in.v1", "output_contract": f"lab.{name}.out.v1",
+        "side_effect": side_effect, "policy": policy,
+    })
+
+
+class Recorder:
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        value = Echo.model_validate(inputs).value
+        self.calls.append(value)
+        return Out(echoed=value)
+
+
+def studio(tmp_path: Path) -> tuple[ChatAuthoring, Recorder]:
+    recorder = Recorder()
+    installed = InstalledCapabilities()
+    for name, effect in (("read-it", "read"), ("write-it", "write")):
+        installed.register(spec(name, effect), recorder, Echo, Out,
+                           ExecutionDependencies(central_required=False))
+    bridge = BridgeExecutor(installed, LocalPolicy(()))
+    return ChatAuthoring(
+        tmp_path / "chat", bridge=lambda: bridge, namespace="engineering",
+        workflows_dir=tmp_path / "workflows", grants_file=tmp_path / "grants.json",
+    ), recorder
+
+
+def workflow(capability: str) -> dict[str, Any]:
+    return {
+        "name": "echo-month", "description": "Echo the month.",
+        "parameters": [{"name": "month", "label": "Which month?", "kind": "text",
+                        "scope": "runtime", "required": True}],
+        "steps": [{"capability": f"lab/{capability}@1.0.0",
+                   "inputs": {"value": {"source": "run", "path": ["month"]}}}],
+    }
+
+
+def context() -> RequestContext:
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"), actor="owner",
+        namespace="engineering", channel="local", session_id="session-1", message="x",
+    )
+
+
+def call(chat: ChatAuthoring, name: str, args: dict[str, Any]) -> Any:
+    tool = next(t for t in chat.tools() if t.tool.name == name)
+    return asyncio.run(tool.handler(context(), args))
+
+
+def draft(chat: ChatAuthoring, capability: str) -> Any:
+    return call(chat, "authoring__draft_workflow",
+                {"title": "Echo", "workflow": workflow(capability)})
+
+
+def test_an_invalid_draft_returns_problems_and_keeps_nothing(tmp_path: Path) -> None:
+    chat, _ = studio(tmp_path)
+    outcome = call(chat, "authoring__draft_workflow",
+                   {"title": "x", "workflow": workflow("missing-capability")})
+    assert outcome.status == "failed" and outcome.failure.code == "workflow_invalid"
+    assert chat.candidates("owner") == []
+
+
+def test_a_read_only_workflow_runs_directly(tmp_path: Path) -> None:
+    chat, recorder = studio(tmp_path)
+    drafted = draft(chat, "read-it")
+    assert drafted.status == "succeeded" and drafted.data["read_only"] is True
+    ran = call(chat, "authoring__run_workflow",
+               {"candidate_id": drafted.data["candidate_id"], "arguments": {"month": "2026-09"}})
+    assert ran.status == "succeeded" and ran.data["status"] == "succeeded"
+    assert recorder.calls == ["2026-09"]
+
+
+def test_a_writing_workflow_waits_for_the_owner_and_runs_once_approved(tmp_path: Path) -> None:
+    chat, recorder = studio(tmp_path)
+    drafted = draft(chat, "write-it")
+    candidate_id = drafted.data["candidate_id"]
+    asked = call(chat, "authoring__run_workflow",
+                 {"candidate_id": candidate_id, "arguments": {"month": "2026-08"}})
+    assert asked.status == "awaiting_approval" and recorder.calls == []
+    (pending,) = chat.approvals("owner", session_id="session-1")
+    assert pending.approval_id == asked.data["approval_id"]
+    decided = chat.decide(pending.approval_id, "owner", approve=True)
+    assert decided.status == "approved" and recorder.calls == ["2026-08"]
+    assert isinstance(decided.result, dict) and decided.result["status"] == "succeeded"
+    with pytest.raises(ChatAuthoringError):
+        chat.decide(pending.approval_id, "owner", approve=True)
+    assert chat.approvals("owner") == []
+
+
+def test_a_rejected_or_stale_request_never_runs_and_others_cannot_decide(tmp_path: Path) -> None:
+    chat, recorder = studio(tmp_path)
+    drafted = draft(chat, "write-it")
+    candidate_id = drafted.data["candidate_id"]
+    first = call(chat, "authoring__run_workflow", {"candidate_id": candidate_id, "arguments": {}})
+    with pytest.raises(ChatAuthoringError):
+        chat.decide(first.data["approval_id"], "someone-else", approve=True)
+    assert chat.decide(first.data["approval_id"], "owner", approve=False).status == "rejected"
+    second = call(chat, "authoring__run_workflow", {"candidate_id": candidate_id, "arguments": {}})
+    changed = workflow("write-it") | {"description": "Changed after the request."}
+    call(chat, "authoring__draft_workflow",
+         {"title": "W", "workflow": changed, "candidate_id": candidate_id})
+    stale = chat.decide(second.data["approval_id"], "owner", approve=True)
+    assert stale.status == "failed" and recorder.calls == []
+
+
+def test_install_needs_approval_and_a_rerun_keeps_the_same_digest(tmp_path: Path) -> None:
+    chat, recorder = studio(tmp_path)
+    drafted = draft(chat, "write-it")
+    candidate_id = drafted.data["candidate_id"]
+    asked = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
+    assert asked.status == "awaiting_approval"
+    assert not (tmp_path / "workflows").exists()
+    installed = chat.decide(asked.data["approval_id"], "owner", approve=True)
+    assert installed.status == "approved"
+    files = list((tmp_path / "workflows").glob("*.json"))
+    assert len(files) == 1
+    published = json.loads(files[0].read_text(encoding="utf-8"))
+    assert published["metadata"]["lifecycle"] == "published"
+    assert published["metadata"]["business_approval"]["reviewer"] == "owner"
+    grants = json.loads((tmp_path / "grants.json").read_text(encoding="utf-8"))
+    assert [g["asset"]["name"] for g in grants] == ["write-it"]
+    listed = call(chat, "authoring__list_workflows", {})
+    assert listed.data[0]["status"] == "installed"
+    item = chat.candidate(candidate_id, "owner")
+    assert listed.data[0]["digest"] == digest(item.draft) == installed.result["digest"]
+    again = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
+    assert again.status == "failed" and again.failure.code == "candidate_already_installed"
+    for month in ("2026-09", "2026-10"):
+        run = call(chat, "authoring__run_workflow",
+                   {"candidate_id": candidate_id, "arguments": {"month": month}})
+        chat.decide(run.data["approval_id"], "owner", approve=True)
+    assert recorder.calls == ["2026-09", "2026-10"]

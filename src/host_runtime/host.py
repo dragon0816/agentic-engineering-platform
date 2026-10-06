@@ -159,6 +159,7 @@ from harness.restricted_runner import (
     is_venv_launcher,
 )
 from host_runtime.agent import LocalAgent
+from host_runtime.chat_authoring import ChatAuthoring
 from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
 from host_runtime.contracts import (
     CompanyHostConfiguration,
@@ -293,6 +294,7 @@ class HostRuntime:
         state: SqliteLocalState,
         telegram: TelegramIngress | None,
         platform: PlatformClient | None = None,
+        chat_authoring: ChatAuthoring | None = None,
     ) -> None:
         self.config = config
         self.layout = layout
@@ -300,6 +302,7 @@ class HostRuntime:
         self.state = state
         self.telegram = telegram
         self.platform = platform
+        self.chat_authoring = chat_authoring
 
     @property
     def actor(self) -> str:
@@ -1592,6 +1595,16 @@ def build_runtime(
         membership=membership,
         dut_adapter=dut_adapter,
     )
+    # Conversational authoring (G4): the Agent drafts, previews and asks to
+    # run or install a Workflow; the owner approves outside the model.
+    chat_authoring = ChatAuthoring(
+        place.workspace_root / "authoring" / "chat",
+        bridge=lambda: gateway.bridge,
+        namespace=checked.namespace or "engineering",
+        workflows_dir=place.workflows,
+        grants_file=place.grants,
+    )
+    gateway.host_tools = chat_authoring.tools
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:
@@ -1618,4 +1631,4 @@ def build_runtime(
     except BaseException:
         state.close()
         raise
-    return HostRuntime(checked, place, agent, state, telegram, platform)
+    return HostRuntime(checked, place, agent, state, telegram, platform, chat_authoring)

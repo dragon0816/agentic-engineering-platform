@@ -21,10 +21,11 @@ with the run (owner decision 2026-10-06, lab gap L3). Each script is kept under
 from __future__ import annotations
 
 import asyncio
+import json
 from collections.abc import Callable, Mapping
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, JsonValue
 
 from capabilities.coding_change.contracts import CodingHostBinding
 from capabilities.contracts import CapabilitySpec
@@ -62,6 +63,10 @@ class RunPythonRequest(Contract):
 
 class RunPythonStepInput(Contract):
     request: RunPythonRequest
+    # A Workflow's run values for the script (G4): written as JSON beside the
+    # script, its path in AEP_WORKFLOW_PARAMS, so a saved script is rerun
+    # with new values without changing its code.
+    arguments: dict[str, JsonValue] | None = None
 
 
 class OutputFile(Contract):
@@ -88,8 +93,8 @@ class RunPythonHandler:
         self.extra_env = dict(extra_env or {})
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
-        request = RunPythonStepInput.model_validate(inputs).request
-        return await asyncio.to_thread(self.run, request)
+        step_input = RunPythonStepInput.model_validate(inputs)
+        return await asyncio.to_thread(self.run, step_input.request, step_input.arguments)
 
     def _workspace(self, raw: str) -> Path:
         path = Path(raw.strip())
@@ -106,7 +111,9 @@ class RunPythonHandler:
             return resolved
         raise CapabilityRefused("coding_workspace_not_allowed")
 
-    def run(self, request: RunPythonRequest) -> RunPythonResult:
+    def run(
+        self, request: RunPythonRequest, arguments: dict[str, JsonValue] | None = None
+    ) -> RunPythonResult:
         workspace = self._workspace(request.workspace)
         python = Path(self.binding.runner_python)
         try:
@@ -125,8 +132,13 @@ class RunPythonHandler:
         step.mkdir()
         script = step / "script.py"
         script.write_text(request.script, encoding="utf-8")
+        env = dict(self.extra_env)
+        if arguments is not None:
+            params = step / "params.json"
+            params.write_text(json.dumps(arguments, ensure_ascii=False, indent=1), encoding="utf-8")
+            env["AEP_WORKFLOW_PARAMS"] = str(params)
         label_low(output)
-        result = runner.run([str(script)], cwd=workspace, run_dir=step, extra_env=self.extra_env)
+        result = runner.run([str(script)], cwd=workspace, run_dir=step, extra_env=env)
         files = sorted(
             (OutputFile(path=item.relative_to(workspace).as_posix(), bytes=item.stat().st_size)
              for item in output.rglob("*") if item.is_file()),

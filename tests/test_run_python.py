@@ -81,3 +81,26 @@ def test_the_skill_says_when_not_to_use_it() -> None:
     assert "Never use it to answer a question" in skill.instructions
     names = [field.name for field in run_python_workflow().parameters]
     assert names == ["workspace", "script"]
+
+
+def test_a_workflow_step_gives_the_same_script_new_values(tmp_path: Path) -> None:
+    """G4: a saved script reruns with new run values and unchanged code."""
+    import asyncio
+
+    from capabilities.coding_change.run_python import RunPythonStepInput
+
+    workspace = task(tmp_path)
+    script = (
+        "import json, os\n"
+        "params = json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\n"
+        "open('output/' + params['name'] + '.txt', 'w').write(params['month'])\n"
+    )
+    runner = handler(tmp_path / "tasks")
+    request = RunPythonRequest(workspace=str(workspace), script=script)
+    for month in ("2026-09", "2026-08"):
+        step = RunPythonStepInput(request=request, arguments={"name": f"m{month}", "month": month})
+        run = asyncio.run(runner(None, step))  # type: ignore[arg-type]
+        assert run.exit_code == 0, run.output  # type: ignore[attr-defined]
+    assert (workspace / "output" / "m2026-08.txt").read_text() == "2026-08"
+    scripts = sorted((workspace / ".aep-run").glob("run-*/script.py"))
+    assert len(scripts) == 2 and scripts[0].read_bytes() == scripts[1].read_bytes()

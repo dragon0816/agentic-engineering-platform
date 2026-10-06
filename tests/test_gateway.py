@@ -554,3 +554,77 @@ def test_the_chat_request_default_allows_the_whole_tool_budget() -> None:
             context=request("x"), history=(ModelMessage(role="user", text="x"),),
             max_turns=MAX_CONVERSATION_TURNS + 1,
         )
+
+
+def _host_gateway(
+    host_tools: list[Any], replies: list[ModelResponse | None]
+) -> tuple[Gateway, Any]:
+    from agent.gateway import HostTool  # noqa: F401 - imported for the fixture's type
+
+    class Scripted(FakeModel):
+        def generate(self, item: ModelRequest) -> ModelResponse:
+            self.calls.append(item)
+            reply = replies[len(self.calls) - 1]
+            assert reply is not None
+            return reply.model_copy(update={"trace": item.trace, "model_alias": item.model_alias})
+
+    model = Scripted()
+    built = gateway(Handler(), model)
+    built.host_tools = lambda: host_tools
+    return built, model
+
+
+def _call(name: str, arguments: dict[str, Any]) -> ModelResponse:
+    return ModelResponse(
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        tool_calls=(ModelToolCall(call_id="c1", name=name, arguments=arguments),),
+    )
+
+
+def _text(text: str) -> ModelResponse:
+    return ModelResponse(
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        text=text,
+    )
+
+
+def test_a_host_tool_is_offered_and_its_outcome_is_recorded() -> None:
+    """G4: authoring tools are host actions; awaiting approval means nothing ran."""
+    from agent.gateway import HostTool, HostToolOutcome
+    from models.contracts import ModelTool
+
+    seen: list[dict[str, Any]] = []
+
+    async def draft(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        seen.append(arguments)
+        return HostToolOutcome(status="awaiting_approval", data={"approval_id": "a-1"})
+
+    tool = HostTool(ModelTool(name="authoring__run_workflow", description="run",
+                              input_contract="x.v1"), draft)
+    built, model = _host_gateway([tool], [_call("authoring__run_workflow", {"x": 1}), _text("ok")])
+    history = (ModelMessage(role="user", text="run it"),)
+    result = asyncio.run(built.converse(request("run it"), history))
+    assert result.status == "answered" and seen == [{"x": 1}]
+    (item,) = result.tools
+    assert item.host is not None and item.host.status == "awaiting_approval"
+    assert item.decision is None
+    assert "authoring__run_workflow" in {t.name for t in model.calls[0].tools}
+
+
+def test_a_failing_host_tool_is_an_observation_and_a_task_scope_hides_it() -> None:
+    from agent.gateway import HostTool, HostToolOutcome
+    from models.contracts import ModelTool
+
+    async def broken(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        raise RuntimeError("boom")
+
+    tool = HostTool(ModelTool(name="authoring__draft_workflow", description="d",
+                              input_contract="x.v1"), broken)
+    built, _ = _host_gateway([tool], [_call("authoring__draft_workflow", {}), _text("sorry")])
+    result = asyncio.run(built.converse(request("d"), (ModelMessage(role="user", text="d"),)))
+    assert result.tools[0].failure is not None
+    assert result.tools[0].failure.code == "host_tool_failed"
+    scoped, model = _host_gateway([tool], [_text("no tools")])
+    asyncio.run(scoped.converse(request("d"), (ModelMessage(role="user", text="d"),),
+                                allowed_tools=frozenset({"other__tool"})))
+    assert all(t.name != "authoring__draft_workflow" for t in model.calls[0].tools)

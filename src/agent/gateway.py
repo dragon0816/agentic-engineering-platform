@@ -8,8 +8,9 @@ deterministic ones, so a trigger's origin never changes what may execute.
 
 import asyncio
 import json
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from contextvars import ContextVar
+from dataclasses import dataclass
 from typing import Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
@@ -103,6 +104,8 @@ def _tool_progress(name: str, state: ToolProgressState) -> None:
 def _tool_succeeded(item: "ConversationToolExecution") -> bool:
     if item.failure is not None:
         return False
+    if item.host is not None:
+        return item.host.status != "failed"
     if item.capability is not None:
         return item.capability.status == "succeeded"
     return item.workflow is not None and item.workflow.run.status == "succeeded"
@@ -159,6 +162,26 @@ class GatewayResult(Contract):
         return self
 
 
+class HostToolOutcome(Contract):
+    """What a host-owned conversation tool did (G4 authoring). The host
+    performs the action; `awaiting_approval` means nothing ran yet and the
+    owner decides with a button the model cannot press."""
+
+    status: Literal["succeeded", "awaiting_approval", "failed"]
+    data: JsonValue = None
+    failure: Failure | None = None
+
+
+@dataclass(frozen=True)
+class HostTool:
+    """A conversation tool the host implements itself, such as drafting a
+    Workflow. It never approves, installs or runs a change on its own: any
+    step that is not a read goes through an owner approval."""
+
+    tool: ModelTool
+    handler: Callable[[RequestContext, dict[str, JsonValue]], Awaitable[HostToolOutcome]]
+
+
 class ConversationToolExecution(Contract):
     """Evidence for one model-proposed call after installed-target lookup."""
 
@@ -167,6 +190,7 @@ class ConversationToolExecution(Contract):
     decision: RouteDecision | None = None
     capability: CapabilityResult | None = None
     workflow: WorkflowRunSnapshot | None = None
+    host: HostToolOutcome | None = None
     failure: Failure | None = None
 
     @model_validator(mode="after")
@@ -174,14 +198,17 @@ class ConversationToolExecution(Contract):
         outcomes = (
             self.capability is not None,
             self.workflow is not None,
+            self.host is not None,
             self.failure is not None,
         )
         if sum(outcomes) != 1:
             raise ValueError("a tool call has exactly one execution outcome")
         if self.failure is not None and self.decision is not None:
             raise ValueError("a refused tool call selected no execution target")
-        if self.decision is None and self.failure is None:
+        if self.decision is None and self.failure is None and self.host is None:
             raise ValueError("an executed tool call records its exact target")
+        if self.host is not None and self.decision is not None:
+            raise ValueError("a host tool selects no installed target")
         return self
 
 
@@ -277,7 +304,11 @@ class Gateway:
         knowledge_vaults: Callable[[], Sequence[KnowledgeVaultTool]] | None = None,
         knowledge_capability: AssetIdentity | None = None,
         accelerator_excluded_aliases: frozenset[str] = frozenset(),
+        host_tools: Callable[[], Sequence[HostTool]] | None = None,
     ):
+        # Host-owned conversation tools (G4 authoring); the host may set it after
+        # construction, once the services behind the tools exist.
+        self.host_tools = host_tools
         self.router = router
         self.bridge = bridge
         self.engine = engine
@@ -498,6 +529,15 @@ class Gateway:
             bindings = {
                 name: binding for name, binding in bindings.items() if name in selected_names
             }
+        # Host tools join after any narrowing: a selector ranks installed
+        # Skills, and authoring is not one of them.
+        host: dict[str, HostTool] = {}
+        for host_tool in self.host_tools() if self.host_tools is not None else ():
+            name = host_tool.tool.name
+            if name in bindings or (allowed_tools is not None and name not in allowed_tools):
+                continue
+            host[name] = host_tool
+            tools.append(host_tool.tool)
         evidence: list[ConversationToolExecution] = []
         for turn in range(1, max_turns + 1):
             model_request = ModelRequest(
@@ -548,7 +588,11 @@ class Gateway:
                 )
             call = response.tool_calls[0]
             binding = bindings.get(call.name)
-            if binding is None:
+            if call.name in host:
+                _tool_progress(call.name, "running")
+                item = await self._execute_host_tool(context, call, host[call.name])
+                _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
+            elif binding is None:
                 item = ConversationToolExecution(
                     call_id=call.call_id,
                     name=call.name,
@@ -592,6 +636,19 @@ class Gateway:
         return self._conversation_failure(
             context, "tool_loop_limit", min(max_turns, len(evidence)), tuple(evidence)
         )
+
+    @staticmethod
+    async def _execute_host_tool(
+        context: RequestContext, call: ModelToolCall, item: HostTool
+    ) -> ConversationToolExecution:
+        try:
+            outcome = await item.handler(context, dict(call.arguments))
+        except Exception as error:  # noqa: BLE001 - a host fault is an observation
+            return ConversationToolExecution(
+                call_id=call.call_id, name=call.name,
+                failure=Failure(code="host_tool_failed", message=type(error).__name__),
+            )
+        return ConversationToolExecution(call_id=call.call_id, name=call.name, host=outcome)
 
     async def _execute_conversation_tool(
         self,
