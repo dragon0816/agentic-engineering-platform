@@ -22,13 +22,20 @@ prompt and a worse thing to show a person.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
 from pydantic import ValidationError
 
 from capabilities.runtime import InstalledCapabilities
-from common.assets import AssetIdentity, StepInput, WorkflowManifest, WorkflowStep
+from common.assets import (
+    AssetIdentity,
+    FixedInput,
+    StepInput,
+    WorkflowManifest,
+    WorkflowStep,
+)
 from common.base import Contract
 
 
@@ -185,7 +192,11 @@ def rendered(manifest: WorkflowManifest, installed: InstalledCapabilities) -> st
         lines.append(f"  {index}. {step.capability.name} -- {what}")
         for name in sorted(step.inputs):
             source = step.inputs[name]
-            if isinstance(source, StepInput):
+            if isinstance(source, FixedInput):
+                fixed = json.dumps(source.value, ensure_ascii=False)
+                shown = fixed if len(fixed) <= 120 else fixed[:117] + "..."
+                lines.append(f"       {name} = fixed {shown}")
+            elif isinstance(source, StepInput):
                 path = "".join(f"[{part!r}]" for part in source.path)
                 lines.append(f"       {name} <- step {source.step_index}{path}")
             else:

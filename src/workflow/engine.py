@@ -19,6 +19,7 @@ from pydantic import JsonValue, TypeAdapter, ValidationError
 from capabilities.runtime import CapabilityInvocation
 from common.assets import (
     AssetIdentity,
+    FixedInput,
     PathPart,
     RetryPolicy,
     RunInput,
@@ -795,7 +796,9 @@ class WorkflowEngine:
                 try:
                     inputs = (
                         {
-                            name: _select(
+                            name: deepcopy(ref.value)
+                            if isinstance(ref, FixedInput)
+                            else _select(
                                 arguments
                                 if isinstance(ref, RunInput)
                                 else record.step_results[ref.step_index].data,

@@ -5,6 +5,7 @@ from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
     Field,
+    JsonValue,
     SerializerFunctionWrapHandler,
     StrictBool,
     StrictStr,
@@ -243,6 +244,20 @@ class StepInput(Contract):
     path: tuple[PathPart, ...] = ()
 
 
+class FixedInput(Contract):
+    """A value written into the Workflow itself, such as a recorded web
+    procedure, a URL or a sheet name (owner decision 2026-10-06). It is part of
+    the reviewed and versioned manifest, never a credential."""
+
+    source: Literal["fixed"]
+    value: JsonValue
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets({"value": self.value})
+        return self
+
+
 class RetryPolicy(Contract):
     """Opt-in bounded retries; the installed capability decides whether it is safe."""
 
@@ -252,7 +267,9 @@ class RetryPolicy(Contract):
 
 class WorkflowStep(RegistryContract):
     capability: AssetIdentity
-    inputs: dict[Symbol, Annotated[RunInput | StepInput, Field(discriminator="source")]]
+    inputs: dict[
+        Symbol, Annotated[RunInput | StepInput | FixedInput, Field(discriminator="source")]
+    ]
     retry: RetryPolicy = RetryPolicy()
 
 

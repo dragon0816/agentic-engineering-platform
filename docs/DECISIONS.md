@@ -1315,3 +1315,18 @@ capability tool (the model would still have to spell exact asset identities);
 an automatic default when only one vault exists (a special case that breaks
 at the second vault); descriptions in host.json (they would not travel with a
 shared vault).
+
+## 2026-10-06 — A Workflow step may take a fixed value written into the manifest
+
+Decision (owner): `WorkflowStep.inputs` gains a third source,
+`{"source": "fixed", "value": <JSON>}`, beside `run` and `step`. A generated
+Workflow carries its recorded web procedure, URLs, labels and sheet names this
+way, so they are part of the manifest the owner reviews, approves and
+versions. A fixed value that looks like a credential is refused when the
+manifest is read. Existing manifests serialize unchanged.
+
+Reason: a step could read only the run's arguments or an earlier step's
+output, so SOP to Workflow had nowhere to put what it recorded. Rejected
+alternatives: hidden per-install Workflow settings (what runs would not be in
+the approved manifest and could be edited on the Settings page); a separate
+procedure file referenced by path (a second artifact to version and approve).
