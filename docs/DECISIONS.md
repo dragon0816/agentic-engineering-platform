@@ -1347,3 +1347,25 @@ Reason: `RunStatus` and the run journal are shared by every execution path
 (Agent Web, Telegram, schedules, recovery); a separate result type changes
 none of them. Rejected alternative: a `mode` on `execute` with a new run
 status, which every consumer of run status would have to learn.
+
+## 2026-10-06 — Author in conversations, approve with buttons, keep candidates in one place
+
+Decision (owner): Workflows and Skills are developed in any conversation
+(Agent Web or Telegram) with files attached to it, not on dedicated pages; the
+"Create a Workflow from an SOP" and "Create a Skill or Workflow draft" panels
+are removed and contribution drafts move to a Candidates area on the
+Capabilities page. Approval to install a candidate or to run a temporary task
+once is a button in the conversation that only the owner can press; the model
+has no tool that approves, installs or runs a change. A temporary task that
+only reads runs directly; one with a write or external step is previewed and
+waits for approval. Skills and Workflows carry one category from a fixed list
+plus free tags, stored in the existing `AssetMetadata.categories`. Plan:
+`docs/phases/CONVERSATIONAL_AUTHORING.md`.
+
+Reason: a dedicated page fixes authoring to one surface and one kind of
+asset; conversations already exist in both channels, and the approval
+guarantee of design B is kept by making approval a human action outside the
+model's tools. Rejected alternatives: approval only on the Candidates page
+(Telegram could not finish a task); preview-and-approve for every temporary
+task (an extra press for a lookup); free tags only (synonyms drift); a fixed
+list only (a list to maintain for every niche).
