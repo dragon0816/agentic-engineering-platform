@@ -182,7 +182,9 @@ def shipment_workflow() -> WorkflowManifest:
                                   "version": "1.0.0"},
                      "owner": {"type": "team", "id": "engineering"}, "visibility": "private"},
         "kind": "workflow", "description": "每日出貨追蹤 SOP", "execution": {"mode": "local"},
-        "dependencies": {"central_required": False}, "input_contract": "t.in",
+        "dependencies": {"central_required": False, "local_capabilities": [
+            "web.read", "data.select", "excel.upsert_rows", "web.act"]},
+        "input_contract": "t.in",
         "output_contract": "t.out",
         "steps": [
             {"capability": READ_SPEC.identity.model_dump(),
