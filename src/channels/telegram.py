@@ -42,7 +42,9 @@ from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
+from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.schedule_policy import target_side_effect
+from host_runtime.turn_summary import tool_summary
 from models.contracts import ModelMessage
 from models.credentials import CredentialMisconfigured, CredentialResolver
 from models.wire import (
@@ -195,6 +197,10 @@ class _Update:
         # A tapped inline button: its data is the text, and the tap is
         # acknowledged so the client stops showing it as pending.
         self.callback_id = callback_id
+
+
+#: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
+APPROVAL_TAP = re.compile(r"^(approve|reject):(ap-[A-Za-z0-9-]{1,64})$")
 
 
 def _parse(raw: object) -> _Update | None:
@@ -423,6 +429,8 @@ class TelegramIngress:
         self.unmapped: dict[int, UnmappedSender] = {}
         self.progress_refresh_s = PROGRESS_REFRESH_SECONDS
         self._histories: dict[tuple[int, int], list[ModelMessage]] = {}
+        # Conversation run and install requests (G4); set by the host once it exists.
+        self.approvals: ChatAuthoring | None = None
         # Within a process, a duplicate inside one response is skipped; across
         # a restart, the durable cursor is what stops a batch being replayed.
         self._seen: dict[int, None] = {}
@@ -590,8 +598,11 @@ class TelegramIngress:
                 reply="Only text messages are accepted here.",
             )
         text = update.text.strip()
-        parsed = slash_command(text)
         key = (update.chat_id, update.sender_id)
+        tapped = APPROVAL_TAP.match(text)
+        if tapped is not None:
+            return await self._decide(base, key, actor, tapped.group(1), tapped.group(2))
+        parsed = slash_command(text)
         active = self._flows.get(key)
         if active is not None and active.expired():
             del self._flows[key]
@@ -667,6 +678,47 @@ class TelegramIngress:
             **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
         )
 
+    def _approval_buttons(
+        self, request: LocalAgentRequest
+    ) -> tuple[tuple[tuple[str, str], ...], ...]:
+        """One row per pending request the Agent made in this chat (G4, A5)."""
+        if self.approvals is None:
+            return ()
+        rows = []
+        for item in self.approvals.approvals(request.actor, session_id=request.session_id):
+            label = "安裝" if item.kind == "install" else "執行"
+            rows.append(((f"核准{label} {item.workflow}"[:60], f"approve:{item.approval_id}"),
+                         ("拒絕", f"reject:{item.approval_id}")))
+        return tuple(rows)
+
+    async def _decide(
+        self, base: dict[str, Any], key: tuple[int, int], actor: str, decision: str,
+        approval_id: str,
+    ) -> TelegramDelivery:
+        """An approval button. Only the owner decides: a sender acting on the
+        owner's behalf is refused, and the model never reaches this."""
+        acting, on_behalf_of = self._acting(actor)
+        if self.approvals is None:
+            return TelegramDelivery(**base, disposition="answered",
+                                    reply="Approvals are not available on this Bridge.")
+        if on_behalf_of is not None:
+            return TelegramDelivery(**base, disposition="answered",
+                                    reply="Only the owner of this Bridge can approve or reject.")
+        try:
+            decided = await asyncio.to_thread(
+                self.approvals.decide, approval_id, acting, decision == "approve")
+        except ChatAuthoringError as error:
+            return TelegramDelivery(
+                **base, disposition="answered",
+                reply=f"That request was already decided or is unknown ({error.code}).")
+        text = approval_text(decided)
+        history = self._histories.get(key, [])
+        said = ("【核准】" if decision == "approve" else "【拒絕】") + decided.summary
+        history = [*history, ModelMessage(role="user", text=said),
+                   ModelMessage(role="assistant", text=text)]
+        self._histories[key] = history[-MAX_CHAT_HISTORY:]
+        return TelegramDelivery(**base, disposition="answered", reply=scrub(text))
+
     async def _converse(
         self, base: dict[str, Any], key: tuple[int, int], request: LocalAgentRequest,
         text: str,
@@ -689,18 +741,29 @@ class TelegramIngress:
                 **base, disposition="answered", reply=f"Refused: {result.refusal}."
             )
         conversation = result.conversation
+        buttons = self._approval_buttons(request)
+        record = tool_summary(conversation)
         if conversation is None or conversation.status != "answered":
             code = (
                 conversation.failure.code
                 if conversation is not None and conversation.failure is not None
                 else "conversation_failed"
             )
-            return TelegramDelivery(
-                **base, disposition="answered", reply=f"That could not be answered ({code})."
-            )
-        turn.append(ModelMessage(role="assistant", text=conversation.text))
+            reply = f"That could not be answered ({code})."
+            if code == "tool_loop_limit" and conversation is not None:
+                reply = (f"這個回合已用完 {len(conversation.tools)} 次工具呼叫，工作還沒完成；"
+                         "回覆「繼續」我會接著做。")
+                # Keep what was done so 繼續 can pick it up.
+                turn.append(ModelMessage(role="assistant",
+                                         text=f"{reply}\n\n[工具紀錄]\n{record}"))
+                self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+            return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
+        remembered = conversation.text if record is None else (
+            f"{conversation.text}\n\n[工具紀錄]\n{record}")
+        turn.append(ModelMessage(role="assistant", text=remembered))
         self._histories[key] = turn[-MAX_CHAT_HISTORY:]
-        return TelegramDelivery(**base, disposition="answered", reply=scrub(conversation.text))
+        return TelegramDelivery(**base, disposition="answered", reply=scrub(conversation.text),
+                                buttons=buttons)
 
     def _acting(self, actor: str) -> tuple[str, str | None]:
         """Who runs and on whose behalf, as for every other request."""

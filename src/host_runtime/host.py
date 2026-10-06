@@ -1662,6 +1662,8 @@ def build_runtime(
             ),
         )
         telegram = build_telegram(checked, place, agent, resolver)
+        if telegram is not None:
+            telegram.approvals = chat_authoring
         platform = build_platform(checked, resolver)
     except BaseException:
         state.close()

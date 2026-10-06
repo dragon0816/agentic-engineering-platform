@@ -81,7 +81,7 @@ from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
-from host_runtime.chat_authoring import ApprovalRequest, ChatAuthoringError
+from host_runtime.chat_authoring import ChatAuthoringError, approval_text
 from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
@@ -187,33 +187,6 @@ def with_tools(message: ConversationMessage) -> str:
     if message.role != "assistant" or not message.tool_summary:
         return message.text
     return f"{message.text}\n\n[工具紀錄]\n{message.tool_summary}"
-
-
-def approval_text(item: ApprovalRequest) -> str:
-    """What the conversation shows, and the Agent reads, after a decision."""
-    if item.status == "rejected":
-        return f"【已拒絕】{item.summary}。沒有執行任何動作。"
-    result = item.result if isinstance(item.result, dict) else {}
-    if item.status == "failed":
-        return f"【未執行】{item.summary}。原因：{result.get('failure')}"
-    if item.kind == "install":
-        return (f"【已核准安裝】{result.get('installed_as')}（digest {result.get('digest')}）。"
-                "之後可以在對話中用新的參數重跑它。")
-    lines = [f"【已核准並執行】{item.workflow}（候選 {item.candidate_id}，digest "
-             f"{result.get('digest')}）結果：{result.get('status')}"]
-    failure = result.get("failure")
-    if failure:
-        lines.append(f"失敗：{json.dumps(failure, ensure_ascii=False)}")
-    steps = result.get("steps")
-    for step in steps if isinstance(steps, list) else []:
-        if not isinstance(step, dict):
-            continue
-        data = step.get("data")
-        detail = json.dumps(data, ensure_ascii=False)
-        lines.append(f"步驟 {step.get('index')}：{step.get('status')}"
-                     + (f"（{step.get('failure')}）" if step.get("failure") else "")
-                     + f"\n{detail[:2500]}")
-    return "\n".join(lines)
 
 
 def _trace() -> TraceIdentifiers:
