@@ -1277,3 +1277,18 @@ AppContainer prototype blocked all of that and personal-file reads without
 admin rights. Rejected alternatives: AppContainer (owner prefers IT
 governance of egress over a stricter sandbox); AppContainer with network
 allowed but reads blocked (most complex, weakest exfiltration protection).
+
+## 2026-10-06 — The shipped Knowledge Skill stays 1.0.0 without a selector hint
+
+Decision (owner): `company-agent/knowledge-query` in
+`capabilities/company_agent/manifest.py` goes back to 1.0.0 with no
+`selector_hint`. This corrects the 2026-10-05 selector-hint entry for this
+one Skill; the other hinted Skills keep their new versions. The live 1.1.0
+installed on 2026-10-05 was moved to `assets/skills/disabled/`.
+
+Reason: versions 1.1.0-1.4.0 of this Skill already exist on the host from
+Knowledge evolution, with different content (1.4.0 is the current
+candidate). The hinted 1.1.0 changed a published version and re-enabled a
+superseded Skill under a second `knowledge` alias. Later versions come from
+Knowledge evolution, not from the shipped manifest. Rejected alternative:
+an unused 1.5.0, which would sort above the 1.4.0 candidate and look newer.

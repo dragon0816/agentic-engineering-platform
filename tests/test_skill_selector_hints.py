@@ -26,7 +26,11 @@ def test_a_manifest_without_a_hint_keeps_its_published_bytes() -> None:
     unhinted = SkillManifest.model_validate(data)
     assert "selector_hint" not in unhinted.model_dump(mode="json")
     assert "selector_hint" not in unhinted.model_dump_json()
-    assert knowledge_skill().metadata.identity.version == "1.1.0"   # a hinted new version
+    # Owner, 2026-10-06: the shipped Knowledge Skill stays 1.0.0 without a
+    # hint; 1.1.0-1.4.0 already exist on the host from Knowledge evolution,
+    # with other content, so a hinted 1.1.0 changed a published version.
+    knowledge = knowledge_skill()
+    assert knowledge.metadata.identity.version == "1.0.0" and knowledge.selector_hint is None
 
 
 def test_the_adapter_prefers_the_hint_and_strips_the_shared_suffix() -> None:

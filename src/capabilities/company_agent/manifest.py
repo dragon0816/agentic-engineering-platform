@@ -75,15 +75,14 @@ def knowledge_skill() -> SkillManifest:
                 "identity": {
                     "namespace": "company-agent",
                     "name": "knowledge-query",
-                    "version": "1.1.0",
+                    # Later versions come from Knowledge evolution on the
+                    # host (1.1.0-1.4.0 exist there), never from this file:
+                    # reusing one of them would change a published version.
+                    "version": "1.0.0",
                 },
                 **_META,
             },
             "alias": "knowledge",
-            "selector_hint": (
-                "Answer a question about R&S instruments, specs and "
-                "markets 儀器規格與產品知識 from the knowledge base"
-            ),
             "instructions": (
                 "Ask one exact installed published Knowledge version. "
                 "Answers require Raw citations."
