@@ -74,22 +74,35 @@ in Agent Web, may approve and install. That action writes the manifest to
 | W8 | Live run on the practice target, then one real SOP chosen by the owner | no |
 | W9 | Business cards (after W1-W8): photo -> local OCR -> confirmed fields -> contacts database -> org chart | no (new capabilities; channel rule change below) |
 
-## Business cards (W9, owner decisions 2026-10-06)
+## Business cards (W9, owner decisions 2026-10-06, revised the same day)
+
+Reference: the owner's Hermes skill `C:\Users\Chi_L\Downloads\business-cards-skill`
+(`SKILL.md`, `scripts/cards.py`), which the owner rates highly. It works well
+because the model reads the photo itself, through the same local LiteLLM
+Gateway (`127.0.0.1:4000`, gpt-5.5), not because of OCR.
 
 - Photos come from Agent Web upload or Telegram. Telegram accepts photos only
   from allowed senders; every other attachment is still refused. This changes
   the channel rule that refused all attachments.
-- Recognition and field extraction stay on this computer: Windows OCR
-  (`zh-Hant-TW` and `en-US` are installed) plus rules. Nothing goes to the
-  Gateway, because cards hold customers' personal data and the Gateway is
-  approved for UNCLASSIFIED only.
-- The fields (name, company, department, title, phones, email, address) are
-  confirmed by the owner in the preview before they are saved. Saved to a
-  local SQLite database in the workspace, with duplicates found by email or
-  phone; the photo stays local.
-- The org chart is drawn per company from department and title as a draft
-  that the owner corrects ("reports to"), because hierarchy inferred from
-  titles is a guess. Shown in Agent Web and exportable as an image.
+- Reading: the Gateway model reads the photo, as Hermes does. The owner
+  approves sending business-card photos to the internal Gateway. This needs
+  the model's `vision` capability and a data-approval record for card
+  images; no other personal data is sent. This replaces the earlier
+  local-only decision.
+- Output, adopted from the Hermes skill: one JSON object with name, company,
+  department, title, phone (desk, extension kept), mobile, email, address,
+  website and notes (romanised forms go in notes), plus `uncertain`, the
+  fields that were blurred or inferred. Omit a field rather than invent it.
+  The confirmation asks only about the `uncertain` fields.
+- Storage: append-only local SQLite in the workspace. Every scan is a row;
+  queries take the newest row per (name, company), and a re-scan reports
+  what changed ("上次是研發部經理，現在是協理"). The photo stays local. The 14
+  cards in Hermes' `cards.db` are imported once with their history; Hermes'
+  database is not changed.
+- Chart: grouped by company and department, people sorted by title
+  seniority, rendered with Graphviz (installed). Every render says it is not
+  a reporting chart, because cards carry no reporting lines. People with
+  `uncertain` fields are marked.
+- Replies answer the question asked and never dump the store.
 - The cards are the second generation target, used to check that SOP to
   Workflow works for more than the first case.
-
