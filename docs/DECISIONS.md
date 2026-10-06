@@ -1241,3 +1241,23 @@ UNCLASSIFIED data only. Rejected alternatives: Gateway field structuring of
 OCR text, and Gateway vision on the photo, both of which would send personal
 data to the Gateway; Agent Web upload only, which loses taking a photo on the
 phone.
+
+## 2026-10-06 — Business cards are read by the Gateway model, as in the owner's Hermes skill
+
+Decision (owner, replacing the earlier local-only choice for W9): business
+card photos are read by the internal Gateway model (local LiteLLM, gpt-5.5),
+as the owner's Hermes `business-cards` skill already does. Only card photos
+are sent; the store and other personal data stay local. AEP adopts the
+skill's design: a JSON object with an `uncertain` field list, confirmation
+of only those fields, append-only scan history with change reporting, and a
+chart grouped by department and title seniority that always says it is not a
+reporting chart. The 14 cards in Hermes' `cards.db` are imported once, with
+their history.
+
+Reason: the skill's quality comes from the model reading the image, not from
+OCR. Local Windows OCR plus rules would be noticeably worse at telling name
+from title, at vertical cards and at mixed scripts. The photos already reach
+the same Gateway through Hermes. Rejected alternatives: local-only OCR (lower
+accuracy); local first with per-card escalation (more steps for the owner);
+sharing Hermes' database file (it would tie AEP to Hermes' location and
+schema); de-duplicated upserts (they lose job and company changes).
