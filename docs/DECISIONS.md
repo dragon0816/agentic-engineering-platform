@@ -1414,3 +1414,25 @@ it had no effect in shadow mode). In active mode that would leave the model
 only coding tools. Rejected alternatives: relying on the selector hint alone
 (the hint was already narrow); removing coding from JEV's candidate list
 (shadow evaluation would lose the signal).
+
+## 2026-10-06 — Business workflow lab: grading rules and isolation
+
+Decision: the lab (`benchmarks/business_workflow_lab/`) grades each task with
+four separate flags (code generated, executed, Excel correct, workflow
+rerun) and marks a task BLOCKED, never FAIL, when a needed interface tool is
+missing. The BLOCKED layer names only what was observed: a refused
+subprocess, a stopped conversation, or a missing tool. A browser task counts
+only with a browser User-Agent in the site's own log; an HTTP-client script
+reaching the same pages is recorded but does not satisfy the browser
+requirement. The mocks keep their data under `operator/`, and the batch
+script flags scripts that reference mock internals.
+
+Reason: the owner's test plan requires that one success flag never hides
+another gap, and that the Agent not be credited for reading data behind an
+interface. Baseline-001 showed the Agent does read mock internals when it
+cannot operate an interface, so the flag is needed. Rejected alternatives:
+counting HTTP scraping as browser use (the plan requires real browser
+operation); moving the mock data to another Windows account now (it needs
+the owner's machine setup, so it is recorded as gap L7 instead); treating
+model-gateway 503s as task results (they are kept as evidence and the tasks
+were rerun once).

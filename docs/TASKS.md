@@ -1361,6 +1361,20 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   install/run), G5 (no subprocess in the runner).
 - [ ] coding_v1 D3 fix (conversation output cap) awaits the owner: it changes
   every conversation turn, including Knowledge asking.
+- [ ] D3 (output cap 8000, `length` reported as its own failure), G3 (8 tool
+  calls per turn) and G4 (install/run a drafted Workflow from chat) approved
+  by the owner 2026-10-06; the edit to `src/agent/gateway.py` was refused by
+  Claude Code's permission check, so not implemented (see `HANDOFF.md`).
+- [x] Business workflow lab (owner request 2026-10-06):
+  `benchmarks/business_workflow_lab/` with an SAP-like site, a Tk desktop
+  Expense app, a quote CLI, 4 Excel templates, 15 prompts, expected answers,
+  a self-tested grader and a batch runner through Agent Web chat. Mocks 42/42
+  smoke checks. `baseline-001`: 16/16 BLOCKED (no browser, desktop or process
+  tool for the Agent; G3/D3 ended every turn first); scripts read mock
+  internals (isolation limit observed). Gaps L1-L7 in
+  `runs/baseline-001/findings.md`.
+- [ ] Lab gaps L1-L3 and L7 await owner decisions (browser, desktop and
+  process tools for the Agent; mock data isolation).
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted

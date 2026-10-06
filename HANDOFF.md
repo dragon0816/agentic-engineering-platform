@@ -81,10 +81,46 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
   the owner installs it from Agent Web (Capabilities, "Create a Workflow from
   an SOP"), then restarts Agent Web.
 
+## Business workflow lab (2026-10-06)
+
+- `benchmarks/business_workflow_lab/` (README has every command): SAP-like
+  site (port 8810), Tk Expense desktop app, `quote_cli`, 4 templates, 15
+  prompts, expected answers, grader with self-test, `operator/run_lab.py`.
+- host.json `coding.workspace_roots` now also lists
+  `benchmarks\business_workflow_lab\runs` (backup `host.json.bak-before-lab`);
+  Agent Web was restarted for it (token in the newest `.scratch/agent-web-*.out.log`).
+- `baseline-001` (AEP `2193cc3`): 16/16 BLOCKED; mocks 42/42 smoke checks.
+  Findings and gap list L1-L7: `runs/baseline-001/findings.md`. Scripts read
+  mock internals when the desktop app could not be operated.
+- `smoke.py --browser` needs the system Python (Playwright is not in `.venv`).
+
+## Approved but not done: D3, G3, G4
+
+The owner approved (2026-10-06, "你提的1~3我覺得沒問題，可以執行"):
+1. D3: conversation output cap 1024 → 8000 in `agent/gateway.py`
+   (`_converse`, both `ModelRequest(max_output_tokens=1024)`), and report a
+   provider `finish_reason == "length"` as its own failure (for example
+   `model_output_truncated` in `models/openai_compatible.py` `_answer`).
+2. G3: tool calls per turn 4 → 8 (the `len(evidence) >= 4` break, turn limit
+   5 → 9 in `gateway.py` and `agent/backend_contracts.py`; update
+   `tests/test_gateway.py::test_conversation_cannot_execute_an_invented_tool_and_stops`).
+3. G4: install and run a drafted Workflow from chat (conversational authoring
+   A4-A6 in `docs/phases/CONVERSATIONAL_AUTHORING.md`).
+Claude Code's auto-mode permission check refused the edit to
+`src/agent/gateway.py` as a change to a shared core module, so nothing was
+changed. It needs the owner to allow that edit, or a person or another agent
+to make it. After it: rerun Knowledge asking, W14 dry run and run-task, then
+coding_v1 and the lab under new run IDs.
+
 ## Next recommended action
 
-1. Owner: approve and install the practice Workflow, restart Agent Web, run
+1. Owner: allow the D3/G3 edit (see above), then implement, verify, and run
+   coding_v1 `fix-run-003` and lab `fix-001`.
+2. Owner: decide the lab gaps L1-L3 (browser, desktop, process tool for the
+   Agent, including whether the Agent may sign in with test credentials) and
+   L7 (mock data isolation: another account or machine).
+3. Owner: approve and install the practice Workflow, restart Agent Web, run
    it (customer C001), check the workbook and `http://127.0.0.1:8766/state.json`.
-2. One real SOP chosen by the owner (its sites go into `web.allowed_origins`).
-3. W9 business cards (Gateway vision approval and data-approval record first).
-4. Coding C7 live run on the practice repository (runner ready).
+4. One real SOP chosen by the owner (its sites go into `web.allowed_origins`).
+5. W9 business cards (Gateway vision approval and data-approval record first).
+6. Coding C7 live run on the practice repository (runner ready).
