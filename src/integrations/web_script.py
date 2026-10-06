@@ -23,7 +23,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any, Literal, Protocol, Self
 from urllib.parse import urlsplit
 
@@ -65,7 +65,10 @@ class RowScope(Contract):
 
 
 class WebAction(Contract):
-    do: Literal["open", "fill", "click", "read_table", "read_text"]
+    # `download` clicks a link or button and keeps the file it sends under
+    # `save_as`; `read_record` reads a two-column table of field names and
+    # values (a detail page's header). Both need a runner that supports them.
+    do: Literal["open", "fill", "click", "read_table", "read_text", "download", "read_record"]
     url: Text | None = None
     target: WebTarget | None = None
     row: RowScope | None = None
@@ -81,6 +84,8 @@ class WebAction(Contract):
             "click": self.target is not None,
             "read_table": self.table is not None and self.save_as is not None,
             "read_text": self.target is not None and self.save_as is not None,
+            "download": self.target is not None and self.save_as is not None,
+            "read_record": self.table is not None and self.save_as is not None,
         }
         if not needs[self.do]:
             raise ValueError(f"a {self.do} action is missing what it needs")
@@ -174,6 +179,20 @@ _ACT = r"""
 })()
 """
 
+_READ_RECORD = r"""
+(() => {
+  const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+  const table = document.querySelector(%(css)s);
+  if (!table) return JSON.stringify({error: 'web_table_missing'});
+  const record = {};
+  [...table.querySelectorAll('tr')].forEach(tr => {
+    const cells = [...tr.children];
+    if (cells.length >= 2) record[norm(cells[0].innerText)] = norm(cells[1].innerText);
+  });
+  return JSON.stringify({ok: true, record: record});
+})()
+"""
+
 _READ_TABLE = r"""
 (() => {
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
@@ -214,11 +233,15 @@ class ScriptRunner:
     def __init__(
         self, page: ScriptPage, allowed_origins: tuple[str, ...], *, settle_s: float = 0.3,
         timeout_s: float = 30.0,
+        downloader: Callable[[Callable[[], None], str], str] | None = None,
     ) -> None:
         self.page = page
         self.allowed = {origin.rstrip("/").lower() for origin in allowed_origins}
         self.settle_s = settle_s
         self.timeout_s = timeout_s
+        # Given the click that starts a download and the name to keep it
+        # under, returns where the file was kept. None: downloads refused.
+        self.downloader = downloader
 
     def run(self, script: WebScript, mode: ScriptMode) -> WebScriptResult:
         checked = WebScript.model_validate(script)
@@ -250,6 +273,11 @@ class ScriptRunner:
                 raise WebScriptError(getattr(error, "code", "navigation_failed")) from None
             self._check_origin()
             return
+        if action.do == "read_record":
+            assert action.table is not None and action.save_as is not None
+            answer = self._evaluate(_READ_RECORD % {"css": json.dumps(action.table)})
+            data[action.save_as] = answer["record"]
+            return
         if action.do == "read_table":
             assert action.table is not None and action.save_as is not None
             answer = self._evaluate(_READ_TABLE % {"css": json.dumps(action.table),
@@ -257,7 +285,7 @@ class ScriptRunner:
             data[action.save_as] = answer["rows"]
             return
         spec: dict[str, Any] = {
-            "op": action.do, "mode": mode,
+            "op": "click" if action.do == "download" else action.do, "mode": mode,
             **(action.target.model_dump() if action.target else {}),
         }
         if action.row is not None:
@@ -265,6 +293,17 @@ class ScriptRunner:
         if action.do == "fill":
             assert action.value is not None
             spec["value"] = _fill_in(action.value, values)
+        if action.do == "download":
+            assert action.save_as is not None
+            if self.downloader is None:
+                raise WebScriptError("web_download_not_supported")
+            expression = _ACT % {"find": _FIND, "spec": json.dumps(spec)}
+
+            def click() -> None:
+                self._evaluate(expression)
+
+            data[action.save_as] = self.downloader(click, action.save_as)
+            return
         answer = self._evaluate(_ACT % {"find": _FIND, "spec": json.dumps(spec)})
         if action.do == "read_text":
             assert action.save_as is not None

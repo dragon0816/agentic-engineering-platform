@@ -27,6 +27,12 @@ from agent.gateway import Gateway, KnowledgeVaultTool
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
+from capabilities.browser_session.handlers import SPEC as BROWSER_SPEC
+from capabilities.browser_session.handlers import (
+    BrowserRequest,
+    BrowserResult,
+    BrowserSessionHandler,
+)
 from capabilities.chipset_report.apply import ChipsetApplyHandler, ChipsetWorkbookWriter
 from capabilities.chipset_report.contracts import (
     ChipsetApplied,
@@ -159,6 +165,7 @@ from harness.restricted_runner import (
     is_venv_launcher,
 )
 from host_runtime.agent import LocalAgent
+from host_runtime.bridge_tools import bridge_tools
 from host_runtime.chat_authoring import ChatAuthoring
 from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
 from host_runtime.contracts import (
@@ -467,6 +474,17 @@ def build_integrations(
                 spec, WebScriptHandler(config.web, profile, mode),  # type: ignore[arg-type]
                 WebScript, WebScriptResult, ExecutionDependencies(central_required=False),
             )
+        # The Agent's own Edge for a task (lab gap L1): kept open between calls,
+        # in a profile apart from the Workflow steps' so neither locks the other.
+        installed.register(
+            BROWSER_SPEC,
+            BrowserSessionHandler(
+                config.web.allowed_origins, layout.workspace_root / "browser-profile",
+                headless=config.web.headless, timeout_s=float(config.web.timeout_seconds),
+                workspace_roots=config.coding.workspace_roots if config.coding else (),
+            ),
+            BrowserRequest, BrowserResult, ExecutionDependencies(central_required=False),
+        )
     # Data and Excel blocks: installed when a Workflow uses them, or when this
     # host turned on web steps for generated Workflows (`web` in host.json).
     generated = config.web is not None
@@ -1604,7 +1622,7 @@ def build_runtime(
         workflows_dir=place.workflows,
         grants_file=place.grants,
     )
-    gateway.host_tools = chat_authoring.tools
+    gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge))
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:
