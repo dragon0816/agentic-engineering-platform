@@ -52,12 +52,12 @@ RERUN = {
     # New values only: the output name is the Workflow's own; the operator takes the
     # workbook the rerun wrote (owner spec §9: rerun the same Workflow, no code change).
     "W01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：起訖日期 2026-08-01 到 2026-08-31、"
-            "status 改為 Closed。", "rerun"),
-    "D01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31。",
+            "status 改為 Closed。輸出檔名請自行決定，不要覆蓋第一次的結果。", "rerun"),
+    "D01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
             "rerun"),
     "C01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 "
-            "2026-10-31。", "rerun"),
-    "X01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。", "rerun"),
+            "2026-10-31。輸出檔名請自行決定，不要覆蓋第一次的結果。", "rerun"),
+    "X01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。", "rerun"),
 }
 X02_ANSWER = ("費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 "
               "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。")
