@@ -1,0 +1,925 @@
+
+===== src/workflow/engine.py =====
+"""Deterministic workflow engine: ordered capability steps through Bridge dispatch.
+
+Run-tracking semantics are adapted from the pinned rs_workflow_system job runner;
+lineage, preserved invariants and intentional differences are recorded in
+docs/PHASE_3_MIGRATION.md. The engine never imports job code: workflows are
+explicitly installed manifests and every step is authorized by the Bridge.
+"""
+
+import asyncio
+import functools
+import json
+import math
+import uuid
+from collections.abc import Callable, Mapping
+from copy import deepcopy
+from typing import Literal
+
+from pydantic import Field, JsonValue, TypeAdapter, ValidationError
+
+from capabilities.runtime import CapabilityInvocation, CapabilityRefused
+from common.assets import (
+    AssetIdentity,
+    FixedInput,
+    PathPart,
+    RetryPolicy,
+    RunInput,
+    StepInput,
+    WorkflowManifest,
+    WorkflowStep,
+)
+from common.base import Contract, Text
+from common.execution import (
+    CapabilityResult,
+    Failure,
+    IdempotencyKey,
+    ProgressEvent,
+    RequestContext,
+    ResumePlan,
+    ResumePolicy,
+    RunProgress,
+    RunStatus,
+    SideEffect,
+    StepAttempt,
+    StepState,
+    StepStateRecord,
+    TraceIdentifiers,
+    WorkflowRun,
+)
+from common.workflow_parameters import (
+    WorkflowParameterError,
+    static_fields,
+    validate_static_settings,
+)
+from workflow.checkpoints import CheckpointStoreError
+from workflow.dispatch import BridgeExecutor
+from workflow.journal import (
+    JournalEntry,
+    JournalState,
+    RunJournal,
+    SuspensionConfirmation,
+    intent_signature,
+)
+
+MAX_RUNS_KEPT = 50
+MAX_LOG_LINES = 5000
+MAX_IDEMPOTENCY_KEYS = 50
+MAX_WATCHERS_PER_RUN = 16
+WATCH_QUEUE_SIZE = 256
+
+
+class _Watcher:
+    """One bounded subscriber queue. A full queue drops events and marks the lag;
+    the terminal event always arrives, so a consumer can never hang."""
+
+    def __init__(self, size: int) -> None:
+        if size < 2:
+            raise ValueError("watch queues need room for a terminal event and its end marker")
+        self.queue: asyncio.Queue[RunProgress | None] = asyncio.Queue(maxsize=size)
+        self.lagged = False
+
+    def deliver(self, event: RunProgress, *, terminal: bool = False) -> None:
+        if terminal:
+            # Reserve room for the terminal event and the end-of-stream marker.
+            while self.queue.maxsize - self.queue.qsize() < 2:
+                self.queue.get_nowait()
+                self.lagged = True
+        elif self.queue.full():
+            self.lagged = True
+            return
+        if self.lagged:
+            event = RunProgress.model_validate({**event.model_dump(), "lagged": True})
+            self.lagged = False
+        self.queue.put_nowait(event)
+
+    def close(self) -> None:
+        if self.queue.full():
+            self.queue.get_nowait()
+        self.queue.put_nowait(None)
+
+
+class ProgressStream:
+    """Async iterator over one watcher. Ending, closing or dropping it — even
+    before the first iteration — releases the watcher's slot for the run."""
+
+    def __init__(self, watcher: _Watcher, holder: list[_Watcher] | None = None) -> None:
+        self._watcher = watcher
+        self._holder = holder
+
+    def __aiter__(self) -> "ProgressStream":
+        return self
+
+    async def __anext__(self) -> RunProgress:
+        item = await self._watcher.queue.get()
+        if item is None:
+            self._release()
+            raise StopAsyncIteration
+        return item
+
+    async def aclose(self) -> None:
+        self._release()
+
+    def _release(self) -> None:
+        holder, self._holder = self._holder, None
+        if holder is not None and self._watcher in holder:
+            holder.remove(self._watcher)
+
+    def __del__(self) -> None:
+        try:
+            self._release()
+        except Exception:
+            pass
+
+
+class WorkflowRunSnapshot(Contract):
+    """Step results carry validated outputs for the caller; log lines never do."""
+
+    run: WorkflowRun
+    log: tuple[Text, ...] = ()
+    step_results: tuple[CapabilityResult, ...] = ()
+    attempts: tuple[StepAttempt, ...] = ()
+
+
+class InstalledWorkflows:
+    """Explicit host installation; the Platform Registry is never consulted at runtime."""
+
+    def __init__(self) -> None:
+        self._workflows: dict[tuple[str, str, str], WorkflowManifest] = {}
+
+    def register(self, manifest: WorkflowManifest) -> None:
+        checked = WorkflowManifest.model_validate(manifest)
+        key = checked.metadata.identity.key
+        if key in self._workflows:
+            raise ValueError("workflow version already installed")
+        self._workflows[key] = checked
+
+    def get(self, identity: AssetIdentity) -> WorkflowManifest | None:
+        manifest = self._workflows.get(identity.key)
+        return manifest.model_copy(deep=True) if manifest is not None else None
+
+    def manifests(self) -> tuple[WorkflowManifest, ...]:
+        """Every installed manifest, as copies, in installation order."""
+        return tuple(item.model_copy(deep=True) for item in self._workflows.values())
+
+
+class _RunRecord:
+    """Mutable run state owned by the event loop; snapshots are frozen contracts."""
+
+    def __init__(
+        self,
+        workflow: AssetIdentity,
+        trace: TraceIdentifiers,
+        *,
+        manifest: WorkflowManifest | None = None,
+        arguments: dict[str, JsonValue] | None = None,
+        actor: str = "",
+        namespace: str = "",
+        resumed_from: str | None = None,
+    ) -> None:
+        self.run_id = f"run-{uuid.uuid4().hex}"
+        self.workflow = workflow
+        self.trace = trace
+        self.manifest = manifest
+        self.arguments: dict[str, JsonValue] = arguments if arguments is not None else {}
+        self.actor = actor
+        self.namespace = namespace
+        self.resumed_from = resumed_from
+        # Runs are linear: once continued, the continuation is what gets resumed.
+        self.continued_by: str | None = None
+        self.status: RunStatus = "running"
+        self.completed_steps = 0
+        self.failure: Failure | None = None
+        self.log: list[str] = []
+        self.step_results: list[CapabilityResult] = []
+        self.attempts: list[StepAttempt] = []
+        self.watchers: list[_Watcher] = []
+        self.sequence = 0
+        # Present only when the engine journals this run; the run's place in it.
+        self.journal: JournalState | None = None
+
+        self.final: WorkflowRunSnapshot | None = None
+
+    def append_log(self, message: str) -> None:
+        if len(self.log) < MAX_LOG_LINES:
+            self.log.append(message)
+        elif len(self.log) == MAX_LOG_LINES:
+            self.log.append(f"… log truncated ({MAX_LOG_LINES} lines)")
+
+    def snapshot(self) -> WorkflowRunSnapshot:
+        if self.final is not None:
+            return self.final.model_copy(deep=True)
+        return WorkflowRunSnapshot(
+            run=WorkflowRun(
+                run_id=self.run_id,
+                workflow=self.workflow,
+                trace=self.trace,
+                status=self.status,
+                completed_steps=self.completed_steps,
+                failure=self.failure,
+                resumed_from=self.resumed_from,
+            ),
+            log=tuple(self.log),
+            step_results=tuple(result.model_copy(deep=True) for result in self.step_results),
+            attempts=tuple(self.attempts),
+        )
+
+
+def _step_label(identity: AssetIdentity) -> str:
+    return f"{identity.namespace}/{identity.name}@{identity.version}"
+
+
+class _MissingInput(Exception):
+    """Contains no path or payload, including when converted to a failure."""
+
+
+def _select(value: JsonValue, path: tuple[PathPart, ...]) -> JsonValue:
+    for part in path:
+        if isinstance(part, str) and isinstance(value, dict) and part in value:
+            value = value[part]
+        elif isinstance(part, int) and isinstance(value, list) and part < len(value):
+            value = value[part]
+        else:
+            raise _MissingInput
+    return deepcopy(value)
+
+
+class PreviewStep(Contract):
+    """One step of a preview: `ran` (a read step, for real), `planned` (not
+    dispatched; `output` holds what its handler computed it would do, if it
+    can say), `blocked` (its input comes from a step that did not run),
+    `failed` or `not_permitted`."""
+
+    index: int = Field(ge=0, strict=True)
+    capability: AssetIdentity
+    side_effect: SideEffect | None = None
+    state: Literal["ran", "planned", "blocked", "failed", "not_permitted"]
+    inputs: JsonValue = None
+    output: JsonValue = None
+    failure: Failure | None = None
+
+
+class WorkflowPreview(Contract):
+    workflow: AssetIdentity
+    status: Literal["previewed", "failed", "needs_input", "unavailable"]
+    steps: tuple[PreviewStep, ...] = ()
+    failure: Failure | None = None
+
+
+def _preview_failure(code: str) -> Failure:
+    return Failure(code=code, message="The preview stopped at this step")
+
+
+def _preview_stopped(target: AssetIdentity, code: str, status: str) -> WorkflowPreview:
+    final = status if status in ("needs_input", "unavailable") else "failed"
+    return WorkflowPreview.model_validate(
+        {"workflow": target, "status": final, "failure": _preview_failure(code)}
+    )
+
+
+def _target(step: AssetIdentity | WorkflowStep) -> AssetIdentity:
+    return step.capability if isinstance(step, WorkflowStep) else step
+
+
+class WorkflowEngine:
+    """Caller-wait timeouts never finalize a run; the driving task records the outcome."""
+
+    def __init__(
+        self,
+        workflows: InstalledWorkflows,
+        bridge: BridgeExecutor,
+        *,
+        journal: RunJournal | None = None,
+        watch_queue_size: int = WATCH_QUEUE_SIZE,
+        settings_provider: Callable[[WorkflowManifest], Mapping[str, JsonValue]] | None = None,
+        choices_provider: Callable[
+            [WorkflowManifest, str, Mapping[str, JsonValue]], list[str] | None
+        ]
+        | None = None,
+    ) -> None:
+        self.workflows = workflows
+        self.bridge = bridge
+        # Per-install settings (`scope: static` fields), read on every run so a
+        # change on the settings page applies without a restart.
+        self.settings_provider = settings_provider
+        # Current values of `ref:` sets and `fn:` functions, given the Workflow
+        # (whose settings a function reads) and the run's answers.
+        self.choices_provider = choices_provider
+        # Without a journal the engine behaves exactly as before: in memory only.
+        self.journal = journal
+        self.watch_queue_size = watch_queue_size
+        self._runs: dict[str, _RunRecord] = {}
+        self._tasks: dict[str, asyncio.Task[None]] = {}
+        # Never evict a key silently: even an evicted failed run may have effects.
+        # Scoped to this engine's lifetime and one event loop, not durable storage.
+        self._submissions: dict[tuple[str, str, str], tuple[str, _RunRecord]] = {}
+
+    @property
+    def watch_queue_size(self) -> int:
+        return self._watch_queue_size
+
+    @watch_queue_size.setter
+    def watch_queue_size(self, size: int) -> None:
+        if size < 2:
+            raise ValueError("watch queues need room for a terminal event and its end marker")
+        self._watch_queue_size = size
+
+    def get(self, run_id: str) -> WorkflowRunSnapshot | None:
+        """None means unknown or evicted; only the last MAX_RUNS_KEPT runs are kept."""
+        record = self._runs.get(run_id)
+        return record.snapshot() if record is not None else None
+
+    def submitted(
+        self, actor: str, namespace: str, idempotency_key: str
+    ) -> WorkflowRunSnapshot | None:
+        """The run an idempotency key already names for this actor and
+        namespace, or None. A caller that is told to stop a job it may have
+        started asks this before saying it never ran."""
+        key = (actor, namespace, TypeAdapter(IdempotencyKey).validate_python(idempotency_key))
+        previous = self._submissions.get(key)
+        return previous[1].snapshot() if previous is not None else None
+
+    async def wait(self, run_id: str) -> WorkflowRunSnapshot | None:
+        """Join a run that outlived its caller-wait timeout and return its final state."""
+        task = self._tasks.get(run_id)
+        if task is not None:
+            # Never re-raise a cancelled or failed driving task into the joiner;
+            # the run record carries the outcome.
+            await asyncio.wait({task})
+        return self.get(run_id)
+
+    async def execute(
+        self,
+        context: RequestContext,
+        workflow: AssetIdentity,
+        arguments: dict[str, JsonValue] | None = None,
+        *,
+        timeout_seconds: float = 300,
+        idempotency_key: IdempotencyKey | None = None,
+    ) -> WorkflowRunSnapshot:
+        if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+            raise ValueError("timeout must be finite and positive")
+        checked = RequestContext.model_validate(context)
+        target = AssetIdentity.model_validate(workflow)
+        manifest = self.workflows.get(target)
+        run_arguments = deepcopy(arguments or {})
+        key = None
+        signature = ""
+        token: str | None = None
+        if idempotency_key is not None:
+            token = TypeAdapter(IdempotencyKey).validate_python(idempotency_key)
+            key = (checked.actor, checked.namespace, token)
+            # JSON distinguishes booleans/integers and normalizes object key order.
+            signature = intent_signature(target, checked, run_arguments)
+            previous = self._submissions.get(key)
+            if previous is not None:
+                if previous[0] != signature:
+                    return self._rejected(target, checked, "idempotency_conflict", "needs_input")
+                if not self._replay_allowed(checked, manifest):
+                    return self._rejected(target, checked, "permission_denied", "failed")
+                snapshot = await self._wait_record(previous[1], timeout_seconds)
+                # Authorization may change while joining an active run.
+                if not self._replay_allowed(checked, manifest):
+                    return self._rejected(target, checked, "permission_denied", "failed")
+                return snapshot
+            if len(self._submissions) >= MAX_IDEMPOTENCY_KEYS:
+                return self._rejected(target, checked, "idempotency_capacity")
+        # Pre-flight failures never create a run record (no ghost runs), matching
+        # the source's load-before-create order.
+        if manifest is None:
+            return self._rejected(target, checked, "workflow_not_installed")
+        settings = self._settings(manifest, run_arguments)
+        if isinstance(settings, str):
+            return self._rejected(target, checked, settings, "needs_input")
+        run_arguments = {**run_arguments, **settings}
+        unavailable = self._choices(manifest, run_arguments)
+        if unavailable is not None:
+            return self._rejected(target, checked, unavailable, "needs_input")
+        rejection = self._preflight(manifest, run_arguments)
+        if rejection is not None:
+            return self._rejected(target, checked, *rejection)
+
+        record = _RunRecord(
+            target,
+            checked.trace,
+            manifest=manifest,
+            arguments=run_arguments,
+            actor=checked.actor,
+            namespace=checked.namespace,
+        )
+        if self.journal is not None:
+            # Durable evidence exists before anything executes; a store that
+            # cannot acknowledge the run means no run at all. The write is
+            # blocking, so it never runs on the event loop.
+            try:
+                record.journal = await asyncio.to_thread(
+                    self.journal.begin,
+                    record.run_id,
+                    checked,
+                    manifest,
+                    run_arguments,
+                    idempotency_key=token,
+                )
+            except CheckpointStoreError as error:
+                return self._rejected(target, checked, f"checkpoint_{error.code}")
+            existing = record.journal.checkpoint.run_id
+            if existing != record.run_id:
+                # The key already names a durable run, from this process or an
+                # earlier one: the rejection names it so the caller can inspect it.
+                return self._rejected(
+                    target, checked, "idempotency_conflict", "needs_input", run_id=existing
+                )
+        if key is not None:
+            # No await before reservation/task creation: duplicate submissions on
+            # this event loop see this same record, even before execution starts.
+            self._submissions[key] = (signature, record)
+        return await self._launch(
+            record,
+            manifest,
+            checked,
+            run_arguments,
+            timeout_seconds,
+            opening=f"start workflow {_step_label(target)}",
+        )
+
+    async def preview(
+        self,
+        context: RequestContext,
+        workflow: AssetIdentity,
+        arguments: dict[str, JsonValue] | None = None,
+    ) -> WorkflowPreview:
+        """Show what a run would do, changing nothing (owner design A,
+        2026-10-06). A `read` step runs for real through the Bridge, under the
+        same grants as a run. Any other step is not dispatched: it is listed
+        with the inputs it would receive and, when its handler offers
+        `preview(inputs)`, with what it computes it would do. A step whose
+        input comes from a step that did not run is blocked. Nothing is
+        journaled and no run exists afterwards."""
+        checked = RequestContext.model_validate(context)
+        target = AssetIdentity.model_validate(workflow)
+        manifest = self.workflows.get(target)
+        if manifest is None:
+            return _preview_stopped(target, "workflow_not_installed", "unavailable")
+        run_arguments = deepcopy(arguments or {})
+        settings = self._settings(manifest, run_arguments)
+        if isinstance(settings, str):
+            return _preview_stopped(target, settings, "needs_input")
+        run_arguments = {**run_arguments, **settings}
+        unavailable = self._choices(manifest, run_arguments)
+        if unavailable is not None:
+            return _preview_stopped(target, unavailable, "needs_input")
+        rejection = self._preflight(manifest, run_arguments)
+        if rejection is not None:
+            return _preview_stopped(target, *rejection)
+        effects = [
+            binding.spec.side_effect
+            for binding in (self.bridge.installed.get(_target(step)) for step in manifest.steps)
+            if binding is not None
+        ]
+        if "read" not in effects:
+            return _preview_stopped(target, "preview_has_no_read_step", "unavailable")
+        outputs: dict[int, JsonValue] = {}
+        steps: list[PreviewStep] = []
+        for index, step in enumerate(manifest.steps):
+            steps.append(await self._preview_step(checked, index, step, run_arguments, outputs))
+        failed = any(item.state in ("failed", "not_permitted") for item in steps)
+        return WorkflowPreview(
+            workflow=target, status="failed" if failed else "previewed", steps=tuple(steps)
+        )
+
+    async def _preview_step(
+        self,
+        context: RequestContext,
+        index: int,
+        step: AssetIdentity | WorkflowStep,
+        arguments: dict[str, JsonValue],
+        outputs: dict[int, JsonValue],
+    ) -> PreviewStep:
+        identity = _target(step)
+        binding = self.bridge.installed.get(identity)
+        if binding is None or not isinstance(step, WorkflowStep):
+            return PreviewStep(index=index, capability=identity, state="blocked",
+                               failure=_preview_failure("preview_step_not_previewable"))
+        effect = binding.spec.side_effect
+        inputs: dict[str, JsonValue] = {}
+        for name, ref in step.inputs.items():
+            if isinstance(ref, FixedInput):
+    
+
+===== src/workflow/dispatch.py =====
+"""Local Bridge dispatch: authorization and validation precede every handler call."""
+
+import asyncio
+import json
+import math
+import threading
+from contextlib import nullcontext
+from typing import Literal
+
+from pydantic import ValidationError
+
+from capabilities.runtime import (
+    CapabilityInvocation,
+    CapabilityRefused,
+    InstalledCapabilities,
+    LocalPolicy,
+    TransientCapabilityError,
+)
+from common.assets import AssetIdentity
+from common.base import Contract, Symbol
+from common.execution import CapabilityResult, Failure, TraceIdentifiers
+
+
+class ExecutionEvent(Contract):
+    trace: TraceIdentifiers
+    asset: AssetIdentity
+    status: Literal["succeeded", "failed", "needs_input", "unavailable"]
+    code: Symbol | None = None
+
+
+class BridgeExecutor:
+    """No retry or process isolation. Handlers must honor asynchronous cancellation."""
+
+    def __init__(
+        self,
+        installed: InstalledCapabilities,
+        policy: LocalPolicy | None = None,
+        *,
+        services: frozenset[str] = frozenset(),
+        timeout_seconds: float = 30,
+    ) -> None:
+        if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+            raise ValueError("timeout must be finite and positive")
+        self.installed = installed
+        self.policy = policy if policy is not None else LocalPolicy()
+        self.services = services
+        self.timeout_seconds = timeout_seconds
+        self._events: list[ExecutionEvent] = []
+        # Requests may run concurrently on separate threads (one event loop
+        # each). Anything that can change a shared resource (a workbook, a
+        # draft, a release) and every workflow run is serialized here; reads
+        # run in parallel. Reentrant, so a workflow's own write steps on the
+        # same thread do not wait for themselves.
+        self.exclusive = threading.RLock()
+
+    @property
+    def events(self) -> tuple[ExecutionEvent, ...]:
+        return tuple(self._events)
+
+    def _finish(self, call: CapabilityInvocation, result: CapabilityResult) -> CapabilityResult:
+        self._events.append(
+            ExecutionEvent(
+                trace=call.context.trace,
+                asset=call.target,
+                status=result.status,
+                code=result.failure.code if result.failure else None,
+            )
+        )
+        return result
+
+    def _failure(
+        self,
+        call: CapabilityInvocation,
+        code: str,
+        *,
+        unavailable: bool = False,
+        retryable: bool = False,
+        invoked: bool = False,
+    ) -> CapabilityResult:
+        return self._finish(
+            call,
+            CapabilityResult(
+                trace=call.context.trace,
+                status="unavailable" if unavailable else "failed",
+                failure=Failure(
+                    code=code, message="Capability invocation did not complete", retryable=retryable
+                ),
+                handler_invoked=invoked,
+            ),
+        )
+
+    async def execute(self, invocation: CapabilityInvocation) -> CapabilityResult:
+        call = CapabilityInvocation.model_validate(invocation)
+        binding = self.installed.get(call.target)
+        if binding is None:
+            return self._failure(call, "capability_not_installed", unavailable=True)
+        authorization = self.policy.authorize(call.context, binding.spec)
+        if not authorization.allowed:
+            return self._failure(call, "permission_denied")
+        dependencies = binding.dependencies
+        if not set(dependencies.local_capabilities).issubset(self.installed.names):
+            return self._failure(call, "missing_local_capability", unavailable=True)
+        if any(
+            service.required and service.name not in self.services
+            for service in dependencies.central_services
+        ):
+            return self._failure(call, "needs_connectivity", unavailable=True)
+        if binding.secrets:
+            return self._failure(call, "secret_resolution_unavailable", unavailable=True)
+        try:
+            # Strict against JSON: a step's arguments are what an earlier
+            # step's output serialized to, so a list is a tuple and an ISO
+            # string is a date, while "1" is still not an integer.
+            inputs = binding.input_model.model_validate_json(
+                json.dumps(call.arguments), strict=True
+            )
+        except (ValidationError, TypeError, ValueError):
+            return self._failure(call, "invalid_input")
+        guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive
+        try:
+            with guard:
+                output = await asyncio.wait_for(
+                    binding.handler(call.context, inputs), self.timeout_seconds
+                )
+        except TimeoutError:
+            return self._failure(call, "timeout", invoked=True)
+        except CapabilityRefused as refusal:
+            # The handler named why; only the code travels.
+            return self._failure(call, refusal.code, invoked=True)
+        except TransientCapabilityError:
+            return self._failure(
+                call,
+                "transient_failure",
+                retryable=binding.spec.side_effect == "read",
+                invoked=True,
+            )
+        except ValueError:
+            # A handler that raises ValueError is refusing what it was given:
+            # the input, or the thing the input pointed it at. Its text may
+            # quote either, so only the code travels.
+            return self._failure(call, "invalid_input", invoked=True)
+        except Exception:
+            # Exception text may contain credentials or input data; never trace it.
+            return self._failure(call, "handler_error", invoked=True)
+        try:
+            checked = binding.output_model.model_validate(output, strict=True)
+            result = CapabilityResult(
+                trace=call.context.trace,
+                status="succeeded",
+                data=checked.model_dump(mode="json"),
+                handler_invoked=True,
+            )
+        except (ValidationError, TypeError, ValueError):
+            return self._failure(call, "invalid_output", invoked=True)
+        return self._finish(call, result)
+
+
+===== src/workflow/payloads.py =====
+"""Content-addressed local storage for the payloads a checkpoint only references.
+
+A `PayloadRef` in a checkpoint names validated, secret-free JSON that a future
+recovery coordinator needs back: a run's arguments and each completed step's
+result. This module stores exactly that, beside the checkpoint file, under the
+host's own access controls.
+
+What is stored is a record of owner, contract and payload, and the digest of that
+whole record is the storage identity (`ref_id`); `PayloadRef.sha256` remains the
+digest of the payload value itself. Both are checked on every read, and the
+record's own owner decides who may read it, so case-insensitive filesystems,
+tampering and swapped files all fail closed rather than returning something the
+run never produced.
+
+Nothing here resolves secrets, enforces policy, grants access or deletes data.
+"""
+
+import hashlib
+import json
+import os
+import re
+import tempfile
+from pathlib import Path
+from typing import Protocol
+
+from pydantic import JsonValue, TypeAdapter, ValidationError
+
+from common.base import Symbol
+from common.checkpoints import CheckpointOwner, PayloadRef
+from workflow.checkpoints import CheckpointStoreError, validate_owner
+
+_SYMBOL: TypeAdapter[str] = TypeAdapter(Symbol)
+_JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
+# A digest may start with a digit, which a Symbol may not; the prefix also keeps
+# the identifier recognisable as this store's, and the file name derives from it.
+REF_PREFIX = "payload-"
+_REF_ID = re.compile(f"^{REF_PREFIX}[a-f0-9]{{64}}$")
+# Payload evidence is small by design: references, identities and validated
+# step data, never attachments, logs or binary content.
+MAX_PAYLOAD_BYTES = 1_000_000
+
+
+class PayloadStore(Protocol):
+    """Trusted storage seam. `put` returns the reference a checkpoint records;
+    `get` returns the payload only when every recorded identity still matches."""
+
+    def put(self, owner: CheckpointOwner, contract: Symbol, payload: JsonValue) -> PayloadRef: ...
+
+    def get(self, owner: CheckpointOwner, ref: PayloadRef) -> JsonValue: ...
+
+
+def _canonical(value: JsonValue) -> bytes:
+    """One byte string per value, so equal records share one digest and file."""
+    return json.dumps(
+        value,
+        sort_keys=True,
+        ensure_ascii=True,
+        allow_nan=False,
+        separators=(",", ":"),
+    ).encode()
+
+
+def _reject_constant(literal: str) -> JsonValue:
+    # NaN/Infinity are not JSON; a stored record containing them is not ours.
+    raise ValueError(f"non-JSON constant: {literal}")
+
+
+def digest_of(payload: JsonValue) -> str:
+    return hashlib.sha256(_canonical(_JSON.validate_python(payload))).hexdigest()
+
+
+def ref_id_for(record_sha256: str) -> str:
+    """The only identifier this store accepts, so a file name can never be a path."""
+    return f"{REF_PREFIX}{record_sha256}"
+
+
+class FilePayloadStore:
+    """One directory per owner under `root`; one file per stored record.
+
+    Writes are atomic (temporary file plus `os.replace`) and idempotent: the same
+    owner, contract and payload land on the same path with the same bytes. There
+    is no deletion API, no TTL and no eviction — a checkpoint may reference a
+    payload for as long as it is retained. Directory permissions are the host's
+    responsibility; the owner recorded inside each file, not its location, is
+    what this store checks.
+    """
+
+    def __init__(self, root: Path, *, max_bytes: int = MAX_PAYLOAD_BYTES) -> None:
+        if type(max_bytes) is not int or max_bytes < 1:
+            raise ValueError("max_bytes must be a positive integer")
+        self._root = Path(root)
+        self._max_bytes = max_bytes
+
+    def _path(self, owner: CheckpointOwner, ref_id: str) -> Path:
+        # Owner parts are validated Symbol/Slug and the file name is a validated
+        # digest, so no component is free-form caller text.
+        return self._root / owner.actor / owner.namespace / f"{ref_id}.json"
+
+    @staticmethod
+    def _record(owner: CheckpointOwner, contract: str, payload: JsonValue) -> bytes:
+        return _canonical(
+            {
+                "owner": {"actor": owner.actor, "namespace": owner.namespace},
+                "contract": contract,
+                "payload": payload,
+            }
+        )
+
+    def put(self, owner: CheckpointOwner, contract: Symbol, payload: JsonValue) -> PayloadRef:
+        checked_owner = validate_owner(owner)
+        name = _SYMBOL.validate_python(contract)
+        try:
+            value = _JSON.validate_python(payload)
+            body = _canonical(value)
+            record = self._record(checked_owner, name, value)
+        except (ValidationError, TypeError, ValueError):
+            # Unserializable data is not evidence; never store a partial record.
+            raise CheckpointStoreError("invalid_transition") from None
+        if len(body) > self._max_bytes:
+            raise CheckpointStoreError("capacity")
+        ref = PayloadRef(
+            ref_id=ref_id_for(hashlib.sha256(record).hexdigest()),
+            sha256=hashlib.sha256(body).hexdigest(),
+            contract=name,
+        )
+        path = self._path(checked_owner, ref.ref_id)
+        try:
+            # An existing file is only trusted when it still hashes to this record;
+            # a truncated or tampered one is rewritten rather than reported as fine.
+            if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != (
+                ref.ref_id.removeprefix(REF_PREFIX)
+            ):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                self._write_atomically(path, record)
+        except OSError:
+            raise CheckpointStoreError("unavailable") from None
+        return ref
+
+    @staticmethod
+    def _write_atomically(path: Path, body: bytes) -> None:
+        handle, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+        try:
+            with os.fdopen(handle, "wb") as stream:
+                stream.write(body)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, path)
+            _fsync_directory(path.parent)
+        except BaseException:
+            Path(temporary).unlink(missing_ok=True)
+            raise
+
+    def get(self, owner: CheckpointOwner, ref: PayloadRef) -> JsonValue:
+        checked_owner = validate_owner(owner)
+        checked_ref = PayloadRef.model_validate(ref)
+        if not _REF_ID.match(checked_ref.ref_id):
+            # Not an identifier this store issues: refuse before naming a path.
+            raise CheckpointStoreError("invalid_transition")
+        path = self._path(checked_owner, checked_ref.ref_id)
+        try:
+            body = path.read_bytes()
+        except FileNotFoundError:
+            raise CheckpointStoreError("missing") from None
+        except OSError:
+            raise CheckpointStoreError("unavailable") from None
+        # The reference decides what is acceptable; the file never gets a vote.
+        if hashlib.sha256(body).hexdigest() != checked_ref.ref_id.removeprefix(REF_PREFIX):
+            raise CheckpointStoreError("unavailable")
+        try:
+            record = json.loads(body, parse_constant=_reject_constant)
+            payload = _JSON.validate_python(record["payload"])
+            stored_owner = CheckpointOwner.model_validate(record["owner"])
+            stored_contract = _SYMBOL.validate_python(record["contract"])
+            payload_digest = digest_of(payload)
+        except (ValidationError, ValueError, TypeError, KeyError, IndexError):
+            raise CheckpointStoreError("unavailable") from None
+        if stored_owner != checked_owner:
+            # A filesystem that folds case must not fold ownership with it.
+            raise CheckpointStoreError("missing")
+        if payload_digest != checked_ref.sha256:
+            raise CheckpointStoreError("unavailable")
+        if stored_contract != checked_ref.contract:
+            raise CheckpointStoreError("invalid_transition")
+        return payload
+
+
+def _fsync_directory(directory: Path) -> None:
+    """Make the rename itself durable where the platform supports it."""
+    try:
+        handle = os.open(directory, os.O_RDONLY)
+    except OSError:
+        return  # Windows cannot open a directory; the replace is atomic there.
+    try:
+        os.fsync(handle)
+    except OSError:
+        pass
+    finally:
+        os.close(handle)
+
+
+===== src/workflow/proof.py =====
+"""Pure metadata proof: manifest -> Registry -> discovery -> Bridge advertisement."""
+
+from agent.registry import TaskRegistry
+from common.assets import TaskManifest
+from workflow.host_bridge import BridgeRegistration
+
+
+def advertise_sample(
+    manifest: TaskManifest,
+    registry: TaskRegistry,
+    bridge: BridgeRegistration,
+) -> BridgeRegistration:
+    """Advertise a discovered Task backed by an already installed read capability.
+
+    Mutates only the provided in-memory Registry. Does not install or execute a Task.
+    The caller supplies the Bridge's installed capabilities explicitly.
+    """
+    checked = TaskManifest.model_validate(manifest)
+    installed = BridgeRegistration.model_validate(bridge)
+    capability = next(
+        (cap for cap in installed.capabilities if cap.identity == checked.capability),
+        None,
+    )
+    if capability is None or capability.side_effect != "read":
+        raise ValueError("sample requires an installed capability classified read")
+    names = {cap.name for cap in installed.capabilities}
+    if not set(checked.dependencies.local_capabilities).issubset(names):
+        raise ValueError("sample is missing a declared local capability")
+    if checked.dependencies.central_required or checked.secrets:
+        raise ValueError("sample proof supports no required central services or secrets")
+    if (checked.input_contract, checked.output_contract) != (
+        capability.input_contract,
+        capability.output_contract,
+    ):
+        raise ValueError("sample Task and installed capability contracts must match")
+    if checked.metadata.lifecycle != "published":
+        raise ValueError("sample requires published metadata for discovery")
+    registry.register(checked)
+    discovered = registry.discover(namespace=checked.metadata.identity.namespace)
+    task = next(task for task in discovered if task.metadata.identity == checked.metadata.identity)
+    tasks = tuple(dict.fromkeys((*installed.installed_tasks, task.metadata.identity)))
+    return BridgeRegistration.model_validate({**installed.model_dump(), "installed_tasks": tasks})
+
+
+===== src/capabilities/registry.py =====
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-002\T09\workspace\.aep-run\run-004\script.py", line 5, in <module>
+    txt=f.read_text(encoding='utf-8', errors='replace')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\Lib\pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\Lib\pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\src\\capabilities\\registry.py'

@@ -211,6 +211,8 @@ def observed_cause(trace_path: str | None) -> str:
         convo = outcome.get("conversation") or {}
         failure = (convo.get("failure") or {}).get("code")
         tools = tools_of(exchange)
+        if failure == "tool_loop_limit":
+            causes.append("G3 the conversation loop's tool budget (4 calls per turn) ended the turn")
         if target.get("namespace") == "knowledge-query":
             causes.append("D1 routed to the Knowledge harness; the model never saw the task")
         elif failure == "empty_model_answer":
@@ -223,6 +225,41 @@ def observed_cause(trace_path: str | None) -> str:
             causes.append("G1 no tool to read the workspace, write files or run code; the reply "
                           "explained this and offered code for a person to run")
     return "; ".join(dict.fromkeys(causes)) or "see trace"
+
+
+def script_runs(trace_path: str | None) -> list[int | None]:
+    """Exit codes of each `coding__run` script, in order, from the trace."""
+    if not trace_path or not Path(trace_path).is_file():
+        return []
+    codes: list[int | None] = []
+    trace = json.loads(Path(trace_path).read_text(encoding="utf-8"))
+    for exchange in trace.get("exchanges", []):
+        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+            "conversation") or {}
+        for tool in convo.get("tools") or []:
+            if tool.get("name") != "coding__run":
+                continue
+            steps = (tool.get("workflow") or {}).get("step_results") or []
+            data = steps[0].get("data") if steps else None
+            codes.append(data.get("exit_code") if isinstance(data, dict) else None)
+    return codes
+
+
+def first_attempt(results: dict[str, dict[str, Any]]) -> str:
+    """PASS tasks whose every script run exited 0, over PASS tasks with script runs."""
+    with_runs = [r for r in results.values() if r["status"] == "PASS" and script_runs(r.get("trace_path"))]
+    clean = [r for r in with_runs if all(c == 0 for c in script_runs(r.get("trace_path")))]
+    if not with_runs:
+        return "- First-attempt success: no PASS task with script evidence"
+    return (f"- First-attempt success (derived: PASS with no failing script run): "
+            f"{len(clean)}/{len(with_runs)}")
+
+
+def derived_loops(codes: list[int | None]) -> int | None:
+    """Repair loops derived from exit codes: a failing script followed by another run."""
+    if not codes:
+        return None
+    return sum(1 for i, code in enumerate(codes[:-1]) if code not in (0, None))
 
 
 def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta: dict[str, Any]) -> None:
@@ -245,15 +282,19 @@ def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta:
         f"- Fixture manifest SHA-256: `{meta['fixture_manifest_sha256']}`; validator {VALIDATOR_VERSION}",
         f"- Budget: {TIME_LIMIT_S} s per task; tool calls bounded by the Gateway loop (4 per turn)", "",
         "## Results", "",
-        "| Task | Status | Tool calls | Seconds | Interventions | Observed cause |", "|---|---|---|---|---|---|",
+        "| Task | Status | Tool calls | Script runs (exit codes) | Derived repair loops | Seconds "
+        "| Interventions | Observed cause |", "|---|---|---|---|---|---|---|---|",
     ]
     for task in ALL:
         r = results.get(task)
         if r is None:
             lines.append(f"| {task} | NOT_RUN | | | | |")
             continue
-        reason = observed_cause(r.get("trace_path")).replace("|", "/")
+        reason = "" if r["status"] == "PASS" else observed_cause(r.get("trace_path")).replace("|", "/")
+        codes = script_runs(r.get("trace_path"))
+        loops = derived_loops(codes)
         lines.append(f"| {task} | {r['status']} | {r.get('tool_calls') if r.get('tool_calls') is not None else ''} | "
+                     f"{codes if codes else ''} | {'' if loops is None else loops} | "
                      f"{r.get('duration_seconds') if r.get('duration_seconds') is not None else ''} | "
                      f"{r.get('human_interventions') if r.get('human_interventions') is not None else ''} | {reason} |")
     lines += [
@@ -264,7 +305,9 @@ def report(run_dir: Path, run_id: str, results: dict[str, dict[str, Any]], meta:
         "- PASS/(PASS+FAIL+TIMEOUT): no attempted task",
         f"- Median duration: {statistics.median(durations):.1f} s" if durations else "- Median duration: n/a",
         f"- Median tool calls: {statistics.median(calls)}" if calls else "- Median tool calls: n/a",
-        "- First-attempt success and repair loops: null for every task (not observable; see limitations)",
+        first_attempt(results),
+        "- Repair loops above are derived from script exit codes (a failing run followed by another "
+        "run); `results.jsonl` keeps them null because the trace has no explicit edit events.",
         "",
     ]
     (run_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
