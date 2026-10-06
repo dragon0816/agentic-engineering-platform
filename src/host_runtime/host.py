@@ -13,7 +13,6 @@ the engine decides every workflow, and the Agent decides who may ask.
 """
 
 import os
-import subprocess
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from types import TracebackType
@@ -153,7 +152,12 @@ from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from dut.runtime import PhysicalDutValidationService
 from harness.network_block import create_rule_command, outbound_rule_present
-from harness.restricted_runner import is_venv_launcher
+from harness.restricted_runner import (
+    RestrictedRunner,
+    RunnerError,
+    RunnerLimits,
+    is_venv_launcher,
+)
 from host_runtime.agent import LocalAgent
 from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
 from host_runtime.contracts import (
@@ -1321,6 +1325,23 @@ def inspect_models(config: CompanyHostConfiguration) -> DoctorCheck:
     )
 
 
+def _runner_probe(python: Path) -> str | None:
+    import tempfile
+
+    try:
+        runner = RestrictedRunner(python, RunnerLimits(timeout_seconds=60))
+        with tempfile.TemporaryDirectory(prefix="aep-runner-probe-") as folder:
+            result = runner.run(["-c", "import pytest, openpyxl; print('ok')"],
+                                cwd=Path(folder), run_dir=Path(folder))
+    except (RunnerError, OSError) as error:
+        return f"the runner interpreter cannot start restricted ({type(error).__name__})"
+    if result.exit_code == 0 and result.output.strip().endswith("ok"):
+        return None
+    code = result.exit_code if result.exit_code is None else hex(result.exit_code & 0xFFFFFFFF)
+    return ("the runner interpreter does not start restricted or lacks pytest/openpyxl "
+            f"(exit {code})")
+
+
 def inspect_coding(
     config: CompanyHostConfiguration,
     *,
@@ -1338,11 +1359,12 @@ def inspect_coding(
     elif is_venv_launcher(python):
         problems.append("the runner interpreter is a venv launcher; use a standalone Python")
     else:
-        probe = subprocess.run(
-            [str(python), "-c", "import pytest"], capture_output=True, check=False, timeout=60
-        )
-        if probe.returncode != 0:
-            problems.append("pytest is not installed in the runner interpreter")
+        # Started the way a coding run starts it (low integrity, one-process
+        # Job): a folder the low-integrity token cannot read fails only here,
+        # never in a normal-integrity probe (coding_v1 fix-run-001, D4).
+        problem = _runner_probe(python)
+        if problem is not None:
+            problems.append(problem)
         if binding.require_network_block and not rule_present(python):
             problems.append(f"no outbound firewall block names the runner; run elevated: "
                             f"{create_rule_command(python)}")

@@ -1,0 +1,59 @@
+{
+ "run_id": "fix-run-001",
+ "task_id": "T07",
+ "attempt": 1,
+ "status": "BLOCKED",
+ "task_success": false,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 0,
+ "duration_seconds": 12.17,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "specs.xlsx exists",
+   "passed": false,
+   "expected": "specs.xlsx",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": "environment",
+ "failure_reason": "no output was produced; the Agent had no usable tool to read the workspace, write files or run code (no tool call)",
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-001\\T07\\trace.json",
+ "tools": [],
+ "model_turns": [
+  1
+ ],
+ "repo_commit": "ba91a4633850186e2897c3af0c41c8a13cd5c175",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.1.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.0"
+}
