@@ -33,7 +33,7 @@ from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPo
 from common.assets import ExecutionDependencies, WorkflowManifest
 from common.base import Contract
 from common.evaluation import EvaluationCase
-from common.execution import RequestContext, TraceIdentifiers
+from common.execution import Failure, RequestContext, TraceIdentifiers
 from models.contracts import ModelMessage, ModelRequest, ModelResponse, ModelToolCall
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
@@ -655,3 +655,29 @@ def test_several_calls_in_one_reply_run_in_order_and_each_gets_an_answer() -> No
     assert result.status == "answered" and ran == ["1", "2"] and len(result.tools) == 2
     answered = [m.tool_call_id for m in model.calls[1].messages if m.role == "tool"]
     assert answered == ["a", "b"]
+
+
+def _cut() -> ModelResponse:
+    return ModelResponse(
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        failure=Failure(code="model_output_truncated", message="cut"),
+    )
+
+
+def test_a_reply_cut_at_the_output_limit_is_retried_with_a_notice() -> None:
+    """Lab fix-005 D04: one truncated reply ended the whole turn."""
+    from agent.gateway import TRUNCATED_NOTICE
+
+    built, model = _host_gateway([], [_cut(), _text("shorter answer")])
+    history = (ModelMessage(role="user", text="go"),)
+    result = asyncio.run(built.converse(request("go"), history))
+    assert result.status == "answered" and result.text == "shorter answer"
+    assert model.calls[1].messages[-1].text == TRUNCATED_NOTICE
+
+
+def test_a_reply_that_keeps_getting_cut_still_fails_with_its_own_code() -> None:
+    built, _ = _host_gateway([], [_cut(), _cut(), _cut(), _text("never")])
+    history = (ModelMessage(role="user", text="go"),)
+    result = asyncio.run(built.converse(request("go"), history))
+    assert result.status == "failed" and result.failure is not None
+    assert result.failure.code == "model_output_truncated"

@@ -57,6 +57,14 @@ from workflow.dispatch import BridgeExecutor
 from workflow.engine import ProgressStream, WorkflowEngine, WorkflowRunSnapshot
 from workflow.journal import SuspensionConfirmation
 
+# A reply cut at the output limit is retried this often within a turn, with
+# this notice, before the turn fails with `model_output_truncated`.
+MAX_TRUNCATED_RETRIES = 2
+TRUNCATED_NOTICE = (
+    "Your last reply was cut off at the output limit before it finished, so nothing was "
+    "done with it. Reply again more briefly: split a long script into smaller steps or "
+    "files, or shorten the text."
+)
 MAX_CONVERSATION_HISTORY = 12
 MAX_CONVERSATION_MESSAGE_CHARS = 4_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
@@ -539,6 +547,7 @@ class Gateway:
             host[name] = host_tool
             tools.append(host_tool.tool)
         evidence: list[ConversationToolExecution] = []
+        truncated_retries = 0
         for turn in range(1, max_turns + 1):
             model_request = ModelRequest(
                 trace=context.trace,
@@ -557,6 +566,17 @@ class Gateway:
                 return self._conversation_failure(
                     context, "model_unavailable", turn, tuple(evidence)
                 )
+            if (
+                response.failure is not None
+                and response.failure.code == "model_output_truncated"
+                and truncated_retries < MAX_TRUNCATED_RETRIES
+                and turn < max_turns
+            ):
+                # The reply was cut at the output limit (lab fix-005 D04): say so
+                # and let the model answer again more briefly within this turn.
+                truncated_retries += 1
+                messages.append(ModelMessage(role="user", text=TRUNCATED_NOTICE))
+                continue
             if response.failure is not None:
                 return GatewayConversationResult(
                     trace=context.trace,
