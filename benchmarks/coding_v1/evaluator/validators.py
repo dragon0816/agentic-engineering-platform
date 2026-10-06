@@ -25,7 +25,10 @@ from typing import Any
 # every expected answer is unchanged from 1.0.
 # 1.2 (2026-10-06): T12 reads the merged rows from a workbook, CSV or JSON file;
 # the owner's acceptance for T12 names rows and values, not a file format.
-VALIDATOR_VERSION = "1.2"
+# 1.3 (2026-10-06): T13 counts the 500 page's requests during the delivered
+# program's final run (the session total is reported beside it), and T09 checks
+# data.json as the success scenario left it, before the always_fail run.
+VALIDATOR_VERSION = "1.3"
 
 
 @dataclass
@@ -393,7 +396,12 @@ def t09(ctx: Ctx) -> list[dict[str, Any]]:
     ok_run = runs.get("succeed_third")
     fail_run = runs.get("always_fail")
     data_path = _find(ctx, "data.json")
-    data_ok = data_path is not None and _json(data_path) == {"items": [{"id": "A1", "value": 42}, {"id": "A2", "value": 7}]}
+    want = {"items": [{"id": "A1", "value": 42}, {"id": "A2", "value": 7}]}
+    snapshot = ctx.extra.get("t09_success_output")
+    data_ok = snapshot == want if snapshot is not None else (
+        data_path is not None and _json(data_path) == want)
+    if snapshot is not None:
+        data_path = data_path or ctx.output / "data.json (success-scenario snapshot)"
     runtime = ctx.extra.get("aep_workflow_runs") or []
     return [
         check("a platform workflow ran in the AEP runtime", bool(runtime) or None, "AEP run id",
@@ -512,7 +520,14 @@ def t12(ctx: Ctx) -> list[dict[str, Any]]:
 
 
 def t13(ctx: Ctx) -> list[dict[str, Any]]:
-    tries = _hits(ctx, "/t13/item/5")
+    window = ctx.extra.get("final_run_window")
+    session_total = _hits(ctx, "/t13/item/5")
+    if window:
+        start, end = window
+        tries = sum(1 for r in ctx.requests("/t13/item/5")
+                    if r["path"].split("?")[0] == "/t13/item/5" and start <= r.get("t", start) <= end)
+    else:
+        tries = session_total
     path = _find(ctx, "robust_products.xlsx")
     if path is None:
         return _missing("robust_products.xlsx") + [check("500 page tried 3 times", tries == 3, 3, tries)]
@@ -537,7 +552,8 @@ def t13(ctx: Ctx) -> list[dict[str, Any]]:
         check("complete pages correct", full, "Phone A/B with price, CPU, ok", None),
         check("missing values are N/A", missing, "Phone C price N/A, Phone D CPU N/A", None),
         check("500 page kept as error with N/A", error_ok, "error, N/A, URL kept", err),
-        check("500 page tried exactly 3 times", tries == 3, 3, tries),
+        check("500 page tried exactly 3 times", tries == 3, 3,
+              {"delivered program's run": tries, "whole session": session_total}),
         check("warnings.json locates the failed URL", located, "/t13/item/5", str(warnings_path) if warnings_path else None),
     ]
 

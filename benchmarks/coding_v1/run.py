@@ -119,6 +119,32 @@ def step_exit_codes(result: dict[str, Any]) -> list[Any]:
             for s in result.get("steps") or [] if isinstance(s, dict)]
 
 
+def script_exit_codes(session: AgentWebSession) -> list[Any]:
+    codes = []
+    for exchange in session.exchanges:
+        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+            "conversation") or {}
+        for tool in convo.get("tools") or []:
+            if tool.get("name") == "coding__run":
+                steps = (tool.get("workflow") or {}).get("step_results") or []
+                data = steps[0].get("data") if steps else None
+                codes.append(data.get("exit_code") if isinstance(data, dict) else None)
+    return codes
+
+
+def final_run_window(workspace: Path, codes: list[Any]) -> list[float] | None:
+    """Start and end of the last coding run that exited 0: the delivered program's run,
+    from its run folder (script written at start, output closed at the end)."""
+    runs = sorted((workspace / ".aep-run").glob("run-*")) if (workspace / ".aep-run").is_dir() else []
+    chosen = None
+    for folder, code in zip(runs, codes, strict=False):
+        if code == 0:
+            chosen = folder
+    if chosen is None or not (chosen / "script.py").is_file() or not (chosen / "output.txt").is_file():
+        return None
+    return [(chosen / "script.py").stat().st_mtime - 0.5, (chosen / "output.txt").stat().st_mtime + 0.5]
+
+
 def settle(session: AgentWebSession, deadline: float, interventions: list[dict[str, Any]],
            decided: list[dict[str, Any]], before: Any = None) -> None:
     """Press the owner's approve button for every request the Agent made, then
@@ -196,6 +222,16 @@ def run_task(task: str, run_id: str, run_dir: Path, server: FixtureServer, base:
 
     if not session.exchanges[-1]["timed_out"]:
         settle(session, deadline, interventions, decided, before_decision)
+    success_output: Any = None
+    if task == "T09":
+        # The success scenario's data.json as it stood when that scenario ended;
+        # the always_fail run may rightly clear a stale file afterwards.
+        data_file = workspace / "output" / "data.json"
+        if data_file.is_file():
+            try:
+                success_output = json.loads(data_file.read_text(encoding="utf-8-sig"))
+            except ValueError:
+                success_output = data_file.read_text(encoding="utf-8-sig", errors="replace")
     if task == "T09" and t09_ranges["succeed_third"] and time.monotonic() < deadline:
         server.set_scenario("always_fail")
         phase["name"] = "always_fail"
@@ -211,7 +247,10 @@ def run_task(task: str, run_id: str, run_dir: Path, server: FixtureServer, base:
     runs = [t["authored_run_id"] for t in tools if t.get("authored_run_id")]
     runs += [d["run_id"] for d in decided if d.get("run_id")]
     log = server.log[mark:]
-    extra: dict[str, Any] = {"aep_workflow_runs": runs, "approvals": decided}
+    extra: dict[str, Any] = {"aep_workflow_runs": runs, "approvals": decided,
+                             "final_run_window": final_run_window(workspace, script_exit_codes(session))}
+    if task == "T09":
+        extra["t09_success_output"] = success_output
     if task == "T09":
         def counted(ranges: list[tuple[int, int]]) -> dict[str, Any] | None:
             if not ranges:
