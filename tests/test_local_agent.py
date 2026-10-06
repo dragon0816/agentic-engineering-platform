@@ -23,6 +23,7 @@ from evaluation_runner import (
 )
 from pydantic import ValidationError
 
+from agent.backend_contracts import MAX_CONVERSATION_TURNS
 from agent.gateway import Gateway, GatewayConversationResult
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillRegistry
@@ -178,7 +179,7 @@ def test_conversation_uses_gateway_backend_after_admission(tmp_path: Path) -> No
     assert called.await_args.kwargs == {
         "persona_guidance": "Be concise.",
         "allowed_tools": None,
-        "max_turns": 5,
+        "max_turns": MAX_CONVERSATION_TURNS,
         "max_history_messages": 12,
     }
 

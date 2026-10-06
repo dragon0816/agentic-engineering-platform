@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from pydantic import ValidationError
 
-from agent.backend_contracts import BackendHealth, BackendProfile, GatewayConversationRequest
+from agent.backend_contracts import (
+    MAX_CONVERSATION_TURNS,
+    BackendHealth,
+    BackendProfile,
+    GatewayConversationRequest,
+)
 from agent.backends.gateway import GatewayModelBackend
 from agent.gateway import ConversationToolExecution, GatewayConversationResult
 from agent.orchestrator import BackendRouter, BackendSelectionError
@@ -110,6 +115,6 @@ def test_gateway_adapter_forwards_full_request_and_preserves_failure_evidence() 
         history,
         persona_guidance="Speak briefly.",
         allowed_tools=None,
-        max_turns=5,
+        max_turns=MAX_CONVERSATION_TURNS,
         max_history_messages=12,
     )

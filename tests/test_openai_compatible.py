@@ -548,3 +548,31 @@ def test_json_mode_adds_no_instruction_when_a_message_already_says_json() -> Non
         )
     )
     assert len(transport.calls[0]["payload"]["messages"]) == 2
+
+
+def test_a_reply_cut_at_the_output_limit_with_nothing_usable_is_its_own_failure() -> None:
+    """coding_v1 D3: a tool call cut mid-argument used to look like an empty answer."""
+    cut_call = {
+        "choices": [{"index": 0, "finish_reason": "length", "message": {
+            "role": "assistant", "content": None,
+            "tool_calls": [{"id": "c1", "type": "function",
+                            "function": {"name": "coding__run",
+                                         "arguments": "{\"script\": \"impo"}}]}}],
+        "usage": {"prompt_tokens": 5, "completion_tokens": 256},
+    }
+    empty = {"choices": [{"index": 0, "finish_reason": "length",
+                          "message": {"role": "assistant", "content": ""}}]}
+    for body in (cut_call, empty):
+        client = OpenAICompatible(endpoint(), transport=Transport(json_reply(body)))
+        response = client.generate(request())
+        assert response.failure is not None
+        assert response.failure.code == "model_output_truncated"
+
+
+def test_a_long_text_answer_at_the_output_limit_is_still_returned() -> None:
+    body = {"choices": [{"index": 0, "finish_reason": "length",
+                         "message": {"role": "assistant", "content": "a long partial answer"}}]}
+    client = OpenAICompatible(endpoint(), transport=Transport(json_reply(body)))
+    response = client.generate(request())
+    assert response.failure is None
+    assert response.text == "a long partial answer"

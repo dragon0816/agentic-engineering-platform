@@ -8,6 +8,14 @@ from common.base import Contract, Symbol
 from common.execution import RequestContext
 from models.contracts import ModelMessage
 
+# One reply may carry a whole script inside a tool call; 1024 tokens cut such
+# calls off mid-argument (coding_v1 D3, docs/DECISIONS.md 2026-10-06).
+CONVERSATION_MAX_OUTPUT_TOKENS = 8_000
+# Tool calls one conversation turn may make (coding_v1 G3); the turn budget is
+# one more so the model can answer after its last call.
+MAX_CONVERSATION_TOOL_CALLS = 8
+MAX_CONVERSATION_TURNS = MAX_CONVERSATION_TOOL_CALLS + 1
+
 BackendKind = Literal["model", "agent"]
 BackendHarness = Literal["aep", "native"]
 BackendHealthState = Literal["ready", "unknown", "unavailable"]
@@ -46,7 +54,7 @@ class GatewayConversationRequest(Contract):
     history: tuple[ModelMessage, ...]
     persona_guidance: str | None = None
     allowed_tools: tuple[Symbol, ...] | None = None
-    max_turns: int = 5
+    max_turns: int = MAX_CONVERSATION_TURNS
     max_history_messages: int = Field(default=12, ge=1, le=40, strict=True)
 
     @model_validator(mode="after")
@@ -55,8 +63,10 @@ class GatewayConversationRequest(Contract):
             self.allowed_tools
         ):
             raise ValueError("allowed tool names must be unique")
-        if isinstance(self.max_turns, bool) or not 1 <= self.max_turns <= 5:
-            raise ValueError("Gateway conversation supports one to five turns")
+        if isinstance(self.max_turns, bool) or not 1 <= self.max_turns <= MAX_CONVERSATION_TURNS:
+            raise ValueError(
+                f"Gateway conversation supports one to {MAX_CONVERSATION_TURNS} turns"
+            )
         return self
 
 

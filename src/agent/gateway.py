@@ -14,6 +14,11 @@ from typing import Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
+from agent.backend_contracts import (
+    CONVERSATION_MAX_OUTPUT_TOKENS,
+    MAX_CONVERSATION_TOOL_CALLS,
+    MAX_CONVERSATION_TURNS,
+)
 from agent.decisions import (
     DecisionProvider,
     DecisionResult,
@@ -186,8 +191,10 @@ class GatewayConversationResult(Contract):
     trace: TraceIdentifiers
     status: Literal["answered", "needs_input", "failed"]
     text: str
-    model_turns: int = Field(ge=0, le=5, strict=True)
-    tools: tuple[ConversationToolExecution, ...] = Field(default=(), max_length=4)
+    model_turns: int = Field(ge=0, le=MAX_CONVERSATION_TURNS, strict=True)
+    tools: tuple[ConversationToolExecution, ...] = Field(
+        default=(), max_length=MAX_CONVERSATION_TOOL_CALLS
+    )
     failure: Failure | None = None
 
     @model_validator(mode="after")
@@ -341,7 +348,7 @@ class Gateway:
         *,
         persona_guidance: str | None = None,
         allowed_tools: frozenset[str] | None = None,
-        max_turns: int = 5,
+        max_turns: int = MAX_CONVERSATION_TURNS,
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
     ) -> GatewayConversationResult:
         result = await self._converse(
@@ -363,10 +370,10 @@ class Gateway:
         *,
         persona_guidance: str | None = None,
         allowed_tools: frozenset[str] | None = None,
-        max_turns: int = 5,
+        max_turns: int = MAX_CONVERSATION_TURNS,
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
     ) -> GatewayConversationResult:
-        """Use installed commands as tools in a five-turn/four-call maximum loop.
+        """Use installed commands as tools in a nine-turn/eight-call maximum loop.
 
         The model receives aliases for installed commands, never raw capability
         authority. Every accepted call is resolved back to its manifest target
@@ -375,8 +382,10 @@ class Gateway:
         they are never executed.
         """
         context = RequestContext.model_validate(request)
-        if isinstance(max_turns, bool) or not 1 <= max_turns <= 5:
-            raise ValueError("Gateway conversation supports one to five turns")
+        if isinstance(max_turns, bool) or not 1 <= max_turns <= MAX_CONVERSATION_TURNS:
+            raise ValueError(
+                f"Gateway conversation supports one to {MAX_CONVERSATION_TURNS} turns"
+            )
         if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
             raise ValueError("Gateway conversation supports one to forty history messages")
         if any(
@@ -477,7 +486,7 @@ class Gateway:
                         local_only=self.router.local_only,
                     ),
                     tools=tuple(tools),
-                    max_output_tokens=1024,
+                    max_output_tokens=CONVERSATION_MAX_OUTPUT_TOKENS,
                 ),
                 selector_hints=hints,
             )
@@ -500,7 +509,7 @@ class Gateway:
                     local_only=self.router.local_only,
                 ),
                 tools=tuple(tools),
-                max_output_tokens=1024,
+                max_output_tokens=CONVERSATION_MAX_OUTPUT_TOKENS,
             )
             try:
                 response = await asyncio.to_thread(self.router.model.generate, model_request)
@@ -578,10 +587,10 @@ class Gateway:
                     text=observation,
                 )
             )
-            if len(evidence) >= 4:
+            if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
                 break
         return self._conversation_failure(
-            context, "tool_loop_limit", min(5, len(evidence)), tuple(evidence)
+            context, "tool_loop_limit", min(max_turns, len(evidence)), tuple(evidence)
         )
 
     async def _execute_conversation_tool(

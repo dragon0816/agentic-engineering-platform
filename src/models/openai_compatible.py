@@ -212,6 +212,15 @@ class OpenAICompatible:
         message = choices[0].get("message")
         content = message.get("content") if isinstance(message, dict) else None
         calls = _tool_calls(message)
+        # A reply cut at the output limit with nothing usable is its own
+        # failure, not an empty answer: the caller can raise the limit or
+        # shorten the request.
+        cut = choices[0].get("finish_reason") == "length"
+        if cut and (isinstance(calls, Failure) or (not calls and not (content or "").strip())):
+            return refused(Failure(
+                code="model_output_truncated",
+                message="the model reached the output token limit before finishing",
+            ))
         if isinstance(calls, Failure):
             return refused(calls)
         if not isinstance(content, str) and not calls:

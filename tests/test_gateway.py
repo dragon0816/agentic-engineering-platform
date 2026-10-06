@@ -8,6 +8,12 @@ import pytest
 from pydantic import ValidationError
 from test_routing import FakeModel
 
+from agent.backend_contracts import (
+    CONVERSATION_MAX_OUTPUT_TOKENS,
+    MAX_CONVERSATION_TOOL_CALLS,
+    MAX_CONVERSATION_TURNS,
+    GatewayConversationRequest,
+)
 from agent.decisions import (
     DecisionAcceleratorConfig,
     DecisionResult,
@@ -497,8 +503,10 @@ def test_conversation_cannot_execute_an_invented_tool_and_stops() -> None:
     )
     assert result.status == "needs_input"
     assert result.failure is not None and result.failure.code == "tool_loop_limit"
-    assert len(result.tools) == 4
+    assert len(result.tools) == MAX_CONVERSATION_TOOL_CALLS
     assert all(item.failure and item.failure.code == "uninstalled_tool" for item in result.tools)
+    # coding_v1 D3: every conversation request leaves room for a whole script.
+    assert {call.max_output_tokens for call in model.calls} == {CONVERSATION_MAX_OUTPUT_TOKENS}
     assert handler.calls == 0
 
 
@@ -533,3 +541,16 @@ def test_conversation_tool_call_still_requires_bridge_policy() -> None:
     assert result.tools[0].capability.failure is not None
     assert result.tools[0].capability.failure.code == "permission_denied"
     assert handler.calls == 0
+
+
+def test_the_chat_request_default_allows_the_whole_tool_budget() -> None:
+    """coding_v1 G3: Agent Web chat builds its request with the default turn limit."""
+    item = GatewayConversationRequest(
+        context=request("x"), history=(ModelMessage(role="user", text="x"),)
+    )
+    assert item.max_turns == MAX_CONVERSATION_TURNS == MAX_CONVERSATION_TOOL_CALLS + 1
+    with pytest.raises(ValidationError):
+        GatewayConversationRequest(
+            context=request("x"), history=(ModelMessage(role="user", text="x"),),
+            max_turns=MAX_CONVERSATION_TURNS + 1,
+        )
