@@ -30,6 +30,13 @@ from check import (
 from expected import expected
 from openpyxl import load_workbook
 
+# 1.1 (2026-10-07): a grouped Summary is checked only where the request asks for
+# one (W01 currency, D01 status and currency, D03 employee and category, C01
+# status and currency, C03 project); 1.0 also demanded it of W02, W04, D02,
+# D04, C02 and C04, whose requests name no grouping.
+GRADER_VERSION = "1.1"
+GROUPED_SUMMARY = {"W01", "D01", "D03", "C01", "C03"}
+
 TEMPLATE = {"W01": "sales", "W02": "sales", "W04": "sales", "W03": "project",
             "D01": "expense", "D02": "expense", "D03": "expense", "D04": "expense",
             "C01": "quote", "C02": "quote", "C03": "quote", "C04": "quote",
@@ -88,7 +95,8 @@ def grade_workbook(task: str, variant: str, path: Path | None, reply: str, outpu
         fields = SALES_FIELDS + (("CustomerContact", "PaymentTerms") if task in {"W02", "W04"} else ())
         out += detail_checks(path, exp, "Details", "OrderID", fields)
         out.append(_total(path, "Details", "NetAmountTWD", exp["total_twd"]))
-        out.append(grouped_summary_check(path, exp["summary_by_currency"], need_amount=True))
+        if task in GROUPED_SUMMARY:
+            out.append(grouped_summary_check(path, exp["summary_by_currency"], need_amount=True))
         if task == "W01":
             order = ids_in(path, "Details", "OrderID")
             out.append(check("Details sorted by OrderID", order == sorted(order), order[:5]))
@@ -100,9 +108,9 @@ def grade_workbook(task: str, variant: str, path: Path | None, reply: str, outpu
         out += detail_checks(path, exp, "Details", "ExpenseID", EXPENSE_FIELDS + (
             ("ReceiptID", "Description", "MissingReceipt") if task in {"D02", "D03"} else ()))
         out.append(_total(path, "Details", "AmountTWD", exp["total_twd"]))
-        if exp["ids"]:
-            out.append(grouped_summary_check(path, exp["summary"], need_amount=task != "D02"))
-        else:
+        if exp["ids"] and task in GROUPED_SUMMARY:
+            out.append(grouped_summary_check(path, exp["summary"], need_amount=True))
+        elif not exp["ids"]:
             out.append(check("empty report: Details has no rows", not ids_in(path, "Details", "ExpenseID")))
         if task == "D02":
             got = sorted(set(ids_in(path, "Exceptions", "ExpenseID")))
@@ -130,7 +138,7 @@ def grade_workbook(task: str, variant: str, path: Path | None, reply: str, outpu
             wrong = [f"{p}: {rows_by_project.get(p)} != {v}" for p, v in exp["by_project_twd"].items()
                      if dec(v) not in rows_by_project.get(p, set())]
             out.append(check("Summary: one row per project P001-P005 with TWD totals (zero kept)", not wrong, wrong))
-        elif exp["summary"]:
+        elif exp["summary"] and task in GROUPED_SUMMARY:
             out.append(grouped_summary_check(path, exp["summary"], need_amount=True))
         if task == "C02":
             findings = next(iter(output.rglob("findings.md")), None)

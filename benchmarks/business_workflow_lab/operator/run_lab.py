@@ -32,7 +32,7 @@ REPO = LAB.parents[1]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "benchmarks" / "coding_v1" / "adapters"))
 from aep_web import AgentWebSession, agent_web, answer_text, model_turns, tools_of  # noqa: E402
-from grade import TEMPLATE, find_workbook, grade_workbook, verdict  # noqa: E402
+from grade import GRADER_VERSION, TEMPLATE, find_workbook, grade_workbook, verdict  # noqa: E402
 from reset import events, reset  # noqa: E402
 
 SAP_PORT = 8810
@@ -363,12 +363,19 @@ def classify(task: str, variant: str, timed_out: bool, excel_ok: bool | None, ev
     if bypass:
         notes.append("scripts read mock internals instead of using the interface: " + "; ".join(bypass[:3]))
     systems = SYSTEMS[task]
+    tools = agent_tools()
+    # A tool that exists but was not used is the Agent's failure, not a missing tool.
     if "expense" in systems and "expense" not in evidence:
+        reason = "; ".join(["the Expense desktop app was never operated", *notes])
+        if "desktop" in tools:
+            return "FAIL", None, reason
         return ("BLOCKED", "harness: no native desktop (GUI automation) tool in the AEP conversation or Bridge",
-                "; ".join(["the Expense desktop app was never operated", *notes]))
+                reason)
     if "sap" in systems and not evidence.get("sap", {}).get("browser"):
         how = ("scripts reached the site with an HTTP client" if "sap" in evidence
                else "the site was never reached")
+        if "browser" in tools:
+            return "FAIL", None, "; ".join([how + " (the browser tool was available)", *notes])
         return ("BLOCKED", "harness: no browser tool in the AEP conversation (web/act exists only as a Workflow step)",
                 "; ".join([how, *notes]))
     if "quote" in systems and "quote" not in evidence:
@@ -407,6 +414,21 @@ def reclassify(record: dict[str, Any], folder: Path) -> dict[str, Any]:
     (folder / "result.json").write_text(json.dumps(updated, ensure_ascii=False, indent=1, default=str),
                                         encoding="utf-8")
     return updated
+
+
+def agent_tools() -> set[str]:
+    """Which interface tools this host gives the Agent, read from its host.json."""
+    found: set[str] = set()
+    try:
+        host = json.loads((Path.home() / "AppData/Local/AgenticEngineeringPlatform/preview-0.1.0/host.json")
+                          .read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return found
+    if SAP_URL.rstrip("/") in ((host.get("web") or {}).get("allowed_origins") or []):
+        found.add("browser")
+    if any(app.get("name") == "expense" for app in (host.get("desktop") or {}).get("applications") or []):
+        found.add("desktop")
+    return found
 
 
 def not_run(task: str, reason: str | None = None, layer: str | None = None, status: str = "NOT_RUN") -> dict[str, Any]:
@@ -517,7 +539,7 @@ def main() -> int:
         commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
                                 cwd=REPO).stdout.strip()
         meta = {"run_id": args.run_id, "started": datetime.now().isoformat(timespec="seconds"),
-                "repo_commit": commit, "agent_web": base,
+                "repo_commit": commit, "agent_web": base, "grader_version": GRADER_VERSION,
                 "source_sha256": sha256(LAB / "operator" / "data" / "source.json"),
                 "templates": {p.name: sha256(p) for p in sorted((LAB / "templates").glob("*.xlsx"))}}
         try:
