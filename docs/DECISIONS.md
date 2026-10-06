@@ -1369,3 +1369,33 @@ model's tools. Rejected alternatives: approval only on the Candidates page
 (Telegram could not finish a task); preview-and-approve for every temporary
 task (an extra press for a lookup); free tags only (synonyms drift); a fixed
 list only (a list to maintain for every niche).
+
+## 2026-10-06 — Conversation coding tool and a narrower Knowledge intent route (coding_v1 G1, D1)
+
+Decision (owner, on the condition that Knowledge asking and task/Workflow
+execution are not affected and that JEV does not turn every task into
+coding):
+
+- G1: Workflow `engineering/run-python` (capability `coding/run-python@1.0.0`)
+  lets the conversation Agent run one Python script in a task workspace under
+  a folder listed in `coding.workspace_roots`, with the restricted runner.
+  The script writes only to the workspace's `output/` and its own run folder;
+  `input/` stays read-only. The result (exit code, output, output files) goes
+  back to the model, which can fix and run again within the conversation's
+  tool budget. The capability's side effect is `execute`, and it has a
+  standing grant. Skill `engineering/coding` moves to 1.1.0 with commands
+  `change` and `run`; its instructions and selector hint limit it to
+  requests to process local files or to write and run a program.
+- D1: the Knowledge intent route in Agent Web chat no longer takes a message
+  that names local work (a URL, a drive or UNC path, or a file name with a
+  common extension); the model handles that message. Questions without such
+  references route as before.
+
+Reason: coding_v1 baseline-run-001 was 20/20 BLOCKED. Every task lacked a
+file and execution tool (G1); five web and spec tasks never reached the model
+(D1). Rejected alternatives: removing the Knowledge intent route (it carries
+the 1.4.0 evidence procedure the owner reviews answers with); a capability
+tool without a schema (the model cannot fill its fields; a Workflow gives the
+tool its schema without a Gateway change); per-run approval buttons for
+script runs (conversational authoring A5 is not built yet; writes are
+confined to the workspace's output folder instead).

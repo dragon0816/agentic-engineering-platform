@@ -281,6 +281,20 @@ def extension_lifecycle(runtime: HostRuntime) -> tuple[ExtensionLifecycleProject
     return tuple(projected)
 
 
+_LOCAL_WORK = re.compile(
+    r"https?://"
+    r"|(?<![A-Za-z])[A-Za-z]:[\\/]"
+    r"|\\\\[^\\\s]+\\"
+    r"|[\w\-]+\.(?:xlsx|xls|csv|json|md|txt|py|log|pdf|docx|html)(?![A-Za-z0-9])",
+    re.IGNORECASE,
+)
+
+
+def names_local_work(message: str) -> bool:
+    """A URL, a drive or UNC path, or a file name with a common extension."""
+    return _LOCAL_WORK.search(message) is not None
+
+
 class AgentWeb:
     """What the pages ask for, with no HTTP in it.
 
@@ -1461,7 +1475,15 @@ class AgentWeb:
         return matches[0] if len(matches) == 1 else None
 
     def _skill_intended_knowledge(self, message: str) -> dict[str, Any] | None:
-        """Use one installed Skill's declared intent only with one exact Vault."""
+        """Use one installed Skill's declared intent only with one exact Vault.
+
+        A message that names local work (a URL, a local path or a file) is a
+        task for the model and its tools, not a Knowledge question: the intent
+        words a spec question shares with such a task ("product", "price")
+        sent coding_v1's web tasks to the Knowledge harness (defect D1,
+        2026-10-06). Questions without such references route as before."""
+        if names_local_work(message):
+            return None
         eligible = [
             item for item in self.assets()["skills"] if item["knowledge_harness_selectable"]
         ]
