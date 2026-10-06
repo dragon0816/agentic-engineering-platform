@@ -17,6 +17,7 @@ from agent.data_policy import BackendDataApproval
 from agent.decisions import DecisionAcceleratorConfig
 from capabilities.chipset_report.contracts import ChipsetReportSettings
 from capabilities.coding_change.contracts import CodingHostBinding
+from capabilities.desktop_session.handlers import DesktopHostBinding
 from capabilities.release_package.contracts import IsolatedApplySettings, ReleasePreviewSettings
 from capabilities.team_tickets.contracts import TeamTicketsSettings
 from capabilities.web.handlers import WebHostBinding
@@ -484,6 +485,8 @@ class CompanyHostConfiguration(Contract):
     # Web steps of generated Workflows (docs/phases/SOP_TO_WORKFLOW.md W2):
     # the origins they may open and the browser profile they use.
     web: WebHostBinding | None = None
+    # Registered Windows applications the Agent may operate (lab gap L2).
+    desktop: DesktopHostBinding | None = None
     # How long one capability step may run. The platform's default of thirty
     # seconds is right for a file read and wrong for a Jira search over a
     # week's tickets with their comment threads and a throttle waited out;

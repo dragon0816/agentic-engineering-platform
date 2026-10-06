@@ -55,6 +55,12 @@ from capabilities.coding_change.run_python import (
     RunPythonStepInput,
 )
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
+from capabilities.desktop_session.handlers import SPEC as DESKTOP_SPEC
+from capabilities.desktop_session.handlers import (
+    DesktopRequest,
+    DesktopResult,
+    DesktopSessionHandler,
+)
 from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
     PhysicalDutValidationHandler,
@@ -484,6 +490,17 @@ def build_integrations(
                 workspace_roots=config.coding.workspace_roots if config.coding else (),
             ),
             BrowserRequest, BrowserResult, ExecutionDependencies(central_required=False),
+        )
+    # Registered desktop applications the Agent may operate (lab gap L2).
+    if config.desktop is not None:
+        desktop = config.desktop
+        if not desktop.workspace_roots and config.coding is not None:
+            desktop = desktop.model_copy(
+                update={"workspace_roots": config.coding.workspace_roots})
+        installed.register(
+            DESKTOP_SPEC,
+            DesktopSessionHandler(desktop, layout.workspace_root / "desktop-tool"),
+            DesktopRequest, DesktopResult, ExecutionDependencies(central_required=False),
         )
     # Data and Excel blocks: installed when a Workflow uses them, or when this
     # host turned on web steps for generated Workflows (`web` in host.json).
