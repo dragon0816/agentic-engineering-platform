@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -37,6 +39,12 @@ def reset(sap: str = "normal", expense: str = "normal", quote: str = "normal", l
             handle.write(json.dumps({"at": datetime.now().isoformat(timespec="milliseconds"),
                                      "event": "operator_reset", "mode": mode, "label": label}) + "\n")
         offsets[system] = log.stat().st_size
+        if system == "quote" and sys.platform == "win32":
+            # The Agent runs the CLI from its low-integrity runner; let that
+            # process record its events and consume a one-time fault.
+            for name in ("quote_fault.json", "quote_events.jsonl"):
+                subprocess.run(["icacls", str(STATE / name), "/setintegritylevel", "low", "/Q"],
+                               capture_output=True, check=False)
     return offsets
 
 

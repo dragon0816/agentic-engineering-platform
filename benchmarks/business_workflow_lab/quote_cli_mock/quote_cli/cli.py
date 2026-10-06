@@ -168,7 +168,9 @@ def main(argv: list[str] | None = None) -> int:
     if failure is not None:
         return failure
     data = json.loads(DATA.read_text(encoding="utf-8"))
-    event("command", argv=argv)
+    # argv0 tells a real CLI process (the module or launcher) from a script
+    # that imported this module and called main() in its own process.
+    event("command", argv=argv, argv0=sys.argv[0] if sys.argv else "", pid=os.getpid())
     if args.group == "customers":
         rows = [{"CustomerID": c["CustomerID"], "CustomerName": c["CustomerName"]} for c in data["customers"]]
         if args.format == "json":

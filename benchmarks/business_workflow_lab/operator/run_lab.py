@@ -115,17 +115,62 @@ def prepare(task: str, folder: Path, help_text: str) -> tuple[Path, str]:
         attachments.append(MANUAL[system])
     if task == "X03":
         source = folder.parent / "X01" / "workspace" / "output" / "workflow"
-        shutil.copytree(source, workspace / "input" / "x01_workflow")
-        attachments.append("x01_workflow\\（X01 產生的 workflow 與程式）")
+        if source.is_dir():
+            shutil.copytree(source, workspace / "input" / "x01_workflow")
+            attachments.append("x01_workflow\\（X01 產生的 workflow 與程式）")
     request = (LAB / "prompts" / f"{task}.md").read_text(encoding="utf-8").strip()
     listing = "\n".join(f"  - input\\{name}" for name in attachments)
     prompt = (f"{request}\n\n---\n環境說明（操作者提供）\n"
               f"- 今天日期：2026-10-06（Asia/Taipei）\n"
               f"- 本題 workspace：{workspace}\n"
               f"- 附件（在 workspace 的 input 資料夾）：\n{listing}\n"
-              f"- 交付物請寫到 workspace 的 output 資料夾；workflow 與程式請放在 output\\workflow\\。")
+              f"- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。")
     (folder / "prompt.md").write_text(prompt + "\n", encoding="utf-8")
     return workspace, prompt
+
+
+FOLLOW_UP = ("（操作者已按下核准，執行結果已附在對話中。）請檢查結果並繼續；"
+             "完成時說明產出了哪些檔案。")
+
+
+def settle(session: AgentWebSession, deadline: float, interventions: list[dict[str, Any]],
+           decided: list[dict[str, Any]]) -> None:
+    """Press the owner's approve button for each request the Agent made (spec §10: recorded
+    as an intervention), then tell it the result is in the conversation."""
+    for _ in range(6):
+        pending = session.approvals()
+        if not pending or time.monotonic() > deadline:
+            return
+        for item in pending:
+            reply = session.decide(item["approval_id"], "approve",
+                                   max(60.0, deadline - time.monotonic()))
+            approval = reply.get("approval") or {}
+            result = approval.get("result") if isinstance(approval.get("result"), dict) else {}
+            decided.append({"approval_id": item["approval_id"], "kind": item["kind"],
+                            "workflow": item.get("workflow"), "arguments": item.get("arguments"),
+                            "status": approval.get("status"), "run_id": result.get("run_id"),
+                            "run_status": result.get("status"), "digest": result.get("digest"),
+                            "text": str(reply.get("text") or "")[:800]})
+            interventions.append({"kind": "operator pressed the owner's approve button",
+                                  "approval_id": item["approval_id"], "summary": item["summary"]})
+        session.send(FOLLOW_UP, max(60.0, deadline - time.monotonic()))
+
+
+def authored_runs(exchanges: list[dict[str, Any]], decided: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Platform Workflow runs: read-only runs the host did at once, and approved runs."""
+    out = []
+    for exchange in exchanges:
+        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+            "conversation") or {}
+        for tool in convo.get("tools") or []:
+            host = tool.get("host") or {}
+            data = host.get("data") if isinstance(host.get("data"), dict) else {}
+            if tool.get("name") == "authoring__run_workflow" and data.get("run_id"):
+                out.append({"run_id": data["run_id"], "digest": data.get("digest"),
+                            "status": data.get("status")})
+    out += [{"run_id": d["run_id"], "digest": d["digest"], "status": d["run_status"]}
+            for d in decided if d.get("run_id")]
+    return out
 
 
 def tree_hashes(folder: Path) -> dict[str, str]:
@@ -181,9 +226,16 @@ def interfaces(task_events: dict[str, list[dict[str, Any]]], runs: list[dict[str
         used.append("desktop GUI (Expense)")
         evidence["expense"] = [e["event"] for e in expense]
     quote = [e for e in task_events["quote"] if e["event"] not in {"operator_reset"}]
-    if quote:
+    process = [e for e in quote if e["event"] != "command"
+               or str(e.get("argv0", "")).replace("\\", "/").endswith(
+                   ("quote_cli/__main__.py", "run_quote_cli.py"))]
+    if process:
         used.append("CLI subprocess (quote)")
-        evidence["quote"] = [{"event": e["event"], "argv": e.get("argv")} for e in quote]
+        evidence["quote"] = [{"event": e["event"], "argv": e.get("argv"), "argv0": e.get("argv0")}
+                             for e in quote]
+    elif quote:
+        used.append("quote CLI imported in-process (not a CLI run)")
+        evidence["quote_in_process"] = [{"event": e["event"], "argv0": e.get("argv0")} for e in quote]
     if runs:
         used.append("coding execution (restricted runner)")
     if bypass:
@@ -216,15 +268,24 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
                                   "text": X02_ANSWER})
             session.send(X02_ANSWER, max(60.0, limit - (time.monotonic() - started)))
     output = workspace / "output"
-    workflow_before = tree_hashes(output / "workflow")
+    deadline = started + limit
+    decided: list[dict[str, Any]] = []
+    if not session.exchanges[-1]["timed_out"]:
+        settle(session, deadline, interventions, decided)
+    first_runs = authored_runs(session.exchanges, decided)
     rerun_checks: list[dict[str, Any]] | None = None
     workflow_same: bool | None = None
     if task in RERUN and variant_override is None and find_workbook(output, task) is not None:
         message, variant = RERUN[task]
         interventions.append({"kind": "operator rerun request (spec §9 second parameter set)", "text": message})
-        session.send(message, max(60.0, limit - (time.monotonic() - started)))
-        workflow_after = tree_hashes(output / "workflow")
-        workflow_same = bool(workflow_before) and workflow_before == workflow_after
+        mark = len(session.exchanges)
+        session.send(message, max(60.0, deadline - time.monotonic()))
+        settle(session, deadline, interventions, decided)
+        rerun_runs = [r for r in authored_runs(session.exchanges[mark:], decided)
+                      if r not in first_runs]
+        digests = {r["digest"] for r in first_runs if r.get("digest")}
+        # Same Workflow code: the rerun used a digest the first runs used, and succeeded.
+        workflow_same = bool(rerun_runs) and all(r.get("digest") in digests for r in rerun_runs)
         rerun_book = find_workbook(output, task, "rerun")
         rerun_checks = grade_workbook(task, variant, rerun_book, answer_text(session.exchanges[-1]), output)
     duration = time.monotonic() - started
@@ -275,7 +336,8 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
         "script_runs": [{"exit_code": r["exit_code"], "script": r["script"], "refused": r["refused"]} for r in runs],
         "conversation_failures": conversation_failures(session.exchanges),
         "bypass_signals": bypass, "interventions": interventions,
-        "workflow_files": sorted(workflow_before), "workflow_unchanged_on_rerun": workflow_same,
+        "platform_runs": authored_runs(session.exchanges, decided), "approvals": decided,
+        "workflow_unchanged_on_rerun": workflow_same,
         "checks": checks, "rerun_checks": rerun_checks,
         "session_id": session_id, "model_turns": [model_turns(x) for x in session.exchanges],
         "tool_calls": len([t for x in session.exchanges for t in tools_of(x)]),

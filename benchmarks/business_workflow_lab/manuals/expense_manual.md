@@ -1,9 +1,10 @@
 # Expense Viewer（模擬原生桌面費用程式）使用說明
 
-> 合成測試資料。這是 Windows 桌面視窗程式（Tkinter），不是網頁。
+> 合成測試資料。這是 Windows 桌面視窗程式（WinForms），不是網頁。
 
-- 啟動：`python "{LAB}\expense_desktop_mock\expense_app.py"`（需要已登入的互動式 Windows 桌面）
+- 在 AEP 中已登記為桌面應用程式 `expense`（由平台啟動，需要已登入的互動式 Windows 桌面）。
 - 視窗標題：`Expense Viewer (synthetic lab)`
+- 控制項名稱（UI Automation id）：EmployeeFilter、ProjectFilter、DateFrom、DateTo、StatusFilter、QueryButton、ResultsList、PreviousButton、NextButton、CountLabel、DetailsButton、ExportCsvButton、ExportExcelButton；明細視窗為 Detail<欄位>（例如 DetailReceiptID）與 CloseButton。
 
 ## 主視窗
 
