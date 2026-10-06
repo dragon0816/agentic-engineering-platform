@@ -5,9 +5,17 @@ from __future__ import annotations
 import hashlib
 import shutil
 from pathlib import Path
-from typing import Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, StrictBool, field_validator, model_validator
+from pydantic import (
+    Field,
+    SerializerFunctionWrapHandler,
+    StrictBool,
+    StringConstraints,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 
 from common.assets import (
     AssetIdentity,
@@ -70,6 +78,21 @@ class KnowledgeManifest(RegistryContract):
     decisions_sha256: Sha256
     content_sha256: Sha256
     evaluation_case_ids: tuple[Symbol, ...] = ()
+    # What the vault is for and what it does not cover, as the vault's owner
+    # wrote them (owner decision 2026-10-06). The Agent offers each vault as
+    # its own tool with these words, so the model (or a Skill selector such
+    # as JEV) chooses the vault. Omitted when unset, so manifests published
+    # before these fields keep their bytes.
+    purpose: Annotated[str, StringConstraints(min_length=1, max_length=400)] | None = None
+    boundaries: Annotated[str, StringConstraints(min_length=1, max_length=400)] | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_unset_descriptions(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        for name in ("purpose", "boundaries"):
+            if getattr(self, name) is None:
+                data.pop(name, None)
+        return data
 
     @model_validator(mode="after")
     def governed_version(self) -> Self:
@@ -570,6 +593,10 @@ class KnowledgeCatalog:
 
     def get(self, identity: AssetIdentity) -> tuple[KnowledgeManifest, Vault] | None:
         return self._versions.get(identity.key)
+
+    def manifests(self) -> tuple[KnowledgeManifest, ...]:
+        """Every registered version, in a stable order."""
+        return tuple(item[0] for _, item in sorted(self._versions.items()))
 
     def versions(self, namespace: str, name: str) -> tuple[KnowledgeManifest, ...]:
         return tuple(

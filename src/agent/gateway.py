@@ -8,7 +8,7 @@ deterministic ones, so a trigger's origin never changes what may execute.
 
 import asyncio
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from contextvars import ContextVar
 from typing import Literal, Self
 
@@ -64,6 +64,25 @@ ToolProgressState = Literal["running", "succeeded", "failed"]
 TOOL_PROGRESS: ContextVar[Callable[[str, ToolProgressState], None] | None] = ContextVar(
     "aep_tool_progress", default=None
 )
+
+
+#: The only field the model fills on a Knowledge vault tool.
+VAULT_QUESTION_SCHEMA: dict[str, JsonValue] = {
+    "type": "object",
+    "properties": {"question": {
+        "type": "string", "description": "The question to answer from this vault",
+    }},
+    "required": ["question"],
+    "additionalProperties": False,
+}
+
+
+class KnowledgeVaultTool(Contract):
+    """One installed Knowledge vault as the Agent offers it."""
+
+    asset: AssetIdentity
+    purpose: Text
+    boundaries: Text | None = None
 
 
 def _tool_progress(name: str, state: ToolProgressState) -> None:
@@ -248,6 +267,8 @@ class Gateway:
         skill_shadow_observer: Callable[[SkillCandidateRequest, DecisionShadow], None]
         | None = None,
         conversation_observer: Callable[[GatewayConversationResult], None] | None = None,
+        knowledge_vaults: Callable[[], Sequence[KnowledgeVaultTool]] | None = None,
+        knowledge_capability: AssetIdentity | None = None,
     ):
         self.router = router
         self.bridge = bridge
@@ -264,6 +285,44 @@ class Gateway:
         # Sees each finished conversation turn (which tools the model called),
         # so a shadow accelerator's choices can be compared with the outcome.
         self._conversation_observer = conversation_observer
+        # One conversation tool per Knowledge vault (owner decision 2026-10-06):
+        # a Skill command naming `knowledge_capability` is offered once per
+        # vault, described by the vault's own purpose and boundaries, with the
+        # vault bound by the host and only the question left to the model.
+        self._knowledge_vaults = knowledge_vaults
+        self._knowledge_capability = knowledge_capability
+
+    def _vault_tools(
+        self,
+        alias: str,
+        instructions: str,
+        command: CommandBinding,
+        bindings: dict[str, CommandBinding],
+        bound: dict[str, dict[str, JsonValue]],
+        tools: list[ModelTool],
+        hints: dict[str, str],
+    ) -> None:
+        assert self._knowledge_vaults is not None
+        for vault in self._knowledge_vaults():
+            asset = vault.asset
+            name = f"{alias}__{asset.name}"
+            if name in bindings:
+                name = f"{name}.{asset.version}"
+            if name in bindings:
+                continue
+            outside = f" It does not cover: {vault.boundaries}" if vault.boundaries else ""
+            bindings[name] = command
+            bound[name] = {"asset": asset.model_dump(mode="json")}
+            hints[name] = vault.purpose[:240]
+            tools.append(ModelTool(
+                name=name,
+                description=(
+                    f"Ask the Knowledge vault {asset.namespace}/{asset.name}@{asset.version}. "
+                    f"It covers: {vault.purpose}.{outside} {instructions}"
+                ),
+                input_contract="platform.command-arguments.v1",
+                input_schema=VAULT_QUESTION_SCHEMA,
+            ))
 
     async def converse(
         self,
@@ -321,6 +380,8 @@ class Gateway:
         if self.router.model is None:
             return self._conversation_failure(context, "model_not_configured", 0, ())
         bindings: dict[str, CommandBinding] = {}
+        # Arguments the host fixes for a tool; the model never sees or sets them.
+        bound: dict[str, dict[str, JsonValue]] = {}
         tools: list[ModelTool] = []
         hints: dict[str, str] = {}
         for skill in self.router.commands.skills.discover(context.namespace):
@@ -331,6 +392,14 @@ class Gateway:
                 ):
                     continue
                 if command.kind == "workflow" and self.engine.workflows.get(command.target) is None:
+                    continue
+                if (
+                    command.kind == "capability"
+                    and self._knowledge_vaults is not None
+                    and command.target == self._knowledge_capability
+                ):
+                    self._vault_tools(skill.alias, skill.instructions, command,
+                                      bindings, bound, tools, hints)
                     continue
                 name = f"{skill.alias}__{command.name}"
                 bindings[name] = command
@@ -471,7 +540,9 @@ class Gateway:
                 )
             else:
                 _tool_progress(call.name, "running")
-                item = await self._execute_conversation_tool(context, call, binding)
+                item = await self._execute_conversation_tool(
+                    context, call, binding, bound.get(call.name)
+                )
                 _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
             evidence.append(item)
             messages.append(
@@ -508,6 +579,7 @@ class Gateway:
         context: RequestContext,
         call: ModelToolCall,
         binding: CommandBinding,
+        bound: dict[str, JsonValue] | None = None,
     ) -> ConversationToolExecution:
         decision = RouteDecision(
             kind=binding.kind,
@@ -515,11 +587,19 @@ class Gateway:
             reason="Model selected an installed conversation tool",
         )
         if binding.kind == "capability":
+            invocation_arguments = dict(call.arguments)
+            if bound is not None:
+                # Only the question comes from the model; the vault is the
+                # host's, so a model cannot point the tool at another vault.
+                invocation_arguments = {
+                    key: value for key, value in invocation_arguments.items()
+                    if key == "question"
+                } | bound
             result = await self.bridge.execute(
                 CapabilityInvocation(
                     context=context,
                     target=binding.target,
-                    arguments=call.arguments,
+                    arguments=invocation_arguments,
                 )
             )
             return ConversationToolExecution(

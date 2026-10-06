@@ -24,7 +24,7 @@ from pydantic import JsonValue, ValidationError
 from agent.backends.gateway import GatewayModelBackend
 from agent.contracts import AgentProfile
 from agent.data_policy import DataPolicy
-from agent.gateway import Gateway
+from agent.gateway import Gateway, KnowledgeVaultTool
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
@@ -783,6 +783,7 @@ def build_gateway(
         if authorization is None
         else tuple(item for item in authorization.selections if item.kind == "knowledge")
     )
+    knowledge_catalog: KnowledgeCatalog | None = None
     if config.knowledge or selected_knowledge:
         model_ready = (
             drafting_model is not None and binding is not None and binding.routing_alias is not None
@@ -806,6 +807,7 @@ def build_gateway(
             )
             if model_ready and drafting_model is not None and binding is not None:
                 assert binding.routing_alias is not None
+                knowledge_catalog = catalog
                 installed.register(
                     KNOWLEDGE_QUERY_SPEC,
                     KnowledgeQueryHandler(catalog, drafting_model, alias=binding.routing_alias),
@@ -862,7 +864,29 @@ def build_gateway(
         skill_authorizer=authorize,
         skill_shadow_observer=None if shadow_log is None else shadow_log.decision,
         conversation_observer=None if shadow_log is None else shadow_log.conversation,
+        knowledge_vaults=(
+            None if knowledge_catalog is None else _vault_tools(knowledge_catalog)
+        ),
+        knowledge_capability=KNOWLEDGE_QUERY_SPEC.identity,
     )
+
+
+def _vault_tools(catalog: KnowledgeCatalog) -> Callable[[], list[KnowledgeVaultTool]]:
+    """Each queryable vault as the Agent offers it, from the vault's own
+    manifest. A vault published before `purpose` existed is described by its
+    domain until a new version says more."""
+
+    def tools() -> list[KnowledgeVaultTool]:
+        return [
+            KnowledgeVaultTool(
+                asset=manifest.metadata.identity,
+                purpose=manifest.purpose or f"the {manifest.domain} knowledge domain",
+                boundaries=manifest.boundaries,
+            )
+            for manifest in catalog.manifests()
+        ]
+
+    return tools
 
 
 def workflow_settings_provider(
