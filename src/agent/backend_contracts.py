@@ -11,9 +11,11 @@ from models.contracts import ModelMessage
 # One reply may carry a whole script inside a tool call; 1024 tokens cut such
 # calls off mid-argument (coding_v1 D3, docs/DECISIONS.md 2026-10-06).
 CONVERSATION_MAX_OUTPUT_TOKENS = 8_000
-# Tool calls one conversation turn may make (coding_v1 G3); the turn budget is
-# one more so the model can answer after its last call.
-MAX_CONVERSATION_TOOL_CALLS = 8
+# Tool calls one conversation turn may make (coding_v1 G3: 8; owner 2026-10-07:
+# 20, for business tasks that explore, extract, write, check and run a Workflow
+# in one turn); the turn budget is one more so the model can answer after its
+# last call.
+MAX_CONVERSATION_TOOL_CALLS = 20
 MAX_CONVERSATION_TURNS = MAX_CONVERSATION_TOOL_CALLS + 1
 
 BackendKind = Literal["model", "agent"]

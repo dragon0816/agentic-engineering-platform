@@ -146,6 +146,7 @@ from host_runtime.telegram_settings import (
     telegram_status,
     windows_user_environment,
 )
+from host_runtime.turn_summary import tool_summary
 from host_runtime.workflow_settings import (
     SETTINGS_FILE,
     WorkflowSettingsError,
@@ -179,6 +180,13 @@ AUTHORING_ROUTES = (
 BEARER = "Bearer "
 #: The only addresses this ever binds to or answers for.
 LOOPBACK = ("127.0.0.1", "localhost", "[::1]", "::1")
+
+
+def with_tools(message: ConversationMessage) -> str:
+    """An answer's text plus its tool record, as the model reads it on later turns."""
+    if message.role != "assistant" or not message.tool_summary:
+        return message.text
+    return f"{message.text}\n\n[工具紀錄]\n{message.tool_summary}"
 
 
 def approval_text(item: ApprovalRequest) -> str:
@@ -602,6 +610,11 @@ class AgentWeb:
         return bool(environment and os.environ.get(environment))
 
     def _gateway_conversation_text(self, result: GatewayConversationResult) -> str:
+        if result.failure is not None and result.failure.code == "tool_loop_limit":
+            return (
+                f"這個回合已用完 {len(result.tools)} 次工具呼叫，工作還沒完成。"
+                "目前做到的步驟已記錄在這段對話中；回覆「繼續」我會接著做。"
+            )
         if result.failure is not None and result.failure.code == "empty_model_answer":
             return (
                 "The LLM Gateway returned an empty answer (empty_model_answer). "
@@ -1299,7 +1312,7 @@ class AgentWeb:
             # A reply keeps the chosen exchange directly before the new
             # question, even when it is older than the recent-history window.
             raw_history = tuple(
-                ModelMessage(role=message.role, text=message.text)
+                ModelMessage(role=message.role, text=with_tools(message))
                 for message in (*recent, *(quoted or ()))
             ) + (ModelMessage(role="user", text=item.message),)
             routed_message = (
@@ -1448,6 +1461,7 @@ class AgentWeb:
                     )
                     result = conversational.conversation
                     answer = {
+                        "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
                             self._gateway_conversation_text(result)
@@ -1504,6 +1518,7 @@ class AgentWeb:
                                 text=str(answer["answer"]),
                                 created_at=finished,
                                 status=status,
+                                tool_summary=answer.get("tool_summary"),
                                 trace=(
                                     None
                                     if trace_data is None

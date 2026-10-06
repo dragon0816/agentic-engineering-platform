@@ -35,6 +35,10 @@ class ConversationMessage(Contract):
     reply_to: Symbol | None = None
     # Only an answer carries the user's feedback.
     feedback: MessageFeedback | None = None
+    # A compact record of the tools an answer used (owner 2026-10-07), given to
+    # the model with the answer's text on later turns so it can continue the
+    # work; never page or file content.
+    tool_summary: str | None = None
 
     @model_validator(mode="after")
     def user_and_assistant_evidence(self) -> Self:
@@ -46,6 +50,8 @@ class ConversationMessage(Contract):
             raise ValueError("feedback rates an answer, not a question")
         if self.role == "assistant" and self.reply_to is not None:
             raise ValueError("only a question replies to an earlier exchange")
+        if self.role == "user" and self.tool_summary is not None:
+            raise ValueError("only an answer records the tools it used")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

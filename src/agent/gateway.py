@@ -404,7 +404,7 @@ class Gateway:
         max_turns: int = MAX_CONVERSATION_TURNS,
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
     ) -> GatewayConversationResult:
-        """Use installed commands as tools in a nine-turn/eight-call maximum loop.
+        """Use installed commands as tools in a bounded loop (`MAX_CONVERSATION_TOOL_CALLS`).
 
         The model receives aliases for installed commands, never raw capability
         authority. Every accepted call is resolved back to its manifest target
