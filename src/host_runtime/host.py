@@ -42,6 +42,12 @@ from capabilities.coding_change.contracts import CodingChangeResult, CodingChang
 from capabilities.coding_change.handlers import CodingChangeHandler
 from capabilities.coding_change.manifest import CHANGE_SPEC as CODING_CHANGE_SPEC
 from capabilities.coding_change.manifest import REPOSITORIES_FUNCTION as CODING_REPOSITORIES
+from capabilities.coding_change.run_python import RUN_SPEC as CODING_RUN_SPEC
+from capabilities.coding_change.run_python import (
+    RunPythonHandler,
+    RunPythonResult,
+    RunPythonStepInput,
+)
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
 from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
@@ -804,6 +810,11 @@ def build_gateway(
         WorkflowDraft,
         ExecutionDependencies(central_required=False),
     )
+    if config.coding is not None and config.coding.workspace_roots:
+        installed.register(
+            CODING_RUN_SPEC, RunPythonHandler(config.coding), RunPythonStepInput,
+            RunPythonResult, ExecutionDependencies(central_required=False),
+        )
     if config.coding is not None:
         installed.register(
             CODING_CHANGE_SPEC,

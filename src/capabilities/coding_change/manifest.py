@@ -10,7 +10,8 @@ from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.0.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.1.0")
+RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
 CHANGE_SPEC = CapabilitySpec.model_validate(
@@ -86,21 +87,63 @@ def coding_workflow() -> WorkflowManifest:
     )
 
 
+def run_python_workflow() -> WorkflowManifest:
+    from capabilities.coding_change.run_python import RUN_SPEC
+
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": RUN_WORKFLOW.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "Run one Python script for a task the person asked for, in a task workspace "
+                "folder they named. The script reads the workspace and writes only to its "
+                "output folder; the result shows the exit code, what it printed and the "
+                "output files, so a failing script can be fixed and run again."
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False, "local_capabilities": [RUN_SPEC.name]},
+            "parameters": [
+                {"name": "workspace", "label": "Which task workspace folder?", "kind": "text",
+                 "required": True, "order": 10,
+                 "help": "The absolute folder the person named; it holds input/ and output/."},
+                {"name": "script", "label": "The complete Python script", "kind": "text",
+                 "required": True, "order": 20,
+                 "help": "Python 3.12 with openpyxl. Relative paths resolve from the workspace. "
+                         "Print what you need to check. Never write credentials literally."},
+            ],
+            "input_contract": "engineering.run-python.input.v1",
+            "output_contract": "coding.run-python.output.v1",
+            "steps": [
+                {"capability": RUN_SPEC.identity.model_dump(),
+                 "inputs": {"request": {"source": "run"}}},
+            ],
+        }
+    )
+
+
 def coding_skill() -> SkillManifest:
     return SkillManifest.model_validate(
         {
             "metadata": {"identity": SKILL.model_dump(), **_METADATA},
             "alias": "coding",
             "selector_hint": (
-                "change code 改程式 fix implement function in a repository until pytest passes"
+                "write and run a program on local files in a task folder 寫程式處理本機檔案; "
+                "change code in a repository until pytest passes"
             ),
             "instructions": (
-                "Change code in a configured repository: one file, judged by existing pytest "
-                "tests the person names. Ask for the repository, what should change, the file "
-                "and the tests if they are not clear. Report the diff and the worktree; the "
-                "change is never committed."
+                "Use only when the person asks you to process local files or to write and run a "
+                "program in a folder they name, or to change code in a configured repository. "
+                "Never use it to answer a question, to look something up in Knowledge, or for "
+                "work an installed Workflow already does. `run`: write a complete Python script "
+                "for the task, run it in the named workspace, read the result, and fix and run "
+                "again until the output is right; outputs go to the workspace's output folder "
+                "and input files are never changed. `change`: change one file in a configured "
+                "repository against existing pytest tests; never committed."
             ),
-            "commands": [{"name": "change", "kind": "workflow", "target": WORKFLOW.model_dump()}],
+            "commands": [
+                {"name": "change", "kind": "workflow", "target": WORKFLOW.model_dump()},
+                {"name": "run", "kind": "workflow", "target": RUN_WORKFLOW.model_dump()},
+            ],
             "default_command": "change",
         }
     )

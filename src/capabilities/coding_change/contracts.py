@@ -63,6 +63,9 @@ class CodingHostBinding(Contract):
     memory_mb: int = Field(default=1024, ge=128, le=8192, strict=True)
     # Off only for a test host: production runs refuse without the block.
     require_network_block: StrictBool = True
+    # Folders a conversation task may run Python in (`coding/run-python`); a
+    # workspace must lie under one of them. Empty: the capability is not installed.
+    workspace_roots: tuple[Text, ...] = ()
 
     def repository(self, name: str) -> CodingRepository | None:
         return next((item for item in self.repositories if item.name == name), None)

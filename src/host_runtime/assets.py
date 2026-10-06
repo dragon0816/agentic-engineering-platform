@@ -11,7 +11,11 @@ from agent.skills import SkillManifest
 from capabilities.chipset_report.manifest import preview_skill as chipset_preview_skill
 from capabilities.chipset_report.manifest import preview_workflow as chipset_preview_workflow
 from capabilities.chipset_report.manifest import report_workflow as chipset_report_workflow
-from capabilities.coding_change.manifest import coding_skill, coding_workflow
+from capabilities.coding_change.manifest import (
+    coding_skill,
+    coding_workflow,
+    run_python_workflow,
+)
 from capabilities.company_agent.manifest import (
     knowledge_skill,
     market_alignment_skill,
@@ -55,6 +59,7 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         personal_proof_workflow(),
         coding_skill(),
         coding_workflow(),
+        run_python_workflow(),
     )
 
 
