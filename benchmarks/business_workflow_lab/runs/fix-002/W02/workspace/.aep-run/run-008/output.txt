@@ -1,0 +1,18 @@
+Output files:
+- output\sales_order_summary.txt 353
+- output\sales_template_filled.xlsx 10647
+Details headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+Details OrderIDs: ['0045000101', '0045000107', '0045000109', '0045000114', '0045000119', '0045000125', '0045000129', '0045000132', '0045000136']
+Blank allowed fields: [('0045000132', 'PaymentTerms')]
+Summary B2 formula: =SUM(Details!I5:I13)
+Summary rows: [['Status', 'Cancelled', 'USD', 11956, 382592, 1], ['Status', 'Closed', 'TWD', 482340, 482340, 2], ['Status', 'Closed', 'USD', 6250, 200000, 1], ['Status', 'Open', 'EUR', 11025, 385875, 2], ['Status', 'Open', 'TWD', 200400, 200400, 2], ['Status', 'Open', 'USD', 1602, 51264, 1]]
+Details TWD total: 1702471.00 Summary TWD total: 1702471.00 Summary count: 9
+Summary text:
+CustomerID: C001 (exact match only)
+Date range: 2026-08-01 to 2026-10-31 inclusive
+Orders included: 9
+OrderIDs: 0045000101, 0045000107, 0045000109, 0045000114, 0045000119, 0045000125, 0045000129, 0045000132, 0045000136
+Similar-name customer exclusion: verified every exported/detail row has CustomerID C001.
+Missing data: 0045000132: PaymentTerms
+
+All saved-output checks passed.

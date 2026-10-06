@@ -1,0 +1,23 @@
+Inputs:
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\D01\workspace\input\expense_template.xlsx: exists=True size=10787
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\D01\workspace\input\fx_rates.csv: exists=True size=276
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\D01\workspace\output\E001_september_export.xlsx: exists=True size=6180
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+export row count: 13
+first rows: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00003', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-03', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '450.00', 'Status': 'Submitted', 'ReceiptID': 'RC162210', 'Description': '加班餐費', 'MissingReceipt': False}]
+detail template headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\D01\workspace\output\E001_september_expenses.xlsx
+Verification passed:
+ - output file exists: E001_september_expenses.xlsx 12679 bytes
+ - Details row count: 13
+ - Details headers preserved: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+ - Filters checked: EmployeeID E001 dates 2026-09-01 to 2026-09-30
+ - Amount and AmountTWD numeric with two-decimal format; ID/date/status fields text
+ - MissingReceipt/NeedsReview values are true/false
+ - Summary rows by Status and Currency: [('Status', 'Approved', 'EUR', 102.5, 3587.5, 2), ('Status', 'Approved', 'TWD', 5050, 5050, 3), ('Status', 'Approved', 'USD', 200, 6400, 1), ('Status', 'Draft', 'USD', 124.15, 3972.8, 2), ('Status', 'Rejected', 'EUR', 155, 5425, 1), ('Status', 'Rejected', 'USD', 12.3, 393.6, 1), ('Status', 'Submitted', 'TWD', 7049, 7049, 3)]
+ - Summary!B2 formula: =SUM(Details!I5:I17)
+ - Total TWD from saved detail rows: 31877.90
+ - Exception rows: 5
+ - Report note: Exported 13 expenses. Total TWD=31877.90. NeedsReview flags: missing receipt, Draft, or Rejected.

@@ -1,0 +1,13 @@
+Preparing workbook from raw files:
+- invoices_C001_2026-09.csv 346
+- orders_C001_2026-09.csv 402
+- quotes_C001_2026-09.json 1185
+- expenses_P001_2026-09.csv 1059
+- expenses_P003_2026-09.csv 1312
+Rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+counts raw orders/invoices/expenses/quotes 4 3 18 4 projects ['P001', 'P003']
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\X02\workspace\.aep-run\run-008\script.py", line 199, in <module>
+    letter=col[0].column_letter
+           ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MergedCell' object has no attribute 'column_letter'

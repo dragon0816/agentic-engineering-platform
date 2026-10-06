@@ -1,0 +1,12 @@
+FX rates loaded: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Fetched counts by project: [('P001', 1), ('P002', 1), ('P003', 0), ('P004', 1), ('P005', 0)]
+Fetched quote IDs: ['Q0011', 'Q0013', 'Q0015']
+Saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\C03\workspace\output\quote_report_P001_P005_2026-09_Accepted.xlsx
+Verification passed:
+- output workbook exists and was reopened: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\C03\workspace\output\quote_report_P001_P005_2026-09_Accepted.xlsx
+- Quotes headers preserved; 3 Accepted rows Q0011/Q0013/Q0015; IDs are text; money fields are numeric
+- NetAmountTWD checked from saved Quotes using fx_rates.csv: USD 32, EUR 35, TWD 1
+- Lines headers preserved; 5 line-item rows
+- Summary has one row for each P001-P005; P003 and P005 are zero rows
+- Summary original Amount grouped with Currency (USD/EUR/TWD), so original currencies are not mixed
+- Summary B2 formula is =SUM(Quotes!K5:K7); saved TWD total is 710800.85

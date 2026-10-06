@@ -1,0 +1,72 @@
+Workbook instructions full:
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+('Report', 'B9', '備註：缺少的資料、例外或限制。')
+('Report', 'A20 與頁尾', '固定 footer，保留不改。')
+('All detail sheets', 'Row 4', '欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。')
+('All detail sheets', 'Formats', 'ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。')
+('All sheets', '-', '不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。')
+('All sheets', 'AmountTWD', '原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。')
+('Details', 'A4', 'OrderID: text (文字，保留前導零)')
+('Details', 'B4', 'CustomerID: text (文字，保留前導零)')
+('Details', 'C4', 'CustomerName: text')
+('Details', 'D4', 'ProjectID: text (文字，保留前導零)')
+('Details', 'E4', 'OrderDate: date YYYY-MM-DD')
+('Details', 'F4', 'Status: text')
+('Details', 'G4', 'Currency: text')
+('Details', 'H4', 'NetAmount: number, 2 decimals (0.00)')
+('Details', 'I4', 'NetAmountTWD: number, 2 decimals (0.00)')
+('Details', 'J4', 'CustomerContact: text')
+('Details', 'K4', 'PaymentTerms: text')
+('Summary', 'B2', '公式 =SUM(Details!I5:I{最後資料列})：Details 的 NetAmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 I5:I5（結果為 0）。')
+('Summary', 'A4:F4 / row 5+', '彙總表：Group、SubGroup 為分組鍵（依題目要求，例如 Status、Currency、EmployeeID、Category；不用時留空），Currency 為原幣，Amount 為該組原幣合計，AmountTWD 為該組 TWD 合計，Count 為筆數；全部 TWD 總額不得混加不同原幣。')
+
+Export headers: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+Export rows: 9
+{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}
+{'OrderID': '0045000107', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-08-27', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '6250.00'}
+{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+{'OrderID': '0045000114', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-08', 'Status': 'Cancelled', 'Currency': 'USD', 'NetAmount': '11956.00'}
+{'OrderID': '0045000119', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-15', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '8775.00'}
+{'OrderID': '0045000125', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-25', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '386445.00'}
+{'OrderID': '0045000129', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-10-01', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '1602.00'}
+{'OrderID': '0045000132', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-10-09', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '50400.00'}
+{'OrderID': '0045000136', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-10-31', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '2250.00'}
+
+DETAIL 0045000101 http://127.0.0.1:8810/orders/0045000101
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sales Order 0045000101 - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Sales Order 0045000101</h1><h2>Header</h2><table id='header'><tr><th scope='row'>OrderID</th><td data-field='OrderID'>0045000101</td></tr><tr><th scope='row'>CustomerID</th><td data-field='CustomerID'><a href='/customers?customer=C001' id='customer-link'>C001</a></td></tr><tr><th scope='row'>CustomerName</th><td data-field='CustomerName'>Acme Precision Taiwan Ltd.</td></tr><tr><th scope='row'>ProjectID</th><td data-field='ProjectID'><a href='/projects/P001' id='project-link'>P001</a></td></tr><tr><th scope='row'>OrderDate</th><td data-field='OrderDate'>2026-08-03</td></tr><tr><th scope='row'>Status</th><td data-field='Status'>Closed</td></tr><tr><th scope='row'>Currency</th><td data-field='Currency'>TWD</td></tr><tr><th scope='row'>NetAmount</th><td data-field='NetAmount'>95895.00</td></tr><tr><th scope='row'>CustomerContact</th><td data-field='CustomerContact'>Grace Lin &lt;grace.lin@acme-precision.example&gt;</td></tr><tr><th scope='row'>PaymentTerms</th><td data-field='PaymentTerms'>NET15</td></tr><tr><th scope='row'>SalesRep</th><td data-field='SalesRep'>E002</td></tr></table><h2>Line items</h2><table id='line-items'><thead><tr><th>LineNo</th><th>ProductID</th><th>Quantity</th><th>UnitPrice</th><th>LineAmount</th></tr></thead><tbody><tr><td data-field='LineNo'>10</td><td data-field='ProductID'>MAT-1002</td><td data-field='Quantity'>3</td><td data-field='UnitPrice'>2565.00</td><td data-field='LineAmount'>7695.00</td></tr><tr><td data-field='LineNo'>20</td><td data-field='ProductID'>MAT-1006</td><td data-field='Quantity'>3</td><td data-field='UnitPrice'>29400.00</td><td data-field='LineAmount'>88200.00</td></tr></tbody></table><p><a href='/orders'>← Back to Sales Orders</a></p></main><script>document.querySelectorAll('form.filters').forEach(f=>f.addEventListener('submit',()=>{document.getElementById('loading').style.display='block'}))</script></body></html>
+tables? ["<table id='header'><tr><th scope='row'>OrderID</th><td data-field='OrderID'>0045000101</td></tr><tr><th scope='row'>CustomerID</th><td data-field='CustomerID'><a href='/customers?customer=C001' id='customer-link'>C001</a></td></tr><tr><th scope='row'>CustomerName</th><td data-field='CustomerName'>Acme Precision Taiwan Ltd.</td></tr><tr><th scope='row'>ProjectID</th><td data-field='ProjectID'><a href='/projects/P001' id='project-link'>P001</a></td></tr><tr><th scope='row'>OrderDate</th><td data-field='OrderDate'>2026-08-03</td></tr><tr><th scope='row'>Status</th><td data-field='Status'>Closed</td></tr><tr><th scope='row'>Currency</th><td data-field='Currency'>TWD</td></tr><tr><th scope='row'>NetAmount</th><td data-field='NetAmount'>95895.00</td></tr><tr><th scope='row'>CustomerContact</th><td data-field='CustomerContact'>Grace Lin &lt;grace.lin@acme-precision.example&gt;</td></tr><tr><th scope='row'>PaymentTerms</th><td data-field='PaymentTerms'>NET15</td></tr><tr><th scope='row'>SalesRep</th><td data-field='SalesRep'>E002</td></tr></table>", "<table id='line-items'><thead><tr><th>LineNo</th><th>ProductID</th><th>Quantity</th><th>UnitPrice</th><th>LineAmount</th></tr></thead><tbody><tr><td data-field='LineNo'>10</td><td data-field='ProductID'>MAT-1002</td><td data-field='Quantity'>3</td><td data-field='UnitPrice'>2565.00</td><td data-field='LineAmount'>7695.00</td></tr><tr><td data-field='LineNo'>20</td><td data-field='ProductID'>MAT-1006</td><td data-field='Quantity'>3</td><td data-field='UnitPrice'>29400.00</td><td data-field='LineAmount'>88200.00</td></tr></tbody></table>"]
+
+DETAIL 0045000107 http://127.0.0.1:8810/orders/0045000107
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sales Order 0045000107 - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong><a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a><a href='/invoices'>Invoices</a><span class='grow'></span><span id='current-user'>lab.analyst</span><form method='post' action='/logout' style='margin:0'><button type='submit' id='logout'>Log out</button></form></header><main><h1>Sales Order 0045000107</h1><h2>Header</h2><table id='header'><tr><th scope='row'>OrderID</th><td data-field='OrderID'>0045000107</td></tr><tr><th scope='row'>CustomerID</th><td data-field='CustomerID'><a href='/customers?customer=C001' id='customer-link'>C001</a></td></tr><tr><th scope='row'>CustomerName</th><td data-field='CustomerName'>Acme Precision Taiwan Ltd.</td></tr><tr><th scope='row'>ProjectID</th><td data-field='ProjectID'><a href='/projects/P003' id='project-link'>P003</a></td></tr><tr><th scope='row'>OrderDate</th><td data-field='OrderDate'>2026-08-27</td></tr><tr><th scope='row'>Status</th><td data-field='Status'>Closed</td></tr><tr><th scope='row'>Currency</th><td data-field='Currency'>USD</td></tr><tr><th scope='row'>NetAmount</th><td data-field='NetAmount'>6250.00</td></tr><tr><th scope='row'>CustomerContact</th><td data-field='CustomerContact'>Grace Lin &lt;grace.lin@acme-precision.example&gt;</td></tr><tr><th scope='row'>PaymentTerms</th><td data-field='PaymentTerms'>NET30</td></tr><tr><th scope='row'>SalesRep</th><td data-field='SalesRep'>E006</td></tr></table><h2>Line items</h2><table id='line-items'><thead><tr><th>LineNo</th><th>ProductID</th><th>Quantity</th><th>UnitPrice</th><th>LineAmount</th></tr></thead><tbody><tr><td data-field='LineNo'>10</td><td data-field='ProductID'>MAT-1001</td><td data-field='Quantity'>5</td><td data-field='UnitPrice'>1250.00</td><td data-field='LineAmount'>6250.00</td></tr></tbody></table><p><a href='/orders'>← Back to Sales Orders</a></p></main><script>document.querySelectorAll('form.filters').forEach(f=>f.addEventListener('submit',()=>{document.getElementById('loading').style.display='block'}))</script></body></html>
+tables? ["<table id='header'><tr><th scope='row'>OrderID</th><td data-field='OrderID'>0045000107</td></tr><tr><th scope='row'>CustomerID</th><td data-field='CustomerID'><a href='/customers?customer=C001' id='customer-link'>C001</a></td></tr><tr><th scope='row'>CustomerName</th><td data-field='CustomerName'>Acme Precision Taiwan Ltd.</td></tr><tr><th scope='row'>ProjectID</th><td data-field='ProjectID'><a href='/projects/P003' id='project-link'>P003</a></td></tr><tr><th scope='row'>OrderDate</th><td data-field='OrderDate'>2026-08-27</td></tr><tr><th scope='row'>Status</th><td data-field='Status'>Closed</td></tr><tr><th scope='row'>Currency</th><td data-field='Currency'>USD</td></tr><tr><th scope='row'>NetAmount</th><td data-field='NetAmount'>6250.00</td></tr><tr><th scope='row'>CustomerContact</th><td data-field='CustomerContact'>Grace Lin &lt;grace.lin@acme-precision.example&gt;</td></tr><tr><th scope='row'>PaymentTerms</th><td data-field='PaymentTerms'>NET30</td></tr><tr><th scope='row'>SalesRep</th><td data-field='SalesRep'>E006</td></tr></table>", "<table id='line-items'><thead><tr><th>LineNo</th><th>ProductID</th><th>Quantity</th><th>UnitPrice</th><th>LineAmount</th></tr></thead><tbody><tr><td data-field='LineNo'>10</td><td data-field='ProductID'>MAT-1001</td><td data-field='Quantity'>5</td><td data-field='UnitPrice'>1250.00</td><td data-field='LineAmount'>6250.00</td></tr></tbody></table>"]

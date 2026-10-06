@@ -1,0 +1,60 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\X01\workspace
+Output files present:
+ - expenses_2026-09_approved.csv 1843 bytes
+ - expenses_2026-09_approved_normalized.csv 1843 bytes
+ - project_report_2026-09.xlsx 17995 bytes
+ - project_report_2026-09_workflow.xlsx 17986 bytes
+ - quotes_2026-09_accepted.csv 389 bytes
+ - sap_invoices_2026-09.csv 1142 bytes
+ - sap_orders_2026-09_all.csv 1616 bytes
+ - sap_orders_2026-09_non_cancelled.csv 1456 bytes
+ - summary_2026-09.csv 282 bytes
+
+CSV sap_orders_2026-09_all.csv
+ headers: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+ rows: 20
+ sample: {"OrderID": "0045000109", "CustomerID": "C001", "CustomerName": "Acme Precision Taiwan Ltd.", "ProjectID": "P003", "OrderDate": "2026-09-01", "Status": "Open", "Currency": "TWD", "NetAmount": "150000.00"}
+
+CSV sap_orders_2026-09_non_cancelled.csv
+ headers: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+ rows: 18
+ sample: {"OrderID": "0045000109", "CustomerID": "C001", "CustomerName": "Acme Precision Taiwan Ltd.", "ProjectID": "P003", "OrderDate": "2026-09-01", "Status": "Open", "Currency": "TWD", "NetAmount": "150000.00"}
+
+CSV sap_invoices_2026-09.csv
+ headers: dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'])
+ rows: 13
+ sample: {"InvoiceID": "0090000207", "OrderID": "0045000108", "CustomerID": "C006", "ProjectID": "", "InvoiceDate": "2026-09-01", "DueDate": "2026-09-16", "Currency": "EUR", "Amount": "3028.95", "PaidAmount": "0.00", "Balance": "3028.95"}
+
+CSV expenses_2026-09_approved.csv
+ headers: dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'])
+ rows: 15
+ sample: {"ExpenseID": "EXP-00001", "EmployeeID": "E001", "EmployeeName": "陳怡君 (Yi-Chun Chen)", "ProjectID": "P001", "ExpenseDate": "2026-09-01", "Category": "Travel", "Currency": "TWD", "Amount": "1280.00", "Status": "Approved", "ReceiptID": "RC702658", "Description": "高鐵 台北-新竹 往返", "MissingReceipt": "False"}
+
+CSV expenses_2026-09_approved_normalized.csv
+ headers: dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'])
+ rows: 15
+ sample: {"ExpenseID": "EXP-00001", "EmployeeID": "E001", "EmployeeName": "陳怡君 (Yi-Chun Chen)", "ProjectID": "P001", "ExpenseDate": "2026-09-01", "Category": "Travel", "Currency": "TWD", "Amount": "1280.00", "Status": "Approved", "ReceiptID": "RC702658", "Description": "高鐵 台北-新竹 往返", "MissingReceipt": "False"}
+
+CSV quotes_2026-09_accepted.csv
+ headers: dict_keys(['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount'])
+ rows: 4
+ sample: {"QuoteID": "Q0011", "CustomerID": "C001", "ProjectID": "P001", "QuoteDate": "2026-09-03", "ValidUntil": "2026-10-03", "Status": "Accepted", "Currency": "USD", "Subtotal": "11500.00", "DiscountPercent": "10", "NetAmount": "10350.00"}
+
+CSV summary_2026-09.csv
+ headers: dict_keys(['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD'])
+ rows: 5
+ sample: {"ProjectID": "P001", "OrderTWD": "693570.00", "InvoiceBalanceTWD": "386445.00", "ApprovedExpenseTWD": "18305.00", "AcceptedQuoteTWD": "331200.00"}
+
+Workbook project_report_2026-09_workflow.xlsx
+ sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+ Summary: headers=['Project summary (TWD)', None, None, None, None]; data_rows=8
+ Orders: headers=['Sales orders by project', None, None, None, None, None, None, None]; data_rows=21
+ Invoices: headers=['Invoices by project', None, None, None, None, None, None, None, None, None, None]; data_rows=16
+ Expenses: headers=['Expenses by project', None, None, None, None, None, None, None]; data_rows=18
+ Quotes: headers=['Quotes by project', None, None, None, None, None, None, None, None]; data_rows=7
+ Exceptions: headers=['Exceptions 例外與關注項目', None, None, None]; data_rows=24
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\X01\workspace\.aep-run\run-009\script.py", line 95, in <module>
+    assert wb['Summary'].max_row - 1 == 5, 'workbook Summary row count mismatch'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: workbook Summary row count mismatch

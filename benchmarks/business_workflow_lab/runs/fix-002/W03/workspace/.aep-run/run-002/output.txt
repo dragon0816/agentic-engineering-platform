@@ -1,0 +1,49 @@
+sap_manual.md full:
+# Lab ERP（模擬 SAP 類查詢網頁）使用說明
+
+> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
+
+- 網址：http://127.0.0.1:8810/
+- 登入：公司帳號自動登入（SSO）。開啟網址後若出現登入頁，按 **使用公司帳號登入 Continue with company account** 即可，不需要輸入帳號或密碼。
+- 登出：右上角 **Log out**。
+
+## 查詢頁
+
+上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。
+
+篩選欄位（輸入後按 **Search**）：
+
+| 欄位 | 說明 |
+|---|---|
+| Customer ID | 客戶代碼，完全相符，例如 C001 |
+| Project | 專案代碼，完全相符，例如 P001 |
+| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |
+| Status | 只在 Sales Orders：Open、Closed、Cancelled |
+| Sort by / Order | 排序欄位與 asc / desc |
+
+- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。
+- 沒有符合資料時顯示「查無資料（0 筆）」。
+- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：
+  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。
+- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。
+- 列表欄位：
+  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
+  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
+- 文件編號有前導零（例如 0045000101），請當成文字處理。
+- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，再按一次 **使用公司帳號登入** 即可繼續。
+- 金額為原幣；不同幣別不可直接相加。
+
+URL status 200 http://127.0.0.1:8810/login?next=/orders text/html; charset=utf-8
+<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><title>Sign in - Lab ERP</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2731}
+header{background:#0a3d62;color:#fff;padding:8px 16px;display:flex;gap:16px;align-items:center}
+header a{color:#fff;text-decoration:none} header .grow{flex:1}
+main{padding:16px} table{border-collapse:collapse;background:#fff;width:100%}
+th,td{border:1px solid #c9d2db;padding:4px 8px;font-size:14px;text-align:left}
+th{background:#e3e9ef} td.num{text-align:right}
+form.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+form.filters label{display:flex;flex-direction:column;font-size:12px}
+.msg{padding:8px;margin:8px 0;border-radius:4px} .error{background:#fde2e1;color:#8a1c14}
+.info{background:#e6f1fb} #loading{display:none;color:#0a3d62}
+.pager{margin-top:8px;display:flex;gap:8px;align-items:center}
+</style></head><body><header><strong>Lab ERP (synthetic)</strong></header><main><h1>Sign in</h1><p>此系統使用公司帳號自動登入。 This site uses your company account.</p><form method='post' action='/login' id='login-form'><input type='hidden' name='next' value='/orders'><input type='hidden' name='sso' value='company'><button type='submit' id='login-submit'>使用公司帳號登入 Continue with company account</button></form></main><script>document.querySelectorAll('form.filters').forEach(f=>f.addEventListener('submit',()=>{document.getElementById('loading').style.display='block'}))</script></body></html>

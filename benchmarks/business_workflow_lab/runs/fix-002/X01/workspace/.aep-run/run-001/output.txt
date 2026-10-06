@@ -1,0 +1,136 @@
+workspace C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\X01\workspace
+INPUT expense_manual.md 2007
+# Expense Viewer（模擬原生桌面費用程式）使用說明
+
+> 合成測試資料。這是 Windows 桌面視窗程式（WinForms），不是網頁。
+
+- 在 AEP 中已登記為桌面應用程式 `expense`（由平台啟動，需要已登入的互動式 Windows 桌面）。
+- 視窗標題：`Expense Viewer (synthetic lab)`
+- 控制項名稱（UI Automation id）：EmployeeFilter、ProjectFilter、DateFrom、DateTo、StatusFilter、QueryButton、ResultsList、PreviousButton、NextButton、CountLabel、DetailsButton、ExportCsvButton、ExportExcelButton；明細視窗為 Detail<欄位>（例如 DetailReceiptID）與 CloseButton。
+
+## 主視窗
+
+| 控制項 | 說明 |
+|---|---|
+| Employee 員工 | 下拉選單 E001～E006，空白代表全部 |
+| Project 專案 | 下拉選單 P001～P005，空白代表全部 |
+| Date from 起 / Date to 迄 | YYYY-MM-DD，含起訖兩日（ExpenseDate） |
+| Status 狀態 | Draft、Submitted、Approved、Rejected，空白代表全部 |
+| Query 查詢 | 執行查詢，完成後跳出「查詢完成，共 N 筆」或「查無資料（0 筆）」 |
+
+- 結果表格每頁 8 筆，下方顯示 `Total N rows · Page x / y`，用 **Previous 上一頁** / **Next 下一頁** 換頁。
+- 表格欄位：ExpenseID、EmployeeID、EmployeeName、ProjectID、ExpenseDate、Category、Currency、Amount、Status。
+- 選一列後按 **Details 明細**（或雙擊該列）開啟明細視窗，內含 ReceiptID、Category、Description（可能含中文與換行）、MissingReceipt；按 **Close 返回** 關閉。
+- **Export CSV 匯出 CSV**、**Export Excel 匯出 Excel**：開啟 Windows「另存新檔」對話框，匯出目前篩選條件的全部結果（不只目前這一頁），欄位包含 ReceiptID、Description、MissingReceipt。
+- 匯出若顯示「暫時無法寫入，請重試」，表示這次沒有產生檔案，可以再按一次匯出。
+- 程式沒有其他資料介面；請透過視窗操作與匯出取得資料。
+
+INPUT fx_rates.csv 276
+  ['Currency', 'RateToTWD', 'Note']
+  ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+  ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+  ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+INPUT project_template.xlsx 14021
+ sheets ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+ sheet Report 20 6
+  ('Project Integration Report 專案整合報表', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('起始日期 From', None, '結束日期 To', None, None, None)
+  ('條件 Condition', None, None, None, None, None)
+  ('產出時間 Generated at', None, None, None, None, None)
+ sheet Orders 4 8
+  ('Sales orders by project', None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None)
+  ('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+ sheet Invoices 4 11
+  ('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None, None, None)
+  ('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')
+ sheet Expenses 4 8
+  ('Expenses by project', None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None)
+  ('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')
+ sheet Quotes 4 9
+  ('Quotes by project', None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None)
+  ('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+ sheet Summary 4 5
+  ('Project summary (TWD)', None, None, None, None)
+  ('總計 TWD Totals', '=SUM(B5:B5)', '=SUM(C5:C5)', '=SUM(D5:D5)', '=SUM(E5:E5)')
+  (None, None, None, None, None)
+  ('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')
+ sheet Exceptions 4 4
+  ('Exceptions 例外與關注項目', None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+  (None, None, None, None)
+  ('Source', 'DocumentID', 'ProjectID', 'Reason')
+ sheet Instructions 54 3
+  ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+  (None, None, None)
+  ('Sheet', 'Cell / Range', 'Content and rule')
+  ('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+  ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+INPUT quote_cli_manual.md 2303
+# quote_cli（模擬報價系統 CLI）使用說明
+
+> 合成測試資料。
+
+- Windows 執行：`"C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd" <command>`
+- 跨平台執行：`python "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py" <command>`
+- `quote_cli --help` 的內容如下：
+
+```text
+usage: quote_cli [-h] {customers,quotes} ...
+
+quote_cli: the synthetic quote system's public command line.
+
+Contract (stable, schema_version 1):
+  quote_cli --help
+  quote_cli customers list --format json
+  quote_cli quotes list [--customer C001] [--project P001] [--from YYYY-MM-DD]
+                        [--to YYYY-MM-DD] [--status Draft|Sent|Accepted|Expired]
+                        [--format json|table]
+  quote_cli quotes get Q0001 [--format json|table]
+  quote_cli quotes export [filters as list] --output quotes.csv
+
+Every filter is optional and filters combine with AND; dates include both
+ends. stdout carries only the result (JSON or table); errors and diagnostics
+go to stderr. Money is a decimal string in JSON ("1234.50"): parse it with a
+decimal type, not a float. Nothing here creates or changes a 
+INPUT sap_manual.md 2077
+# Lab ERP（模擬 SAP 類查詢網頁）使用說明
+
+> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
+
+- 網址：http://127.0.0.1:8810/
+- 登入：公司帳號自動登入（SSO）。開啟網址後若出現登入頁，按 **使用公司帳號登入 Continue with company account** 即可，不需要輸入帳號或密碼。
+- 登出：右上角 **Log out**。
+
+## 查詢頁
+
+上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。
+
+篩選欄位（輸入後按 **Search**）：
+
+| 欄位 | 說明 |
+|---|---|
+| Customer ID | 客戶代碼，完全相符，例如 C001 |
+| Project | 專案代碼，完全相符，例如 P001 |
+| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |
+| Status | 只在 Sales Orders：Open、Closed、Cancelled |
+| Sort by / Order | 排序欄位與 asc / desc |
+
+- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。
+- 沒有符合資料時顯示「查無資料（0 筆）」。
+- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：
+  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。
+- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。
+- 列表欄位：
+  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
+  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
+- 文件編號有前導零（例如 0045000101），請當成文字處理。
+- 工作階段可能逾

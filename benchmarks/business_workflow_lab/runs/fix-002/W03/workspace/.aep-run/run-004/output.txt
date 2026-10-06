@@ -1,0 +1,13 @@
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Logged in: 200 http://127.0.0.1:8810/invoices
+Invoice export: http://127.0.0.1:8810/invoices/export.csv?date_from=2026-09-01&date_to=2026-09-30 text/csv; charset=utf-8 2041 bytes
+Export sample:
+  InvoiceID,OrderID,CustomerID,ProjectID,InvoiceDate,DueDate,Currency,Amount,PaidAmount,Balance
+  0090000201,0045000101,C001,P001,2026-08-06,2026-08-21,TWD,95895.00,47947.50,47947.50
+  0090000202,0045000102,C002,P002,2026-08-10,2026-09-09,USD,4095.00,4095.00,0.00
+  0090000203,0045000105,C007,P005,2026-08-20,2026-09-04,TWD,227850.00,113925.00,113925.00
+  0090000204,0045000103,C003,P004,2026-08-25,2026-09-24,EUR,958.95,0.00,958.95
+Invoice columns: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice rows: 24
+Invoice outside requested range: {'InvoiceID': '0090000201', 'OrderID': '0045000101', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-08-06', 'DueDate': '2026-08-21', 'Currency': 'TWD', 'Amount': '95895.00', 'PaidAmount': '47947.50', 'Balance': '47947.50'}

@@ -1,0 +1,25 @@
+http://127.0.0.1:8810/login?next=/orders
+http://127.0.0.1:8810/orders
+filtered url http://127.0.0.1:8810/orders?customer=C001&from=2026-08-01&to=2026-10-31
+<p id='result-count'>Total: <strong>9</strong> rows · Page 1 of 1</p>
+export hrefs ['/orders/export.csv?customer=C001&from=2026-08-01&to=2026-10-31']
+links ['/orders/0045000101', '/orders/0045000107', '/orders/0045000109', '/orders/0045000114', '/orders/0045000119', '/orders/0045000125', '/orders/0045000129', '/orders/0045000132', '/orders/0045000136']
+export url http://127.0.0.1:8810/orders/export.csv?customer=C001&from=2026-08-01&to=2026-10-31
+csv preview
+﻿OrderID,CustomerID,CustomerName,ProjectID,OrderDate,Status,Currency,NetAmount
+0045000101,C001,Acme Precision Taiwan Ltd.,P001,2026-08-03,Closed,TWD,95895.00
+0045000107,C001,Acme Precision Taiwan Ltd.,P003,2026-08-27,Closed,USD,6250.00
+0045000109,C001,Acme Precision Taiwan Ltd.,P003,2026-09-01,Open,TWD,150000.00
+0045000114,C001,Acme Precision Taiwan Ltd.,P001,2026-09-08,Cancelled,USD,11956.00
+0045000119,C001,Acme Precision Taiwan Ltd.,P001,2026-09-15,Open,EUR,8775.00
+0045000125,C001,Acme Precision Taiwan Ltd.,P001,2026-09-25,Closed,TWD,386445.00
+0045000129,C001,Acme Precision Taiwan Ltd.,P001,2026-10-01,Open,USD,1602.00
+0045000132,C001,Acme Precision Taiwan Ltd.,P003,2026-10-09,Open,TWD,50400.00
+0045000136,C001,Acme Precision Taiwan Ltd.,P001,2026-10-31,Open,EUR,2250.00
+
+rows count 9 cust ids ['C001']
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\W02\workspace\.aep-run\run-004\script.py", line 24, in <module>
+    print('orders', [r['OrderID'] for r in rows])
+                     ~^^^^^^^^^^^
+KeyError: 'OrderID'

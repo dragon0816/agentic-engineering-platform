@@ -1,0 +1,61 @@
+Inputs inspected for final run:
+- expense_manual.md 2007
+- fx_rates.csv 276
+- project_template.xlsx 14021
+- quote_cli_manual.md 2303
+- sap_manual.md 2077
+Raw extracted files:
+- expenses_P001_2026-09.csv 1059
+- expenses_P003_2026-09.csv 1312
+- invoices_C001_2026-09.csv 346
+- orders_C001_2026-09.csv 402
+- quotes_C001_2026-09.json 1185
+Counts loaded: {'orders': 4, 'invoices': 3, 'expenses': 18, 'quotes': 4, 'projects': ['P001', 'P003']}
+Saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\X02\workspace\output\C001_project_report_2026-09_TWD.xlsx
+
+Verification from saved outputs:
+file orders_C001_2026-09.csv exists True bytes 402
+file invoices_C001_2026-09.csv exists True bytes 346
+file quotes_C001_2026-09.json exists True bytes 1185
+file expenses_P001_2026-09.csv exists True bytes 1059
+file expenses_P003_2026-09.csv exists True bytes 1312
+file C001_project_report_2026-09_TWD.xlsx exists True bytes 16760
+Orders row_count 4 expected 4 OK
+Invoices row_count 3 expected 3 OK
+Expenses row_count 18 expected 18 OK
+Quotes row_count 4 expected 4 OK
+Summary row_count 2 expected 2 OK
+Exceptions row_count 18 expected 18 OK
+Orders ID text and numeric amount types OK
+Invoices ID text and numeric amount types OK
+Expenses ID text and numeric amount types OK
+Quotes ID text and numeric amount types OK
+Orders headers ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] OK
+Invoices headers ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD'] OK
+Expenses headers ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD'] OK
+Quotes headers ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] OK
+Summary headers ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD'] OK
+Exceptions headers ['Source', 'DocumentID', 'ProjectID', 'Reason'] OK
+Report period: 2026-09-01 2026-09-30
+Summary totals:
+P001 {'OrderTWD': '693570.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}
+P003 {'OrderTWD': '150000.00', 'InvoiceBalanceTWD': '0.00', 'ApprovedExpenseTWD': '13037.50', 'AcceptedQuoteTWD': '0.00'}
+Exceptions count 18
+('Orders', '0045000109', 'P003', 'Open order requiring follow-up')
+('Orders', '0045000114', 'P001', 'Cancelled order in period')
+('Orders', '0045000119', 'P001', 'Open order requiring follow-up')
+('Invoices', '0090000219', 'P001', 'Overdue unpaid balance')
+('Expenses', 'EXP-00005', 'P001', 'Expense status Draft')
+('Expenses', 'EXP-00006', 'P001', 'Missing receipt')
+('Expenses', 'EXP-00010', 'P001', 'Expense status Draft')
+('Expenses', 'EXP-00012', 'P001', 'Expense status Rejected')
+('Expenses', 'EXP-00003', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00015', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00015', 'P003', 'Missing receipt')
+('Expenses', 'EXP-00007', 'P003', 'Expense status Rejected')
+('Expenses', 'EXP-00008', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00011', 'P003', 'Expense status Submitted')
+('Expenses', 'EXP-00018', 'P003', 'Expense status Rejected')
+('Quotes', 'Q0010', 'P001', 'Sent quote past valid-until date')
+('Quotes', 'Q0014', 'P001', 'Expired quote')
+('Quotes', 'Q0018', 'P001', 'Draft quote not sent')

@@ -1,0 +1,39 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\W03\workspace
+Inputs: ['fx_rates.csv', 'project_template.xlsx', 'sap_manual.md']
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX sample row: ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+FX sample row: ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+FX sample row: ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+FX rates loaded: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Template sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Invoices headers: ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+Summary headers: ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+Exceptions headers: ['Source', 'DocumentID', 'ProjectID', 'Reason']
+Orders headers: ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+Expenses headers: ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+Quotes headers: ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+Logged in: 200 http://127.0.0.1:8810/invoices
+Invoice export: http://127.0.0.1:8810/invoices/export.csv?from=2026-09-01&to=2026-09-30 text/csv; charset=utf-8 1142 bytes
+Export sample lines:
+  InvoiceID,OrderID,CustomerID,ProjectID,InvoiceDate,DueDate,Currency,Amount,PaidAmount,Balance
+  0090000207,0045000108,C006,,2026-09-01,2026-09-16,EUR,3028.95,0.00,3028.95
+  0090000208,0045000109,C001,P003,2026-09-02,2026-09-12,TWD,150000.00,150000.00,0.00
+  0090000209,0045000112,C007,P005,2026-09-05,2026-09-20,USD,12311.00,4924.40,7386.60
+  0090000210,0045000111,C003,P004,2026-09-08,2026-10-08,EUR,2250.00,0.00,2250.00
+  0090000211,0045000115,C005,,2026-09-10,2026-09-30,USD,6391.00,0.00,6391.00
+Invoice columns: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice rows: 13
+Saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\W03\workspace\output\project_invoice_report_2026-09.xlsx
+CHECK Orders blank data cells: 0
+CHECK Expenses blank data cells: 0
+CHECK Quotes blank data cells: 0
+CHECK invoice headers: ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+CHECK invoice row count: 13
+CHECK summary row count: 6
+CHECK summary rows: [(None, 0, 378827.75, 0, 0), ('P001', 0, 386445, 0, 0), ('P002', 0, 156256, 0, 0), ('P003', 0, 0, 0, 0), ('P004', 0, 78750, 0, 0), ('P005', 0, 236371.2, 0, 0)]
+CHECK exception row count: 4
+CHECK exception rows: [('Invoices', '0090000207', None, 'Overdue'), ('Invoices', '0090000209', 'P005', 'Overdue'), ('Invoices', '0090000212', 'P002', 'Overdue'), ('Invoices', '0090000217', 'P002', 'Overdue')]
+CHECK due-on-2026-09-30 open invoices not overdue: ['0090000211', '0090000213', '0090000219']
+Verification OK
+Projects summarized: [('<blank>', '378827.75'), ('P001', '386445.00'), ('P002', '156256.00'), ('P003', '0.00'), ('P004', '78750.00'), ('P005', '236371.20')]
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\W03\workspace\output\project_invoice_report_2026-09.xlsx

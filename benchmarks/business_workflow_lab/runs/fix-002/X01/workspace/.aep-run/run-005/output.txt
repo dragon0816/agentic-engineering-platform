@@ -1,0 +1,19 @@
+/orders {'from': '2026-09-01', 'to': '2026-09-30'} count 20
+ export /orders/export.csv?from=2026-09-01&to=2026-09-30
+ inputs [('from', '2026-09-01'), ('to', '2026-09-30')]
+/orders {'from': '2026-09-01', 'to': '2026-09-30', 'status': 'Open'} count 14
+ export /orders/export.csv?from=2026-09-01&to=2026-09-30&status=Open
+ inputs [('from', '2026-09-01'), ('to', '2026-09-30')]
+/orders {'date_from': '2026-09-01', 'date_to': '2026-09-30'} count 36
+ export /orders/export.csv?date_from=2026-09-01&date_to=2026-09-30
+ inputs [('from', ''), ('to', '')]
+/invoices {'from': '2026-09-01', 'to': '2026-09-30'} count 13
+ export /invoices/export.csv?from=2026-09-01&to=2026-09-30
+ inputs [('from', '2026-09-01'), ('to', '2026-09-30')]
+
+EXPORT orders 1497 OrderID,CustomerID,CustomerName,ProjectID,OrderDate,Status,Currency,NetAmount
+rows 20 sample [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}, {'OrderID': '0045000111', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-03', 'Status': 'Closed', 'Currency': 'EUR', 'NetAmount': '2250.00'}]
+statuses ['Cancelled', 'Closed', 'Open']
+
+EXPORT invoices 1139 InvoiceID,OrderID,CustomerID,ProjectID,InvoiceDate,DueDate,Currency,Amount,PaidAmount,Balance
+rows 13 sample [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]

@@ -1,0 +1,21 @@
+Inputs really present:
+- fx_rates.csv (276 bytes)
+- quote_cli_manual.md (2303 bytes)
+- quote_template.xlsx (10803 bytes)
+Task period: 2026-09-01 to 2026-09-30 base date: 2026-09-30
+Using quote CLI: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py
+fx header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+List schema_version: 1 count: 12 items: 12
+Fetched quote documents: 12 line items: 29
+First quote header sample: {'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}
+First line sample: {'ProductID': 'MAT-1003', 'ProductName': '校正服務 (Calibration)', 'Quantity': 1, 'UnitPrice': '12600.00', 'LineAmount': '12600.00', 'QuoteID': 'Q0010'}
+
+Verification from saved outputs:
+Saved workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\C02\workspace\output\quote_template.xlsx
+Saved markdown: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\C02\workspace\output\findings.md
+Saved quote rows: 12 line rows: 29 summary rows: 7
+Mismatches - line: 0 subtotal: 0 net: 0
+Expired & unaccepted: 3 ['Q0010', 'Q0014', 'Q0017']
+Summary formula: =SUM(Quotes!K5:K16)
+All saved-output checks passed.

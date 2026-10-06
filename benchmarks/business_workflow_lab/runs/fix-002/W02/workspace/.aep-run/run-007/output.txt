@@ -1,0 +1,30 @@
+FX rates loaded: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Filtered orders page: http://127.0.0.1:8810/orders?customer=C001&from=2026-08-01&to=2026-10-31
+ERP filtered row count shown: 9
+Export URL: http://127.0.0.1:8810/orders/export.csv?customer=C001&from=2026-08-01&to=2026-10-31
+Export row count: 9
+Export CustomerIDs: ['C001']
+Export OrderIDs: ['0045000101', '0045000107', '0045000109', '0045000114', '0045000119', '0045000125', '0045000129', '0045000132', '0045000136']
+Detail fetched: 0045000101 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET15
+Detail fetched: 0045000107 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET30
+Detail fetched: 0045000109 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET10
+Detail fetched: 0045000114 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET5
+Detail fetched: 0045000119 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET30
+Detail fetched: 0045000125 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET0
+Detail fetched: 0045000129 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET30
+Detail fetched: 0045000132 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= <blank>
+Detail fetched: 0045000136 CustomerContact= Grace Lin <grace.lin@acme-precision.example> PaymentTerms= NET5
+
+Verification:
+Saved workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\W02\workspace\output\sales_template_filled.xlsx
+Saved summary: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-002\W02\workspace\output\sales_order_summary.txt
+Details rows checked: 9
+Details headers checked: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+All CustomerID values: ['C001']
+All OrderIDs: ['0045000101', '0045000107', '0045000109', '0045000114', '0045000119', '0045000125', '0045000129', '0045000132', '0045000136']
+Calculated Details NetAmountTWD total: 1702471.00
+Summary grouped row count: 6
+Summary total rows count: 9
+Missing notes: 0045000132: PaymentTerms
+ERRORS:
+- PaymentTerms is missing/None at row 12
