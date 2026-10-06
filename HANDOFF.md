@@ -51,13 +51,10 @@ in `docs/DECISIONS.md` (2026-10-06). Done C1-C6:
   (writable `src/practice/*.py`), grant for `leo.chi` (backup
   `grants.json.bak-*-before-coding`).
 
-Blocked on the owner (C7): create the firewall rule in an elevated
-PowerShell. Until then every coding run is refused with
-`coding_network_block_missing` by design.
-
-```
-New-NetFirewallRule -DisplayName "AEP coding runner - block outbound" -Direction Outbound -Program "C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\python.exe" -Action Block -Profile Any
-```
+The firewall rule exists (created by the owner 2026-10-06) and blocks
+direct egress (verified live). Loopback, including the company Zscaler
+proxy, is reachable and allowed by the owner. Live `inspect_coding`: passed.
+Agent Web was restarted with the fixed rule check (`8c337f0`).
 
 ## Verification (this commit series)
 
@@ -71,12 +68,11 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 
 ## Next recommended action
 
-1. After the owner creates the rule: run `inspect_coding` against the live
-   host.json (expect passed), then the network probe with the runner against
-   the Gateway host (expect blocked).
-2. C7 live run: in Agent Web or Telegram, ask the Agent to implement
+1. C7 live run: in Agent Web or Telegram, ask the Agent to implement
    `format_duration` in `practice`, file `src/practice/formatting.py`, tests
    `tests/test_formatting.py`. Check the diff in the worktree and that the
    practice repo's own checkout is untouched. Record results in TASKS.
+2. SOP to Workflow W2-W3 (plan `docs/phases/SOP_TO_WORKFLOW.md`; W1 done),
+   then W4/W5 (approved harness designs A/B), W6-W8, then W9 business cards.
 3. Then decide C8 (Claude Code author, PUBLIC only) or return to W12
    chipset_readiness (notes in `docs/phases/RS_WORKFLOW_MIGRATION.md`).
