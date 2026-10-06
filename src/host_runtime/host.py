@@ -47,6 +47,16 @@ from capabilities.dut_engineering.handlers import (
     DUT_PHYSICAL_VALIDATE_SPEC,
     PhysicalDutValidationHandler,
 )
+from capabilities.excel_blocks.handlers import READ_SHEET_SPEC as EXCEL_READ_SHEET_SPEC
+from capabilities.excel_blocks.handlers import UPSERT_SPEC as EXCEL_UPSERT_SPEC
+from capabilities.excel_blocks.handlers import (
+    ReadSheetHandler,
+    ReadSheetRequest,
+    SheetRows,
+    UpsertHandler,
+    UpsertRequest,
+    UpsertResult,
+)
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.knowledge_query.handlers import (
     KNOWLEDGE_QUERY_SPEC,
@@ -443,10 +453,23 @@ def build_integrations(
                 spec, WebScriptHandler(config.web, profile, mode),  # type: ignore[arg-type]
                 WebScript, WebScriptResult, ExecutionDependencies(central_required=False),
             )
-    if config.web is not None or DATA_SELECT_SPEC.identity.key in uses:
+    # Data and Excel blocks: installed when a Workflow uses them, or when this
+    # host turned on web steps for generated Workflows (`web` in host.json).
+    generated = config.web is not None
+    if generated or DATA_SELECT_SPEC.identity.key in uses:
         installed.register(
             DATA_SELECT_SPEC, SelectHandler(), SelectRequest, SelectResult,
             ExecutionDependencies(central_required=False),
+        )
+    if generated or EXCEL_READ_SHEET_SPEC.identity.key in uses:
+        installed.register(
+            EXCEL_READ_SHEET_SPEC, ReadSheetHandler(), ReadSheetRequest, SheetRows,
+            ExecutionDependencies(central_required=False),
+        )
+    if generated or EXCEL_UPSERT_SPEC.identity.key in uses:
+        installed.register(
+            EXCEL_UPSERT_SPEC, UpsertHandler(layout.workspace_root / "excel-backups"),
+            UpsertRequest, UpsertResult, ExecutionDependencies(central_required=False),
         )
     # The Outlook draft building block: installed when a Workflow uses it.
     if MAIL_DRAFT_SPEC.identity.key in uses:
