@@ -10,7 +10,7 @@ from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.1.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.2.0")
 RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
@@ -134,11 +134,17 @@ def coding_skill() -> SkillManifest:
                 "Use only when the person asks you to process local files or to write and run a "
                 "program in a folder they name, or to change code in a configured repository. "
                 "Never use it to answer a question, to look something up in Knowledge, or for "
-                "work an installed Workflow already does. `run`: write a complete Python script "
-                "for the task, run it in the named workspace, read the result, and fix and run "
-                "again until the output is right; outputs go to the workspace's output folder "
-                "and input files are never changed. `change`: change one file in a configured "
-                "repository against existing pytest tests; never committed."
+                "work an installed Workflow already does. `run`: first run a short script that "
+                "prints what the inputs really are (file names, headers, sample rows, page "
+                "markup), then write a complete Python script for the task and run it in the "
+                "named workspace. Before answering, run a check that reopens every output file "
+                "and confirms each requirement the person stated (file and column names, value "
+                "types such as text IDs and numeric values, placeholders for missing data, row "
+                "counts); keep the source's column names unless told otherwise. Fix and run "
+                "again until every requirement holds, then say what was checked. Outputs go to "
+                "the workspace's output folder and input files are never changed. `change`: "
+                "change one file in a configured repository against existing pytest tests; "
+                "never committed."
             ),
             "commands": [
                 {"name": "change", "kind": "workflow", "target": WORKFLOW.model_dump()},
