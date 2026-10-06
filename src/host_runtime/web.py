@@ -33,6 +33,8 @@ not -- any process on the machine, and any page open in the browser. So:
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hmac
 import json
 import os
@@ -63,6 +65,7 @@ from agent.task_contract import (
 )
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
+from capabilities.workflow_author.review import rendered as review_rendered
 from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.distribution import LocalStateError
 from common.execution import Failure, RequestContext, TraceIdentifiers
@@ -77,6 +80,7 @@ from common.workflow_parameters import (
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
+from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
     AgentProfileActivationRequest,
@@ -165,6 +169,12 @@ from models.wire import MethodTransport, UrllibTransport
 
 #: Anything larger than this is not a request to an Agent.
 MAX_BODY_BYTES = 256 * 1024
+#: An uploaded SOP PDF arrives base64-encoded: a 20 MiB PDF is about 27 MiB.
+MAX_SOP_UPLOAD_BYTES = 28 * 1024 * 1024
+AUTHORING_ROUTES = (
+    "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
+    "/api/authoring/preview", "/api/authoring/install",
+)
 BEARER = "Bearer "
 #: The only addresses this ever binds to or answers for.
 LOOPBACK = ("127.0.0.1", "localhost", "[::1]", "::1")
@@ -321,10 +331,89 @@ class AgentWeb:
         self.reference_sets = ReferenceSetStore(
             runtime.layout.workspace_root / REFERENCE_SETS_FILE
         )
+        # SOP to Workflow authoring sessions (docs/phases/SOP_TO_WORKFLOW.md W5).
+        router = runtime.agent.gateway.router
+        self.authoring = AuthoringStudio(
+            runtime.layout.workspace_root / "authoring",
+            installed=runtime.agent.gateway.bridge.installed,
+            model=lambda: router.model,
+            model_alias=router.model_alias,
+            local_only=router.local_only,
+            namespace=self.namespace or "engineering",
+            workflows_dir=runtime.layout.workflows,
+            grants_file=runtime.layout.grants,
+            settings_store=self.workflow_settings_store,
+        )
 
     @property
     def request_lock(self) -> threading.RLock:
         return self._one_at_a_time
+
+    # -- SOP to Workflow authoring --------------------------------------------
+
+    def _authoring_view(self, session: AuthoringSession) -> dict[str, Any]:
+        draft = session.draft
+        installed = self.runtime.agent.gateway.bridge.installed
+        return {
+            "ok": True,
+            "session_id": session.session_id, "title": session.title,
+            "status": session.status, "sop_kind": session.sop_kind,
+            "sop_chars": len(session.sop_text),
+            "turns": [turn.model_dump(mode="json") for turn in session.turns],
+            "questions": list(session.questions), "problems": list(session.problems),
+            "draft_text": None if draft is None else review_rendered(draft, installed),
+            "run_fields": [] if draft is None else form_fields(draft, "web"),
+            "settings_fields": [] if draft is None else settings_fields(draft),
+            "settings": session.settings,
+            "preview_arguments": session.preview_arguments,
+            "preview": None if session.preview is None
+            else session.preview.model_dump(mode="json"),
+            "installed_as": session.installed_as,
+        }
+
+    def authoring_sessions(self) -> dict[str, Any]:
+        return {"ok": True, "sessions": [
+            {"session_id": item.session_id, "title": item.title, "status": item.status,
+             "updated_at": item.updated_at}
+            for item in self.authoring.sessions(self.runtime.actor)
+        ]}
+
+    def authoring_action(self, action: str, body: dict[str, Any]) -> dict[str, Any]:
+        actor = self.runtime.actor
+        try:
+            if action == "start":
+                pdf = body.get("pdf_base64")
+                session = self.authoring.start(
+                    actor, title=str(body.get("title") or "SOP"),
+                    sop_text=None if pdf else str(body.get("sop_text") or ""),
+                    pdf=base64.b64decode(str(pdf), validate=True) if pdf else None,
+                )
+            elif action == "get":
+                session = self.authoring.load(str(body.get("session_id")), actor)
+            elif action == "discuss":
+                session = self.authoring.discuss(
+                    str(body.get("session_id")), actor, str(body.get("message") or ""))
+            elif action == "preview":
+                arguments = body.get("arguments") or {}
+                settings = body.get("settings") or {}
+                if not isinstance(arguments, dict) or not isinstance(settings, dict):
+                    return {"ok": False, "code": "authoring_preview_invalid"}
+                with self.request_lock:
+                    session = self.authoring.preview(
+                        str(body.get("session_id")), actor, arguments, settings,
+                        self.runtime.agent.gateway.bridge)
+            elif action == "install":
+                session, _path = self.authoring.install(str(body.get("session_id")), actor)
+                view = self._authoring_view(session)
+                view["restart_required"] = True
+                return view
+            else:
+                return {"ok": False, "code": "authoring_action_unknown"}
+        except AuthoringError as error:
+            return {"ok": False, "code": error.code}
+        except (ValueError, binascii.Error):
+            return {"ok": False, "code": "authoring_request_invalid"}
+        return self._authoring_view(session)
 
     def _turn_lock(self, session_id: str) -> threading.Lock:
         with self._session_guard:
@@ -2471,6 +2560,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.settings())
         elif parsed.path == "/api/settings/models":
             self._json(200, web.available_models())
+        elif parsed.path == "/api/authoring":
+            self._json(200, web.authoring_sessions())
         elif parsed.path == "/api/settings/workflows":
             self._json(200, web.workflow_settings())
         elif parsed.path == "/api/backends":
@@ -2519,6 +2610,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/conversations/backend",
             "/api/backends/authenticate",
             "/api/contributions",
+            *AUTHORING_ROUTES,
         ):
             self._json(404, {"error": "no such page"})
             return
@@ -2527,13 +2619,21 @@ class _Handler(BaseHTTPRequestHandler):
         except ValueError:
             self._json(400, {"error": "the request did not say how long it was"})
             return
-        if length > MAX_BODY_BYTES:
+        limit = MAX_SOP_UPLOAD_BYTES if path == "/api/authoring/start" else MAX_BODY_BYTES
+        if length > limit:
             self._json(413, {"error": "that is larger than a request to an Agent"})
             return
         try:
             body = json.loads(self.rfile.read(length) or b"{}")
         except (ValueError, TypeError):
             self._json(400, {"error": "the request was not valid JSON"})
+            return
+        if path in AUTHORING_ROUTES:
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "authoring_request_invalid"})
+                return
+            result = self.server.web.authoring_action(path.rsplit("/", 1)[1], body)
+            self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/settings/model":
             try:

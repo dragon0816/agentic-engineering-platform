@@ -628,6 +628,42 @@ tr:last-child td { border-bottom: none; }
         </div>
       </article>
     </div>
+    <details id="sop-authoring" class="card settings" style="margin-top: 14px">
+      <summary><strong>Create a Workflow from an SOP</strong></summary>
+      <p class="note">Give the steps or an SOP PDF, discuss it with the Agent, preview what
+        the Workflow would do (reading steps run, changing steps only say what they would
+        do), then approve and install it. Only you can approve and install.</p>
+      <label for="authoring-pick">Authoring session</label>
+      <select id="authoring-pick"><option value="">New session…</option></select>
+      <div id="authoring-new">
+        <label for="authoring-title">Title</label>
+        <input id="authoring-title" placeholder="每日出貨追蹤">
+        <label for="authoring-pdf">SOP PDF</label>
+        <input id="authoring-pdf" type="file" accept=".pdf,application/pdf">
+        <label for="authoring-sop">…or paste the steps</label>
+        <textarea id="authoring-sop" spellcheck="false"></textarea>
+        <p><button class="go" id="authoring-start" type="button">Start</button></p>
+      </div>
+      <div id="authoring-session" hidden>
+        <p class="note" id="authoring-status" role="status"></p>
+        <div id="authoring-turns"></div>
+        <label for="authoring-message">Your answer or change</label>
+        <textarea id="authoring-message"></textarea>
+        <p><button id="authoring-send" type="button">Send</button></p>
+        <h4>Draft</h4>
+        <pre id="authoring-draft" class="markdown-panel">No draft yet.</pre>
+        <h4>Preview</h4>
+        <p class="note">Settings for this computer</p>
+        <div id="authoring-settings"></div>
+        <p class="note">Values for this run</p>
+        <div id="authoring-run"></div>
+        <p><button id="authoring-preview" type="button">Preview</button>
+          <button class="go" id="authoring-install" type="button" disabled>Approve and
+            install</button></p>
+        <div id="authoring-preview-result"></div>
+      </div>
+      <p id="authoring-result" class="note" role="status"></p>
+    </details>
     <details class="card settings" style="margin-top: 14px">
       <summary><strong>Create a Skill or Workflow draft</strong></summary>
       <p class="note">The current conversation is copied as evidence. The draft remains local,
@@ -2120,6 +2156,150 @@ function showWorkflowContract() {
     typed ? {workflow: {namespace: workflow.namespace, name: workflow.name,
       version: workflow.version}} : null);
 }
+
+// -- SOP to Workflow authoring ------------------------------------------------
+
+let authoringSession = null;
+const AUTHORING_PROBLEMS = {
+  authoring_model_unavailable: "No model is configured, so nothing can be drafted.",
+  authoring_sop_not_a_pdf: "That file is not a PDF.",
+  authoring_sop_unreadable: "No text could be read from that PDF.",
+  authoring_sop_missing: "Give the SOP as a PDF or as text.",
+  authoring_preview_required:
+    "Preview the current draft first; it must change nothing and fail nowhere.",
+  authoring_workflow_exists: "A Workflow with this name and version is already installed.",
+  authoring_session_installed: "This session is already installed.",
+};
+const authoringProblem = (failure) =>
+  AUTHORING_PROBLEMS[failure.code] || failure.message || failure.code;
+
+async function loadAuthoringList(selected) {
+  const listed = await call("/api/authoring");
+  const pick = el("authoring-pick");
+  const first = document.createElement("option"); first.value = "";
+  first.append(text("New session…"));
+  pick.replaceChildren(first, ...listed.sessions.map((item) => {
+    const option = document.createElement("option"); option.value = item.session_id;
+    option.append(text(item.title + " · " + item.status)); return option;
+  }));
+  pick.value = selected || "";
+}
+
+function showAuthoring(view) {
+  authoringSession = view;
+  el("authoring-new").hidden = !!view;
+  el("authoring-session").hidden = !view;
+  if (!view) return;
+  el("authoring-status").replaceChildren(text("Status: " + view.status
+    + (view.installed_as ? " · installed as " + view.installed_as : "")));
+  const turns = el("authoring-turns"); turns.replaceChildren();
+  for (const turn of view.turns) {
+    const line = document.createElement("p");
+    const who = document.createElement("strong");
+    who.append(text(turn.role === "owner" ? "You: " : "Agent: "));
+    line.append(who, text(turn.text)); turns.append(line);
+  }
+  for (const problem of view.problems) {
+    const line = document.createElement("p"); line.className = "note";
+    line.append(text("Problem: " + problem)); turns.append(line);
+  }
+  el("authoring-draft").replaceChildren(text(view.draft_text || "No draft yet."));
+  const settingsFields = view.settings_fields.map((field) => Object.assign({}, field,
+    Object.prototype.hasOwnProperty.call(view.settings, field.name)
+      ? {default: view.settings[field.name]} : {}));
+  const runFields = view.run_fields.map((field) => Object.assign({}, field,
+    Object.prototype.hasOwnProperty.call(view.preview_arguments, field.name)
+      ? {default: view.preview_arguments[field.name]} : {}));
+  view._settingsFields = settingsFields; view._runFields = runFields;
+  renderParameterForm(el("authoring-settings"), settingsFields, "authoring-setting-", null);
+  renderParameterForm(el("authoring-run"), runFields, "authoring-run-", null);
+  el("authoring-preview").disabled = !view.draft_text || view.status === "installed";
+  el("authoring-install").disabled = view.status !== "previewed";
+  const result = el("authoring-preview-result"); result.replaceChildren();
+  if (view.preview) {
+    const head = document.createElement("p"); head.className = "note";
+    head.append(text("Preview: " + view.preview.status
+      + (view.preview.failure ? " (" + view.preview.failure.code + ")" : "")));
+    result.append(head, table(["#", "Step", "Effect", "Result", "Details"],
+      view.preview.steps, (step, column) => {
+        if (column === 0) return String(step.index + 1);
+        if (column === 1) return step.capability.namespace + "/" + step.capability.name;
+        if (column === 2) return step.side_effect || "";
+        if (column === 3) return step.state + (step.failure ? " · " + step.failure.code : "");
+        const shown = step.output !== null && step.output !== undefined ? step.output : step.inputs;
+        const json = JSON.stringify(shown);
+        return json && json.length > 300 ? json.slice(0, 297) + "…" : (json || "");
+      }));
+  }
+}
+
+async function authoringAct(action, body) {
+  const result = el("authoring-result");
+  result.replaceChildren(text("Working… a model turn or a preview can take a minute."));
+  try {
+    const view = await call("/api/authoring/" + action, body);
+    showAuthoring(view);
+    result.replaceChildren(text(view.restart_required
+      ? "Installed. Restart Agent Web to run it." : ""));
+    await loadAuthoringList(view.session_id);
+  } catch (failure) {
+    result.replaceChildren(text("Not done: " + authoringProblem(failure)));
+  }
+}
+
+el("sop-authoring").addEventListener("toggle", () => {
+  if (el("sop-authoring").open) loadAuthoringList(authoringSession && authoringSession.session_id);
+});
+el("authoring-pick").addEventListener("change", async () => {
+  const chosen = el("authoring-pick").value;
+  if (!chosen) { showAuthoring(null); return; }
+  await authoringAct("get", {session_id: chosen});
+});
+el("authoring-start").addEventListener("click", async () => {
+  const file = el("authoring-pdf").files[0];
+  const body = {title: el("authoring-title").value.trim() || "SOP"};
+  if (file) {
+    const data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",", 2)[1] || "");
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+    body.pdf_base64 = data;
+  } else {
+    body.sop_text = el("authoring-sop").value;
+  }
+  await authoringAct("start", body);
+});
+el("authoring-send").addEventListener("click", async () => {
+  if (!authoringSession) return;
+  const message = el("authoring-message").value.trim();
+  if (!message) return;
+  el("authoring-message").value = "";
+  await authoringAct("discuss", {session_id: authoringSession.session_id, message: message});
+});
+el("authoring-preview").addEventListener("click", async () => {
+  if (!authoringSession) return;
+  let settings, runValues;
+  try {
+    settings = collectParameterValues(el("authoring-settings"), authoringSession._settingsFields,
+      "authoring-setting-");
+    runValues = collectParameterValues(el("authoring-run"), authoringSession._runFields,
+      "authoring-run-");
+  } catch (failure) {
+    el("authoring-result").replaceChildren(text(failure.message)); return;
+  }
+  await authoringAct("preview", {session_id: authoringSession.session_id,
+    settings: settings, arguments: runValues});
+});
+el("authoring-install").addEventListener("click", async () => {
+  if (!authoringSession) return;
+  if (!confirm("Install this Workflow and grant the steps it uses? Its changing steps will "
+      + "run for real the next time it is run.")) return;
+  await authoringAct("install", {session_id: authoringSession.session_id});
+});
+
+// -- end SOP to Workflow authoring
 
 // -- Parameter forms ------------------------------------------------------
 // One renderer for every form generated from a Workflow's parameter
