@@ -1,0 +1,15 @@
+INPUT FILES:
+- report_a.csv 79 bytes
+  CSV sample:
+    ['DUT', 'Item', 'Result', 'Measurement', 'Unit']
+    ['D001', 'TxPower', 'OK', '12.5', 'dBm']
+    ['D002', 'TxPower', 'NG', '', 'dBm']
+- report_b.json 204 bytes
+  JSON type: list
+  JSON sample: [{"device": "D003", "test": "EVM", "outcome": "PASS", "value": -35.2, "unit": "dB"}, {"device": "D004", "test": "EVM", "outcome": "FAIL", "value": -20.1}]
+- report_c.md 146 bytes
+  Markdown first lines:
+    | Device | Test | Status | Value | Unit |
+    |---|---|---|---|---|
+    | D005 | Sensitivity | OK | -90 | dBm |
+    | D006 | Sensitivity | FAIL | -70 | dBm |

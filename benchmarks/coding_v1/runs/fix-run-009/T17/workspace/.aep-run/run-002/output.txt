@@ -1,0 +1,8 @@
+Wrote: output\testplan.json
+Wrote: output\warnings.json
+Converted frequency strings:
+ - $.bands[0].frequency: "2.4GHz" -> 2400 MHz
+ - $.bands[1].frequency: "5 GHz" -> 5000 MHz
+ - $.bands[2].frequency: "2400MHz" -> 2400 MHz
+Warnings: 1 [{'path': '$.sub.nested[1].frequency', 'value': '100kHz', 'warning': 'Unknown frequency unit; value left unchanged'}]
+Verified: input unchanged, exact-name frequency only, converted GHz/MHz strings to numeric MHz, added frequency_unit only to converted objects, preserved numeric frequency, recorded unknown unit warning, preserved unrelated fields and array order.

@@ -1,0 +1,60 @@
+Found 4 detail links:
+ - Laptop 13 http://127.0.0.1:50351/t11/item/1
+ - Laptop 15 http://127.0.0.1:50351/t11/item/2
+ - Mini PC http://127.0.0.1:50351/t11/item/3
+ - Tablet 11 http://127.0.0.1:50351/t11/item/4
+
+Detail page samples and parsed values:
+
+URL: http://127.0.0.1:50351/t11/item/1
+TEXT SAMPLE: Laptop 13
+Laptop 13
+Price
+NT$32,900
+CPU
+Intel i5-1340P
+Memory
+16 GB
+PARSED: {'Name': 'Laptop 13', 'Price': '32900', 'Currency': 'NT$', 'CPU': 'Intel i5-1340P', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:50351/t11/item/1'}
+
+URL: http://127.0.0.1:50351/t11/item/2
+TEXT SAMPLE: Laptop 15
+Laptop 15
+Price
+NT$45,500
+CPU
+Intel i7-1360P
+Memory
+32GB
+PARSED: {'Name': 'Laptop 15', 'Price': '45500', 'Currency': 'NT$', 'CPU': 'Intel i7-1360P', 'MemoryGB': 32, 'URL': 'http://127.0.0.1:50351/t11/item/2'}
+
+URL: http://127.0.0.1:50351/t11/item/3
+TEXT SAMPLE: Mini PC
+Mini PC
+Price
+NT$18,800
+Memory
+16 GB
+PARSED: {'Name': 'Mini PC', 'Price': '18800', 'Currency': 'NT$', 'CPU': '', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:50351/t11/item/3'}
+
+URL: http://127.0.0.1:50351/t11/item/4
+TEXT SAMPLE: Tablet 11
+Tablet 11
+Price
+NT$12,300
+CPU
+ARM A78
+Memory
+8 GB
+PARSED: {'Name': 'Tablet 11', 'Price': '12300', 'Currency': 'NT$', 'CPU': 'ARM A78', 'MemoryGB': 8, 'URL': 'http://127.0.0.1:50351/t11/item/4'}
+
+Wrote output\details.xlsx
+Verified output file: output\details.xlsx
+Verified headers: ['Name', 'Price', 'Currency', 'CPU', 'MemoryGB', 'URL']
+Verified data rows: 4
+Verified MemoryGB values are numeric when present and blank allowed for missing fields.
+Output rows:
+['Laptop 13', '32900', 'NT$', 'Intel i5-1340P', 16, 'http://127.0.0.1:50351/t11/item/1']
+['Laptop 15', '45500', 'NT$', 'Intel i7-1360P', 32, 'http://127.0.0.1:50351/t11/item/2']
+['Mini PC', '18800', 'NT$', None, 16, 'http://127.0.0.1:50351/t11/item/3']
+['Tablet 11', '12300', 'NT$', 'ARM A78', 8, 'http://127.0.0.1:50351/t11/item/4']
