@@ -1,0 +1,6 @@
+CHECK OK
+output exists: True warnings exists: True
+converted count: 3 [('$.bands[0].frequency', '2.4GHz', 2400), ('$.bands[1].frequency', '5 GHz', 5000), ('$.bands[2].frequency', '2400MHz', 2400)]
+numeric frequency kept: 1 [('$.sub.nested[0].frequency', 915)]
+unknown unit warnings: 1 [{'path': '$.sub.nested[1].frequency', 'value': '100kHz', 'warning': 'frequency string has unknown or unsupported unit; value left unchanged'}]
+input unchanged readable: True output files: ['testplan.json', 'warnings.json']

@@ -1,0 +1,49 @@
+CSV headers: ['DUT', 'Item', 'Result', 'Measurement', 'Unit']
+JSON type: list records: 2
+Markdown table rows including header/separator: 4
+Wrote output\reports.json records: 6
+[
+  {
+    "device_id": "D001",
+    "test_name": "TxPower",
+    "status": "Pass",
+    "value": 12.5,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D002",
+    "test_name": "TxPower",
+    "status": "Fail",
+    "value": null,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D003",
+    "test_name": "EVM",
+    "status": "Pass",
+    "value": -35.2,
+    "unit": "dB"
+  },
+  {
+    "device_id": "D004",
+    "test_name": "EVM",
+    "status": "Fail",
+    "value": -20.1,
+    "unit": null
+  },
+  {
+    "device_id": "D005",
+    "test_name": "Sensitivity",
+    "status": "Pass",
+    "value": -90,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D006",
+    "test_name": "Sensitivity",
+    "status": "Fail",
+    "value": -70,
+    "unit": "dBm"
+  }
+]
+CHECK OK: output file exists; 6 records preserved; fields/order match; device_id is text; statuses normalized; missing/blank value or unit represented as null.

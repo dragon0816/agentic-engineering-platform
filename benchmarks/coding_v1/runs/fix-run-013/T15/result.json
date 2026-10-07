@@ -1,0 +1,201 @@
+{
+ "run_id": "fix-run-013",
+ "task_id": "T15",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 22.84,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "six records parsed correctly",
+   "passed": true,
+   "expected": [
+    [
+     "2026-01-05T08:00:00",
+     "DUT-01",
+     "TxPower",
+     "Pass"
+    ],
+    [
+     "2026-01-05T08:00:05",
+     "DUT-01",
+     "EVM",
+     "Fail"
+    ],
+    [
+     "2026-01-05T08:01:00",
+     "DUT-02",
+     "TxPower",
+     "Pass"
+    ],
+    [
+     "2026-01-05T08:02:00",
+     "DUT-03",
+     "TxPower",
+     "Pass"
+    ],
+    [
+     "2026-01-05T08:03:00",
+     "DUT-04",
+     "TxPower",
+     "Fail"
+    ],
+    [
+     "2026-01-05T08:04:00",
+     "DUT-05",
+     "EVM",
+     "Pass"
+    ]
+   ],
+   "actual": [
+    [
+     "2026-01-05T08:00:00",
+     "DUT-01",
+     "TxPower",
+     "Pass"
+    ],
+    [
+     "2026-01-05T08:00:05",
+     "DUT-01",
+     "EVM",
+     "Fail"
+    ],
+    [
+     "2026-01-05T08:01:00",
+     "DUT-02",
+     "TxPower",
+     "Pass"
+    ],
+    [
+     "2026-01-05T08:02:00",
+     "DUT-03",
+     "TxPower",
+     "Pass"
+    ],
+    [
+     "2026-01-05T08:03:00",
+     "DUT-04",
+     "TxPower",
+     "Fail"
+    ],
+    [
+     "2026-01-05T08:04:00",
+     "DUT-05",
+     "EVM",
+     "Pass"
+    ]
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "warnings for lines 5, 7, 9",
+   "passed": true,
+   "expected": [
+    5,
+    7,
+    9
+   ],
+   "actual": [
+    5,
+    7,
+    9
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "warnings keep the raw text and a reason",
+   "passed": true,
+   "expected": "raw + reason",
+   "actual": [
+    {
+     "line_number": 5,
+     "line": "[2026-01-05T08:01:05][DUT-02][EVM]PASS]",
+     "reason": "expected 4 bracketed fields, found 3"
+    },
+    {
+     "line_number": 7,
+     "line": "[2026-01-05T08:02:05][DUT-03][PASS]",
+     "reason": "expected 4 bracketed fields, found 3"
+    },
+    {
+     "line_number": 9,
+     "line": "[2026-01-05T08:03:05][DUT-04][EVM][SKIP]",
+     "reason": "invalid result 'SKIP'; expected PASS or FAIL"
+    }
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-013\\T15\\workspace\\output\\parsed.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-013\\T15\\workspace\\output\\warnings.json"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-013\\T15\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-f8682518e86e46b9a60d6cddb634074e",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-1f1fc4474d9241c2af45e5aa99c98742",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "041c7463cd9360f85539d7bc2c1f27d38eb9c0ed",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.5.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.7.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}
