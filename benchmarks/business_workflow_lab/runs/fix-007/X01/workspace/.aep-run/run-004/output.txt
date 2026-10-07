@@ -1,0 +1,135 @@
+quote_cli return: 0
+quote_cli stdout: {
+ "schema_version": 1,
+ "output": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X01\\workspace\\output\\downloads\\quotes_2026-09_accepted.csv",
+ "rows": 4
+}
+orders file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\downloads\sap_orders_2026-09.csv exists= True bytes= 1616
+orders header: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+orders sample: ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+invoices file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\downloads\sap_invoices_2026-09.csv exists= True bytes= 1142
+invoices header: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+invoices sample: ['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95']
+expenses file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\downloads\expenses_2026-09_approved.csv exists= True bytes= 1843
+expenses header: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+expenses sample: ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False']
+quotes file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\downloads\quotes_2026-09_accepted.csv exists= True bytes= 389
+quotes header: ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount']
+quotes sample: ['Q0011', 'C001', 'P001', '2026-09-03', '2026-10-03', 'Accepted', 'USD', '11500.00', '10', '10350.00']
+fx loaded: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+filtered counts: {'orders': 18, 'raw_orders': 20, 'invoices': 13, 'expenses': 15, 'quotes': 4}
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\project_integration_2026-09.xlsx
+verification row counts: {'Orders': 18, 'Invoices': 13, 'Expenses': 15, 'Quotes': 4, 'Summary': 5, 'Exceptions': 13}
+summary: {
+  "P001": {
+    "AcceptedQuoteTWD": 331200.0,
+    "ApprovedExpenseTWD": 18305.0,
+    "InvoiceBalanceTWD": 386445.0,
+    "OrderTWD": 693570.0
+  },
+  "P002": {
+    "AcceptedQuoteTWD": 97450.85,
+    "ApprovedExpenseTWD": 9100.0,
+    "InvoiceBalanceTWD": 156256.0,
+    "OrderTWD": 516084.5
+  },
+  "P003": {
+    "AcceptedQuoteTWD": 0.0,
+    "ApprovedExpenseTWD": 13037.5,
+    "InvoiceBalanceTWD": 0.0,
+    "OrderTWD": 150000.0
+  },
+  "P004": {
+    "AcceptedQuoteTWD": 282150.0,
+    "ApprovedExpenseTWD": 8840.0,
+    "InvoiceBalanceTWD": 78750.0,
+    "OrderTWD": 794876.25
+  },
+  "P005": {
+    "AcceptedQuoteTWD": 0.0,
+    "ApprovedExpenseTWD": 6424.0,
+    "InvoiceBalanceTWD": 236371.2,
+    "OrderTWD": 770874.2
+  }
+}
+exceptions: [
+  [
+    "Orders",
+    "0045000113",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Orders",
+    "0045000115",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Orders",
+    "0045000116",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Orders",
+    "0045000120",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Orders",
+    "0045000124",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Orders",
+    "0045000126",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Invoices",
+    "0090000207",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Invoices",
+    "0090000211",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Invoices",
+    "0090000213",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Invoices",
+    "0090000215",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Invoices",
+    "0090000216",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Invoices",
+    "0090000218",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ],
+  [
+    "Quotes",
+    "Q0020",
+    "",
+    "Missing ProjectID; excluded from Summary"
+  ]
+]
+output_file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\project_integration_2026-09.xlsx

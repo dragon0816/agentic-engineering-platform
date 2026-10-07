@@ -1,0 +1,697 @@
+{
+ "session_id": "conversation-96c87a33fef443719f85ce8ba5190bac",
+ "exchanges": [
+  {
+   "sent": "請幫我整理上個月 C001 的訂單、費用和報價，填 project_template.xlsx，換成台幣，標出需要關注的項目，並產生下次可以再用的 workflow。\n\n---\n環境說明（操作者提供）\n- 今天日期：2026-10-06（Asia/Taipei）\n- 本題 workspace：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\n- 附件（在 workspace 的 input 資料夾）：\n  - input\\project_template.xlsx\n  - input\\fx_rates.csv\n  - input\\sap_manual.md\n  - input\\expense_manual.md\n  - input\\quote_cli_manual.md\n- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。",
+   "http_status": 200,
+   "seconds": 7.687,
+   "timed_out": false,
+   "reply": {
+    "ok": true,
+    "conversation": {
+     "session_id": "conversation-96c87a33fef443719f85ce8ba5190bac",
+     "actor": "leo.chi",
+     "title": "請幫我整理上個月 C001 的訂單、費用和報價，填 project_template.xlsx，換成台幣，標出需要關注的項目，並產生下次可以再用…",
+     "backend": "gateway",
+     "data_classification": "UNCLASSIFIED",
+     "classified_by": null,
+     "created_at": "2026-10-07T03:09:52.173621Z",
+     "updated_at": "2026-10-07T03:09:59.768838Z",
+     "messages": [
+      {
+       "message_id": "message-3bcb03c4ac3748a2bb87233ef677cbe4",
+       "role": "user",
+       "text": "請幫我整理上個月 C001 的訂單、費用和報價，填 project_template.xlsx，換成台幣，標出需要關注的項目，並產生下次可以再用的 workflow。\n\n---\n環境說明（操作者提供）\n- 今天日期：2026-10-06（Asia/Taipei）\n- 本題 workspace：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\n- 附件（在 workspace 的 input 資料夾）：\n  - input\\project_template.xlsx\n  - input\\fx_rates.csv\n  - input\\sap_manual.md\n  - input\\expense_manual.md\n  - input\\quote_cli_manual.md\n- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。",
+       "created_at": "2026-10-07T03:09:52.211882Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null
+      },
+      {
+       "message_id": "message-253c089edc7749da8061cfba5418ad20",
+       "role": "assistant",
+       "text": "可以，我先確認一個會影響結果的規則，確認後我再開始處理檔案、填模板並建立可重跑 workflow。\n\n目前條件我理解如下：\n- 客戶：C001\n- 期間：上個月＝2026-09-01 到 2026-09-30（依你提供今天 2026-10-06，Asia/Taipei）\n- 輸出：寫到 workspace 的 `output` 資料夾\n- 模板：填寫 `input\\project_template.xlsx`\n- 幣別：全部換成台幣\n- 需要建立可重跑的成本平台 workflow\n\n需要你確認的是：\n\n**「需要關注的項目」要用什麼規則標出？**\n\n例如可以是以下其中一種或多種：\n1. 金額超過某門檻，例如單筆 > NT$100,000  \n2. 訂單、費用、報價之間金額差異超過某比例，例如報價與訂單差異 > 10%  \n3. 缺少必要欄位，例如缺客戶、日期、幣別、匯率、報價單號  \n4. 狀態異常，例如取消、逾期、未核准、未開立訂單  \n5. 毛利或成本異常，例如費用高於訂單金額、毛利率低於某門檻  \n6. 其他你指定的規則\n\n請告訴我要套用哪些關注規則與門檻。確認後我會開始執行。",
+       "created_at": "2026-10-07T03:09:59.768838Z",
+       "status": "answered",
+       "trace": {
+        "trace_id": "trace-8f379547e8674551b82f7b978c4d6ac4",
+        "request_id": "request-8f379547e8674551b82f7b978c4d6ac4",
+        "span_id": "span-8f379547e8674551b82f7b978c4d6ac4",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null
+      }
+     ]
+    },
+    "answer": {
+     "tool_summary": null,
+     "ok": true,
+     "answer": "可以，我先確認一個會影響結果的規則，確認後我再開始處理檔案、填模板並建立可重跑 workflow。\n\n目前條件我理解如下：\n- 客戶：C001\n- 期間：上個月＝2026-09-01 到 2026-09-30（依你提供今天 2026-10-06，Asia/Taipei）\n- 輸出：寫到 workspace 的 `output` 資料夾\n- 模板：填寫 `input\\project_template.xlsx`\n- 幣別：全部換成台幣\n- 需要建立可重跑的成本平台 workflow\n\n需要你確認的是：\n\n**「需要關注的項目」要用什麼規則標出？**\n\n例如可以是以下其中一種或多種：\n1. 金額超過某門檻，例如單筆 > NT$100,000  \n2. 訂單、費用、報價之間金額差異超過某比例，例如報價與訂單差異 > 10%  \n3. 缺少必要欄位，例如缺客戶、日期、幣別、匯率、報價單號  \n4. 狀態異常，例如取消、逾期、未核准、未開立訂單  \n5. 毛利或成本異常，例如費用高於訂單金額、毛利率低於某門檻  \n6. 其他你指定的規則\n\n請告訴我要套用哪些關注規則與門檻。確認後我會開始執行。",
+     "status": "answered",
+     "outcome": {
+      "trace": {
+       "trace_id": "trace-8f379547e8674551b82f7b978c4d6ac4",
+       "request_id": "request-8f379547e8674551b82f7b978c4d6ac4",
+       "span_id": "span-8f379547e8674551b82f7b978c4d6ac4",
+       "parent_span_id": null
+      },
+      "ingress": "local",
+      "actor": "leo.chi",
+      "refusal": null,
+      "conversation": {
+       "trace": {
+        "trace_id": "trace-8f379547e8674551b82f7b978c4d6ac4",
+        "request_id": "request-8f379547e8674551b82f7b978c4d6ac4",
+        "span_id": "span-8f379547e8674551b82f7b978c4d6ac4",
+        "parent_span_id": null
+       },
+       "status": "answered",
+       "text": "可以，我先確認一個會影響結果的規則，確認後我再開始處理檔案、填模板並建立可重跑 workflow。\n\n目前條件我理解如下：\n- 客戶：C001\n- 期間：上個月＝2026-09-01 到 2026-09-30（依你提供今天 2026-10-06，Asia/Taipei）\n- 輸出：寫到 workspace 的 `output` 資料夾\n- 模板：填寫 `input\\project_template.xlsx`\n- 幣別：全部換成台幣\n- 需要建立可重跑的成本平台 workflow\n\n需要你確認的是：\n\n**「需要關注的項目」要用什麼規則標出？**\n\n例如可以是以下其中一種或多種：\n1. 金額超過某門檻，例如單筆 > NT$100,000  \n2. 訂單、費用、報價之間金額差異超過某比例，例如報價與訂單差異 > 10%  \n3. 缺少必要欄位，例如缺客戶、日期、幣別、匯率、報價單號  \n4. 狀態異常，例如取消、逾期、未核准、未開立訂單  \n5. 毛利或成本異常，例如費用高於訂單金額、毛利率低於某門檻  \n6. 其他你指定的規則\n\n請告訴我要套用哪些關注規則與門檻。確認後我會開始執行。",
+       "model_turns": 1,
+       "tools": [],
+       "failure": null
+      },
+      "runs": [],
+      "unrecorded": []
+     }
+    },
+    "draft": null,
+    "approvals": []
+   }
+  },
+  {
+   "sent": "費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。",
+   "http_status": 200,
+   "seconds": 234.156,
+   "timed_out": false,
+   "reply": {
+    "ok": false,
+    "conversation": {
+     "session_id": "conversation-96c87a33fef443719f85ce8ba5190bac",
+     "actor": "leo.chi",
+     "title": "請幫我整理上個月 C001 的訂單、費用和報價，填 project_template.xlsx，換成台幣，標出需要關注的項目，並產生下次可以再用…",
+     "backend": "gateway",
+     "data_classification": "UNCLASSIFIED",
+     "classified_by": null,
+     "created_at": "2026-10-07T03:09:52.173621Z",
+     "updated_at": "2026-10-07T03:13:53.923118Z",
+     "messages": [
+      {
+       "message_id": "message-3bcb03c4ac3748a2bb87233ef677cbe4",
+       "role": "user",
+       "text": "請幫我整理上個月 C001 的訂單、費用和報價，填 project_template.xlsx，換成台幣，標出需要關注的項目，並產生下次可以再用的 workflow。\n\n---\n環境說明（操作者提供）\n- 今天日期：2026-10-06（Asia/Taipei）\n- 本題 workspace：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\n- 附件（在 workspace 的 input 資料夾）：\n  - input\\project_template.xlsx\n  - input\\fx_rates.csv\n  - input\\sap_manual.md\n  - input\\expense_manual.md\n  - input\\quote_cli_manual.md\n- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。",
+       "created_at": "2026-10-07T03:09:52.211882Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null
+      },
+      {
+       "message_id": "message-253c089edc7749da8061cfba5418ad20",
+       "role": "assistant",
+       "text": "可以，我先確認一個會影響結果的規則，確認後我再開始處理檔案、填模板並建立可重跑 workflow。\n\n目前條件我理解如下：\n- 客戶：C001\n- 期間：上個月＝2026-09-01 到 2026-09-30（依你提供今天 2026-10-06，Asia/Taipei）\n- 輸出：寫到 workspace 的 `output` 資料夾\n- 模板：填寫 `input\\project_template.xlsx`\n- 幣別：全部換成台幣\n- 需要建立可重跑的成本平台 workflow\n\n需要你確認的是：\n\n**「需要關注的項目」要用什麼規則標出？**\n\n例如可以是以下其中一種或多種：\n1. 金額超過某門檻，例如單筆 > NT$100,000  \n2. 訂單、費用、報價之間金額差異超過某比例，例如報價與訂單差異 > 10%  \n3. 缺少必要欄位，例如缺客戶、日期、幣別、匯率、報價單號  \n4. 狀態異常，例如取消、逾期、未核准、未開立訂單  \n5. 毛利或成本異常，例如費用高於訂單金額、毛利率低於某門檻  \n6. 其他你指定的規則\n\n請告訴我要套用哪些關注規則與門檻。確認後我會開始執行。",
+       "created_at": "2026-10-07T03:09:59.768838Z",
+       "status": "answered",
+       "trace": {
+        "trace_id": "trace-8f379547e8674551b82f7b978c4d6ac4",
+        "request_id": "request-8f379547e8674551b82f7b978c4d6ac4",
+        "span_id": "span-8f379547e8674551b82f7b978c4d6ac4",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null
+      },
+      {
+       "message_id": "message-bd703b3aab5b417792f210aeda0fd833",
+       "role": "user",
+       "text": "費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。",
+       "created_at": "2026-10-07T03:09:59.885768Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null
+      },
+      {
+       "message_id": "message-d7fda87d3104468da31b6bbd10d4d009",
+       "role": "assistant",
+       "text": "The configured model could not answer this turn.",
+       "created_at": "2026-10-07T03:13:53.923118Z",
+       "status": "failed",
+       "trace": {
+        "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+        "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+        "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": "- coding__run: succeeded {\"exit_code\": 0, \"script\": \".aep-run/run-001/script.py\"}\n- browser__operate: failed (web_target_missing)\n- browser__operate: succeeded {\"url\": \"http://127.0.0.1:8810/orders\"}\n- browser__operate: succeeded {\"url\": \"http://127.0.0.1:8810/invoices?customer=C001&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc\", \"downloads\": [\"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-007\\\\X02\\\\workspace\\\\output\\\\downloads\\\\sap_sales_orders_C001_2026-09.csv\", \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-007\\\\X02\\\\workspace\\\\output\\\\downloads\\\\sap_invoices_C001_2026-09.csv\"], \"read\": [\"sap_invoices_C001_2026-09.csv\", \"sap_sales_orders_C001_2026-09.csv\"]}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/downloads/sap_invoices_C001_2026-09.csv\", \"output/downloads/sap_sales_orders_C001_2026-09.csv\"], \"script\": \".aep-run/run-002/script.py\"}\n- desktop__operate: failed (desktop_dialog_still_open)\n- desktop__operate: succeeded {\"app\": \"expense\", \"read\": [\"open_dialog\"]}\n(turn stopped: model_http_error)"
+      }
+     ]
+    },
+    "answer": {
+     "tool_summary": "- coding__run: succeeded {\"exit_code\": 0, \"script\": \".aep-run/run-001/script.py\"}\n- browser__operate: failed (web_target_missing)\n- browser__operate: succeeded {\"url\": \"http://127.0.0.1:8810/orders\"}\n- browser__operate: succeeded {\"url\": \"http://127.0.0.1:8810/invoices?customer=C001&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc\", \"downloads\": [\"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-007\\\\X02\\\\workspace\\\\output\\\\downloads\\\\sap_sales_orders_C001_2026-09.csv\", \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-007\\\\X02\\\\workspace\\\\output\\\\downloads\\\\sap_invoices_C001_2026-09.csv\"], \"read\": [\"sap_invoices_C001_2026-09.csv\", \"sap_sales_orders_C001_2026-09.csv\"]}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/downloads/sap_invoices_C001_2026-09.csv\", \"output/downloads/sap_sales_orders_C001_2026-09.csv\"], \"script\": \".aep-run/run-002/script.py\"}\n- desktop__operate: failed (desktop_dialog_still_open)\n- desktop__operate: succeeded {\"app\": \"expense\", \"read\": [\"open_dialog\"]}\n(turn stopped: model_http_error)",
+     "ok": false,
+     "answer": "The configured model could not answer this turn.",
+     "status": "failed",
+     "outcome": {
+      "trace": {
+       "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+       "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+       "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+       "parent_span_id": null
+      },
+      "ingress": "local",
+      "actor": "leo.chi",
+      "refusal": null,
+      "conversation": {
+       "trace": {
+        "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+        "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+        "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+        "parent_span_id": null
+       },
+       "status": "failed",
+       "text": "The configured model could not answer this turn.",
+       "model_turns": 8,
+       "tools": [
+        {
+         "call_id": "call_Oirgg4Wii4uRmj1j3KYrNNYQ",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-7b560ea7792a4918833194d13c0d06d3",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+            "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+            "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+             "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+             "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "WORKSPACE C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\nINPUT FILES:\n- expense_manual.md 2007\n- fx_rates.csv 276\n- project_template.xlsx 14209\n- quote_cli_manual.md 2303\n- sap_manual.md 2077\nWORKBOOK SHEETS: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']\nSHEET Report: max_row=20 max_col=6\n  ('Project Integration Report 專案整合報表', None, None, None, None, None)\n  (None, None, None, None, None, None)\n  ('起始日期 From', None, '結束日期 To', None, None, None)\n  ('條件 Condition', None, None, None, None, None)\n  ('產出時間 Generated at', None, None, None, None, None)\n  (None, None, None, None, None, None)\n  ('資料來源 Source', None, '取得時間 Fetched at', None, None, None)\n  (None, None, None, None, None, None)\nSHEET Orders: max_row=4 max_col=8\n  ('Sales orders by project', None, None, None, None, None, None, None)\n  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)\n  (None, None, None, None, None, None, None, None)\n  ('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')\nSHEET Invoices: max_row=4 max_col=11\n  ('Invoices by project', None, None, None, None, None, None, None, None, None, None)\n  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)\n  (None, None, None, None, None, None, None, None, None, None, None)\n  ('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')\nSHEET Expenses: max_row=4 max_col=8\n  ('Expenses by project', None, None, None, None, None, None, None)\n  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)\n  (None, None, None, None, None, None, None, None)\n  ('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')\nSHEET Quotes: max_row=4 max_col=9\n  ('Quotes by project', None, None, None, None, None, None, None, None)\n  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)\n  (None, None, None, None, None, None, None, None, None)\n  ('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')\nSHEET Summary: max_row=4 max_col=5\n  ('Project summary (TWD)', None, None, None, None)\n  ('總計 TWD Totals', '=SUM(B5:B5)', '=SUM(C5:C5)', '=SUM(D5:D5)', '=SUM(E5:E5)')\n  (None, None, None, None, None)\n  ('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')\nSHEET Exceptions: max_row=4 max_col=4\n  ('Exceptions 例外與關注項目', None, None, None)\n  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)\n  (None, None, None, None)\n  ('Source', 'DocumentID', 'ProjectID', 'Reason')\nSHEET Instructions: max_row=56 max_col=3\n  ('填寫說明 Instructions（請勿修改本工作表）', None, None)\n  (None, None, None)\n  ('Sheet', 'Cell / Range', 'Content and rule')\n  ('Report', 'A1:F1', '合併儲存格標題，保留不改。')\n  ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')\n  ('Report', 'B4', '本次查詢條件的文字說明。')\n  ('Report', 'B5', '產出時間（ISO 8601）。')\n  ('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')\nFX SAMPLE:\n['Currency', 'RateToTWD', 'Note']\n['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']\n['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']\n['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']\n\nMANUAL sap_manual.md\n# Lab ERP（模擬 SAP 類查詢網頁）使用說明\n\n> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。\n\n- 網址：http://127.0.0.1:8810/\n- 登入：公司帳號自動登入（SSO）。開啟網址後若出現登入頁，按 **使用公司帳號登入 Continue with company account** 即可，不需要輸入帳號或密碼。\n- 登出：右上角 **Log out**。\n\n## 查詢頁\n\n上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。\n\n篩選欄位（輸入後按 **Search**）：\n\n| 欄位 | 說明 |\n|---|---|\n| Customer ID | 客戶代碼，完全相符，例如 C001 |\n| Project | 專案代碼，完全相符，例如 P001 |\n| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |\n| Status | 只在 Sales Orders：Open、Closed、Cancelled |\n| Sort by / Order | 排序欄位與 asc / desc |\n\n- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。\n- 沒有符合資料時顯示「查無資料（0 筆）」。\n- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：\n  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。\n- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。\n- 列表欄位：\n  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount\n  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）\n- 文件編號有前導零（例如 0045000101），請當成文字處理。\n- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，再按一次 **使用公司帳號登入** 即可繼續。\n- 金額為原幣；不同幣別不可直接相加。\n\n\nMANUAL expense_manual.md\n# Expense Viewer（模擬原生桌面費用程式）使用說明\n\n> 合成測試資料。這是 Windows 桌面視窗程式（WinForms），不是網頁。\n\n- 在 AEP 中已登記為桌面應用程式 `expense`（由平台啟動，需要已登入的互動式 Windows 桌面）。\n- 視窗標題：`Expense Viewer (synthetic lab)`\n- 控制項名稱（UI Automation id）：EmployeeFilter、ProjectFilter、DateFrom、DateTo、StatusFilter、QueryButton、ResultsList、PreviousButton、NextButton、CountLabel、DetailsButton、ExportCsvButton、ExportExcelButton；明細視窗為 Detail<欄位>（例如 DetailReceiptID）與 CloseButton。\n\n## 主視窗\n\n| 控制項 | 說明 |\n|---|---|\n| Employee 員工 | 下拉選單 E001～E006，空白代表全部 |\n| Project 專案 | 下拉選單 P001～P005，空白代表全部 |\n| Date from 起 / Date to 迄 | YYYY-MM-DD，含起訖兩日（ExpenseDate） |\n| Status 狀態 | Draft、Submitted、Approved、Rejected，空白代表全部 |\n| Query 查詢 | 執行查詢，完成後跳出「查詢完成，共 N 筆」或「查無資料（0 筆）」 |\n\n- 結果表格每頁 8 筆，下方顯示 `Total N rows · Page x / y`，用 **Previous 上一頁** / **Next 下一頁** 換頁。\n- 表格欄位：ExpenseID、EmployeeID、EmployeeName、ProjectID、ExpenseDate、Category、Currency、Amount、Status。\n- 選一列後按 **Details 明細**（或雙擊該列）開啟明細視窗，內含 ReceiptID、Category、Description（可能含中文與換行）、MissingReceipt；按 **Close 返回** 關閉。\n- **Export CSV 匯出 CSV**、**Export Excel 匯出 Excel**：開啟 Windows「另存新檔」對話框，匯出目前篩選條件的全部結果（不只目前這一頁），欄位包含 ReceiptID、Description、MissingReceipt。\n- 匯出若顯示「暫時無法寫入，請重試」，表示這次沒有產生檔案，可以再按一次匯出。\n- 程式沒有其他資料介面；請透過視窗操作與匯出取得資料。\n\n\nMANUAL quote_cli_manual.md\n# quote_cli（模擬報價系統 CLI）使用說明\n\n> 合成測試資料。\n\n- Windows 執行：`\"C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd\" <command>`\n- 跨平台執行：`python \"C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\run_quote_cli.py\" <command>`\n- `quote_cli --help` 的內容如下：\n\n```text\nusage: quote_cli [-h] {customers,quotes} ...\n\nquote_cli: the synthetic quote system's public command line.\n\nContract (stable, schema_version 1):\n  quote_cli --help\n  quote_cli customers list --format json\n  quote_cli quotes list [--customer C001] [--project P001] [--from YYYY-MM-DD]\n                        [--to YYYY-MM-DD] [--status Draft|Sent|Accepted|Expired]\n                        [--format json|table]\n  quote_cli quotes get Q0001 [--format json|table]\n  quote_cli quotes export [filters as list] --output quotes.csv\n\nEvery filter is optional and filters combine with AND; dates include both\nends. stdout carries only the result (JSON or table); errors and diagnostics\ngo to stderr. Money is a decimal string in JSON (\"1234.50\"): parse it with a\ndecimal type, not a float. Nothing here creates or changes a quote.\n\nExit codes: 0 success (zero rows included), 2 invalid arguments, 3 document\nnot found, 4 temporary service error (retry later).\n\npositional arguments:\n  {customers,quotes}\n    customers         customer master data\n    quotes            quotes\n\noptions:\n  -h, --help          show this help message and exit\n```\n\n補充：\n- `quotes list` 回傳 `{\"schema_version\": 1, \"items\": [...], \"count\": N}`；`items` 只有表頭欄位。\n- `quotes get Q0001 --format json` 回傳 `{\"schema_version\": 1, \"header\": {...}, \"line_items\": [...]}`，line items 欄位：ProductID、ProductName、Quantity、UnitPrice、LineAmount。\n- 表頭欄位：QuoteID、CustomerID、ProjectID、QuoteDate、ValidUntil、Status、Currency、Subtotal、DiscountPercent、NetAmount。\n- NetAmount = Subtotal × (1 − DiscountPercent / 100)，四捨五入（ROUND_HALF_UP）至兩位小數；LineAmount = Quantity × UnitPrice。\n- 只有 exit code 0 時 stdout 才是正式資料；錯誤訊息在 stderr。\n\n",
+             "files": [],
+             "script_path": ".aep-run/run-001/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_rDAuXMe0c50kipUPtbONgxnh",
+         "name": "browser__operate",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "failed",
+          "data": null,
+          "failure": {
+           "code": "web_target_missing",
+           "message": "Capability invocation did not complete",
+           "retryable": false
+          }
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_kBETmmjyaHMRiByzYqSGgHKY",
+         "name": "browser__operate",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": {
+           "url": "http://127.0.0.1:8810/orders",
+           "data": {},
+           "items": {},
+           "downloads": [],
+           "page": "Sales Orders - Lab ERP  <http://127.0.0.1:8810/orders>\n\nLab ERP (synthetic)\nCustomers\nSales Orders\nInvoices\nlab.analyst\nLog out\nSales Orders\nCustomer ID\nProject\nDate from (YYYY-MM-DD)\nDate to (YYYY-MM-DD)\nStatus\n(all)\nOpen\nClosed\nCancelled\nSort by\nOrderID\nCustomerID\nCustomerName\nProjectID\nOrderDate\nStatus\nCurrency\nNetAmount\nOrder\nasc\ndesc\nSearch\n\nExport CSV (all filtered rows)\n\nTotal: 36 rows · Page 1 of 4\n\nOrderID\tCustomerID\tCustomerName\tProjectID\tOrderDate\tStatus\tCurrency\tNetAmount\n0045000101\tC001\tAcme Precision Taiwan Ltd.\tP001\t2026-08-03\tClosed\tTWD\t95895.00\n0045000102\tC002\t台灣精密股份有限公司\tP002\t2026-08-07\tClosed\tUSD\t4095.00\n0045000103\tC003\tNorthwind Components GmbH\tP004\t2026-08-12\tOpen\tEUR\t958.95\n0045000104\tC004\t藍海電子有限公司\t\t2026-08-15\tCancelled\tTWD\t25200.00\n0045000105\tC007\tAcme Precision Taiwan Limited\tP005\t2026-08-19\tClosed\tTWD\t227850.00\n0045000106\tC005\tPacific Test Systems Inc.\t\t2026-08-22\tOpen\tUSD\t4942.00\n0045000107\tC001\tAcme Precision Taiwan Ltd.\tP003\t2026-08-27\tClosed\tUSD\t6250.00\n0045000108\tC006\tHelios Optics B.V.\t\t2026-08-31\tOpen\tEUR\t3028.95\n0045000109\tC001\tAcme Precision Taiwan Ltd.\tP003\t2026-09-01\tOpen\tTWD\t150000.00\n0045000110\tC002\t台灣精密股份有限公司\tP002\t2026-09-02\tOpen\tTWD\t293572.50\nPage 1 / 4\nNext ›\n\n24 thing(s) that can be used:\n  [0] a 'Customers' -> /customers\n  [1] a 'Sales Orders' -> /orders\n  [2] a 'Invoices' -> /invoices\n  [3] button type=submit id=logout 'Log out'\n  [4] input id=f-customer\n  [5] input id=f-project\n  [6] input id=f-from\n  [7] input id=f-to\n  [8] select id=f-status '(all) Open Closed Cancelled'\n  [9] select id=f-sort 'OrderID CustomerID CustomerName ProjectID OrderDate Status C' holding 'OrderID'\n  [10] select id=f-dir 'asc desc' holding 'asc'\n  [11] button type=submit id=search 'Search'\n  [12] a id=export-csv 'Export CSV (all filtered rows)' -> /orders/export.csv?\n  [13] a '0045000101' -> /orders/0045000101\n  [14] a '0045000102' -> /orders/0045000102\n  [15] a '0045000103' -> /orders/0045000103\n  [16] a '0045000104' -> /orders/0045000104\n  [17] a '0045000105' -> /orders/0045000105\n  [18] a '0045000106' -> /orders/0045000106\n  [19] a '0045000107' -> /orders/0045000107\n  [20] a '0045000108' -> /orders/0045000108\n  [21] a '0045000109' -> /orders/0045000109\n  [22] a '0045000110' -> /orders/0045000110\n  [23] a id=next-page 'Next ›' -> /orders?page=2"
+          },
+          "failure": null
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_z3gREnkCkWnaWLbJPpo4rkJi",
+         "name": "browser__operate",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": {
+           "url": "http://127.0.0.1:8810/invoices?customer=C001&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc",
+           "data": {
+            "sap_sales_orders_C001_2026-09.csv": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\\output\\downloads\\sap_sales_orders_C001_2026-09.csv",
+            "sap_invoices_C001_2026-09.csv": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\\output\\downloads\\sap_invoices_C001_2026-09.csv"
+           },
+           "items": {},
+           "downloads": [
+            "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\\output\\downloads\\sap_sales_orders_C001_2026-09.csv",
+            "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\\output\\downloads\\sap_invoices_C001_2026-09.csv"
+           ],
+           "page": "Invoices - Lab ERP  <http://127.0.0.1:8810/invoices?customer=C001&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc>\n\nLab ERP (synthetic)\nCustomers\nSales Orders\nInvoices\nlab.analyst\nLog out\nInvoices\nCustomer ID\nProject\nDate from (YYYY-MM-DD)\nDate to (YYYY-MM-DD)\nSort by\nInvoiceID\nOrderID\nCustomerID\nProjectID\nInvoiceDate\nDueDate\nCurrency\nAmount\nPaidAmount\nBalance\nOrder\nasc\ndesc\nSearch\n\nExport CSV (all filtered rows)\n\nTotal: 3 rows · Page 1 of 1\n\nInvoiceID\tOrderID\tCustomerID\tProjectID\tInvoiceDate\tDueDate\tCurrency\tAmount\tPaidAmount\tBalance\n0090000208\t0045000109\tC001\tP003\t2026-09-02\t2026-09-12\tTWD\t150000.00\t150000.00\t0.00\n0090000214\t0045000119\tC001\tP001\t2026-09-16\t2026-10-16\tEUR\t8775.00\t8775.00\t0.00\n0090000219\t0045000125\tC001\tP001\t2026-09-30\t2026-09-30\tTWD\t386445.00\t0.00\t386445.00\nPage 1 / 1\n\n15 thing(s) that can be used:\n  [0] a 'Customers' -> /customers\n  [1] a 'Sales Orders' -> /orders\n  [2] a 'Invoices' -> /invoices\n  [3] button type=submit id=logout 'Log out'\n  [4] input id=f-customer holding 'C001'\n  [5] input id=f-project\n  [6] input id=f-from holding '2026-09-01'\n  [7] input id=f-to holding '2026-09-30'\n  [8] select id=f-sort 'InvoiceID OrderID CustomerID ProjectID InvoiceDate DueDate C' holding 'InvoiceID'\n  [9] select id=f-dir 'asc desc' holding 'asc'\n  [10] button type=submit id=search 'Search'\n  [11] a id=export-csv 'Export CSV (all filtered rows)' -> /invoices/export.csv?customer=C001&from=2026-09-01&to=2026-09-30&sort=InvoiceID&\n  [12] a '0090000208' -> /invoices/0090000208\n  [13] a '0090000214' -> /invoices/0090000214\n  [14] a '0090000219' -> /invoices/0090000219"
+          },
+          "failure": null
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_1EOmxUW3Y7PQr0MqwBlvpxPJ",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-586e516350d74e16ac55d978f2b7ea21",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+            "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+            "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-2113c2378dd1451eb0efea67830f3ce8",
+             "request_id": "request-2113c2378dd1451eb0efea67830f3ce8",
+             "span_id": "span-2113c2378dd1451eb0efea67830f3ce8",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "Downloads:\n- sap_invoices_C001_2026-09.csv 346\n rows incl header 4\n  ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']\n  ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']\n  ['0090000214', '0045000119', 'C001', 'P001', '2026-09-16', '2026-10-16', 'EUR', '8775.00', '8775.00', '0.00']\n  ['0090000219', '0045000125', 'C001', 'P001', '2026-09-30', '2026-09-30', 'TWD', '386445.00', '0.00', '386445.00']\n- sap_sales_orders_C001_2026-09.csv 402\n rows incl header 5\n  ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']\n  ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']\n  ['0045000114', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-08', 'Cancelled', 'USD', '11956.00']\n  ['0045000119', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-15', 'Open', 'EUR', '8775.00']\n  ['0045000125', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-25', 'Closed', 'TWD', '386445.00']\nRUN ['C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\quote_cli.cmd', 'quotes', 'list', '--customer', 'C001', '--from', '2026-09-01', '--to', '2026-09-30', '--format', 'json']\nreturncode 0\nstderr \nstdout {\n \"schema_version\": 1,\n \"items\": [\n  {\n   \"QuoteID\": \"Q0010\",\n   \"CustomerID\": \"C001\",\n   \"ProjectID\": \"P001\",\n   \"QuoteDate\": \"2026-09-01\",\n   \"ValidUntil\": \"2026-09-20\",\n   \"Status\": \"Sent\",\n   \"Currency\": \"TWD\",\n   \"Subtotal\": \"218557.50\",\n   \"DiscountPercent\": \"5\",\n   \"NetAmount\": \"207629.63\"\n  },\n  {\n   \"QuoteID\": \"Q0011\",\n   \"CustomerID\": \"C001\",\n   \"ProjectID\": \"P001\",\n   \"QuoteDate\": \"2026-09-03\",\n   \"ValidUntil\": \"2026-10-03\",\n   \"Status\": \"Accepted\",\n   \"Currency\": \"USD\",\n   \"Subtotal\": \"11500.00\",\n   \"DiscountPercent\": \"10\",\n   \"NetAmount\": \"10350.00\"\n  },\n  {\n   \"QuoteID\": \"Q0014\",\n   \"CustomerID\": \"C001\",\n   \"ProjectID\": \"P001\",\n   \"QuoteDate\": \"2026-09-09\",\n   \"ValidUntil\": \"2026-09-28\",\n   \"Status\": \"Expired\",\n   \"Currency\": \"EUR\",\n   \"Subtotal\": \"18072.00\",\n   \"DiscountPercent\": \"0\",\n   \"NetAmount\": \"18072.00\"\n  },\n  {\n   \"QuoteID\": \"Q0018\",\n   \"CustomerID\": \"C001\",\n   \"ProjectID\": \"P001\",\n   \"QuoteDate\": \"2026-09-21\",\n   \"ValidUntil\": \"2026-10-21\",\n   \"Status\": \"Draft\",\n   \"Currency\": \"TWD\",\n   \"Subtotal\": \"572130.00\",\n   \"DiscountPercent\": \"10\",\n   \"NetAmount\": \"514917.00\"\n  }\n ],\n \"count\": 4\n}\n\nquote count 4\nquote projects ['P001']\n{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}\n{'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}\n{'QuoteID': 'Q0014', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-09', 'ValidUntil': '2026-09-28', 'Status': 'Expired', 'Currency': 'EUR', 'Subtotal': '18072.00', 'DiscountPercent': '0', 'NetAmount': '18072.00'}\n{'QuoteID': 'Q0018', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-21', 'ValidUntil': '2026-10-21', 'Status': 'Draft', 'Currency': 'TWD', 'Subtotal': '572130.00', 'DiscountPercent': '10', 'NetAmount': '514917.00'}\n",
+             "files": [
+              {
+               "path": "output/downloads/sap_invoices_C001_2026-09.csv",
+               "bytes": 346
+              },
+              {
+               "path": "output/downloads/sap_sales_orders_C001_2026-09.csv",
+               "bytes": 402
+              }
+             ],
+             "script_path": ".aep-run/run-002/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_tWiFQ34GxSdsqgRhBUscBulX",
+         "name": "desktop__operate",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "failed",
+          "data": null,
+          "failure": {
+           "code": "desktop_dialog_still_open",
+           "message": "Capability invocation did not complete",
+           "retryable": false
+          }
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_JrFZGYgM4aSAJHwJDpHQJ9Zb",
+         "name": "desktop__operate",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": {
+           "app": "expense",
+           "data": {
+            "open_dialog": {
+             "title": "Save As 另存新檔",
+             "texts": [
+              "File name:",
+              "Save as type:"
+             ],
+             "buttons": [
+              "&Help",
+              "View Slider",
+              "Organize",
+              "New folder",
+              "Back by small amount",
+              "Back by large amount",
+              "Forward by large amount",
+              "Forward by small amount",
+              "Column left",
+              "Page right",
+              "Column right",
+              "Line up",
+              "Page down",
+              "Line down",
+              "Filter dropdown",
+              "Filter dropdown",
+              "Filter dropdown",
+              "Filter dropdown",
+              "Drop Down Button",
+              "Drop Down Button",
+              "Hide Folders",
+              "Save",
+              "Cancel",
+              "Back (Alt + Left Arrow)",
+              "Forward (Alt + Right Arrow)",
+              "Recent locations",
+              "Up to \"output\" (Alt + Up Arrow)",
+              "Previous Locations",
+              "Refresh \"downloads\" (F5)",
+              "Search"
+             ],
+             "controls": [
+              {
+               "id": "FolderBandModuleInner",
+               "type": "ToolBar",
+               "name": "Command Module",
+               "value": "",
+               "enabled": true
+              },
+              {
+               "id": "HelpButton",
+               "type": "Button",
+               "name": "&Help",
+               "enabled": true
+              },
+              {
+               "id": "ViewControl",
+               "type": "SplitButton",
+               "name": "Details",
+               "value": "",
+               "enabled": true
+              },
+              {
+               "id": "SplitMenuButton",
+               "type": "Button",
+               "name": "View Slider",
+               "enabled": true
+              },
+              {
+               "id": "{7DDC1264-7E4D-4F74-BBC0-D191987C8D0F}",
+               "type": "Button",
+               "name": "Organize",
+               "enabled": true
+              },
+              {
+               "id": "{E44616AD-6DF1-4B94-85A4-E465AE8A19DB}",
+               "type": "Button",
+               "name": "New folder",
+               "enabled": true
+              },
+              {
+               "id": "100",
+               "type": "Tree",
+               "name": "Namespace Tree Control",
+               "value": "Namespace Tree Control",
+               "enabled": true
+              },
+              {
+               "id": "FileNameControlHost",
+               "type": "ComboBox",
+               "name": "File name:",
+               "value": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X02\\workspace\\output\\downloads\\expenses_P001_approved_2026-09.csv",
+               "enabled": true
+              },
+              {
+               "id": "FileTypeControlHost",
+               "type": "ComboBox",
+               "name": "Save as type:",
+               "value": "CSV (*.csv)",
+               "enabled": true
+              },
+              {
+               "id": "SaveDialogPreviewMetadataInner",
+               "type": "Tree",
+               "name": "Save Fields",
+               "value": "",
+               "enabled": true
+              },
+              {
+               "id": "AppControlsModuleInner",
+               "type": "Tree",
+               "name": "Application Controls",
+               "value": "",
+               "enabled": true
+              },
+              {
+               "id": "Item 103",
+               "type": "Button",
+               "name": "Hide Folders",
+               "enabled": true
+              },
+              {
+               "id": "1",
+               "type": "Button",
+               "name": "Save",
+               "enabled": true
+              },
+              {
+               "id": "2",
+               "type": "Button",
+               "name": "Cancel",
+               "enabled": true
+              },
+              {
+               "id": "Item 256",
+               "type": "Button",
+               "name": "Back (Alt + Left Arrow)",
+               "enabled": false
+              },
+              {
+               "id": "Item 257",
+               "type": "Button",
+               "name": "Forward (Alt + Right Arrow)",
+               "enabled": false
+              },
+              {
+               "id": "Item 258",
+               "type": "Button",
+               "name": "Recent locations",
+               "enabled": false
+              },
+              {
+               "id": "1001",
+               "type": "ToolBar",
+               "name": "Address: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X01\\workspace\\output\\downloads",
+               "value": "Address: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X01\\workspace\\output\\downloads",
+               "enabled": true
+              },
+              {
+               "id": "Item 1280",
+               "type": "SplitButton",
+               "name": "All locations",
+               "value": "All locations",
+               "enabled": true
+              },
+              {
+               "id": "Item 1287",
+               "type": "SplitButton",
+               "name": "‎fix-007",
+               "value": "‎fix-007",
+               "enabled": true
+              },
+              {
+               "id": "Item 1288",
+               "type": "SplitButton",
+               "name": "‎X01",
+               "value": "‎X01",
+               "enabled": true
+              },
+              {
+               "id": "Item 1289",
+               "type": "SplitButton",
+               "name": "‎workspace",
+               "value": "‎workspace",
+               "enabled": true
+              },
+              {
+               "id": "Item 1290",
+               "type": "SplitButton",
+               "name": "‎output",
+               "value": "‎output",
+               "enabled": true
+              },
+              {
+               "id": "Item 1291",
+               "type": "MenuItem",
+               "name": "‎downloads",
+               "value": "‎downloads",
+               "enabled": true
+              },
+              {
+               "id": "Item 202",
+               "type": "Button",
+               "name": "Previous Locations",
+               "enabled": true
+              },
+              {
+               "id": "Item 102",
+               "type": "Button",
+               "name": "Refresh \"downloads\" (F5)",
+               "enabled": true
+              },
+              {
+               "id": "SearchEditBox",
+               "type": "Edit",
+               "name": "Search Box",
+               "value": "",
+               "enabled": true
+              },
+              {
+               "id": "SearchBoxSearchButton",
+               "type": "Button",
+               "name": "Search",
+               "enabled": true
+              }
+             ]
+            }
+           },
+           "look": "Window: Expense Viewer (synthetic lab)\nControls (id [type] value):\n  ResultsList [DataGrid] = '5 rows'\n  PreviousButton [Button] (disabled)\n  NextButton [Button] (disabled)\n  CountLabel [Edit] = 'Total 5 rows · Page 1 / 1'\n  DetailsButton [Button]\n  ExportCsvButton [Button]\n  ExportExcelButton [Button]\n  StatusBar [Text]\n  EmployeeFilter [ComboBox] = ''\n  EmployeeFilterLabel [Text] 'Employee 員工'\n  ProjectFilterLabel [Text] 'Project 專案'\n  ProjectFilter [ComboBox] = 'P001'\n  DateFromLabel [Text] 'Date from 起 (YYYY-MM-DD)'\n  DateFrom [Edit] = '2026-09-01'\n  DateToLabel [Text] 'Date to 迄 (YYYY-MM-DD)'\n  DateTo [Edit] = '2026-09-30'\n  StatusFilterLabel [Text] 'Status 狀態'\n  StatusFilter [ComboBox] = 'Approved'\n  QueryButton [Button]"
+          },
+          "failure": null
+         },
+         "failure": null
+        }
+       ],
+       "failure": {
+        "code": "model_http_error",
+        "message": "400: {\"error\":{\"message\":\"litellm.BadRequestError: Hosted_vllmException - {\\\"detail\\\":\\\"The server had an error while processing your request. Sorry about that!\\\"}. Received Model Group=gpt-5.5\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"400\"}}",
+        "retryable": false
+       }
+      },
+      "runs": [
+       {
+        "run_id": "run-7b560ea7792a4918833194d13c0d06d3",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-07T03:13:53.902836Z"
+       },
+       {
+        "run_id": "run-586e516350d74e16ac55d978f2b7ea21",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-07T03:13:53.910884Z"
+       }
+      ],
+      "unrecorded": []
+     }
+    },
+    "draft": null,
+    "approvals": []
+   }
+  }
+ ]
+}

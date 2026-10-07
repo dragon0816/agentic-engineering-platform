@@ -1,0 +1,14 @@
+INPUT source_csv C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W01\workspace\output\downloads\sap_sales_orders_2026-09-01_2026-09-30_Open.csv True
+INPUT template C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W01\workspace\input\sales_template.xlsx True
+INPUT fx_file C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W01\workspace\input\fx_rates.csv True
+FX header ['Currency', 'RateToTWD', 'Note']
+FX rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Export headers ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+Export row_count 14
+Details headers ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+WROTE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W01\workspace\output\september_open_orders.xlsx
+Verified output: september_open_orders.xlsx
+Verified Details rows: 14
+Verified sorted OrderIDs: 0045000109 ... 0045000128
+Verified Summary B2: =SUM(Details!I5:I18)
+Summary rows: [['Currency', 'EUR', 'EUR', 28936.37, 1012772.95, 4], ['Currency', 'TWD', 'TWD', 637522.5, 637522.5, 6], ['Currency', 'USD', 'USD', 32014, 1024448, 4], ['Total', 'All currencies', 'TWD', None, 2674743.45, 14]]

@@ -1,0 +1,39 @@
+Inputs confirmed:
+ template: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\C04\workspace\input\quote_template.xlsx True
+ fx rates: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\C04\workspace\input\fx_rates.csv True
+ cli: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py True
+ output: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\C04\workspace\output\quote_report_2026-09_Sent.xlsx
+fx header: ['Currency', 'RateToTWD', 'Note']
+fx currencies: ['EUR', 'TWD', 'USD']
+CLI quotes list Sep 2026 Sent attempt 1: exit=0; stderr=''
+quotes list count: 4 items: 4
+CLI quotes get Q0010 attempt 1: exit=0; stderr=''
+CLI quotes get Q0016 attempt 1: exit=0; stderr=''
+CLI quotes get Q0017 attempt 1: exit=0; stderr=''
+CLI quotes get Q0019 attempt 1: exit=0; stderr=''
+
+Verification checks:
+ - sheets unchanged: OK
+ - Report B3/D3 period: OK
+ - Report condition mentions Sent: OK
+ - Report source/fetched populated: OK
+ - Report footer kept: OK
+ - Report merge kept: OK
+ - Quotes headers kept: OK
+ - Lines headers kept: OK
+ - Summary headers kept: OK
+ - quote row count: OK
+ - line row count: OK
+ - summary B2 formula extended: OK
+ - quotes filter Status Sent and Sep 2026: OK
+ - ID columns are text values: FAIL
+ - amount/quantity cells are numeric: OK
+ - NetAmountTWD calculated with fx ROUND_HALF_UP: OK
+ - summary count matches quotes: OK
+ - summary TWD matches quote TWD total: OK
+ - CLI retry policy followed: OK
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\C04\workspace\.aep-run\run-005\script.py", line 248, in <module>
+    if failed: raise RuntimeError('Output verification failed: ' + ', '.join(failed))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Output verification failed: ID columns are text values

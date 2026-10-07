@@ -1,0 +1,34 @@
+Rechecking saved outputs:
+ workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\C04\workspace\output\quote_report_2026-09_Sent.xlsx True
+ audit: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\C04\workspace\output\quote_report_2026-09_Sent_audit.json True
+
+Verification checks:
+ - workbook exists: OK
+ - audit exists: OK
+ - sheets unchanged: OK
+ - Instructions sheet present and not removed: OK
+ - Report title merge kept: OK
+ - Report footer kept: OK
+ - period is Sep 2026 inclusive: OK
+ - condition says Sent: OK
+ - generated/source/fetched populated: OK
+ - Quotes headers kept: OK
+ - Lines headers kept: OK
+ - Summary headers kept: OK
+ - quote row count matches audit: OK
+ - line row count matches audit: OK
+ - Summary B2 formula range: OK
+ - all Quotes rows are Sent in September 2026: OK
+ - ID values are text, missing ProjectID stays blank: OK
+ - amount and quantity cells are numeric: OK
+ - NetAmountTWD uses fx ROUND_HALF_UP: OK
+ - summary count matches quotes: OK
+ - summary TWD matches quote total: OK
+ - CLI retry policy: code 4 max two retries, code 2/3 not retried: OK
+ - CLI successful data only in audit/result: OK
+
+Verified output files:
+ - output/quote_report_2026-09_Sent.xlsx
+ - output/quote_report_2026-09_Sent_audit.json
+Counts: quotes=4, lines=8, summary rows=2
+CLI attempts recorded: 5

@@ -1,0 +1,67 @@
+Inputs discovered:
+ input/ expense_manual.md 2007
+ input/ fx_rates.csv 276
+ input/ project_template.xlsx 14209
+ input/ quote_cli_manual.md 2303
+ input/ sap_manual.md 2077
+ download/ expenses_2026-09_approved.csv 1843
+ download/ quotes_2026-09_accepted.csv 389
+ download/ sap_invoices_2026-09.csv 1142
+ download/ sap_orders_2026-09.csv 1616
+fx_rates= {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+sap_orders_2026-09.csv headers= dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']) rows= 20
+ sample= {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+sap_invoices_2026-09.csv headers= dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']) rows= 13
+ sample= {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}
+expenses_2026-09_approved.csv headers= dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']) rows= 15
+ sample= {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+Running quote CLI: ['python', 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\run_quote_cli.py', 'quotes', 'export', '--from', '2026-09-01', '--to', '2026-09-30', '--status', 'Accepted', '--output', 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X01\\workspace\\output\\downloads\\quotes_2026-09_accepted.csv']
+quote_cli returncode= 0
+quote_cli stdout= {
+ "schema_version": 1,
+ "output": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-007\\X01\\workspace\\output\\downloads\\quotes_2026-09_accepted.csv",
+ "rows": 4
+}
+
+quotes_2026-09_accepted.csv headers= dict_keys(['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount']) rows= 4
+ sample= {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}
+Filtered counts: {'orders_non_cancelled': 18, 'invoices': 13, 'approved_expenses': 15, 'accepted_quotes': 4}
+Saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\X01\workspace\output\project_integration_2026-09.xlsx
+CHECK OK - output workbook exists
+CHECK OK - source template copied with Instructions sheet
+CHECK OK - Report from/to
+CHECK OK - Orders headers
+CHECK OK - Invoices headers
+CHECK OK - Expenses headers
+CHECK OK - Quotes headers
+CHECK OK - Summary headers
+CHECK OK - Exceptions headers
+CHECK OK - Orders row count 18=18
+CHECK OK - Invoices row count 13=13
+CHECK OK - Expenses row count 15=15
+CHECK OK - Quotes row count 4=4
+CHECK OK - Summary row count 5=5
+CHECK OK - Exceptions row count 13=13
+CHECK OK - no Cancelled orders
+CHECK OK - all expenses Approved
+CHECK OK - all quotes Accepted
+CHECK OK - Summary P001
+CHECK OK - Summary P002
+CHECK OK - Summary P003
+CHECK OK - Summary P004
+CHECK OK - Summary P005
+CHECK OK - separate summary columns
+CHECK OK - orders and quotes not combined as revenue
+CHECK OK - missing ProjectIDs excluded from Summary
+Final files:
+output\downloads\sap_orders_2026-09.csv 1616
+output\downloads\sap_invoices_2026-09.csv 1142
+output\downloads\expenses_2026-09_approved.csv 1843
+output\downloads\quotes_2026-09_accepted.csv 389
+output\project_integration_2026-09.xlsx 17779
+Summary rows:
+('P001', 693570, 386445, 18305, 331200)
+('P002', 516084.5, 156256, 9100, 97450.85)
+('P003', 150000, 0, 13037.5, 0)
+('P004', 794876.25, 78750, 8840, 282150)
+('P005', 770874.2, 236371.2, 6424, 0)

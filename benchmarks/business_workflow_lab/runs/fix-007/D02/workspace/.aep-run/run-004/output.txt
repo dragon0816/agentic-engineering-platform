@@ -1,0 +1,24 @@
+Inputs present:
+- expense_manual.md
+- expense_template.xlsx
+- fx_rates.csv
+Exports present:
+- approved_2026_09.csv 1843
+- submitted_2026_09.csv 914
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+submitted_2026_09.csv columns: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+approved_2026_09.csv columns: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Combined row count: 22
+Missing receipt IDs: ['EXP-00015', 'EXP-00006']
+Details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\D02\workspace\output\expense_report_2026_09_submitted_approved.xlsx
+Verification:
+- output file exists: True 13431 bytes
+- Details rows: 22
+- Details ExpenseIDs: ['EXP-00001', 'EXP-00002', 'EXP-00003', 'EXP-00014', 'EXP-00004', 'EXP-00019', 'EXP-00023', 'EXP-00015', 'EXP-00006', 'EXP-00026', 'EXP-00020', 'EXP-00008', 'EXP-00016', 'EXP-00009', 'EXP-00024', 'EXP-00021', 'EXP-00027', 'EXP-00011', 'EXP-00025', 'EXP-00022', 'EXP-00013', 'EXP-00028']
+- Exception ExpenseIDs: ['EXP-00015', 'EXP-00006']
+- Summary rows: 6 formula: =SUM(Details!I5:I26) total TWD: 66609.3
+- ReceiptID/Description/MissingReceipt columns verified from exported detail columns
+- Missing receipt rows retained in Details: True
+All checks passed.

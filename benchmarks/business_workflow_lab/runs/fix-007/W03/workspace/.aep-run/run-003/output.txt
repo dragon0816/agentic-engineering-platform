@@ -1,0 +1,220 @@
+Inputs:
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W03\workspace\input\project_template.xlsx: exists=True size=14209
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W03\workspace\input\fx_rates.csv: exists=True size=276
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W03\workspace\output\downloads\invoices_2026-09.csv: exists=True size=1142
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Invoice CSV headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice row count: 13
+Invoice sample rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W03\workspace\output\project_invoices_2026-09_asof_2026-09-30.xlsx
+Checks passed:
+- Invoices headers preserved
+- Summary headers preserved
+- Exceptions headers preserved
+- All 13 September invoices written
+- Summary has one row per nonblank project
+- Exceptions has one row per overdue invoice
+- Orders source sheet remains blank below headers
+- Expenses source sheet remains blank below headers
+- Quotes source sheet remains blank below headers
+- Invoices row 5 col 1 text format
+- Invoices row 5 col 2 text format
+- Invoices row 5 col 3 text format
+- Invoices row 5 col 4 text format
+- Invoices row 5 col 7 text format
+- InvoiceID row 5 is text with leading zeros
+- OrderID row 5 is text with leading zeros
+- InvoiceDate row 5 in requested period
+- Invoices row 5 col 8 numeric
+- Invoices row 5 col 9 numeric
+- Invoices row 5 col 10 numeric
+- Invoices row 5 col 11 numeric
+- Invoices row 6 col 1 text format
+- Invoices row 6 col 2 text format
+- Invoices row 6 col 3 text format
+- Invoices row 6 col 4 text format
+- Invoices row 6 col 7 text format
+- InvoiceID row 6 is text with leading zeros
+- OrderID row 6 is text with leading zeros
+- InvoiceDate row 6 in requested period
+- Invoices row 6 col 8 numeric
+- Invoices row 6 col 9 numeric
+- Invoices row 6 col 10 numeric
+- Invoices row 6 col 11 numeric
+- Invoices row 7 col 1 text format
+- Invoices row 7 col 2 text format
+- Invoices row 7 col 3 text format
+- Invoices row 7 col 4 text format
+- Invoices row 7 col 7 text format
+- InvoiceID row 7 is text with leading zeros
+- OrderID row 7 is text with leading zeros
+- InvoiceDate row 7 in requested period
+- Invoices row 7 col 8 numeric
+- Invoices row 7 col 9 numeric
+- Invoices row 7 col 10 numeric
+- Invoices row 7 col 11 numeric
+- Invoices row 8 col 1 text format
+- Invoices row 8 col 2 text format
+- Invoices row 8 col 3 text format
+- Invoices row 8 col 4 text format
+- Invoices row 8 col 7 text format
+- InvoiceID row 8 is text with leading zeros
+- OrderID row 8 is text with leading zeros
+- InvoiceDate row 8 in requested period
+- Invoices row 8 col 8 numeric
+- Invoices row 8 col 9 numeric
+- Invoices row 8 col 10 numeric
+- Invoices row 8 col 11 numeric
+- Invoices row 9 col 1 text format
+- Invoices row 9 col 2 text format
+- Invoices row 9 col 3 text format
+- Invoices row 9 col 4 text format
+- Invoices row 9 col 7 text format
+- InvoiceID row 9 is text with leading zeros
+- OrderID row 9 is text with leading zeros
+- InvoiceDate row 9 in requested period
+- Invoices row 9 col 8 numeric
+- Invoices row 9 col 9 numeric
+- Invoices row 9 col 10 numeric
+- Invoices row 9 col 11 numeric
+- Invoices row 10 col 1 text format
+- Invoices row 10 col 2 text format
+- Invoices row 10 col 3 text format
+- Invoices row 10 col 4 text format
+- Invoices row 10 col 7 text format
+- InvoiceID row 10 is text with leading zeros
+- OrderID row 10 is text with leading zeros
+- InvoiceDate row 10 in requested period
+- Invoices row 10 col 8 numeric
+- Invoices row 10 col 9 numeric
+- Invoices row 10 col 10 numeric
+- Invoices row 10 col 11 numeric
+- Invoices row 11 col 1 text format
+- Invoices row 11 col 2 text format
+- Invoices row 11 col 3 text format
+- Invoices row 11 col 4 text format
+- Invoices row 11 col 7 text format
+- InvoiceID row 11 is text with leading zeros
+- OrderID row 11 is text with leading zeros
+- InvoiceDate row 11 in requested period
+- Invoices row 11 col 8 numeric
+- Invoices row 11 col 9 numeric
+- Invoices row 11 col 10 numeric
+- Invoices row 11 col 11 numeric
+- Invoices row 12 col 1 text format
+- Invoices row 12 col 2 text format
+- Invoices row 12 col 3 text format
+- Invoices row 12 col 4 text format
+- Invoices row 12 col 7 text format
+- InvoiceID row 12 is text with leading zeros
+- OrderID row 12 is text with leading zeros
+- InvoiceDate row 12 in requested period
+- Invoices row 12 col 8 numeric
+- Invoices row 12 col 9 numeric
+- Invoices row 12 col 10 numeric
+- Invoices row 12 col 11 numeric
+- Invoices row 13 col 1 text format
+- Invoices row 13 col 2 text format
+- Invoices row 13 col 3 text format
+- Invoices row 13 col 4 text format
+- Invoices row 13 col 7 text format
+- InvoiceID row 13 is text with leading zeros
+- OrderID row 13 is text with leading zeros
+- InvoiceDate row 13 in requested period
+- Invoices row 13 col 8 numeric
+- Invoices row 13 col 9 numeric
+- Invoices row 13 col 10 numeric
+- Invoices row 13 col 11 numeric
+- Invoices row 14 col 1 text format
+- Invoices row 14 col 2 text format
+- Invoices row 14 col 3 text format
+- Invoices row 14 col 4 text format
+- Invoices row 14 col 7 text format
+- InvoiceID row 14 is text with leading zeros
+- OrderID row 14 is text with leading zeros
+- InvoiceDate row 14 in requested period
+- Invoices row 14 col 8 numeric
+- Invoices row 14 col 9 numeric
+- Invoices row 14 col 10 numeric
+- Invoices row 14 col 11 numeric
+- Invoices row 15 col 1 text format
+- Invoices row 15 col 2 text format
+- Invoices row 15 col 3 text format
+- Invoices row 15 col 4 text format
+- Invoices row 15 col 7 text format
+- InvoiceID row 15 is text with leading zeros
+- OrderID row 15 is text with leading zeros
+- InvoiceDate row 15 in requested period
+- Invoices row 15 col 8 numeric
+- Invoices row 15 col 9 numeric
+- Invoices row 15 col 10 numeric
+- Invoices row 15 col 11 numeric
+- Invoices row 16 col 1 text format
+- Invoices row 16 col 2 text format
+- Invoices row 16 col 3 text format
+- Invoices row 16 col 4 text format
+- Invoices row 16 col 7 text format
+- InvoiceID row 16 is text with leading zeros
+- OrderID row 16 is text with leading zeros
+- InvoiceDate row 16 in requested period
+- Invoices row 16 col 8 numeric
+- Invoices row 16 col 9 numeric
+- Invoices row 16 col 10 numeric
+- Invoices row 16 col 11 numeric
+- Invoices row 17 col 1 text format
+- Invoices row 17 col 2 text format
+- Invoices row 17 col 3 text format
+- Invoices row 17 col 4 text format
+- Invoices row 17 col 7 text format
+- InvoiceID row 17 is text with leading zeros
+- OrderID row 17 is text with leading zeros
+- InvoiceDate row 17 in requested period
+- Invoices row 17 col 8 numeric
+- Invoices row 17 col 9 numeric
+- Invoices row 17 col 10 numeric
+- Invoices row 17 col 11 numeric
+- BalanceTWD for 0090000207
+- BalanceTWD for 0090000208
+- BalanceTWD for 0090000209
+- BalanceTWD for 0090000210
+- BalanceTWD for 0090000211
+- BalanceTWD for 0090000212
+- BalanceTWD for 0090000213
+- BalanceTWD for 0090000214
+- BalanceTWD for 0090000215
+- BalanceTWD for 0090000216
+- BalanceTWD for 0090000217
+- BalanceTWD for 0090000218
+- BalanceTWD for 0090000219
+- Summary InvoiceBalanceTWD for P001
+- Summary OrderTWD blank-source zero for P001
+- Summary ApprovedExpenseTWD blank-source zero for P001
+- Summary AcceptedQuoteTWD blank-source zero for P001
+- Summary InvoiceBalanceTWD for P002
+- Summary OrderTWD blank-source zero for P002
+- Summary ApprovedExpenseTWD blank-source zero for P002
+- Summary AcceptedQuoteTWD blank-source zero for P002
+- Summary InvoiceBalanceTWD for P003
+- Summary OrderTWD blank-source zero for P003
+- Summary ApprovedExpenseTWD blank-source zero for P003
+- Summary AcceptedQuoteTWD blank-source zero for P003
+- Summary InvoiceBalanceTWD for P004
+- Summary OrderTWD blank-source zero for P004
+- Summary ApprovedExpenseTWD blank-source zero for P004
+- Summary AcceptedQuoteTWD blank-source zero for P004
+- Summary InvoiceBalanceTWD for P005
+- Summary OrderTWD blank-source zero for P005
+- Summary ApprovedExpenseTWD blank-source zero for P005
+- Summary AcceptedQuoteTWD blank-source zero for P005
+- Exceptions match overdue rule only
+- Invoice due on 2026-09-30 is not marked overdue
+- Partly unpaid invoice due on 2026-09-30 is not marked overdue
+Summary totals:
+P001 386445.00
+P002 156256.00
+P003 0.00
+P004 78750.00
+P005 236371.20
+Overdue invoice IDs: ['0090000207', '0090000209', '0090000212', '0090000217']
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W03\workspace\output\project_invoices_2026-09_asof_2026-09-30.xlsx

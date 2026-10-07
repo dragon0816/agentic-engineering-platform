@@ -1,0 +1,12 @@
+Inputs:
+ export_csv C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\D01\workspace\output\expense_export_E001_2026-09-01_2026-09-30.csv True 1715
+ template C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\D01\workspace\input\expense_template.xlsx True 10969
+ fx_file C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\D01\workspace\input\fx_rates.csv True 276
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+export header: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+export row count: 13
+sample rows: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}]
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\D01\workspace\output\E001_september_expenses.xlsx 12806
+Rows written Details: 13 Summary groups: 7 Exceptions: 1
+TWD total formula Summary!B2: =SUM(Details!I5:I17)

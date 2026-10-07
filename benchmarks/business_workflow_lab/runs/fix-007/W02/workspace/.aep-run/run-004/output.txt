@@ -1,0 +1,22 @@
+inputs:
+fx_rates.csv 276
+sales_template.xlsx 9844
+sap_manual.md 2077
+export exists C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W02\workspace\output\downloads\c001_orders_2026-08-01_2026-10-31.csv True
+export headers ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+export row count 9
+export sample [{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}, {'OrderID': '0045000107', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-08-27', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '6250.00'}]
+fx rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+filtered rows 9
+{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': Decimal('95895.00'), 'NetAmountTWD': Decimal('95895.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET15'}
+{'OrderID': '0045000107', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-08-27', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': Decimal('6250.00'), 'NetAmountTWD': Decimal('200000.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET30'}
+{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': Decimal('150000.00'), 'NetAmountTWD': Decimal('150000.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET10'}
+{'OrderID': '0045000114', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-08', 'Status': 'Cancelled', 'Currency': 'USD', 'NetAmount': Decimal('11956.00'), 'NetAmountTWD': Decimal('382592.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET5'}
+{'OrderID': '0045000119', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-15', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': Decimal('8775.00'), 'NetAmountTWD': Decimal('307125.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET30'}
+{'OrderID': '0045000125', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-25', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': Decimal('386445.00'), 'NetAmountTWD': Decimal('386445.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET0'}
+{'OrderID': '0045000129', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-10-01', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': Decimal('1602.00'), 'NetAmountTWD': Decimal('51264.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET30'}
+{'OrderID': '0045000132', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-10-09', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': Decimal('50400.00'), 'NetAmountTWD': Decimal('50400.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': ''}
+{'OrderID': '0045000136', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-10-31', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': Decimal('2250.00'), 'NetAmountTWD': Decimal('78750.00'), 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET5'}
+details template headers ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-007\W02\workspace\output\sales_C001_2026-08-01_2026-10-31.xlsx
+missing ['0045000132 PaymentTerms']

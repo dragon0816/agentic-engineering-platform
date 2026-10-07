@@ -1,0 +1,78 @@
+Downloads:
+- sap_invoices_C001_2026-09.csv 346
+ rows incl header 4
+  ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+  ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']
+  ['0090000214', '0045000119', 'C001', 'P001', '2026-09-16', '2026-10-16', 'EUR', '8775.00', '8775.00', '0.00']
+  ['0090000219', '0045000125', 'C001', 'P001', '2026-09-30', '2026-09-30', 'TWD', '386445.00', '0.00', '386445.00']
+- sap_sales_orders_C001_2026-09.csv 402
+ rows incl header 5
+  ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+  ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+  ['0045000114', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-08', 'Cancelled', 'USD', '11956.00']
+  ['0045000119', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-15', 'Open', 'EUR', '8775.00']
+  ['0045000125', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-09-25', 'Closed', 'TWD', '386445.00']
+RUN ['C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd', 'quotes', 'list', '--customer', 'C001', '--from', '2026-09-01', '--to', '2026-09-30', '--format', 'json']
+returncode 0
+stderr 
+stdout {
+ "schema_version": 1,
+ "items": [
+  {
+   "QuoteID": "Q0010",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-01",
+   "ValidUntil": "2026-09-20",
+   "Status": "Sent",
+   "Currency": "TWD",
+   "Subtotal": "218557.50",
+   "DiscountPercent": "5",
+   "NetAmount": "207629.63"
+  },
+  {
+   "QuoteID": "Q0011",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-03",
+   "ValidUntil": "2026-10-03",
+   "Status": "Accepted",
+   "Currency": "USD",
+   "Subtotal": "11500.00",
+   "DiscountPercent": "10",
+   "NetAmount": "10350.00"
+  },
+  {
+   "QuoteID": "Q0014",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-09",
+   "ValidUntil": "2026-09-28",
+   "Status": "Expired",
+   "Currency": "EUR",
+   "Subtotal": "18072.00",
+   "DiscountPercent": "0",
+   "NetAmount": "18072.00"
+  },
+  {
+   "QuoteID": "Q0018",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-21",
+   "ValidUntil": "2026-10-21",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "572130.00",
+   "DiscountPercent": "10",
+   "NetAmount": "514917.00"
+  }
+ ],
+ "count": 4
+}
+
+quote count 4
+quote projects ['P001']
+{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}
+{'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}
+{'QuoteID': 'Q0014', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-09', 'ValidUntil': '2026-09-28', 'Status': 'Expired', 'Currency': 'EUR', 'Subtotal': '18072.00', 'DiscountPercent': '0', 'NetAmount': '18072.00'}
+{'QuoteID': 'Q0018', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-21', 'ValidUntil': '2026-10-21', 'Status': 'Draft', 'Currency': 'TWD', 'Subtotal': '572130.00', 'DiscountPercent': '10', 'NetAmount': '514917.00'}

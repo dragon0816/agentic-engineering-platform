@@ -1,0 +1,172 @@
+from pathlib import Path
+from decimal import Decimal, ROUND_HALF_UP
+import csv, shutil
+from datetime import datetime, timezone, timedelta
+from openpyxl import load_workbook
+from openpyxl.styles import Font, PatternFill, Border, Alignment
+
+base = Path.cwd()
+in_dir = base/'input'
+out_dir = base/'output'
+out_dir.mkdir(exist_ok=True)
+template = in_dir/'sales_template.xlsx'
+out_file = out_dir/'sales_C001_2026-08-01_2026-10-31.xlsx'
+
+print('inputs:')
+for p in sorted(in_dir.iterdir()):
+    print(p.name, p.stat().st_size)
+
+# Read CSV exported via browser from the enterprise-like web app.
+export_csv = out_dir/'downloads'/'c001_orders_2026-08-01_2026-10-31.csv'
+print('export exists', export_csv, export_csv.exists())
+with open(export_csv, newline='', encoding='utf-8-sig') as f:
+    export_rows = list(csv.DictReader(f))
+print('export headers', list(export_rows[0].keys()) if export_rows else [])
+print('export row count', len(export_rows))
+print('export sample', export_rows[:2])
+
+# Detail fields read from each order detail page through browser__operate.
+detail_by_order = {
+    '0045000101': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET15'},
+    '0045000107': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET30'},
+    '0045000109': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET10'},
+    '0045000114': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET5'},
+    '0045000119': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET30'},
+    '0045000125': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET0'},
+    '0045000129': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET30'},
+    '0045000132': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': ''},
+    '0045000136': {'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET5'},
+}
+
+# FX rates: first two CSV fields are Currency and RateToTWD.
+rates = {}
+with open(in_dir/'fx_rates.csv', newline='', encoding='utf-8-sig') as f:
+    reader = csv.reader(f)
+    header = next(reader)
+    for row in reader:
+        if len(row) >= 2:
+            rates[row[0]] = Decimal(row[1])
+print('fx rates', rates)
+
+expected_headers = ['OrderID','CustomerID','CustomerName','ProjectID','OrderDate','Status','Currency','NetAmount']
+if export_rows and list(export_rows[0].keys()) != expected_headers:
+    raise AssertionError(f'Unexpected export headers: {list(export_rows[0].keys())}')
+
+# Exact filters: keep only exact customer C001 and inclusive dates, protecting against similar names/customers.
+from_date = '2026-08-01'
+to_date = '2026-10-31'
+rows = []
+for r in export_rows:
+    if r['CustomerID'] != 'C001':
+        continue
+    if not (from_date <= r['OrderDate'] <= to_date):
+        continue
+    oid = r['OrderID']
+    d = detail_by_order.get(oid, {})
+    net = Decimal(r['NetAmount'])
+    rate = rates[r['Currency']]
+    twd = (net * rate).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    row = {
+        **r,
+        'NetAmount': net,
+        'NetAmountTWD': twd,
+        'CustomerContact': d.get('CustomerContact', ''),
+        'PaymentTerms': d.get('PaymentTerms', ''),
+    }
+    rows.append(row)
+rows.sort(key=lambda x: x['OrderID'])
+print('filtered rows', len(rows))
+for r in rows:
+    print(r)
+
+missing = []
+for r in rows:
+    for field in ['CustomerContact', 'PaymentTerms']:
+        if r.get(field, '') in (None, ''):
+            missing.append(f"{r['OrderID']} {field}")
+
+# Fill a copy of the real template.
+shutil.copyfile(template, out_file)
+wb = load_workbook(out_file)
+report = wb['Report']
+details = wb['Details']
+summary = wb['Summary']
+
+# Clear prior detail rows and summary grouping rows if any, without altering workbook sheets/merges.
+for ws, min_row, max_col in [(details, 5, 11), (summary, 5, 6)]:
+    if ws.max_row >= min_row:
+        for row in ws.iter_rows(min_row=min_row, max_row=ws.max_row, max_col=max_col):
+            for cell in row:
+                cell.value = None
+
+# Report metadata.
+taipei = timezone(timedelta(hours=8))
+now_iso = datetime.now(taipei).replace(microsecond=0).isoformat()
+report['B3'] = from_date
+report['D3'] = to_date
+report['B4'] = 'Sales Orders: CustomerID = C001 (exact match), OrderDate 2026-08-01 to 2026-10-31 inclusive; all statuses'
+report['B5'] = now_iso
+report['B7'] = 'Lab ERP Sales Orders; sales order detail pages; fx_rates.csv'
+report['D7'] = now_iso
+if missing:
+    report['B9'] = 'Missing source fields left blank: ' + '; '.join(missing) + '. Similar customer names excluded by exact CustomerID filter.'
+else:
+    report['B9'] = 'No missing CustomerContact or PaymentTerms. Similar customer names excluded by exact CustomerID filter.'
+
+# Preserve row 4 style into data rows.
+headers = [details.cell(4, c).value for c in range(1, 12)]
+print('details template headers', headers)
+style_src = [details.cell(4, c) for c in range(1, 12)]
+for idx, r in enumerate(rows, start=5):
+    values = [
+        r['OrderID'], r['CustomerID'], r['CustomerName'], r['ProjectID'], r['OrderDate'], r['Status'],
+        r['Currency'], float(r['NetAmount']), float(r['NetAmountTWD']), r['CustomerContact'], r['PaymentTerms']
+    ]
+    for c, val in enumerate(values, start=1):
+        cell = details.cell(idx, c)
+        cell.value = val
+        # copy basic style from previous/template row where available, using row 4 as base
+        src = style_src[c-1]
+        if src.has_style:
+            cell._style = src._style.copy()
+        cell.font = src.font.copy()
+        cell.fill = src.fill.copy()
+        cell.border = src.border.copy()
+        cell.alignment = src.alignment.copy()
+    # explicit formats
+    for c in [1,2,4]:
+        details.cell(idx,c).number_format = '@'
+    details.cell(idx,5).number_format = 'yyyy-mm-dd'
+    for c in [8,9]:
+        details.cell(idx,c).number_format = '0.00'
+
+last_row = 4 + len(rows) if rows else 5
+formula_last = last_row if rows else 5
+summary['B2'] = f'=SUM(Details!I5:I{formula_last})'
+
+# Add a compact summary grouped by Status and Currency.
+groups = {}
+for r in rows:
+    key = (r['Status'], r['Currency'])
+    groups.setdefault(key, {'Amount': Decimal('0'), 'AmountTWD': Decimal('0'), 'Count': 0})
+    groups[key]['Amount'] += r['NetAmount']
+    groups[key]['AmountTWD'] += r['NetAmountTWD']
+    groups[key]['Count'] += 1
+summary_style = [summary.cell(4, c) for c in range(1,7)]
+rowno = 5
+for (status, currency), agg in sorted(groups.items()):
+    values = ['Status', status, currency, float(agg['Amount'].quantize(Decimal('0.01'))), float(agg['AmountTWD'].quantize(Decimal('0.01'))), agg['Count']]
+    for c, val in enumerate(values, start=1):
+        cell = summary.cell(rowno, c)
+        cell.value = val
+        src = summary_style[c-1]
+        if src.has_style:
+            cell._style = src._style.copy()
+        cell.font = src.font.copy(); cell.fill = src.fill.copy(); cell.border = src.border.copy(); cell.alignment = src.alignment.copy()
+    summary.cell(rowno,4).number_format = '0.00'
+    summary.cell(rowno,5).number_format = '0.00'
+    rowno += 1
+
+wb.save(out_file)
+print('wrote', out_file)
+print('missing', missing)
