@@ -105,6 +105,8 @@ class DesktopAction(Contract):
     title: str | None = None
     button: str | None = None
     seconds: float | None = Field(default=None, ge=0, le=60)
+    # `save_as`: replace a file already at `path` (still only inside output/).
+    replace: bool = False
 
     @model_validator(mode="after")
     def _complete(self) -> DesktopAction:
@@ -193,7 +195,7 @@ class DesktopSessionHandler:
         self._processes[app.name] = started
         return started
 
-    def _save_path(self, raw: str) -> str:
+    def _save_path(self, raw: str, replace: bool = False) -> str:
         path = Path(raw.strip())
         if not path.is_absolute():
             raise CapabilityRefused("desktop_path_not_allowed")
@@ -204,8 +206,10 @@ class DesktopSessionHandler:
             # The file sits somewhere under an `output` folder below the root.
             if "output" in resolved.relative_to(root).parts[:-1]:
                 if resolved.exists():
-                    # Save As would stop on its overwrite question.
-                    raise CapabilityRefused("desktop_path_exists")
+                    if not replace:
+                        # Save As would stop on its overwrite question.
+                        raise CapabilityRefused("desktop_path_exists")
+                    resolved.unlink()
                 resolved.parent.mkdir(parents=True, exist_ok=True)
                 return str(resolved)
         raise CapabilityRefused("desktop_path_not_allowed")
@@ -221,7 +225,8 @@ class DesktopSessionHandler:
                 if isinstance(item.get(field), str):
                     item[field] = _fill(item[field], request.values)
             if action.do == "save_as" and isinstance(item.get("path"), str):
-                item["path"] = self._save_path(item["path"])
+                item["path"] = self._save_path(item["path"], action.replace)
+            item.pop("replace", None)
             actions.append(item)
         with self._lock:
             process = self._process(app)

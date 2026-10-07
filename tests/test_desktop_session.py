@@ -251,3 +251,22 @@ def test_an_app_name_matches_regardless_of_case_and_the_tool_lists_the_apps(tmp_
                        ExecutionDependencies(central_required=False))
     (tool,) = bridge_tools(BridgeExecutor(installed, LocalPolicy(())))
     assert "Registered applications: expense (Expense Viewer)" in tool.tool.description
+
+
+def test_save_as_may_replace_an_earlier_file_only_when_asked(tmp_path: Path) -> None:
+    """Lab fix-006 X01: a rerun's fixed export name met the first run's file."""
+    fakes = Fakes()
+    run = handler(tmp_path, fakes)
+    target = tmp_path / "tasks" / "X01" / "output" / "expenses.csv"
+    target.parent.mkdir(parents=True)
+    target.write_text("first run", encoding="utf-8")
+    keep = DesktopRequest.model_validate({
+        "app": "expense", "actions": [{"do": "save_as", "path": str(target)}]})
+    with pytest.raises(CapabilityRefused) as refused:
+        run.run(keep)
+    assert refused.value.code == "desktop_path_exists" and target.exists()
+    replace = DesktopRequest.model_validate({
+        "app": "expense", "actions": [{"do": "save_as", "path": str(target), "replace": True}]})
+    run.run(replace)
+    assert not target.exists()
+    assert "replace" not in fakes.requests[-1]["actions"][0]
