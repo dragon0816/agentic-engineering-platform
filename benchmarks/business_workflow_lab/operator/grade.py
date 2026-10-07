@@ -37,7 +37,11 @@ from openpyxl import load_workbook
 # 1.2 (2026-10-07): W04 counts a sign-in after the injected expiry (1.1 wanted two
 # sign-ins, but a task could start signed in); the site now signs everybody out at
 # each reset. A grouping key may also sit inside a label cell ("E001 陳怡君").
-GRADER_VERSION = "1.2"
+# 1.3 (2026-10-07, owner approved): a rerun keeps the Workflow code when it uses a
+# version run *or installed* before the rerun request and no draft follows the
+# request. 1.2 compared only with digests the first phase had run, and the digest
+# includes the version, so a version bump made only to install (fix-008 W01) failed.
+GRADER_VERSION = "1.3"
 GROUPED_SUMMARY = {"W01", "D01", "D03", "C01", "C03"}
 
 TEMPLATE = {"W01": "sales", "W02": "sales", "W04": "sales", "W03": "project",

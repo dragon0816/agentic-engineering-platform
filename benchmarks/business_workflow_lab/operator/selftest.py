@@ -153,8 +153,25 @@ def damage(path: Path, task: str) -> None:
     book.save(path)
 
 
+def rerun_rule_checks() -> int:
+    """Grader 1.3: a revision after the rerun request is counted; a reply without one is not."""
+    from run_lab import drafted
+
+    def exchange(*names: str) -> dict[str, Any]:
+        tools = [{"name": n, "host": {"status": "succeeded", "data": {}}} for n in names]
+        return {"reply": {"answer": {"outcome": {"conversation": {"tools": tools}}}}}
+
+    cases = [(drafted([exchange("authoring__run_workflow")]), 0),
+             (drafted([exchange("authoring__draft_workflow", "authoring__run_workflow"),
+                       exchange("authoring__draft_workflow")]), 2),
+             (drafted([{"reply": None}]), 0)]
+    wrong = sum(1 for got, want in cases if got != want)
+    print(f"{'PASS' if not wrong else 'FAIL'}  rerun rule: revisions counted after the request")
+    return wrong
+
+
 def main() -> int:
-    failures = 0
+    failures = rerun_rule_checks()
     with tempfile.TemporaryDirectory() as folder:
         for task, variant in CASES:
             target = Path(folder) / f"{task}-{variant}.xlsx"

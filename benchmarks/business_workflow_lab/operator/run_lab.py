@@ -198,6 +198,17 @@ def authored_runs(exchanges: list[dict[str, Any]], decided: list[dict[str, Any]]
     return out
 
 
+def drafted(exchanges: list[dict[str, Any]]) -> int:
+    """How many Workflow drafts or revisions the Agent made in these exchanges."""
+    count = 0
+    for exchange in exchanges:
+        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+            "conversation") or {}
+        count += sum(1 for tool in convo.get("tools") or []
+                     if tool.get("name") == "authoring__draft_workflow")
+    return count
+
+
 def tree_hashes(folder: Path) -> dict[str, str]:
     if not folder.is_dir():
         return {}
@@ -303,6 +314,7 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     first_runs = authored_runs(session.exchanges, decided)
     rerun_checks: list[dict[str, Any]] | None = None
     workflow_same: bool | None = None
+    revised: int | None = None
     # The first result is kept as it stands now: a rerun may overwrite a fixed file name.
     first_book = find_workbook(output, task)
     if first_book is not None:
@@ -312,14 +324,22 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
         rerun_started = time.time()
         interventions.append({"kind": "operator rerun request (spec §9 second parameter set)", "text": message})
         mark = len(session.exchanges)
+        # Workflow code the Agent had settled on before the rerun was asked for:
+        # versions it ran, and versions the owner installed for reuse (grader 1.3).
+        ready = {r["digest"] for r in first_runs if r.get("digest")} | {
+            d["digest"] for d in decided
+            if d.get("kind") == "install" and d.get("status") == "approved" and d.get("digest")}
         session.send(message, max(60.0, deadline - time.monotonic()))
         settle(session, deadline, interventions, decided)
         keep_going(session, deadline, interventions, decided)
         rerun_runs = [r for r in authored_runs(session.exchanges[mark:], decided)
                       if r not in first_runs]
-        digests = {r["digest"] for r in first_runs if r.get("digest")}
-        # Same Workflow code: the rerun used a digest the first runs used, and succeeded.
-        workflow_same = bool(rerun_runs) and all(r.get("digest") in digests for r in rerun_runs)
+        revised = drafted(session.exchanges[mark:])
+        # Same Workflow code (spec: "使用你剛才產生的 workflow，不要修改程式碼"): every
+        # rerun used code that was run or installed before the request, and no
+        # draft or revision followed the request.
+        workflow_same = bool(rerun_runs) and not revised and all(
+            r.get("digest") in ready for r in rerun_runs)
         # The rerun's workbook: the newest one written after the rerun was asked for.
         fresh = [p for p in output.rglob("*.xlsx") if not p.name.startswith("~$")
                  and p.stat().st_mtime >= rerun_started]
@@ -381,6 +401,7 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
         "bypass_signals": bypass, "interventions": interventions,
         "platform_runs": authored_runs(session.exchanges, decided), "approvals": decided,
         "workflow_unchanged_on_rerun": workflow_same,
+        "workflow_revisions_after_rerun_request": revised,
         "checks": checks, "rerun_checks": rerun_checks,
         "session_id": session_id, "model_turns": [model_turns(x) for x in session.exchanges],
         "tool_calls": len([t for x in session.exchanges for t in tools_of(x)]),

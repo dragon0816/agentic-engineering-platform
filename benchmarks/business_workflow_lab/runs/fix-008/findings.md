@@ -19,3 +19,7 @@ Result: **12 PASS of 16 runs**:
 ## Operator note
 
 The bypass scan matched `expense_app` inside `expense_approved_*.csv`, the export the Agent made through the GUI. That flagged D02 and X01 as "direct read of mock internals". The flag was a note only: a status fails only for `source.json` or `operator/` reads, so no status changed. The pattern is now `expense_app\b`.
+
+## Regrade note (grader 1.3, 2026-10-07)
+
+The trace shows the Agent bumped W01's version from 1.0.1 to 1.0.2 only because the install hit `workflow_version_exists`: a 1.0.1 of that name was left from an earlier lab run. It said it was "the same verified Workflow, re-versioned". The rerun then used installed 1.0.2 without any revision. Grader 1.3 (owner approved) accepts a version that was run *or installed* before the rerun request, as long as no draft follows the request. Under 1.3, W01 is PASS and this run is **13 PASS of 16**. The recorded results above stay as graded by 1.2.
