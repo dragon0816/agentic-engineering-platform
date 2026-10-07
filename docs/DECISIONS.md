@@ -1583,3 +1583,13 @@ Boundaries:
 Rejected alternatives:
 - Passing the helper message through: it carries window content.
 - Encoding the index into the failure code: codes are a fixed vocabulary the UI and the tests rely on.
+
+## 2026-10-07: Conversation messages redact credential-shaped text instead of refusing it
+
+Decision (owner approved): `ConversationMessage` cuts credential-shaped text out of `text` and `tool_summary` with the shared `SECRET_PATTERN`, replacing it with `[redacted]`, before validation. The rejection check stays as a backstop. The shared pattern is unchanged.
+
+Reason: in coding_v1 fix-run-010 T09, the Agent's reply quoted the task's SOP line `Authorization: Bearer <token>`. Building the stored message raised a validation error that nobody caught. Agent Web dropped the connection, the turn was lost with no message to the person, and the benchmark runner crashed. A person pasting a password into chat would have hit the same failure.
+
+Rejected alternatives:
+- Refusing the reply and telling the person: the answer is usually useful apart from the quoted line.
+- Loosening the shared pattern for `<placeholder>` values: the pattern is the one definition every redactor uses.

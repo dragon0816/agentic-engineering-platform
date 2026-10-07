@@ -1,11 +1,11 @@
 """Durable, local-only Personal Agent conversation evidence."""
 
 from datetime import datetime
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from pydantic import Field, StrictBool, model_validator
 
-from common.assets import reject_embedded_secrets
+from common.assets import REDACTED, SECRET_PATTERN, reject_embedded_secrets
 from common.base import Contract, Symbol, Text
 from common.execution import TraceIdentifiers
 from host_runtime.conversation_backends import ConversationBackendName
@@ -39,6 +39,18 @@ class ConversationMessage(Contract):
     # the model with the answer's text on later turns so it can continue the
     # work; never page or file content.
     tool_summary: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def redact_credentials(cls, data: Any) -> Any:
+        """Credential-shaped text is cut out, not refused: a reply quoting
+        `Authorization: Bearer <token>` from a document must not lose the whole
+        turn (coding_v1 fix-run-010 T09). The check below stays as a backstop."""
+        if isinstance(data, dict):
+            data = {**data, **{key: SECRET_PATTERN.sub(REDACTED, data[key])
+                               for key in ("text", "tool_summary")
+                               if isinstance(data.get(key), str)}}
+        return data
 
     @model_validator(mode="after")
     def user_and_assistant_evidence(self) -> Self:

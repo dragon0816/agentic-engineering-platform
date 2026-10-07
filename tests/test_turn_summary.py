@@ -78,3 +78,38 @@ def test_a_stopped_turn_says_so_and_the_next_turn_sees_what_was_done(
           body={"session_id": session_id, "message": "繼續"})
     previous = [m.text for m in seen[1] if m.role == "assistant"]
     assert previous and "[工具紀錄]" in previous[-1] and "ap-1" in previous[-1]
+
+
+def test_credential_shaped_text_is_redacted_not_refused() -> None:
+    """coding_v1 fix-run-010 T09: a reply quoting a document's header line."""
+    now = datetime.now(UTC)
+    answer = ConversationMessage(
+        message_id="m2", role="assistant", created_at=now, status="answered",
+        text="SOP 第 3 步：以 Authorization: Bearer abc.def-123 呼叫 GET /data",
+        tool_summary="- coding__run: api_key=sk-live-1")
+    assert "abc.def-123" not in answer.text and "[redacted]" in answer.text
+    assert answer.tool_summary is not None and "sk-live-1" not in answer.tool_summary
+    question = ConversationMessage(message_id="m1", role="user", created_at=now,
+                                   status="submitted", text="password: hunter2 能用嗎")
+    assert "hunter2" not in question.text
+
+
+def test_a_reply_quoting_a_bearer_header_still_answers_the_turn(
+    served: AgentWebServer, monkeypatch: pytest.MonkeyPatch  # noqa: F811
+) -> None:
+    quoted = "登入後以 header Authorization: Bearer <token> 呼叫 GET /data。"
+
+    async def converse(request: Any, history: Any, **_: Any) -> LocalConversationOutcome:
+        return LocalConversationOutcome(
+            trace=TRACE, ingress="local", actor=request.actor,
+            conversation=result(tools=(), failure=None, status="answered", text=quoted))
+
+    monkeypatch.setattr(served.web.runtime.agent, "converse", converse)
+    url, token = base(served), served.token
+    session = fetch(url + "/api/conversations", token=token, body={}).json()
+    turn = fetch(url + "/api/conversations/turn", token=token,
+                 body={"session_id": session["conversation"]["session_id"],
+                       "message": "SOP 怎麼呼叫 /data？"}).json()
+    stored = turn["conversation"]["messages"][-1]
+    assert stored["status"] == "answered"
+    assert "GET /data" in stored["text"] and "[redacted]" in stored["text"]
