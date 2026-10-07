@@ -1412,6 +1412,18 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   the next Agent Web restart.
 - [ ] Asset ownership step 2 (Registry-wide owner, co-editors, automatic
   versions, one active version per person, publish UI) after the lab stage.
+- [x] Asset ownership step 2, Registry and member service (2026-10-07,
+  `01fc30e`, not merged): `(namespace, name)` ownership record in both
+  Registries (additive `name_owners` table, existing names derived from their
+  earliest version), owner / team / co-editor publish check, assigned
+  (patch/minor/major) or strictly higher versions, co-editors, transfer,
+  deprecation beside the name, one active version per member per device per
+  name in `select()`, and member portal routes for the owner operations.
+  Tests: `tests/test_asset_ownership.py`. Not live: the Shared Platform needs
+  a restart on the merged code.
+- [ ] Asset ownership step 2 remainder: a member publish route (artifact
+  upload plus a review queue reusing `Review` / `TechnicalPolicy`), the
+  Agent Web publish and ownership UI, and showing deprecations to Hosts.
 - [x] knowledge_v1 benchmark (owner request 2026-10-07): the owner's 1,100
   questions, pinned; 110-question stratified sample; loop + Vault-verified
   citations + Gateway-model review (`ab9cb3e`).

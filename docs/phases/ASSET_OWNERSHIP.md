@@ -1,6 +1,6 @@
-# Asset ownership and versions (planned)
+# Asset ownership and versions
 
-Owner request: 2026-10-07. Status: **step 1 done; step 2 planned for after the business workflow lab stage.**
+Owner request: 2026-10-07. Status: **step 1 done; step 2 items 1–4 and 6 done in the control plane (2026-10-07, not yet merged or live); item 5 (member publish route and UI) open.**
 
 ## Goal
 
@@ -39,5 +39,23 @@ This step is Host-local. It reads the installed Workflow files and does not touc
 4. **One active version per person:** `select()` replaces an active version of the same name instead of adding a second one, matching `replace()`. The Host inventory keeps older versions inert for rollback, as it does today.
 5. **Member publish surface:** Agent Web lets the owner publish, manage co-editors, deprecate versions and transfer ownership. The review queue reuses `Review` and `TechnicalPolicy`.
 6. **Contract and architecture updates** in `docs/ARCHITECTURE.md` and `docs/CONTRACTS.md`, with tests for each rule.
+
+### Step 2 status (2026-10-07)
+
+Done, with tests in `tests/test_asset_ownership.py` (contract and code in `docs/CONTRACTS.md`, "Asset name ownership and versions"):
+
+- **1. Ownership record:** `common.ownership.AssetNameOwnership` in both Registries. SQLite keeps it in an additive `name_owners` table. `schema_version` stays `1`, so the previous code can still open the database. A name published before this change gets its owner from its earliest version.
+- **2. Publish check:** `PackageRegistry.publish_as` refuses `publisher_not_authorized` and `owner_mismatch` inside the writing transaction. The platform's own `publish` (preview seed) keeps names with their owner and does not order versions.
+- **3. Automatic versions:** `next_version` and `AssetOwnershipService.publish_next(change, build)`. An artifact carries its own version, so the platform assigns the version before the package is built and never renumbers one afterwards. A supplied version must be above every existing one (`version_not_above_highest`).
+- **Owner operations:** add and remove co-editors, transfer, deprecate. A deprecation is recorded beside the name and does not change the package, because published packages are immutable and `PublishedAssetPackage` accepts only `lifecycle="published"`. A deprecated version is no longer offered or chosen anew. Existing selections and installs keep it for rollback.
+- **4. One active version:** `select()` revokes the member's other active version of the name on that device.
+- **5 (partly):** member portal routes for the owner operations, under `/v1/member/assets/`.
+- **6.** `docs/ARCHITECTURE.md` and `docs/CONTRACTS.md` are updated.
+
+Open:
+- a member publish route. It needs artifact upload and a review queue reusing `Review` and `TechnicalPolicy`; today a member could otherwise assert their own reviews.
+- the Agent Web publish and ownership UI.
+- telling Hosts which versions are deprecated.
+- reconciling Host-local chat authoring (step 1) with the Registry record.
 
 Plan step 2 together with conversational authoring A1–A3 (`docs/phases/CONVERSATIONAL_AUTHORING.md`), since both decide how a person's edits become versions.

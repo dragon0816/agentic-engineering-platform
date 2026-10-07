@@ -419,6 +419,27 @@ reuse those bytes; it still requires synchronized platform authorization.
 Revoking a selection removes its authority without deleting the only local
 rollback evidence.
 
+A member has one active version of each Add-on `namespace/name` per device
+(owner decision 2026-10-07): selecting a version revokes any other active
+version of that name the member chose on that device, exactly as a
+replacement does. References stay exact `namespace/name@version`; nothing
+resolves to a "latest" version.
+
+**Asset name ownership (owner decisions 2026-10-07,
+`docs/phases/ASSET_OWNERSHIP.md`).** The Registry keeps one ownership record
+per `namespace/name`: the owner (a person or a team) and the co-editors the
+owner names. The first publish of a name creates it. A member publishes a new
+version only as the owner, a member of an owning team or a co-editor, and the
+version is either the one the platform assigns for a patch, minor or major
+change or one the publisher supplies that is above every existing version. The
+owner (or any member of an owning team) adds and removes co-editors, transfers
+the name and deprecates versions. Published packages stay immutable: a
+deprecation is recorded beside the name, so a deprecated version is no longer
+offered or chosen anew, while selections already made and versions already
+installed keep working for rollback. The rules are checked inside the
+Registry transaction that writes. Publishing still grants no execution, and
+the existing validation and review layers still apply.
+
 Bridge Extensions and independent Applications are separate marketplace
 categories. A Bridge Extension declares exact Windows/Python/ABI compatibility,
 a versioned JSON-lines subprocess protocol, typed Bridge capabilities, health

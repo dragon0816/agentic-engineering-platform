@@ -1485,7 +1485,14 @@ whose own `CapabilitySpec` requires one, `approver_not_member` when the
 approver is not an active platform member, `tool_not_grantable` for a
 capability that declares no policy reference and so cannot be granted to
 anybody, `decision_in_future` for a decision no bundle could carry,
-`duplicate_selection`, and `selection_missing` on revocation. `grants(bridge_id)` derives the device's
+`duplicate_selection`, `asset_deprecated` for a version its name's owner
+deprecated (in `select` and `replace`), and `selection_missing` on
+revocation. Selecting a Workflow, Skill, Knowledge or Agent version revokes
+any other active version of the same `namespace/name` the member chose on
+that device, in the same storage transaction (one active version per member,
+device and name, 2026-10-07); capability selections are not versions of an
+Add-on and are unaffected. `available` leaves deprecated versions out.
+`grants(bridge_id)` derives the device's
 `CapabilityGrant`s through `grant_from(spec, selection)`: the permissions and
 policy references are the capability's own declaration and the approval is the
 member's, so a decision about which tools never becomes a decision about what
@@ -1914,6 +1921,68 @@ sessions, device selections, remote jobs, execution grants or Bridge/local
 execution state. `SharedPlatformState.durable` uses separate allowlisted JSON
 tables in the same database for identity, browser login and authorization
 selection records; Registry package and artifact semantics remain independent.
+
+## Asset name ownership and versions (2026-10-07)
+
+Owner decisions and plan: `docs/phases/ASSET_OWNERSHIP.md`.
+
+`common.ownership.AssetNameOwnership` is the record for one name:
+`namespace`, `name`, `owner` (`common.assets.Owner`), `co_editors` (unique
+member actor ids; a user owner is never also listed) and `deprecations`.
+`VersionDeprecation` is `version`, `reason`, optional `replacement` (another
+version of the same name) and `deprecated_by`. `manages(actor, groups)` is
+true for the owner or a member of an owning group (`common.identity.owns`,
+the same rule `entitled` uses); `may_publish` adds the co-editors.
+`version_key` is SemVer 2.0.0 precedence (build metadata ignored);
+`next_version(versions, change)` increases the highest version at
+`patch`/`minor`/`major`, and a name with no versions starts at `1.0.0`;
+`above_all(version, versions)` is the manual-version rule.
+
+`PackageRegistry` adds:
+
+- `publish_as(package, *, publisher, groups, change=None)` (SQLite also takes
+  `artifact`), the member publish. `admit_member_version` applies, in the same
+  transaction as the insert: the first publish of a name must declare the
+  publisher or one of their groups as owner; a later one needs `may_publish`
+  (`publisher_not_authorized`) and must declare the record's owner
+  (`owner_mismatch`); with `change` the version must equal the assigned one
+  (`version_not_assigned`), otherwise it must be above every existing version
+  (`version_not_above_highest`); `duplicate_package` as before.
+- `publish(package)` stays the platform's own path (preview seed,
+  migration). It creates the record from the package's owner on a name's
+  first publish, refuses `owner_mismatch` against an existing record, and does
+  not order versions, so a historical catalog can be imported as it was.
+- `ownership(namespace, name)` and `save_ownership(updated, *, previous)`, a
+  compare-and-set that refuses `ownership_changed` when the stored record is
+  no longer `previous`, and `name_missing`.
+
+A package's artifact carries its own version, so the platform never
+renumbers a built package. `control_plane.ownership.AssetOwnershipService`
+offers `next_version`, `publish` and `publish_next(..., change, build)`,
+which asks for the assigned identity, calls `build(identity)` for the package
+and bytes, publishes, and asks again (up to three times) if another publisher
+took that version first. The same service gives the owner `add_co_editor`,
+`remove_co_editor`, `transfer` and `deprecate`, refusing `not_name_owner`,
+`co_editor_unknown` / `co_editor_exists` / `co_editor_missing`,
+`owner_unchanged`, `new_owner_unknown` (a user owner must be an active
+member), `version_missing` and `version_deprecated`. A member reads a record
+only when they may publish the name or use one of its versions; anyone else
+gets `name_missing`. Identity comes from a valid `AuthenticatedActor` and
+groups from the platform's own member record.
+
+`SqliteRegistry` keeps records in a `name_owners` table. The table is
+additive and `schema_version` stays `1`, so the previous code still opens a
+database this code wrote. Opening a database derives a record for every name
+without one from the owner declared by that name's earliest version (lowest
+SemVer precedence), and a publish does the same inside its transaction for a
+name the previous code published meanwhile.
+
+The member portal (`/v1/member/assets/...`) exposes `ownership`,
+`next-version`, `co-editors/add`, `co-editors/remove`, `transfer` and
+`deprecate` with `AssetNameRequest`, `AssetNextVersionRequest`,
+`AssetCoEditorRequest`, `AssetTransferRequest` and `AssetDeprecateRequest`;
+replies are `AssetOwnershipReply` or `AssetNextVersionReply`. Requests carry
+no actor. A member publish route is not exposed yet (see the phase plan).
 
 ## Shared-platform transport (Phase 7, slice 2i)
 

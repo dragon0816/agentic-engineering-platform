@@ -1671,3 +1671,23 @@ The frames come from a 10-character sheet the owner supplied. `scripts/slice_ava
 Rejected alternatives:
 - One avatar for the whole Agent: the owner chose per person.
 - An unauthenticated image route: data URIs over the existing API need no new route.
+
+## 2026-10-07: Asset ownership step 2 in the Registry (implementation decisions)
+
+This implements the owner decisions of the 2026-10-07 entry "Asset ownership and versions" in the control plane. Plan and status: `docs/phases/ASSET_OWNERSHIP.md`. Contract: `docs/CONTRACTS.md`, "Asset name ownership and versions".
+
+Decisions:
+1. **The record and the rule live in the Registry.** The `(namespace, name)` ownership record is stored next to the packages. `publish_as` applies the publish check inside the transaction that inserts the version, so two publishers cannot both pass it.
+2. **The platform's own publish stays separate.** `publish(package)` is the preview seed and migration path, with no member identity. It keeps a name with its owner (`owner_mismatch`) but does not order versions, so a historical catalog can be imported as it was. Members publish only through `publish_as`.
+3. **Additive schema.** The `name_owners` table is added without changing `schema_version` (`1`), so the previous code still opens a migrated database, which makes a rollback safe. A name without a record, whether it is older or was published meanwhile by the previous code, gets one from the owner declared by its earliest version (lowest SemVer precedence). That happens when the database is opened and inside each publish.
+4. **Assigned versions do not renumber packages.** A package's artifact (a manifest, or a signed extension envelope) carries its own version. So the platform assigns the version first (`next_version`), the publisher builds for it, and the publish checks that the version is still the assigned one (`version_not_assigned`). `publish_next(change, build)` does this and retries when another publisher took the version.
+5. **Deprecation is recorded beside the name, not in the package.** The owner asked for the existing `deprecated` lifecycle. But `PublishedAssetPackage` accepts only `lifecycle="published"`, and the owner also decided that published versions are immutable. Rewriting a stored package would break both, and a Host on older code would then reject the catalog. A `VersionDeprecation` (version, reason, optional replacement, deprecated_by) is therefore recorded on the ownership record. A deprecated version is no longer offered (`available`) or chosen anew (`asset_deprecated` in `select` and `replace`). Existing selections and installs keep it for rollback.
+6. **One active version per member, device and name.** `select()` revokes the member's other active version of the name on that device in the same storage write, like `replace()`. Tool (capability) selections are not affected. `DeviceAuthorization` does not reject two versions, because stored authorizations from before this change may hold two and must still load.
+7. **Co-editors are member actor ids.** Managing a name (co-editors, transfer, deprecation) belongs to the owner, or to any member of an owning team. That is the same `owns()` rule `entitled()` uses. A transfer to a user requires an active member. A transfer to a team is accepted as named, because the platform has no registry of groups.
+8. **No member publish route yet.** The member portal exposes reading a record, the next version and the owner operations. A publish route needs artifact upload and a review queue. Without them, a member could submit a package that asserts its own business approval and technical review.
+
+Rejected alternatives:
+- Marking `lifecycle="deprecated"` in the stored package: it breaks the immutability and the `PublishedAssetPackage` contract (see 5).
+- Bumping `schema_version` to 2: the previous code would refuse the database (`unsupported_schema`), so rollback would need a restore.
+- Letting the Registry rewrite the version of a submitted package: the artifact bytes and their digest would disagree with it.
+- A `DeviceAuthorization` validator for one version per name: it would fail on stored authorizations that already hold two versions.
