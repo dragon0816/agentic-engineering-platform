@@ -275,6 +275,8 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     scenario = dict(SCENARIO.get(task, {}))
     if variant_override == "force_exit2":
         scenario = {"quote": "force_exit2"}
+    # Each task meets the desktop app freshly started, not with the last task's filters.
+    subprocess.run(["taskkill", "/IM", "ExpenseApp.exe", "/F"], capture_output=True, check=False)
     offsets = reset(label=f"{run_dir.name}/{label}", **scenario)
     limit = LIMIT_S[task]
     session = AgentWebSession(base, token, limit)
