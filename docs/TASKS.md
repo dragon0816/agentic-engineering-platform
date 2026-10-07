@@ -1359,8 +1359,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   BLOCKED; remaining D3 (1024-token conversation output cap truncates tool
   calls, 11 tasks), G3 (4 tool calls per turn), G4 (no chat Workflow
   install/run), G5 (no subprocess in the runner).
-- [ ] coding_v1 D3 fix (conversation output cap) awaits the owner: it changes
-  every conversation turn, including Knowledge asking.
+- [x] coding_v1 D3 fix (conversation output cap) awaits the owner: it changes
+  every conversation turn, including Knowledge asking. Resolved: the owner
+  approved it and it shipped in `fea13ff` (row below).
 - [x] D3 (8000-token conversation output cap, `model_output_truncated`) and
   G3 (8 tool calls per turn), `fea13ff`, after the owner allowed the edit.
 - [x] G4 conversational authoring: `authoring__draft/preview/run/install/list_workflows`
@@ -1411,8 +1412,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   tool for the Agent; G3/D3 ended every turn first); scripts read mock
   internals (isolation limit observed). Gaps L1-L7 in
   `runs/baseline-001/findings.md`.
-- [ ] Lab gaps L1-L3 and L7 await owner decisions (browser, desktop and
-  process tools for the Agent; mock data isolation).
+- [x] Lab gaps L1-L3 and L7 await owner decisions (browser, desktop and
+  process tools for the Agent; mock data isolation). Resolved 2026-10-07: the
+  owner chose Edge, Windows UI Automation and a relaxed runner (done, see the
+  L1-L3 row); for L7 the owner said the mocks need no isolation.
 - [ ] Natural-language Workflow authoring and modification (owner request
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
