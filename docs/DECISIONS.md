@@ -1656,3 +1656,18 @@ Rejected alternatives:
 - One targeted re-synthesis asking the model to cite the uncited facet's passages. In 4 of 5 offline trials it passed the check only by citing irrelevant passages, sometimes to say they did not apply. That is a false validation.
 - Copying the procedure into the engineering Skill: two sources of truth.
 - Routing every Knowledge question to the direct route: it cannot handle questions that mix Knowledge with other work.
+
+## 2026-10-07: Per-person pixel-art avatars in Agent Web
+
+Decision (owner):
+- Each person picks an avatar in Settings.
+- It shows at the top left of Agent Web. Frame 1 shows at rest; while a conversation turn runs, the character's other frames loop about every 180 ms, and frame 1 returns when the last turn ends. Under the system's reduce-motion setting, one action frame shows instead of the loop.
+- The choice is per person: it is stored per actor under `workspace/user-preferences/` (the file is named by a digest of the actor), and only a character the manifest lists can be chosen.
+
+The frames come from a 10-character sheet the owner supplied. `scripts/slice_avatars.py` cuts it into transparent two-tone PNGs (`src/host_runtime/avatars/`, about 50 KB). The frames reach the page as data URIs through the token-protected `/api/avatars`, so no image route is served without the token. In dark mode the black ink is inverted.
+
+**The characters are from One Piece (© Eiichiro Oda / Shueisha / Toei).** The owner was told about the copyright risk and chose to keep the sheet in the repository rather than keep it local or use original characters. The mechanism takes any N-row, multi-frame sheet, so the art can be replaced by re-running the slicer.
+
+Rejected alternatives:
+- One avatar for the whole Agent: the owner chose per person.
+- An unauthenticated image route: data URIs over the existing API need no new route.

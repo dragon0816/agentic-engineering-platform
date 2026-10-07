@@ -47,6 +47,8 @@ where = ["src"]
 # host has to supply: a host may point at its own file, and without one the
 # shipped default is what runs.
 "*" = ["py.typed", "*.json", "*.cs"]
+# Agent Web avatar frames (owner 2026-10-07), cut by scripts/slice_avatars.py.
+"host_runtime" = ["avatars/*.png", "avatars/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

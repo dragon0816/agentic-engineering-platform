@@ -32,18 +32,19 @@ PAGE = r"""<!DOCTYPE html>
   --dim: #666d78; --accent: #2f6db5; --good: #2e7d4f; --bad: #b3352f;
   --accent-soft: #eaf2fb; --selected: #dceafb; --warn: #8a5a00;
   --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --avatar-filter: none;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #15181c; --panel: #1d2127; --line: #2c323a; --ink: #e6e9ee;
     --dim: #97a0ac; --accent: #74a9e8; --good: #6cc48d; --bad: #e8827c;
-    --accent-soft: #1d3046; --selected: #243e5b; --warn: #e6b75a;
+    --accent-soft: #1d3046; --selected: #243e5b; --warn: #e6b75a; --avatar-filter: invert(1);
   }
 }
 :root[data-theme="dark"] {
   --bg: #15181c; --panel: #1d2127; --line: #2c323a; --ink: #e6e9ee;
   --dim: #97a0ac; --accent: #74a9e8; --good: #6cc48d; --bad: #e8827c;
-  --accent-soft: #1d3046; --selected: #243e5b; --warn: #e6b75a;
+  --accent-soft: #1d3046; --selected: #243e5b; --warn: #e6b75a; --avatar-filter: invert(1);
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -60,6 +61,16 @@ body {
 .brand { padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
 .brand h1 { margin: 0; font-size: 18px; font-weight: 700; }
 .brand .note { display: block; margin-top: 3px; }
+/* The person's pixel-art avatar (owner 2026-10-07): frame 1 at rest, the
+   other frames while a turn runs. Wide frames reach right, never push text. */
+.avatar-stage { height: 48px; margin-bottom: 6px; overflow: visible; }
+.avatar-stage img { height: 48px; width: auto; image-rendering: pixelated;
+  filter: var(--avatar-filter); }
+.avatar-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.avatar-choice { display: flex; flex-direction: column; align-items: center; gap: 4px;
+  min-width: 72px; padding: 6px; background: var(--panel); }
+.avatar-choice img { height: 40px; image-rendering: pixelated; filter: var(--avatar-filter); }
+.avatar-choice[aria-checked="true"] { outline: 2px solid var(--accent); }
 .side-actions { display: grid; gap: 4px; padding: 12px 0; }
 .side-actions button {
   min-height: 42px; padding: 9px 10px; color: var(--ink); background: transparent;
@@ -371,6 +382,7 @@ tr:last-child td { border-bottom: none; }
 <div class="app-shell">
 <aside class="sidebar" aria-label="Agent workspace">
   <div class="brand">
+    <div class="avatar-stage" id="avatar-stage" hidden><img id="agent-avatar" alt=""></div>
     <h1 id="agent-name">Agent</h1>
     <span class="note" id="agent-introduction"></span>
   </div>
@@ -465,6 +477,14 @@ tr:last-child td { border-bottom: none; }
         <p><button class="go" id="persona-save" type="submit">Save Agent identity</button></p>
         <pre id="persona-result" class="note">Reading current identity&hellip;</pre>
       </form>
+    </div>
+    <h2>Avatar</h2>
+    <p class="note">Your own picture at the top left; it moves while the Agent works.
+      Each person who uses this Agent picks their own.</p>
+    <div class="card settings">
+      <div id="avatar-choices" class="avatar-choices" role="radiogroup"
+           aria-label="Avatar"></div>
+      <pre id="avatar-result" class="note"></pre>
     </div>
     <h2>Natural-language model</h2>
     <p class="note">Connect the Agent to the existing OpenAI-compatible Gateway.
@@ -1536,6 +1556,7 @@ form.addEventListener("submit", (event) => {
   const run = async () => {
     entry.state = "working"; showPendingState(entry); renderSessionList();
     let answer = null;
+    avatarWorking(1);
     try {
       const completed = await call("/api/conversations/turn", {
         session_id: session, message: asked,
@@ -1546,7 +1567,7 @@ form.addEventListener("submit", (event) => {
     } catch (failure) {
       entry.state = "failed"; entry.error = failure.message;
       showPendingState(entry);
-    }
+    } finally { avatarWorking(-1); }
     try {
       if (session === activeConversation) await loadConversations(session);
       else { conversationRows = (await call("/api/conversations")).conversations;
@@ -1561,6 +1582,85 @@ form.addEventListener("submit", (event) => {
   sessionChains.set(session, chain);
   field.focus();
 });
+
+// -- The person's avatar (owner 2026-10-07) -------------------------------
+// Frame 1 shows at rest; while any turn runs, the other frames play in a loop
+// and frame 1 returns when the last turn ends.
+
+let avatarCharacters = [], avatarChoice = null, avatarTimer = null;
+let avatarFrame = 0, workingTurns = 0;
+const AVATAR_FRAME_MS = 180;
+const calmMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function chosenAvatar() {
+  return avatarCharacters.find(character => character.id === avatarChoice) || null;
+}
+
+function showAvatar() {
+  const character = chosenAvatar(), stage = el("avatar-stage"), picture = el("agent-avatar");
+  if (!character) { stage.hidden = true; return; }
+  stage.hidden = false;
+  picture.alt = character.name;
+  const moving = workingTurns > 0 && character.frames.length > 1;
+  picture.src = moving
+    ? character.frames[1 + (avatarFrame % (character.frames.length - 1))]
+    : character.frames[0];
+}
+
+function avatarWorking(change) {
+  workingTurns = Math.max(0, workingTurns + change);
+  if (workingTurns > 0 && avatarTimer === null && !calmMotion.matches) {
+    avatarFrame = 0;
+    avatarTimer = setInterval(() => { avatarFrame += 1; showAvatar(); }, AVATAR_FRAME_MS);
+  } else if (workingTurns === 0 && avatarTimer !== null) {
+    clearInterval(avatarTimer); avatarTimer = null;
+  }
+  showAvatar();
+}
+
+function renderAvatarChoices() {
+  const box = el("avatar-choices");
+  box.textContent = "";
+  for (const character of [{id: null, name: "None", frames: []}, ...avatarCharacters]) {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "avatar-choice";
+    button.setAttribute("role", "radio");
+    button.setAttribute("aria-checked", String(character.id === avatarChoice));
+    if (character.frames.length) {
+      const picture = document.createElement("img");
+      picture.src = character.frames[0]; picture.alt = "";
+      button.appendChild(picture);
+    }
+    const label = document.createElement("span");
+    label.textContent = character.name;
+    button.appendChild(label);
+    button.addEventListener("click", () => chooseAvatar(character.id));
+    box.appendChild(button);
+  }
+}
+
+async function chooseAvatar(id) {
+  const result = el("avatar-result");
+  result.textContent = "Saving avatar…";
+  try {
+    avatarChoice = (await call("/api/preferences", {avatar: id})).preferences.avatar;
+    result.textContent = id ? "Saved for you." : "No avatar.";
+  } catch (failure) {
+    result.textContent = "The avatar was not saved: " + failure.message;
+  }
+  showAvatar(); renderAvatarChoices();
+}
+
+async function loadAvatars() {
+  try {
+    avatarCharacters = (await call("/api/avatars")).characters;
+    avatarChoice = (await call("/api/preferences")).preferences.avatar;
+  } catch (failure) {
+    // A missing avatar never stops the page; the name still shows.
+    avatarCharacters = []; avatarChoice = null;
+  }
+  showAvatar(); renderAvatarChoices();
+}
 
 // -- The listings ---------------------------------------------------------
 
@@ -3186,7 +3286,7 @@ el("nav-capabilities").addEventListener("click", () => selectPrimaryTab("install
 el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"));
 el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"));
 
-Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands()])
+Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars()])
   .catch(showBootError);
 field.focus();
 </script>

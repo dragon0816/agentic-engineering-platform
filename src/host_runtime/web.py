@@ -81,6 +81,7 @@ from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
+from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
 from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
@@ -323,6 +324,7 @@ class AgentWeb:
         self.namespace = namespace if namespace is not None else runtime.config.namespace
         self.config_path = config_path
         self.persona = AgentPersonaStore(runtime.layout.workspace_root)
+        self.preferences = UserPreferencesStore(runtime.layout.workspace_root)
         self.conversation_context = ConversationContextStore(runtime.layout.workspace_root)
         self.backends = conversation_backends or LocalConversationBackends(
             runtime.layout.workspace_root
@@ -887,6 +889,19 @@ class AgentWeb:
         with self._one_at_a_time:
             saved = self.persona.save(request)
         return {"ok": True, "restart_required": False, "persona": saved.model_dump(mode="json")}
+
+    def avatars(self) -> dict[str, Any]:
+        """The pixel-art characters a person can pick, frames as data URIs."""
+        return {"characters": list(catalog())}
+
+    def user_preferences(self) -> dict[str, Any]:
+        """This person's own Agent Web choices (owner 2026-10-07)."""
+        return {"preferences": self.preferences.load(self.runtime.actor).model_dump(mode="json")}
+
+    def update_user_preferences(self, request: UserPreferences) -> dict[str, Any]:
+        with self._one_at_a_time:
+            saved = self.preferences.save(self.runtime.actor, request)
+        return {"ok": True, "preferences": saved.model_dump(mode="json")}
 
     def update_context_settings(self, request: ConversationContextSettings) -> dict[str, Any]:
         with self._one_at_a_time:
@@ -2665,6 +2680,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
+        elif parsed.path == "/api/avatars":
+            self._json(200, web.avatars())
+        elif parsed.path == "/api/preferences":
+            self._json(200, web.user_preferences())
         elif parsed.path == "/api/settings/models":
             self._json(200, web.available_models())
         elif parsed.path == "/api/authoring":
@@ -2713,6 +2732,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/workflow-options",
             "/api/settings/persona",
             "/api/settings/context",
+            "/api/preferences",
             "/api/conversations",
             "/api/conversations/delete",
             "/api/conversations/turn",
@@ -2789,6 +2809,15 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             result = self.server.web.save_workflow_settings(update)
             self._json(200 if result["ok"] else 400, result)
+            return
+        if path == "/api/preferences":
+            try:
+                preferences = UserPreferences.model_validate(body)
+                result = self.server.web.update_user_preferences(preferences)
+            except (OSError, ValueError, TypeError):
+                self._json(400, {"error": "the request was not a known avatar"})
+                return
+            self._json(200, result)
             return
         if path == "/api/settings/persona":
             try:
