@@ -1380,7 +1380,20 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   and placeholders; coding Skill 1.5.0; runner `tzdata`.
 - [x] Lab fix-002 5/16, fix-003 invalid (leftover Edge), fix-004 9/16
   (grader 1.2 would add D03 and W04); grader 1.2.
-- [ ] Lab fix-005 (running) and coding_v1 re-verification on the current build.
+- [x] Lab fix-005 and coding_v1 re-verification on the current build (done;
+  results in the rows below).
+- [x] Lab fix-005 11/16, fix-006 13/16, fix-007 12/16 (X02 asked first, then
+  an upstream 400), fix-008 12/16 with **X01 passing** (all three interfaces,
+  unchanged-code rerun). coding_v1 fix-run-007 20/20, -008 18/20 (validator
+  1.4 fixes T14), -009 19/20 (T08 Agent variance). Each run's `findings.md`
+  lists causes and follow-ups.
+- [x] A refused desktop step names the failed action (`CapabilityRefused.where`,
+  "Refused at action N (kind)"), never the helper's message (`a8a4864`,
+  lab fix-008 D01). Lab bypass scan: `expense_app\b`.
+- [ ] coding_v1 fix-run-010 and lab fix-009 on build `a8a4864` (running).
+- [ ] Lab remaining gaps: W01/D01 reruns where the Agent revises the Workflow
+  instead of reusing it; X02 overdue invoices dated before the period; X03
+  depends on X01's Workflow taking project and output name as run values.
 - [ ] Conversational authoring A1-A3, A7, A8.
 - [x] Business workflow lab (owner request 2026-10-06):
   `benchmarks/business_workflow_lab/` with an SAP-like site, a Tk desktop

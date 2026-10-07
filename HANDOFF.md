@@ -83,54 +83,76 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 
 ## Current work: coding_v1 and the business workflow lab (2026-10-07)
 
-**coding_v1.**
-- fix-run-006 passed 20/20 with validator 1.3.
-- The build has changed since then: 20 calls per turn, the tool record, several calls per reply, Edge and desktop fixes, and coding 1.5.0. Re-verify with a new run ID once lab fix-005 is done.
-- Run it with:
+**Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
-    .venv\Scripts\python benchmarks\coding_v1un.py --run-id <new> --tasks all
+**Build under test:** `a8a4864` (refusal location for desktop steps). Agent Web was restarted on it at 12:48; its logs are `.scratch/agent-web-20261007-124833.*`.
 
-**Lab.** `benchmarks/business_workflow_lab/`, grader 1.2.
-- Run it with:
+**Running at handoff time:**
+- coding_v1 `fix-run-010`, with logs at `.scratch/coding_v1-fix-run-010.log` and `.log.err`.
+- Lab `fix-009` comes next on the same build. Run one benchmark at a time, because both use the same Agent Web.
 
-    .venv\Scripts\python benchmarksusiness_workflow_lab\operatorun_lab.py --run-id <new> --tasks all
+**Commands** (repo root, repo `.venv`):
 
-- Mocks: run `python ...\operator\smoke.py --browser` with the system Python.
-- Results so far: fix-001 4/16, fix-002 5/16, fix-003 invalid, fix-004 9/16, fix-005 running. Each run's `findings.md` lists its causes and the fixes that followed.
-- The operator presses approval buttons, replies 繼續 at most 3 times when a turn stops at the budget, and asks for the spec's reruns. Each of these is recorded as an intervention.
+    .venv\Scripts\python benchmarks\coding_v1\run.py --run-id <new> --tasks all
+    .venv\Scripts\python benchmarks\business_workflow_lab\operator\run_lab.py --run-id <new> --tasks all
 
-**Live host.** The changes below each have a `.bak-*` backup next to the file.
+- Mock smoke checks: `python benchmarks\business_workflow_lab\operator\smoke.py --browser`.
+- Set `PYTHONIOENCODING=utf-8` when output goes to a cp950 console.
+
+**Results so far.** Each run folder holds a `findings.md`.
+
+| Benchmark | Run | Result | Note |
+|---|---|---|---|
+| coding_v1 | fix-run-006 | 20/20 | |
+| coding_v1 | fix-run-007 | 20/20 | |
+| coding_v1 | fix-run-008 | 18/20 | validator 1.4 then fixed T14 |
+| coding_v1 | fix-run-009 | 19/20 | T08 Agent variance |
+| Lab | fix-005 | 11/16 | |
+| Lab | fix-006 | 13/16 | |
+| Lab | fix-007 | 12/16 | |
+| Lab | fix-008 | 12/16 | X01 passes for the first time |
+
+**Open lab gaps** (fix-008):
+- W01 and D01 reruns: the Agent revised the Workflow instead of reusing it. In D01 this was because a desktop failure did not say which action failed, which is now fixed.
+- X02: an overdue invoice dated before the period was missed.
+- X03: X01's Workflow fixes the output name and filters by customer, so the Agent asked instead of running.
+
+The operator presses approvals, replies 繼續 at most 3 times, and asks for the spec's reruns. Each of these is recorded as an intervention. Expected answers are never changed; grader and operator changes are versioned (grader 1.2).
+
+**Live host changes** (a `.bak-*` backup sits next to each changed file):
 - host.json:
   - `web.allowed_origins` has `http://127.0.0.1:8810`;
-  - `desktop.applications` registers `expense`, pointing at `...\expense_desktop_mockin\ExpenseApp.exe`;
+  - `desktop.applications.expense` points at `...\expense_desktop_mock\bin\ExpenseApp.exe`;
   - `coding.workspace_roots` includes the lab's runs folder.
 - grants.json has grants for `browser/operate` and `desktop/operate`.
-- Skill `engineering/coding@1.5.0` is installed.
+- Skill `engineering/coding@1.6.0` is installed.
 - The coding runner Python has `tzdata`.
-- Agent Web runs from `src` with the repo `.venv`. Restarting it with `Stop-Process` leaves its Edge running. The next start now recovers from that, but closing Agent Web normally is cleaner.
 
-**Platform pieces.** The decisions are in `docs/DECISIONS.md`, 2026-10-06 and 2026-10-07:
+**Restarting Agent Web:**
+- Refresh the user environment variables (`AEP_*`, `LITELLM_MASTER_KEY`) first.
+- `Stop-Process` leaves Edge running. The next start recovers from that (`close_leftover`).
+
+**Platform pieces.** Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
 - `agent.backend_contracts` sets the limits: 8000 tokens and 20 calls per turn.
-- `Gateway.host_tools`; several calls in one reply run in order.
-- `host_runtime/chat_authoring.py`: G4, plus `approval_text`.
-- `host_runtime/bridge_tools.py`: `browser__operate` and `desktop__operate`, which list the registered apps.
-- `host_runtime/turn_summary.py`: the tool record.
-- Agent Web `/api/approvals` and Telegram approval buttons.
-- `capabilities/browser_session` (leftover recovery) and `capabilities/desktop_session` (placeholders, `clear_dialogs`); `integrations/desktop(.py, _uia.cs)`.
-- run-python `AEP_WORKFLOW_PARAMS` and child processes.
+- `Gateway.host_tools`; several calls in one reply run in order; a truncated reply is retried twice.
+- `host_runtime/chat_authoring.py` provides G4 and `approval_text`.
+- `bridge_tools.py` provides `browser__operate` and `desktop__operate`.
+- `turn_summary.py` provides the tool record.
+- Approvals: Agent Web `/api/approvals` and Telegram buttons.
+- Bridge failures: `invalid_input` names its fields, and `CapabilityRefused.where` names the place in the request.
 
 ## Verification
 
-ruff and mypy (`src`) pass. In the full pytest, only these fail:
-- `test_local_developer_environment` (cp950), which is excluded;
-- `test_knowledge_stage`, `test_browser::test_the_whole_flow_the_owner_described` and `test_sop_practice::test_the_sop_pdf_carries_the_routine_as_text`, which fail only now and then inside the full run under load and pass alone.
+Build `a8a4864`:
+- ruff passes.
+- mypy (`src`) passes with the repo `.venv`.
+- Full pytest with the repo `.venv` (`-m "not live"`): 2257 passed, 1 failed. The failure is `test_local_developer_environment`, which fails on cp950 stderr decoding, also fails on a clean tree, and is excluded.
 
-The last full run: 2235 passed.
-
-Live checks after every Gateway change, all unchanged: Knowledge direct and in chat (no coding or authoring tool used), the W14 dry run and `run-task`.
+Use the repo `.venv`. The system Python has matplotlib 3.7.3 with numpy 2.2.6, which breaks the chart tests.
 
 ## Next recommended action
 
-1. Read lab fix-005's results and fix what they show, then rerun the lab and coding_v1 on the same build under new run IDs.
-2. Conversational authoring A1-A3, A7, A8.
-3. The practice SOP Workflow install, a real SOP, W9 business cards, coding C7 (unchanged).
+1. Let coding_v1 fix-run-010 finish, then run lab `fix-009` on the same build. Record both, with findings, under their run IDs.
+2. If the coding_v1 result is below 20/20, read the failing tasks' traces. Agent variance on one task does not by itself call for a platform change. Rerun under a new ID.
+3. Lab gaps: see "Open lab gaps" above.
+4. After this stage: conversational authoring A1–A3, A7, A8.
