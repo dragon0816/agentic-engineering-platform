@@ -59,36 +59,172 @@ direct egress (verified live). Loopback, including the company Zscaler
 proxy, is reachable and allowed by the owner. Live `inspect_coding`: passed.
 Agent Web was restarted with the fixed rule check (`8c337f0`).
 
+## Verification (this commit series)
+
+Ruff and mypy (`src`) pass. Full pytest before C5's export-list update:
+2153 passed, 3 failed: `test_local_developer_environment` (cp950 stderr
+decoding, fails the same at the earlier HEAD), `test_agent_web` header test
+(flaky, passes on rerun) and the export list (fixed). All coding tests pass
+(`test_restricted_runner.py`, `test_coding_worktree_pytest.py`,
+`test_coding_model_author.py`, `test_coding_change_capability.py`, plus
+E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
+
+## SOP to Workflow state (2026-10-06)
+
+- W1-W7 done and committed; W8 done up to preview (see docs/TASKS.md).
+- host.json has `web` (allowed origin `http://127.0.0.1:8766`, backup
+  `host.json.bak-20261006-174008-before-web`). That origin is the practice
+  site, started with `python -m evaluation.sop_practice serve --port 8766`
+  (run from `src` with the repo venv); it does not survive a reboot.
+- Practice files: `C:\Users\Chi_L\Documents\aep-sop-practice` (workbook and
+  SOP PDF). Authoring session `sop-20261006-094136-07236f` is `previewed`;
+  the owner installs it from Agent Web (Capabilities, "Create a Workflow from
+  an SOP"), then restarts Agent Web.
+
+## Current work (2026-10-07): coding_v1, the business workflow lab, knowledge_v1
+
+**Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
+
+**Build state:**
+- HEAD is `d91fc0f` or later.
+- Agent Web was restarted at 06:47 on 2026-10-08; its logs are `.scratch/agent-web-20261008-064756.*`. It serves:
+  - avatars;
+  - every web page (`web.allowed_origins: ["*"]`; the host.json backup is `*-before-any-origin`);
+  - attachments, with vision on for the company endpoint (backup `*-before-vision`).
+- The Shared Platform was not restarted, so asset ownership step 2 is merged but not live. The owner confirmed its design choices on 2026-10-08.
+- Running: a subagent is adding Telegram attachments in its own worktree.
+
+**Phase gate status, build `db38f28`:**
+- Lab fix-010: 14/16.
+- coding_v1 fix-run-013 and fix-run-014: 19/20 each, with a different task failing each time (Agent diligence).
+
+The owner has **paused** the gate decision (coding Skill 1.8.0 wording, from the rule-following analysis) and the Knowledge tool-route choice, to check the Agent by hand first.
+
+### Owner rule (2026-10-07): GUI tests run only while the owner is away
+
+Tests that drive Edge or the Expense desktop app open windows and can take focus from the owner's work. Run them only when the owner is not using the computer, such as evenings or after the owner says they have left.
+
+| Can run during working hours (no GUI) | Only while the owner is away (GUI) |
+|---|---|
+| coding_v1, all 20 tasks | Lab W01–W04 (Edge) |
+| knowledge_v1 | Lab D01–D04 (Expense desktop app) |
+| Lab C02, C03, C04, C04 exit-2 (CLI only) | Lab C01 (desktop + CLI) |
+| Plain `pytest`: the desktop test skips unless `AEP_GUI_TESTS=1`; browser tests run headless | Lab X01–X03 (all three systems) |
+| | `AEP_GUI_TESTS=1 pytest` and `smoke.py --browser` |
+
+Run only the CLI tasks with `--tasks C02,C03,C04` (comma-separated IDs). Both `all` and the default `smoke` include GUI tasks.
+
+The project has **no** `live` pytest marker, so `-m "not live"` excludes nothing. Its GUI marker is `gui`.
+
+**Commands** (repo root, repo `.venv`):
+
+    .venv\Scripts\python benchmarks\coding_v1\run.py --run-id <new> --tasks all
+    .venv\Scripts\python benchmarks\business_workflow_lab\operator\run_lab.py --run-id <new> --tasks all
+    .venv\Scripts\python benchmarks\knowledge_v1\run.py --run-id <new> --set sample|all --workers 2
+
+- Set `PYTHONIOENCODING=utf-8` when output goes to a cp950 console.
+- Run one benchmark at a time, because they all use the same Agent Web.
+- When a script waits for a runner, wait on its PID. A `pgrep -f` on the runner's name matches the waiting shell's own command line.
+
+### Results so far
+
+Each run folder holds a `findings.md`.
+
+| Benchmark | Run | Result | Note |
+|---|---|---|---|
+| coding_v1 | fix-run-011 | 20/20 | build `4becd6b` |
+| coding_v1 | **fix-run-012** | **20/20** | build `967249b` (Skill 1.7.0) |
+| Lab | fix-008 | 12/16 | 13/16 under grader 1.3 (W01) |
+| Lab | fix-009 | stopped | W01–W04 PASS, D01 FAIL (it revised the Workflow on the rerun), the rest not run |
+| knowledge_v1 | sample-001 | 64/110 acceptable | baseline: direct 22/34, tool 9/58, no Knowledge 18 |
+| knowledge_v1 | sample-002 | 75/110 acceptable | Knowledge used every time, no cut-offs; tool route 15/76 PASS |
+| Lab | **fix-010** | **14/16** | build `db38f28`. Every rerun reuses its Workflow, and X03 passes. C02 and X02 are Agent rule-following |
+| coding_v1 | fix-run-013 | 19/20 | build `db38f28`. T13 parsing (Agent variance) |
+| coding_v1 | fix-run-014 | 19/20 | build `db38f28`. T16 read only the top of `input/` |
+| knowledge_v1 | sample-003 | 68/110 acceptable | direct 25/34 PASS (was 19/34), tool 10/74 (was 15/76) |
+
+**What changed today for the lab gaps:**
+- **Grader 1.3:** a rerun may use a version run *or installed* before the request, as long as no draft follows the request.
+- **Draft guide and coding Skill 1.7.0:** run the installed Workflow and check its output before calling it reusable; rerun that version unchanged.
+- **Ownership step 1:** versions continue from the highest installed one, so no more `workflow_version_exists` from a restarted 1.0.0.
+
+**Open lab gaps:**
+- **X02:** an overdue invoice dated before the period was missed (an Agent reading error).
+- **X03:** X01's Workflow fixes the output name.
+- **desktop save_as:** in fix-009 D01 it once wrote to an existing `output/tny.xlsx` instead of the given name. Investigate during the GUI run.
+
+The operator presses approvals, replies 繼續 at most 3 times, and asks for the spec's reruns. Each of these is recorded as an intervention. Expected answers are never changed.
+
+### knowledge_v1 (new, owner request)
+
+See `benchmarks/knowledge_v1/README.md` and `docs/DECISIONS.md` (2026-10-07).
+- The owner's 1,100 questions are pinned by sha256, and `.gitattributes` keeps their bytes exact.
+- A question passes when the Knowledge loop ran, its citations are verified in the Vault, and a Gateway-model reviewer finds it reasonable.
+
+Early observations, to confirm with the sample:
+- Some questions are answered **without Knowledge**: the model answers from its own knowledge (`EXECUTION_GAP`).
+- When a `knowledge__rs-knowledge` call fails with `knowledge_model_failed`, the conversation model still answers **without citations and without saying so**. The cause of `knowledge_model_failed` is not yet known. Synthesis defaults to 800 output tokens on the tool path (`handlers.py:169`). An offline repro with the default prompt did not fail.
+- On the tool route, the model adds its own general knowledge around the evidence, and the reviewer fails some of those answers.
+
+### Live host changes
+
+A `.bak-*` backup sits next to each changed file.
+- host.json:
+  - `web.allowed_origins` has `http://127.0.0.1:8810`;
+  - `desktop.applications.expense` is registered;
+  - `coding.workspace_roots` includes the lab's runs folder.
+- grants.json has grants for `browser/operate` and `desktop/operate`.
+- Skill `engineering/coding@1.7.0` is in `workspace/assets/skills/`, and 1.6.0 has moved to `skills/disabled/`.
+- The coding runner Python has `tzdata`.
+
+**Restarting Agent Web:**
+- Refresh the user environment variables (`AEP_*`, `LITELLM_MASTER_KEY`) first.
+- `Stop-Process` leaves Edge running. The next start recovers from that (`close_leftover`).
+
+### Platform pieces
+
+Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
+- `agent.backend_contracts` sets the limits: 8000 tokens and 20 calls per turn.
+- `Gateway.host_tools`; several calls in one reply run in order; a truncated reply is retried twice.
+- `host_runtime/chat_authoring.py`:
+  - G4 and `approval_text`;
+  - versions continue from the highest installed one;
+  - a name owned by someone else is refused.
+- `bridge_tools.py` provides `browser__operate` and `desktop__operate`.
+- `turn_summary.py` provides the tool record.
+- Approvals: Agent Web `/api/approvals` and Telegram buttons.
+- Bridge failures: `invalid_input` names its fields, and `CapabilityRefused.where` names the place in the request.
+- `ConversationMessage` redacts credential-shaped text instead of refusing it.
+- Web access: `web.allowed_origins` `"*"` means any http(s) page and is the default (`integrations.web_script.origin_permitted`).
+- Attachments: `host_runtime/attachments.py`, `/api/attachments`, and images on the newest message only (`agent/gateway.py`).
+- Avatars: `host_runtime/avatars.py`, `/api/avatars`, `/api/preferences`.
+- Asset ownership step 2: `common/ownership.py` and `control_plane/ownership.py`.
+
 ## Verification
 
-HEAD `3a102e3` or later, with the repo `.venv`, after the subagent merges of 2026-10-07/08 (asset ownership step 2, test stability, knowledge_v1 `compare.py`):
+HEAD `d91fc0f`, with the repo `.venv`:
 - ruff passes.
 - mypy (`src`) passes.
-- Full pytest: **2318 passed, 6 skipped, 0 failed**. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
+- Full pytest: **2325 passed, 6 skipped, 0 failed**. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
 
-These earlier failures are fixed and no longer excluded:
-- the cp950 loader test;
-- Defender rename locks, now retried briefly in `common/filesystem.publish_directory`;
-- the SOP PDF wait;
-- the Agent Web refused-POST reset.
+The 2026-10-08 test-stability work fixed the cp950 loader test, the Windows rename locks (`common/filesystem.publish_directory`), the SOP PDF wait, the Agent Web refused-POST reset and the snapshot line endings.
 
 `test_browser::test_a_signed_in_profile_is_what_carries_the_session` failed once on 2026-10-05; that is still open and unreproduced.
 
 Use the repo `.venv`: the system Python has matplotlib 3.7.3 with numpy 2.2.6.
 
-**Left over:**
-- Headless Edge PID 7956 (child 13048) from the test-stability probe needs closing by the owner; the subagent's kill was denied.
-- An unrelated headless Edge, PID 10352, has run since 2026-10-06 23:08.
+Left over: headless Edge PID 7956 (child 13048) from the test-stability probe, which the owner should close, and an unrelated headless Edge, PID 10352, that has run since 2026-10-06 23:08.
 
 ## Next recommended action
 
-1. When sample-002 finishes:
-   - write its findings, comparing with sample-001 by route;
-   - install Knowledge Skill 1.5.0 live and restart Agent Web;
-   - run sample-003 on `72af226` or later.
-   - Then run the full 1,100 (`--set all`, several hours, no GUI).
-2. Agent Web restarts: wait until a benchmark run ends.
-3. **While the owner is away:** run lab `fix-010`, all tasks. If the platform changed since `967249b`, also rerun coding_v1 on the same build.
-4. After this stage:
-   - asset ownership step 2 (`docs/phases/ASSET_OWNERSHIP.md`);
+1. When the Telegram attachment subagent reports:
+   - review its branch, rebase onto main and merge;
+   - run the full verification;
+   - restart Agent Web, which also restarts the Telegram loop.
+2. **Paused by the owner, who will check the Agent by hand first:**
+   - the phase gate (coding Skill 1.8.0 wording: read rules in full, missing values follow the request or template, keep template formulas, check outputs against inputs; X02's period/as-of wording to be tested separately);
+   - the Knowledge tool route: (a) return the harness answer as it is, (b) route more questions directly, or (c) leave it.
+3. The knowledge_v1 full 1,100 run (`--set all`, several hours, no GUI) once the tool-route choice is made.
+4. Later:
+   - asset ownership step 2 follow-ups: member publish route with a review queue, a UI, and a Shared Platform restart to go live;
    - conversational authoring A1–A3, A7, A8.
