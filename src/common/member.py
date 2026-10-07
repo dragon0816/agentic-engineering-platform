@@ -10,11 +10,12 @@ from typing import Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
-from common.assets import AssetIdentity
+from common.assets import AssetIdentity, Owner
 from common.authorization import DeviceAssetSelection
-from common.base import Contract, Symbol
+from common.base import Contract, Slug, Symbol, Text
 from common.distribution import PublishedAssetPackage
 from common.enrollment import Invitation, PlatformRole
+from common.ownership import AssetNameOwnership, VersionChange
 
 
 class MemberCatalogRequest(Contract):
@@ -163,3 +164,41 @@ class MemberReplacementReply(Contract):
         ) != (self.selection.asset.namespace, self.selection.asset.name):
             raise ValueError("replacement stays within one Add-on family and kind")
         return self
+
+
+class AssetNameRequest(Contract):
+    """One Skill or Workflow name, across its versions."""
+
+    namespace: Slug
+    name: Slug
+
+
+class AssetNextVersionRequest(AssetNameRequest):
+    change: VersionChange
+
+
+class AssetNextVersionReply(Contract):
+    namespace: Slug
+    name: Slug
+    version: Text
+
+
+class AssetCoEditorRequest(AssetNameRequest):
+    co_editor: Symbol
+
+
+class AssetTransferRequest(AssetNameRequest):
+    owner: Owner
+
+
+class AssetDeprecateRequest(AssetNameRequest):
+    version: Text
+    reason: Text
+    replacement: Text | None = None
+
+
+class AssetOwnershipReply(Contract):
+    """A name's owner, co-editors and deprecations, with its versions."""
+
+    ownership: AssetNameOwnership
+    versions: tuple[Text, ...] = ()

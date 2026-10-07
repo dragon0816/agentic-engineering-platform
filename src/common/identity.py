@@ -18,7 +18,7 @@ from typing import Literal, Self
 
 from pydantic import AwareDatetime, model_validator
 
-from common.assets import AssetMetadata, RegistryContract
+from common.assets import AssetMetadata, Owner, RegistryContract
 from common.base import Sha256, Symbol, Text
 
 # How a Bridge says who it is acting for. Named here because the record of an
@@ -173,6 +173,12 @@ class IssuedMemberLogin:
         return f"IssuedMemberLogin(login_id={self.grant.login_id!r}, secret=[redacted])"
 
 
+def owns(owner: Owner, actor: str, groups: tuple[str, ...]) -> bool:
+    """Whether this member is, or belongs to, the owner: a user owner is the
+    member themselves, any other owner is a group the member belongs to."""
+    return owner.id == actor if owner.type == "user" else owner.id in groups
+
+
 def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bool:
     """Whether one member may use one published asset.
 
@@ -193,8 +199,6 @@ def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bo
     """
     if metadata.lifecycle != "published":
         return False
-    owner = metadata.owner
-    owned = owner.id == actor if owner.type == "user" else owner.id in groups
-    if owned or actor in metadata.contributors:
+    if owns(metadata.owner, actor, groups) or actor in metadata.contributors:
         return True
     return metadata.visibility in ("public", "organization")

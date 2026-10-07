@@ -13,7 +13,7 @@ import secrets
 import threading
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Literal, Self
+from typing import Literal, Self, TypeVar
 
 from pydantic import AwareDatetime, model_validator
 
@@ -25,6 +25,13 @@ from common.identity import ACCESS_TOKEN_METHOD, AuthenticatedActor, entitled
 from common.member import (
     AdminExtensionCatalogEntry,
     AdminExtensionCatalogReply,
+    AssetCoEditorRequest,
+    AssetDeprecateRequest,
+    AssetNameRequest,
+    AssetNextVersionReply,
+    AssetNextVersionRequest,
+    AssetOwnershipReply,
+    AssetTransferRequest,
     MemberCatalogEntry,
     MemberCatalogReply,
     MemberCatalogRequest,
@@ -35,10 +42,12 @@ from common.member import (
     MemberSelectionReply,
     MemberSelectRequest,
 )
+from common.ownership import AssetNameOwnership
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
 from control_plane.enrollment import InMemoryEnrollmentRegistry
 from control_plane.identity import fingerprint
 from control_plane.identity_store import SqliteIdentityStorage
+from control_plane.ownership import AssetOwnershipService, OwnershipError
 from software.marketplace import (
     ApplicationCatalog,
     ApplicationCatalogReply,
@@ -63,7 +72,22 @@ MemberErrorCode = Literal[
     "decision_in_future",
     "invalid_request",
     "not_administrator",
+    # Asset ownership (owner decisions 2026-10-07).
+    "asset_deprecated",
+    "publisher_not_authorized",
+    "name_missing",
+    "not_name_owner",
+    "ownership_changed",
+    "co_editor_unknown",
+    "co_editor_exists",
+    "co_editor_missing",
+    "owner_unchanged",
+    "new_owner_unknown",
+    "version_missing",
+    "version_deprecated",
 ]
+
+T = TypeVar("T")
 
 
 class MemberError(Exception):
@@ -182,6 +206,24 @@ _AUTHORIZATION_CODES: dict[str, MemberErrorCode] = {
     "duplicate_selection": "duplicate_selection",
     "selection_missing": "selection_missing",
     "decision_in_future": "decision_in_future",
+    "asset_deprecated": "asset_deprecated",
+}
+
+_OWNERSHIP_CODES: dict[str, MemberErrorCode] = {
+    "session_expired": "session_expired",
+    "actor_unknown": "actor_unknown",
+    "actor_disabled": "actor_disabled",
+    "publisher_not_authorized": "publisher_not_authorized",
+    "name_missing": "name_missing",
+    "not_name_owner": "not_name_owner",
+    "ownership_changed": "ownership_changed",
+    "co_editor_unknown": "co_editor_unknown",
+    "co_editor_exists": "co_editor_exists",
+    "co_editor_missing": "co_editor_missing",
+    "owner_unchanged": "owner_unchanged",
+    "new_owner_unknown": "new_owner_unknown",
+    "version_missing": "version_missing",
+    "version_deprecated": "version_deprecated",
 }
 
 
@@ -195,12 +237,16 @@ class MemberService:
         authorization: InMemoryAuthorizationRegistry,
         sessions: InMemoryMemberSessions,
         applications: ApplicationCatalog | None = None,
+        ownership: AssetOwnershipService | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.enrollment = enrollment
         self.authorization = authorization
         self.sessions = sessions
         self.applications = applications if applications is not None else ApplicationCatalog()
+        # Name management needs the Registry that keeps ownership records;
+        # without it the entry point answers invalid_request.
+        self.ownership = ownership
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
 
@@ -353,3 +399,121 @@ class MemberService:
             except AuthorizationError as error:
                 raise MemberError(_AUTHORIZATION_CODES.get(error.code, "invalid_request")) from None
         return MemberReplacementReply(previous=previous, selection=selected)
+
+    # -- asset names: owner management (owner decisions 2026-10-07) -------
+
+    def _owned(
+        self,
+        session_id: str,
+        secret: str,
+        operation: Callable[[AssetOwnershipService, AuthenticatedActor, datetime], T],
+    ) -> T:
+        if self.ownership is None:
+            raise MemberError("invalid_request")
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            try:
+                return operation(self.ownership, who, now)
+            except OwnershipError as error:
+                raise MemberError(_OWNERSHIP_CODES.get(error.code, "invalid_request")) from None
+
+    def asset_ownership(
+        self, session_id: str, secret: str, request: AssetNameRequest
+    ) -> AssetOwnershipReply:
+        item = AssetNameRequest.model_validate(request)
+        record, versions = self._owned(
+            session_id,
+            secret,
+            lambda service, who, now: service.ownership(who, item.namespace, item.name, now=now),
+        )
+        return AssetOwnershipReply(ownership=record, versions=versions)
+
+    def asset_next_version(
+        self, session_id: str, secret: str, request: AssetNextVersionRequest
+    ) -> AssetNextVersionReply:
+        item = AssetNextVersionRequest.model_validate(request)
+        version = self._owned(
+            session_id,
+            secret,
+            lambda service, who, now: service.next_version(
+                who, item.namespace, item.name, item.change, now=now
+            ),
+        )
+        return AssetNextVersionReply(namespace=item.namespace, name=item.name, version=version)
+
+    def _ownership_reply(
+        self,
+        session_id: str,
+        secret: str,
+        item: AssetNameRequest,
+        operation: Callable[[AssetOwnershipService, AuthenticatedActor, datetime], object],
+    ) -> AssetOwnershipReply:
+        def run(
+            service: AssetOwnershipService, who: AuthenticatedActor, now: datetime
+        ) -> tuple[AssetNameOwnership, tuple[str, ...]]:
+            operation(service, who, now)
+            return service.ownership(who, item.namespace, item.name, now=now)
+
+        record, versions = self._owned(session_id, secret, run)
+        return AssetOwnershipReply(ownership=record, versions=versions)
+
+    def asset_add_co_editor(
+        self, session_id: str, secret: str, request: AssetCoEditorRequest
+    ) -> AssetOwnershipReply:
+        item = AssetCoEditorRequest.model_validate(request)
+        return self._ownership_reply(
+            session_id,
+            secret,
+            item,
+            lambda service, who, now: service.add_co_editor(
+                who, item.namespace, item.name, item.co_editor, now=now
+            ),
+        )
+
+    def asset_remove_co_editor(
+        self, session_id: str, secret: str, request: AssetCoEditorRequest
+    ) -> AssetOwnershipReply:
+        item = AssetCoEditorRequest.model_validate(request)
+        return self._ownership_reply(
+            session_id,
+            secret,
+            item,
+            lambda service, who, now: service.remove_co_editor(
+                who, item.namespace, item.name, item.co_editor, now=now
+            ),
+        )
+
+    def asset_transfer(
+        self, session_id: str, secret: str, request: AssetTransferRequest
+    ) -> AssetOwnershipReply:
+        """After a transfer the former owner may no longer be able to read
+        the record, so the reply is the record as the transfer left it."""
+        item = AssetTransferRequest.model_validate(request)
+        record = self._owned(
+            session_id,
+            secret,
+            lambda service, who, now: service.transfer(
+                who, item.namespace, item.name, item.owner, now=now
+            ),
+        )
+        return AssetOwnershipReply(ownership=record)
+
+    def asset_deprecate(
+        self, session_id: str, secret: str, request: AssetDeprecateRequest
+    ) -> AssetOwnershipReply:
+        item = AssetDeprecateRequest.model_validate(request)
+        return self._ownership_reply(
+            session_id,
+            secret,
+            item,
+            lambda service, who, now: service.deprecate(
+                who,
+                item.namespace,
+                item.name,
+                item.version,
+                item.reason,
+                replacement=item.replacement,
+                now=now,
+            ),
+        )

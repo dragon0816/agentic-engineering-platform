@@ -8,7 +8,7 @@ the same enrollment, authorization, package and session state.
 from __future__ import annotations
 
 import ssl
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, MutableMapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path, PureWindowsPath
@@ -34,6 +34,7 @@ from control_plane.member import InMemoryMemberSessions, MemberService
 from control_plane.member_http import MemberPortalServer
 from control_plane.member_login import InMemoryMemberLogins
 from control_plane.member_signin import InMemoryInvitationSignIn
+from control_plane.ownership import AssetOwnershipService
 from control_plane.registry_sqlite import SqliteRegistry
 from control_plane.service import ControlPlaneService
 from software.marketplace import ApplicationCatalog
@@ -194,6 +195,13 @@ class SharedPlatformApplication:
             authorization=state.authorization,
             sessions=sessions,
             applications=state.applications,
+            ownership=AssetOwnershipService(
+                state.enrollment,
+                state.packages,
+                artifacts=(
+                    state.artifacts if isinstance(state.artifacts, MutableMapping) else None
+                ),
+            ),
             clock=moment,
         )
         self.control_server = ControlPlaneServer(

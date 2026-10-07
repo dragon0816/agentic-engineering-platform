@@ -21,6 +21,11 @@ from common.member import (
     AdminInvitationListReply,
     AdminInvitationMetadata,
     AdminInvitationRevokeRequest,
+    AssetCoEditorRequest,
+    AssetDeprecateRequest,
+    AssetNameRequest,
+    AssetNextVersionRequest,
+    AssetTransferRequest,
     MemberCatalogRequest,
     MemberReplaceRequest,
     MemberRevokeRequest,
@@ -56,6 +61,18 @@ STATUS_FOR = {
     "invitation_used": 409,
     "invitation_revoked": 401,
     "not_administrator": 403,
+    "asset_deprecated": 409,
+    "publisher_not_authorized": 403,
+    "name_missing": 404,
+    "not_name_owner": 403,
+    "ownership_changed": 409,
+    "co_editor_unknown": 400,
+    "co_editor_exists": 409,
+    "co_editor_missing": 404,
+    "owner_unchanged": 409,
+    "new_owner_unknown": 400,
+    "version_missing": 404,
+    "version_deprecated": 409,
 }
 
 
@@ -132,6 +149,12 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/invitations/list",
             "admin/invitations/revoke",
             "admin/extensions",
+            "assets/ownership",
+            "assets/next-version",
+            "assets/co-editors/add",
+            "assets/co-editors/remove",
+            "assets/transfer",
+            "assets/deprecate",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -184,6 +207,30 @@ class _Handler(BaseHTTPRequestHandler):
             elif operation == "revoke":
                 reply = self.server.service.revoke(
                     *credential, MemberRevokeRequest.model_validate(raw)
+                )
+            elif operation == "assets/ownership":
+                reply = self.server.service.asset_ownership(
+                    *credential, AssetNameRequest.model_validate(raw)
+                )
+            elif operation == "assets/next-version":
+                reply = self.server.service.asset_next_version(
+                    *credential, AssetNextVersionRequest.model_validate(raw)
+                )
+            elif operation == "assets/co-editors/add":
+                reply = self.server.service.asset_add_co_editor(
+                    *credential, AssetCoEditorRequest.model_validate(raw)
+                )
+            elif operation == "assets/co-editors/remove":
+                reply = self.server.service.asset_remove_co_editor(
+                    *credential, AssetCoEditorRequest.model_validate(raw)
+                )
+            elif operation == "assets/transfer":
+                reply = self.server.service.asset_transfer(
+                    *credential, AssetTransferRequest.model_validate(raw)
+                )
+            elif operation == "assets/deprecate":
+                reply = self.server.service.asset_deprecate(
+                    *credential, AssetDeprecateRequest.model_validate(raw)
                 )
             elif operation == "admin/invitations":
                 create = AdminInvitationCreateRequest.model_validate(raw)

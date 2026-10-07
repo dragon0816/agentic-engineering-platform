@@ -7,6 +7,7 @@ device authorization or execution grants, and it never executes an artifact.
 from __future__ import annotations
 
 import hashlib
+import json
 import sqlite3
 from collections.abc import Iterator, Mapping
 from pathlib import Path
@@ -14,11 +15,20 @@ from typing import Literal
 
 from pydantic import TypeAdapter, ValidationError
 
-from common.assets import AssetIdentity
+from common.assets import AssetIdentity, Owner
 from common.base import Symbol
 from common.distribution import InstallationPlan, PublishedAssetPackage
-from control_plane.distribution import ControlError
+from common.ownership import AssetNameOwnership, VersionChange, version_key
+from control_plane.distribution import (
+    ControlError,
+    admit_member_version,
+    admit_trusted_version,
+)
 
+# The name-ownership table (2026-10-07) is additive: a database written by
+# this version still opens under the previous code, which ignores the table,
+# and a name the previous code published is given its record the next time
+# this code opens the database or publishes that name.
 SCHEMA_VERSION = "1"
 RegistryStoreErrorCode = Literal["unsupported_schema", "corrupt_record", "storage_unavailable"]
 
@@ -102,6 +112,18 @@ class SqliteRegistry:
                     "CREATE TABLE IF NOT EXISTS artifacts ("
                     "reference TEXT PRIMARY KEY, content BLOB NOT NULL)"
                 )
+                connection.execute(
+                    "CREATE TABLE IF NOT EXISTS name_owners ("
+                    "namespace TEXT NOT NULL, name TEXT NOT NULL, payload TEXT NOT NULL, "
+                    "PRIMARY KEY(namespace, name))"
+                )
+                unowned = connection.execute(
+                    "SELECT DISTINCT p.namespace, p.name FROM packages p "
+                    "LEFT JOIN name_owners o ON o.namespace = p.namespace AND o.name = p.name "
+                    "WHERE o.namespace IS NULL ORDER BY p.namespace, p.name"
+                ).fetchall()
+                for namespace, name in unowned:
+                    self._ensure_record(connection, namespace, name)
         except RegistryStoreError:
             raise
         except sqlite3.DatabaseError as error:
@@ -114,6 +136,46 @@ class SqliteRegistry:
         return connection
 
     @staticmethod
+    def _versions(connection: sqlite3.Connection, namespace: str, name: str) -> tuple[str, ...]:
+        rows = connection.execute(
+            "SELECT version FROM packages WHERE namespace = ? AND name = ?", (namespace, name)
+        ).fetchall()
+        return tuple(row[0] for row in rows)
+
+    @staticmethod
+    def _ensure_record(
+        connection: sqlite3.Connection, namespace: str, name: str
+    ) -> AssetNameOwnership | None:
+        """The name's record, deriving and storing it from the owner its
+        earliest version declares when the name was published before records
+        existed. None only for a name with no versions."""
+        row = connection.execute(
+            "SELECT payload FROM name_owners WHERE namespace = ? AND name = ?", (namespace, name)
+        ).fetchone()
+        if row is not None:
+            try:
+                return AssetNameOwnership.model_validate_json(row[0])
+            except (ValidationError, ValueError, TypeError) as error:
+                raise RegistryStoreError("corrupt_record") from error
+        rows = connection.execute(
+            "SELECT version, payload FROM packages WHERE namespace = ? AND name = ?",
+            (namespace, name),
+        ).fetchall()
+        if not rows:
+            return None
+        try:
+            _, earliest = min(rows, key=lambda entry: version_key(entry[0]))
+            owner = Owner.model_validate(json.loads(earliest)["metadata"]["owner"])
+            record = AssetNameOwnership(namespace=namespace, name=name, owner=owner)
+        except (ValidationError, ValueError, TypeError, KeyError) as error:
+            raise RegistryStoreError("corrupt_record") from error
+        connection.execute(
+            "INSERT INTO name_owners(namespace, name, payload) VALUES (?, ?, ?)",
+            (namespace, name, record.model_dump_json()),
+        )
+        return record
+
+    @staticmethod
     def _package(payload: str) -> PublishedAssetPackage:
         try:
             return PublishedAssetPackage.model_validate_json(payload)
@@ -122,6 +184,34 @@ class SqliteRegistry:
 
     def publish(
         self, package: PublishedAssetPackage, *, artifact: bytes | None = None
+    ) -> PublishedAssetPackage:
+        """The platform's own publish (preview seed, migration); see
+        `admit_trusted_version`."""
+        return self._publish(package, artifact=artifact, admit=None)
+
+    def publish_as(
+        self,
+        package: PublishedAssetPackage,
+        *,
+        publisher: Symbol,
+        groups: tuple[str, ...],
+        change: VersionChange | None = None,
+        artifact: bytes | None = None,
+    ) -> PublishedAssetPackage:
+        """A member publishes a version under the ownership rules; see
+        `admit_member_version`. The rule is applied inside the same
+        transaction as the insert, so two publishers cannot both pass it."""
+        member = TypeAdapter(Symbol).validate_python(publisher)
+        return self._publish(
+            package, artifact=artifact, admit=(member, tuple(groups), change)
+        )
+
+    def _publish(
+        self,
+        package: PublishedAssetPackage,
+        *,
+        artifact: bytes | None,
+        admit: tuple[str, tuple[str, ...], VersionChange | None] | None,
     ) -> PublishedAssetPackage:
         item = PublishedAssetPackage.model_validate(package)
         described = item.metadata.package
@@ -133,6 +223,28 @@ class SqliteRegistry:
         try:
             with self._connect() as connection:
                 connection.execute("BEGIN IMMEDIATE")
+                current = self._ensure_record(connection, identity.namespace, identity.name)
+                if admit is None:
+                    if identity.version in self._versions(
+                        connection, identity.namespace, identity.name
+                    ):
+                        raise ControlError("duplicate_package")
+                    record = admit_trusted_version(item, current)
+                else:
+                    publisher, groups, change = admit
+                    record = admit_member_version(
+                        item,
+                        current,
+                        self._versions(connection, identity.namespace, identity.name),
+                        publisher=publisher,
+                        groups=groups,
+                        change=change,
+                    )
+                if current is None:
+                    connection.execute(
+                        "INSERT INTO name_owners(namespace, name, payload) VALUES (?, ?, ?)",
+                        (identity.namespace, identity.name, record.model_dump_json()),
+                    )
                 try:
                     connection.execute(
                         "INSERT INTO packages(namespace, name, version, payload) "
@@ -152,6 +264,49 @@ class SqliteRegistry:
                         "INSERT OR IGNORE INTO artifacts(reference, content) VALUES (?, ?)",
                         (described.artifact_ref, artifact),
                     )
+        except ControlError:
+            raise
+        except sqlite3.DatabaseError as error:
+            raise RegistryStoreError("storage_unavailable") from error
+        return item.model_copy(deep=True)
+
+    def ownership(self, namespace: str, name: str) -> AssetNameOwnership | None:
+        try:
+            with self._connect() as connection:
+                row = connection.execute(
+                    "SELECT payload FROM name_owners WHERE namespace = ? AND name = ?",
+                    (namespace, name),
+                ).fetchone()
+        except sqlite3.DatabaseError as error:
+            raise RegistryStoreError("storage_unavailable") from error
+        if row is None:
+            return None
+        try:
+            return AssetNameOwnership.model_validate_json(row[0])
+        except (ValidationError, ValueError, TypeError) as error:
+            raise RegistryStoreError("corrupt_record") from error
+
+    def save_ownership(
+        self, updated: AssetNameOwnership, *, previous: AssetNameOwnership
+    ) -> AssetNameOwnership:
+        """Replace a name's record only if it is still the one the change was
+        decided against, so two concurrent owner actions cannot lose one."""
+        item = AssetNameOwnership.model_validate(updated)
+        before = AssetNameOwnership.model_validate(previous)
+        if item.key != before.key:
+            raise ControlError("ownership_changed")
+        try:
+            with self._connect() as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                current = self._ensure_record(connection, *item.key)
+                if current is None:
+                    raise ControlError("name_missing")
+                if current != before:
+                    raise ControlError("ownership_changed")
+                connection.execute(
+                    "UPDATE name_owners SET payload = ? WHERE namespace = ? AND name = ?",
+                    (item.model_dump_json(), *item.key),
+                )
         except ControlError:
             raise
         except sqlite3.DatabaseError as error:

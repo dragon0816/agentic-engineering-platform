@@ -38,6 +38,7 @@ AuthorizationErrorCode = Literal[
     "actor_not_admitted",
     "asset_not_published",
     "asset_not_entitled",
+    "asset_deprecated",
     "kind_mismatch",
     "tool_not_advertised",
     "tool_not_grantable",
@@ -137,6 +138,30 @@ class InMemoryAuthorizationRegistry:
             raise AuthorizationError("actor_disabled")
         return user.groups
 
+    def _deprecated(self, asset: AssetIdentity) -> bool:
+        """Whether the name's owner deprecated this exact version. A
+        deprecated version is not offered or chosen anew; selections already
+        made and installs already done keep working, for rollback."""
+        record = self.packages.ownership(asset.namespace, asset.name)
+        return record is not None and record.deprecation(asset.version) is not None
+
+    def _active_versions(
+        self, bridge_id: str, actor: str, asset: AssetIdentity
+    ) -> tuple[DeviceAssetSelection, ...]:
+        """This member's active selections of other versions of the same
+        name on this device. Tools are chosen per exact capability and are
+        not versions of an Add-on, so they never count."""
+        return tuple(
+            item
+            for item in self._selections.values()
+            if item.status == "active"
+            and item.kind != "capability"
+            and item.bridge_id == bridge_id
+            and item.actor == actor
+            and (item.asset.namespace, item.asset.name) == (asset.namespace, asset.name)
+            and item.asset.key != asset.key
+        )
+
     def _valid(self, identity: AuthenticatedActor, now: datetime | None) -> AuthenticatedActor:
         who = AuthenticatedActor.model_validate(identity)
         if not who.valid_at(now if now is not None else datetime.now(UTC)):
@@ -161,6 +186,7 @@ class InMemoryAuthorizationRegistry:
             # published kind here would offer what cannot be chosen.
             if package.kind in ("workflow", "skill", "knowledge", "agent")
             and entitled(package.metadata, who.actor, groups)
+            and not self._deprecated(package.metadata.identity)
         )
 
     def select(
@@ -170,7 +196,11 @@ class InMemoryAuthorizationRegistry:
         *,
         now: datetime | None = None,
     ) -> DeviceAssetSelection:
-        """Record one decision, or say why the member may not make it."""
+        """Record one decision, or say why the member may not make it.
+
+        A member has one active version of each Add-on name on a device
+        (owner decision 2026-10-07): choosing a version replaces any other
+        version of that name they had chosen there, as `replace` does."""
         moment = now if now is not None else datetime.now(UTC)
         who = self._valid(identity, moment)
         item = DeviceAssetSelection.model_validate(selection)
@@ -209,10 +239,22 @@ class InMemoryAuthorizationRegistry:
                 raise AuthorizationError("kind_mismatch")
             if not entitled(package.metadata, item.actor, self._member_groups(item.actor)):
                 raise AuthorizationError("asset_not_entitled")
+            if self._deprecated(item.asset):
+                raise AuthorizationError("asset_deprecated")
         current = self._selections.get(item.key)
         if current is not None and current.status == "active":
             raise AuthorizationError("duplicate_selection")
-        self._save(item)
+        replaced = (
+            ()
+            if item.kind == "capability" or item.status != "active"
+            else tuple(
+                previous.model_copy(update={"status": "revoked"})
+                for previous in self._active_versions(item.bridge_id, item.actor, item.asset)
+            )
+        )
+        self._save(*replaced, item)
+        for previous in replaced:
+            self._selections[previous.key] = previous
         self._selections[item.key] = item
         return item.model_copy(deep=True)
 
@@ -271,6 +313,8 @@ class InMemoryAuthorizationRegistry:
             raise AuthorizationError("kind_mismatch")
         if not entitled(package.metadata, who.actor, self._member_groups(who.actor)):
             raise AuthorizationError("asset_not_entitled")
+        if self._deprecated(new):
+            raise AuthorizationError("asset_deprecated")
         replacement_key = (device, who.actor, new.key)
         current_replacement = self._selections.get(replacement_key)
         if current_replacement is not None and current_replacement.status == "active":

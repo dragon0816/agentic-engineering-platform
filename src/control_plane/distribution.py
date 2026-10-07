@@ -22,6 +22,7 @@ from common.distribution import (
     verify_installation,
 )
 from common.enrollment import BridgeDevice, BridgeExecutionSubject, admit_device
+from common.ownership import AssetNameOwnership, VersionChange, above_all, next_version
 
 ControlErrorCode = Literal[
     "duplicate_package",
@@ -42,6 +43,13 @@ ControlErrorCode = Literal[
     "job_bridge_mismatch",
     "job_settled",
     "job_run_mismatch",
+    # Asset ownership (owner decisions 2026-10-07).
+    "publisher_not_authorized",
+    "owner_mismatch",
+    "version_not_assigned",
+    "version_not_above_highest",
+    "name_missing",
+    "ownership_changed",
 ]
 
 
@@ -68,10 +76,83 @@ def _copy(item: ContractT) -> ContractT:
     return item.model_copy(deep=True)
 
 
+def admit_trusted_version(
+    package: PublishedAssetPackage, record: AssetNameOwnership | None
+) -> AssetNameOwnership:
+    """The platform's own publish (preview seed, migration): no member is
+    publishing, so the package's declared owner must be the name's owner, and
+    the first package of a name makes its owner the name's owner. Versions are
+    not ordered here, so a historical catalog can be imported as it was."""
+    identity = package.metadata.identity
+    if record is None:
+        return AssetNameOwnership(
+            namespace=identity.namespace, name=identity.name, owner=package.metadata.owner
+        )
+    if package.metadata.owner != record.owner:
+        raise ControlError("owner_mismatch")
+    return record
+
+
+def admit_member_version(
+    package: PublishedAssetPackage,
+    record: AssetNameOwnership | None,
+    existing_versions: tuple[str, ...],
+    *,
+    publisher: str,
+    groups: tuple[str, ...],
+    change: VersionChange | None,
+) -> AssetNameOwnership:
+    """Whether this member may publish this version of this name, and the
+    ownership record that holds afterwards. Raises the reason it may not.
+
+    The first publish of a name must declare the publisher, or a team they
+    belong to, as owner. Every later one comes from the owner, a member of an
+    owning team or a co-editor, and declares the name's owner unchanged. With
+    a change level, the version must be the one the platform assigns now;
+    without one, it must be above every existing version."""
+    identity = package.metadata.identity
+    owner = package.metadata.owner
+    if record is None:
+        candidate = AssetNameOwnership(
+            namespace=identity.namespace, name=identity.name, owner=owner
+        )
+        if not candidate.manages(publisher, groups):
+            raise ControlError("publisher_not_authorized")
+        record = candidate
+    else:
+        if not record.may_publish(publisher, groups):
+            raise ControlError("publisher_not_authorized")
+        if owner != record.owner:
+            raise ControlError("owner_mismatch")
+    if identity.version in existing_versions:
+        raise ControlError("duplicate_package")
+    if change is not None:
+        if identity.version != next_version(existing_versions, change):
+            raise ControlError("version_not_assigned")
+    elif not above_all(identity.version, existing_versions):
+        raise ControlError("version_not_above_highest")
+    return record
+
+
 class PackageRegistry(Protocol):
     """The catalog boundary consumed by authorization and transport."""
 
     def publish(self, package: PublishedAssetPackage) -> PublishedAssetPackage: ...
+
+    def publish_as(
+        self,
+        package: PublishedAssetPackage,
+        *,
+        publisher: Symbol,
+        groups: tuple[str, ...],
+        change: VersionChange | None = None,
+    ) -> PublishedAssetPackage: ...
+
+    def ownership(self, namespace: str, name: str) -> AssetNameOwnership | None: ...
+
+    def save_ownership(
+        self, updated: AssetNameOwnership, *, previous: AssetNameOwnership
+    ) -> AssetNameOwnership: ...
 
     def discover(self, *, namespace: str | None = None) -> tuple[PublishedAssetPackage, ...]: ...
 
@@ -91,14 +172,71 @@ class InMemoryPackageRegistry:
 
     def __init__(self) -> None:
         self._packages: dict[tuple[str, str, str], str] = {}
+        self._owners: dict[tuple[str, str], str] = {}
+
+    def _record(self, namespace: str, name: str) -> AssetNameOwnership | None:
+        payload = self._owners.get((namespace, name))
+        return None if payload is None else AssetNameOwnership.model_validate_json(payload)
+
+    def _versions(self, namespace: str, name: str) -> tuple[str, ...]:
+        return tuple(
+            version for (ns, nm, version) in self._packages if (ns, nm) == (namespace, name)
+        )
+
+    def _store(self, item: PublishedAssetPackage, record: AssetNameOwnership) -> None:
+        self._packages[item.metadata.identity.key] = item.model_dump_json()
+        self._owners[record.key] = record.model_dump_json()
 
     def publish(self, package: PublishedAssetPackage) -> PublishedAssetPackage:
         item = PublishedAssetPackage.model_validate(package)
-        key = item.metadata.identity.key
-        if key in self._packages:
+        identity = item.metadata.identity
+        if identity.key in self._packages:
             raise ControlError("duplicate_package")
-        self._packages[key] = item.model_dump_json()
+        record = admit_trusted_version(item, self._record(identity.namespace, identity.name))
+        self._store(item, record)
         return _copy(item)
+
+    def publish_as(
+        self,
+        package: PublishedAssetPackage,
+        *,
+        publisher: Symbol,
+        groups: tuple[str, ...],
+        change: VersionChange | None = None,
+    ) -> PublishedAssetPackage:
+        """A member publishes a version under the ownership rules."""
+        item = PublishedAssetPackage.model_validate(package)
+        identity = item.metadata.identity
+        record = admit_member_version(
+            item,
+            self._record(identity.namespace, identity.name),
+            self._versions(identity.namespace, identity.name),
+            publisher=TypeAdapter(Symbol).validate_python(publisher),
+            groups=tuple(groups),
+            change=change,
+        )
+        self._store(item, record)
+        return _copy(item)
+
+    def ownership(self, namespace: str, name: str) -> AssetNameOwnership | None:
+        return self._record(namespace, name)
+
+    def save_ownership(
+        self, updated: AssetNameOwnership, *, previous: AssetNameOwnership
+    ) -> AssetNameOwnership:
+        """Replace a name's record only if it is still the one the change was
+        decided against, so two concurrent owner actions cannot lose one."""
+        item = AssetNameOwnership.model_validate(updated)
+        before = AssetNameOwnership.model_validate(previous)
+        if item.key != before.key:
+            raise ControlError("ownership_changed")
+        current = self._record(*item.key)
+        if current is None:
+            raise ControlError("name_missing")
+        if current != before:
+            raise ControlError("ownership_changed")
+        self._owners[item.key] = item.model_dump_json()
+        return item.model_copy(deep=True)
 
     def discover(self, *, namespace: str | None = None) -> tuple[PublishedAssetPackage, ...]:
         result = []
