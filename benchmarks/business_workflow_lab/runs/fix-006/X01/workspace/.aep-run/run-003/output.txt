@@ -1,0 +1,32 @@
+INPUTS FOR INTEGRATION
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\output\downloads\sap_orders_sep2026.csv exists= True bytes= 1616
+  0 ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+  1 ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+  2 ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', '293572.50']
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\output\downloads\sap_invoices_sep2026.csv exists= True bytes= 1142
+  0 ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+  1 ['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95']
+  2 ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\output\expense_approved_sep2026.csv exists= True bytes= 1843
+  0 ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+  1 ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False']
+  2 ['EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'False']
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\input\project_template.xlsx exists= True bytes= 14209
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\input\fx_rates.csv exists= True bytes= 276
+  0 ['Currency', 'RateToTWD', 'Note']
+  1 ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+  2 ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+FX currencies: ['EUR', 'TWD', 'USD'] {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Quote CLI: ['C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\python.exe', 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\run_quote_cli.py', 'quotes', 'list', '--from', '2026-09-01', '--to', '2026-09-30', '--status', 'Accepted', '--format', 'json']
+Quote CLI returncode: 0
+Created C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\output\project_integration_report.xlsx
+Created C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\output\project_summary_sep2026.csv
+Created C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\output\quotes_accepted_sep2026.json
+Rows: {'orders_raw': 20, 'orders_non_cancelled': 18, 'invoices': 13, 'expenses_approved': 15, 'quotes_accepted': 4, 'summary_projects': 5, 'exceptions': 13}
+Summary rows:
+{'ProjectID': 'P001', 'OrderTWD': Decimal('693570.00'), 'InvoiceBalanceTWD': Decimal('386445.00'), 'ApprovedExpenseTWD': Decimal('18305.00'), 'AcceptedQuoteTWD': Decimal('331200.00')}
+{'ProjectID': 'P002', 'OrderTWD': Decimal('516084.50'), 'InvoiceBalanceTWD': Decimal('156256.00'), 'ApprovedExpenseTWD': Decimal('9100.00'), 'AcceptedQuoteTWD': Decimal('97450.85')}
+{'ProjectID': 'P003', 'OrderTWD': Decimal('150000.00'), 'InvoiceBalanceTWD': Decimal('0.00'), 'ApprovedExpenseTWD': Decimal('13037.50'), 'AcceptedQuoteTWD': Decimal('0.00')}
+{'ProjectID': 'P004', 'OrderTWD': Decimal('794876.25'), 'InvoiceBalanceTWD': Decimal('78750.00'), 'ApprovedExpenseTWD': Decimal('8840.00'), 'AcceptedQuoteTWD': Decimal('282150.00')}
+{'ProjectID': 'P005', 'OrderTWD': Decimal('770874.20'), 'InvoiceBalanceTWD': Decimal('236371.20'), 'ApprovedExpenseTWD': Decimal('6424.00'), 'AcceptedQuoteTWD': Decimal('0.00')}
+Verification passed: reopened workbook, checked template headers, date cells, row counts, non-Cancelled orders, Approved expenses, Accepted quotes, text IDs, numeric amounts, and summary formulas.

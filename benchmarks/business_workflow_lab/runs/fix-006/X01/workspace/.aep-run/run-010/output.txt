@@ -1,0 +1,67 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace
+OUTPUT EXISTS True
+FILE output\downloads\sap_invoices.csv size=587 mtime=2026-10-07T07:49:31
+FILE output\downloads\sap_invoices_sep2026.csv size=1142 mtime=2026-10-07T07:41:33
+FILE output\downloads\sap_orders.csv size=697 mtime=2026-10-07T07:49:29
+FILE output\downloads\sap_orders_sep2026.csv size=1456 mtime=2026-10-07T07:48:37
+FILE output\expense_approved.csv size=1843 mtime=2026-10-07T07:46:08
+FILE output\expense_approved_sep2026.csv size=1843 mtime=2026-10-07T07:43:16
+FILE output\project_integration_report.xlsx size=17788 mtime=2026-10-07T07:48:37
+FILE output\project_summary_sep2026.csv size=282 mtime=2026-10-07T07:48:37
+FILE output\quotes_accepted.json size=1321 mtime=2026-10-07T07:48:37
+FILE output\quotes_accepted_sep2026.json size=1321 mtime=2026-10-07T07:48:37
+CSV output/downloads/sap_orders.csv rows 8 headers dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+ first {'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}
+ last {'OrderID': '0045000108', 'CustomerID': 'C006', 'CustomerName': 'Helios Optics B.V.', 'ProjectID': '', 'OrderDate': '2026-08-31', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '3028.95'}
+  OrderDate ['2026-08-03', '2026-08-07', '2026-08-12'] ... ['2026-08-22', '2026-08-27', '2026-08-31']
+ Status counts {'Cancelled': 1, 'Closed': 4, 'Open': 3}
+ blank ProjectID 3
+CSV output/downloads/sap_invoices.csv rows 6 headers dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'])
+ first {'InvoiceID': '0090000201', 'OrderID': '0045000101', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-08-06', 'DueDate': '2026-08-21', 'Currency': 'TWD', 'Amount': '95895.00', 'PaidAmount': '47947.50', 'Balance': '47947.50'}
+ last {'InvoiceID': '0090000206', 'OrderID': '0045000106', 'CustomerID': 'C005', 'ProjectID': '', 'InvoiceDate': '2026-08-31', 'DueDate': '2026-09-30', 'Currency': 'USD', 'Amount': '4942.00', 'PaidAmount': '0.00', 'Balance': '4942.00'}
+  InvoiceDate ['2026-08-06', '2026-08-10', '2026-08-20'] ... ['2026-08-25', '2026-08-29', '2026-08-31']
+ blank ProjectID 1
+CSV output/downloads/sap_orders_sep2026.csv rows 18 headers dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+ first {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+ last {'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-30', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '104160.00'}
+  OrderDate ['2026-09-01', '2026-09-02', '2026-09-03'] ... ['2026-09-25', '2026-09-28', '2026-09-30']
+ Status counts {'Closed': 4, 'Open': 14}
+ blank ProjectID 6
+CSV output/downloads/sap_invoices_sep2026.csv rows 13 headers dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'])
+ first {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}
+ last {'InvoiceID': '0090000219', 'OrderID': '0045000125', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-09-30', 'DueDate': '2026-09-30', 'Currency': 'TWD', 'Amount': '386445.00', 'PaidAmount': '0.00', 'Balance': '386445.00'}
+  InvoiceDate ['2026-09-01', '2026-09-02', '2026-09-05'] ... ['2026-09-22', '2026-09-25', '2026-09-30']
+ blank ProjectID 6
+CSV output/expense_approved.csv rows 15 headers dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'])
+ first {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+ last {'ExpenseID': 'EXP-00028', 'EmployeeID': 'E005', 'EmployeeName': '王小華', 'ProjectID': 'P002', 'ExpenseDate': '2026-09-30', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '300.00', 'Status': 'Approved', 'ReceiptID': 'RC906299', 'Description': '加班餐費', 'MissingReceipt': 'False'}
+  ExpenseDate ['2026-09-01', '2026-09-02', '2026-09-04'] ... ['2026-09-20', '2026-09-24', '2026-09-30']
+ Status counts {'Approved': 15}
+ blank ProjectID 0
+CSV output/expense_approved_sep2026.csv rows 15 headers dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'])
+ first {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+ last {'ExpenseID': 'EXP-00028', 'EmployeeID': 'E005', 'EmployeeName': '王小華', 'ProjectID': 'P002', 'ExpenseDate': '2026-09-30', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '300.00', 'Status': 'Approved', 'ReceiptID': 'RC906299', 'Description': '加班餐費', 'MissingReceipt': 'False'}
+  ExpenseDate ['2026-09-01', '2026-09-02', '2026-09-04'] ... ['2026-09-20', '2026-09-24', '2026-09-30']
+ Status counts {'Approved': 15}
+ blank ProjectID 0
+CSV output/project_summary_sep2026.csv rows 5 headers dict_keys(['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD'])
+ first {'ProjectID': 'P001', 'OrderTWD': '693570.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}
+ last {'ProjectID': 'P005', 'OrderTWD': '770874.20', 'InvoiceBalanceTWD': '236371.20', 'ApprovedExpenseTWD': '6424.00', 'AcceptedQuoteTWD': '0.00'}
+ blank ProjectID 0
+WORKBOOK output\project_integration_report.xlsx sheets ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+ SHEET Report max_row 20 max_col 6
+  row1 ['Project Integration Report 專案整合報表', None, None, None, None, None]
+ SHEET Orders max_row 22 max_col 8
+  row1 ['Sales orders by project', None, None, None, None, None, None, None]
+ SHEET Invoices max_row 17 max_col 11
+  row1 ['Invoices by project', None, None, None, None, None, None, None, None, None, None]
+ SHEET Expenses max_row 19 max_col 8
+  row1 ['Expenses by project', None, None, None, None, None, None, None]
+ SHEET Quotes max_row 8 max_col 9
+  row1 ['Quotes by project', None, None, None, None, None, None, None, None]
+ SHEET Summary max_row 9 max_col 5
+  row1 ['Project summary (TWD)', None, None, None, None]
+ SHEET Exceptions max_row 17 max_col 4
+  row1 ['Exceptions 例外與關注項目', None, None, None]
+ SHEET Instructions max_row 56 max_col 3
+  row1 ['填寫說明 Instructions（請勿修改本工作表）', None, None]

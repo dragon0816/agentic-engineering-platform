@@ -1,0 +1,244 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\C01\workspace
+Input files: ['fx_rates.csv', 'quote_cli_manual.md', 'quote_template.xlsx']
+Output files: [('quote_report_C001_2026-09-01_to_2026-09-30.xlsx', 12057)]
+Run dirs: ['run-001', 'run-002', 'run-003', 'run-004', 'run-005', 'run-006', 'run-007', 'run-008']
+
+== run-004 ==
+  home 0
+  output.txt 6485
+  params.json 236
+  script.py 21002
+  tmp 0
+ script first line: import os, sys, json, csv, subprocess, shlex, re, math
+ script tail:
+456: q_rows = max(0, cq.max_row - 1)
+457: l_rows = max(0, cl.max_row - 1)
+458: s_rows = max(0, cs.max_row - 1)
+459: assert q_rows == len(quotes), f'Quotes row count {q_rows} != {len(quotes)}'
+460: assert l_rows == len(lines), f'Lines row count {l_rows} != {len(lines)}'
+461: assert s_rows == len(summary_rows), f'Summary row count {s_rows} != {len(summary_rows)}'
+462: for r in range(2, cq.max_row + 1):
+463:     assert isinstance(cq.cell(r, qh['QuoteID']).value, str), 'QuoteID is not text'
+464:     assert isinstance(cq.cell(r, qh['CustomerID']).value, str), 'CustomerID is not text'
+465:     assert isinstance(cq.cell(r, qh['TotalAmount']).value, (int,float)), 'TotalAmount is not numeric'
+466: for r in range(2, cl.max_row + 1):
+467:     assert isinstance(cl.cell(r, lh['QuoteID']).value, str), 'Line QuoteID is not text'
+468:     assert isinstance(cl.cell(r, lh['LineID']).value, str), 'LineID is not text'
+469:     assert isinstance(cl.cell(r, lh['Quantity']).value, (int,float)), 'Quantity is not numeric'
+470:     assert isinstance(cl.cell(r, lh['UnitPrice']).value, (int,float)), 'UnitPrice is not numeric'
+471:     assert isinstance(cl.cell(r, lh['LineAmount']).value, (int,float)), 'LineAmount is not numeric'
+472: # Verify summary equals status/currency aggregation from Quotes sheet.
+473: actual = defaultdict(lambda: {'QuoteCount': 0, 'TotalAmount': 0.0})
+474: for r in range(2, cq.max_row + 1):
+475:     key = (cq.cell(r, qh['Status']).value, cq.cell(r, qh['Currency']).value)
+476:     actual[key]['QuoteCount'] += 1
+477:     actual[key]['TotalAmount'] += float(cq.cell(r, qh['TotalAmount']).value)
+478: seen = {}
+479: for r in range(2, cs.max_row + 1):
+480:     key = (cs.cell(r, sh['Status']).value, cs.cell(r, sh['Currency']).value)
+481:     seen[key] = {'QuoteCount': cs.cell(r, sh['QuoteCount']).value, 'TotalAmount': float(cs.cell(r, sh['TotalAmount']).value)}
+482: assert set(seen) == set(actual), f'Summary keys {set(seen)} != {set(actual)}'
+483: for key, vals in actual.items():
+484:     assert seen[key]['QuoteCount'] == vals['QuoteCount'], f'Summary count mismatch {key}'
+485:     assert abs(seen[key]['TotalAmount'] - vals['TotalAmount']) < 0.005, f'Summary amount mismatch {key}'
+486: print('Verified output file:', out_path.name)
+487: print('Verified Quotes rows:', q_rows)
+488: print('Verified Lines rows:', l_rows)
+489: print('Verified Summary rows:', s_rows)
+490: print('Output files:', sorted(p.name for p in output_dir.iterdir()))
+
+== run-005 ==
+  home 0
+  output.txt 3985
+  script.py 1672
+  tmp 0
+ script first line: from pathlib import Path
+ script tail:
+1: from pathlib import Path
+2: from openpyxl import load_workbook
+3: import json, os, textwrap
+4: ws = Path.cwd()
+5: print('Workspace:', ws)
+6: print('Input files:', sorted(p.name for p in (ws/'input').glob('*')))
+7: print('Output files:', [(p.name, p.stat().st_size) for p in sorted((ws/'output').glob('*'))])
+8: run_dir = ws/'.aep-run'
+9: if run_dir.exists():
+10:     runs = sorted([p for p in run_dir.iterdir() if p.is_dir()])
+11:     print('Run dirs:', [p.name for p in runs])
+12:     if runs:
+13:         latest = runs[-1]
+14:         print('Latest run dir:', latest)
+15:         sp = latest/'script.py'
+16:         if sp.exists():
+17:             lines = sp.read_text(encoding='utf-8', errors='replace').splitlines()
+18:             print('Latest script line count:', len(lines))
+19:             for i, line in enumerate(lines[-80:], start=max(1,len(lines)-79)):
+20:                 if 'assert' in line or 'Summary' in line or 'B3' in line or 'D3' in line:
+21:                     print(f'{i}: {line}')
+22: for out in sorted((ws/'output').glob('*.xlsx')):
+23:     print('\nInspect workbook:', out.name)
+24:     wb = load_workbook(out, data_only=False)
+25:     print('Sheets:', wb.sheetnames)
+26:     for s in ['Report','Quotes','Lines','Summary']:
+27:         sh = wb[s]
+28:         print(s, 'max_row', sh.max_row, 'max_col', sh.max_column)
+29:         sample = []
+30:         for row in sh.iter_rows(min_row=1, max_row=min(sh.max_row,8), values_only=True):
+31:             sample.append(row[:min(sh.max_column,12)])
+32:         print(s, 'sample:', sample)
+33:     cr = wb['Report']
+34:     print('Report B3/D3 raw:', repr(cr['B3'].value), type(cr['B3'].value), repr(cr['D3'].value), type(cr['D3'].value))
+35:     print('Summary B2:', wb['Summary']['B2'].value)
+
+== run-006 ==
+  home 0
+  output.txt 15692
+  script.py 665
+  tmp 0
+ script first line: from pathlib import Path
+ script tail:
+1: from pathlib import Path
+2: ws=Path.cwd()
+3: for rn in ['run-003','run-004']:
+4:     p=ws/'.aep-run'/rn/'script.py'
+5:     print('\n---', rn, 'exists', p.exists(), '---')
+6:     if p.exists():
+7:         lines=p.read_text(encoding='utf-8', errors='replace').splitlines()
+8:         print('line_count', len(lines))
+9:         for i,line in enumerate(lines, start=1):
+10:             if 'assert' in line or 'date_norm' in line or 'Summary' in line or 'B3' in line or 'D3' in line or 'raise ' in line:
+11:                 print(f'{i}: {line}')
+12:         print('\nLast 70 lines:')
+13:         for i,line in enumerate(lines[-70:], start=max(1,len(lines)-69)):
+14:             print(f'{i}: {line}')
+
+== run-007 ==
+  home 0
+  output.txt 4552
+  params.json 236
+  script.py 17036
+  tmp 0
+ script first line: import csv, json, os, shutil, subprocess, sys
+ script tail:
+315: def as_date(v):
+316:     if isinstance(v, datetime): return v.date()
+317:     if isinstance(v, date): return v
+318:     if isinstance(v, str): return datetime.strptime(v[:10], '%Y-%m-%d').date()
+319:     return v
+320: assert [cq.cell(4,c).value for c in range(1, len(quote_headers)+1)] == quote_headers, 'Quotes headers changed'
+321: assert [cl.cell(4,c).value for c in range(1, len(line_headers)+1)] == line_headers, 'Lines headers changed'
+322: assert [cs.cell(4,c).value for c in range(1, len(summary_headers)+1)] == summary_headers, 'Summary headers changed'
+323: assert as_date(cr['B3'].value) == start_dt, f'Report!B3 {cr["B3"].value!r} != {start_dt}'
+324: assert as_date(cr['D3'].value) == end_dt, f'Report!D3 {cr["D3"].value!r} != {end_dt}'
+325: assert cq.max_row == (4 if not quote_docs else 4 + len(quote_docs)), f'Quotes rows {cq.max_row}'
+326: assert cl.max_row == (4 if not quote_docs else 4 + line_count), f'Lines rows {cl.max_row}'
+327: for r in range(5, 5 + len(quote_docs)):
+328:     for c in [qh.get('QuoteID'), qh.get('CustomerID'), qh.get('ProjectID')]:
+329:         if c: assert isinstance(cq.cell(r,c).value, str), f'Quotes text column {c} row {r}'
+330:     for c in [qh.get('Subtotal'), qh.get('DiscountPercent'), qh.get('NetAmount'), qh.get('NetAmountTWD')]:
+331:         if c: assert isinstance(cq.cell(r,c).value, (int,float)), f'Quotes numeric column {c} row {r}'
+332: for r in range(5, 5 + line_count):
+333:     for c in [lh.get('QuoteID'), lh.get('ProductID')]:
+334:         if c: assert isinstance(cl.cell(r,c).value, str), f'Lines text column {c} row {r}'
+335:     for c in [lh.get('Quantity'), lh.get('UnitPrice'), lh.get('LineAmount')]:
+336:         if c: assert isinstance(cl.cell(r,c).value, (int,float)), f'Lines numeric column {c} row {r}'
+337: expected_formula = '=SUM(Quotes!K5:K5)' if not quote_docs else f'=SUM(Quotes!K5:K{last_quote_row})'
+338: assert cs['B2'].value == expected_formula, f'Summary!B2 {cs["B2"].value!r} != {expected_formula!r}'
+339: saved_summary = {}
+340: for r in range(5, cs.max_row+1):
+341:     if cs.cell(r,1).value is None:
+342:         continue
+343:     key = (cs.cell(r, sh['SubGroup']).value, cs.cell(r, sh['Currency']).value)
+344:     saved_summary[key] = {'amount': q2(cs.cell(r, sh['Amount']).value), 'amount_twd': q2(cs.cell(r, sh['AmountTWD']).value), 'count': int(cs.cell(r, sh['Count']).value)}
+345: expected_summary = {k: {'amount': q2(v['amount']), 'amount_twd': q2(v['amount_twd']), 'count': int(v['count'])} for k, v in summary.items()}
+346: assert saved_summary == expected_summary, f'Summary mismatch saved={saved_summary} expected={expected_summary}'
+347: print('Output workbook:', out_path)
+348: print('Checked: template sheets preserved; Report dates and condition set; Quotes rows:', len(quote_docs), '; Lines rows:', line_count, '; Summary rows:', len(expected_summary), '; Summary!B2:', expected_formula, '; ID columns text; numeric amount columns numeric.')
+349: print('Output files:', sorted(p.name for p in output_dir.iterdir()))
+
+== run-008 ==
+  home 0
+  output.txt 8256
+  script.py 1599
+  tmp 0
+ script first line: from pathlib import Path
+ script tail:
+1: from pathlib import Path
+2: import json, os, zipfile
+3: from openpyxl import load_workbook
+4: ws = Path.cwd()
+5: print('Workspace:', ws)
+6: print('Input files:', sorted(p.name for p in (ws/'input').glob('*')) if (ws/'input').exists() else 'NO input')
+7: print('Output files:', [(p.name, p.stat().st_size) for p in sorted((ws/'output').glob('*'))] if (ws/'output').exists() else 'NO output')
+8: run_root = ws/'.aep-run'
+9: print('Run dirs:', [p.name for p in sorted(run_root.glob('*'))] if run_root.exists() else 'NO .aep-run')
+10: for run in sorted(run_root.glob('run-*'))[-5:]:
+11:     print('\n==', run.name, '==')
+12:     for p in sorted(run.iterdir()):
+13:         print(' ', p.name, p.stat().st_size)
+14:     sp = run/'script.py'
+15:     if sp.exists():
+16:         text = sp.read_text(encoding='utf-8', errors='replace')
+17:         print(' script first line:', text.splitlines()[0] if text.splitlines() else '')
+18:         # Print likely assertion/check lines near bottom for current failure diagnosis
+19:         lines = text.splitlines()
+20:         print(' script tail:')
+21:         for i, line in list(enumerate(lines, start=1))[-35:]:
+22:             print(f'{i}: {line}')
+23: 
+24: out = ws/'output'/'quote_report_C001_2026-09-01_to_2026-09-30.xlsx'
+25: if out.exists():
+26:     wb = load_workbook(out, data_only=False)
+27:     print('\nWorkbook sheets:', wb.sheetnames)
+28:     for s in ['Report','Quotes','Lines','Summary']:
+29:         sh = wb[s]
+30:         print('\nSheet', s, 'max_row', sh.max_row, 'max_col', sh.max_column)
+31:         for row in sh.iter_rows(min_row=1, max_row=min(sh.max_row, 10), values_only=True):
+32:             print(row)
+33:     wb.close()
+
+Workbook sheets: ['Report', 'Quotes', 'Lines', 'Summary', 'Instructions']
+
+Sheet Report max_row 20 max_col 6
+('Quotation Report 報價報表', None, None, None, None, None)
+(None, None, None, None, None, None)
+('起始日期 From', datetime.datetime(2026, 9, 1, 0, 0), '結束日期 To', datetime.datetime(2026, 9, 30, 0, 0), None, None)
+('條件 Condition', 'CustomerID=C001; QuoteDate 2026-09-01 to 2026-09-30 inclusive', None, None, None, None)
+('產出時間 Generated at', '2026-10-07T07:29:35+08:00', None, None, None, None)
+(None, None, None, None, None, None)
+('資料來源 Source', 'quote_cli; fx_rates.csv', '取得時間 Fetched at', '2026-10-07T07:29:35+08:00', None, None)
+(None, None, None, None, None, None)
+('備註 Notes', None, None, None, None, None)
+(None, None, None, None, None, None)
+
+Sheet Quotes max_row 8 max_col 11
+('Quote headers', None, None, None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None, None, None)
+('QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount', 'NetAmountTWD')
+('Q0010', 'C001', 'P001', datetime.datetime(2026, 9, 1, 0, 0), datetime.datetime(2026, 9, 20, 0, 0), 'Sent', 'TWD', 218557.5, 5, 207629.63, 207629.63)
+('Q0011', 'C001', 'P001', datetime.datetime(2026, 9, 3, 0, 0), datetime.datetime(2026, 10, 3, 0, 0), 'Accepted', 'USD', 11500, 10, 10350, 331200)
+('Q0014', 'C001', 'P001', datetime.datetime(2026, 9, 9, 0, 0), datetime.datetime(2026, 9, 28, 0, 0), 'Expired', 'EUR', 18072, 0, 18072, 632520)
+('Q0018', 'C001', 'P001', datetime.datetime(2026, 9, 21, 0, 0), datetime.datetime(2026, 10, 21, 0, 0), 'Draft', 'TWD', 572130, 10, 514917, 514917)
+
+Sheet Lines max_row 15 max_col 6
+('Quote line items', None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None)
+(None, None, None, None, None, None)
+('QuoteID', 'ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount')
+('Q0010', 'MAT-1003', '校正服務 (Calibration)', 1, 12600, 12600)
+('Q0010', 'MAT-1001', 'Signal Analyzer Module', 5, 37500, 187500)
+('Q0010', 'MAT-1005', 'Test Fixture 治具', 1, 18457.5, 18457.5)
+('Q0011', 'MAT-1004', 'Shielding Box', 5, 2300, 11500)
+('Q0014', 'MAT-1004', 'Shielding Box', 4, 2070, 8280)
+('Q0014', 'MAT-1006', 'Power Sensor', 6, 882, 5292)
+
+Sheet Summary max_row 8 max_col 6
+('Quote summary', None, None, None, None, None)
+('總計 TWD Totals', '=SUM(Quotes!K5:K8)', None, None, None, None)
+(None, None, None, None, None, None)
+('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+('Status', 'Accepted', 'USD', 10350, 331200, 1)
+('Status', 'Draft', 'TWD', 514917, 514917, 1)
+('Status', 'Expired', 'EUR', 18072, 632520, 1)
+('Status', 'Sent', 'TWD', 207629.63, 207629.63, 1)

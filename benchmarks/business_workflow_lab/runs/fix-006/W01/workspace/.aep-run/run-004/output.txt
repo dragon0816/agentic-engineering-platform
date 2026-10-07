@@ -1,0 +1,29 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\W01\workspace
+INPUT FILES
+ - fx_rates.csv 276 bytes
+ - sales_template.xlsx 9844 bytes
+ - sap_manual.md 2077 bytes
+OUTPUT FILES
+ - output\downloads\orders_export.csv 1129 bytes
+ - output\september_open_orders.xlsx 11464 bytes
+TARGET_EXISTS True
+SHEETS ['Report', 'Details', 'Summary', 'Instructions']
+SHEET Report max_row 20 max_col 6
+SAMPLE [('Sales Order Report 銷售訂單報表', None, None, None, None, None), (None, None, None, None, None, None), ('起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None), ('條件 Condition', 'Sales Orders; Status=Open; Sort by OrderID asc', None, None, None, None), ('產出時間 Generated at', '2026-10-07T07:02:48+08:00', None, None, None, None), (None, None, None, None, None, None), ('資料來源 Source', 'Lab ERP synthetic SAP-like web system', '取得時間 Fetched at', '2026-10-07T07:02:48+08:00', None, None), (None, None, None, None, None, None)]
+SHEET Details max_row 18 max_col 11
+SAMPLE [('Sales order details', None, None, None, None, None, None, None, None, None, None), ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None), (None, None, None, None, None, None, None, None, None, None, None), ('OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms'), ('0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', 150000, 150000, 'Grace Lin <grace.lin@acme-precision.example>', 'NET10'), ('0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', 293572.5, 293572.5, '張美玲 <mei@tw-precision.example>', 'NET30'), ('0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', 12311, 393952, 'Peter Ho <peter.ho@acme-limited.example>', 'NET15'), ('0045000113', 'C004', '藍海電子有限公司', None, '2026-09-05', 'Open', 'TWD', 15390, 15390, None, 'NET15')]
+SHEET Summary max_row 8 max_col 6
+SAMPLE [('Sales summary', None, None, None, None, None), ('總計 TWD Totals', '=SUM(Details!I5:I18)', None, None, None, None), (None, None, None, None, None, None), ('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count'), ('Currency', 'EUR', 'EUR', 28936.37, 1012772.95, 4), ('Currency', 'TWD', 'TWD', 637522.5, 637522.5, 6), ('Currency', 'USD', 'USD', 32014, 1024448, 4), ('Total', 'All currencies', 'TWD', None, 2674743.45, 14)]
+SHEET Instructions max_row 29 max_col 3
+SAMPLE [('填寫說明 Instructions（請勿修改本工作表）', None, None), (None, None, None), ('Sheet', 'Cell / Range', 'Content and rule'), ('Report', 'A1:F1', '合併儲存格標題，保留不改。'), ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。'), ('Report', 'B4', '本次查詢條件的文字說明。'), ('Report', 'B5', '產出時間（ISO 8601）。'), ('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')]
+DETAIL_HEADER_ROW 4
+DETAIL_HEADERS ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+DETAIL_DATA_ROWS 14 [5, 6, 7] [16, 17, 18]
+ORDER_IDS ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+ORDER_IDS_SORTED True
+STATUSES ['Open']
+DATE_RANGE 2026-09-01 2026-09-30
+BY_CURRENCY {"EUR": [28936.370000000003, 1012772.95, 4], "TWD": [637522.5, 637522.5, 6], "USD": [32014.0, 1024448.0, 4]}
+TOTAL_TWD 2674743.45
+SUMMARY_B2_FORMULA_OR_VALUE =SUM(Details!I5:I18)
+SUMMARY_ROWS [('Sales summary', None, None, None, None, None), ('總計 TWD Totals', '=SUM(Details!I5:I18)', None, None, None, None), (None, None, None, None, None, None), ('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count'), ('Currency', 'EUR', 'EUR', 28936.37, 1012772.95, 4), ('Currency', 'TWD', 'TWD', 637522.5, 637522.5, 6), ('Currency', 'USD', 'USD', 32014, 1024448, 4), ('Total', 'All currencies', 'TWD', None, 2674743.45, 14)]

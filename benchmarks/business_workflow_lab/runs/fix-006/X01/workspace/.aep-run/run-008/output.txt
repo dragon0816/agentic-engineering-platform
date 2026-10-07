@@ -1,0 +1,157 @@
+
+WORKBOOK input\project_template.xlsx
+SHEET Report
+1 ['Project Integration Report 專案整合報表', None, None, None, None, None]
+2 [None, None, None, None, None, None]
+3 ['起始日期 From', None, '結束日期 To', None, None, None]
+4 ['條件 Condition', None, None, None, None, None]
+5 ['產出時間 Generated at', None, None, None, None, None]
+6 [None, None, None, None, None, None]
+7 ['資料來源 Source', None, '取得時間 Fetched at', None, None, None]
+8 [None, None, None, None, None, None]
+9 ['備註 Notes', None, None, None, None, None]
+10 [None, None, None, None, None, None]
+---
+SHEET Orders
+1 ['Sales orders by project', None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None]
+4 ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+---
+SHEET Invoices
+1 ['Invoices by project', None, None, None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None, None, None]
+4 ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+---
+SHEET Expenses
+1 ['Expenses by project', None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None]
+4 ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+---
+SHEET Quotes
+1 ['Quotes by project', None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None]
+4 ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+---
+SHEET Summary
+1 ['Project summary (TWD)', None, None, None, None]
+2 ['總計 TWD Totals', '=SUM(B5:B5)', '=SUM(C5:C5)', '=SUM(D5:D5)', '=SUM(E5:E5)']
+3 [None, None, None, None, None]
+4 ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+---
+SHEET Exceptions
+1 ['Exceptions 例外與關注項目', None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None]
+3 [None, None, None, None]
+4 ['Source', 'DocumentID', 'ProjectID', 'Reason']
+---
+SHEET Instructions
+1 ['填寫說明 Instructions（請勿修改本工作表）', None, None]
+2 [None, None, None]
+3 ['Sheet', 'Cell / Range', 'Content and rule']
+4 ['Report', 'A1:F1', '合併儲存格標題，保留不改。']
+5 ['Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。']
+6 ['Report', 'B4', '本次查詢條件的文字說明。']
+7 ['Report', 'B5', '產出時間（ISO 8601）。']
+8 ['Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。']
+9 ['Report', 'B9', '備註：缺少的資料、例外或限制。']
+10 ['Report', 'A20 與頁尾', '固定 footer，保留不改。']
+---
+
+WORKBOOK output\project_integration_report.xlsx
+SHEET Report
+1 ['Project Integration Report 專案整合報表', None, None, None, None, None]
+2 [None, None, None, None, None, None]
+3 ['起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None]
+4 ['條件 Condition', 'SAP Sales Orders excluding Cancelled by OrderDate; SAP Invoices by InvoiceDate; Expense Approved by ExpenseDate; Quote CLI Accepted by QuoteDate. Aggregated separately by ProjectID; customer name is not used as a join key; orders and quotes are not combined as revenue.', None, None, None, None]
+5 ['產出時間 Generated at', '2026-10-07T07:46:29+08:00', None, None, None, None]
+6 [None, None, None, None, None, None]
+7 ['資料來源 Source', 'Lab ERP SAP web; Expense Viewer desktop; quote_cli; fx_rates.csv', '取得時間 Fetched at', '2026-10-07T07:46:29+08:00', None, None]
+8 [None, None, None, None, None, None]
+9 ['備註 Notes', None, None, None, None, None]
+10 [None, None, None, None, None, None]
+---
+SHEET Orders
+1 ['Sales orders by project', None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None]
+4 ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+5 ['0045000109', 'P003', 'C001', '2026-09-01', 'Open', 'TWD', 150000, 150000]
+6 ['0045000110', 'P002', 'C002', '2026-09-02', 'Open', 'TWD', 293572.5, 293572.5]
+7 ['0045000111', 'P004', 'C003', '2026-09-03', 'Closed', 'EUR', 2250, 78750]
+8 ['0045000112', 'P005', 'C007', '2026-09-04', 'Open', 'USD', 12311, 393952]
+9 ['0045000113', None, 'C004', '2026-09-05', 'Open', 'TWD', 15390, 15390]
+10 ['0045000115', None, 'C005', '2026-09-09', 'Open', 'USD', 6391, 204512]
+---
+SHEET Invoices
+1 ['Invoices by project', None, None, None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None, None, None]
+4 ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+5 ['0090000207', '0045000108', None, 'C006', '2026-09-01', '2026-09-16', 'EUR', 3028.95, 0, 3028.95, 106013.25]
+6 ['0090000208', '0045000109', 'P003', 'C001', '2026-09-02', '2026-09-12', 'TWD', 150000, 150000, 0, 0]
+7 ['0090000209', '0045000112', 'P005', 'C007', '2026-09-05', '2026-09-20', 'USD', 12311, 4924.4, 7386.6, 236371.2]
+8 ['0090000210', '0045000111', 'P004', 'C003', '2026-09-08', '2026-10-08', 'EUR', 2250, 0, 2250, 78750]
+9 ['0090000211', '0045000115', None, 'C005', '2026-09-10', '2026-09-30', 'USD', 6391, 0, 6391, 204512]
+10 ['0090000212', '0045000117', 'P002', 'C002', '2026-09-12', '2026-09-22', 'TWD', 90000, 0, 90000, 90000]
+---
+SHEET Expenses
+1 ['Expenses by project', None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None]
+4 ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+5 ['EXP-00001', 'P001', 'E001', '2026-09-01', 'Approved', 'TWD', 1280, 1280]
+6 ['EXP-00002', 'P001', 'E001', '2026-09-02', 'Approved', 'USD', 200, 6400]
+7 ['EXP-00014', 'P003', 'E002', '2026-09-04', 'Approved', 'EUR', 180, 6300]
+8 ['EXP-00004', 'P003', 'E001', '2026-09-05', 'Approved', 'EUR', 42.5, 1487.5]
+9 ['EXP-00019', 'P002', 'E003', '2026-09-06', 'Approved', 'TWD', 8800, 8800]
+10 ['EXP-00023', 'P004', 'E004', '2026-09-07', 'Approved', 'USD', 156.25, 5000]
+---
+SHEET Quotes
+1 ['Quotes by project', None, None, None, None, None, None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None]
+3 [None, None, None, None, None, None, None, None, None]
+4 ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+5 ['Q0011', 'P001', 'C001', '2026-09-03', '2026-10-03', 'Accepted', 'USD', 10350, 331200]
+6 ['Q0013', 'P002', 'C002', '2026-09-07', '2026-10-07', 'Accepted', 'EUR', 2784.31, 97450.85]
+7 ['Q0015', 'P004', 'C003', '2026-09-11', '2026-09-25', 'Accepted', 'TWD', 282150, 282150]
+8 ['Q0020', None, 'C006', '2026-09-28', '2026-10-28', 'Accepted', 'EUR', 4870.1, 170453.5]
+---
+SHEET Summary
+1 ['Project summary (TWD)', None, None, None, None]
+2 ['總計 TWD Totals', '=SUM(B5:B9)', '=SUM(C5:C9)', '=SUM(D5:D9)', '=SUM(E5:E9)']
+3 [None, None, None, None, None]
+4 ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+5 ['P001', 693570, 386445, 18305, 331200]
+6 ['P002', 516084.5, 156256, 9100, 97450.85]
+7 ['P003', 150000, 0, 13037.5, 0]
+8 ['P004', 794876.25, 78750, 8840, 282150]
+9 ['P005', 770874.2, 236371.2, 6424, 0]
+---
+SHEET Exceptions
+1 ['Exceptions 例外與關注項目', None, None, None]
+2 ['第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None]
+3 [None, None, None, None]
+4 ['Source', 'DocumentID', 'ProjectID', 'Reason']
+5 ['SAP Orders', '0045000113', None, 'Missing ProjectID; excluded from project summary']
+6 ['SAP Orders', '0045000115', None, 'Missing ProjectID; excluded from project summary']
+7 ['SAP Orders', '0045000116', None, 'Missing ProjectID; excluded from project summary']
+8 ['SAP Orders', '0045000120', None, 'Missing ProjectID; excluded from project summary']
+9 ['SAP Orders', '0045000124', None, 'Missing ProjectID; excluded from project summary']
+10 ['SAP Orders', '0045000126', None, 'Missing ProjectID; excluded from project summary']
+---
+SHEET Instructions
+1 ['填寫說明 Instructions（請勿修改本工作表）', None, None]
+2 [None, None, None]
+3 ['Sheet', 'Cell / Range', 'Content and rule']
+4 ['Report', 'A1:F1', '合併儲存格標題，保留不改。']
+5 ['Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。']
+6 ['Report', 'B4', '本次查詢條件的文字說明。']
+7 ['Report', 'B5', '產出時間（ISO 8601）。']
+8 ['Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。']
+9 ['Report', 'B9', '備註：缺少的資料、例外或限制。']
+10 ['Report', 'A20 與頁尾', '固定 footer，保留不改。']
+---

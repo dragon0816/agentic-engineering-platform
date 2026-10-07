@@ -1,0 +1,28 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace
+Output files:
+ - output\downloads\sap_invoices.csv 1142
+ - output\downloads\sap_invoices_sep2026.csv 1142
+ - output\downloads\sap_orders.csv 1616
+ - output\downloads\sap_orders_sep2026.csv 1616
+ - output\expense_approved.csv 1843
+ - output\expense_approved_sep2026.csv 1843
+ - output\project_integration_report.xlsx 17723
+ - output\project_summary_sep2026.csv 282
+ - output\quotes_accepted.json 1321
+ - output\quotes_accepted_sep2026.json 1321
+CSV output\downloads\sap_orders.csv rows=20 headers=['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+ sample: {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+CSV output\downloads\sap_invoices.csv rows=13 headers=['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+ sample: {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}
+CSV output\expense_approved.csv rows=15 headers=['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+ sample: {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+CSV output\project_summary_sep2026.csv rows=5 headers=['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+ sample: {'ProjectID': 'P001', 'OrderTWD': '693570.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}
+Quote JSON list key: items
+JSON output/quotes_accepted_sep2026.json records=4
+ sample: {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}
+OK orders: all 20 rows in 2026-09-01..2026-09-30 by OrderDate
+OK invoices: all 13 rows in 2026-09-01..2026-09-30 by InvoiceDate
+OK expenses: all 15 rows in 2026-09-01..2026-09-30 by ExpenseDate
+OK quotes: all 4 rows in 2026-09-01..2026-09-30 by QuoteDate
+orders include Cancelled rows

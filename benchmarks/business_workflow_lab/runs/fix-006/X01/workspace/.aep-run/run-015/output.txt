@@ -1,0 +1,30 @@
+Rechecking explicit August and September outputs
+ - output\downloads\sap_orders_aug2026.csv 620
+ - output\downloads\sap_invoices_aug2026.csv 587
+ - output\expense_approved_aug2026.csv 562
+ - output\quotes_accepted_aug2026.json 1323
+ - output\project_summary_aug2026.csv 273
+ - output\project_integration_report_aug2026.xlsx 16046
+ - output\downloads\sap_orders_sep2026.csv 1456
+ - output\downloads\sap_invoices_sep2026.csv 1142
+ - output\expense_approved_sep2026.csv 1843
+ - output\quotes_accepted_sep2026.json 1321
+ - output\project_summary_sep2026.csv 282
+ - output\project_integration_report_sep2026.xlsx 17788
+
+August counts:
+ orders 7
+ invoices 6
+ expenses 4
+ quotes 4
+ summary rows 5
+ quote sample: [{'QuoteID': 'Q0001', 'CustomerID': 'C002', 'ProjectID': 'P002', 'QuoteDate': '2026-08-04', 'ValidUntil': '2026-09-03', 'Status': 'Accepted', 'Currency': 'TWD', 'Subtotal': '69000.00', 'DiscountPercent': '0', 'NetAmount': '69000.00'}, {'QuoteID': 'Q0003', 'CustomerID': 'C003', 'ProjectID': 'P004', 'QuoteDate': '2026-08-11', 'ValidUntil': '2026-09-10', 'Status': 'Accepted', 'Currency': 'EUR', 'Subtotal': '9463.96', 'DiscountPercent': '10', 'NetAmount': '8517.56'}]
+
+September restored counts:
+ orders 18
+ invoices 13
+ expenses 15
+ quotes 4
+ summary rows 5
+
+Validation passed: explicit August outputs exist, September _sep2026 outputs restored, and date/status/count checks passed.

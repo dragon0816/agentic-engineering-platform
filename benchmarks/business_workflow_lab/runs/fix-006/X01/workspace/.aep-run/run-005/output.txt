@@ -1,0 +1,32 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace
+Input files:
+ - input\expense_manual.md 2007
+ - input\fx_rates.csv 276
+ - input\project_template.xlsx 14209
+ - input\quote_cli_manual.md 2303
+ - input\sap_manual.md 2077
+Output files:
+ - output\downloads\sap_invoices.csv 1142
+ - output\downloads\sap_invoices_sep2026.csv 1142
+ - output\downloads\sap_orders.csv 1616
+ - output\downloads\sap_orders_sep2026.csv 1616
+ - output\expense_approved.csv 1843
+ - output\expense_approved_sep2026.csv 1843
+ - output\project_integration_report.xlsx 17723
+ - output\project_summary_sep2026.csv 282
+ - output\quotes_accepted.json 1321
+ - output\quotes_accepted_sep2026.json 1321
+CSV output\downloads\sap_orders.csv rows=20 headers=['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+ sample: {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+CSV output\downloads\sap_invoices.csv rows=13 headers=['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+ sample: {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}
+CSV output\expense_approved.csv rows=15 headers=['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+ sample: {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+CSV output\project_summary_sep2026.csv rows=5 headers=['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+ sample: {'ProjectID': 'P001', 'OrderTWD': '693570.00', 'InvoiceBalanceTWD': '386445.00', 'ApprovedExpenseTWD': '18305.00', 'AcceptedQuoteTWD': '331200.00'}
+JSON output\quotes_accepted_sep2026.json rows=3
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X01\workspace\.aep-run\run-005\script.py", line 48, in <module>
+    print(' sample:', quotes[0])
+                      ~~~~~~^^^
+KeyError: 0

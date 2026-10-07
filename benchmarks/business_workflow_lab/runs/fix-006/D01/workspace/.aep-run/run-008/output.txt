@@ -1,0 +1,22 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\D01\workspace
+Output files: ['E001_september_expenses.xlsx', 'E001_september_expenses_export.csv', 'expense_export_E001_2026-09-01_2026-09-30.csv']
+Found E001_september_expenses.xlsx: 12755 bytes
+Found expense_export_E001_2026-09-01_2026-09-30.csv: 1715 bytes
+Found E001_september_expenses_export.csv: 1715 bytes
+CSV headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+CSV row count: 13
+FX rates used: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Expected summary groups: {('Approved', 'TWD'): {'Count': 3, 'Amount': Decimal('5050.00'), 'AmountTWD': Decimal('5050.00')}, ('Approved', 'USD'): {'Count': 1, 'Amount': Decimal('200.00'), 'AmountTWD': Decimal('6400.00')}, ('Submitted', 'TWD'): {'Count': 3, 'Amount': Decimal('7049.00'), 'AmountTWD': Decimal('7049.00')}, ('Approved', 'EUR'): {'Count': 2, 'Amount': Decimal('102.50'), 'AmountTWD': Decimal('3587.50')}, ('Draft', 'USD'): {'Count': 2, 'Amount': Decimal('124.15'), 'AmountTWD': Decimal('3972.80')}, ('Rejected', 'EUR'): {'Count': 1, 'Amount': Decimal('155.00'), 'AmountTWD': Decimal('5425.00')}, ('Rejected', 'USD'): {'Count': 1, 'Amount': Decimal('12.30'), 'AmountTWD': Decimal('393.60')}}
+Expected TWD total: 31877.90
+Expected exceptions: 1
+Workbook sheets: ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+Details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+Summary headers: ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+Exceptions headers: ['ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason']
+Details rows: 13
+Summary rows: 7
+Exceptions rows: 1
+Summary B2 formula: =SUM(Details!I5:I17)
+Workbook TWD total from Summary rows: 31877.90
+FINAL CHECK PASSED
+Verified: exported CSV, filled template workbook, details/status-currency summary, TWD total 31877.90, and missing-receipt exception.

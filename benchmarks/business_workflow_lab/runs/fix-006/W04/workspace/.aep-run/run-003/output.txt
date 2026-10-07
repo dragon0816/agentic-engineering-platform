@@ -1,0 +1,14 @@
+Downloaded filtered rows: 14
+Downloaded headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+OrderIDs: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\W04\workspace\output\sales_template_filled.xlsx
+Verification passed:
+- output workbook exists and sheets preserved
+- Details headers preserved; 14 rows written from row 5 with no duplicate/missing OrderID
+- OrderID/CustomerID/ProjectID stored as text where applicable; blank source values left blank
+- dates within 2026-09-01..2026-09-30 and status Open
+- NetAmount and NetAmountTWD numeric with 0.00 format; TWD values match fx_rates.csv ROUND_HALF_UP
+- Summary B2 formula extends to Details!I5:I18 and grouped totals equal Details total
+Summary rows: [('Open', None, 'TWD', 637522.5, 637522.5, 6), ('Open', None, 'USD', 32014, 1024448, 4), ('Open', None, 'EUR', 28936.37, 1012772.95, 4)]
+Total NetAmountTWD: 2674743.45

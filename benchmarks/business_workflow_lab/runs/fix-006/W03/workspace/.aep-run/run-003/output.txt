@@ -1,0 +1,45 @@
+FX rates loaded: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Invoice CSV headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice rows loaded: 13
+ sample invoice: {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'ProjectID': '', 'CustomerID': 'C006', 'InvoiceDate': datetime.date(2026, 9, 1), 'DueDate': datetime.date(2026, 9, 16), 'Currency': 'EUR', 'Amount': Decimal('3028.95'), 'PaidAmount': Decimal('0.00'), 'Balance': Decimal('3028.95'), 'BalanceTWD': Decimal('106013.25')}
+ sample invoice: {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'InvoiceDate': datetime.date(2026, 9, 2), 'DueDate': datetime.date(2026, 9, 12), 'Currency': 'TWD', 'Amount': Decimal('150000.00'), 'PaidAmount': Decimal('150000.00'), 'Balance': Decimal('0.00'), 'BalanceTWD': Decimal('0.00')}
+ sample invoice: {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'ProjectID': 'P005', 'CustomerID': 'C007', 'InvoiceDate': datetime.date(2026, 9, 5), 'DueDate': datetime.date(2026, 9, 20), 'Currency': 'USD', 'Amount': Decimal('12311.00'), 'PaidAmount': Decimal('4924.40'), 'Balance': Decimal('7386.60'), 'BalanceTWD': Decimal('236371.20')}
+ sample invoice: {'InvoiceID': '0090000210', 'OrderID': '0045000111', 'ProjectID': 'P004', 'CustomerID': 'C003', 'InvoiceDate': datetime.date(2026, 9, 8), 'DueDate': datetime.date(2026, 10, 8), 'Currency': 'EUR', 'Amount': Decimal('2250.00'), 'PaidAmount': Decimal('0.00'), 'Balance': Decimal('2250.00'), 'BalanceTWD': Decimal('78750.00')}
+ sample invoice: {'InvoiceID': '0090000211', 'OrderID': '0045000115', 'ProjectID': '', 'CustomerID': 'C005', 'InvoiceDate': datetime.date(2026, 9, 10), 'DueDate': datetime.date(2026, 9, 30), 'Currency': 'USD', 'Amount': Decimal('6391.00'), 'PaidAmount': Decimal('0.00'), 'Balance': Decimal('6391.00'), 'BalanceTWD': Decimal('204512.00')}
+Saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\W03\workspace\output\project_invoices_2026-09.xlsx
+
+Verification checks:
+ - sheet_names_preserved: OK
+ - invoice_headers_exact: OK
+ - invoice_row_count_13: OK
+ - invoice_ids_text_leading_zero: OK
+ - order_ids_text_leading_zero: OK
+ - invoice_dates_are_dates: OK
+ - due_dates_are_dates: OK
+ - invoice_amounts_numeric: OK
+ - balance_twd_recomputed_all_rows: OK
+ - Orders_data_rows_blank: OK
+ - Expenses_data_rows_blank: OK
+ - Quotes_data_rows_blank: OK
+ - summary_row_count_projects_including_blank: OK
+ - summary_invoice_balance_twd_exact: OK
+ - summary_other_source_columns_blank: OK
+ - summary_formulas_extended: OK
+ - exceptions_exact_overdue_only: OK
+ - due_2026_09_30_not_overdue: OK
+
+Summary computed:
+ - ProjectID P001: InvoiceBalanceTWD 386445.00
+ - ProjectID P002: InvoiceBalanceTWD 156256.00
+ - ProjectID P003: InvoiceBalanceTWD 0.00
+ - ProjectID P004: InvoiceBalanceTWD 78750.00
+ - ProjectID P005: InvoiceBalanceTWD 236371.20
+ - ProjectID (blank): InvoiceBalanceTWD 378827.75
+
+Exceptions:
+ - ['Invoices', '0090000207', None, 'Overdue']
+ - ['Invoices', '0090000209', 'P005', 'Overdue']
+ - ['Invoices', '0090000212', 'P002', 'Overdue']
+ - ['Invoices', '0090000217', 'P002', 'Overdue']
+
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\W03\workspace\output\project_invoices_2026-09.xlsx

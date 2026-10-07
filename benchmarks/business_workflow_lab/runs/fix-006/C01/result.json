@@ -1,0 +1,487 @@
+{
+ "task_id": "C01",
+ "status": "PASS",
+ "code_generated": true,
+ "execution_succeeded": true,
+ "excel_correct": true,
+ "workflow_rerun_succeeded": true,
+ "elapsed_seconds": 385.9,
+ "repair_loops": 0,
+ "human_interventions": 6,
+ "interfaces_used": [
+  "CLI subprocess (quote)",
+  "coding execution (restricted runner)",
+  "direct read of mock internals (bypass)"
+ ],
+ "failure_reason": null,
+ "blocked_layer": null,
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\output\\quote_report_C001_2026-09-01_to_2026-09-30.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\output\\quote_report_C002_2026-08-01_to_2026-10-31.xlsx"
+ ],
+ "evidence_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\trace.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\events.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-001\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-002\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-003\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-004\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-005\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-006\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-007\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-008\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-009\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-010\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-011\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-012\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-013\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-014\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-006\\C01\\workspace\\.aep-run\\run-015\\script.py"
+ ],
+ "script_runs": [
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-001/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-002/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-005/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-006/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-008/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-009/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-010/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-012/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-014/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-015/script.py",
+   "refused": null
+  }
+ ],
+ "conversation_failures": [],
+ "bypass_signals": [
+  ".aep-run/run-011/script.py: from quote_cli",
+  ".aep-run/run-013/script.py: from quote_cli"
+ ],
+ "interventions": [
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261006-232925-72aedc",
+   "summary": "Run engineering/quote-report-from-cli@1.0.0 once with {\"customer_id\": \"C001\", \"start_date\": \"2026-09-01\", \"end_date\": \"2026-09-30\", \"cli_path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\quote_cli.cmd\"} — steps: coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261006-233026-a82fd3",
+   "summary": "Run engineering/quote-report-from-cli@1.0.1 once with {\"customer_id\": \"C001\", \"start_date\": \"2026-09-01\", \"end_date\": \"2026-09-30\", \"cli_path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\quote_cli.cmd\"} — steps: coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261006-233143-3938ff",
+   "summary": "Run engineering/quote-report-from-cli@1.0.2 once with {\"customer_id\": \"C001\", \"start_date\": \"2026-09-01\", \"end_date\": \"2026-09-30\", \"cli_path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\quote_cli.cmd\"} — steps: coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261006-233307-9c701a",
+   "summary": "Run engineering/quote-report-from-cli@1.0.3 once with {\"customer_id\": \"C001\", \"start_date\": \"2026-09-01\", \"end_date\": \"2026-09-30\", \"cli_path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\quote_cli.cmd\"} — steps: coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator rerun request (spec §9 second parameter set)",
+   "text": "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 2026-10-31。輸出檔名請自行決定，不要覆蓋第一次的結果。"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261006-233348-2f250f",
+   "summary": "Run engineering/quote-report-from-cli@1.0.3 once with {\"customer_id\": \"C002\", \"start_date\": \"2026-08-01\", \"end_date\": \"2026-10-31\", \"cli_path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\quote_cli.cmd\"} — steps: coding/run-python@1.0.0"
+  }
+ ],
+ "platform_runs": [
+  {
+   "run_id": "run-09d6d6feb282466294a3d3956c7f6163",
+   "digest": "8f2ff2d2fd36fc730228f06a5e38367dc0098c7a75812cfb056b8a44b265e30b",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-f1d40c95f97f4ec3815de143147fcdfe",
+   "digest": "d8716f75ff17c202247000623199eab02e21eb202bad05817db82d193bbfd068",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-37119758c6bc4106b1347ab109c9666f",
+   "digest": "4779dfd1da5cbe234c4e2039b08d9e6d7fccd07004f4a6edde660c309c838614",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-8b1378f2f1fb45e2b06e568eb1ff869d",
+   "digest": "b7a284c59c32587355991a850c26dccc59d6ae557dec2fb3bb3b78a87dd02c73",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-e7e3f2d0396e43818f3b43d8732f1c59",
+   "digest": "b7a284c59c32587355991a850c26dccc59d6ae557dec2fb3bb3b78a87dd02c73",
+   "status": "succeeded"
+  }
+ ],
+ "approvals": [
+  {
+   "approval_id": "ap-20261006-232925-72aedc",
+   "kind": "run",
+   "workflow": "engineering/quote-report-from-cli@1.0.0",
+   "arguments": {
+    "customer_id": "C001",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-30",
+    "cli_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd"
+   },
+   "status": "approved",
+   "run_id": "run-09d6d6feb282466294a3d3956c7f6163",
+   "run_status": "succeeded",
+   "digest": "8f2ff2d2fd36fc730228f06a5e38367dc0098c7a75812cfb056b8a44b265e30b",
+   "text": "【已核准並執行】engineering/quote-report-from-cli@1.0.0（候選 wf-20261006-232920-83673f，digest 8f2ff2d2fd36fc730228f06a5e38367dc0098c7a75812cfb056b8a44b265e30b）結果：succeeded\n步驟 0：succeeded\n{\"exit_code\": 1, \"timed_out\": false, \"output\": \"Workspace: C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-006\\\\C01\\\\workspace\\nInput files: ['fx_rates.csv', 'quote_cli_manual.md', 'quote_template.xlsx']\\nParameters: {'customer_id': 'C001', 'start_date': '2026-09-01', 'end_date': '2026-09-30', 'cli_path': 'C:\\\\\\\\Users\\\\\\\\Chi_L\\\\\\\\Documents\\\\\\\\ChatGPT\\\\\\\\agentic-engineering-platform\\\\\\\\benchmarks\\\\\\\\business_workflow_lab\\\\\\\\quote_cli_mock\\\\\\\\quote_cli.cmd'}\\nFX currencies: ['EUR', 'TWD', 'USD']\\nQuotes listed: 4 count field: 4\\nQuote documents fetched: "
+  },
+  {
+   "approval_id": "ap-20261006-233026-a82fd3",
+   "kind": "run",
+   "workflow": "engineering/quote-report-from-cli@1.0.1",
+   "arguments": {
+    "customer_id": "C001",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-30",
+    "cli_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd"
+   },
+   "status": "approved",
+   "run_id": "run-f1d40c95f97f4ec3815de143147fcdfe",
+   "run_status": "succeeded",
+   "digest": "d8716f75ff17c202247000623199eab02e21eb202bad05817db82d193bbfd068",
+   "text": "【已核准並執行】engineering/quote-report-from-cli@1.0.1（候選 wf-20261006-232920-83673f，digest d8716f75ff17c202247000623199eab02e21eb202bad05817db82d193bbfd068）結果：succeeded\n步驟 0：succeeded\n{\"truncated\": true, \"preview\": \"{\\\"exit_code\\\": 1, \\\"timed_out\\\": false, \\\"output\\\": \\\"Workspace: C:\\\\\\\\Users\\\\\\\\Chi_L\\\\\\\\Documents\\\\\\\\ChatGPT\\\\\\\\agentic-engineering-platform\\\\\\\\benchmarks\\\\\\\\business_workflow_lab\\\\\\\\runs\\\\\\\\fix-006\\\\\\\\C01\\\\\\\\workspace\\\\nInput files: ['fx_rates.csv', 'quote_cli_manual.md', 'quote_template.xlsx']\\\\nParameters: {'customer_id': 'C001', 'start_date': '2026-09-01', 'end_date': '2026-09-30', 'cli_path': 'C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Chi_L\\\\\\\\\\\\\\\\Documents\\\\\\\\\\\\\\\\ChatGPT\\\\\\\\\\\\\\\\agentic-engineering-platform\\\\\\\\\\\\\\\\benchmarks\\\\\\\\\\\\\\\\business_workflow_lab\\\\\\\\\\\\\\\\quote_cli_mock\\\\\\\\\\\\\\\\quote_cli.cmd'"
+  },
+  {
+   "approval_id": "ap-20261006-233143-3938ff",
+   "kind": "run",
+   "workflow": "engineering/quote-report-from-cli@1.0.2",
+   "arguments": {
+    "customer_id": "C001",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-30",
+    "cli_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd"
+   },
+   "status": "approved",
+   "run_id": "run-37119758c6bc4106b1347ab109c9666f",
+   "run_status": "succeeded",
+   "digest": "4779dfd1da5cbe234c4e2039b08d9e6d7fccd07004f4a6edde660c309c838614",
+   "text": "【已核准並執行】engineering/quote-report-from-cli@1.0.2（候選 wf-20261006-232920-83673f，digest 4779dfd1da5cbe234c4e2039b08d9e6d7fccd07004f4a6edde660c309c838614）結果：succeeded\n步驟 0：succeeded\n{\"truncated\": true, \"preview\": \"{\\\"exit_code\\\": 1, \\\"timed_out\\\": false, \\\"output\\\": \\\"Workspace: C:\\\\\\\\Users\\\\\\\\Chi_L\\\\\\\\Documents\\\\\\\\ChatGPT\\\\\\\\agentic-engineering-platform\\\\\\\\benchmarks\\\\\\\\business_workflow_lab\\\\\\\\runs\\\\\\\\fix-006\\\\\\\\C01\\\\\\\\workspace\\\\nInput files: ['fx_rates.csv', 'quote_cli_manual.md', 'quote_template.xlsx']\\\\nParameters: {'customer_id': 'C001', 'start_date': '2026-09-01', 'end_date': '2026-09-30', 'cli_path': 'C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Chi_L\\\\\\\\\\\\\\\\Documents\\\\\\\\\\\\\\\\ChatGPT\\\\\\\\\\\\\\\\agentic-engineering-platform\\\\\\\\\\\\\\\\benchmarks\\\\\\\\\\\\\\\\business_workflow_lab\\\\\\\\\\\\\\\\quote_cli_mock\\\\\\\\\\\\\\\\quote_cli.cmd'"
+  },
+  {
+   "approval_id": "ap-20261006-233307-9c701a",
+   "kind": "run",
+   "workflow": "engineering/quote-report-from-cli@1.0.3",
+   "arguments": {
+    "customer_id": "C001",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-30",
+    "cli_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd"
+   },
+   "status": "approved",
+   "run_id": "run-8b1378f2f1fb45e2b06e568eb1ff869d",
+   "run_status": "succeeded",
+   "digest": "b7a284c59c32587355991a850c26dccc59d6ae557dec2fb3bb3b78a87dd02c73",
+   "text": "【已核准並執行】engineering/quote-report-from-cli@1.0.3（候選 wf-20261006-232920-83673f，digest b7a284c59c32587355991a850c26dccc59d6ae557dec2fb3bb3b78a87dd02c73）結果：succeeded\n步驟 0：succeeded\n{\"exit_code\": 0, \"timed_out\": false, \"output\": \"Workspace: C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-006\\\\C01\\\\workspace\\nInput files: ['fx_rates.csv', 'quote_cli_manual.md', 'quote_template.xlsx']\\nParameters: {'customer_id': 'C001', 'start_date': '2026-09-01', 'end_date': '2026-09-30', 'cli_path': 'C:\\\\\\\\Users\\\\\\\\Chi_L\\\\\\\\Documents\\\\\\\\ChatGPT\\\\\\\\agentic-engineering-platform\\\\\\\\benchmarks\\\\\\\\business_workflow_lab\\\\\\\\quote_cli_mock\\\\\\\\quote_cli.cmd'}\\nTemplate sheets: ['Report', 'Quotes', 'Lines', 'Summary', 'Instructions']\\nSheet sample Report: "
+  },
+  {
+   "approval_id": "ap-20261006-233348-2f250f",
+   "kind": "run",
+   "workflow": "engineering/quote-report-from-cli@1.0.3",
+   "arguments": {
+    "customer_id": "C002",
+    "start_date": "2026-08-01",
+    "end_date": "2026-10-31",
+    "cli_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli.cmd"
+   },
+   "status": "approved",
+   "run_id": "run-e7e3f2d0396e43818f3b43d8732f1c59",
+   "run_status": "succeeded",
+   "digest": "b7a284c59c32587355991a850c26dccc59d6ae557dec2fb3bb3b78a87dd02c73",
+   "text": "【已核准並執行】engineering/quote-report-from-cli@1.0.3（候選 wf-20261006-232920-83673f，digest b7a284c59c32587355991a850c26dccc59d6ae557dec2fb3bb3b78a87dd02c73）結果：succeeded\n步驟 0：succeeded\n{\"exit_code\": 0, \"timed_out\": false, \"output\": \"Workspace: C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-006\\\\C01\\\\workspace\\nInput files: ['fx_rates.csv', 'quote_cli_manual.md', 'quote_template.xlsx']\\nParameters: {'customer_id': 'C002', 'start_date': '2026-08-01', 'end_date': '2026-10-31', 'cli_path': 'C:\\\\\\\\Users\\\\\\\\Chi_L\\\\\\\\Documents\\\\\\\\ChatGPT\\\\\\\\agentic-engineering-platform\\\\\\\\benchmarks\\\\\\\\business_workflow_lab\\\\\\\\quote_cli_mock\\\\\\\\quote_cli.cmd'}\\nTemplate sheets: ['Report', 'Quotes', 'Lines', 'Summary', 'Instructions']\\nSheet sample Report: "
+  }
+ ],
+ "workflow_unchanged_on_rerun": true,
+ "checks": [
+  {
+   "name": "an Excel deliverable exists",
+   "ok": true,
+   "detail": "first_result.xlsx"
+  },
+  {
+   "name": "template: sheet names and order",
+   "ok": true,
+   "detail": [
+    "Report",
+    "Quotes",
+    "Lines",
+    "Summary",
+    "Instructions"
+   ]
+  },
+  {
+   "name": "template: Report fixed labels and footer cell",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Report A1:F1 merged",
+   "ok": true,
+   "detail": [
+    "A1:F1"
+   ]
+  },
+  {
+   "name": "template: page footers kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Instructions unchanged",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: row-4 column names kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: freeze panes and auto-filter kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: column widths kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "formula kept: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(Quotes!K5:K8)"
+  },
+  {
+   "name": "formula range covers the data: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(Quotes!K5:K8); last data row 8"
+  },
+  {
+   "name": "formula cached value present: Summary!B2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "Quotes: QuoteID set matches",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "extra": []
+   }
+  },
+  {
+   "name": "Quotes: no duplicate QuoteID",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: row count",
+   "ok": true,
+   "detail": "4 vs 4"
+  },
+  {
+   "name": "Quotes: IDs stored as text",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: field values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: NetAmountTWD total (independent of formulas)",
+   "ok": true,
+   "detail": "1686266.63 vs 1686266.63"
+  },
+  {
+   "name": "Lines: every quote line joined to its QuoteID",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "extra": []
+   }
+  },
+  {
+   "name": "Summary: every expected group row (keys, amounts)",
+   "ok": true,
+   "detail": []
+  }
+ ],
+ "rerun_checks": [
+  {
+   "name": "an Excel deliverable exists",
+   "ok": true,
+   "detail": "quote_report_C002_2026-08-01_to_2026-10-31.xlsx"
+  },
+  {
+   "name": "template: sheet names and order",
+   "ok": true,
+   "detail": [
+    "Report",
+    "Quotes",
+    "Lines",
+    "Summary",
+    "Instructions"
+   ]
+  },
+  {
+   "name": "template: Report fixed labels and footer cell",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Report A1:F1 merged",
+   "ok": true,
+   "detail": [
+    "A1:F1"
+   ]
+  },
+  {
+   "name": "template: page footers kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Instructions unchanged",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: row-4 column names kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: freeze panes and auto-filter kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: column widths kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "formula kept: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(Quotes!K5:K10)"
+  },
+  {
+   "name": "formula range covers the data: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(Quotes!K5:K10); last data row 10"
+  },
+  {
+   "name": "formula cached value present: Summary!B2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "Quotes: QuoteID set matches",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "extra": []
+   }
+  },
+  {
+   "name": "Quotes: no duplicate QuoteID",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: row count",
+   "ok": true,
+   "detail": "6 vs 6"
+  },
+  {
+   "name": "Quotes: IDs stored as text",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: field values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: NetAmountTWD total (independent of formulas)",
+   "ok": true,
+   "detail": "707167.85 vs 707167.85"
+  },
+  {
+   "name": "Lines: every quote line joined to its QuoteID",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "extra": []
+   }
+  },
+  {
+   "name": "Summary: every expected group row (keys, amounts)",
+   "ok": true,
+   "detail": []
+  }
+ ],
+ "session_id": "conversation-babc25d78c45460899cfdc7525d82361",
+ "model_turns": [
+  5,
+  null,
+  3,
+  null,
+  5,
+  null,
+  6,
+  null,
+  2,
+  2,
+  null,
+  3
+ ],
+ "tool_calls": 19
+}

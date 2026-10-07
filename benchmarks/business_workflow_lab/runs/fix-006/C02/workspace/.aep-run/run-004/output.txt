@@ -1,0 +1,22 @@
+Input files:
+- fx_rates.csv (276 bytes)
+- quote_cli_manual.md (2303 bytes)
+- quote_template.xlsx (10991 bytes)
+Using CLI: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+CLI list count: reported=12 actual_items=12
+List fields: ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount']
+List sample: [{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}, {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}]
+Detail fetched: quotes=12 lines=29
+Header fields: ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount']
+Line fields: ['ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount', 'QuoteID']
+First quote detail: {'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}
+First line: {'ProductID': 'MAT-1003', 'ProductName': '校正服務 (Calibration)', 'Quantity': 1, 'UnitPrice': '12600.00', 'LineAmount': '12600.00', 'QuoteID': 'Q0010'}
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\C02\workspace\output\quote_template.xlsx
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\C02\workspace\output\findings.md
+
+VALIDATION
+Checked output workbook sheet names, unchanged headers, quote row count=12, line row count=29, Summary!B2 range, ID/text fields including blanks, numeric amount fields, all QuoteIDs retained, and findings.md expired list.
+Consistency issue quote count=0; IDs=(none)
+Expired-unaccepted quote count=3; IDs=Q0010, Q0014, Q0017

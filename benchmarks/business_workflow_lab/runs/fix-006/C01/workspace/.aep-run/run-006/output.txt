@@ -1,0 +1,238 @@
+
+--- run-003 exists True ---
+line_count 341
+24:     raise RuntimeError("This script must be run by the workflow runtime with AEP_WORKFLOW_PARAMS.")
+34:     raise ValueError("customer_id is required")
+36:     raise ValueError("start_date and end_date are required")
+41:     raise ValueError("start_date and end_date must be YYYY-MM-DD") from exc
+43:     raise ValueError("start_date must be on or before end_date")
+45:     raise ValueError("cli_path is required")
+48:     raise FileNotFoundError(f"CLI path does not exist: {CLI_PATH}")
+53:     raise FileNotFoundError(template_path)
+55:     raise FileNotFoundError(fx_path)
+68:         raise ValueError("fx_rates.csv must start with Currency,RateToTWD")
+115:         raise RuntimeError(f"quote_cli failed rc={last.returncode} args={args}; stderr={last.stderr.strip()}")
+120:         raise RuntimeError(f"quote_cli returned non-JSON stdout for args={args}: {out[:500]}") from exc
+130:     raise ValueError(f"Unsupported list schema_version: {list_payload.get('schema_version')}")
+138:         raise ValueError(f"Quote list item missing QuoteID: {item}")
+141:         raise ValueError(f"Unsupported get schema_version for {qid}: {doc.get('schema_version')}")
+145:         raise ValueError(f"QuoteID mismatch in get payload for {qid}: {header.get('QuoteID')}")
+154: required_sheets = ["Report", "Quotes", "Lines", "Summary", "Instructions"]
+157:     raise ValueError(f"Template missing sheets: {missing}")
+162: summary_ws = wb["Summary"]
+168:     raise ValueError("Quotes row 4 headers do not match template contract")
+170:     raise ValueError("Lines row 4 headers do not match template contract")
+172:     raise ValueError("Summary row 4 headers do not match template contract")
+202: report["B3"] = start_dt
+203: report["B3"].number_format = "yyyy-mm-dd"
+204: report["D3"] = end_dt
+205: report["D3"].number_format = "yyyy-mm-dd"
+221:         raise ValueError(f"No FX rate for currency {currency} in quote {qid}")
+302: assert set(required_sheets).issubset(check_wb.sheetnames)
+305: cs = check_wb["Summary"]
+307: assert [cq.cell(4, c).value for c in range(1, 12)] == quote_headers
+308: assert [cl.cell(4, c).value for c in range(1, 7)] == line_headers
+309: assert [cs.cell(4, c).value for c in range(1, 7)] == summary_headers
+310: assert cr["B3"].value == start_dt and cr["D3"].value == end_dt
+311: assert cq.max_row == (4 if not quote_docs else 4 + len(quote_docs))
+312: assert cl.max_row == (4 if not quote_docs else 4 + line_count)
+313: assert cq["A5"].data_type == "s" if quote_docs else True
+316:         assert isinstance(cq.cell(r, c).value, str), f"Quotes ID column {c} row {r} is not text"
+318:         assert isinstance(cq.cell(r, c).value, (int, float)), f"Quotes numeric column {c} row {r} is not numeric"
+320:     assert isinstance(cl.cell(r, 1).value, str), f"Lines QuoteID row {r} is not text"
+321:     assert isinstance(cl.cell(r, 2).value, str), f"Lines ProductID row {r} is not text"
+323:         assert isinstance(cl.cell(r, c).value, (int, float)), f"Lines numeric column {c} row {r} is not numeric"
+325: assert cs["B2"].value == expected_formula
+338: assert saved_summary == expected_summary, f"Summary mismatch: saved={saved_summary} expected={expected_summary}"
+341: print("Checked: template sheets preserved; Report dates/condition set; Quotes headers and", len(quote_docs), "rows; Lines headers and", line_count, "rows; Summary by status/currency", len(expected_summary), "rows; B2 formula", expected_formula, "; ID columns text; amount columns numeric.")
+
+Last 70 lines:
+272:                 cell.number_format = "0.00"
+273:             elif col == 4:
+274:                 cell.number_format = "0"
+275:         line_row += 1
+276:         line_count += 1
+277: 
+278: summary_row = 5
+279: for (status, currency), agg in sorted(summary.items()):
+280:     apply_style_from_header(summary_ws, summary_row, len(summary_headers))
+281:     vals = ["Status", status, currency, decimal_to_number(agg["amount"]), decimal_to_number(agg["amount_twd"]), int(agg["count"])]
+282:     for col, val in enumerate(vals, start=1):
+283:         cell = summary_ws.cell(summary_row, col, val)
+284:         if col in (1, 2, 3):
+285:             cell.number_format = "@"
+286:         elif col in (4, 5):
+287:             cell.number_format = "0.00"
+288:         elif col == 6:
+289:             cell.number_format = "0"
+290:     summary_row += 1
+291: 
+292: last_quote_row = 4 + len(quote_docs)
+293: if len(quote_docs) == 0:
+294:     summary_ws["B2"] = "=SUM(Quotes!K5:K5)"
+295: else:
+296:     summary_ws["B2"] = f"=SUM(Quotes!K5:K{last_quote_row})"
+297: 
+298: wb.save(out_path)
+299: 
+300: # Reopen and verify saved output against stated requirements.
+301: check_wb = load_workbook(out_path, data_only=False)
+302: assert set(required_sheets).issubset(check_wb.sheetnames)
+303: cq = check_wb["Quotes"]
+304: cl = check_wb["Lines"]
+305: cs = check_wb["Summary"]
+306: cr = check_wb["Report"]
+307: assert [cq.cell(4, c).value for c in range(1, 12)] == quote_headers
+308: assert [cl.cell(4, c).value for c in range(1, 7)] == line_headers
+309: assert [cs.cell(4, c).value for c in range(1, 7)] == summary_headers
+310: assert cr["B3"].value == start_dt and cr["D3"].value == end_dt
+311: assert cq.max_row == (4 if not quote_docs else 4 + len(quote_docs))
+312: assert cl.max_row == (4 if not quote_docs else 4 + line_count)
+313: assert cq["A5"].data_type == "s" if quote_docs else True
+314: for r in range(5, 5 + len(quote_docs)):
+315:     for c in (1, 2, 3):
+316:         assert isinstance(cq.cell(r, c).value, str), f"Quotes ID column {c} row {r} is not text"
+317:     for c in (8, 9, 10, 11):
+318:         assert isinstance(cq.cell(r, c).value, (int, float)), f"Quotes numeric column {c} row {r} is not numeric"
+319: for r in range(5, 5 + line_count):
+320:     assert isinstance(cl.cell(r, 1).value, str), f"Lines QuoteID row {r} is not text"
+321:     assert isinstance(cl.cell(r, 2).value, str), f"Lines ProductID row {r} is not text"
+322:     for c in (4, 5, 6):
+323:         assert isinstance(cl.cell(r, c).value, (int, float)), f"Lines numeric column {c} row {r} is not numeric"
+324: expected_formula = "=SUM(Quotes!K5:K5)" if not quote_docs else f"=SUM(Quotes!K5:K{last_quote_row})"
+325: assert cs["B2"].value == expected_formula
+326: 
+327: saved_summary = {}
+328: for r in range(5, cs.max_row + 1):
+329:     if cs.cell(r, 1).value is None:
+330:         continue
+331:     key = (cs.cell(r, 2).value, cs.cell(r, 3).value)
+332:     saved_summary[key] = {
+333:         "amount": q2(cs.cell(r, 4).value),
+334:         "amount_twd": q2(cs.cell(r, 5).value),
+335:         "count": int(cs.cell(r, 6).value),
+336:     }
+337: expected_summary = {k: {"amount": q2(v["amount"]), "amount_twd": q2(v["amount_twd"]), "count": v["count"]} for k, v in summary.items()}
+338: assert saved_summary == expected_summary, f"Summary mismatch: saved={saved_summary} expected={expected_summary}"
+339: 
+340: print("Output workbook:", out_path)
+341: print("Checked: template sheets preserved; Report dates/condition set; Quotes headers and", len(quote_docs), "rows; Lines headers and", line_count, "rows; Summary by status/currency", len(expected_summary), "rows; B2 formula", expected_formula, "; ID columns text; amount columns numeric.")
+
+--- run-004 exists True ---
+line_count 490
+22:     raise SystemExit('Missing required parameter: customer_id, start_date, end_date, cli_path')
+29:     raise SystemExit('end_date must be on or after start_date')
+39:     raise SystemExit('Missing input/quote_template.xlsx')
+41:     raise SystemExit('Missing input/fx_rates.csv')
+43:     raise SystemExit('Missing input/quote_cli_manual.md')
+45:     raise SystemExit(f'CLI path does not exist: {cli_path}')
+50: for s in ['Report','Quotes','Lines','Summary','Instructions']:
+91:         raise RuntimeError(f'CLI failed ({p.returncode}) for {cmd}\nSTDOUT:{out}\nSTDERR:{err}')
+97:         raise ValueError('Empty CLI output')
+105:     raise ValueError('CLI output was not JSON: ' + txt[:500])
+117:     raise RuntimeError('Could not run CLI for ' + purpose + '\n' + '\n'.join(errors))
+135:     raise ValueError('Cannot find quote list in CLI output')
+155:         raise ValueError('Quote row has no quote id: ' + repr(row))
+222:         raise ValueError('Quote document is not an object: ' + repr(doc))
+287: required_sheets = ['Report','Quotes','Lines','Summary']
+290:         raise SystemExit(f'Missing required template sheet: {s}')
+294: ws_summary = wb['Summary']
+303: print('Summary headers:', summary_headers)
+328: for coord, value in {'B2': customer_id, 'B3': start_dt, 'D3': end_dt}.items():
+383: # Summary by status and currency.
+404: # If Summary B2 was a formula in the template, extend/fill formulas as requested while preserving output values elsewhere.
+405: # The benchmark expects Summary!B2 formula copied down when a formula column exists.
+437: cr = check['Report']; cq = check['Quotes']; cl = check['Lines']; cs = check['Summary']
+446: assert cr['B2'].value == customer_id, f'Report!B2 {cr["B2"].value!r} != {customer_id!r}'
+447: assert as_date(cr['B3'].value) == start_dt, f'Report!B3 {cr["B3"].value!r} != {start_dt!r}'
+448: assert as_date(cr['D3'].value) == end_dt, f'Report!D3 {cr["D3"].value!r} != {end_dt!r}'
+452: assert q_headers == [c.value for c in wb_probe['Quotes'][1] if c.value is not None], 'Quotes headers changed'
+453: assert l_headers == [c.value for c in wb_probe['Lines'][1] if c.value is not None], 'Lines headers changed'
+454: assert s_headers == [c.value for c in wb_probe['Summary'][1] if c.value is not None], 'Summary headers changed'
+459: assert q_rows == len(quotes), f'Quotes row count {q_rows} != {len(quotes)}'
+460: assert l_rows == len(lines), f'Lines row count {l_rows} != {len(lines)}'
+461: assert s_rows == len(summary_rows), f'Summary row count {s_rows} != {len(summary_rows)}'
+463:     assert isinstance(cq.cell(r, qh['QuoteID']).value, str), 'QuoteID is not text'
+464:     assert isinstance(cq.cell(r, qh['CustomerID']).value, str), 'CustomerID is not text'
+465:     assert isinstance(cq.cell(r, qh['TotalAmount']).value, (int,float)), 'TotalAmount is not numeric'
+467:     assert isinstance(cl.cell(r, lh['QuoteID']).value, str), 'Line QuoteID is not text'
+468:     assert isinstance(cl.cell(r, lh['LineID']).value, str), 'LineID is not text'
+469:     assert isinstance(cl.cell(r, lh['Quantity']).value, (int,float)), 'Quantity is not numeric'
+470:     assert isinstance(cl.cell(r, lh['UnitPrice']).value, (int,float)), 'UnitPrice is not numeric'
+471:     assert isinstance(cl.cell(r, lh['LineAmount']).value, (int,float)), 'LineAmount is not numeric'
+482: assert set(seen) == set(actual), f'Summary keys {set(seen)} != {set(actual)}'
+484:     assert seen[key]['QuoteCount'] == vals['QuoteCount'], f'Summary count mismatch {key}'
+485:     assert abs(seen[key]['TotalAmount'] - vals['TotalAmount']) < 0.005, f'Summary amount mismatch {key}'
+489: print('Verified Summary rows:', s_rows)
+
+Last 70 lines:
+421: set_col_format(ws_lines, ['QuoteID','LineID','Product'], '@')
+422: set_col_format(ws_quotes, ['TotalAmount'], '#,##0.00')
+423: set_col_format(ws_lines, ['Quantity'], '0')
+424: set_col_format(ws_lines, ['UnitPrice','LineAmount'], '#,##0.00')
+425: set_col_format(ws_summary, ['QuoteCount'], '0')
+426: set_col_format(ws_summary, ['TotalAmount','TotalAmountTWD'], '#,##0.00')
+427: 
+428: out_name = f'quote_report_{customer_id}_{start_dt.isoformat()}_to_{end_dt.isoformat()}.xlsx'
+429: out_path = output_dir / out_name
+430: if out_path.exists():
+431:     out_path.unlink()
+432: wb.save(out_path)
+433: print('Saved:', out_path)
+434: 
+435: # Reopen and verify every stated requirement and the source column names.
+436: check = load_workbook(out_path, data_only=False)
+437: cr = check['Report']; cq = check['Quotes']; cl = check['Lines']; cs = check['Summary']
+438: 
+439: def as_date(v):
+440:     if isinstance(v, datetime): return v.date()
+441:     if isinstance(v, date): return v
+442:     if isinstance(v, str):
+443:         try: return datetime.strptime(v[:10], '%Y-%m-%d').date()
+444:         except Exception: return v
+445:     return v
+446: assert cr['B2'].value == customer_id, f'Report!B2 {cr["B2"].value!r} != {customer_id!r}'
+447: assert as_date(cr['B3'].value) == start_dt, f'Report!B3 {cr["B3"].value!r} != {start_dt!r}'
+448: assert as_date(cr['D3'].value) == end_dt, f'Report!D3 {cr["D3"].value!r} != {end_dt!r}'
+449: q_headers = [c.value for c in cq[1] if c.value is not None]
+450: l_headers = [c.value for c in cl[1] if c.value is not None]
+451: s_headers = [c.value for c in cs[1] if c.value is not None]
+452: assert q_headers == [c.value for c in wb_probe['Quotes'][1] if c.value is not None], 'Quotes headers changed'
+453: assert l_headers == [c.value for c in wb_probe['Lines'][1] if c.value is not None], 'Lines headers changed'
+454: assert s_headers == [c.value for c in wb_probe['Summary'][1] if c.value is not None], 'Summary headers changed'
+455: qh = header_map(cq); lh = header_map(cl); sh = header_map(cs)
+456: q_rows = max(0, cq.max_row - 1)
+457: l_rows = max(0, cl.max_row - 1)
+458: s_rows = max(0, cs.max_row - 1)
+459: assert q_rows == len(quotes), f'Quotes row count {q_rows} != {len(quotes)}'
+460: assert l_rows == len(lines), f'Lines row count {l_rows} != {len(lines)}'
+461: assert s_rows == len(summary_rows), f'Summary row count {s_rows} != {len(summary_rows)}'
+462: for r in range(2, cq.max_row + 1):
+463:     assert isinstance(cq.cell(r, qh['QuoteID']).value, str), 'QuoteID is not text'
+464:     assert isinstance(cq.cell(r, qh['CustomerID']).value, str), 'CustomerID is not text'
+465:     assert isinstance(cq.cell(r, qh['TotalAmount']).value, (int,float)), 'TotalAmount is not numeric'
+466: for r in range(2, cl.max_row + 1):
+467:     assert isinstance(cl.cell(r, lh['QuoteID']).value, str), 'Line QuoteID is not text'
+468:     assert isinstance(cl.cell(r, lh['LineID']).value, str), 'LineID is not text'
+469:     assert isinstance(cl.cell(r, lh['Quantity']).value, (int,float)), 'Quantity is not numeric'
+470:     assert isinstance(cl.cell(r, lh['UnitPrice']).value, (int,float)), 'UnitPrice is not numeric'
+471:     assert isinstance(cl.cell(r, lh['LineAmount']).value, (int,float)), 'LineAmount is not numeric'
+472: # Verify summary equals status/currency aggregation from Quotes sheet.
+473: actual = defaultdict(lambda: {'QuoteCount': 0, 'TotalAmount': 0.0})
+474: for r in range(2, cq.max_row + 1):
+475:     key = (cq.cell(r, qh['Status']).value, cq.cell(r, qh['Currency']).value)
+476:     actual[key]['QuoteCount'] += 1
+477:     actual[key]['TotalAmount'] += float(cq.cell(r, qh['TotalAmount']).value)
+478: seen = {}
+479: for r in range(2, cs.max_row + 1):
+480:     key = (cs.cell(r, sh['Status']).value, cs.cell(r, sh['Currency']).value)
+481:     seen[key] = {'QuoteCount': cs.cell(r, sh['QuoteCount']).value, 'TotalAmount': float(cs.cell(r, sh['TotalAmount']).value)}
+482: assert set(seen) == set(actual), f'Summary keys {set(seen)} != {set(actual)}'
+483: for key, vals in actual.items():
+484:     assert seen[key]['QuoteCount'] == vals['QuoteCount'], f'Summary count mismatch {key}'
+485:     assert abs(seen[key]['TotalAmount'] - vals['TotalAmount']) < 0.005, f'Summary amount mismatch {key}'
+486: print('Verified output file:', out_path.name)
+487: print('Verified Quotes rows:', q_rows)
+488: print('Verified Lines rows:', l_rows)
+489: print('Verified Summary rows:', s_rows)
+490: print('Output files:', sorted(p.name for p in output_dir.iterdir()))

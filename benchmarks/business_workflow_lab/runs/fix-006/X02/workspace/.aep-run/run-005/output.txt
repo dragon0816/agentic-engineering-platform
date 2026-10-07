@@ -1,0 +1,21 @@
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Counts loaded: {'orders': 4, 'invoices': 3, 'expenses': 18, 'quotes': 4}
+Orders sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000114', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-08', 'Status': 'Cancelled', 'Currency': 'USD', 'NetAmount': '11956.00'}]
+Invoices sample: [{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000214', 'OrderID': '0045000119', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-09-16', 'DueDate': '2026-10-16', 'Currency': 'EUR', 'Amount': '8775.00', 'PaidAmount': '8775.00', 'Balance': '0.00'}]
+Expenses sample: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}]
+Quotes sample: [{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}, {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}]
+Saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-006\X02\workspace\output\project_C001_2026-09_report.xlsx
+Row count checks: [('Orders', 4, 4, True), ('Invoices', 3, 3, True), ('Expenses', 18, 18, True), ('Quotes', 4, 4, True), ('Summary', 2, 2, True), ('Exceptions', 15, 15, True)]
+Header unchanged Orders True ['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+Header unchanged Invoices True ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+Header unchanged Expenses True ['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']
+Header unchanged Quotes True ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+Header unchanged Summary True ['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']
+Header unchanged Exceptions True ['Source', 'DocumentID', 'ProjectID', 'Reason']
+Summary formulas: ['=SUM(B5:B6)', '=SUM(C5:C6)', '=SUM(D5:D6)', '=SUM(E5:E6)']
+Report period: 2026-09-01 2026-09-30
+Orders first data row values: ['0045000109', 'P003', 'C001', '2026-09-01', 'Open', 'TWD', 150000, 150000]
+Invoices first data row values: ['0090000208', '0045000109', 'P003', 'C001', '2026-09-02', '2026-09-12', 'TWD', 150000, 150000, 0, 0]
+Expenses first data row values: ['EXP-00001', 'P001', 'E001', '2026-09-01', 'Approved', 'TWD', 1280, 1280]
+Quotes first data row values: ['Q0010', 'P001', 'C001', '2026-09-01', '2026-09-20', 'Sent', 'TWD', 207629.63, 207629.63]
+Validation passed
