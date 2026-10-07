@@ -1,0 +1,162 @@
+{
+ "run_id": "fix-run-011",
+ "task_id": "T11",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 45.27,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "four rows matching the detail pages",
+   "passed": true,
+   "expected": [
+    [
+     "Laptop 13",
+     32900,
+     "Intel i5-1340P",
+     16,
+     "/t11/item/1"
+    ],
+    [
+     "Laptop 15",
+     45500,
+     "Intel i7-1360P",
+     32,
+     "/t11/item/2"
+    ],
+    [
+     "Mini PC",
+     18800,
+     null,
+     16,
+     "/t11/item/3"
+    ],
+    [
+     "Tablet 11",
+     12300,
+     "ARM A78",
+     8,
+     "/t11/item/4"
+    ]
+   ],
+   "actual": [
+    {
+     "Name": "Laptop 13",
+     "Price": 32900,
+     "Currency": "NT$",
+     "CPU": "Intel i5-1340P",
+     "MemoryGB": 16,
+     "URL": "http://127.0.0.1:54763/t11/item/1"
+    },
+    {
+     "Name": "Laptop 15",
+     "Price": 45500,
+     "Currency": "NT$",
+     "CPU": "Intel i7-1360P",
+     "MemoryGB": 32,
+     "URL": "http://127.0.0.1:54763/t11/item/2"
+    },
+    {
+     "Name": "Mini PC",
+     "Price": 18800,
+     "Currency": "NT$",
+     "CPU": null,
+     "MemoryGB": 16,
+     "URL": "http://127.0.0.1:54763/t11/item/3"
+    },
+    {
+     "Name": "Tablet 11",
+     "Price": 12300,
+     "Currency": "NT$",
+     "CPU": "ARM A78",
+     "MemoryGB": 8,
+     "URL": "http://127.0.0.1:54763/t11/item/4"
+    }
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "missing CPU left blank",
+   "passed": true,
+   "expected": "blank",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "4 detail pages visited (access log)",
+   "passed": true,
+   "expected": "all >0",
+   "actual": {
+    "1": 2,
+    "2": 1,
+    "3": 1,
+    "4": 1
+   },
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-011\\T11\\workspace\\output\\details.xlsx"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-011\\T11\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-4ffea2a624904d4ebf1926d66a4ad351",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-e6ba7d5a0e4644fbbb3e520b04d22e4c",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "fa09c03d5d8cfe9866cc3c191bb45a07030c3e96",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.6.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}

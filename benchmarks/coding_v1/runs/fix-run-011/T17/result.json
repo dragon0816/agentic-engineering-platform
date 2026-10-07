@@ -1,0 +1,135 @@
+{
+ "run_id": "fix-run-011",
+ "task_id": "T17",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 35.2,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "deep comparison with the expected conversion",
+   "passed": true,
+   "expected": "only 3 frequency fields converted",
+   "actual": {
+    "name": "RF plan",
+    "description": "frequency values in GHz or MHz; keep this text",
+    "center_frequency": "2.4GHz",
+    "bands": [
+     {
+      "label": "WLAN 2G",
+      "frequency": 2400,
+      "bandwidth": "20MHz",
+      "power": 18,
+      "frequency_unit": "MHz"
+     },
+     {
+      "label": "WLAN 5G",
+      "frequency": 5000,
+      "bandwidth": "80MHz",
+      "power": 17,
+      "frequency_unit": "MHz"
+     },
+     {
+      "label": "ISM",
+      "frequency": 2400,
+      "timeout": 30,
+      "frequency_unit": "MHz"
+     }
+    ],
+    "sub": {
+     "nested": [
+      {
+       "frequency": 915,
+       "power": 10
+      },
+      {
+       "frequency": "100kHz",
+       "note": "LF"
+      }
+     ]
+    },
+    "timeout": 120
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "unknown unit 100kHz kept and warned",
+   "passed": true,
+   "expected": "kept + warning",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-011\\T17\\workspace\\output\\testplan.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-011\\T17\\workspace\\output\\warnings.json"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-011\\T17\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-1132172bda934666b7f820f570852040",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-2a00fd3e186445ebbf30c39f247c783f",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "fa09c03d5d8cfe9866cc3c191bb45a07030c3e96",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.6.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}

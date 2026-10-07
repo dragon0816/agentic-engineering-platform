@@ -1,0 +1,16 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-011\T20\workspace
+Input directory: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-011\T20\workspace\input
+Output directory: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-011\T20\workspace\output
+SOP file found: C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/benchmarks/coding_v1/runs/fix-run-011/T20/workspace/input/supplied_sop.md
+Manifest: {'results.csv': 'input/data/test_results.csv'}
+CSV path: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-011\T20\workspace\input\data\test_results.csv
+CSV headers: ['Device ID', 'Status', 'Value']
+CSV data rows: 5
+CSV sample rows: [{'Device ID': 'D01', 'Status': 'Fail', 'Value': '10'}, {'Device ID': 'D02', 'Status': 'Pass', 'Value': '5'}, {'Device ID': 'D03', 'Status': 'Fail', 'Value': '20'}, {'Device ID': 'D04', 'Status': 'Pass', 'Value': '7'}, {'Device ID': 'D05', 'Status': 'Fail', 'Value': '30'}]
+Created: C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/benchmarks/coding_v1/runs/fix-run-011/T20/workspace/output/failures.xlsx
+Created: C:/Users/Chi_L/Documents/ChatGPT/agentic-engineering-platform/benchmarks/coding_v1/runs/fix-run-011/T20/workspace/output/summary.md
+Verified failures.xlsx columns: ['Device ID', 'Status', 'Value', 'Urgent']
+Verified failures.xlsx failed rows: 3
+Verified Urgent rule: Status == Fail and Value > 20 is true, otherwise false for Fail rows
+Verified summary counts: {'Total': 5, 'Pass': 2, 'Fail': 3, 'Urgent': 1}
+Input files were not modified by this workflow script.
