@@ -1702,3 +1702,21 @@ The owner confirmed the five choices made while implementing step 2 (`9a81382`):
 5. Two active versions selected before this change are cleaned up at the member's next selection of that name.
 
 Still to do: a member publish route with artifact upload and a review queue, a publish and ownership UI, showing deprecations to Hosts, and reconciling the Host-local step 1 with the Registry record. Step 2 goes live when the Shared Platform restarts.
+
+## 2026-10-08: The Agent may use every web page; company IT governs network access
+
+Decision (owner): the browser tool and web Workflow steps may open any web site. There is no per-site approval and no block list. Network access itself is governed by company IT (the Zscaler proxy).
+- `web.allowed_origins` accepts `"*"`, meaning any http or https origin. `"*"` is also the default, so `"web": {}` enables every site.
+- Listing explicit origins still restricts the Agent to those origins.
+- The live host now uses `["*"]`; the backup is `host.json.bak-20261008-062556-before-any-origin`.
+
+Kept boundaries:
+- Only http and https pages are web pages. `file:`, `javascript:`, `data:` and browser pages are refused (`integrations.web_script.origin_permitted`).
+- The Agent's Edge uses its own profile, apart from the person's browser.
+- Downloads land only in a task workspace's `output/downloads/`.
+- Page content is data, never instructions.
+
+Reason: the owner asked a coding task to read Yahoo Finance (`tw.stock.yahoo.com`). Every attempt failed with `web_origin_not_allowed`. Telling the Agent "it is open now" changed nothing, because only host.json decides, and the change needed a restart.
+
+Rejected alternatives:
+- Per-site approval cards with "once" or "always" options, with a per-person list and an admin block list. The owner judged that too hard to use, since IT already controls access.

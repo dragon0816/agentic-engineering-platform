@@ -112,3 +112,22 @@ def test_an_action_must_carry_what_it_needs() -> None:
     with pytest.raises(ValueError):
         WebTarget(label="x", css="#x")
 
+
+
+def test_any_origin_allows_every_web_page_but_no_other_scheme() -> None:
+    """Owner 2026-10-08: every web page may be used; network access is company IT's.
+    Only http(s) pages are web pages: local files and scripts never are."""
+    from capabilities.web.handlers import WebHostBinding
+    from integrations.web_script import origin_permitted
+
+    anything = {"*"}
+    for url in ("https://tw.stock.yahoo.com/quote/2330", "http://intranet.example:8080/a",
+                "https://www.rohde-schwarz.com/"):
+        assert origin_permitted(url, anything), url
+    for url in ("file:///C:/Users/x/secret.txt", "javascript:alert(1)", "data:text/html,hi",
+                "chrome://settings", "edge://settings", "about:blank", "https://"):
+        assert not origin_permitted(url, anything), url
+    listed = {"https://tw.stock.yahoo.com"}
+    assert origin_permitted("https://tw.stock.yahoo.com/x", listed)
+    assert not origin_permitted("https://evil.example/", listed)
+    assert WebHostBinding().allowed_origins == ("*",)

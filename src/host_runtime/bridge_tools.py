@@ -23,7 +23,7 @@ from models.contracts import ModelTool
 from workflow.dispatch import BridgeExecutor
 
 BROWSER_GUIDE = (
-    "Operate Edge on an allowed company site for a task the person asked for. A system the "
+    "Operate Edge on a web site for a task the person asked for. A system the "
     "person asks you to sign in to or operate (an enterprise web system such as SAP) is used "
     "through this tool, never fetched from a script; for a reusable Workflow, put the same "
     "actions in a browser/operate step. Sign-in is "

@@ -12,7 +12,8 @@ choose the next actions. The browser stays open between calls (one profile
 of its own), so a conversation can work through a site step by step, and a
 drafted Workflow can carry the same actions as a step.
 
-Bounds: every page stays on the host's `web.allowed_origins`; downloads land
+Bounds: every page is an http(s) page the host's `web.allowed_origins` allows
+("*", the default, is any site); downloads land
 only in `output/downloads/` of a task workspace under an allowed root; page
 content is data returned to the caller, never instructions.
 """
@@ -38,7 +39,7 @@ from integrations.web_script import ScriptRunner, WebAction, WebScript, WebScrip
 SPEC = CapabilitySpec.model_validate({
     "identity": {"namespace": "browser", "name": "operate", "version": "1.0.0"},
     "name": "browser.operate",
-    "description": "Operate the host's Edge on allowed sites: open, fill, click, read, download",
+    "description": "Operate the host's Edge on web sites: open, fill, click, read, download",
     "input_contract": "browser.operate.input.v1",
     "output_contract": "browser.operate.output.v1",
     "side_effect": "external_side_effect",

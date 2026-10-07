@@ -219,6 +219,21 @@ def _origin(url: str) -> str:
     return f"{parts.scheme}://{parts.netloc}".lower()
 
 
+#: In `allowed_origins`, any web site (owner 2026-10-08: every page may be
+#: used; network access itself is governed by company IT).
+ANY_ORIGIN = "*"
+WEB_SCHEMES = ("http", "https")
+
+
+def origin_permitted(url: str, allowed: set[str] | frozenset[str]) -> bool:
+    """A web page (http or https) whose origin the host allows. Other schemes
+    (file, javascript, data, browser pages) are never web pages to operate."""
+    parts = urlsplit(url)
+    if parts.scheme.lower() not in WEB_SCHEMES or not parts.netloc:
+        return False
+    return ANY_ORIGIN in allowed or _origin(url) in allowed
+
+
 def _fill_in(text: str, values: Mapping[str, JsonValue]) -> str:
     def replace(match: re.Match[str]) -> str:
         name = match.group(1)
@@ -265,7 +280,7 @@ class ScriptRunner:
         if action.do == "open":
             assert action.url is not None
             url = _fill_in(action.url, values)
-            if _origin(url) not in self.allowed:
+            if not origin_permitted(url, self.allowed):
                 raise WebScriptError("web_origin_not_allowed")
             try:
                 self.page.navigate(url)
@@ -345,5 +360,5 @@ class ScriptRunner:
 
     def _check_origin(self) -> None:
         url = self._url()
-        if url and not url.startswith("about:") and _origin(url) not in self.allowed:
+        if url and not url.startswith("about:") and not origin_permitted(url, self.allowed):
             raise WebScriptError("web_origin_not_allowed")

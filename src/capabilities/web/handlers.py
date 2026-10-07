@@ -65,7 +65,9 @@ SELECT_SPEC = CapabilitySpec.model_validate({
 class WebHostBinding(Contract):
     """Trusted host wiring for web steps (host.json `web`)."""
 
-    allowed_origins: tuple[Text, ...] = Field(min_length=1)
+    # Origins the Agent may operate; "*" (the default) is any http or https
+    # site (owner 2026-10-08: company IT governs network access).
+    allowed_origins: tuple[Text, ...] = Field(default=("*",), min_length=1)
     # A profile of its own; unset means `<workspace>/web-profile`.
     profile_dir: Text | None = None
     headless: bool = True
