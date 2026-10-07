@@ -183,3 +183,38 @@ def test_the_agent_can_read_back_its_own_draft(tmp_path: Path) -> None:
     assert [p["name"] for p in shown.data["parameters"]] == ["month"]
     missing = call(chat, "authoring__get_workflow", {"candidate_id": "wf-nope"})
     assert missing.status == "failed" and missing.failure.code == "candidate_unknown"
+
+
+def install(chat: ChatAuthoring, candidate_id: str) -> Any:
+    asked = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
+    return chat.decide(asked.data["approval_id"], "owner", approve=True)
+
+
+def test_a_new_draft_of_an_installed_name_continues_its_versions(tmp_path: Path) -> None:
+    """Lab fix-008 W01: a new candidate restarted at 1.0.0 and collided on install."""
+    chat, _ = studio(tmp_path)
+    first = draft(chat, "write-it")
+    assert first.data["workflow"] == "engineering/echo-month@1.0.0"
+    assert install(chat, first.data["candidate_id"]).status == "approved"
+    revised = call(chat, "authoring__draft_workflow",
+                   {"title": "Echo", "workflow": workflow("write-it"),
+                    "candidate_id": first.data["candidate_id"]})
+    assert revised.data["workflow"] == "engineering/echo-month@1.0.1"
+    later = draft(chat, "write-it")  # another conversation, same name
+    assert later.data["workflow"] == "engineering/echo-month@1.0.1"
+    assert install(chat, later.data["candidate_id"]).status == "approved"
+    again = draft(chat, "write-it")
+    assert again.data["workflow"] == "engineering/echo-month@1.0.2"
+
+
+def test_a_name_someone_else_installed_is_refused_with_its_owner(tmp_path: Path) -> None:
+    chat, _ = studio(tmp_path)
+    first = draft(chat, "write-it")
+    install(chat, first.data["candidate_id"])
+    (path,) = (tmp_path / "workflows").glob("*.json")
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["metadata"]["owner"] = {"type": "user", "id": "colleague"}
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    refused = draft(chat, "write-it")
+    assert refused.status == "failed"
+    assert "colleague" in json.dumps(refused.model_dump(mode="json"), ensure_ascii=False)

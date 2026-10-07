@@ -1593,3 +1593,21 @@ Reason: in coding_v1 fix-run-010 T09, the Agent's reply quoted the task's SOP li
 Rejected alternatives:
 - Refusing the reply and telling the person: the answer is usually useful apart from the quoted line.
 - Loosening the shared pattern for `<placeholder>` values: the pattern is the one definition every redactor uses.
+
+## 2026-10-07: Asset ownership and versions (owner decisions)
+
+Decision (owner):
+- The first publisher of a Skill or Workflow name owns it. The owner may be a person or a team, and ownership can be transferred.
+- The owner names co-editors, who publish new versions directly. The owner may deprecate versions and remove co-editors.
+- The platform assigns version numbers by increasing the highest existing one; the publisher picks patch, minor or major.
+- Each person has one active version per name.
+
+Plan: `docs/phases/ASSET_OWNERSHIP.md`.
+- Step 1 is done now for chat-authored Workflows: versions continue from the highest installed one, and a name installed by another owner is refused with that owner's id.
+- Step 2, the Registry-wide ownership record, publish check, automatic versions, one active version per person and a publish UI, follows the business workflow lab stage.
+
+Reason: lab fix-008 W01 hit `workflow_version_exists`. Every new chat candidate restarted at 1.0.0, and the only guard was a Host-local file check. A code survey also found that nothing stops one person from publishing a new version under another person's name.
+
+Rejected alternatives:
+- Per-version owner approval for co-editors: it stalls when the owner is away.
+- Publisher-chosen version numbers without an ordering rule: they collide.

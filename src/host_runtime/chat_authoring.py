@@ -88,6 +88,12 @@ class ApprovalRequest(Contract):
     result: JsonValue = None
 
 
+def _core(version: str) -> tuple[int, int, int]:
+    """A SemVer's major, minor and patch, for ordering."""
+    major, minor, patch = version.split("-", 1)[0].split("+", 1)[0].split(".")
+    return int(major), int(minor), int(patch)
+
+
 def _key(identity: AssetIdentity) -> str:
     return f"{identity.namespace}/{identity.name}@{identity.version}"
 
@@ -262,7 +268,22 @@ class ChatAuthoring:
         previous = self.candidate(candidate_id, actor) if candidate_id else None
         revision = previous.revision + 1 if previous is not None else 1
         assembled = assemble(raw, namespace=self.namespace, owner=actor, installed=self.installed)
-        assembled["metadata"]["identity"]["version"] = f"1.0.{revision - 1}"
+        identity = assembled["metadata"]["identity"]
+        # A name belongs to whoever installed it first; its versions only go up,
+        # so a new draft of an existing name never reuses an installed version
+        # (owner decision 2026-10-07; lab fix-008 W01 hit workflow_version_exists).
+        published = self._published(str(identity["namespace"]), str(identity["name"]))
+        others = sorted({m.metadata.owner.id for m in published
+                         if (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)})
+        if others:
+            return None, [f"workflow.name: '{identity['name']}' already belongs to "
+                          f"{', '.join(others)}; choose another name, or ask its owner to let "
+                          "you co-edit it"]
+        taken = [_core(m.metadata.identity.version) for m in published]
+        if previous is not None and previous.draft.metadata.identity.name == identity["name"]:
+            taken.append(_core(previous.draft.metadata.identity.version))
+        major, minor, patch = max(taken) if taken else (1, 0, -1)
+        identity["version"] = f"{major}.{minor}.{patch + 1}"
         problems: list[str] = []
         try:
             manifest = WorkflowManifest.model_validate(assembled)
@@ -292,6 +313,19 @@ class ChatAuthoring:
                 manifest) else "draft",
         )
         return self._save_candidate(item), []
+
+    def _published(self, namespace: str, name: str) -> list[WorkflowManifest]:
+        """The versions of one Workflow name installed on this Host."""
+        found = []
+        for path in self.workflows_dir.glob(f"{namespace}__{name}__*.json"):
+            try:
+                manifest = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if (manifest.metadata.identity.namespace, manifest.metadata.identity.name) == (
+                    namespace, name):
+                found.append(manifest)
+        return found
 
     def _engine(self, manifest: WorkflowManifest, actor: str, ref: str) -> WorkflowEngine:
         workflows = InstalledWorkflows()
