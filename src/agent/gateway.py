@@ -495,8 +495,10 @@ class Gateway:
             "unless a supplied tool successfully returned it. If the requested source has no "
             "available tool, say that it cannot be accessed here. Ask for missing inputs. When a "
             "request for work leaves open a rule that would change the result (which records "
-            "count, which period or status, what to flag), ask that question first and do no "
-            "other work in that turn; do not guess it. After a "
+            "count, which period or status, what to flag) and the request has no plain reading, "
+            "ask that question first and do no other work in that turn; do not guess it. A "
+            "request that names no filter means no filter, and what a screen shows from earlier "
+            "use is not the person's choice. After a "
             "tool result, explain what happened and what the user should do next."
         )
         if persona_guidance:

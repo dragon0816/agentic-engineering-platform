@@ -690,3 +690,4 @@ def test_the_system_prompt_asks_for_an_open_rule_before_working() -> None:
     system = model.calls[0].messages[0]
     assert system.role == "system"
     assert "ask that question first and do no other work in that turn" in system.text
+    assert "names no filter means no filter" in system.text
