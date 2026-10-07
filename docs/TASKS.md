@@ -1490,7 +1490,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   TXT, JSON, YAML, MD, ZIP; 25 MB / 10 files; vision on for the company
   endpoint; checked live (CSV average and image text read correctly)
   (`d91fc0f`).
-- [ ] Attachments in Telegram (subagent in progress).
 - [ ] Paused by the owner: phase gate decision (coding Skill 1.8.0 wording) and
   the Knowledge tool-route choice; the owner will check the Agent by hand first.
-
+- [x] Telegram accepts files and photos (owner 2026-10-08): documents and the
+  largest photo size are downloaded via `getFile` after the sender check,
+  saved with the shared `AttachmentStore` per chat and sender, and given to
+  the conversation model as Agent Web does. An album within one poll batch
+  is one turn. Size, count, type and Telegram's 20 MB download limit are
+  refused with Chinese replies. `/new` deletes the chat's files, and the
+  token never leaves the download call. `tests/test_telegram_attachments.py`.

@@ -6,8 +6,9 @@ opens no inbound port; a numeric sender checked before anything is routed; and
 a slash command that reaches the deterministic router without a model. What
 is deliberately not carried over: the token in a configuration file (it is a
 `SecretRef` resolved per call and never held), the rule that an empty
-allowlist admits everyone (an empty map admits nobody), HTML presentation, and
-attachment handling.
+allowlist admits everyone (an empty map admits nobody) and HTML presentation.
+Files and photos are accepted (owner 2026-10-08) through the shared
+`host_runtime.attachments` store, downloaded only after the sender is checked.
 
 The adapter adds no authority. It maps a sender to exactly one platform actor
 and hands the Agent a `LocalAgentRequest`; the Agent admits or refuses by the
@@ -23,6 +24,7 @@ import re
 import time
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any, Literal, Self
 
 from pydantic import Field, JsonValue, StrictBool, field_validator, model_validator
@@ -42,6 +44,16 @@ from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
+from host_runtime.attachments import (
+    KINDS,
+    MAX_FILE_BYTES,
+    MAX_FILES_PER_MESSAGE,
+    Attachment,
+    AttachmentError,
+    AttachmentStore,
+    for_model,
+    safe_name,
+)
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.schedule_policy import target_side_effect
 from host_runtime.turn_summary import tool_summary
@@ -74,9 +86,36 @@ SLASH_COMMAND = re.compile(
 HELP = (
     "Talk to the Agent in words, or send a skill command as /<skill> <command> "
     "[arguments]. /run <number or name> asks a Workflow's fields one by one. /status "
-    "shows this Bridge's state. /new starts a fresh conversation. Attachments are not "
-    "accepted."
+    "shows this Bridge's state. /new starts a fresh conversation and forgets its files. "
+    "Send files or photos with a caption to have the Agent work on them."
 )
+#: Telegram lets a bot download at most 20 MB a file (the Bot API's limit).
+TELEGRAM_DOWNLOAD_BYTES = 20 * 1024 * 1024
+#: The message text when a file or photo comes without a caption.
+DEFAULT_CAPTION = "請看附件。"
+SUPPORTED_TYPES = ", ".join(suffix.lstrip(".") for suffix in KINDS)
+#: A `file_path` from `getFile`, which goes into the download URL.
+_FILE_PATH = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_./-]{0,255}$")
+_ATTACHMENT_REPLIES = {
+    "attachment_type_not_supported": f"不支援這種檔案。可以傳的類型：{SUPPORTED_TYPES}。",
+    "attachment_too_large": f"檔案超過 {MAX_FILE_BYTES // (1024 * 1024)} MB 的上限，沒有收下。",
+    "attachment_too_many": f"一則訊息最多 {MAX_FILES_PER_MESSAGE} 個檔案，沒有收下。",
+    "attachment_telegram_limit": (
+        f"Telegram 只讓 Bot 下載 {TELEGRAM_DOWNLOAD_BYTES // (1024 * 1024)} MB 以內的檔案，"
+        "這個檔案太大，請改用 Agent Web 上傳。"),
+    "attachment_download_failed": "無法從 Telegram 下載附件，請再傳一次。",
+    "attachment_zip_invalid": "這個 zip 檔無法解開。",
+    "attachment_zip_too_many_files": "zip 裡的檔案太多（上限 2000 個），沒有收下。",
+    "attachment_zip_too_large": "zip 解開後超過 200 MB，沒有收下。",
+    "attachment_zip_unsafe_path": "zip 裡有會跑出資料夾的路徑，已拒絕。",
+    "attachment_unknown": "找不到這個附件。",
+}
+
+
+def attachment_reply(code: str) -> str:
+    """What the person is told about an attachment refusal, by its code."""
+    return _ATTACHMENT_REPLIES.get(code, f"附件無法處理（{code}）。")
+
 #: Turns of a Telegram chat kept as context for the next one (memory only).
 MAX_CHAT_HISTORY = 12
 #: How often a "working on it" message refreshes its elapsed time.
@@ -183,10 +222,20 @@ class TelegramPollResult(Contract):
     next_offset: int | None = None
 
 
+class _File:
+    """A document or photo Telegram announced; nothing is downloaded yet."""
+
+    def __init__(self, file_id: str, filename: str, size: int | None) -> None:
+        self.file_id = file_id
+        self.filename = filename
+        self.size = size
+
+
 class _Update:
     def __init__(
         self, update_id: int, chat_id: int, sender_id: int, text: str | None,
         callback_id: str | None = None, sender_name: str = "",
+        files: list[_File] | None = None, media_group_id: str | None = None,
     ) -> None:
         self.update_id = update_id
         self.chat_id = chat_id
@@ -197,8 +246,24 @@ class _Update:
         # A tapped inline button: its data is the text, and the tap is
         # acknowledged so the client stops showing it as pending.
         self.callback_id = callback_id
+        # Attached files; an album's items share `media_group_id`.
+        self.files = files if files is not None else []
+        self.media_group_id = media_group_id
+
+    def joins(self, other: "_Update") -> bool:
+        """Whether `other` is another item of this update's album."""
+        return (
+            self.media_group_id is not None and self.media_group_id == other.media_group_id
+            and self.chat_id == other.chat_id and self.sender_id == other.sender_id
+        )
+
+    def absorb(self, other: "_Update") -> None:
+        self.files.extend(other.files)
+        if not (self.text or "").strip() and other.text:
+            self.text = other.text
 
 
+CREDENTIAL_REPLY = "That message was not forwarded: it looks like it contains a credential."
 #: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
 APPROVAL_TAP = re.compile(r"^(approve|reject):(ap-[A-Za-z0-9-]{1,64})$")
 
@@ -234,10 +299,51 @@ def _parse(raw: object) -> _Update | None:
     if not isinstance(sender, dict) or type(sender.get("id")) is not int:
         return None
     text = message.get("text")
+    if not isinstance(text, str):
+        # A file's or photo's words are its caption.
+        text = message.get("caption")
+    group = message.get("media_group_id")
     return _Update(
         raw["update_id"], chat["id"], sender["id"], text if isinstance(text, str) else None,
-        sender_name=_display_name(sender),
+        sender_name=_display_name(sender), files=_files(message, raw["update_id"]),
+        media_group_id=group if isinstance(group, str) else None,
     )
+
+
+def _size(value: object) -> int | None:
+    return value if type(value) is int and value >= 0 else None
+
+
+def _files(message: dict[str, Any], update_id: int) -> list[_File]:
+    """The document, or the largest size of the photo, a message carries."""
+    document = message.get("document")
+    if isinstance(document, dict) and isinstance(document.get("file_id"), str):
+        name = document.get("file_name")
+        if not isinstance(name, str) or not name.strip():
+            mime = document.get("mime_type")
+            suffix = next(
+                (key for key, (_, media) in KINDS.items() if media == mime), "")
+            name = f"file-{update_id}{suffix}"
+        return [_File(document["file_id"], name, _size(document.get("file_size")))]
+    photo = message.get("photo")
+    if isinstance(photo, list):
+        sizes = [item for item in photo
+                 if isinstance(item, dict) and isinstance(item.get("file_id"), str)]
+        if sizes:
+            largest = max(sizes, key=lambda item: (
+                _size(item.get("file_size")) or 0,
+                (_size(item.get("width")) or 0) * (_size(item.get("height")) or 0),
+            ))
+            unique = largest.get("file_unique_id")
+            label = unique if isinstance(unique, str) and unique else str(update_id)
+            return [_File(largest["file_id"], f"photo-{label}.jpg",
+                          _size(largest.get("file_size")))]
+    return []
+
+
+def _files_session(key: tuple[int, int]) -> str:
+    """The attachment session of one chat and sender, keyed as its history is."""
+    return f"telegram-chat-{key[0]}-sender-{key[1]}"
 
 
 def _display_name(sender: dict[str, Any]) -> str:
@@ -419,6 +525,7 @@ class TelegramIngress:
         resolver: CredentialResolver,
         *,
         transport: Transport | None = None,
+        attachments: AttachmentStore | None = None,
     ) -> None:
         self.config = TelegramIngressConfig.model_validate(config)
         if self.config.bridge_id != agent.membership.device.bridge_id:
@@ -436,6 +543,8 @@ class TelegramIngress:
         self._seen: dict[int, None] = {}
         # Open Workflow question flows, by (chat, sender); they expire.
         self._flows: dict[tuple[int, int], telegram_flow.FlowState] = {}
+        # Where attached files are kept; without it files are refused.
+        self.attachments = attachments
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
@@ -516,6 +625,7 @@ class TelegramIngress:
             )
         deliveries: list[TelegramDelivery] = []
         highest = offset
+        updates: list[_Update] = []
         for raw in items:
             # Every update is confirmed, including the kinds this adapter does
             # not handle; otherwise Telegram would redeliver them forever.
@@ -527,6 +637,14 @@ class TelegramIngress:
             if update.update_id in self._seen:
                 continue
             self._remember(update.update_id)
+            # An album arrives as one update per file; the items in this
+            # batch become one turn, answered once.
+            album = next((item for item in updates if item.joins(update)), None)
+            if album is not None:
+                album.absorb(update)
+                continue
+            updates.append(update)
+        for update in updates:
             delivery = await self._deliver_guarded(update)
             if update.callback_id is not None:
                 await asyncio.to_thread(self._acknowledge, update.callback_id)
@@ -591,6 +709,8 @@ class TelegramIngress:
                 oldest = min(self.unmapped.values(), key=lambda item: item.seen)
                 del self.unmapped[oldest.sender_id]
             return TelegramDelivery(**base, disposition="unmapped_sender")
+        if update.files:
+            return await self._attached(base, actor, update)
         if update.text is None or not update.text.strip():
             return TelegramDelivery(
                 **base,
@@ -618,6 +738,8 @@ class TelegramIngress:
             return TelegramDelivery(**base, disposition="answered", reply=HELP)
         if parsed is not None and parsed[0] == "new":
             self._histories.pop(key, None)
+            if self.attachments is not None:
+                await asyncio.to_thread(self.attachments.delete_session, _files_session(key))
             return TelegramDelivery(
                 **base, disposition="answered", reply="Started a fresh conversation."
             )
@@ -625,34 +747,10 @@ class TelegramIngress:
             # A durable read under the store's lock, so never on the event loop.
             report = await asyncio.to_thread(self._status)
             return TelegramDelivery(**base, disposition="answered", reply=report)
-        # Whose machine this is. A sender who is that member drives it as
-        # themselves; anybody else has it done on their behalf, and the
-        # Agent decides whether this kind of machine allows that.
-        member = self.agent.membership.member()
-        acting = member if member is not None and member != actor else actor
-        try:
-            request = LocalAgentRequest(
-                ingress="telegram",
-                actor=acting,
-                on_behalf_of=actor if acting != actor else None,
-                bridge_id=self.config.bridge_id,
-                namespace=self.config.namespace,
-                message=command_to_message(text),
-                trace=TraceIdentifiers(
-                    trace_id=f"telegram-{update.update_id}",
-                    request_id=f"telegram-{update.update_id}",
-                    span_id="telegram",
-                ),
-                session_id=f"telegram-chat-{update.chat_id}",
-            )
-        except ValueError:
-            # The request contract refuses credential material; the text is
-            # not forwarded and not echoed.
+        request = self._request(update, actor, text)
+        if request is None:
             return TelegramDelivery(
-                **base,
-                disposition="unsupported_content",
-                reply="That message was not forwarded: it looks like it contains a credential.",
-            )
+                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY)
         if (
             parsed is None and not DOT_COMMAND.match(text)
             and self.agent.gateway.router.model is not None
@@ -677,6 +775,122 @@ class TelegramIngress:
         return TelegramDelivery(
             **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
         )
+
+    def _request(self, update: _Update, actor: str, text: str) -> LocalAgentRequest | None:
+        """The Agent request for `text`, or None when the request contract
+        refuses it as credential material; the text is then not forwarded
+        and not echoed."""
+        # Whose machine this is. A sender who is that member drives it as
+        # themselves; anybody else has it done on their behalf, and the
+        # Agent decides whether this kind of machine allows that.
+        acting, on_behalf_of = self._acting(actor)
+        try:
+            return LocalAgentRequest(
+                ingress="telegram",
+                actor=acting,
+                on_behalf_of=on_behalf_of,
+                bridge_id=self.config.bridge_id,
+                namespace=self.config.namespace,
+                message=command_to_message(text),
+                trace=TraceIdentifiers(
+                    trace_id=f"telegram-{update.update_id}",
+                    request_id=f"telegram-{update.update_id}",
+                    span_id="telegram",
+                ),
+                session_id=f"telegram-chat-{update.chat_id}",
+            )
+        except ValueError:
+            return None
+
+    async def _attached(
+        self, base: dict[str, Any], actor: str, update: _Update
+    ) -> TelegramDelivery:
+        """A message with files or photos (owner 2026-10-08): checked against
+        the limits before anything is downloaded, saved with the shared store,
+        and given to the conversation model as Agent Web does. The caller has
+        already admitted the sender."""
+        def refused(code: str) -> TelegramDelivery:
+            return TelegramDelivery(
+                **base, disposition="unsupported_content", reply=attachment_reply(code))
+
+        if self.attachments is None:
+            return TelegramDelivery(**base, disposition="unsupported_content",
+                                    reply="這個 Bridge 不接受附件。")
+        if self.agent.gateway.router.model is None:
+            return TelegramDelivery(**base, disposition="unsupported_content",
+                                    reply="附件需要對話模型，這個 Bridge 目前沒有設定。")
+        if len(update.files) > MAX_FILES_PER_MESSAGE:
+            return refused("attachment_too_many")
+        for file in update.files:
+            if Path(safe_name(file.filename)).suffix.lower() not in KINDS:
+                return refused("attachment_type_not_supported")
+            if file.size is not None and file.size > MAX_FILE_BYTES:
+                return refused("attachment_too_large")
+            if file.size is not None and file.size > TELEGRAM_DOWNLOAD_BYTES:
+                return refused("attachment_telegram_limit")
+        text = (update.text or "").strip() or DEFAULT_CAPTION
+        request = self._request(update, actor, text)
+        if request is None:
+            return TelegramDelivery(
+                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY)
+        key = (update.chat_id, update.sender_id)
+        try:
+            saved = await asyncio.to_thread(self._save, _files_session(key), update.files)
+            note, images = await asyncio.to_thread(for_model, saved)
+        except AttachmentError as error:
+            return TelegramDelivery(**base, disposition="answered",
+                                    reply=attachment_reply(error.code))
+        # Later turns keep the names and paths, never the content.
+        listing = "[附件]\n" + "\n".join(
+            f"- {item.filename} ({item.kind}): {item.path}" for item in saved)
+        return await self._converse(base, key, request, text, (note, images, listing))
+
+    def _save(self, session_id: str, files: list[_File]) -> list[Attachment]:
+        assert self.attachments is not None
+        return [
+            self.attachments.add(session_id, file.filename, self._download(file.file_id))
+            for file in files
+        ]
+
+    def _download(self, file_id: str) -> bytes:
+        """`getFile`, then the file itself, through the bot's own transport.
+        The token is resolved for the URL and dropped; a failure is reported
+        by code only, so no URL or error text can carry it anywhere."""
+        try:
+            status, body = self._call("getFile", {"file_id": file_id})
+            result = json.loads(body).get("result") if status == 200 else None
+            path = result.get("file_path") if isinstance(result, dict) else None
+            if not isinstance(path, str) or not _FILE_PATH.match(path) or ".." in path:
+                raise AttachmentError("attachment_download_failed")
+            size = _size(result.get("file_size")) if isinstance(result, dict) else None
+            if size is not None and size > MAX_FILE_BYTES:
+                raise AttachmentError("attachment_too_large")
+            token = self._resolver.resolve(self.config.credential)
+            url = f"{self.config.api_base}/file/bot{token}/{path}"
+            del token
+            timeout_s = float(self.config.poll_timeout_seconds + POLL_MARGIN_SECONDS)
+            # A file is read with GET where the transport can name the method.
+            method = getattr(self._transport, "request", None)
+            reply = (
+                method("GET", url, None, {}, timeout_s) if callable(method)
+                else self._transport.send(url, b"", {}, timeout_s)
+            )
+            del url
+            try:
+                if reply.status != 200:
+                    raise AttachmentError("attachment_download_failed")
+                data = bytearray()
+                for chunk in reply.chunks():
+                    data.extend(chunk)
+                    if len(data) > MAX_FILE_BYTES:
+                        raise AttachmentError("attachment_too_large")
+            finally:
+                close_quietly(reply)
+            return bytes(data)
+        except AttachmentError:
+            raise
+        except Exception:  # noqa: BLE001 - the error text could name the URL
+            raise AttachmentError("attachment_download_failed") from None
 
     def _approval_buttons(
         self, request: LocalAgentRequest
@@ -721,15 +935,25 @@ class TelegramIngress:
 
     async def _converse(
         self, base: dict[str, Any], key: tuple[int, int], request: LocalAgentRequest,
-        text: str,
+        text: str, attached: tuple[str, tuple[str, ...], str] | None = None,
     ) -> TelegramDelivery:
+        """`attached` is the files' note and pictures for the model, and the
+        short listing the stored history keeps in their place."""
         history = self._histories.get(key, [])
-        turn = [*history, ModelMessage(role="user", text=text)]
+        if attached is None:
+            turn = [*history, ModelMessage(role="user", text=text)]
+            sent = turn
+        else:
+            note, images, listing = attached
+            turn = [*history, ModelMessage(role="user", text=f"{text}\n\n{listing}")]
+            # The files ride on the newest message only, as in Agent Web.
+            sent = [*history, ModelMessage(role="user", text=f"{text}\n\n{note}",
+                                           images=images)]
         progress = await self._progress(base["chat_id"], "Working on it")
         listening = TOOL_PROGRESS.set(progress.tool)
         answered = False
         try:
-            result = await self.agent.converse(request, tuple(turn))
+            result = await self.agent.converse(request, tuple(sent))
             answered = (
                 result.conversation is not None and result.conversation.status == "answered"
             )

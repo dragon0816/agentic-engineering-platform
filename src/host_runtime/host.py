@@ -171,6 +171,7 @@ from harness.restricted_runner import (
     is_venv_launcher,
 )
 from host_runtime.agent import LocalAgent
+from host_runtime.attachments import AttachmentStore
 from host_runtime.bridge_tools import bridge_tools
 from host_runtime.chat_authoring import ChatAuthoring
 from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
@@ -1198,7 +1199,10 @@ def build_telegram(
             raise HostError("credential_unmapped", layout.telegram)
         resolver = EnvironmentCredentials(mapped)
     try:
-        return TelegramIngress(ingress_config, agent, resolver)
+        return TelegramIngress(
+            ingress_config, agent, resolver,
+            attachments=AttachmentStore(layout.workspace_root),
+        )
     except ValueError as error:
         raise HostError("telegram_invalid", layout.telegram) from error
 

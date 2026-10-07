@@ -1742,3 +1742,22 @@ Reason: the owner's coding work needed files, and the Agent could not take any.
 Rejected alternatives:
 - Images as files only: the owner chose vision.
 - Putting whole files into the conversation: a large file would crowd out the conversation, and the path gives tools the full file.
+
+## 2026-10-08: Telegram accepts files and photos
+
+Decision (owner): the Telegram channel takes the same attachments as Agent Web. A message with a document (png, jpg/jpeg, gif, webp, bmp, pdf, csv, html/htm, txt, json, yaml/yml, md, zip) or a photo is a conversation turn; its caption is the text, and "請看附件。" stands in when there is none.
+
+How it works (`channels/telegram.py`, shared core `host_runtime/attachments.py` unchanged):
+- The sender map is checked first; a stranger's file is never downloaded. Type, size and count are checked from Telegram's own metadata before any download, then again by the store.
+- A photo uses its largest size. A file is fetched with `getFile`, then a GET of `<api_base>/file/bot<token>/<file_path>` through the bot's own transport. The token is resolved for that one URL and dropped. A download failure is reported by code only, so no URL or exception text reaches a reply, the history or a log. The `file_path` Telegram returns is checked before it goes into the URL.
+- Limits: our 25 MB a file and 10 files a message, plus Telegram's 20 MB bot download limit. Each refusal is a Traditional-Chinese reply; an unsupported type lists the supported ones.
+- Files are kept in the shared `AttachmentStore` under the workspace, per chat and sender (`telegram-chat-<chat>-sender-<sender>`, the same key as the chat's history). `/new` clears that history and deletes those files.
+- `for_model` builds the note and pictures, which ride on the newest user message only, as in Agent Web. The stored history keeps the caption plus a `[附件]` list of names, kinds and paths, never the content.
+- Album: the items of one `media_group_id` (same chat and sender) that arrive in the same `getUpdates` batch become one turn with one reply. An item that arrives in a later batch is its own turn. Telegram normally delivers an album together, and buffering across polls would need timers in the poll loop.
+- Without a conversation model, or on a host without an attachment store, files are refused with a reply.
+
+Reason: the owner's Telegram use needed the same files as Agent Web (decision of the same date).
+
+Rejected alternatives:
+- Waiting a short time to gather every album item across polls: it adds state and timing to the cursor-confirmed loop for a rare case.
+- POSTing the download like other Bot API calls: the file endpoint is read with GET, and the transport already offers `request`.
