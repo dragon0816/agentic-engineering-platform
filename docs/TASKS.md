@@ -1415,7 +1415,15 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] knowledge_v1 benchmark (owner request 2026-10-07): the owner's 1,100
   questions, pinned; 110-question stratified sample; loop + Vault-verified
   citations + Gateway-model review (`ab9cb3e`).
-- [ ] knowledge_v1 sample-001 (running), then the full 1,100.
+- [x] knowledge_v1 sample-001: 64 of 110 acceptable (PASS 31, INSUFFICIENT 33);
+  direct route 22/34 PASS, tool route 9/58, no Knowledge 18 (`c64a724`).
+- [x] Knowledge fixes (owner approved): synthesis 4000 tokens + one retry on
+  truncation, "say when Knowledge gave no answer" (`8e25b8b`); rs-knowledge
+  1.0.2 purpose (live binding); facet credit from cited passages, supported
+  answers kept with the gap named, tool route uses the harness Skill
+  procedure, Skill 1.5.0 fixture with three market hints (`72af226`).
+- [ ] knowledge_v1 sample-002 (running: fixes up to `8e25b8b` + 1.0.2), then
+  install Skill 1.5.0 live, restart, sample-003 (all fixes), then the full 1,100.
 - [ ] Lab remaining gaps: W01/D01 reruns where the Agent revises the Workflow
   instead of reusing it; X02 overdue invoices dated before the period; X03
   depends on X01's Workflow taking project and output name as run values.

@@ -86,9 +86,16 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 **Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
 **Build state:**
-- HEAD contains everything below.
-- Agent Web runs build `967249b` with coding Skill 1.7.0. It was restarted at 15:11; its logs are `.scratch/agent-web-20261007-151130.*`.
-- Ownership step 1 (`9f07861`) takes effect only after the **next Agent Web restart**. Restart before lab `fix-010`, but not while a benchmark is running.
+- HEAD is `72af226` or later.
+- Agent Web was restarted at 17:32 on `c64a724`, with rs-knowledge 1.0.2 bound; its logs are `.scratch/agent-web-20261007-173229.*`. That build includes:
+  - ownership step 1;
+  - the Knowledge synthesis limit and retry;
+  - the "say when Knowledge gave no answer" rule;
+  - coding Skill 1.7.0.
+- **Not yet live:** `72af226` (facet credit, supported answers kept, the tool route using the harness Skill procedure) and Knowledge Skill 1.5.0.
+  - The Skill is only in `tests/fixtures/harness_skills/knowledge-evidence-v1.5.json`.
+  - To install it, copy that file to `workspace/assets/skills/company-agent__knowledge-query__1.5.0.json` and move 1.4.0 to `skills/disabled/`.
+  - Then restart Agent Web, after the running benchmark ends.
 
 ### Owner rule (2026-10-07): GUI tests run only while the owner is away
 
@@ -126,7 +133,8 @@ Each run folder holds a `findings.md`.
 | coding_v1 | **fix-run-012** | **20/20** | build `967249b` (Skill 1.7.0) |
 | Lab | fix-008 | 12/16 | 13/16 under grader 1.3 (W01) |
 | Lab | fix-009 | stopped | W01–W04 PASS, D01 FAIL (it revised the Workflow on the rerun), the rest not run |
-| knowledge_v1 | sample-001 | running | started about 16:00, roughly 2 h. Log: `.scratch/knowledge_v1-sample-001.log` |
+| knowledge_v1 | sample-001 | 64/110 acceptable | baseline: direct 22/34, tool 9/58, no Knowledge 18 |
+| knowledge_v1 | sample-002 | running | build `c64a724` + rs-knowledge 1.0.2. Log: `.scratch/knowledge_v1-sample-002.log` |
 
 **What changed today for the lab gaps:**
 - **Grader 1.3:** a rerun may use a version run *or installed* before the request, as long as no draft follows the request.
@@ -194,12 +202,12 @@ knowledge_v1 `selftest.py` and lab `selftest.py` pass. Use the repo `.venv`: the
 
 ## Next recommended action
 
-1. When knowledge_v1 sample-001 finishes:
-   - read `report.md` and spot-check a few reviewer verdicts;
-   - write `runs/sample-001/findings.md`;
-   - investigate `knowledge_model_failed`, and the uncited fallback answer after a failed Knowledge call. A harness change goes to the owner first.
-   - Then run the full set (`--set all`), which takes many hours, outside GUI time or alongside other work.
-2. Restart Agent Web so ownership step 1 takes effect.
+1. When sample-002 finishes:
+   - write its findings, comparing with sample-001 by route;
+   - install Knowledge Skill 1.5.0 live and restart Agent Web;
+   - run sample-003 on `72af226` or later.
+   - Then run the full 1,100 (`--set all`, several hours, no GUI).
+2. Agent Web restarts: wait until a benchmark run ends.
 3. **While the owner is away:** run lab `fix-010`, all tasks. If the platform changed since `967249b`, also rerun coding_v1 on the same build.
 4. After this stage:
    - asset ownership step 2 (`docs/phases/ASSET_OWNERSHIP.md`);
