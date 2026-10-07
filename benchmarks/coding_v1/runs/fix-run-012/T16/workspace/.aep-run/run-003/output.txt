@@ -1,0 +1,22 @@
+Input files to process:
+- logs/run_a.log
+- logs/run_b.log
+- logs/run_c.log
+
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T16\workspace\output\unified.json
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T16\workspace\output\warnings.json
+Unified record count: 6
+Warning count: 2
+By format: {'V1': 3, 'V2': 3}
+By status: {'Pass': 4, 'Fail': 2}
+
+First unified records:
+{'timestamp': '2026-02-01T10:00:00', 'device_id': 'DUT-11', 'test_name': 'TxPower', 'status': 'Pass', 'source_file': 'logs/run_a.log', 'format_version': 'V1'}
+{'timestamp': '2026-02-01T10:00:05', 'device_id': 'DUT-11', 'test_name': 'EVM', 'status': 'Fail', 'source_file': 'logs/run_a.log', 'format_version': 'V1'}
+{'timestamp': '2026-02-01T10:01:00', 'device_id': 'DUT-12', 'test_name': 'TxPower', 'status': 'Pass', 'source_file': 'logs/run_a.log', 'format_version': 'V1'}
+
+Warnings:
+{'source_file': 'logs/run_c.log', 'line_number': 1, 'line': '2026/02/03 11:00 DUT-31 TxPower => PASS', 'warning': 'unknown format: not V1 bracket format and not valid JSON'}
+{'source_file': 'logs/run_c.log', 'line_number': 2, 'line': '2026/02/03 11:01 DUT-31 EVM => FAIL', 'warning': 'unknown format: not V1 bracket format and not valid JSON'}
+
+Verification passed: reopened unified.json and warnings.json; checked fields, status values, format versions, source_file presence, and warning fields.

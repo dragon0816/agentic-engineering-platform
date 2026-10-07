@@ -1,0 +1,51 @@
+CSV report_a.csv headers: ['DUT', 'Item', 'Result', 'Measurement', 'Unit']
+JSON report_b.json top-level: list
+Markdown report_c.md headers: ['Device', 'Test', 'Status', 'Value', 'Unit']
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T08\workspace\output\reports.json
+Source counts: {'report_a.csv': 2, 'report_b.json': 2, 'report_c.md': 2}
+Total records: 6
+Records: [
+  {
+    "device_id": "D001",
+    "test_name": "TxPower",
+    "status": "Pass",
+    "value": 12.5,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D002",
+    "test_name": "TxPower",
+    "status": "Fail",
+    "value": null,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D003",
+    "test_name": "EVM",
+    "status": "Pass",
+    "value": -35.2,
+    "unit": "dB"
+  },
+  {
+    "device_id": "D004",
+    "test_name": "EVM",
+    "status": "Fail",
+    "value": -20.1,
+    "unit": null
+  },
+  {
+    "device_id": "D005",
+    "test_name": "Sensitivity",
+    "status": "Pass",
+    "value": -90,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D006",
+    "test_name": "Sensitivity",
+    "status": "Fail",
+    "value": -70,
+    "unit": "dBm"
+  }
+]
+Verification OK: reopened reports.json; checked field names/order, 6 rows, text IDs, normalized statuses, value/unit null placeholders.

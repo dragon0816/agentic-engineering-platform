@@ -1,0 +1,20 @@
+workspace=C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T20\workspace
+input_dir=C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T20\workspace\input exists=True
+output_dir=C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T20\workspace\output exists=True
+input entries:
+  input\data\test_results.csv size=81
+  input\manifest.json size=50
+  input\supplied_sop.md size=395
+csv_path=input\data\test_results.csv
+csv_headers=['Device ID', 'Status', 'Value']
+total_rows=5
+sample_row_1={'Device ID': 'D01', 'Status': 'Fail', 'Value': '10'}
+sample_row_2={'Device ID': 'D02', 'Status': 'Pass', 'Value': '5'}
+sample_row_3={'Device ID': 'D03', 'Status': 'Fail', 'Value': '20'}
+sample_row_4={'Device ID': 'D04', 'Status': 'Pass', 'Value': '7'}
+sample_row_5={'Device ID': 'D05', 'Status': 'Fail', 'Value': '30'}
+wrote=output\failures.xlsx bytes=4949
+wrote=output\summary.md bytes=60
+checked failures.xlsx: file exists, sheet failures, columns Device ID/Status/Value/Urgent, all rows Status=Fail, Value numeric, Urgent boolean Value>20, row count matches Fail count
+checked summary.md: Total, Pass, Fail, Urgent counts match CSV
+counts total=5 pass=2 fail=3 urgent=1

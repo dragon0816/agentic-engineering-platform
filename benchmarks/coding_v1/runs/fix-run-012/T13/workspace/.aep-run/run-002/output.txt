@@ -1,0 +1,27 @@
+list status: 200
+list headers content-type: text/html; charset=utf-8
+list sample: <!doctype html><html><head><meta charset="utf-8"></head><body><ul id="products"><li><a href="/t13/item/1">Phone A</a></li><li><a href="/t13/item/2">Phone B</a></li><li><a href="/t13/item/3">Phone C</a></li><li><a href="/t13/item/4">Phone D</a></li><li><a href="/t13/item/5">Phone E</a></li></ul></body></html>
+product links: [('Phone A', 'http://127.0.0.1:64212/t13/item/1'), ('Phone B', 'http://127.0.0.1:64212/t13/item/2'), ('Phone C', 'http://127.0.0.1:64212/t13/item/3'), ('Phone D', 'http://127.0.0.1:64212/t13/item/4'), ('Phone E', 'http://127.0.0.1:64212/t13/item/5')]
+detail Phone A http://127.0.0.1:64212/t13/item/1 attempts=[{'attempt': 1, 'status': 200}] ok=True
+detail sample: <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone A</h1><table class="spec"><tr><th>Price</th><td>NT$9,900</td></tr><tr><th>CPU</th><td>Snap 7</td></tr></table></body></html>
+detail Phone B http://127.0.0.1:64212/t13/item/2 attempts=[{'attempt': 1, 'status': 200}] ok=True
+detail sample: <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone B</h1><table class="spec"><tr><th>Price</th><td>NT$12,900</td></tr><tr><th>CPU</th><td>Snap 8</td></tr></table></body></html>
+detail Phone C http://127.0.0.1:64212/t13/item/3 attempts=[{'attempt': 1, 'status': 200}] ok=True
+detail sample: <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone C</h1><table class="spec"><tr><th>CPU</th><td>Dim 9</td></tr></table></body></html>
+detail Phone D http://127.0.0.1:64212/t13/item/4 attempts=[{'attempt': 1, 'status': 200}] ok=True
+detail sample: <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone D</h1><table class="spec"><tr><th>Price</th><td>NT$7,500</td></tr></table></body></html>
+detail Phone E http://127.0.0.1:64212/t13/item/5 attempts=[{'attempt': 1, 'status': 500}, {'attempt': 2, 'status': 500}, {'attempt': 3, 'status': 500}] ok=False
+VERIFY xlsx exists: True path: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T13\workspace\output\robust_products.xlsx
+VERIFY json exists: True path: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-012\T13\workspace\output\warnings.json
+VERIFY headers: ['Name', 'Price', 'Currency', 'CPU', 'URL', 'FetchStatus']
+VERIFY row_count: 5
+VERIFY warnings_count: 5
+VERIFY statuses: ['ok', 'ok', 'ok', 'ok', 'error']
+VERIFY no blank cells: True
+VERIFY rows:
+('Phone A', '9900', 'TWD', 'Snap 7', 'http://127.0.0.1:64212/t13/item/1', 'ok')
+('Phone B', '12900', 'TWD', 'Snap 8', 'http://127.0.0.1:64212/t13/item/2', 'ok')
+('Phone C', 'N/A', 'N/A', 'Dim 9', 'http://127.0.0.1:64212/t13/item/3', 'ok')
+('Phone D', '7500', 'TWD', 'N/A', 'http://127.0.0.1:64212/t13/item/4', 'ok')
+('Phone E', 'N/A', 'N/A', 'N/A', 'http://127.0.0.1:64212/t13/item/5', 'error')
+DONE
