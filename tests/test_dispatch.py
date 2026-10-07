@@ -7,6 +7,7 @@ from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import (
     CapabilityGrant,
     CapabilityInvocation,
+    CapabilityRefused,
     InstalledCapabilities,
     LocalPolicy,
 )
@@ -307,3 +308,16 @@ def test_invalid_input_says_where_and_what_kind_but_never_the_value() -> None:
     assert result.failure is not None and result.failure.code == "invalid_input"
     assert "count" in result.failure.message and "extra" in result.failure.message
     assert "secret-looking-1" not in result.failure.message and "x9" not in result.failure.message
+
+
+def test_a_refusal_carries_where_in_the_request_but_no_message() -> None:
+    """A model can find the step action to fix (lab fix-008 D01)."""
+
+    class Refuses(Handler):
+        async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+            raise CapabilityRefused("desktop_dialog_missing", "action 7 (wait_dialog)")
+
+    bridge = BridgeExecutor(installed(Refuses()), LocalPolicy((grant(),)))
+    result = asyncio.run(bridge.execute(invocation()))
+    assert result.failure is not None and result.failure.code == "desktop_dialog_missing"
+    assert result.failure.message == "Refused at action 7 (wait_dialog)"

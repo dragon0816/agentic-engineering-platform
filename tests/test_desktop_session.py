@@ -155,6 +155,24 @@ def test_helper_refusals_come_back_as_desktop_codes(tmp_path: Path) -> None:
     with pytest.raises(CapabilityRefused) as refused:
         run.run(request(actions=[{"do": "invoke", "id": "X"}]))
     assert refused.value.code == "desktop_control_missing"
+    assert refused.value.where == "action 0 (invoke)"
+
+
+def test_a_refusal_names_the_action_but_never_the_helpers_message(tmp_path: Path) -> None:
+    fakes = Fakes({"ok": False, "code": "dialog_missing",
+                   "message": "no dialog titled like 'Secret Title'", "step": 1})
+    run = handler(tmp_path, fakes)
+    with pytest.raises(CapabilityRefused) as refused:
+        run.run(request(actions=[{"do": "invoke", "id": "QueryButton"},
+                                 {"do": "wait_dialog", "title": "Secret Title"}]))
+    assert refused.value.code == "desktop_dialog_missing"
+    assert refused.value.where == "action 1 (wait_dialog)"
+    assert "Secret" not in str(refused.value)
+    # A step outside the request names no place.
+    fakes = Fakes({"ok": False, "code": "dialog_missing", "message": "", "step": 9})
+    with pytest.raises(CapabilityRefused) as refused:
+        handler(tmp_path, fakes).run(request(actions=[{"do": "invoke", "id": "QueryButton"}]))
+    assert refused.value.where is None
 
 
 def test_actions_missing_what_they_need_are_invalid() -> None:

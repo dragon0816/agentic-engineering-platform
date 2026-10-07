@@ -238,7 +238,13 @@ class DesktopSessionHandler:
                 raise CapabilityRefused(error.code) from None
         if not answer.get("ok"):
             code = str(answer.get("code") or "failed")
-            raise CapabilityRefused(code if code.startswith("desktop_") else f"desktop_{code}")
+            step = answer.get("step")
+            # Only the position and the action's kind travel, never the helper's message.
+            where = (f"action {step} ({request.actions[step].do})"
+                     if isinstance(step, int) and not isinstance(step, bool)
+                     and 0 <= step < len(request.actions) else None)
+            raise CapabilityRefused(
+                code if code.startswith("desktop_") else f"desktop_{code}", where)
         data = answer.get("data")
         look = answer.get("look")
         return DesktopResult(

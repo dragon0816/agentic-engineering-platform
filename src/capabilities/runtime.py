@@ -18,10 +18,15 @@ class CapabilityRefused(Exception):
     without the handler's message travelling: a message may quote the input
     or the data it reached, and neither may leave the Bridge. Use it for a
     refusal a person can act on; anything else is a `handler_error`.
+
+    `where` may name the place in the request that was refused, such as
+    "action 7 (wait_dialog)". It must be built from the request's own
+    structure (positions and fixed kinds), never from values or data.
     """
 
-    def __init__(self, code: str) -> None:
+    def __init__(self, code: str, where: str | None = None) -> None:
         self.code: str = TypeAdapter(Symbol).validate_python(code)
+        self.where = where
         super().__init__(self.code)
 
 

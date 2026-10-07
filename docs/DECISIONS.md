@@ -1568,3 +1568,18 @@ Rejected alternatives:
 - **The draft guide.** It says to put run values in output file names, so reruns do not collide with earlier results.
 - **coding Skill 1.6.0.** It fills a copy of a given template and follows the template's instructions; it never rebuilds a look-alike workbook.
 - **coding_v1 validator 1.4.** T14's Overall statistics may be name/value rows. The owner's acceptance names the values; the expected values are unchanged.
+
+## 2026-10-07: A refusal may say where in the request it happened
+
+Decision: `CapabilityRefused` takes an optional `where`, a place in the request built only from its structure, such as `action 7 (wait_dialog)`. The Bridge turns it into the failure message "Refused at action 7 (wait_dialog)". `desktop/operate` fills it from the helper's failed step index and the action's kind.
+
+Reason: in lab fix-008 D01, every run of a platform Workflow failed with `desktop_dialog_missing` and the generic "Capability invocation did not complete". The step waited for a dialog the app never showed after Query. The Agent could not tell which of 13 actions failed, so it retried the same code three times and then revised the Workflow.
+
+Boundaries:
+- The helper's own message still never travels, because it can quote dialog titles or control values.
+- A step index outside the request names no place.
+- This follows the 2026-10-07 `invalid_input` field locations: positions and kinds, never values.
+
+Rejected alternatives:
+- Passing the helper message through: it carries window content.
+- Encoding the index into the failure code: codes are a fixed vocabulary the UI and the tests rely on.
