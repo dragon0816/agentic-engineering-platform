@@ -71,6 +71,17 @@ body {
   min-width: 72px; padding: 6px; background: var(--panel); }
 .avatar-choice img { height: 40px; image-rendering: pixelated; filter: var(--avatar-filter); }
 .avatar-choice[aria-checked="true"] { outline: 2px solid var(--accent); }
+/* Files attached to the next message (owner 2026-10-08). */
+.attachment-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 8px 0; }
+.attachment-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--panel);
+  font-size: 12px; max-width: 260px; }
+.attachment-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attachment-chip.bad { border-color: var(--bad); color: var(--bad); }
+.attachment-chip button { border: 0; background: none; cursor: pointer; padding: 0 2px; }
+.attach-button { font-size: 18px; padding: 0 6px; }
+#ask.dropping { outline: 2px dashed var(--accent); }
+.asked-files { font-size: 12px; color: var(--dim); margin: 2px 0 0 12px; }
 .side-actions { display: grid; gap: 4px; padding: 12px 0; }
 .side-actions button {
   min-height: 42px; padding: 9px 10px; color: var(--ink); background: transparent;
@@ -413,9 +424,16 @@ tr:last-child td { border-bottom: none; }
         <button type="button" id="reply-chip-clear" class="link-button"
           aria-label="取消回覆">✕</button>
       </div>
+      <div id="attachment-chips" class="attachment-chips" aria-live="polite" hidden></div>
       <textarea id="message" rows="3" autocomplete="off" spellcheck="true"
         placeholder="Ask naturally, or type / to choose a command"></textarea>
       <div class="composer-footer">
+        <button id="attach" class="link-button attach-button" type="button"
+          aria-label="附加檔案"
+          title="附加檔案：圖片、PDF、CSV、HTML、TXT、JSON、YAML、MD、ZIP
+（單檔 25 MB，最多 10 個）">📎</button>
+        <input id="attach-input" type="file" multiple hidden
+          accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.pdf,.csv,.html,.htm,.txt,.json,.yaml,.yml,.md,.zip">
         <div class="backend-control">
           <select id="conversation-backend" aria-label="Conversation backend"></select>
           <span id="backend-state" class="backend-state" role="status"></span>
@@ -1061,8 +1079,8 @@ let pendingPublicBackend = "";
 let activeConversationPublic = false;
 let activeConversationMessages = 0;
 
-function turn(asked, replyQuestion) {
-  const block = turnBlock(asked, replyQuestion);
+function turn(asked, replyQuestion, files) {
+  const block = turnBlock(asked, replyQuestion, files);
   log.append(block);
   log.scrollTop = log.scrollHeight;
   return block.querySelector(".said");
@@ -1071,6 +1089,8 @@ function turn(asked, replyQuestion) {
 function renderConversation(record) {
   log.replaceChildren();
   closeTurnMenu();
+  // Files wait in the conversation they were uploaded to.
+  if (attachmentSession && attachmentSession !== activeConversation) clearAttachments();
   if (replyTarget && !(record && record.messages.some(
     item => item.message_id === replyTarget.message_id))) clearReply();
   if (!record) return;
@@ -1081,7 +1101,8 @@ function renderConversation(record) {
   for (let index = 0; index < record.messages.length; index += 2) {
     const asked = record.messages[index];
     const replied = record.messages[index + 1];
-    const said = turn(asked.text, asked.reply_to ? questions.get(asked.reply_to) || "" : null);
+    const said = turn(asked.text, asked.reply_to ? questions.get(asked.reply_to) || "" : null,
+      asked.attachments || []);
     if (replied) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
@@ -1134,7 +1155,7 @@ const RATINGS = [["up", "\u{1F44D}", "\u6709\u5e6b\u52a9"],
   ["down", "\u{1F44E}", "\u6c92\u5e6b\u52a9"], ["neutral", "\u2796", "\u666e\u901a"]];
 let replyTarget = null;
 
-function turnBlock(asked, replyQuestion) {
+function turnBlock(asked, replyQuestion, files) {
   const block = document.createElement("div");
   block.className = "turn"; block.tabIndex = 0;
   block.setAttribute("role", "group");
@@ -1150,7 +1171,14 @@ function turnBlock(asked, replyQuestion) {
   line.className = "asked"; line.append(text("> " + asked));
   const said = document.createElement("div");
   said.className = "said waiting"; said.append(text("working\u2026"));
-  block.append(line, said);
+  block.append(line);
+  if (files && files.length) {
+    const attached = document.createElement("div");
+    attached.className = "asked-files";
+    attached.append(text("\ud83d\udcce " + files.map(file => file.filename).join("\u3001")));
+    block.append(attached);
+  }
+  block.append(said);
   return block;
 }
 
@@ -1528,29 +1556,133 @@ function showPendingState(entry) {
 
 function renderPendingTurns(sessionId) {
   for (const entry of pendingTurns.get(sessionId) || []) {
-    entry.said = turn(entry.asked, entry.replyQuestion);
+    entry.said = turn(entry.asked, entry.replyQuestion, entry.files);
     showPendingState(entry);
   }
 }
 
 // -- end Turn queues
 
+// -- Attachments (owner 2026-10-08) ----------------------------------------
+// Files are uploaded to the open conversation as they are chosen, dropped or
+// pasted, shown as chips, and sent with the next message by their ids.
+
+const ATTACHMENT_TYPES = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".pdf", ".csv",
+  ".html", ".htm", ".txt", ".json", ".yaml", ".yml", ".md", ".zip"];
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024, MAX_ATTACHMENTS = 10;
+let attachedFiles = [], uploadingFiles = 0, attachmentSession = "";
+
+function readyFiles() { return attachedFiles.filter(file => file.file_id); }
+
+function clearAttachments() { attachedFiles = []; renderAttachments(); }
+
+function renderAttachments() {
+  const box = el("attachment-chips");
+  box.replaceChildren();
+  box.hidden = attachedFiles.length === 0;
+  for (const file of attachedFiles) {
+    const chip = document.createElement("span");
+    chip.className = "attachment-chip" + (file.error ? " bad" : "");
+    const label = document.createElement("span");
+    label.textContent = file.error ? file.filename + "：" + file.error
+      : file.file_id ? file.filename : file.filename + "（上傳中…）";
+    chip.title = label.textContent;
+    const remove = document.createElement("button");
+    remove.type = "button"; remove.textContent = "✕";
+    remove.setAttribute("aria-label", "移除 " + file.filename);
+    remove.addEventListener("click", () => {
+      attachedFiles = attachedFiles.filter(item => item !== file); renderAttachments();
+    });
+    chip.append(label, remove);
+    box.append(chip);
+  }
+  send.disabled = uploadingFiles > 0 || !activeConversation;
+}
+
+function readAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",", 2)[1] || "");
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addFiles(files) {
+  if (!activeConversation) return;
+  if (attachmentSession !== activeConversation) { attachedFiles = []; }
+  attachmentSession = activeConversation;
+  for (const file of files) {
+    const entry = {filename: file.name || "pasted.png", file_id: null, error: null};
+    const suffix = (entry.filename.match(/\.[^.]+$/) || [""])[0].toLowerCase();
+    if (attachedFiles.length >= MAX_ATTACHMENTS) entry.error = "一則訊息最多 10 個檔案";
+    else if (!ATTACHMENT_TYPES.includes(suffix)) entry.error = "不支援的檔案類型";
+    else if (file.size > MAX_ATTACHMENT_BYTES) entry.error = "超過 25 MB";
+    attachedFiles.push(entry);
+    renderAttachments();
+    if (entry.error) continue;
+    uploadingFiles += 1; renderAttachments();
+    try {
+      const saved = await call("/api/attachments", {
+        session_id: attachmentSession, filename: entry.filename, data: await readAsBase64(file),
+      });
+      if (saved.ok) Object.assign(entry, saved.attachment);
+      else entry.error = saved.code || "上傳失敗";
+    } catch (failure) {
+      entry.error = failure.code || failure.message;
+    } finally {
+      uploadingFiles -= 1; renderAttachments();
+    }
+  }
+}
+
+el("attach").addEventListener("click", () => el("attach-input").click());
+el("attach-input").addEventListener("change", (event) => {
+  const chosen = Array.from(event.target.files || []);
+  event.target.value = "";
+  addFiles(chosen);
+});
+form.addEventListener("dragover", (event) => {
+  if (Array.from(event.dataTransfer.types || []).includes("Files")) {
+    event.preventDefault(); form.classList.add("dropping");
+  }
+});
+form.addEventListener("dragleave", () => form.classList.remove("dropping"));
+form.addEventListener("drop", (event) => {
+  form.classList.remove("dropping");
+  const dropped = Array.from(event.dataTransfer.files || []);
+  if (dropped.length) { event.preventDefault(); addFiles(dropped); }
+});
+field.addEventListener("paste", (event) => {
+  const pasted = Array.from(event.clipboardData ? event.clipboardData.files : []);
+  if (!pasted.length) return;
+  event.preventDefault();
+  const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+  addFiles(pasted.map((file, index) => file.name && file.name !== "image.png" ? file
+    : new File([file], "pasted-" + stamp + (index ? "-" + index : "") + ".png",
+      {type: file.type || "image/png"})));
+});
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const asked = field.value.trim();
+  if (uploadingFiles > 0) return;
+  const files = readyFiles();
+  const asked = field.value.trim() || (files.length ? "請看附件。" : "");
   if (!asked || !activeConversation) return;
   field.value = "";
   el("command-palette").hidden = true;
   const session = activeConversation, replying = replyTarget;
   clearReply();
+  clearAttachments();
   const entry = {
     asked: asked, replyQuestion: replying ? replying.question : null,
     replyTo: replying ? replying.message_id : null, state: "queued", said: null,
+    files: files,
   };
   const queue = pendingFor(session);
   if (queue.every(item => item.state === "failed")) entry.state = "working";
   queue.push(entry);
-  entry.said = turn(entry.asked, entry.replyQuestion);
+  entry.said = turn(entry.asked, entry.replyQuestion, entry.files);
   showPendingState(entry);
   renderSessionList();
   const run = async () => {
@@ -1561,6 +1693,7 @@ form.addEventListener("submit", (event) => {
       const completed = await call("/api/conversations/turn", {
         session_id: session, message: asked,
         ...(entry.replyTo ? {reply_to: entry.replyTo} : {}),
+        ...(entry.files.length ? {attachments: entry.files.map(file => file.file_id)} : {}),
       });
       answer = completed.answer;
       queue.splice(queue.indexOf(entry), 1);

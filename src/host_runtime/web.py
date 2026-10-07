@@ -80,6 +80,12 @@ from common.workflow_parameters import (
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime.answers import readable
+from host_runtime.attachments import (
+    AttachmentError,
+    AttachmentStore,
+    for_model,
+)
+from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
@@ -174,6 +180,8 @@ from models.wire import MethodTransport, UrllibTransport
 MAX_BODY_BYTES = 256 * 1024
 #: An uploaded SOP PDF arrives base64-encoded: a 20 MiB PDF is about 27 MiB.
 MAX_SOP_UPLOAD_BYTES = 28 * 1024 * 1024
+#: One attached file (25 MB) as base64 in JSON, with room for its name.
+MAX_ATTACHMENT_REQUEST_BYTES = 36 * 1024 * 1024
 AUTHORING_ROUTES = (
     "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
     "/api/authoring/preview", "/api/authoring/install",
@@ -184,7 +192,13 @@ LOOPBACK = ("127.0.0.1", "localhost", "[::1]", "::1")
 
 
 def with_tools(message: ConversationMessage) -> str:
-    """An answer's text plus its tool record, as the model reads it on later turns."""
+    """An answer's text plus its tool record, and a question's attached files,
+    as the model reads them on later turns."""
+    if message.role == "user" and message.attachments:
+        files = "\n".join(
+            f"- {file['filename']} ({file['kind']}): {file['path']}" for file in message.attachments
+        )
+        return f"{message.text}\n\n[附件]\n{files}"
     if message.role != "assistant" or not message.tool_summary:
         return message.text
     return f"{message.text}\n\n[工具紀錄]\n{message.tool_summary}"
@@ -325,6 +339,7 @@ class AgentWeb:
         self.config_path = config_path
         self.persona = AgentPersonaStore(runtime.layout.workspace_root)
         self.preferences = UserPreferencesStore(runtime.layout.workspace_root)
+        self.attachments = AttachmentStore(runtime.layout.workspace_root)
         self.conversation_context = ConversationContextStore(runtime.layout.workspace_root)
         self.backends = conversation_backends or LocalConversationBackends(
             runtime.layout.workspace_root
@@ -1048,7 +1063,19 @@ class AgentWeb:
     def delete_conversation(self, request: ConversationDeleteRequest) -> dict[str, Any]:
         item = ConversationDeleteRequest.model_validate(request)
         deleted = self.runtime.state.delete_conversation(item.session_id, self.runtime.actor)
+        if deleted:
+            self.attachments.delete_session(item.session_id)
         return {"ok": deleted, "code": None if deleted else "conversation_unknown"}
+
+    def add_attachment(self, session_id: str, filename: str, data: bytes) -> dict[str, Any]:
+        """Keep one file for this person's conversation (owner 2026-10-08)."""
+        if self.runtime.state.conversation(session_id, self.runtime.actor) is None:
+            return {"ok": False, "code": "conversation_unknown"}
+        try:
+            saved = self.attachments.add(session_id, filename, data)
+        except AttachmentError as error:
+            return {"ok": False, "code": error.code}
+        return {"ok": True, "attachment": attachment_summary(saved)}
 
     def conversation_backends(self) -> dict[str, Any]:
         binding = self.runtime.config.models
@@ -1255,6 +1282,12 @@ class AgentWeb:
             record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
+            try:
+                attached = [self.attachments.get(item.session_id, file_id)
+                            for file_id in item.attachments]
+            except AttachmentError as error:
+                return {"ok": False, "code": error.code}
+            attachment_note, attachment_images = for_model(attached)
             started = datetime.now(UTC)
             if record.data_classification == "PUBLIC" and item.message.lstrip().startswith("/"):
                 answer = {
@@ -1313,6 +1346,12 @@ class AgentWeb:
             except ValueError:
                 history = ()
                 history_error = True
+            if attached and history:
+                # The files ride on the newest message, outside the typed
+                # text's budget; the Gateway gives that message more room.
+                history = (*history[:-1], ModelMessage(
+                    role="user", text=f"{history[-1].text}\n\n{attachment_note}",
+                    images=attachment_images))
             context_too_large = {
                 "ok": False,
                 "answer": (
@@ -1324,6 +1363,12 @@ class AgentWeb:
             }
             if answer:
                 pass
+            elif attached and record.backend != "gateway":
+                answer = {
+                    "ok": False,
+                    "answer": "附件目前只能用在 Gateway 對話；請改用 Gateway session。",
+                    "status": "needs_input",
+                }
             elif history_error and record.backend != "gateway":
                 answer = context_too_large
             elif record.backend != "gateway":
@@ -1400,6 +1445,9 @@ class AgentWeb:
                         named_knowledge = installed_knowledge[0]
                 command_match = self.runtime.agent.gateway.router.commands.match(context)
                 explicit_command = bool(DOT_COMMAND.match(item.message.strip()))
+                if attached:
+                    # Files are for the conversation and its tools to work on.
+                    named_knowledge, command_match, explicit_command = None, None, False
                 if command_match is not None and explicit_command:
                     with self._one_at_a_time:
                         direct = asyncio.run(self.runtime.agent.handle(local))
@@ -1432,7 +1480,7 @@ class AgentWeb:
                         ),
                         "outcome": json.loads(direct.model_dump_json()),
                     }
-                elif (
+                elif not attached and (
                     inferred_knowledge := self._skill_intended_knowledge(routed_message)
                 ) is not None:
                     answer = self._knowledge_reply(inferred_knowledge, routed_message)
@@ -1499,6 +1547,11 @@ class AgentWeb:
                                 created_at=started,
                                 status="submitted",
                                 reply_to=None if quoted is None else quoted[1].message_id,
+                                attachments=tuple(
+                                    {"filename": file.filename, "kind": file.kind,
+                                     "path": file.path}
+                                    for file in attached
+                                ),
                             ),
                             ConversationMessage(
                                 message_id=f"message-{uuid.uuid4().hex}",
@@ -2758,6 +2811,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/persona",
             "/api/settings/context",
             "/api/preferences",
+            "/api/attachments",
             "/api/conversations",
             "/api/conversations/delete",
             "/api/conversations/turn",
@@ -2775,7 +2829,11 @@ class _Handler(BaseHTTPRequestHandler):
         except ValueError:
             self._json(400, {"error": "the request did not say how long it was"})
             return
-        limit = MAX_SOP_UPLOAD_BYTES if path == "/api/authoring/start" else MAX_BODY_BYTES
+        limit = (
+            MAX_SOP_UPLOAD_BYTES if path == "/api/authoring/start"
+            else MAX_ATTACHMENT_REQUEST_BYTES if path == "/api/attachments"
+            else MAX_BODY_BYTES
+        )
         if length > limit:
             self._json(413, {"error": "that is larger than a request to an Agent"})
             return
@@ -2833,6 +2891,19 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not valid workflow settings"})
                 return
             result = self.server.web.save_workflow_settings(update)
+            self._json(200 if result["ok"] else 400, result)
+            return
+        if path == "/api/attachments":
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "attachment_request_invalid"})
+                return
+            try:
+                data = base64.b64decode(str(body.get("data") or ""), validate=True)
+            except (ValueError, binascii.Error):
+                self._json(400, {"ok": False, "code": "attachment_request_invalid"})
+                return
+            result = self.server.web.add_attachment(
+                str(body.get("session_id") or ""), str(body.get("filename") or ""), data)
             self._json(200 if result["ok"] else 400, result)
             return
         if path == "/api/preferences":

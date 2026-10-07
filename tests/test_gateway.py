@@ -701,3 +701,18 @@ def test_the_system_prompt_says_a_failed_knowledge_lookup_out_loud() -> None:
     system = model.calls[0].messages[0].text
     assert "say first that the knowledge base gave no answer" in system
     assert "marked as not from the knowledge base and uncited" in system
+
+
+def test_pictures_on_the_newest_message_reach_the_model_and_need_vision() -> None:
+    """Owner 2026-10-08: attached pictures go with the person's newest message."""
+    built, model = _host_gateway([], [_text("a chart")])
+    picture = "data:image/png;base64,iVBORw0KGgo="
+    history = (ModelMessage(role="user", text="what is this?", images=(picture,)),)
+    result = asyncio.run(built.converse(request("what is this?"), history))
+    assert result.status == "answered"
+    sent = model.calls[0]
+    assert sent.requirements.vision is True and sent.messages[-1].images == (picture,)
+    older = (ModelMessage(role="user", text="old", images=(picture,)),
+             ModelMessage(role="assistant", text="ok"), ModelMessage(role="user", text="new"))
+    refused = asyncio.run(built.converse(request("new"), older))
+    assert refused.failure is not None and refused.failure.code == "conversation_history_invalid"

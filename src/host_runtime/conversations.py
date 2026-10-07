@@ -39,6 +39,9 @@ class ConversationMessage(Contract):
     # the model with the answer's text on later turns so it can continue the
     # work; never page or file content.
     tool_summary: str | None = None
+    # A question's attached files: name, kind and absolute path, so later
+    # turns can still point tools at them; never their content.
+    attachments: tuple[dict[str, str], ...] = ()
 
     @model_validator(mode="before")
     @classmethod
@@ -105,6 +108,8 @@ class ConversationTurnRequest(Contract):
     session_id: Symbol
     message: Text
     reply_to: Symbol | None = None
+    # Files uploaded to this conversation for this turn (owner 2026-10-08).
+    attachments: tuple[Symbol, ...] = Field(default=(), max_length=10)
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

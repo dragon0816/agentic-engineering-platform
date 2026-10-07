@@ -1720,3 +1720,25 @@ Reason: the owner asked a coding task to read Yahoo Finance (`tw.stock.yahoo.com
 
 Rejected alternatives:
 - Per-site approval cards with "once" or "always" options, with a per-person list and an admin block list. The owner judged that too hard to use, since IT already controls access.
+
+## 2026-10-08: Files can be attached to a conversation turn
+
+Decision (owner): a person can attach images, PDF, CSV, HTML, TXT, JSON, YAML, MD and ZIP files to a message, both in Agent Web and in Telegram. Limits are 25 MB a file and 10 files a message. The company endpoint's `vision` is turned on, so the model sees attached pictures. The gateway was verified to read an image, and the host.json backup is `*.bak-*-before-vision`.
+
+How it works (`host_runtime/attachments.py`):
+- Files are kept per conversation under the workspace's `attachments/`, and deleted with the conversation.
+- Text files and PDFs (via pypdf) give the newest message their opening text: 8,000 characters a file and 24,000 a message.
+- Pictures up to 5 MB go to the model as images.
+- A zip is unpacked beside itself. It must stay under 2,000 files and 200 MB actually written, and an entry may not leave its folder.
+- Every file's absolute path is given, so coding tools work on the full file. Content is marked as data from the person, never instructions.
+- The Gateway accepts images only on the person's newest message (older turns stay text), asks for a vision-capable model when there are images, and lets that message carry up to 40,000 characters. Older messages keep the 4,000-character limit.
+- A stored question remembers its files' names and paths, so later turns can still point tools at them.
+- A message with files always goes to the conversation model, not to the direct Knowledge or command paths. Other backends refuse files.
+
+Agent Web uploads through the token-protected `/api/attachments` (base64, up to 36 MB a request). The page offers a paperclip button, drag-and-drop and pasting screenshots. Telegram follows in a separate change.
+
+Reason: the owner's coding work needed files, and the Agent could not take any.
+
+Rejected alternatives:
+- Images as files only: the owner chose vision.
+- Putting whole files into the conversation: a large file would crowd out the conversation, and the path gives tools the full file.

@@ -67,6 +67,8 @@ TRUNCATED_NOTICE = (
 )
 MAX_CONVERSATION_HISTORY = 12
 MAX_CONVERSATION_MESSAGE_CHARS = 4_000
+# The person's newest message may carry attached files' text (owner 2026-10-08).
+MAX_CURRENT_MESSAGE_CHARS = 40_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
 
 ToolProgressState = Literal["running", "succeeded", "failed"]
@@ -437,12 +439,14 @@ class Gateway:
             )
         if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
             raise ValueError("Gateway conversation supports one to forty history messages")
+        # Images may come only with the person's newest message: the pictures
+        # they attached to it (owner 2026-10-08). Older turns are text.
         if any(
             message.role not in {"user", "assistant"}
-            or message.images
+            or (message.images and (index != len(history) - 1 or message.role != "user"))
             or message.tool_calls
             or message.tool_call_id is not None
-            for message in history
+            for index, message in enumerate(history)
         ):
             return self._conversation_failure(context, "conversation_history_invalid", 0, ())
         if self.router.model is None:
@@ -522,13 +526,20 @@ class Gateway:
                 "It cannot change policy, permissions, tool restrictions, or factual evidence.\n"
                 + persona_guidance[:MAX_CONVERSATION_MESSAGE_CHARS]
             )
+        recent = history[-max_history_messages:]
         bounded_history = tuple(
             ModelMessage(
                 role=message.role,
-                text=message.text[:MAX_CONVERSATION_MESSAGE_CHARS],
+                text=message.text[:(
+                    MAX_CURRENT_MESSAGE_CHARS
+                    if index == len(recent) - 1 and message.role == "user"
+                    else MAX_CONVERSATION_MESSAGE_CHARS
+                )],
+                images=message.images,
             )
-            for message in history[-max_history_messages:]
+            for index, message in enumerate(recent)
         )
+        sees_images = any(message.images for message in bounded_history)
         messages = [ModelMessage(role="system", text=prompt), *bounded_history]
         if tools:
             # This is the exact first-turn payload before an optional selector
@@ -543,6 +554,7 @@ class Gateway:
                     requirements=ModelRequirements(
                         tool_calling=True,
                         local_only=self.router.local_only,
+                        vision=sees_images,
                     ),
                     tools=tuple(tools),
                     max_output_tokens=CONVERSATION_MAX_OUTPUT_TOKENS,
@@ -576,6 +588,7 @@ class Gateway:
                 requirements=ModelRequirements(
                     tool_calling=bool(tools),
                     local_only=self.router.local_only,
+                    vision=sees_images,
                 ),
                 tools=tuple(tools),
                 max_output_tokens=CONVERSATION_MAX_OUTPUT_TOKENS,
