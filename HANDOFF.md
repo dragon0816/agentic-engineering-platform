@@ -86,13 +86,13 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 **Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
 **Build state:**
-- HEAD is `d91fc0f` or later.
-- Agent Web was restarted at 06:47 on 2026-10-08; its logs are `.scratch/agent-web-20261008-064756.*`. It serves:
+- HEAD is `286e30c` or later.
+- Agent Web was restarted at 07:17 on 2026-10-08; its logs are `.scratch/agent-web-20261008-071743.*`. It serves:
   - avatars;
   - every web page (`web.allowed_origins: ["*"]`; the host.json backup is `*-before-any-origin`);
-  - attachments, with vision on for the company endpoint (backup `*-before-vision`).
+  - attachments in Agent Web and Telegram, with vision on for the company endpoint (backup `*-before-vision`).
 - The Shared Platform was not restarted, so asset ownership step 2 is merged but not live. The owner confirmed its design choices on 2026-10-08.
-- Running: a subagent is adding Telegram attachments in its own worktree.
+- Nothing is running. Telegram file download has been tested only with a fake transport, so the owner should try a real photo.
 
 **Phase gate status, build `db38f28`:**
 - Lab fix-010: 14/16.
@@ -202,10 +202,10 @@ Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
 
 ## Verification
 
-HEAD `d91fc0f`, with the repo `.venv`:
+HEAD `286e30c`, with the repo `.venv`:
 - ruff passes.
 - mypy (`src`) passes.
-- Full pytest: **2325 passed, 6 skipped, 0 failed**. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
+- Full pytest: **2333 passed, 6 skipped, 0 failed**. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
 
 The 2026-10-08 test-stability work fixed the cp950 loader test, the Windows rename locks (`common/filesystem.publish_directory`), the SOP PDF wait, the Agent Web refused-POST reset and the snapshot line endings.
 
@@ -217,10 +217,7 @@ Left over: headless Edge PID 7956 (child 13048) from the test-stability probe, w
 
 ## Next recommended action
 
-1. When the Telegram attachment subagent reports:
-   - review its branch, rebase onto main and merge;
-   - run the full verification;
-   - restart Agent Web, which also restarts the Telegram loop.
+1. Check the owner's first real Telegram photo or file, since download has only been tested with a fake transport.
 2. **Paused by the owner, who will check the Agent by hand first:**
    - the phase gate (coding Skill 1.8.0 wording: read rules in full, missing values follow the request or template, keep template formulas, check outputs against inputs; X02's period/as-of wording to be tested separately);
    - the Knowledge tool route: (a) return the harness answer as it is, (b) route more questions directly, or (c) leave it.
