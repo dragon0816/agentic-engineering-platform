@@ -1,8 +1,10 @@
 """Offline check of the grader: synthetic replies for every status, a temporary
-Vault, and a stand-in reviewer. Run: python benchmarks/knowledge_v1/selftest.py"""
+Vault, and a stand-in reviewer; and of compare.py on synthetic run folders.
+Run: python benchmarks/knowledge_v1/selftest.py"""
 
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -13,6 +15,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1] / "benchmarks" / "coding_v1"))
 sys.path.insert(0, str(HERE))
 
+import compare  # noqa: E402
 from questions import load, sample  # noqa: E402
 from run import grade  # noqa: E402
 
@@ -58,6 +61,63 @@ def tool(text: str, passages: list[dict[str, Any]]) -> dict[str, Any]:
         "answer": text, "outcome": {"conversation": {"status": "answered", "text": text, "tools": [call]}}}}}
 
 
+def write_run(root: Path, name: str, results: list[dict[str, Any]]) -> Path:
+    folder = root / name
+    for result in results:
+        (folder / result["id"]).mkdir(parents=True)
+        (folder / result["id"] / "result.json").write_text(json.dumps(result), encoding="utf-8")
+    (folder / "metadata.json").write_text(json.dumps({"started": name, "commit": "abc1234"}), encoding="utf-8")
+    (folder / "Q0003").mkdir(exist_ok=True)  # a question still being asked: no result.json yet
+    return folder
+
+
+def result(qid: str, status: str, route: str, seconds: float, why: str = "",
+           citations: int = 0, overreach: int = 0) -> dict[str, Any]:
+    out: dict[str, Any] = {"id": qid, "status": status, "route": route, "seconds": seconds, "grader": "1.1",
+                           "gap": "" if status == "PASS" else "REASONING_GAP", "why": why}
+    if citations:
+        out["citations"] = [{"number": n, "ok": n != 2} for n in range(1, citations + 1)]
+        out["review"] = {"ok": True, "supported": status == "PASS", "reasonable": True, "confidence": "high",
+                         "overreach": ["claim"] * overreach}
+    return out
+
+
+def compare_cases() -> int:
+    """compare.py on two synthetic runs; the second is partial (Q1001 not asked yet)."""
+    with tempfile.TemporaryDirectory() as folder:
+        root = Path(folder)
+        old = write_run(root, "run-a", [
+            result("Q0001", "PASS", "direct", 10.0, citations=2),
+            result("Q0002", "FAIL", "tool", 20.0, "reviewer: unsupported", citations=1, overreach=2),
+            result("Q0011", "SYSTEM_ERROR", "tool", 600.0, "timed out"),
+            result("Q1001", "INSUFFICIENT_KNOWLEDGE", "tool", 30.0, "gap")])
+        write_run(root, "run-b", [
+            result("Q0001", "FAIL", "tool", 40.0, "reviewer: overreach | detail", citations=1, overreach=1),
+            result("Q0002", "PASS", "direct", 50.0, citations=3),
+            result("Q0011", "FAIL", "tool", 60.0, "reviewer: no")])
+        runs = [compare.load_run(compare.resolve(str(old))), compare.load_run(compare.resolve("run-b", root))]
+        markdown = compare.compare(runs, compare.load_questions())
+        moved = compare.transitions(runs[0].results, runs[1].results, ["Q0001", "Q0002", "Q0011"])
+    checks = {
+        "a partial run is compared on the shared questions": "| run-a | run-a | `abc1234` | 1.1 | 4 | 3 | 1 |"
+        in markdown,
+        "status counts": "| PASS | 1 | 1 |" in markdown and "| SYSTEM_ERROR | 1 | 0 |" in markdown,
+        "route x status": "| run-b | direct | 1 | 1 | 0 | 0 | 0 | 0 | 100% |" in markdown,
+        "breakdown by market with delta": "| Wireless Communication | 3 | 1 / 1 | 1 / 1 | +0 |" in markdown,
+        "improved / regressed / same rank": (moved["counts"]["improved"], moved["counts"]["regressed"],
+                                             moved["counts"]["changed, same rank"]) == (1, 1, 1),
+        "transition rows with route change and reason": "| Q0001 | regressed | PASS → FAIL | direct → tool |"
+        in markdown and "reviewer: overreach / detail" in markdown,
+        "reviewer overreach share": "| run-a | 2 | 2 | 1 (50%) | 2 (100%) | 2 / 0 / 0 | 1 (50%) | 1.0 |"
+        in markdown,
+        "latency median and p90": "| run-a | tool | 2 | 310.0 | 600.0 |" in markdown,
+        "citations and verification rate": "| run-b | 2 | 4 | 2.0 | 3 (75%) |" in markdown,
+    }
+    for name, ok in checks.items():
+        print(f"{'PASS' if ok else 'FAIL'}  compare: {name}")
+    return sum(1 for ok in checks.values() if not ok)
+
+
 def main() -> int:
     question = {"id": "Q0001", "text": "What does the tester measure?"}
     with tempfile.TemporaryDirectory() as folder:
@@ -89,6 +149,7 @@ def main() -> int:
     shape_ok = len(bank) == 1100 and len(picked) == 110 and len({q["id"] for q in bank}) == 1100
     print(f"{'PASS' if shape_ok else 'FAIL'}  question bank 1100, sample 110")
     wrong += 0 if shape_ok else 1
+    wrong += compare_cases()
     print("selftest:", "all good" if not wrong else f"{wrong} case(s) wrong")
     return 1 if wrong else 0
 
