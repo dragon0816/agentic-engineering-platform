@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -192,6 +193,9 @@ def test_the_look_text_is_bounded() -> None:
     assert len(text) <= 2002 and text.startswith("Window: W")
 
 
+@pytest.mark.gui
+@pytest.mark.skipif(os.environ.get("AEP_GUI_TESTS") != "1",
+                    reason="drives a desktop window; set AEP_GUI_TESTS=1 when the screen is free")
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows UI Automation")
 @pytest.mark.skipif(not EXPENSE_EXE.is_file(),
                     reason="build benchmarks/business_workflow_lab/expense_desktop_mock first")
