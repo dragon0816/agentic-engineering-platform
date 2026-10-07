@@ -1,0 +1,11 @@
+Inputs for rerun:
+input\sales_template.xlsx exists= True bytes= 9844
+output\downloads\orders_C001_2026-08-01_2026-10-31.csv exists= True bytes= 793
+input\fx_rates.csv exists= True bytes= 276
+Downloaded order rows: 9
+OrderIDs: ['0045000101', '0045000107', '0045000109', '0045000114', '0045000119', '0045000125', '0045000129', '0045000132', '0045000136']
+Sample row: {'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}
+FX rates used: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Wrote: output\sales_report_C001_2026-08-01_2026-10-31.xlsx
+Checked: workbook sheets/merged range preserved; Report fields populated; 9 rows all exact CustomerID C001 and dates inclusive; no C007/similar-name customer rows; detail CustomerContact/PaymentTerms written with blank only where source blank; OrderIDs are text; amounts are numeric; Summary B2 formula and grouped totals equal Details total 1702471.00 TWD.
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W02\workspace\output\sales_report_C001_2026-08-01_2026-10-31.xlsx

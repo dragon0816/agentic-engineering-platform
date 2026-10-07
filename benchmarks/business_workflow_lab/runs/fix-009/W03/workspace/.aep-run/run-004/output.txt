@@ -1,0 +1,29 @@
+Inputs:
+ - fx_rates.csv
+ - project_template.xlsx
+ - sap_manual.md
+Invoice CSV: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W03\workspace\output\downloads\invoices_2026-09.csv exists= True
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+invoice headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+invoice row count: 13
+invoice sample rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+processed in period: 13
+Workbook sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Invoices row 4 A:K: ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W03\workspace\output\project_invoice_report_2026-09.xlsx
+Invoices headers A:K: ['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']
+Expected overdue IDs: ['0090000207', '0090000209', '0090000212', '0090000217']
+Actual exception rows: [['Invoices', '0090000207', None, 'Overdue'], ['Invoices', '0090000209', 'P005', 'Overdue'], ['Invoices', '0090000212', 'P002', 'Overdue'], ['Invoices', '0090000217', 'P002', 'Overdue']]
+Due on as-of date with balance, not overdue: ['0090000211', '0090000213', '0090000219']
+Expected project invoice balance TWD: {'P003': Decimal('0.00'), 'P005': Decimal('236371.20'), 'P004': Decimal('78750.00'), 'P002': Decimal('156256.00'), 'P001': Decimal('386445.00')}
+Actual project invoice balance TWD: {'P001': Decimal('386445.00'), 'P002': Decimal('156256.00'), 'P003': Decimal('0.00'), 'P004': Decimal('78750.00'), 'P005': Decimal('236371.20')}
+Summary B2 formula: =SUM(B5:B9)
+Summary C2 formula: =SUM(C5:C9)
+Summary D2 formula: =SUM(D5:D9)
+Summary E2 formula: =SUM(E5:E9)
+VERIFICATION PASSED
+Output file: project_invoice_report_2026-09.xlsx
+Invoice rows: 13
+Summary projects: 5
+Exceptions: 4

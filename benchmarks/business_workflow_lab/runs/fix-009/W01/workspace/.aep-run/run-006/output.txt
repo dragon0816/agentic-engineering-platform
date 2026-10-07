@@ -1,0 +1,51 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W01\workspace
+input files:
+ - input\fx_rates.csv 276
+ - input\sales_template.xlsx 9844
+ - input\sap_manual.md 2077
+output files:
+ - output\september_open_orders.xlsx 11427
+download files:
+ - output\downloads\all_sales_orders_for_workflow_ids.csv 2849
+ - output\downloads\sales_orders_2026-09-01_2026-09-30_Open.csv 1129
+ - output\downloads\workflow_all_sales_orders.csv 2849
+ - output\downloads\workflow_sales_orders_filtered.csv 1129
+workbook sheets: ['Report', 'Details', 'Summary', 'Instructions']
+sheet Report max_row 20 max_column 6
+  ('Sales Order Report 銷售訂單報表', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None)
+  ('條件 Condition', 'Sales Orders; Status=Open; Sort by OrderID asc; date field=OrderDate; all filtered rows from Export CSV', None, None, None, None)
+  ('產出時間 Generated at', '2026-10-07T13:52:49+08:00', None, None, None, None)
+  (None, None, None, None, None, None)
+  ('資料來源 Source', 'Lab ERP synthetic SAP', '取得時間 Fetched at', '2026-10-07T13:52:49+08:00', None, None)
+  (None, None, None, None, None, None)
+sheet Details max_row 18 max_column 11
+  ('Sales order details', None, None, None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None, None, None)
+  ('OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms')
+  ('0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', 150000, 150000, 'Grace Lin <grace.lin@acme-precision.example>', 'NET10')
+  ('0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', 293572.5, 293572.5, '張美玲 <mei@tw-precision.example>', 'NET30')
+  ('0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', 12311, 393952, 'Peter Ho <peter.ho@acme-limited.example>', 'NET15')
+  ('0045000113', 'C004', '藍海電子有限公司', None, '2026-09-05', 'Open', 'TWD', 15390, 15390, None, 'NET15')
+sheet Summary max_row 8 max_column 6
+  ('Sales summary', None, None, None, None, None)
+  ('總計 TWD Totals', '=SUM(Details!I5:I18)', None, None, None, None)
+  (None, None, None, None, None, None)
+  ('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+  ('Currency', None, 'EUR', 28936.37, 1012772.95, 4)
+  ('Currency', None, 'TWD', 637522.5, 637522.5, 6)
+  ('Currency', None, 'USD', 32014, 1024448, 4)
+  ('Total', 'All currencies converted to TWD', 'TWD', None, 2674743.45, 14)
+sheet Instructions max_row 29 max_column 3
+  ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+  (None, None, None)
+  ('Sheet', 'Cell / Range', 'Content and rule')
+  ('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+  ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+  ('Report', 'B4', '本次查詢條件的文字說明。')
+  ('Report', 'B5', '產出時間（ISO 8601）。')
+  ('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+workflow_sales_orders_filtered.csv rows including header: 15 header: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'] first data: ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+workflow_all_sales_orders.csv rows including header: 37 header: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'] first data: ['0045000101', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-08-03', 'Closed', 'TWD', '95895.00']

@@ -1,0 +1,16 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D01\workspace
+input files: ['expense_manual.md', 'expense_template.xlsx', 'fx_rates.csv']
+output files: ['E001_september_expenses.xlsx', 'E001_september_expenses_export.xlsx']
+report size: 12733
+export size: 6179
+report sheets: ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+details row count: 13
+summary headers: ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+summary data rows: 7
+summary B2: =SUM(Details!I5:I17)
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D01\workspace\.aep-run\run-008\script.py", line 88, in <module>
+    assert h in summary_headers, f'missing summary column {h}'
+           ^^^^^^^^^^^^^^^^^^^^
+AssertionError: missing summary column Status

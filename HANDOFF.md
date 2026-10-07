@@ -85,37 +85,61 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 
 **Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
-**Build under test:** `a8a4864` (refusal location for desktop steps). Agent Web was restarted on it at 12:48; its logs are `.scratch/agent-web-20261007-124833.*`.
+**Build under test:** `4becd6b`.
+- It contains the refusal location for desktop steps and redaction of credential-shaped text in stored conversation messages.
+- Agent Web was restarted on it at 13:30. Its logs are `.scratch/agent-web-20261007-133033.*`.
 
-**Running at handoff time:**
-- coding_v1 `fix-run-010`, with logs at `.scratch/coding_v1-fix-run-010.log` and `.log.err`.
-- Lab `fix-009` comes next on the same build. Run one benchmark at a time, because both use the same Agent Web.
+### Owner rule (2026-10-07): GUI tests run only while the owner is away
+
+Tests that drive Edge or the Expense desktop app open windows and can take focus from the owner's work. Run them only when the owner is not using the computer, such as evenings or after the owner says they have left.
+
+| Can run during working hours (no GUI) | Only while the owner is away (GUI) |
+|---|---|
+| coding_v1, all 20 tasks | Lab W01–W04 (Edge) |
+| Lab C02, C03, C04, C04 exit-2 (CLI only) | Lab D01–D04 (Expense desktop app) |
+| pytest with `-m "not live"` | Lab C01 (desktop + CLI) |
+| | Lab X01–X03 (all three systems) |
+| | The live desktop pytest test (`-m live`) |
+| | `smoke.py --browser` |
+
+Run only the CLI tasks with `--tasks C02,C03,C04` (comma-separated IDs). Both `all` and the default `smoke` may include GUI tasks.
+
+**Stopped at the owner's request:** lab `fix-009` (13:5x). Finished before the stop:
+- W01–W04: PASS. W01's rerun with unchanged code passed for the first time.
+- D01: FAIL (rerun).
+
+D02's folder is incomplete. Details are in `runs/fix-009/findings.md`. The Expense app and the lab's Edge were closed. The SAP mock web server (`sap_mock/server.py --port 8810`) still runs headless; it does not use the screen.
+
+**Next GUI run:** a new run ID (`fix-010`), all tasks, on the same build. Check first:
+- Agent Web is up: port 53583 returns 401 without the token.
+- No ExpenseApp process is left over.
 
 **Commands** (repo root, repo `.venv`):
 
     .venv\Scripts\python benchmarks\coding_v1\run.py --run-id <new> --tasks all
     .venv\Scripts\python benchmarks\business_workflow_lab\operator\run_lab.py --run-id <new> --tasks all
 
-- Mock smoke checks: `python benchmarks\business_workflow_lab\operator\smoke.py --browser`.
+- Mock smoke checks: `python benchmarks\business_workflow_lab\operator\smoke.py --browser` (GUI).
 - Set `PYTHONIOENCODING=utf-8` when output goes to a cp950 console.
+- Run one benchmark at a time, because both use the same Agent Web.
+- When a script waits for a runner, wait on its PID. A `pgrep -f` on the runner's name matches the waiting shell's own command line.
 
 **Results so far.** Each run folder holds a `findings.md`.
 
 | Benchmark | Run | Result | Note |
 |---|---|---|---|
-| coding_v1 | fix-run-006 | 20/20 | |
-| coding_v1 | fix-run-007 | 20/20 | |
-| coding_v1 | fix-run-008 | 18/20 | validator 1.4 then fixed T14 |
-| coding_v1 | fix-run-009 | 19/20 | T08 Agent variance |
-| Lab | fix-005 | 11/16 | |
-| Lab | fix-006 | 13/16 | |
-| Lab | fix-007 | 12/16 | |
+| coding_v1 | fix-run-006 / 007 | 20/20, 20/20 | |
+| coding_v1 | fix-run-008 / 009 | 18/20, 19/20 | T14 validator (since fixed); T08 Agent variance |
+| coding_v1 | fix-run-010 | interrupted at T09 | Agent Web defect, fixed in `4becd6b` |
+| coding_v1 | **fix-run-011** | **20/20** | build `4becd6b`: the coding_v1 half of the gate is met |
+| Lab | fix-005 / 006 / 007 | 11, 13, 12 of 16 | |
 | Lab | fix-008 | 12/16 | X01 passes for the first time |
+| Lab | fix-009 | stopped | W01–W04 PASS, D01 FAIL, the rest not run |
 
-**Open lab gaps** (fix-008):
-- W01 and D01 reruns: the Agent revised the Workflow instead of reusing it. In D01 this was because a desktop failure did not say which action failed, which is now fixed.
-- X02: an overdue invoice dated before the period was missed.
-- X03: X01's Workflow fixes the output name and filters by customer, so the Agent asked instead of running.
+**Open lab gaps:**
+- **Reruns where the Agent revises the Workflow instead of reusing it:** fix-008 W01, fix-009 D01. The Agent fixes the Workflow until a run succeeds, then changes it once more before the rerun, so "same code" fails.
+- **X02:** an overdue invoice dated before the period was missed (fix-008).
+- **X03:** X01's Workflow fixes the output name and filters by customer, so the Agent asked instead of running (fix-008).
 
 The operator presses approvals, replies 繼續 at most 3 times, and asks for the spec's reruns. Each of these is recorded as an intervention. Expected answers are never changed; grader and operator changes are versioned (grader 1.2).
 
@@ -140,19 +164,20 @@ The operator presses approvals, replies 繼續 at most 3 times, and asks for the
 - `turn_summary.py` provides the tool record.
 - Approvals: Agent Web `/api/approvals` and Telegram buttons.
 - Bridge failures: `invalid_input` names its fields, and `CapabilityRefused.where` names the place in the request.
+- `ConversationMessage` redacts credential-shaped text instead of refusing it.
 
 ## Verification
 
-Build `a8a4864`:
+Build `4becd6b`:
 - ruff passes.
 - mypy (`src`) passes with the repo `.venv`.
-- Full pytest with the repo `.venv` (`-m "not live"`): 2257 passed, 1 failed. The failure is `test_local_developer_environment`, which fails on cp950 stderr decoding, also fails on a clean tree, and is excluded.
+- Full pytest with the repo `.venv` (`-m "not live"`): 2259 passed, 1 failed. The failure is `test_local_developer_environment`, which fails on cp950 stderr decoding, also fails on a clean tree, and is excluded.
 
 Use the repo `.venv`. The system Python has matplotlib 3.7.3 with numpy 2.2.6, which breaks the chart tests.
 
 ## Next recommended action
 
-1. Let coding_v1 fix-run-010 finish, then run lab `fix-009` on the same build. Record both, with findings, under their run IDs.
-2. If the coding_v1 result is below 20/20, read the failing tasks' traces. Agent variance on one task does not by itself call for a platform change. Rerun under a new ID.
-3. Lab gaps: see "Open lab gaps" above.
+1. **While the owner is away:** run lab `fix-010`, all tasks, on build `4becd6b`, then record its findings.
+2. During working hours, work that needs no GUI is fine, such as code changes for the open lab gaps and coding_v1 reruns.
+3. For the rerun gap, consider whether the draft guide or the coding Skill should say: once a Workflow run has succeeded and the result was delivered, a rerun uses that installed version unchanged. Discuss with the owner before changing the harness.
 4. After this stage: conversational authoring A1–A3, A7, A8.

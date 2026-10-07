@@ -1,0 +1,18 @@
+Inputs really used:
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W01\workspace\input\sales_template.xlsx exists= True size= 9844
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W01\workspace\input\fx_rates.csv exists= True size= 276
+- C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W01\workspace\output\downloads\sales_orders_2026-09-01_2026-09-30_Open.csv exists= True size= 1129
+fx header/sample: [['Currency', 'RateToTWD', 'Note'], ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)'], ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)'], ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']]
+fx rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+CSV headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+CSV row count: 14
+CSV sample rows: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}, {'OrderID': '0045000112', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-09-04', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '12311.00'}]
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W01\workspace\output\september_open_orders.xlsx
+Verification OK:
+- output file: september_open_orders.xlsx
+- details rows: 14
+- order IDs sorted: 0045000109 ... 0045000128
+- currencies: ['EUR', 'TWD', 'USD']
+- all TWD total: 2674743.45
+- Summary B2 formula: =SUM(Details!I5:I18)
+- Summary rows: [['Currency', None, 'EUR', 28936.37, 1012772.95, 4], ['Currency', None, 'TWD', 637522.5, 637522.5, 6], ['Currency', None, 'USD', 32014, 1024448, 4], ['Total', 'All currencies converted to TWD', 'TWD', None, 2674743.45, 14], [None, None, None, None, None, None]]

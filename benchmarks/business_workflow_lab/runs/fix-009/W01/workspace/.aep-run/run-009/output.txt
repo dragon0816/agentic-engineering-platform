@@ -1,0 +1,51 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\W01\workspace
+OUTPUT FILES:
+- output\august_closed_orders.xlsx 10500
+- output\downloads\all_sales_orders_for_workflow_ids.csv 2849
+- output\downloads\sales_orders_2026-09-01_2026-09-30_Open.csv 1129
+- output\downloads\workflow_all_sales_orders.csv 2849
+- output\downloads\workflow_sales_orders_filtered.csv 408
+- output\september_open_orders.xlsx 11427
+
+CHECK output/august_closed_orders.xlsx exists= True size= 10500
+ sheets= ['Report', 'Details', 'Summary', 'Instructions']
+ Report: max_row=20, max_col=6
+ Details: max_row=8, max_col=11
+  header row 4= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+  detail_rows= 4
+  first rows= [['0045000101', 'C001', 'Acme Precision Taiwan Ltd.', 'P001', '2026-08-03', 'Closed', 'TWD', 95895, 95895, 'Grace Lin <grace.lin@acme-precision.example>', 'NET30'], ['0045000102', 'C002', '台灣精密股份有限公司', 'P002', '2026-08-07', 'Closed', 'USD', 4095, 131040, '張美玲 <mei@tw-precision.example>', 'NET30'], ['0045000105', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-08-19', 'Closed', 'TWD', 227850, 227850, 'Peter Ho <peter.ho@acme-limited.example>', 'NET15'], ['0045000107', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-08-27', 'Closed', 'USD', 6250, 200000, 'Grace Lin <grace.lin@acme-precision.example>', 'NET10']]
+ Summary: max_row=7, max_col=6
+  summary row 1 ['Sales summary', None, None, None, None, None]
+  summary row 2 ['總計 TWD Totals', '=SUM(Details!I5:I8)', None, None, None, None]
+  summary row 4 ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+  summary row 5 ['Currency', None, 'TWD', 323745, 323745, 2]
+  summary row 6 ['Currency', None, 'USD', 10345, 331040, 2]
+  summary row 7 ['Total', 'All currencies converted to TWD', 'TWD', None, 654785, 4]
+ Instructions: max_row=29, max_col=3
+
+CHECK output/september_open_orders.xlsx exists= True size= 11427
+ sheets= ['Report', 'Details', 'Summary', 'Instructions']
+ Report: max_row=20, max_col=6
+ Details: max_row=18, max_col=11
+  header row 4= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+  detail_rows= 14
+  first rows= [['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', 150000, 150000, 'Grace Lin <grace.lin@acme-precision.example>', 'NET10'], ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', 293572.5, 293572.5, '張美玲 <mei@tw-precision.example>', 'NET30'], ['0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', 12311, 393952, 'Peter Ho <peter.ho@acme-limited.example>', 'NET15'], ['0045000113', 'C004', '藍海電子有限公司', None, '2026-09-05', 'Open', 'TWD', 15390, 15390, None, 'NET15'], ['0045000115', 'C005', 'Pacific Test Systems Inc.', None, '2026-09-09', 'Open', 'USD', 6391, 204512, 'Sam Patel <sam@pacifictest.example>', 'NET20']]
+ Summary: max_row=8, max_col=6
+  summary row 1 ['Sales summary', None, None, None, None, None]
+  summary row 2 ['總計 TWD Totals', '=SUM(Details!I5:I18)', None, None, None, None]
+  summary row 4 ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+  summary row 5 ['Currency', None, 'EUR', 28936.37, 1012772.95, 4]
+  summary row 6 ['Currency', None, 'TWD', 637522.5, 637522.5, 6]
+  summary row 7 ['Currency', None, 'USD', 32014, 1024448, 4]
+  summary row 8 ['Total', 'All currencies converted to TWD', 'TWD', None, 2674743.45, 14]
+ Instructions: max_row=29, max_col=3
+
+CHECK output/downloads/workflow_sales_orders_filtered.csv exists= True size= 408
+ csv headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+ csv rows= 4
+ csv first rows= [{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}, {'OrderID': '0045000102', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-08-07', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '4095.00'}, {'OrderID': '0045000105', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-08-19', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '227850.00'}, {'OrderID': '0045000107', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-08-27', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '6250.00'}]
+
+CHECK output/downloads/workflow_all_sales_orders.csv exists= True size= 2849
+ csv headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+ csv rows= 36
+ csv first rows= [{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}, {'OrderID': '0045000102', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-08-07', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '4095.00'}, {'OrderID': '0045000103', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-08-12', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '958.95'}, {'OrderID': '0045000104', 'CustomerID': 'C004', 'CustomerName': '藍海電子有限公司', 'ProjectID': '', 'OrderDate': '2026-08-15', 'Status': 'Cancelled', 'Currency': 'TWD', 'NetAmount': '25200.00'}, {'OrderID': '0045000105', 'CustomerID': 'C007', 'CustomerName': 'Acme Precision Taiwan Limited', 'ProjectID': 'P005', 'OrderDate': '2026-08-19', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '227850.00'}]

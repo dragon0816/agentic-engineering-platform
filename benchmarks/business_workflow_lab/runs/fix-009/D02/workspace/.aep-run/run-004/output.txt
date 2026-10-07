@@ -1,0 +1,21 @@
+Inputs really are:
+ template: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D02\workspace\input\expense_template.xlsx True
+ submitted csv: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D02\workspace\output\submitted_2026_09.csv True
+ approved csv: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D02\workspace\output\approved_2026_09.csv True
+ fx csv: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D02\workspace\input\fx_rates.csv True
+submitted_2026_09.csv headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+submitted_2026_09.csv row_count: 7
+submitted_2026_09.csv sample: ['EXP-00003', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-03', 'Meals', 'TWD', '450.00', 'Submitted', 'RC162210', '加班餐費', 'False']
+approved_2026_09.csv headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+approved_2026_09.csv row_count: 15
+approved_2026_09.csv sample: ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False']
+fx headers: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+combined record count: 22
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D02\workspace\output\expense_2026_09_submitted_approved.xlsx
+verify detail rows: 22
+verify exception rows: 2 [('EXP-00015', 'E002', '2026-09-09', 'Missing receipt'), ('EXP-00006', 'E001', '2026-09-10', 'Missing receipt')]
+summary B2 formula: =SUM(Details!I5:I26)
+summary rows: [('Approved', None, 'EUR', 425.5, 14892.5, 4), ('Approved', None, 'TWD', 21030, 21030, 7), ('Approved', None, 'USD', 618.25, 19784, 4), ('Submitted', None, 'EUR', 18.2, 637, 1), ('Submitted', None, 'TWD', 8189, 8189, 5), ('Submitted', None, 'USD', 64.9, 2076.8, 1)]
+expected AmountTWD total: 66609.30 actual: 66609.30
+verified output workbook: expense_2026_09_submitted_approved.xlsx

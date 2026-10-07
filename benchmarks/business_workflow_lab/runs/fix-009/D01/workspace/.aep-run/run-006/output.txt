@@ -1,0 +1,82 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D01\workspace
+[input] exists=True
+ - expense_manual.md 2007 bytes
+ - expense_template.xlsx 10969 bytes
+ - fx_rates.csv 276 bytes
+[output] exists=True
+ - E001_september_expenses.xlsx 12733 bytes
+ - E001_september_expenses_export.xlsx 6179 bytes
+
+FILE input/expense_template.xlsx exists= True
+ sheets= ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+  Report: max_row=20, max_col=6
+    ('Expense Report 費用報表', None, None, None, None, None)
+    ('起始日期 From', None, '結束日期 To', None, None, None)
+    ('條件 Condition', None, None, None, None, None)
+    ('產出時間 Generated at', None, None, None, None, None)
+    ('資料來源 Source', None, '取得時間 Fetched at', None, None, None)
+  Details: max_row=4, max_col=14
+    ('Expense details', None, None, None, None, None, None, None, None, None, None, None)
+    ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None, None)
+    ('ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description')
+  Summary: max_row=4, max_col=6
+    ('Expense summary', None, None, None, None, None)
+    ('總計 TWD Totals', '=SUM(Details!I5:I5)', None, None, None, None)
+    ('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+  Exceptions: max_row=4, max_col=4
+    ('Exceptions 例外', None, None, None)
+    ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+    ('ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason')
+  Instructions: max_row=34, max_col=3
+    ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+    ('Sheet', 'Cell / Range', 'Content and rule')
+    ('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+    ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+    ('Report', 'B4', '本次查詢條件的文字說明。')
+
+FILE output/E001_september_expenses.xlsx exists= True
+ sheets= ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+  Report: max_row=20, max_col=6
+    ('Expense Report 費用報表', None, None, None, None, None)
+    ('起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None)
+    ('條件 Condition', 'EmployeeID=E001; ExpenseDate 2026-09-01 to 2026-09-30; Status=All', None, None, None, None)
+    ('產出時間 Generated at', '2026-10-06T00:00:00+08:00', None, None, None, None)
+    ('資料來源 Source', 'Expense Viewer (synthetic lab); fx_rates.csv', '取得時間 Fetched at', '2026-10-06T00:00:00+08:00', None, None)
+  Details: max_row=17, max_col=14
+    ('Expense details', None, None, None, None, None, None, None, None, None, None, None)
+    ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None, None)
+    ('ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description')
+    ('EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', 1280, 1280, 'Approved', 'RC702658', '高鐵 台北-新竹 往返')
+    ('EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', 200, 6400, 'Approved', 'RC138828', '客戶驗收住宿 2 晚')
+  Summary: max_row=11, max_col=6
+    ('Expense summary', None, None, None, None, None)
+    ('總計 TWD Totals', '=SUM(Details!I5:I17)', None, None, None, None)
+    ('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+    ('Approved', None, 'EUR', 102.5, 3587.5, 2)
+    ('Approved', None, 'TWD', 5050, 5050, 3)
+  Exceptions: max_row=5, max_col=4
+    ('Exceptions 例外', None, None, None)
+    ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+    ('ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason')
+    ('EXP-00006', 'E001', '2026-09-10', 'Missing receipt')
+  Instructions: max_row=34, max_col=3
+    ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+    ('Sheet', 'Cell / Range', 'Content and rule')
+    ('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+    ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+    ('Report', 'B4', '本次查詢條件的文字說明。')
+
+FILE output/E001_september_expenses_export.xlsx exists= True
+ sheets= ['Expenses']
+  Expenses: max_row=14, max_col=12
+    ('ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt')
+    ('EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', False)
+    ('EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', False)
+    ('EXP-00003', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-03', 'Meals', 'TWD', '450.00', 'Submitted', 'RC162210', '加班餐費', False)
+    ('EXP-00004', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-05', 'Supplies', 'EUR', '42.50', 'Approved', 'RC358881', '治具耗材', False)
+
+FILE input/fx_rates.csv exists= True
+  ['Currency', 'RateToTWD', 'Note']
+  ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+  ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+  ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']

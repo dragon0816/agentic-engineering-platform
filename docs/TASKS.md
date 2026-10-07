@@ -1390,7 +1390,15 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] A refused desktop step names the failed action (`CapabilityRefused.where`,
   "Refused at action N (kind)"), never the helper's message (`a8a4864`,
   lab fix-008 D01). Lab bypass scan: `expense_app\b`.
-- [ ] coding_v1 fix-run-010 and lab fix-009 on build `a8a4864` (running).
+- [x] coding_v1 fix-run-010 interrupted at T09 by an Agent Web defect: a
+  reply quoting `Authorization: Bearer <token>` failed the stored-message
+  credential check and dropped the request. Messages now redact instead
+  (`4becd6b`). **coding_v1 fix-run-011: 20/20 on `4becd6b`.**
+- [x] Lab fix-009 on `4becd6b` stopped at the owner's request (GUI tests only
+  while the owner is away): W01–W04 PASS (W01 rerun passes for the first
+  time), D01 FAIL (rerun), the rest not run.
+- [ ] Lab fix-010, all tasks, on `4becd6b`, run while the owner is away from
+  the computer (see HANDOFF.md for which tasks drive the GUI).
 - [ ] Lab remaining gaps: W01/D01 reruns where the Agent revises the Workflow
   instead of reusing it; X02 overdue invoices dated before the period; X03
   depends on X01's Workflow taking project and output name as run values.

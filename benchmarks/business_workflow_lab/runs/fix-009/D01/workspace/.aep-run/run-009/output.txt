@@ -1,0 +1,20 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-009\D01\workspace
+input files: ['expense_manual.md', 'expense_template.xlsx', 'fx_rates.csv']
+output files: ['E001_september_expenses.xlsx', 'E001_september_expenses_export.xlsx']
+report size: 12733
+export size: 6179
+report sheets: ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+details row count: 13
+summary headers: ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+summary data rows: 7
+summary rows: [{'Group': 'Approved', 'SubGroup': None, 'Currency': 'EUR', 'Amount': 102.5, 'AmountTWD': 3587.5, 'Count': 2}, {'Group': 'Approved', 'SubGroup': None, 'Currency': 'TWD', 'Amount': 5050, 'AmountTWD': 5050, 'Count': 3}, {'Group': 'Approved', 'SubGroup': None, 'Currency': 'USD', 'Amount': 200, 'AmountTWD': 6400, 'Count': 1}, {'Group': 'Draft', 'SubGroup': None, 'Currency': 'USD', 'Amount': 124.15, 'AmountTWD': 3972.8, 'Count': 2}, {'Group': 'Rejected', 'SubGroup': None, 'Currency': 'EUR', 'Amount': 155, 'AmountTWD': 5425, 'Count': 1}, {'Group': 'Rejected', 'SubGroup': None, 'Currency': 'USD', 'Amount': 12.3, 'AmountTWD': 393.6, 'Count': 1}, {'Group': 'Submitted', 'SubGroup': None, 'Currency': 'TWD', 'Amount': 7049, 'AmountTWD': 7049, 'Count': 3}]
+summary B2: =SUM(Details!I5:I17)
+exceptions headers: ['ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason']
+exceptions data rows: 1
+exceptions rows: [{'ExpenseID': 'EXP-00006', 'EmployeeID': 'E001', 'ExpenseDate': '2026-09-10', 'Reason': 'Missing receipt'}]
+computed TWD total: 31877.90
+export sheets: ['Expenses']
+export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+export row count: 13
+CHECK_OK
