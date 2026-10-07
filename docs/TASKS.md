@@ -1400,6 +1400,22 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   time), D01 FAIL (rerun), the rest not run.
 - [ ] Lab fix-010, all tasks, on `4becd6b`, run while the owner is away from
   the computer (see HANDOFF.md for which tasks drive the GUI).
+- [x] Lab grader 1.3 (owner approved): a rerun may use a version run or
+  installed before the request, with no draft after it (`b44412a`); fix-008
+  W01 regrades to PASS (13/16). Draft guide and coding Skill 1.7.0: run the
+  installed Workflow and check its output before calling it reusable
+  (`552bc7f`, installed live). The live desktop test runs only with
+  `AEP_GUI_TESTS=1` (`967249b`). coding_v1 fix-run-012: 20/20.
+- [x] Asset ownership step 1 (owner decisions, `docs/phases/ASSET_OWNERSHIP.md`):
+  chat Workflow versions continue from the highest installed one; a name
+  another owner installed is refused with that owner (`9f07861`). Live after
+  the next Agent Web restart.
+- [ ] Asset ownership step 2 (Registry-wide owner, co-editors, automatic
+  versions, one active version per person, publish UI) after the lab stage.
+- [x] knowledge_v1 benchmark (owner request 2026-10-07): the owner's 1,100
+  questions, pinned; 110-question stratified sample; loop + Vault-verified
+  citations + Gateway-model review (`ab9cb3e`).
+- [ ] knowledge_v1 sample-001 (running), then the full 1,100.
 - [ ] Lab remaining gaps: W01/D01 reruns where the Agent revises the Workflow
   instead of reusing it; X02 overdue invoices dated before the period; X03
   depends on X01's Workflow taking project and output name as run values.

@@ -81,13 +81,14 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
   the owner installs it from Agent Web (Capabilities, "Create a Workflow from
   an SOP"), then restarts Agent Web.
 
-## Current work: coding_v1 and the business workflow lab (2026-10-07)
+## Current work (2026-10-07): coding_v1, the business workflow lab, knowledge_v1
 
 **Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
-**Build under test:** `4becd6b`.
-- It contains the refusal location for desktop steps and redaction of credential-shaped text in stored conversation messages.
-- Agent Web was restarted on it at 13:30. Its logs are `.scratch/agent-web-20261007-133033.*`.
+**Build state:**
+- HEAD contains everything below.
+- Agent Web runs build `967249b` with coding Skill 1.7.0. It was restarted at 15:11; its logs are `.scratch/agent-web-20261007-151130.*`.
+- Ownership step 1 (`9f07861`) takes effect only after the **next Agent Web restart**. Restart before lab `fix-010`, but not while a benchmark is running.
 
 ### Owner rule (2026-10-07): GUI tests run only while the owner is away
 
@@ -96,70 +97,84 @@ Tests that drive Edge or the Expense desktop app open windows and can take focus
 | Can run during working hours (no GUI) | Only while the owner is away (GUI) |
 |---|---|
 | coding_v1, all 20 tasks | Lab W01–W04 (Edge) |
-| Lab C02, C03, C04, C04 exit-2 (CLI only) | Lab D01–D04 (Expense desktop app) |
-| pytest with `-m "not live"` | Lab C01 (desktop + CLI) |
-| | Lab X01–X03 (all three systems) |
-| | The live desktop pytest test (`-m live`) |
-| | `smoke.py --browser` |
+| knowledge_v1 | Lab D01–D04 (Expense desktop app) |
+| Lab C02, C03, C04, C04 exit-2 (CLI only) | Lab C01 (desktop + CLI) |
+| Plain `pytest`: the desktop test skips unless `AEP_GUI_TESTS=1`; browser tests run headless | Lab X01–X03 (all three systems) |
+| | `AEP_GUI_TESTS=1 pytest` and `smoke.py --browser` |
 
-Run only the CLI tasks with `--tasks C02,C03,C04` (comma-separated IDs). Both `all` and the default `smoke` may include GUI tasks.
+Run only the CLI tasks with `--tasks C02,C03,C04` (comma-separated IDs). Both `all` and the default `smoke` include GUI tasks.
 
-**Stopped at the owner's request:** lab `fix-009` (13:5x). Finished before the stop:
-- W01–W04: PASS. W01's rerun with unchanged code passed for the first time.
-- D01: FAIL (rerun).
-
-D02's folder is incomplete. Details are in `runs/fix-009/findings.md`. The Expense app and the lab's Edge were closed. The SAP mock web server (`sap_mock/server.py --port 8810`) still runs headless; it does not use the screen.
-
-**Next GUI run:** a new run ID (`fix-010`), all tasks, on the same build. Check first:
-- Agent Web is up: port 53583 returns 401 without the token.
-- No ExpenseApp process is left over.
+The project has **no** `live` pytest marker, so `-m "not live"` excludes nothing. Its GUI marker is `gui`.
 
 **Commands** (repo root, repo `.venv`):
 
     .venv\Scripts\python benchmarks\coding_v1\run.py --run-id <new> --tasks all
     .venv\Scripts\python benchmarks\business_workflow_lab\operator\run_lab.py --run-id <new> --tasks all
+    .venv\Scripts\python benchmarks\knowledge_v1\run.py --run-id <new> --set sample|all --workers 2
 
-- Mock smoke checks: `python benchmarks\business_workflow_lab\operator\smoke.py --browser` (GUI).
 - Set `PYTHONIOENCODING=utf-8` when output goes to a cp950 console.
-- Run one benchmark at a time, because both use the same Agent Web.
+- Run one benchmark at a time, because they all use the same Agent Web.
 - When a script waits for a runner, wait on its PID. A `pgrep -f` on the runner's name matches the waiting shell's own command line.
 
-**Results so far.** Each run folder holds a `findings.md`.
+### Results so far
+
+Each run folder holds a `findings.md`.
 
 | Benchmark | Run | Result | Note |
 |---|---|---|---|
-| coding_v1 | fix-run-006 / 007 | 20/20, 20/20 | |
-| coding_v1 | fix-run-008 / 009 | 18/20, 19/20 | T14 validator (since fixed); T08 Agent variance |
-| coding_v1 | fix-run-010 | interrupted at T09 | Agent Web defect, fixed in `4becd6b` |
-| coding_v1 | **fix-run-011** | **20/20** | build `4becd6b`: the coding_v1 half of the gate is met |
-| Lab | fix-005 / 006 / 007 | 11, 13, 12 of 16 | |
-| Lab | fix-008 | 12/16 | X01 passes for the first time |
-| Lab | fix-009 | stopped | W01–W04 PASS, D01 FAIL, the rest not run |
+| coding_v1 | fix-run-011 | 20/20 | build `4becd6b` |
+| coding_v1 | **fix-run-012** | **20/20** | build `967249b` (Skill 1.7.0) |
+| Lab | fix-008 | 12/16 | 13/16 under grader 1.3 (W01) |
+| Lab | fix-009 | stopped | W01–W04 PASS, D01 FAIL (it revised the Workflow on the rerun), the rest not run |
+| knowledge_v1 | sample-001 | running | started about 16:00, roughly 2 h. Log: `.scratch/knowledge_v1-sample-001.log` |
+
+**What changed today for the lab gaps:**
+- **Grader 1.3:** a rerun may use a version run *or installed* before the request, as long as no draft follows the request.
+- **Draft guide and coding Skill 1.7.0:** run the installed Workflow and check its output before calling it reusable; rerun that version unchanged.
+- **Ownership step 1:** versions continue from the highest installed one, so no more `workflow_version_exists` from a restarted 1.0.0.
 
 **Open lab gaps:**
-- **Reruns where the Agent revises the Workflow instead of reusing it:** fix-008 W01, fix-009 D01. The Agent fixes the Workflow until a run succeeds, then changes it once more before the rerun, so "same code" fails.
-- **X02:** an overdue invoice dated before the period was missed (fix-008).
-- **X03:** X01's Workflow fixes the output name and filters by customer, so the Agent asked instead of running (fix-008).
+- **X02:** an overdue invoice dated before the period was missed (an Agent reading error).
+- **X03:** X01's Workflow fixes the output name.
+- **desktop save_as:** in fix-009 D01 it once wrote to an existing `output/tny.xlsx` instead of the given name. Investigate during the GUI run.
 
-The operator presses approvals, replies 繼續 at most 3 times, and asks for the spec's reruns. Each of these is recorded as an intervention. Expected answers are never changed; grader and operator changes are versioned (grader 1.2).
+The operator presses approvals, replies 繼續 at most 3 times, and asks for the spec's reruns. Each of these is recorded as an intervention. Expected answers are never changed.
 
-**Live host changes** (a `.bak-*` backup sits next to each changed file):
+### knowledge_v1 (new, owner request)
+
+See `benchmarks/knowledge_v1/README.md` and `docs/DECISIONS.md` (2026-10-07).
+- The owner's 1,100 questions are pinned by sha256, and `.gitattributes` keeps their bytes exact.
+- A question passes when the Knowledge loop ran, its citations are verified in the Vault, and a Gateway-model reviewer finds it reasonable.
+
+Early observations, to confirm with the sample:
+- Some questions are answered **without Knowledge**: the model answers from its own knowledge (`EXECUTION_GAP`).
+- When a `knowledge__rs-knowledge` call fails with `knowledge_model_failed`, the conversation model still answers **without citations and without saying so**. The cause of `knowledge_model_failed` is not yet known. Synthesis defaults to 800 output tokens on the tool path (`handlers.py:169`). An offline repro with the default prompt did not fail.
+- On the tool route, the model adds its own general knowledge around the evidence, and the reviewer fails some of those answers.
+
+### Live host changes
+
+A `.bak-*` backup sits next to each changed file.
 - host.json:
   - `web.allowed_origins` has `http://127.0.0.1:8810`;
-  - `desktop.applications.expense` points at `...\expense_desktop_mock\bin\ExpenseApp.exe`;
+  - `desktop.applications.expense` is registered;
   - `coding.workspace_roots` includes the lab's runs folder.
 - grants.json has grants for `browser/operate` and `desktop/operate`.
-- Skill `engineering/coding@1.6.0` is installed.
+- Skill `engineering/coding@1.7.0` is in `workspace/assets/skills/`, and 1.6.0 has moved to `skills/disabled/`.
 - The coding runner Python has `tzdata`.
 
 **Restarting Agent Web:**
 - Refresh the user environment variables (`AEP_*`, `LITELLM_MASTER_KEY`) first.
 - `Stop-Process` leaves Edge running. The next start recovers from that (`close_leftover`).
 
-**Platform pieces.** Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
+### Platform pieces
+
+Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
 - `agent.backend_contracts` sets the limits: 8000 tokens and 20 calls per turn.
 - `Gateway.host_tools`; several calls in one reply run in order; a truncated reply is retried twice.
-- `host_runtime/chat_authoring.py` provides G4 and `approval_text`.
+- `host_runtime/chat_authoring.py`:
+  - G4 and `approval_text`;
+  - versions continue from the highest installed one;
+  - a name owned by someone else is refused.
 - `bridge_tools.py` provides `browser__operate` and `desktop__operate`.
 - `turn_summary.py` provides the tool record.
 - Approvals: Agent Web `/api/approvals` and Telegram buttons.
@@ -168,16 +183,24 @@ The operator presses approvals, replies 繼續 at most 3 times, and asks for the
 
 ## Verification
 
-Build `4becd6b`:
+Build `9f07861` and later, with the repo `.venv`:
 - ruff passes.
-- mypy (`src`) passes with the repo `.venv`.
-- Full pytest with the repo `.venv` (`-m "not live"`): 2259 passed, 1 failed. The failure is `test_local_developer_environment`, which fails on cp950 stderr decoding, also fails on a clean tree, and is excluded.
+- mypy (`src`) passes.
+- Full pytest: 2259 passed, 2 failed.
+  - `test_local_developer_environment` fails on cp950 stderr decoding, also fails on a clean tree, and is excluded.
+  - `test_extension_package` is flaky under load and passes alone.
 
-Use the repo `.venv`. The system Python has matplotlib 3.7.3 with numpy 2.2.6, which breaks the chart tests.
+knowledge_v1 `selftest.py` and lab `selftest.py` pass. Use the repo `.venv`: the system Python has matplotlib 3.7.3 with numpy 2.2.6, which breaks the chart tests.
 
 ## Next recommended action
 
-1. **While the owner is away:** run lab `fix-010`, all tasks, on build `4becd6b`, then record its findings.
-2. During working hours, work that needs no GUI is fine, such as code changes for the open lab gaps and coding_v1 reruns.
-3. For the rerun gap, consider whether the draft guide or the coding Skill should say: once a Workflow run has succeeded and the result was delivered, a rerun uses that installed version unchanged. Discuss with the owner before changing the harness.
-4. After this stage: conversational authoring A1–A3, A7, A8.
+1. When knowledge_v1 sample-001 finishes:
+   - read `report.md` and spot-check a few reviewer verdicts;
+   - write `runs/sample-001/findings.md`;
+   - investigate `knowledge_model_failed`, and the uncited fallback answer after a failed Knowledge call. A harness change goes to the owner first.
+   - Then run the full set (`--set all`), which takes many hours, outside GUI time or alongside other work.
+2. Restart Agent Web so ownership step 1 takes effect.
+3. **While the owner is away:** run lab `fix-010`, all tasks. If the platform changed since `967249b`, also rerun coding_v1 on the same build.
+4. After this stage:
+   - asset ownership step 2 (`docs/phases/ASSET_OWNERSHIP.md`);
+   - conversational authoring A1–A3, A7, A8.
