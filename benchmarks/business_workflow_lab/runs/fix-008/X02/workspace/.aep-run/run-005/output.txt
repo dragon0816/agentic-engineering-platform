@@ -1,0 +1,23 @@
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+raw orders 4 raw invoices 3
+quotes 4
+projects for expenses ['P001', 'P003']
+expenses 9
+exceptions 4
+saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X02\workspace\output\project_report_C001_2026-09_TWD.xlsx
+CHECKS
+orders_rows_excl_cancelled OK
+invoices_rows OK
+expenses_approved_project_rows OK
+quotes_all_rows OK
+exceptions_rows OK
+ids_text_preserved OK
+money_numeric OK
+summary_formula_extended OK
+ROW_COUNTS {'Orders': 3, 'Invoices': 3, 'Expenses': 9, 'Quotes': 4, 'Summary': 2, 'Exceptions': 4}
+EXCEPTIONS
+('Invoices', '0090000219', 'P001', 'Overdue unpaid invoice as of 2026-09-30: DueDate 2026-09-30, Balance 386445.00 TWD')
+('Expenses', 'EXP-00006', 'P001', 'Approved expense missing receipt')
+('Quotes', 'Q0010', 'P001', 'Quote ValidUntil 2026-09-20 is before 2026-09-30 and status is Sent')
+('Quotes', 'Q0014', 'P001', 'Quote ValidUntil 2026-09-28 is before 2026-09-30 and status is Expired')
+OUTPUT C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X02\workspace\output\project_report_C001_2026-09_TWD.xlsx

@@ -1,0 +1,141 @@
+--- lines 1-140 ---
+0001: import csv, json, os, sys, subprocess, shutil
+0002: from pathlib import Path
+0003: from decimal import Decimal, ROUND_HALF_UP
+0004: from datetime import datetime
+0005: from collections import defaultdict
+0006: from openpyxl import load_workbook
+0007: 
+0008: params = json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))
+0009: FROM = params['from_date']
+0010: TO = params['to_date']
+0011: workspace = Path.cwd()
+0012: input_dir = workspace / 'input'
+0013: output_dir = workspace / 'output'
+0014: downloads = output_dir / 'downloads'
+0015: output_dir.mkdir(parents=True, exist_ok=True)
+0016: downloads.mkdir(parents=True, exist_ok=True)
+0017: 
+0018: orders_raw_path = downloads / 'sap_orders_export.csv'
+0019: invoices_path = downloads / 'sap_invoices_export.csv'
+0020: expenses_path = output_dir / 'expense_approved_export.csv'
+0021: orders_dated_path = downloads / f'sap_orders_{FROM}_{TO}.csv'
+0022: invoices_dated_path = downloads / f'sap_invoices_{FROM}_{TO}.csv'
+0023: expenses_dated_path = output_dir / f'expense_{FROM}_{TO}_approved.csv'
+0024: quote_json_path = output_dir / f'quotes_{FROM}_{TO}_accepted.json'
+0025: report_path = output_dir / f'project_report_{FROM}_{TO}.xlsx'
+0026: 
+0027: required = [input_dir/'project_template.xlsx', input_dir/'fx_rates.csv', orders_raw_path, invoices_path, expenses_path]
+0028: print('Inputs expected:')
+0029: for p in required:
+0030:     print(f'- {p}: exists={p.exists()} size={p.stat().st_size if p.exists() else "missing"}')
+0031: missing = [str(p) for p in required if not p.exists()]
+0032: if missing:
+0033:     raise FileNotFoundError('Missing required input/export files: ' + '; '.join(missing))
+0034: 
+0035: TWOPLACES = Decimal('0.01')
+0036: def D(v):
+0037:     if v is None or str(v).strip() == '':
+0038:         return Decimal('0.00')
+0039:     return Decimal(str(v).strip())
+0040: def q2(v):
+0041:     return Decimal(v).quantize(TWOPLACES, rounding=ROUND_HALF_UP)
+0042: def money_cell(v):
+0043:     return float(q2(v))
+0044: def in_range(date_s):
+0045:     return FROM <= (date_s or '') <= TO
+0046: 
+0047: def read_csv_dict(path):
+0048:     with open(path, newline='', encoding='utf-8-sig') as f:
+0049:         rows = list(csv.DictReader(f))
+0050:         headers = f.fieldnames
+0051:     print(f'Read {len(rows)} rows from {path.name}; headers={headers}')
+0052:     return rows, headers
+0053: 
+0054: def write_csv_dict(path, rows, headers):
+0055:     with open(path, 'w', newline='', encoding='utf-8-sig') as f:
+0056:         w = csv.DictWriter(f, fieldnames=headers)
+0057:         w.writeheader()
+0058:         w.writerows(rows)
+0059:     print(f'Wrote {len(rows)} rows to {path}')
+0060: 
+0061: fx = {}
+0062: with open(input_dir/'fx_rates.csv', newline='', encoding='utf-8-sig') as f:
+0063:     reader = csv.DictReader(f)
+0064:     print('FX headers:', reader.fieldnames)
+0065:     for row in reader:
+0066:         cur = (row.get('Currency') or row.get('currency') or '').strip()
+0067:         rate = row.get('RateToTWD') or row.get('TWD') or row.get('rate_to_twd') or row.get('rate') or row.get('Rate')
+0068:         if not cur and row:
+0069:             vals = list(row.values())
+0070:             cur = str(vals[0]).strip() if vals else ''
+0071:             rate = vals[1] if len(vals) > 1 else rate
+0072:         if cur:
+0073:             fx[cur] = D(rate)
+0074: print('FX currencies:', sorted(fx))
+0075: def to_twd(amount, currency):
+0076:     currency = (currency or '').strip()
+0077:     if currency not in fx:
+0078:         raise ValueError(f'Missing FX rate for currency {currency!r}')
+0079:     return q2(D(amount) * fx[currency])
+0080: 
+0081: orders_raw, orders_headers = read_csv_dict(orders_raw_path)
+0082: invoices, invoices_headers = read_csv_dict(invoices_path)
+0083: expenses, expenses_headers = read_csv_dict(expenses_path)
+0084: orders = [r for r in orders_raw if in_range(r.get('OrderDate')) and (r.get('Status') or '').strip() != 'Cancelled']
+0085: removed_cancelled = len([r for r in orders_raw if in_range(r.get('OrderDate')) and (r.get('Status') or '').strip() == 'Cancelled'])
+0086: removed_other = len(orders_raw) - len(orders) - removed_cancelled
+0087: write_csv_dict(orders_raw_path, orders, orders_headers)
+0088: write_csv_dict(orders_dated_path, orders, orders_headers)
+0089: # Normalize supporting export copies for invoices/expenses too.
+0090: invoices = [r for r in invoices if in_range(r.get('InvoiceDate'))]
+0091: expenses = [r for r in expenses if in_range(r.get('ExpenseDate')) and (r.get('Status') or '').strip() == 'Approved']
+0092: write_csv_dict(invoices_path, invoices, invoices_headers)
+0093: write_csv_dict(invoices_dated_path, invoices, invoices_headers)
+0094: write_csv_dict(expenses_path, expenses, expenses_headers)
+0095: write_csv_dict(expenses_dated_path, expenses, expenses_headers)
+0096: 
+0097: cli_py = Path(r'C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py')
+0098: cmds = [
+0099:     [sys.executable, str(cli_py), 'quotes', 'list', '--from', FROM, '--to', TO, '--status', 'Accepted', '--format', 'json'],
+0100:     [sys.executable, str(cli_py), 'list', '--from', FROM, '--to', TO, '--status', 'Accepted', '--format', 'json'],
+0101: ]
+0102: last = None
+0103: for cmd in cmds:
+0104:     for attempt in range(1, 4):
+0105:         proc = subprocess.run(cmd, text=True, capture_output=True)
+0106:         last = proc
+0107:         if proc.returncode == 0:
+0108:             break
+0109:         if proc.returncode == 4 and attempt < 3:
+0110:             continue
+0111:         break
+0112:     if last and last.returncode == 0:
+0113:         break
+0114: if not last or last.returncode != 0:
+0115:     raise RuntimeError(f'quote_cli failed rc={last.returncode if last else "none"}: {last.stderr if last else "no run"}')
+0116: quote_payload = json.loads(last.stdout)
+0117: quotes = quote_payload.get('items', quote_payload if isinstance(quote_payload, list) else [])
+0118: quotes = [r for r in quotes if in_range(r.get('QuoteDate')) and (r.get('Status') or '').strip() == 'Accepted']
+0119: if isinstance(quote_payload, dict):
+0120:     quote_payload['items'] = quotes
+0121:     quote_payload['count'] = len(quotes)
+0122: else:
+0123:     quote_payload = {'schema_version': 1, 'items': quotes, 'count': len(quotes)}
+0124: quote_json_path.write_text(json.dumps(quote_payload, ensure_ascii=False, indent=2), encoding='utf-8')
+0125: print(f'Read/wrote {len(quotes)} accepted quotes from quote_cli; saved {quote_json_path.name}')
+0126: 
+0127: # Source filters verification.
+0128: for r in orders:
+0129:     assert in_range(r.get('OrderDate')), ('order out of range', r)
+0130:     assert (r.get('Status') or '').strip() != 'Cancelled', ('cancelled order included', r)
+0131: for r in invoices:
+0132:     assert in_range(r.get('InvoiceDate')), ('invoice out of range', r)
+0133: for r in expenses:
+0134:     assert in_range(r.get('ExpenseDate')), ('expense out of range', r)
+0135:     assert (r.get('Status') or '').strip() == 'Approved', ('non-approved expense included', r)
+0136: for r in quotes:
+0137:     assert in_range(r.get('QuoteDate')), ('quote out of range', r)
+0138:     assert (r.get('Status') or '').strip() == 'Accepted', ('non-accepted quote included', r)
+0139: 
+0140: shutil.copyfile(input_dir/'project_template.xlsx', report_path)

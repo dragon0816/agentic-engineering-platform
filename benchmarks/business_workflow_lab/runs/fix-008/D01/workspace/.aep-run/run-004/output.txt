@@ -1,0 +1,97 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\D01\workspace
+INPUT FILES
+- expense_manual.md 2007
+- expense_template.xlsx 10969
+- fx_rates.csv 276
+OUTPUT FILES
+- E001_2026-09_expense_export.xlsx 6179
+- E001_september_expenses.xlsx 12758
+REPORT_EXISTS True
+EXPORT_EXISTS True
+REPORT_SHEETS ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+SHEET Report MAX_ROW 20 MAX_COL 6
+SHEET Details MAX_ROW 17 MAX_COL 14
+SHEET Summary MAX_ROW 11 MAX_COL 6
+SHEET Exceptions MAX_ROW 5 MAX_COL 4
+SHEET Instructions MAX_ROW 34 MAX_COL 3
+
+-- Report --
+('Expense Report 費用報表', None, None, None, None, None)
+(None, None, None, None, None, None)
+('起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None)
+('條件 Condition', 'EmployeeID=E001; ExpenseDate 2026-09-01 to 2026-09-30; Status=All', None, None, None, None)
+('產出時間 Generated at', '2026-10-07T11:51:31+08:00', None, None, None, None)
+(None, None, None, None, None, None)
+('資料來源 Source', 'Expense Viewer (synthetic lab) export', '取得時間 Fetched at', '2026-10-07T11:51:31+08:00', None, None)
+(None, None, None, None, None, None)
+('備註 Notes', 'NeedsReview=true when MissingReceipt=true; Summary grouped by Status and Currency.', None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+(None, None, None, None, None, None)
+('合成測試資料 Synthetic lab data · template v1 · 請勿修改本行', None, None, None, None, None)
+
+-- Summary --
+('Expense summary', None, None, None, None, None)
+('總計 TWD Totals', '=SUM(Details!I5:I17)', None, None, None, None)
+(None, None, None, None, None, None)
+('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+('Status', 'Approved', 'EUR', 102.5, 3587.5, 2)
+('Status', 'Approved', 'TWD', 5050, 5050, 3)
+('Status', 'Approved', 'USD', 200, 6400, 1)
+('Status', 'Draft', 'USD', 124.15, 3972.8, 2)
+('Status', 'Rejected', 'EUR', 155, 5425, 1)
+('Status', 'Rejected', 'USD', 12.3, 393.6, 1)
+('Status', 'Submitted', 'TWD', 7049, 7049, 3)
+
+-- Details --
+('Expense details', None, None, None, None, None, None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None, None, None, None, None, None)
+('ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview')
+('EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 1, 0, 0), 'Travel', 'TWD', 1280, 1280, 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'false', 'false')
+('EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 2, 0, 0), 'Hotel', 'USD', 200, 6400, 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'false', 'false')
+('EXP-00003', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 3, 0, 0), 'Meals', 'TWD', 450, 450, 'Submitted', 'RC162210', '加班餐費', 'false', 'false')
+('EXP-00004', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 5, 0, 0), 'Supplies', 'EUR', 42.5, 1487.5, 'Approved', 'RC358881', '治具耗材', 'false', 'false')
+('EXP-00005', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 8, 0, 0), 'Travel', 'USD', 88.4, 2828.8, 'Draft', 'RC920686', 'Taxi to customer site', 'false', 'false')
+('EXP-00006', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 10, 0, 0), 'Meals', 'TWD', 620, 620, 'Approved', None, 'Team dinner after install', 'true', 'true')
+('EXP-00007', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 12, 0, 0), 'Hotel', 'EUR', 155, 5425, 'Rejected', 'RC483886', '出差住宿\n(含早餐)', 'false', 'false')
+('EXP-00008', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 15, 0, 0), 'Supplies', 'TWD', 2399, 2399, 'Submitted', 'RC301050', 'RF 接頭與轉接器\nSMA x4', 'false', 'false')
+('EXP-00009', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 17, 0, 0), 'Travel', 'TWD', 3150, 3150, 'Approved', 'RC254438', '機票 TPE-FRA\n含行李費', 'false', 'false')
+('EXP-00010', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 19, 0, 0), 'Meals', 'USD', 35.75, 1144, 'Draft', 'RC939068', '加班餐費', 'false', 'false')
+('EXP-00011', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 23, 0, 0), 'Hotel', 'TWD', 4200, 4200, 'Submitted', 'RC551107', '客戶驗收住宿 2 晚', 'false', 'false')
+('EXP-00012', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 26, 0, 0), 'Supplies', 'USD', 12.3, 393.6, 'Rejected', 'RC129370', 'RF 接頭與轉接器\nSMA x4', 'false', 'false')
+('EXP-00013', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 30, 0, 0), 'Travel', 'EUR', 60, 2100, 'Approved', 'RC126979', '高鐵 台北-新竹 往返', 'false', 'false')
+
+-- Exceptions --
+('Exceptions 例外', None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+(None, None, None, None)
+('ExpenseID', 'EmployeeID', 'ExpenseDate', 'Reason')
+('EXP-00006', 'E001', datetime.datetime(2026, 9, 10, 0, 0), 'MissingReceipt=true; receipt is blank')
+DETAIL_ROW_COUNT_FROM_ROW5 13
+DETAIL_HEADERS_ROW4 ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+DETAIL_SAMPLE 1 ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 1, 0, 0), 'Travel', 'TWD', 1280, 1280, 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'false', 'false']
+DETAIL_SAMPLE 2 ['EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', datetime.datetime(2026, 9, 2, 0, 0), 'Hotel', 'USD', 200, 6400, 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'false', 'false']
+DETAIL_SAMPLE 3 ['EXP-00003', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', datetime.datetime(2026, 9, 3, 0, 0), 'Meals', 'TWD', 450, 450, 'Submitted', 'RC162210', '加班餐費', 'false', 'false']
+SUMMARY_B2 =SUM(Details!I5:I17)
+SUMMARY_ROW_COUNT_FROM_ROW5 7
+SUMMARY_ROWS [['Status', 'Approved', 'EUR', 102.5, 3587.5, 2], ['Status', 'Approved', 'TWD', 5050, 5050, 3], ['Status', 'Approved', 'USD', 200, 6400, 1], ['Status', 'Draft', 'USD', 124.15, 3972.8, 2], ['Status', 'Rejected', 'EUR', 155, 5425, 1], ['Status', 'Rejected', 'USD', 12.3, 393.6, 1], ['Status', 'Submitted', 'TWD', 7049, 7049, 3]]
+EXPORT_SHEETS ['Expenses']
+EXPORT_MAX_ROW 14 EXPORT_MAX_COL 12
+EXPORT_ROW ('ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt')
+EXPORT_ROW ('EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', False)
+EXPORT_ROW ('EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', False)
+EXPORT_ROW ('EXP-00003', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-03', 'Meals', 'TWD', '450.00', 'Submitted', 'RC162210', '加班餐費', False)
+EXPORT_ROW ('EXP-00004', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-05', 'Supplies', 'EUR', '42.50', 'Approved', 'RC358881', '治具耗材', False)
+EXPORT_ROW ('EXP-00005', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-08', 'Travel', 'USD', '88.40', 'Draft', 'RC920686', 'Taxi to customer site', False)
+EXPORT_ROW ('EXP-00006', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-10', 'Meals', 'TWD', '620.00', 'Approved', None, 'Team dinner after install', True)
+EXPORT_ROW ('EXP-00007', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-12', 'Hotel', 'EUR', '155.00', 'Rejected', 'RC483886', '出差住宿\n(含早餐)', False)
+EXPORT_ROW ('EXP-00008', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-15', 'Supplies', 'TWD', '2399.00', 'Submitted', 'RC301050', 'RF 接頭與轉接器\nSMA x4', False)
+EXPORT_ROW ('EXP-00009', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-17', 'Travel', 'TWD', '3150.00', 'Approved', 'RC254438', '機票 TPE-FRA\n含行李費', False)

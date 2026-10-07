@@ -1,0 +1,89 @@
+# Expense Viewer（模擬原生桌面費用程式）使用說明
+
+> 合成測試資料。這是 Windows 桌面視窗程式（WinForms），不是網頁。
+
+- 在 AEP 中已登記為桌面應用程式 `expense`（由平台啟動，需要已登入的互動式 Windows 桌面）。
+- 視窗標題：`Expense Viewer (synthetic lab)`
+- 控制項名稱（UI Automation id）：EmployeeFilter、ProjectFilter、DateFrom、DateTo、StatusFilter、QueryButton、ResultsList、PreviousButton、NextButton、CountLabel、DetailsButton、ExportCsvButton、ExportExcelButton；明細視窗為 Detail<欄位>（例如 DetailReceiptID）與 CloseButton。
+
+## 主視窗
+
+| 控制項 | 說明 |
+|---|---|
+| Employee 員工 | 下拉選單 E001～E006，空白代表全部 |
+| Project 專案 | 下拉選單 P001～P005，空白代表全部 |
+| Date from 起 / Date to 迄 | YYYY-MM-DD，含起訖兩日（ExpenseDate） |
+| Status 狀態 | Draft、Submitted、Approved、Rejected，空白代表全部 |
+| Query 查詢 | 執行查詢，完成後跳出「查詢完成，共 N 筆」或「查無資料（0 筆）」 |
+
+- 結果表格每頁 8 筆，下方顯示 `Total N rows · Page x / y`，用 **Previous 上一頁** / **Next 下一頁** 換頁。
+- 表格欄位：ExpenseID、EmployeeID、EmployeeName、ProjectID、ExpenseDate、Category、Currency、Amount、Status。
+- 選一列後按 **Details 明細**（或雙擊該列）開啟明細視窗，內含 ReceiptID、Category、Description（可能含中文與換行）、MissingReceipt；按 **Close 返回** 關閉。
+- **Export CSV 匯出 CSV**、**Export Excel 匯出 Excel**：開啟 Windows「另存新檔」對話框，匯出目前篩選條件的全部結果（不只目前這一頁），欄位包含 ReceiptID、Description、MissingReceipt。
+- 匯出若顯示「暫時無法寫入，請重試」，表示這次沒有產生檔案，可以再按一次匯出。
+- 程式沒有其他資料介面；請透過視窗操作與匯出取得資料。
+
+
+SHEET Report
+A1='Expense Report 費用報表'
+A3='起始日期 From'; C3='結束日期 To'
+A4='條件 Condition'
+A5='產出時間 Generated at'
+A7='資料來源 Source'; C7='取得時間 Fetched at'
+A9='備註 Notes'
+A20='合成測試資料 Synthetic lab data · template v1 · 請勿修改本行'
+merged: [<MergedCellRange A1:F1>]
+
+SHEET Details
+A1='Expense details'
+A2='第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。'
+A4='ExpenseID'; B4='EmployeeID'; C4='EmployeeName'; D4='ProjectID'; E4='ExpenseDate'; F4='Category'; G4='Currency'; H4='Amount'; I4='AmountTWD'; J4='Status'; K4='ReceiptID'; L4='Description'; M4='MissingReceipt'; N4='NeedsReview'
+merged: []
+
+SHEET Summary
+A1='Expense summary'
+A2='總計 TWD Totals'; B2='=SUM(Details!I5:I5)'
+A4='Group'; B4='SubGroup'; C4='Currency'; D4='Amount'; E4='AmountTWD'; F4='Count'
+merged: []
+
+SHEET Exceptions
+A1='Exceptions 例外'
+A2='第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。'
+A4='ExpenseID'; B4='EmployeeID'; C4='ExpenseDate'; D4='Reason'
+merged: []
+
+SHEET Instructions
+A1='填寫說明 Instructions（請勿修改本工作表）'
+A3='Sheet'; B3='Cell / Range'; C3='Content and rule'
+A4='Report'; B4='A1:F1'; C4='合併儲存格標題，保留不改。'
+A5='Report'; B5='B3 / D3'; C5='查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。'
+A6='Report'; B6='B4'; C6='本次查詢條件的文字說明。'
+A7='Report'; B7='B5'; C7='產出時間（ISO 8601）。'
+A8='Report'; B8='B7 / D7'; C8='資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。'
+A9='Report'; B9='B9'; C9='備註：缺少的資料、例外或限制。'
+A10='Report'; B10='A20 與頁尾'; C10='固定 footer，保留不改。'
+A11='All detail sheets'; B11='Row 4'; C11='欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。'
+A12='All detail sheets'; B12='Formats'; C12='ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。'
+A13='All sheets'; B13='-'; C13='不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。'
+A14='All sheets'; B14='Layout'; C14='欄寬、凍結窗格、自動篩選、字型與填色保留模板設定，不要調整或自動調整欄寬。'
+A15='All detail sheets'; B15='Missing values'; C15='來源沒有的值留空（空白儲存格），不要填 N/A、0 或自行推測的值。'
+A16='All sheets'; B16='AmountTWD'; C16='原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。'
+A17='Details'; B17='A4'; C17='ExpenseID: text (文字，保留前導零)'
+A18='Details'; B18='B4'; C18='EmployeeID: text (文字，保留前導零)'
+A19='Details'; B19='C4'; C19='EmployeeName: text'
+A20='Details'; B20='D4'; C20='ProjectID: text (文字，保留前導零)'
+A21='Details'; B21='E4'; C21='ExpenseDate: date YYYY-MM-DD'
+A22='Details'; B22='F4'; C22='Category: text'
+A23='Details'; B23='G4'; C23='Currency: text'
+A24='Details'; B24='H4'; C24='Amount: number, 2 decimals (0.00)'
+A25='Details'; B25='I4'; C25='AmountTWD: number, 2 decimals (0.00)'
+A26='Details'; B26='J4'; C26='Status: text'
+A27='Details'; B27='K4'; C27='ReceiptID: text (文字，保留前導零)'
+A28='Details'; B28='L4'; C28='Description: text'
+A29='Details'; B29='M4'; C29='MissingReceipt: text'
+A30='Details'; B30='N4'; C30='NeedsReview: text'
+A31='Details'; B31='M / N'; C31='MissingReceipt、NeedsReview 填 true 或 false（布林值或文字 true/false）。'
+A32='Summary'; B32='B2'; C32='公式 =SUM(Details!I5:I{最後資料列})：Details 的 AmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 I5:I5。'
+A33='Summary'; B33='A4:F4 / row 5+'; C33='彙總表：Group、SubGroup 為分組鍵（依題目要求，例如 Status、Currency、EmployeeID、Category；不用時留空），Currency 為原幣，Amount 為該組原幣合計，AmountTWD 為該組 TWD 合計，Count 為筆數；全部 TWD 總額不得混加不同原幣。'
+A34='Exceptions'; B34='A4:D4 / row 5+'; C34='例外清單：原始 ExpenseID、EmployeeID、ExpenseDate 與原因；列入例外的費用仍須保留在 Details。'
+merged: []

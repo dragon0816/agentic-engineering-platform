@@ -1,0 +1,95 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\C04-force_exit2\workspace
+INPUT FILES:
+- fx_rates.csv 276 bytes
+- quote_cli_manual.md 2303 bytes
+- quote_template.xlsx 10991 bytes
+
+FX CSV:
+0 ['Currency', 'RateToTWD', 'Note']
+1 ['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+2 ['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+3 ['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+
+WORKBOOK:
+sheets: ['Report', 'Quotes', 'Lines', 'Summary', 'Instructions']
+sheet Report max_row 20 max_col 6
+  ('Quotation Report 報價報表', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('起始日期 From', None, '結束日期 To', None, None, None)
+  ('條件 Condition', None, None, None, None, None)
+  ('產出時間 Generated at', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('資料來源 Source', None, '取得時間 Fetched at', None, None, None)
+  (None, None, None, None, None, None)
+sheet Quotes max_row 4 max_col 11
+  ('Quote headers', None, None, None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None, None, None)
+  ('QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount', 'NetAmountTWD')
+sheet Lines max_row 4 max_col 6
+  ('Quote line items', None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('QuoteID', 'ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount')
+sheet Summary max_row 4 max_col 6
+  ('Quote summary', None, None, None, None, None)
+  ('總計 TWD Totals', '=SUM(Quotes!K5:K5)', None, None, None, None)
+  (None, None, None, None, None, None)
+  ('Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count')
+sheet Instructions max_row 37 max_col 3
+  ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+  (None, None, None)
+  ('Sheet', 'Cell / Range', 'Content and rule')
+  ('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+  ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+  ('Report', 'B4', '本次查詢條件的文字說明。')
+  ('Report', 'B5', '產出時間（ISO 8601）。')
+  ('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+
+MANUAL EXCERPT:
+# quote_cli（模擬報價系統 CLI）使用說明
+
+> 合成測試資料。
+
+- Windows 執行：`"C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd" <command>`
+- 跨平台執行：`python "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py" <command>`
+- `quote_cli --help` 的內容如下：
+
+```text
+usage: quote_cli [-h] {customers,quotes} ...
+
+quote_cli: the synthetic quote system's public command line.
+
+Contract (stable, schema_version 1):
+  quote_cli --help
+  quote_cli customers list --format json
+  quote_cli quotes list [--customer C001] [--project P001] [--from YYYY-MM-DD]
+                        [--to YYYY-MM-DD] [--status Draft|Sent|Accepted|Expired]
+                        [--format json|table]
+  quote_cli quotes get Q0001 [--format json|table]
+  quote_cli quotes export [filters as list] --output quotes.csv
+
+Every filter is optional and filters combine with AND; dates include both
+ends. stdout carries only the result (JSON or table); errors and diagnostics
+go to stderr. Money is a decimal string in JSON ("1234.50"): parse it with a
+decimal type, not a float. Nothing here creates or changes a quote.
+
+Exit codes: 0 success (zero rows included), 2 invalid arguments, 3 document
+not found, 4 temporary service error (retry later).
+
+positional arguments:
+  {customers,quotes}
+    customers         customer master data
+    quotes            quotes
+
+options:
+  -h, --help          show this help message and exit
+```
+
+補充：
+- `quotes list` 回傳 `{"schema_version": 1, "items": [...], "count": N}`；`items` 只有表頭欄位。
+- `quotes get Q0001 --format json` 回傳 `{"schema_version": 1, "header": {...}, "line_items": [...]}`，line items 欄位：ProductID、ProductName、Quantity、UnitPrice、LineAmount。
+- 表頭欄位：QuoteID、CustomerID、ProjectID、QuoteDate、ValidUntil、Status、Currency、Subtotal、DiscountPercent、NetAmount。
+- NetAmount = Subtotal × (1 − DiscountPercent / 100)，四捨五入（ROUND_HALF_UP）至兩位小數；LineAmount = Quantity × UnitPrice。
+- 只有 exit code 0 時 stdout 才是正式資料；錯誤訊息在 stderr。
+

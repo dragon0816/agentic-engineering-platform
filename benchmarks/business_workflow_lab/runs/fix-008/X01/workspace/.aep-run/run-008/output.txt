@@ -1,0 +1,331 @@
+AEP RUN DIRS:
+- .aep-run\run-001
+    home size 0
+    output.txt size 10525
+    script.py size 988
+    tmp size 0
+- .aep-run\run-002
+    home size 0
+    output.txt size 4122
+    script.py size 229
+    tmp size 0
+- .aep-run\run-003
+    home size 0
+    output.txt size 2813
+    params.json size 59
+    script.py size 12915
+    tmp size 0
+- .aep-run\run-004
+    home size 0
+    output.txt size 10243
+    script.py size 2501
+    tmp size 0
+- .aep-run\run-005
+    home size 0
+    output.txt size 675
+    script.py size 6282
+    tmp size 0
+- .aep-run\run-006
+    home size 0
+    output.txt size 1668
+    params.json size 59
+    script.py size 16611
+    tmp size 0
+- .aep-run\run-007
+    home size 0
+    output.txt size 17306
+    script.py size 2402
+    tmp size 0
+- .aep-run\run-008
+    home size 0
+    output.txt size 0
+    script.py size 639
+    tmp size 0
+
+SCRIPT .aep-run\run-004\script.py exists True
+len 2438
+from pathlib import Path
+from openpyxl import load_workbook
+import csv, json, os
+
+ws = Path(r'C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X01\workspace')
+out = ws / 'output'
+print('Workspace:', ws)
+print('Output exists:', out.exists())
+print('\nOutput tree:')
+for p in sorted(out.rglob('*')):
+    if p.is_file():
+        print('-', p.relative_to(ws), 'size=', p.stat().st_size)
+
+xlsx_files = sorted(out.glob('*.xlsx'))
+print('\nXLSX files:', [p.name for p in xlsx_files])
+for xlsx in xlsx_files:
+    print('\nInspect workbook:', xlsx.name)
+    wb = load_workbook(xlsx, data_only=False)
+    print('Sheets:', wb.sheetnames)
+    for sh in wb.sheetnames:
+        wsht = wb[sh]
+        print(f' Sheet {sh}: max_row={wsht.max_row}, max_column={wsht.max_column}')
+        for r in wsht.iter_rows(min_row=1, max_row=min(wsht.max_row, 6), values_only=True):
+            print('  ', r)
+
+csv_files = sorted(out.rglob('*.csv'))
+print('\nCSV files:', [str(p.relative_to(ws)) for p in csv_files])
+for csvp in csv_files:
+    print('\nInspect CSV:', csvp.relative_to(ws))
+    try:
+        with csvp.open('r', encoding='utf-8-sig', newline='') as f:
+            reader = csv.reader(f)
+            rows = []
+            for i, row in enumerate(reader):
+                rows.append(row)
+                if i >= 4:
+                    break
+        print(' sample rows:')
+        for row in rows:
+            print('  ', row)
+        with csvp.open('r', encoding='utf-8-sig', newline='') as f:
+            count = sum(1 for _ in f)
+        print(' line_count:', count)
+    except UnicodeDecodeError:
+        print(' cannot decode as utf-8-sig')
+
+json_files = sorted(out.rglob('*.json'))
+print('\nJSON files:', [str(p.relative_to(ws)) for p in json_files])
+for jp in json_files:
+    print('\nInspect JSON:', jp.relative_to(ws))
+    try:
+        data = json.loads(jp.read_text(encoding='utf-8'))
+        if isinstance(data, list):
+            print(' list length:', len(data))
+            print(' first item:', data[0] if data else None)
+        elif isinstance(data, dict):
+            print(' keys:', list(data.keys()))
+            for k, v in list(data.items())[:3]:
+                print(' ', k, ':', v if not isinstance(v, (list, dict)) else (type(v).__name__, len(v)))
+        else:
+            print(type(data), data)
+    except Exception as e:
+        print(' json read error:', repr(e))
+
+
+SCRIPT .aep-run\run-005\script.py exists True
+len 6150
+oding='utf-8-sig', newline='') as f:
+    inv_rows = list(csv.DictReader(f))
+assert inv_rows, 'invoices no rows'
+for r in inv_rows:
+    assert in_range(r['InvoiceDate']), f'invoice out of range {r}'
+    bal = float(r['Balance']) * fx[r['Currency']]
+    add(summary, r.get('ProjectID',''), 'InvoiceBalanceTWD', bal)
+print('Invoices validated:', len(inv_rows), 'rows; all in period; using Balance only.')
+# expenses
+with expenses_csv.open(encoding='utf-8-sig', newline='') as f:
+    exp_rows = list(csv.DictReader(f))
+assert exp_rows, 'expenses no rows'
+for r in exp_rows:
+    assert in_range(r['ExpenseDate']), f'expense out of range {r}'
+    assert r['Status'] == 'Approved', f'non-approved expense included {r}'
+    amt = float(r['Amount']) * fx[r['Currency']]
+    add(summary, r.get('ProjectID',''), 'ApprovedExpenseTWD', amt)
+print('Expenses validated:', len(exp_rows), 'rows; all Approved; all in period.')
+# quotes
+qdata = json.loads(quotes_json.read_text(encoding='utf-8'))
+items = qdata['items']
+assert qdata['count'] == len(items), 'quote count mismatch'
+for r in items:
+    qdate = r.get('QuoteDate') or r.get('quote_date')
+    status = r.get('Status') or r.get('status')
+    project = r.get('ProjectID') or r.get('project_id') or ''
+    cur = r.get('Currency') or r.get('currency')
+    amt_raw = r.get('NetAmount') if 'NetAmount' in r else r.get('net_amount')
+    assert in_range(qdate), f'quote out of range {r}'
+    assert status == 'Accepted', f'non-accepted quote included {r}'
+    add(summary, project, 'AcceptedQuoteTWD', float(amt_raw) * fx[cur])
+print('Quotes validated:', len(items), 'items; all Accepted; all in period.')
+
+# workbook checks
+wb = load_workbook(report_xlsx, data_only=False)
+for s in ['Report','Orders','Invoices','Expenses','Quotes','Summary','Exceptions','Instructions']:
+    assert s in wb.sheetnames, f'missing sheet {s}'
+print('Workbook sheets present.')
+
+# headers check row 4
+expected_headers = {
+    'Orders': ['OrderID','ProjectID','CustomerID','OrderDate','Status','Currency','NetAmount','AmountTWD'],
+    'Invoices': ['InvoiceID','OrderID','ProjectID','CustomerID','InvoiceDate','DueDate','Currency','Amount','PaidAmount','Balance','BalanceTWD'],
+    'Expenses': ['ExpenseID','ProjectID','EmployeeID','ExpenseDate','Status','Currency','Amount','AmountTWD'],
+    'Quotes': ['QuoteID','ProjectID','CustomerID','QuoteDate','ValidUntil','Status','Currency','NetAmount','AmountTWD'],
+    'Summary': ['ProjectID','OrderTWD','InvoiceBalanceTWD','ApprovedExpenseTWD','AcceptedQuoteTWD'],
+}
+for sheet, headers in expected_headers.items():
+    ws = wb[sheet]
+    got = [ws.cell(4, c).value for c in range(1, len(headers)+1)]
+    assert got == headers, f'{sheet} headers mismatch {got}'
+print('Workbook headers validated.')
+
+# summary compare (rounded to cents tolerance)
+wsum = wb['Summary']
+wb_summary = {}
+for row in range(5, wsum.max_row+1):
+    project = wsum.cell(row,1).value
+    if not project:
+        continue
+    wb_summary[str(project)] = {
+        'OrderTWD': float(wsum.cell(row,2).value or 0),
+        'InvoiceBalanceTWD': float(wsum.cell(row,3).value or 0),
+        'ApprovedExpenseTWD': float(wsum.cell(row,4).value or 0),
+        'AcceptedQuoteTWD': float(wsum.cell(row,5).value or 0),
+    }
+# remove zero-only generated? none expected
+calc_projects = {p for p,v in summary.items() if any(abs(x)>0.0001 for x in v.values())}
+assert set(wb_summary) == calc_projects, f'project set mismatch workbook={set(wb_summary)} calc={calc_projects}'
+for p in sorted(calc_projects):
+    for k in ['OrderTWD','InvoiceBalanceTWD','ApprovedExpenseTWD','AcceptedQuoteTWD']:
+        assert close(wb_summary[p][k], summary[p][k]), f'summary mismatch {p} {k}: wb={wb_summary[p][k]} calc={summary[p][k]}'
+print('Summary totals match source exports by ProjectID and by separate amount columns.')
+print('Projects:', sorted(wb_summary))
+print('Final deliverable:', report_xlsx)
+print('Supporting exports:', orders_csv, invoices_csv, expenses_csv, quotes_json, sep='\n- ')
+
+
+SCRIPT .aep-run\run-006\script.py exists True
+len 16305
+: {removed_cancelled}; other raw order rows removed by date/status normalization: {removed_other}. Orders, invoice balances, approved expenses, and accepted quotes are separate columns; orders and quotes are not added as revenue; CustomerName is not used as a join key.'
+wb.save(report_path)
+
+# Saved-output verification.
+wb2 = load_workbook(report_path, data_only=False)
+for sheet, heads in headers_expected.items():
+    actual = [wb2[sheet].cell(4, c).value for c in range(1, len(heads)+1)]
+    assert actual == heads, f'headers after save mismatch {sheet}: {actual}'
+# Check IDs are text-like strings and amount cells numeric.
+for sheet, id_cols, amount_cols in [
+    ('Orders',[1,2,3],[7,8]), ('Invoices',[1,2,3,4],[8,9,10,11]), ('Expenses',[1,2,3],[7,8]), ('Quotes',[1,2,3],[8,9]), ('Summary',[1],[2,3,4,5])]:
+    ws = wb2[sheet]
+    for row in range(5, ws.max_row+1):
+        if all(ws.cell(row,c).value in (None,'') for c in range(1, ws.max_column+1)):
+            continue
+        for c in id_cols:
+            v = ws.cell(row,c).value
+            if v not in (None, ''):
+                assert isinstance(v, str), f'{sheet} row {row} col {c} ID is not text: {v!r}'
+        for c in amount_cols:
+            v = ws.cell(row,c).value
+            assert isinstance(v, (int,float)), f'{sheet} row {row} col {c} amount is not numeric: {v!r}'
+# Check workbook row counts match cleaned sources.
+assert wb2['Orders'].max_row == 4 + len(orders), f'Orders row count mismatch {wb2["Orders"].max_row} vs {4+len(orders)}'
+assert wb2['Invoices'].max_row == 4 + len(invoices), 'Invoices row count mismatch'
+assert wb2['Expenses'].max_row == 4 + len(expenses), 'Expenses row count mismatch'
+assert wb2['Quotes'].max_row == 4 + len(quotes), 'Quotes row count mismatch'
+assert wb2['Summary'].max_row == 4 + len(projects), 'Summary row count mismatch'
+# Recalculate and compare summary from saved detail sheets.
+calc = defaultdict(lambda: [Decimal('0.00'), Decimal('0.00'), Decimal('0.00'), Decimal('0.00')])
+for sheet, pcol, acol, idx in [('Orders',2,8,0), ('Invoices',3,11,1), ('Expenses',2,8,2), ('Quotes',2,9,3)]:
+    ws = wb2[sheet]
+    for row in range(5, ws.max_row+1):
+        pid = ws.cell(row,pcol).value
+        amt = ws.cell(row,acol).value
+        if pid:
+            calc[pid][idx] += D(amt)
+ws = wb2['Summary']
+saved_summary = {}
+for row in range(5, ws.max_row+1):
+    pid = ws.cell(row,1).value
+    if pid:
+        saved_summary[pid] = [D(ws.cell(row,c).value) for c in range(2,6)]
+assert set(saved_summary) == set(calc), f'Summary project set mismatch {set(saved_summary)} vs {set(calc)}'
+for pid in saved_summary:
+    for a,b in zip(saved_summary[pid], calc[pid]):
+        assert q2(a) == q2(b), f'Summary mismatch {pid}: {saved_summary[pid]} vs {calc[pid]}'
+# Supporting file filters after script rewrote cleaned exports.
+chk_orders, _ = read_csv_dict(orders_raw_path)
+assert all((r.get('Status') or '').strip() != 'Cancelled' and in_range(r.get('OrderDate')) for r in chk_orders), 'clean orders export contains invalid rows'
+chk_exp, _ = read_csv_dict(expenses_path)
+assert all((r.get('Status') or '').strip() == 'Approved' and in_range(r.get('ExpenseDate')) for r in chk_exp), 'clean expense export contains invalid rows'
+qcheck = json.loads(quote_json_path.read_text(encoding='utf-8'))
+assert qcheck.get('count') == len(qcheck.get('items', [])), 'quote count mismatch after save'
+assert all((r.get('Status') or '').strip() == 'Accepted' and in_range(r.get('QuoteDate')) for r in qcheck.get('items', [])), 'quote export contains invalid rows'
+print('Verification passed.')
+print(f'Orders rows: {len(orders)}; cancelled removed: {removed_cancelled}')
+print(f'Invoices rows: {len(invoices)}; Expenses rows: {len(expenses)}; Quotes rows: {len(quotes)}; Projects: {len(projects)}')
+print('Report:', report_path)
+print('Supporting files:')
+for p in [orders_raw_path, orders_dated_path, invoices_path, invoices_dated_path, expenses_path, expenses_dated_path, quote_json_path]:
+    print('-', p)
+
+
+SCRIPT .aep-run\run-007\script.py exists True
+len 2351
+from pathlib import Path
+import csv, json, os
+from openpyxl import load_workbook
+
+root = Path.cwd()
+print('WORKSPACE', root)
+print('INPUT FILES:')
+for p in sorted((root/'input').glob('*')):
+    print('-', p.relative_to(root), 'exists', p.exists(), 'size', p.stat().st_size)
+print('OUTPUT FILES:')
+for p in sorted((root/'output').rglob('*')):
+    if p.is_file():
+        print('-', p.relative_to(root), 'size', p.stat().st_size)
+
+def show_csv(rel, n=5):
+    p = root/rel
+    print('\nCSV', rel, 'exists', p.exists())
+    if not p.exists(): return
+    with p.open(newline='', encoding='utf-8-sig') as f:
+        rows = list(csv.DictReader(f))
+    print('headers', rows[0].keys() if rows else [])
+    print('row_count', len(rows))
+    for r in rows[:n]: print('sample', r)
+    for col in ['Status','OrderDate','InvoiceDate','Date','ExpenseDate']:
+        vals = sorted({r.get(col,'') for r in rows if col in r})
+        if vals: print(col, 'values/minmax', vals[:10], '...', vals[-3:])
+    if 'Status' in (rows[0].keys() if rows else []):
+        print('status_counts', {s: sum(1 for r in rows if r.get('Status')==s) for s in sorted({r.get('Status') for r in rows})})
+
+for rel in ['output/downloads/sap_orders_export.csv','output/downloads/sap_orders_2026-09-01_2026-09-30.csv','output/downloads/sap_invoices_export.csv','output/downloads/sap_invoices_2026-09-01_2026-09-30.csv','output/expense_approved_export.csv','output/expense_2026-09-01_2026-09-30_approved.csv']:
+    show_csv(rel)
+
+q = root/'output/quotes_2026-09-01_2026-09-30_accepted.json'
+print('\nJSON', q.relative_to(root), 'exists', q.exists())
+if q.exists():
+    data=json.load(q.open(encoding='utf-8'))
+    print('type', type(data).__name__, 'count', len(data) if isinstance(data, list) else 'n/a')
+    print('sample', data[:3] if isinstance(data, list) else data)
+
+xlsx = root/'output/project_report_2026-09-01_2026-09-30.xlsx'
+print('\nXLSX', xlsx.relative_to(root), 'exists', xlsx.exists())
+if xlsx.exists():
+    wb=load_workbook(xlsx, data_only=False)
+    print('sheets', wb.sheetnames)
+    for ws in wb.worksheets:
+        print('sheet', ws.title, 'max_row', ws.max_row, 'max_col', ws.max_column)
+        rows=[]
+        for row in ws.iter_rows(min_row=1, max_row=min(ws.max_row,6), values_only=True):
+            rows.append(row)
+        for r in rows: print(' ', r)
+    wb.close()
+
+
+SCRIPT .aep-run\run-008\script.py exists True
+len 623
+from pathlib import Path
+root=Path.cwd()
+print('AEP RUN DIRS:')
+for d in sorted((root/'.aep-run').glob('run-*')):
+    print('-', d.relative_to(root))
+    for f in d.glob('*'):
+        print('   ', f.name, 'size', f.stat().st_size)
+# Print tail of likely latest scripts to identify validation failure text embedded in script.
+latest = sorted((root/'.aep-run').glob('run-*'))[-5:]
+for d in latest:
+    sp=d/'script.py'
+    print('\nSCRIPT', sp.relative_to(root), 'exists', sp.exists())
+    if sp.exists():
+        txt=sp.read_text(encoding='utf-8', errors='replace')
+        print('len', len(txt))
+        print(txt[-4000:])
+

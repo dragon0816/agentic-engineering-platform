@@ -1,0 +1,368 @@
+{
+ "interfaces": {
+  "expense": [
+   "app_started",
+   "query",
+   "export"
+  ],
+  "quote": [
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "list",
+     "--customer",
+     "C001",
+     "--from",
+     "2026-09-01",
+     "--to",
+     "2026-09-30",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0010",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0011",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0014",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0018",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "list",
+     "--customer",
+     "C002",
+     "--from",
+     "2026-08-01",
+     "--to",
+     "2026-10-31",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0001",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0009",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0012",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0013",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0025",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   },
+   {
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0029",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py"
+   }
+  ]
+ },
+ "events": {
+  "sap": [
+   {
+    "at": "2026-10-07T12:11:04.776",
+    "event": "operator_reset",
+    "mode": "normal",
+    "label": "manual"
+   }
+  ],
+  "expense": [
+   {
+    "at": "2026-10-07T12:11:04.779",
+    "event": "operator_reset",
+    "mode": "normal",
+    "label": "manual"
+   },
+   {
+    "at": "2026-10-07T12:11:05.459",
+    "event": "app_started"
+   },
+   {
+    "at": "2026-10-07T12:11:11.346",
+    "event": "query",
+    "filters": {
+     "employee": "E001",
+     "project": "",
+     "from": "2026-09-01",
+     "to": "2026-09-30",
+     "status": ""
+    },
+    "total": 13
+   },
+   {
+    "at": "2026-10-07T12:11:27.918",
+    "event": "export",
+    "kind": "csv",
+    "path": "C:\\Users\\Chi_L\\AppData\\Local\\Temp\\pytest-of-CHI_L\\pytest-984\\test_live_the_lab_expense_app_0\\tasks\\t1\\output\\expenses.csv",
+    "rows": 13
+   }
+  ],
+  "quote": [
+   {
+    "at": "2026-10-07T12:11:01.359",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "list",
+     "--customer",
+     "C001",
+     "--from",
+     "2026-09-01",
+     "--to",
+     "2026-09-30",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 67436
+   },
+   {
+    "at": "2026-10-07T12:11:01.614",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0010",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 54508
+   },
+   {
+    "at": "2026-10-07T12:11:01.884",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0011",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 4688
+   },
+   {
+    "at": "2026-10-07T12:11:02.146",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0014",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 53672
+   },
+   {
+    "at": "2026-10-07T12:11:02.445",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0018",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 37440
+   },
+   {
+    "at": "2026-10-07T12:11:04.782",
+    "event": "operator_reset",
+    "mode": "normal",
+    "label": "manual"
+   },
+   {
+    "at": "2026-10-07T12:11:30.006",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "list",
+     "--customer",
+     "C002",
+     "--from",
+     "2026-08-01",
+     "--to",
+     "2026-10-31",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 27084
+   },
+   {
+    "at": "2026-10-07T12:11:30.337",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0001",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 41284
+   },
+   {
+    "at": "2026-10-07T12:11:30.680",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0009",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 67680
+   },
+   {
+    "at": "2026-10-07T12:11:31.063",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0012",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 17196
+   },
+   {
+    "at": "2026-10-07T12:11:31.448",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0013",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 66284
+   },
+   {
+    "at": "2026-10-07T12:11:31.749",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0025",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 47716
+   },
+   {
+    "at": "2026-10-07T12:11:32.137",
+    "event": "command",
+    "argv": [
+     "quotes",
+     "get",
+     "Q0029",
+     "--format",
+     "json"
+    ],
+    "argv0": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\quote_cli\\__main__.py",
+    "pid": 56140
+   }
+  ]
+ }
+}

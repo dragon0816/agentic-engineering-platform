@@ -1,0 +1,108 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X01\workspace
+Input files:
+- input\expense_manual.md size=2007
+- input\fx_rates.csv size=276
+- input\project_template.xlsx size=14209
+- input\quote_cli_manual.md size=2303
+- input\sap_manual.md size=2077
+Output files:
+- output\downloads\sap_invoices_2026-09-01_2026-09-30.csv size=1142
+- output\downloads\sap_invoices_export.csv size=1142
+- output\downloads\sap_orders_2026-09-01_2026-09-30.csv size=1456
+- output\downloads\sap_orders_export.csv size=1456
+- output\expense_2026-09-01_2026-09-30_approved.csv size=1843
+- output\expense_approved_export.csv size=1843
+- output\project_report_2026-09-01_2026-09-30.xlsx size=17954
+- output\quotes_2026-09-01_2026-09-30_accepted.json size=1321
+
+CSV headers and sample rows:
+
+output/downloads/sap_orders_export.csv: exists=True
+headers: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+row_count: 18
+sample: {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+sample: {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}
+sample: {'OrderID': '0045000111', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-03', 'Status': 'Closed', 'Currency': 'EUR', 'NetAmount': '2250.00'}
+
+output/downloads/sap_orders_2026-09-01_2026-09-30.csv: exists=True
+headers: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+row_count: 18
+sample: {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+sample: {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}
+sample: {'OrderID': '0045000111', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-03', 'Status': 'Closed', 'Currency': 'EUR', 'NetAmount': '2250.00'}
+
+output/downloads/sap_invoices_export.csv: exists=True
+headers: dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'])
+row_count: 13
+sample: {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}
+sample: {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}
+sample: {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}
+
+output/downloads/sap_invoices_2026-09-01_2026-09-30.csv: exists=True
+headers: dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'])
+row_count: 13
+sample: {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}
+sample: {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}
+sample: {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}
+
+output/expense_approved_export.csv: exists=True
+headers: dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'])
+row_count: 15
+sample: {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+sample: {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}
+sample: {'ExpenseID': 'EXP-00014', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-04', 'Category': 'Hotel', 'Currency': 'EUR', 'Amount': '180.00', 'Status': 'Approved', 'ReceiptID': 'RC852962', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}
+
+output/expense_2026-09-01_2026-09-30_approved.csv: exists=True
+headers: dict_keys(['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'])
+row_count: 15
+sample: {'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}
+sample: {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}
+sample: {'ExpenseID': 'EXP-00014', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-04', 'Category': 'Hotel', 'Currency': 'EUR', 'Amount': '180.00', 'Status': 'Approved', 'ReceiptID': 'RC852962', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}
+
+JSON preview:
+output\quotes_2026-09-01_2026-09-30_accepted.json: exists=True
+type: dict count: n/a
+
+Workbook sheets and dimensions:
+output\project_report_2026-09-01_2026-09-30.xlsx: exists=True
+sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Report rows= 20 cols= 6
+  ('Project Integration Report 專案整合報表', None, None, None, None, None)
+  (None, None, None, None, None, None)
+  ('起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None)
+  ('條件 Condition', 'SAP Orders: OrderDate in range and Status != Cancelled; SAP Invoices: InvoiceDate in range; Expense: ExpenseDate in range and Status = Approved; Quotes: QuoteDate in range and Status = Accepted; summary by ProjectID only.', None, None, None, None)
+Orders rows= 22 cols= 8
+  ('Sales orders by project', None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None)
+  ('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+Invoices rows= 17 cols= 11
+  ('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None, None, None)
+  ('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')
+Expenses rows= 19 cols= 8
+  ('Expenses by project', None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None)
+  ('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')
+Quotes rows= 8 cols= 9
+  ('Quotes by project', None, None, None, None, None, None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+  (None, None, None, None, None, None, None, None, None)
+  ('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+Summary rows= 9 cols= 5
+  ('Project summary (TWD)', None, None, None, None)
+  ('總計 TWD Totals', '=SUM(B5:B9)', '=SUM(C5:C9)', '=SUM(D5:D9)', '=SUM(E5:E9)')
+  (None, None, None, None, None)
+  ('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')
+Exceptions rows= 17 cols= 4
+  ('Exceptions 例外與關注項目', None, None, None)
+  ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+  (None, None, None, None)
+  ('Source', 'DocumentID', 'ProjectID', 'Reason')
+Instructions rows= 56 cols= 3
+  ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+  (None, None, None)
+  ('Sheet', 'Cell / Range', 'Content and rule')
+  ('Report', 'A1:F1', '合併儲存格標題，保留不改。')

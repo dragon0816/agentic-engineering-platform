@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "reason": "Non-retryable quote_cli error while listing quotes",
+  "exit_code": 2,
+  "stderr": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)",
+  "period": {
+    "from": "2026-09-01",
+    "to": "2026-09-30"
+  },
+  "status_filter": "Sent",
+  "note": "Per instruction, stdout is ignored unless exit code is 0 and parseable; exit code 2/3 is not retried.",
+  "run_log": [
+    {
+      "label": "quotes list Sent 2026-09",
+      "attempt": 1,
+      "args": [
+        "quotes",
+        "list",
+        "--from",
+        "2026-09-01",
+        "--to",
+        "2026-09-30",
+        "--status",
+        "Sent",
+        "--format",
+        "json"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)\n"
+    }
+  ]
+}

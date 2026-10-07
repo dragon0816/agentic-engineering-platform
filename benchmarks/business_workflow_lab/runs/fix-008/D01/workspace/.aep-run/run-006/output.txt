@@ -1,0 +1,21 @@
+INPUTS
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\D01\workspace\input\expense_template.xlsx exists= True size= 10969
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\D01\workspace\input\fx_rates.csv exists= True size= 276
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\D01\workspace\output\E002_2026-08-01_2026-08-31_expense_export.xlsx exists= True size= 5437
+fx headers ['Currency', 'RateToTWD', 'Note']
+fx rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+export row count 4
+export headers ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+sample rows [{'ExpenseID': 'EXP-00029', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-08-03', 'Category': 'Travel', 'Currency': 'USD', 'Amount': '210.00', 'Status': 'Approved', 'ReceiptID': 'RC421572', 'Description': '機票 TPE-FRA\n含行李費', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00030', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-08-11', 'Category': 'Hotel', 'Currency': 'TWD', 'Amount': '3600.00', 'Status': 'Submitted', 'ReceiptID': 'RC631696', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00031', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P005', 'ExpenseDate': '2026-08-20', 'Category': 'Meals', 'Currency': 'EUR', 'Amount': '48.00', 'Status': 'Approved', 'ReceiptID': None, 'Description': '加班餐費', 'MissingReceipt': True}]
+saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\D01\workspace\output\E002_august_expenses.xlsx
+CHECK output sheets ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+CHECK detail_rows 4
+CHECK summary_rows 4
+CHECK exception_rows 1
+CHECK report B3 D3 B4 2026-08-01 2026-08-31 EmployeeID=E002; ExpenseDate 2026-08-01 to 2026-08-31; Status=All
+CHECK details headers ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+CHECK summary headers ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+CHECK summary B2 formula =SUM(Details!I5:I8)
+CHECK calculated_twd_total 12455.00
+CHECK bad_cells []
+VERIFIED OK

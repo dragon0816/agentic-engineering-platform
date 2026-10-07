@@ -1,0 +1,20 @@
+Input files:
+ - expense_manual.md (2007 bytes)
+ - expense_template.xlsx (10969 bytes)
+ - fx_rates.csv (276 bytes)
+Export files:
+ - expense_approved_2026-09.csv (1843 bytes)
+ - expense_submitted_2026-09.csv (914 bytes)
+fx header: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+expense_submitted_2026-09.csv headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+expense_submitted_2026-09.csv rows: 7
+expense_approved_2026-09.csv headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+expense_approved_2026-09.csv rows: 15
+total selected records: 22
+missing receipt records: ['EXP-00015', 'EXP-00006']
+Details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\D02\workspace\output\expense_report_2026-09_submitted_approved.xlsx
+CHECK OK: workbook reopened; sheets present; Details headers and 22 data rows verified; filters/status/dates verified; ReceiptID/Description/MissingReceipt preserved; Amount/AmountTWD numeric and FX-checked; Exceptions list missing receipt ExpenseIDs and Details retains them; Summary total formula extended.
+output file: expense_report_2026-09_submitted_approved.xlsx
+detail rows: 22 exceptions: 2 summary rows: 6

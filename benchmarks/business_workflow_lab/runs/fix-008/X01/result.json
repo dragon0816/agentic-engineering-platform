@@ -1,0 +1,679 @@
+{
+ "task_id": "X01",
+ "status": "PASS",
+ "code_generated": true,
+ "execution_succeeded": true,
+ "excel_correct": true,
+ "workflow_rerun_succeeded": true,
+ "elapsed_seconds": 756.8,
+ "repair_loops": 6,
+ "human_interventions": 6,
+ "interfaces_used": [
+  "browser (SAP web)",
+  "desktop GUI (Expense)",
+  "CLI subprocess (quote)",
+  "coding execution (restricted runner)",
+  "direct read of mock internals (bypass)"
+ ],
+ "failure_reason": null,
+ "blocked_layer": null,
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\downloads\\sap_invoices_2026-08-01_2026-08-31.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\downloads\\sap_invoices_2026-09-01_2026-09-30.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\downloads\\sap_invoices_export.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\downloads\\sap_orders_2026-08-01_2026-08-31.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\downloads\\sap_orders_2026-09-01_2026-09-30.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\downloads\\sap_orders_export.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\expense_2026-08-01_2026-08-31_approved.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\expense_2026-09-01_2026-09-30_approved.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\expense_approved_export.csv",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\project_report_2026-08-01_2026-08-31.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\project_report_2026-09-01_2026-09-30.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\quotes_2026-08-01_2026-08-31_accepted.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\output\\quotes_2026-09-01_2026-09-30_accepted.json"
+ ],
+ "evidence_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\trace.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\events.json",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-001\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-002\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-003\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-004\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-005\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-006\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-007\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-008\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-009\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-010\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-011\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-012\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-013\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-014\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-015\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-016\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-017\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-018\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-019\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-020\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-021\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-022\\script.py",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-008\\X01\\workspace\\.aep-run\\run-023\\script.py"
+ ],
+ "script_runs": [
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-001/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-002/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-004/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 1,
+   "script": ".aep-run/run-005/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-007/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-008/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 1,
+   "script": ".aep-run/run-009/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 1,
+   "script": ".aep-run/run-010/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-011/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-012/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-014/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 1,
+   "script": ".aep-run/run-015/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 1,
+   "script": ".aep-run/run-016/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-017/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-018/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-020/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 1,
+   "script": ".aep-run/run-021/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-022/script.py",
+   "refused": null
+  },
+  {
+   "exit_code": 0,
+   "script": ".aep-run/run-023/script.py",
+   "refused": null
+  }
+ ],
+ "conversation_failures": [],
+ "bypass_signals": [
+  ".aep-run/run-003/script.py: expense_app",
+  ".aep-run/run-005/script.py: expense_app",
+  ".aep-run/run-006/script.py: expense_app",
+  ".aep-run/run-007/script.py: expense_app",
+  ".aep-run/run-009/script.py: expense_app",
+  ".aep-run/run-010/script.py: expense_app",
+  ".aep-run/run-013/script.py: expense_app",
+  ".aep-run/run-014/script.py: expense_app",
+  ".aep-run/run-015/script.py: expense_app",
+  ".aep-run/run-016/script.py: expense_app",
+  ".aep-run/run-018/script.py: expense_app",
+  ".aep-run/run-019/script.py: expense_app"
+ ],
+ "interventions": [
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261007-041948-e9586a",
+   "summary": "Run engineering/project-integration-report@1.0.0 once with {\"from_date\": \"2026-09-01\", \"to_date\": \"2026-09-30\"} — steps: browser/operate@1.0.0, desktop/operate@1.0.0, coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261007-042040-a7f857",
+   "summary": "Run engineering/project-integration-report@1.0.1 once with {\"from_date\": \"2026-09-01\", \"to_date\": \"2026-09-30\"} — steps: browser/operate@1.0.0, desktop/operate@1.0.0, coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261007-042252-b2d3d2",
+   "summary": "Run engineering/project-integration-report@1.0.2 once with {\"from_date\": \"2026-09-01\", \"to_date\": \"2026-09-30\"} — steps: browser/operate@1.0.0, desktop/operate@1.0.0, coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261007-042558-e874c6",
+   "summary": "Run engineering/project-integration-report@1.0.3 once with {\"from_date\": \"2026-09-01\", \"to_date\": \"2026-09-30\"} — steps: browser/operate@1.0.0, desktop/operate@1.0.0, coding/run-python@1.0.0"
+  },
+  {
+   "kind": "operator rerun request (spec §9 second parameter set)",
+   "text": "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。"
+  },
+  {
+   "kind": "operator pressed the owner's approve button",
+   "approval_id": "ap-20261007-042828-ca8bb7",
+   "summary": "Run engineering/project-integration-report@1.0.3 once with {\"from_date\": \"2026-08-01\", \"to_date\": \"2026-08-31\"} — steps: browser/operate@1.0.0, desktop/operate@1.0.0, coding/run-python@1.0.0"
+  }
+ ],
+ "platform_runs": [
+  {
+   "run_id": "run-36060bca30164230b1a2f008d2794dc9",
+   "digest": "25af643b5ff86cd3b6e2c94015633a2c1d43afc83f8aecf751128ee9fff31269",
+   "status": "failed"
+  },
+  {
+   "run_id": "run-9522768fa034458fa8cf360c3fa192d8",
+   "digest": "0f851b0393630d9770adb55b24c8fb959eb69b5a1b770d878388e376ed3dcab3",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-ae8c8063894443e684f08d096469bc01",
+   "digest": "cc1752edfb27d1a51e0c5d93e294b487e0e0e4e82922ddf87b7078ee192795ce",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-a8685e720563472abdd87653cf14ed17",
+   "digest": "6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f",
+   "status": "succeeded"
+  },
+  {
+   "run_id": "run-39b9ab6797274c6eb66f41961e3ba31e",
+   "digest": "6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f",
+   "status": "succeeded"
+  }
+ ],
+ "approvals": [
+  {
+   "approval_id": "ap-20261007-041948-e9586a",
+   "kind": "run",
+   "workflow": "engineering/project-integration-report@1.0.0",
+   "arguments": {
+    "from_date": "2026-09-01",
+    "to_date": "2026-09-30"
+   },
+   "status": "approved",
+   "run_id": "run-36060bca30164230b1a2f008d2794dc9",
+   "run_status": "failed",
+   "digest": "25af643b5ff86cd3b6e2c94015633a2c1d43afc83f8aecf751128ee9fff31269",
+   "text": "【已核准並執行】engineering/project-integration-report@1.0.0（候選 wf-20261007-041943-57bde2，digest 25af643b5ff86cd3b6e2c94015633a2c1d43afc83f8aecf751128ee9fff31269）結果：failed\n失敗：{\"code\": \"invalid_input\", \"message\": \"Invalid input at actions.4.save_as: string_pattern_mismatch; actions.9.save_as: string_pattern_mismatch\"}\n步驟 0：failed（invalid_input: Invalid input at actions.4.save_as: string_pattern_mismatch; actions.9.save_as: string_pattern_mismatch）\nnull"
+  },
+  {
+   "approval_id": "ap-20261007-042040-a7f857",
+   "kind": "run",
+   "workflow": "engineering/project-integration-report@1.0.1",
+   "arguments": {
+    "from_date": "2026-09-01",
+    "to_date": "2026-09-30"
+   },
+   "status": "approved",
+   "run_id": "run-9522768fa034458fa8cf360c3fa192d8",
+   "run_status": "succeeded",
+   "digest": "0f851b0393630d9770adb55b24c8fb959eb69b5a1b770d878388e376ed3dcab3",
+   "text": "【已核准並執行】engineering/project-integration-report@1.0.1（候選 wf-20261007-041943-57bde2，digest 0f851b0393630d9770adb55b24c8fb959eb69b5a1b770d878388e376ed3dcab3）結果：succeeded\n步驟 0：succeeded\n{\"url\": \"http://127.0.0.1:8810/invoices?customer=&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc\", \"data\": {\"sap_orders_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_orders_export.csv\", \"sap_invoices_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_invoices_export.csv\"}, \"items\": {}, \"downloads\": [\"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineerin"
+  },
+  {
+   "approval_id": "ap-20261007-042252-b2d3d2",
+   "kind": "run",
+   "workflow": "engineering/project-integration-report@1.0.2",
+   "arguments": {
+    "from_date": "2026-09-01",
+    "to_date": "2026-09-30"
+   },
+   "status": "approved",
+   "run_id": "run-ae8c8063894443e684f08d096469bc01",
+   "run_status": "succeeded",
+   "digest": "cc1752edfb27d1a51e0c5d93e294b487e0e0e4e82922ddf87b7078ee192795ce",
+   "text": "【已核准並執行】engineering/project-integration-report@1.0.2（候選 wf-20261007-041943-57bde2，digest cc1752edfb27d1a51e0c5d93e294b487e0e0e4e82922ddf87b7078ee192795ce）結果：succeeded\n步驟 0：succeeded\n{\"url\": \"http://127.0.0.1:8810/invoices?customer=&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc\", \"data\": {\"sap_orders_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_orders_export.csv\", \"sap_invoices_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_invoices_export.csv\"}, \"items\": {}, \"downloads\": [\"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineerin"
+  },
+  {
+   "approval_id": "ap-20261007-042558-e874c6",
+   "kind": "run",
+   "workflow": "engineering/project-integration-report@1.0.3",
+   "arguments": {
+    "from_date": "2026-09-01",
+    "to_date": "2026-09-30"
+   },
+   "status": "approved",
+   "run_id": "run-a8685e720563472abdd87653cf14ed17",
+   "run_status": "succeeded",
+   "digest": "6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f",
+   "text": "【已核准並執行】engineering/project-integration-report@1.0.3（候選 wf-20261007-041943-57bde2，digest 6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f）結果：succeeded\n步驟 0：succeeded\n{\"url\": \"http://127.0.0.1:8810/invoices?customer=&project=&from=2026-09-01&to=2026-09-30&sort=InvoiceID&dir=asc\", \"data\": {\"sap_orders_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_orders_export.csv\", \"sap_invoices_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_invoices_export.csv\"}, \"items\": {}, \"downloads\": [\"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineerin"
+  },
+  {
+   "approval_id": "ap-20261007-042828-ca8bb7",
+   "kind": "run",
+   "workflow": "engineering/project-integration-report@1.0.3",
+   "arguments": {
+    "from_date": "2026-08-01",
+    "to_date": "2026-08-31"
+   },
+   "status": "approved",
+   "run_id": "run-39b9ab6797274c6eb66f41961e3ba31e",
+   "run_status": "succeeded",
+   "digest": "6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f",
+   "text": "【已核准並執行】engineering/project-integration-report@1.0.3（候選 wf-20261007-041943-57bde2，digest 6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f）結果：succeeded\n步驟 0：succeeded\n{\"url\": \"http://127.0.0.1:8810/invoices?customer=&project=&from=2026-08-01&to=2026-08-31&sort=InvoiceID&dir=asc\", \"data\": {\"sap_orders_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_orders_export.csv\", \"sap_invoices_export.csv\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-008\\\\X01\\\\workspace\\\\output\\\\downloads\\\\sap_invoices_export.csv\"}, \"items\": {}, \"downloads\": [\"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineerin"
+  }
+ ],
+ "workflow_unchanged_on_rerun": true,
+ "checks": [
+  {
+   "name": "an Excel deliverable exists",
+   "ok": true,
+   "detail": "first_result.xlsx"
+  },
+  {
+   "name": "template: sheet names and order",
+   "ok": true,
+   "detail": [
+    "Report",
+    "Orders",
+    "Invoices",
+    "Expenses",
+    "Quotes",
+    "Summary",
+    "Exceptions",
+    "Instructions"
+   ]
+  },
+  {
+   "name": "template: Report fixed labels and footer cell",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Report A1:F1 merged",
+   "ok": true,
+   "detail": [
+    "A1:F1"
+   ]
+  },
+  {
+   "name": "template: page footers kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Instructions unchanged",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: row-4 column names kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: freeze panes and auto-filter kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: column widths kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "formula kept: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(B5:B9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(B5:B9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!B2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "formula kept: Summary!C2",
+   "ok": true,
+   "detail": "=SUM(C5:C9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!C2",
+   "ok": true,
+   "detail": "=SUM(C5:C9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!C2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "formula kept: Summary!D2",
+   "ok": true,
+   "detail": "=SUM(D5:D9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!D2",
+   "ok": true,
+   "detail": "=SUM(D5:D9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!D2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "formula kept: Summary!E2",
+   "ok": true,
+   "detail": "=SUM(E5:E9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!E2",
+   "ok": true,
+   "detail": "=SUM(E5:E9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!E2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "Orders: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Orders: AmountTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Invoices: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Invoices: BalanceTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Expenses: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Expenses: AmountTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Quotes: AmountTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Summary: one row per project with the expected TWD totals",
+   "ok": true,
+   "detail": []
+  }
+ ],
+ "rerun_checks": [
+  {
+   "name": "an Excel deliverable exists",
+   "ok": true,
+   "detail": "project_report_2026-08-01_2026-08-31.xlsx"
+  },
+  {
+   "name": "template: sheet names and order",
+   "ok": true,
+   "detail": [
+    "Report",
+    "Orders",
+    "Invoices",
+    "Expenses",
+    "Quotes",
+    "Summary",
+    "Exceptions",
+    "Instructions"
+   ]
+  },
+  {
+   "name": "template: Report fixed labels and footer cell",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Report A1:F1 merged",
+   "ok": true,
+   "detail": [
+    "A1:F1"
+   ]
+  },
+  {
+   "name": "template: page footers kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: Instructions unchanged",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: row-4 column names kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: freeze panes and auto-filter kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "template: column widths kept",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "formula kept: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(B5:B9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!B2",
+   "ok": true,
+   "detail": "=SUM(B5:B9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!B2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "formula kept: Summary!C2",
+   "ok": true,
+   "detail": "=SUM(C5:C9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!C2",
+   "ok": true,
+   "detail": "=SUM(C5:C9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!C2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "formula kept: Summary!D2",
+   "ok": true,
+   "detail": "=SUM(D5:D9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!D2",
+   "ok": true,
+   "detail": "=SUM(D5:D9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!D2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "formula kept: Summary!E2",
+   "ok": true,
+   "detail": "=SUM(E5:E9)"
+  },
+  {
+   "name": "formula range covers the data: Summary!E2",
+   "ok": true,
+   "detail": "=SUM(E5:E9); last data row 9"
+  },
+  {
+   "name": "formula cached value present: Summary!E2",
+   "ok": null,
+   "detail": "no cached value (the writer did not calculate formulas); totals are verified independently"
+  },
+  {
+   "name": "Orders: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Orders: AmountTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Invoices: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Invoices: BalanceTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Expenses: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Expenses: AmountTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Quotes: every expected document, none from other projects",
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "other projects": [],
+    "duplicates": []
+   }
+  },
+  {
+   "name": "Quotes: AmountTWD values",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "Summary: one row per project with the expected TWD totals",
+   "ok": true,
+   "detail": []
+  }
+ ],
+ "session_id": "conversation-85eb2cd4bdc54b2f8857546f6e15fa5a",
+ "model_turns": [
+  9,
+  null,
+  4,
+  null,
+  6,
+  null,
+  8,
+  null,
+  6,
+  2,
+  null,
+  5
+ ],
+ "tool_calls": 35
+}

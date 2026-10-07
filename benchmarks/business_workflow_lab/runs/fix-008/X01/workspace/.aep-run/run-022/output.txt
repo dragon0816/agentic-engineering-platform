@@ -1,0 +1,83 @@
+Inspecting workbook: output\project_report_2026-08-01_2026-08-31.xlsx exists= True size= 16170
+
+SHEET Orders max_row 11 max_col 8
+1 ('Sales orders by project', None, None, None, None, None, None, None)
+2 ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+3 (None, None, None, None, None, None, None, None)
+4 ('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+5 ('0045000101', 'P001', 'C001', '2026-08-03', 'Closed', 'TWD', 95895, 95895)
+6 ('0045000102', 'P002', 'C002', '2026-08-07', 'Closed', 'USD', 4095, 131040)
+7 ('0045000103', 'P004', 'C003', '2026-08-12', 'Open', 'EUR', 958.95, 33563.25)
+8 ('0045000105', 'P005', 'C007', '2026-08-19', 'Closed', 'TWD', 227850, 227850)
+9 ('0045000106', None, 'C005', '2026-08-22', 'Open', 'USD', 4942, 158144)
+10 ('0045000107', 'P003', 'C001', '2026-08-27', 'Closed', 'USD', 6250, 200000)
+11 ('0045000108', None, 'C006', '2026-08-31', 'Open', 'EUR', 3028.95, 106013.25)
+
+SHEET Invoices max_row 10 max_col 11
+1 ('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+2 ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+3 (None, None, None, None, None, None, None, None, None, None, None)
+4 ('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')
+5 ('0090000201', '0045000101', 'P001', 'C001', '2026-08-06', '2026-08-21', 'TWD', 95895, 47947.5, 47947.5, 47947.5)
+6 ('0090000202', '0045000102', 'P002', 'C002', '2026-08-10', '2026-09-09', 'USD', 4095, 4095, 0, 0)
+7 ('0090000203', '0045000105', 'P005', 'C007', '2026-08-20', '2026-09-04', 'TWD', 227850, 113925, 113925, 113925)
+8 ('0090000204', '0045000103', 'P004', 'C003', '2026-08-25', '2026-09-24', 'EUR', 958.95, 0, 958.95, 33563.25)
+9 ('0090000205', '0045000107', 'P003', 'C001', '2026-08-29', '2026-09-28', 'USD', 6250, 6250, 0, 0)
+10 ('0090000206', '0045000106', None, 'C005', '2026-08-31', '2026-09-30', 'USD', 4942, 0, 4942, 158144)
+
+SHEET Expenses max_row 8 max_col 8
+1 ('Expenses by project', None, None, None, None, None, None, None)
+2 ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+3 (None, None, None, None, None, None, None, None)
+4 ('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')
+5 ('EXP-00035', 'P004', 'E004', '2026-08-01', 'Approved', 'EUR', 95, 3325)
+6 ('EXP-00029', 'P003', 'E002', '2026-08-03', 'Approved', 'USD', 210, 6720)
+7 ('EXP-00033', 'P002', 'E003', '2026-08-14', 'Approved', 'TWD', 2100, 2100)
+8 ('EXP-00031', 'P005', 'E002', '2026-08-20', 'Approved', 'EUR', 48, 1680)
+
+SHEET Quotes max_row 8 max_col 9
+1 ('Quotes by project', None, None, None, None, None, None, None, None)
+2 ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+3 (None, None, None, None, None, None, None, None, None)
+4 ('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+5 ('Q0001', 'P002', 'C002', '2026-08-04', '2026-09-03', 'Accepted', 'TWD', 69000, 69000)
+6 ('Q0003', 'P004', 'C003', '2026-08-11', '2026-09-10', 'Accepted', 'EUR', 8517.56, 298114.6)
+7 ('Q0005', 'P003', 'C001', '2026-08-18', '2026-09-17', 'Accepted', 'TWD', 96408.38, 96408.38)
+8 ('Q0008', 'P005', 'C007', '2026-08-28', '2026-09-27', 'Accepted', 'EUR', 3468.12, 121384.2)
+
+SHEET Summary max_row 9 max_col 5
+1 ('Project summary (TWD)', None, None, None, None)
+2 ('總計 TWD Totals', None, None, None, None)
+3 (None, None, None, None, None)
+4 ('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')
+5 ('P001', 95895, 47947.5, 0, 0)
+6 ('P002', 131040, 0, 2100, 69000)
+7 ('P003', 200000, 0, 6720, 96408.38)
+8 ('P004', 33563.25, 33563.25, 3325, 298114.6)
+9 ('P005', 227850, 113925, 1680, 121384.2)
+
+SHEET Report max_row 20 max_col 6
+1 ('Project Integration Report 專案整合報表', None, None, None, None, None)
+2 (None, None, None, None, None, None)
+3 ('起始日期 From', '2026-08-01', '結束日期 To', '2026-08-31', None, None)
+4 ('條件 Condition', 'SAP Orders: OrderDate in range and Status != Cancelled; SAP Invoices: InvoiceDate in range; Expense: ExpenseDate in range and Status = Approved; Quotes: QuoteDate in range and Status = Accepted; summary by ProjectID only.', None, None, None, None)
+5 ('產出時間 Generated at', '2026-10-07T12:29:07+08:00', None, None, None, None)
+6 (None, None, None, None, None, None)
+7 ('資料來源 Source', 'SAP web exports; Expense Viewer export; quote_cli Accepted JSON; fx_rates.csv', '取得時間 Fetched at', '2026-10-07T12:29:07+08:00', None, None)
+8 (None, None, None, None, None, None)
+9 ('備註 Notes', 'Cancelled SAP orders removed: 1; other raw order rows removed by date/status normalization: 0. Orders, invoice balances, approved expenses, and accepted quotes are separate columns; orders and quotes are not added as revenue; CustomerName is not used as a join key.', None, None, None, None)
+10 (None, None, None, None, None, None)
+11 (None, None, None, None, None, None)
+12 (None, None, None, None, None, None)
+13 (None, None, None, None, None, None)
+14 (None, None, None, None, None, None)
+15 (None, None, None, None, None, None)
+
+SHEET Exceptions max_row 7 max_col 4
+1 ('Exceptions 例外與關注項目', None, None, None)
+2 ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+3 (None, None, None, None)
+4 ('Source', 'DocumentID', 'ProjectID', 'Reason')
+5 ('Orders', '0045000106', None, 'Missing ProjectID; excluded from project summary')
+6 ('Orders', '0045000108', None, 'Missing ProjectID; excluded from project summary')
+7 ('Invoices', '0090000206', None, 'Missing ProjectID; excluded from project summary')

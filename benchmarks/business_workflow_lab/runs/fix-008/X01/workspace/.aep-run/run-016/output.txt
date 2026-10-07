@@ -1,0 +1,34 @@
+CHECKS PASSED:
+- output/downloads/sap_orders_export.csv exists size=1456
+- output/downloads/sap_orders_2026-09-01_2026-09-30.csv exists size=1456
+- output/downloads/sap_invoices_export.csv exists size=1142
+- output/downloads/sap_invoices_2026-09-01_2026-09-30.csv exists size=1142
+- output/expense_approved_export.csv exists size=1843
+- output/expense_2026-09-01_2026-09-30_approved.csv exists size=1843
+- output/quotes_2026-09-01_2026-09-30_accepted.json exists size=1321
+- output/project_report_2026-09-01_2026-09-30.xlsx exists size=17954
+- orders CSV headers match source names
+- orders CSV row count 18
+- orders are within date range, exclude Cancelled, preserve text IDs and numeric amounts
+- dated orders CSV matches export CSV
+- invoice CSV headers match source names
+- invoice CSV row count 13
+- invoices are within date range, preserve text IDs and numeric amounts
+- dated invoices CSV matches export CSV
+- expense CSV headers match source names
+- expense CSV row count 15
+- expenses are within date range, Approved only, preserve text IDs and numeric amounts
+- dated expense CSV matches export CSV
+- quotes are within date range, Accepted only, preserve text IDs and numeric amounts
+- workbook sheets preserved
+- Report sheet dates match run period
+- Orders sheet row count matches CSV
+- Invoices sheet row count matches CSV
+- Expenses sheet row count matches CSV
+- workbook filters, text IDs, and numeric amounts checked
+- Summary project IDs match detail sheets
+- Summary amounts match detail sheet sums
+
+ERRORS:
+- quotes count 0 != 4
+- Quotes sheet row count 4 != JSON 0

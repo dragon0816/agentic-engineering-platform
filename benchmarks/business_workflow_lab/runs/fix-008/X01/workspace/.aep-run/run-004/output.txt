@@ -1,0 +1,137 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X01\workspace
+Output exists: True
+
+Output tree:
+- output\downloads\sap_invoices_2026-09-01_2026-09-30.csv size= 1142
+- output\downloads\sap_invoices_export.csv size= 1142
+- output\downloads\sap_orders_2026-09-01_2026-09-30.csv size= 1616
+- output\downloads\sap_orders_export.csv size= 1616
+- output\expense_2026-09-01_2026-09-30_approved.csv size= 1843
+- output\expense_approved_export.csv size= 1843
+- output\project_report_2026-09-01_2026-09-30.xlsx size= 17922
+- output\quotes_2026-09-01_2026-09-30_accepted.json size= 1321
+
+XLSX files: ['project_report_2026-09-01_2026-09-30.xlsx']
+
+Inspect workbook: project_report_2026-09-01_2026-09-30.xlsx
+Sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+ Sheet Report: max_row=20, max_column=6
+   ('Project Integration Report 專案整合報表', None, None, None, None, None)
+   (None, None, None, None, None, None)
+   ('起始日期 From', '2026-09-01', '結束日期 To', '2026-09-30', None, None)
+   ('條件 Condition', 'SAP Orders: OrderDate in range and Status != Cancelled; SAP Invoices: InvoiceDate in range; Expense: ExpenseDate in range and Status = Approved; Quotes: QuoteDate in range and Status = Accepted; summary by ProjectID only.', None, None, None, None)
+   ('產出時間 Generated at', '2026-10-07T12:21:24+08:00', None, None, None, None)
+   (None, None, None, None, None, None)
+ Sheet Orders: max_row=22, max_column=8
+   ('Sales orders by project', None, None, None, None, None, None, None)
+   ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+   (None, None, None, None, None, None, None, None)
+   ('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+   ('0045000109', 'P003', 'C001', '2026-09-01', 'Open', 'TWD', 150000, 150000)
+   ('0045000110', 'P002', 'C002', '2026-09-02', 'Open', 'TWD', 293572.5, 293572.5)
+ Sheet Invoices: max_row=17, max_column=11
+   ('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+   ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+   (None, None, None, None, None, None, None, None, None, None, None)
+   ('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')
+   ('0090000207', '0045000108', None, 'C006', '2026-09-01', '2026-09-16', 'EUR', 3028.95, 0, 3028.95, 106013.25)
+   ('0090000208', '0045000109', 'P003', 'C001', '2026-09-02', '2026-09-12', 'TWD', 150000, 150000, 0, 0)
+ Sheet Expenses: max_row=19, max_column=8
+   ('Expenses by project', None, None, None, None, None, None, None)
+   ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+   (None, None, None, None, None, None, None, None)
+   ('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')
+   ('EXP-00001', 'P001', 'E001', '2026-09-01', 'Approved', 'TWD', 1280, 1280)
+   ('EXP-00002', 'P001', 'E001', '2026-09-02', 'Approved', 'USD', 200, 6400)
+ Sheet Quotes: max_row=8, max_column=9
+   ('Quotes by project', None, None, None, None, None, None, None, None)
+   ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+   (None, None, None, None, None, None, None, None, None)
+   ('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+   ('Q0011', 'P001', 'C001', '2026-09-03', '2026-10-03', 'Accepted', 'USD', 10350, 331200)
+   ('Q0013', 'P002', 'C002', '2026-09-07', '2026-10-07', 'Accepted', 'EUR', 2784.31, 97450.85)
+ Sheet Summary: max_row=9, max_column=5
+   ('Project summary (TWD)', None, None, None, None)
+   ('總計 TWD Totals', '=SUM(B5:B9)', '=SUM(C5:C9)', '=SUM(D5:D9)', '=SUM(E5:E9)')
+   (None, None, None, None, None)
+   ('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')
+   ('P001', 693570, 386445, 18305, 331200)
+   ('P002', 516084.5, 156256, 9100, 97450.85)
+ Sheet Exceptions: max_row=17, max_column=4
+   ('Exceptions 例外與關注項目', None, None, None)
+   ('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+   (None, None, None, None)
+   ('Source', 'DocumentID', 'ProjectID', 'Reason')
+   ('Orders', '0045000113', None, 'Missing ProjectID; excluded from project summary')
+   ('Orders', '0045000115', None, 'Missing ProjectID; excluded from project summary')
+ Sheet Instructions: max_row=56, max_column=3
+   ('填寫說明 Instructions（請勿修改本工作表）', None, None)
+   (None, None, None)
+   ('Sheet', 'Cell / Range', 'Content and rule')
+   ('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+   ('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+   ('Report', 'B4', '本次查詢條件的文字說明。')
+
+CSV files: ['output\\downloads\\sap_invoices_2026-09-01_2026-09-30.csv', 'output\\downloads\\sap_invoices_export.csv', 'output\\downloads\\sap_orders_2026-09-01_2026-09-30.csv', 'output\\downloads\\sap_orders_export.csv', 'output\\expense_2026-09-01_2026-09-30_approved.csv', 'output\\expense_approved_export.csv']
+
+Inspect CSV: output\downloads\sap_invoices_2026-09-01_2026-09-30.csv
+ sample rows:
+   ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+   ['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95']
+   ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']
+   ['0090000209', '0045000112', 'C007', 'P005', '2026-09-05', '2026-09-20', 'USD', '12311.00', '4924.40', '7386.60']
+   ['0090000210', '0045000111', 'C003', 'P004', '2026-09-08', '2026-10-08', 'EUR', '2250.00', '0.00', '2250.00']
+ line_count: 14
+
+Inspect CSV: output\downloads\sap_invoices_export.csv
+ sample rows:
+   ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+   ['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95']
+   ['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']
+   ['0090000209', '0045000112', 'C007', 'P005', '2026-09-05', '2026-09-20', 'USD', '12311.00', '4924.40', '7386.60']
+   ['0090000210', '0045000111', 'C003', 'P004', '2026-09-08', '2026-10-08', 'EUR', '2250.00', '0.00', '2250.00']
+ line_count: 14
+
+Inspect CSV: output\downloads\sap_orders_2026-09-01_2026-09-30.csv
+ sample rows:
+   ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+   ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+   ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', '293572.50']
+   ['0045000111', 'C003', 'Northwind Components GmbH', 'P004', '2026-09-03', 'Closed', 'EUR', '2250.00']
+   ['0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', '12311.00']
+ line_count: 21
+
+Inspect CSV: output\downloads\sap_orders_export.csv
+ sample rows:
+   ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+   ['0045000109', 'C001', 'Acme Precision Taiwan Ltd.', 'P003', '2026-09-01', 'Open', 'TWD', '150000.00']
+   ['0045000110', 'C002', '台灣精密股份有限公司', 'P002', '2026-09-02', 'Open', 'TWD', '293572.50']
+   ['0045000111', 'C003', 'Northwind Components GmbH', 'P004', '2026-09-03', 'Closed', 'EUR', '2250.00']
+   ['0045000112', 'C007', 'Acme Precision Taiwan Limited', 'P005', '2026-09-04', 'Open', 'USD', '12311.00']
+ line_count: 21
+
+Inspect CSV: output\expense_2026-09-01_2026-09-30_approved.csv
+ sample rows:
+   ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+   ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False']
+   ['EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'False']
+   ['EXP-00014', 'E002', 'Daniel Weber', 'P003', '2026-09-04', 'Hotel', 'EUR', '180.00', 'Approved', 'RC852962', '客戶驗收住宿 2 晚', 'False']
+   ['EXP-00004', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-05', 'Supplies', 'EUR', '42.50', 'Approved', 'RC358881', '治具耗材', 'False']
+ line_count: 18
+
+Inspect CSV: output\expense_approved_export.csv
+ sample rows:
+   ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+   ['EXP-00001', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-01', 'Travel', 'TWD', '1280.00', 'Approved', 'RC702658', '高鐵 台北-新竹 往返', 'False']
+   ['EXP-00002', 'E001', '陳怡君 (Yi-Chun Chen)', 'P001', '2026-09-02', 'Hotel', 'USD', '200.00', 'Approved', 'RC138828', '客戶驗收住宿 2 晚', 'False']
+   ['EXP-00014', 'E002', 'Daniel Weber', 'P003', '2026-09-04', 'Hotel', 'EUR', '180.00', 'Approved', 'RC852962', '客戶驗收住宿 2 晚', 'False']
+   ['EXP-00004', 'E001', '陳怡君 (Yi-Chun Chen)', 'P003', '2026-09-05', 'Supplies', 'EUR', '42.50', 'Approved', 'RC358881', '治具耗材', 'False']
+ line_count: 18
+
+JSON files: ['output\\quotes_2026-09-01_2026-09-30_accepted.json']
+
+Inspect JSON: output\quotes_2026-09-01_2026-09-30_accepted.json
+ keys: ['schema_version', 'items', 'count']
+  schema_version : 1
+  items : ('list', 4)
+  count : 4

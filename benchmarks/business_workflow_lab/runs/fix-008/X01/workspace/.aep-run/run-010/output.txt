@@ -1,0 +1,19 @@
+Checking files:
+report output\project_report_2026-09-01_2026-09-30.xlsx exists= True size= 17922
+orders_export output\downloads\sap_orders_export.csv exists= True size= 1616
+orders_dated output\downloads\sap_orders_2026-09-01_2026-09-30.csv exists= True size= 1616
+invoices_export output\downloads\sap_invoices_export.csv exists= True size= 1142
+invoices_dated output\downloads\sap_invoices_2026-09-01_2026-09-30.csv exists= True size= 1142
+expense_export output\expense_approved_export.csv exists= True size= 1843
+expense_dated output\expense_2026-09-01_2026-09-30_approved.csv exists= True size= 1843
+quotes output\quotes_2026-09-01_2026-09-30_accepted.json exists= True size= 1321
+template input\project_template.xlsx exists= True size= 14209
+fx input\fx_rates.csv exists= True size= 276
+fx= {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+output\downloads\sap_orders_export.csv rows= 20 headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+output\downloads\sap_orders_2026-09-01_2026-09-30.csv rows= 20 headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X01\workspace\.aep-run\run-010\script.py", line 52, in <module>
+    assert all(r['Status']!='Cancelled' for r in orders), 'orders contain Cancelled rows'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: orders contain Cancelled rows

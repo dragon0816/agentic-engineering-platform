@@ -1,0 +1,14 @@
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Invoice CSV headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Read 13 invoices from export
+sample invoice: {'InvoiceID': '0090000207', 'OrderID': '0045000108', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Balance': '3028.95'} BalanceTWD 106013.25
+sample invoice: {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Balance': '0.00'} BalanceTWD 0.00
+sample invoice: {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Balance': '7386.60'} BalanceTWD 236371.20
+sample invoice: {'InvoiceID': '0090000210', 'OrderID': '0045000111', 'ProjectID': 'P004', 'InvoiceDate': '2026-09-08', 'DueDate': '2026-10-08', 'Currency': 'EUR', 'Balance': '2250.00'} BalanceTWD 78750.00
+sample invoice: {'InvoiceID': '0090000211', 'OrderID': '0045000115', 'ProjectID': '', 'InvoiceDate': '2026-09-10', 'DueDate': '2026-09-30', 'Currency': 'USD', 'Balance': '6391.00'} BalanceTWD 204512.00
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\W03\workspace\output\project_invoice_report_2026-09.xlsx
+Exceptions: [('0090000207', '2026-09-16', '3028.95'), ('0090000209', '2026-09-20', '7386.60'), ('0090000212', '2026-09-22', '90000.00'), ('0090000217', '2026-09-27', '2070.50')]
+Summary: [('P001', '386445.00'), ('P002', '156256.00'), ('P003', '0.00'), ('P004', '78750.00'), ('P005', '236371.20'), ('<blank>', '378827.75')]
+VALIDATION OK
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\W03\workspace\output\project_invoice_report_2026-09.xlsx
+Checked: template copied; 13 invoices; IDs text; dates/date formats; numeric amounts; BalanceTWD fx conversion; Summary invoice balances; other source sheets/columns blank; overdue exceptions excluding due date 2026-09-30.

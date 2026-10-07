@@ -1,0 +1,59 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-008\X01\workspace
+Output files:
+- output\downloads\sap_invoices_2026-08-01_2026-08-31.csv size= 587
+- output\downloads\sap_invoices_2026-09-01_2026-09-30.csv size= 1142
+- output\downloads\sap_invoices_export.csv size= 587
+- output\downloads\sap_orders_2026-08-01_2026-08-31.csv size= 620
+- output\downloads\sap_orders_2026-09-01_2026-09-30.csv size= 1456
+- output\downloads\sap_orders_export.csv size= 620
+- output\expense_2026-08-01_2026-08-31_approved.csv size= 562
+- output\expense_2026-09-01_2026-09-30_approved.csv size= 1843
+- output\expense_approved_export.csv size= 562
+- output\project_report_2026-08-01_2026-08-31.xlsx size= 16170
+- output\project_report_2026-09-01_2026-09-30.xlsx size= 17954
+- output\quotes_2026-08-01_2026-08-31_accepted.json size= 1323
+- output\quotes_2026-09-01_2026-09-30_accepted.json size= 1321
+
+FILE output\downloads\sap_orders_2026-08-01_2026-08-31.csv exists= True size= 620
+headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+sample 1 {'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}
+sample 2 {'OrderID': '0045000102', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-08-07', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '4095.00'}
+sample 3 {'OrderID': '0045000103', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-08-12', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '958.95'}
+
+FILE output\downloads\sap_invoices_2026-08-01_2026-08-31.csv exists= True size= 587
+headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+sample 1 {'InvoiceID': '0090000201', 'OrderID': '0045000101', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-08-06', 'DueDate': '2026-08-21', 'Currency': 'TWD', 'Amount': '95895.00', 'PaidAmount': '47947.50', 'Balance': '47947.50'}
+sample 2 {'InvoiceID': '0090000202', 'OrderID': '0045000102', 'CustomerID': 'C002', 'ProjectID': 'P002', 'InvoiceDate': '2026-08-10', 'DueDate': '2026-09-09', 'Currency': 'USD', 'Amount': '4095.00', 'PaidAmount': '4095.00', 'Balance': '0.00'}
+sample 3 {'InvoiceID': '0090000203', 'OrderID': '0045000105', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-08-20', 'DueDate': '2026-09-04', 'Currency': 'TWD', 'Amount': '227850.00', 'PaidAmount': '113925.00', 'Balance': '113925.00'}
+
+FILE output\expense_2026-08-01_2026-08-31_approved.csv exists= True size= 562
+headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+sample 1 {'ExpenseID': 'EXP-00035', 'EmployeeID': 'E004', 'EmployeeName': 'Maria Santos', 'ProjectID': 'P004', 'ExpenseDate': '2026-08-01', 'Category': 'Hotel', 'Currency': 'EUR', 'Amount': '95.00', 'Status': 'Approved', 'ReceiptID': 'RC264701', 'Description': '出差住宿\n(含早餐)', 'MissingReceipt': 'False'}
+sample 2 {'ExpenseID': 'EXP-00029', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-08-03', 'Category': 'Travel', 'Currency': 'USD', 'Amount': '210.00', 'Status': 'Approved', 'ReceiptID': 'RC421572', 'Description': '機票 TPE-FRA\n含行李費', 'MissingReceipt': 'False'}
+sample 3 {'ExpenseID': 'EXP-00033', 'EmployeeID': 'E003', 'EmployeeName': '林志明', 'ProjectID': 'P002', 'ExpenseDate': '2026-08-14', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '2100.00', 'Status': 'Approved', 'ReceiptID': 'RC505042', 'Description': '機票 TPE-FRA\n含行李費', 'MissingReceipt': 'False'}
+
+FILE output\quotes_2026-08-01_2026-08-31_accepted.json exists= True size= 1323
+json keys: ['schema_version', 'items', 'count']
+count: 4 items_len: 4
+sample 1 {'QuoteID': 'Q0001', 'CustomerID': 'C002', 'ProjectID': 'P002', 'QuoteDate': '2026-08-04', 'ValidUntil': '2026-09-03', 'Status': 'Accepted', 'Currency': 'TWD', 'Subtotal': '69000.00', 'DiscountPercent': '0', 'NetAmount': '69000.00'}
+sample 2 {'QuoteID': 'Q0003', 'CustomerID': 'C003', 'ProjectID': 'P004', 'QuoteDate': '2026-08-11', 'ValidUntil': '2026-09-10', 'Status': 'Accepted', 'Currency': 'EUR', 'Subtotal': '9463.96', 'DiscountPercent': '10', 'NetAmount': '8517.56'}
+sample 3 {'QuoteID': 'Q0005', 'CustomerID': 'C001', 'ProjectID': 'P003', 'QuoteDate': '2026-08-18', 'ValidUntil': '2026-09-17', 'Status': 'Accepted', 'Currency': 'TWD', 'Subtotal': '101482.50', 'DiscountPercent': '5', 'NetAmount': '96408.38'}
+
+FILE output\project_report_2026-08-01_2026-08-31.xlsx exists= True size= 16170
+sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+sheet Report max_row 20 max_col 6
+ row1: ['Project Integration Report 專案整合報表', None, None, None, None, None]
+sheet Orders max_row 11 max_col 8
+ row1: ['Sales orders by project', None, None, None, None, None, None, None]
+sheet Invoices max_row 10 max_col 11
+ row1: ['Invoices by project', None, None, None, None, None, None, None, None, None]
+sheet Expenses max_row 8 max_col 8
+ row1: ['Expenses by project', None, None, None, None, None, None, None]
+sheet Quotes max_row 8 max_col 9
+ row1: ['Quotes by project', None, None, None, None, None, None, None, None]
+sheet Summary max_row 9 max_col 5
+ row1: ['Project summary (TWD)', None, None, None, None]
+sheet Exceptions max_row 7 max_col 4
+ row1: ['Exceptions 例外與關注項目', None, None, None]
+sheet Instructions max_row 56 max_col 3
+ row1: ['填寫說明 Instructions（請勿修改本工作表）', None, None]

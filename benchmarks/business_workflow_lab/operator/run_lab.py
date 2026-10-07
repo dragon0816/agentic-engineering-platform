@@ -61,7 +61,9 @@ RERUN = {
 }
 X02_ANSWER = ("費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 "
               "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。")
-BYPASS = re.compile(r"source\.json|operator[\\/]+data|operator[\\/]+state|expense_app|quote_cli\.cli|"
+# `expense_app\b` is the mock's module, not an export named expense_approved_*.csv
+# (the looser pattern flagged fix-008 D02 and X01; notes only, no status change).
+BYPASS = re.compile(r"source\.json|operator[\\/]+data|operator[\\/]+state|expense_app\b|quote_cli\.cli|"
                     r"from\s+quote_cli|import\s+quote_cli|business_workflow_lab[\\/]+operator", re.I)
 SUBPROCESS_BLOCKED = re.compile(r"WinError 1816|Not enough quota|PermissionError.*(subprocess|CreateProcess)|"
                                 r"_winapi\.CreateProcess", re.I)
