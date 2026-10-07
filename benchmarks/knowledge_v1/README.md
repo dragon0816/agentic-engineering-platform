@@ -52,3 +52,18 @@ Each run writes, under `runs/<id>/`:
 - `report.md`, with counts by market, product family and question type, the harness routes and gap types, and every question that did not pass.
 
 `python benchmarks/knowledge_v1/selftest.py` checks the grader offline, with one synthetic reply for each status.
+
+## Comparing runs
+
+    .venv\Scripts\python benchmarks\knowledge_v1\compare.py sample-001 sample-002 [more runs] [--out file.md]
+
+- **Input:** each run is a run ID under `runs/` or any folder.
+- **What it compares:**
+  - status by route, market, product family and question type;
+  - gap types;
+  - reviewer verdicts and overreach;
+  - latency;
+  - citation verification.
+- **Changes between runs:** it shows how many questions improved, regressed or stayed the same between consecutive runs, and lists every question whose status changed.
+- **Partial runs:** only questions present in every run are compared, and the header says how many were left out.
+- **No outside calls:** it is offline, with no Agent Web or model calls.
