@@ -1611,3 +1611,18 @@ Reason: lab fix-008 W01 hit `workflow_version_exists`. Every new chat candidate 
 Rejected alternatives:
 - Per-version owner approval for co-editors: it stalls when the owner is away.
 - Publisher-chosen version numbers without an ordering rule: they collide.
+
+## 2026-10-07: knowledge_v1, a harness benchmark for Knowledge asking
+
+Decision (owner):
+- The owner's 1,100 questions (`benchmarks/knowledge_v1/questions/source.md`, pinned by sha256) are asked through Agent Web chat as written, without naming a knowledge base.
+- A fixed, stratified sample of 110 runs first; the full set follows.
+- An answer passes when the Knowledge loop ran, its citations are verified in the Vault, and the answer is reasonable. INSUFFICIENT_KNOWLEDGE from a completed loop is acceptable.
+- Reasonableness is judged by the company Gateway model on the cited passages only, against a "reasonable, evidence-backed" bar rather than a line-by-line audit. Over-reaching claims are listed but do not fail an answer by themselves. Verdicts and reasons are stored for spot-checks.
+
+Reason: the owner wants the harness proven on realistic questions without golden answers. Deterministic checks prove the loop ran and the evidence is real; the model review covers what code cannot judge.
+
+Rejected alternatives:
+- Deterministic checks only: they cannot say whether a conclusion follows.
+- A strict per-claim grounding audit: the first trial failed a well-supported answer for its framing sentences. That is stricter than the owner's bar.
+- Naming the knowledge base in each prompt: it would skip the Agent's own tool choice, which is part of what is tested.
