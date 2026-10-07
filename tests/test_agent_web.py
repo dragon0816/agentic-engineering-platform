@@ -470,6 +470,16 @@ def test_the_page_fetches_nothing_from_anywhere(served: AgentWebServer) -> None:
         assert outside not in body, f"the page reaches for {outside}"
 
 
+def test_a_refused_post_is_answered_rather_than_reset(served: AgentWebServer) -> None:
+    """A POST refused before its body was read used to close with that body
+    unread, which on Windows resets the connection: the client then saw
+    "connection aborted" instead of the 401 (8 of 500 with this body size,
+    and the cause of the header test failing now and then)."""
+    body = {"message": "x" * 100_000}
+    url = base(served) + "/api/knowledge/ask"
+    assert {fetch(url, body=body).status for _ in range(300)} == {401}
+
+
 def test_every_api_call_needs_the_header(served: AgentWebServer) -> None:
     """The header is the whole cross-site defence: a page on another origin
     cannot set one without a preflight, and this server answers none."""

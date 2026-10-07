@@ -2620,12 +2620,36 @@ class _Handler(BaseHTTPRequestHandler):
             "application/json; charset=utf-8",
         )
 
+    def _refuse_unread(self, status: int, payload: Mapping[str, Any]) -> None:
+        """Refuse a POST whose body has not been read, reading it first.
+
+        Closing a connection with request bytes still unread makes Windows
+        send a reset instead of a normal close, and the reset can reach the
+        client before it has read this answer: it then sees "connection
+        aborted" rather than the refusal. A body within the normal limit is
+        read and dropped; anything else is not read, and the connection is
+        closed after the answer.
+        """
+        try:
+            length = int(self.headers.get("Content-Length") or "0")
+        except ValueError:
+            length = -1
+        if 0 <= length <= MAX_BODY_BYTES:
+            self.rfile.read(length)
+        else:
+            self.close_connection = True
+        self._json(status, payload)
+
     def _schedule_route(self, method: str, path: str, query: str) -> None:
         """Scheduled-task routes, after the loopback and token guards."""
         from host_runtime.schedule_web import origin_allowed
 
         if not origin_allowed(self.headers.get("Origin")):
-            self._json(403, {"error": "this interface answers its own page only"})
+            refusal = {"error": "this interface answers its own page only"}
+            if method == "POST":
+                self._refuse_unread(403, refusal)
+            else:
+                self._json(403, refusal)
             return
         body: object = None
         if method == "POST":
@@ -2711,10 +2735,11 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802 - the base class's spelling
         if not self._host_is_loopback():
-            self._json(403, {"error": "this interface answers on the loopback address only"})
+            refusal = {"error": "this interface answers on the loopback address only"}
+            self._refuse_unread(403, refusal)
             return
         if not self._authorized():
-            self._json(401, {"error": "this request carried no usable token"})
+            self._refuse_unread(401, {"error": "this request carried no usable token"})
             return
         path = urlparse(self.path).path
         if path.startswith("/api/schedules"):
@@ -2743,7 +2768,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/approvals/decide",
             *AUTHORING_ROUTES,
         ):
-            self._json(404, {"error": "no such page"})
+            self._refuse_unread(404, {"error": "no such page"})
             return
         try:
             length = int(self.headers.get("Content-Length") or "0")
