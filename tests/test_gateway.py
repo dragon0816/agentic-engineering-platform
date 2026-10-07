@@ -681,3 +681,12 @@ def test_a_reply_that_keeps_getting_cut_still_fails_with_its_own_code() -> None:
     result = asyncio.run(built.converse(request("go"), history))
     assert result.status == "failed" and result.failure is not None
     assert result.failure.code == "model_output_truncated"
+
+
+def test_the_system_prompt_asks_for_an_open_rule_before_working() -> None:
+    """Owner 2026-10-07 (lab X02): ask about a rule that changes the result, do not guess it."""
+    built, model = _host_gateway([], [_text("Which status counts?")])
+    asyncio.run(built.converse(request("go"), (ModelMessage(role="user", text="go"),)))
+    system = model.calls[0].messages[0]
+    assert system.role == "system"
+    assert "ask that question first and do no other work in that turn" in system.text

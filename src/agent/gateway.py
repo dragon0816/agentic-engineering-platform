@@ -493,7 +493,10 @@ class Gateway:
             "Use only the supplied installed tools when work is required. Never invent a tool, "
             "target, permission, result, or completed action. Never claim to have read a source "
             "unless a supplied tool successfully returned it. If the requested source has no "
-            "available tool, say that it cannot be accessed here. Ask for missing inputs. After a "
+            "available tool, say that it cannot be accessed here. Ask for missing inputs. When a "
+            "request for work leaves open a rule that would change the result (which records "
+            "count, which period or status, what to flag), ask that question first and do no "
+            "other work in that turn; do not guess it. After a "
             "tool result, explain what happened and what the user should do next."
         )
         if persona_guidance:
