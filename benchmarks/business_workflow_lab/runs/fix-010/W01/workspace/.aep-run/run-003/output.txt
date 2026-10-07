@@ -1,0 +1,16 @@
+inputs available: ['fx_rates.csv', 'sales_template.xlsx', 'sap_manual.md']
+downloads available: ['september_open_orders_export.csv']
+export headers: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+export row count: 14
+export sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}]
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\W01\workspace\output\september_open_orders.xlsx
+checked rows: 14
+detail OrderIDs: ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+summary B2: =SUM(Details!I5:I18)
+summary row 5 ['Currency', None, 'EUR', 28936.37, 1012772.95, 4]
+summary row 6 ['Currency', None, 'TWD', 637522.5, 637522.5, 6]
+summary row 7 ['Currency', None, 'USD', 32014, 1024448, 4]
+summary row 8 ['Total', 'All', 'TWD', None, 2674743.45, 14]
+total_twd 2674743.45

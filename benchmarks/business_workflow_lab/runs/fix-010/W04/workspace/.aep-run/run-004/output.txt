@@ -1,0 +1,10 @@
+output exists True output\sales_orders_open_2026-09_filled.xlsx bytes 11463
+sheets ['Report', 'Details', 'Summary', 'Instructions']
+Report fields: {'B3': '2026-09-01', 'D3': '2026-09-30', 'B4': 'Sales Orders: Status = Open; OrderDate 2026-09-01 to 2026-09-30 inclusive; sorted by OrderID asc', 'B7': 'Lab ERP (synthetic SAP-like web query); fx_rates.csv', 'D7': '2026-10-07T19:02:05+08:00', 'B9': '14 unique Open orders fetched. Re-login performed once after session timeout. Empty source values are left blank. Detail page also contains SalesRep and line items, but this template has columns only for CustomerContact and PaymentTerms.'}
+headers ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+detail row count 14
+ids ['0045000109', '0045000110', '0045000112', '0045000113', '0045000115', '0045000116', '0045000118', '0045000119', '0045000120', '0045000122', '0045000124', '0045000126', '0045000127', '0045000128']
+Summary B2 formula =SUM(Details!I5:I18)
+summary rows [['Status', 'Open', 'EUR', 28936.37, 1012772.95, 4], ['Status', 'Open', 'TWD', 637522.5, 637522.5, 6], ['Status', 'Open', 'USD', 32014, 1024448, 4]]
+validated total TWD 2674743.45
+VALIDATION OK

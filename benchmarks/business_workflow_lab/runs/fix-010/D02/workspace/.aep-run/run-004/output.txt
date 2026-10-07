@@ -1,0 +1,10 @@
+submitted_2026-09.csv headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+submitted_2026-09.csv rows: 7 sample: [{'ExpenseID': 'EXP-00003', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-03', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '450.00', 'Status': 'Submitted', 'ReceiptID': 'RC162210', 'Description': '加班餐費', 'MissingReceipt': 'False'}]
+approved_2026-09.csv headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+approved_2026-09.csv rows: 15 sample: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}]
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D02\workspace\output\expense_report_2026-09_submitted_approved.xlsx
+detail_rows 22 exception_rows 2 summary_rows 6
+exception IDs: ['EXP-00015', 'EXP-00006']
+CHECK OK: reopened output; template sheet names/headers preserved; Details has 22 rows (7 Submitted + 15 Approved), Sep-2026 dates only, detail fields populated, numeric Amount/AmountTWD, ROUND_HALF_UP FX, Summary formula range, and missing-receipt ExpenseIDs listed in Exceptions while retained in Details.

@@ -1,0 +1,48 @@
+Inspecting workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\X01\workspace
+Output files present:
+ - output\downloads\sap_invoices.csv 587 bytes
+ - output\downloads\sap_invoices_2026-09_test.csv 1142 bytes
+ - output\downloads\sap_orders_2026-09_test.csv 1616 bytes
+ - output\downloads\sap_orders_closed.csv 408 bytes
+ - output\downloads\sap_orders_open.csv 294 bytes
+ - output\expense_2026-09_test.csv 1843 bytes
+ - output\expense_approved.csv 562 bytes
+ - output\project_integration_2026-08.xlsx 16105 bytes
+ - output\project_integration_2026-09.xlsx 17883 bytes
+
+Checking final workbooks exist and are distinct...
+Aug exists: True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\X01\workspace\output\project_integration_2026-08.xlsx
+Sep exists: True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\X01\workspace\output\project_integration_2026-09.xlsx
+Same path: False
+Aug size: 16105
+Sep size: 17883
+
+Workbook sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Sheet Report present: True
+Sheet Orders present: True
+Sheet Invoices present: True
+Sheet Expenses present: True
+Sheet Quotes present: True
+Sheet Summary present: True
+Sheet Exceptions present: True
+Sheet Instructions present: True
+Report: rows=20, cols=6, header=['Project Integration Report 專案整合報表', None, None, None, None, None]
+Orders: rows=11, cols=8, header=['Sales orders by project', None, None, None, None, None, None, None]
+Invoices: rows=10, cols=11, header=['Invoices by project', None, None, None, None, None, None, None, None, None, None]
+Expenses: rows=8, cols=8, header=['Expenses by project', None, None, None, None, None, None, None]
+Quotes: rows=8, cols=9, header=['Quotes by project', None, None, None, None, None, None, None, None]
+Summary: rows=9, cols=5, header=['Project summary (TWD)', None, None, None, None]
+Exceptions: rows=7, cols=4, header=['Exceptions 例外與關注項目', None, None, None]
+
+Report non-empty values: ['Project Integration Report 專案整合報表', '起始日期 From', '2026-08-01', '結束日期 To', '2026-08-31', '條件 Condition', 'Sales Orders Status Open/Closed only (non-Cancelled); Invoices by InvoiceDate; Expenses Approved; Quotes Accepted; grouped by ProjectID.', '產出時間 Generated at', '2026-10-07T19:29:33+08:00', '資料來源 Source', 'Lab ERP SAP-like web; Expense Viewer; quote_cli; fx_rates.csv', '取得時間 Fetched at', '2026-10-07T19:29:33+08:00', '備註 Notes', 'Orders and accepted quotes are reported separately and are not combined as revenue. Join/group key is ProjectID only; customer name is not used. Exceptions: 3.', '合成測試資料 Synthetic lab data · template v1 · 請勿修改本行']
+Contains 2026-08-01: True
+Contains 2026-08-31: True
+
+CSV row counts:
+downloads/sap_orders_open.csv rows_including_header= 4 data_rows= 3 header= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+downloads/sap_orders_closed.csv rows_including_header= 5 data_rows= 4 header= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+downloads/sap_invoices.csv rows_including_header= 7 data_rows= 6 header= ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+expense_approved.csv rows_including_header= 5 data_rows= 4 header= ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Summary header: ['Project summary (TWD)', None, None, None, None]
+Summary required column ProjectID present: False
+Missing summary column ProjectID

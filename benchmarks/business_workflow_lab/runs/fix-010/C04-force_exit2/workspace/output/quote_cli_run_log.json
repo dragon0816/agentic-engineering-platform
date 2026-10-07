@@ -1,0 +1,37 @@
+{
+  "query": {
+    "from": "2026-09-01",
+    "to": "2026-09-30",
+    "status": "Sent"
+  },
+  "attempts": [
+    {
+      "command": [
+        "quotes",
+        "list",
+        "--from",
+        "2026-09-01",
+        "--to",
+        "2026-09-30",
+        "--status",
+        "Sent",
+        "--format",
+        "json"
+      ],
+      "returncode": 2,
+      "stdout_len": 0,
+      "stderr": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)"
+    }
+  ],
+  "result": {
+    "status": "failed",
+    "exit_code": 2,
+    "reason_from_stderr": "quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)",
+    "retried": false
+  },
+  "retry_policy": {
+    "exit_code_4_max_retries": 2,
+    "exit_code_2_or_3_retry": false,
+    "stdout_used_only_on_success_parseable": true
+  }
+}

@@ -1,0 +1,20 @@
+Inputs:
+ export_csv C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D03\workspace\output\expense_2026-09_Approved.csv True 1843
+ template C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D03\workspace\input\expense_template.xlsx True 10969
+ fx_csv C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D03\workspace\input\fx_rates.csv True 276
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Export columns: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Export row count: 15
+Export sample: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}]
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D03\workspace\output\expense_report_2026-09_Approved_TWD.xlsx 13175
+Summary rows: 14 Exception rows: 1
+VERIFY sheets: ['Report', 'Details', 'Summary', 'Exceptions', 'Instructions']
+VERIFY details headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'AmountTWD', 'Status', 'ReceiptID', 'Description', 'MissingReceipt', 'NeedsReview']
+VERIFY detail row count: 15
+VERIFY all Details AmountTWD and NeedsReview flags OK
+VERIFY Summary B2 formula: =SUM(Details!I5:I19)
+VERIFY total TWD details: 55706.50 summary: 55706.50 summary_count: 15
+VERIFY missing receipts: 1 exceptions: 1
+VERIFY report B3/D3/B4: 2026-09-01 2026-09-30 Status=Approved; converted to TWD using input/fx_rates.csv; NeedsReview=true when AmountTWD > 5000
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D03\workspace\output\expense_report_2026-09_Approved_TWD.xlsx

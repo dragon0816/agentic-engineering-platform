@@ -1,0 +1,13 @@
+Workflow parameters: {'employee_id': 'E001', 'from_date': '2026-09-01', 'to_date': '2026-09-30'}
+Input files: ['expense_manual.md', 'expense_template.xlsx', 'fx_rates.csv']
+Expected export: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D01\workspace\output\expense_export_E001_2026-09-01_2026-09-30.xlsx True 6179
+FX headers: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+Export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+Export row count: 13
+Wrote report: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\D01\workspace\output\E001_september_expenses.xlsx 12808
+Validated report: E001_september_expenses.xlsx
+Details rows: 13
+Exceptions rows: 1
+TWD total from Details: 31877.90
+Summary groups: {"('Approved', 'EUR')": ['102.50', '3587.50', 2], "('Approved', 'TWD')": ['5050.00', '5050.00', 3], "('Approved', 'USD')": ['200.00', '6400.00', 1], "('Draft', 'USD')": ['124.15', '3972.80', 2], "('Rejected', 'EUR')": ['155.00', '5425.00', 1], "('Rejected', 'USD')": ['12.30', '393.60', 1], "('Submitted', 'TWD')": ['7049.00', '7049.00', 3]}

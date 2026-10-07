@@ -1,0 +1,34 @@
+Inspecting workflow inputs and files...
+Run values: {"date_from": "2026-08-01", "date_to": "2026-08-31", "period_label": "2026-08"}
+Input files: ['expense_manual.md', 'fx_rates.csv', 'project_template.xlsx', 'quote_cli_manual.md', 'sap_manual.md']
+Download files: ['sap_invoices.csv', 'sap_invoices_2026-09_test.csv', 'sap_orders_2026-09_test.csv', 'sap_orders_closed.csv', 'sap_orders_open.csv']
+fx headers: ['Currency', 'RateToTWD', 'Note']
+FX loaded: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+output\downloads\sap_orders_open.csv: headers=['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'], rows=3, sample=[{'OrderID': '0045000103', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-08-12', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '958.95'}, {'OrderID': '0045000106', 'CustomerID': 'C005', 'CustomerName': 'Pacific Test Systems Inc.', 'ProjectID': '', 'OrderDate': '2026-08-22', 'Status': 'Open', 'Currency': 'USD', 'NetAmount': '4942.00'}]
+output\downloads\sap_orders_closed.csv: headers=['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'], rows=4, sample=[{'OrderID': '0045000101', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-08-03', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '95895.00'}, {'OrderID': '0045000102', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-08-07', 'Status': 'Closed', 'Currency': 'USD', 'NetAmount': '4095.00'}]
+output\downloads\sap_invoices.csv: headers=['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'], rows=6, sample=[{'InvoiceID': '0090000201', 'OrderID': '0045000101', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-08-06', 'DueDate': '2026-08-21', 'Currency': 'TWD', 'Amount': '95895.00', 'PaidAmount': '47947.50', 'Balance': '47947.50'}, {'InvoiceID': '0090000202', 'OrderID': '0045000102', 'CustomerID': 'C002', 'ProjectID': 'P002', 'InvoiceDate': '2026-08-10', 'DueDate': '2026-09-09', 'Currency': 'USD', 'Amount': '4095.00', 'PaidAmount': '4095.00', 'Balance': '0.00'}]
+output\expense_approved.csv: headers=['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt'], rows=4, sample=[{'ExpenseID': 'EXP-00035', 'EmployeeID': 'E004', 'EmployeeName': 'Maria Santos', 'ProjectID': 'P004', 'ExpenseDate': '2026-08-01', 'Category': 'Hotel', 'Currency': 'EUR', 'Amount': '95.00', 'Status': 'Approved', 'ReceiptID': 'RC264701', 'Description': '出差住宿\n(含早餐)', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00029', 'EmployeeID': 'E002', 'EmployeeName': 'Daniel Weber', 'ProjectID': 'P003', 'ExpenseDate': '2026-08-03', 'Category': 'Travel', 'Currency': 'USD', 'Amount': '210.00', 'Status': 'Approved', 'ReceiptID': 'RC421572', 'Description': '機票 TPE-FRA\n含行李費', 'MissingReceipt': 'False'}]
+Running quote CLI: C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\python.exe C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\run_quote_cli.py quotes list --from 2026-08-01 --to 2026-08-31 --status Accepted --format json
+quote CLI returncode: 0
+Quote rows: 4 sample: [{'QuoteID': 'Q0001', 'CustomerID': 'C002', 'ProjectID': 'P002', 'QuoteDate': '2026-08-04', 'ValidUntil': '2026-09-03', 'Status': 'Accepted', 'Currency': 'TWD', 'Subtotal': '69000.00', 'DiscountPercent': '0', 'NetAmount': '69000.00'}, {'QuoteID': 'Q0003', 'CustomerID': 'C003', 'ProjectID': 'P004', 'QuoteDate': '2026-08-11', 'ValidUntil': '2026-09-10', 'Status': 'Accepted', 'Currency': 'EUR', 'Subtotal': '9463.96', 'DiscountPercent': '10', 'NetAmount': '8517.56'}]
+{
+  "output": "output\\project_integration_2026-08.xlsx",
+  "counts": {
+    "orders_non_cancelled": 7,
+    "invoices": 6,
+    "approved_expenses": 4,
+    "accepted_quotes": 4,
+    "summary_projects": 5,
+    "exceptions": 3
+  },
+  "checks": [
+    "template copy filled",
+    "headers preserved",
+    "ID cells text",
+    "orders exclude Cancelled",
+    "expenses Approved only",
+    "quotes Accepted only",
+    "separate summary columns by ProjectID",
+    "FX applied from fx_rates.csv"
+  ]
+}

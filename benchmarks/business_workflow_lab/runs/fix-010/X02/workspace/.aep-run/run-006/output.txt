@@ -1,0 +1,22 @@
+rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+projects ['P001', 'P003']
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-010\X02\workspace\output\project_report_C001_2026-09.xlsx
+counts {'orders_raw': 4, 'orders_after_excluding_cancelled': 3, 'invoices': 3, 'expenses_approved': 9, 'quotes': 4, 'exceptions': 4}
+exceptions
+['Invoices', '0090000219', 'P001', 'Overdue unpaid invoice: DueDate 2026-09-30, Balance 386445.00 TWD as of 2026-09-30']
+['Expenses', 'EXP-00006', 'P001', 'Missing receipt']
+['Quotes', 'Q0010', 'P001', 'Quote expired/not accepted: ValidUntil 2026-09-20, Status Sent']
+['Quotes', 'Q0014', 'P001', 'Quote expired/not accepted: ValidUntil 2026-09-28, Status Expired']
+Orders ID vals ['0045000109', '0045000119', '0045000125']
+Invoices ID vals ['0090000208', '0090000214', '0090000219']
+Expenses ID vals ['EXP-00001', 'EXP-00002', 'EXP-00006', 'EXP-00024', 'EXP-00025', 'EXP-00014', 'EXP-00004', 'EXP-00009', 'EXP-00013']
+Quotes ID vals ['Q0010', 'Q0011', 'Q0014', 'Q0018']
+VALIDATION
+Orders rows 3 expected 3 OK
+Invoices rows 3 expected 3 OK
+Expenses rows 9 expected 9 OK
+Quotes rows 4 expected 4 OK
+Exceptions rows 4 expected 4 OK
+No cancelled orders 0 expected 0 OK
+All expenses Approved 0 expected 0 OK
+Summary formulas ['=SUM(B5:B6)', '=SUM(C5:C6)', '=SUM(D5:D6)', '=SUM(E5:E6)']

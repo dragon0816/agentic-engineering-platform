@@ -1,0 +1,17 @@
+json exists True 1323
+json keys dict_keys(['schema_version', 'items', 'count'])
+count 4 items len 4
+{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}
+{'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}
+{'QuoteID': 'Q0014', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-09', 'ValidUntil': '2026-09-28', 'Status': 'Expired', 'Currency': 'EUR', 'Subtotal': '18072.00', 'DiscountPercent': '0', 'NetAmount': '18072.00'}
+{'QuoteID': 'Q0018', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-21', 'ValidUntil': '2026-10-21', 'Status': 'Draft', 'Currency': 'TWD', 'Subtotal': '572130.00', 'DiscountPercent': '10', 'NetAmount': '514917.00'}
+sheet headers ['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']
+['Q0010', 'P001', 'C001', datetime.datetime(2026, 9, 1, 0, 0), datetime.datetime(2026, 9, 20, 0, 0), 'Sent', 'TWD', 207629.63, 207629.63]
+['Q0011', 'P001', 'C001', datetime.datetime(2026, 9, 3, 0, 0), datetime.datetime(2026, 10, 3, 0, 0), 'Accepted', 'USD', 10350, 331200]
+['Q0014', 'P001', 'C001', datetime.datetime(2026, 9, 9, 0, 0), datetime.datetime(2026, 9, 28, 0, 0), 'Expired', 'EUR', 18072, 632520]
+['Q0018', 'P001', 'C001', datetime.datetime(2026, 9, 21, 0, 0), datetime.datetime(2026, 10, 21, 0, 0), 'Draft', 'TWD', 514917, 514917]
+exceptions
+{'Source': 'Invoices', 'DocumentID': '0090000219', 'ProjectID': 'P001', 'Reason': 'Overdue unpaid invoice: DueDate 2026-09-30, Balance 386445.00 TWD as of 2026-09-30'}
+{'Source': 'Expenses', 'DocumentID': 'EXP-00006', 'ProjectID': 'P001', 'Reason': 'Missing receipt'}
+{'Source': 'Quotes', 'DocumentID': 'Q0010', 'ProjectID': 'P001', 'Reason': 'Quote expired/not accepted: ValidUntil 2026-09-20, Status Sent'}
+{'Source': 'Quotes', 'DocumentID': 'Q0014', 'ProjectID': 'P001', 'Reason': 'Quote expired/not accepted: ValidUntil 2026-09-28, Status Expired'}
