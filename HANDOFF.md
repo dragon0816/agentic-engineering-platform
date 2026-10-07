@@ -86,16 +86,19 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 **Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
 **Build state:**
-- HEAD is `72af226` or later.
-- Agent Web was restarted at 17:32 on `c64a724`, with rs-knowledge 1.0.2 bound; its logs are `.scratch/agent-web-20261007-173229.*`. That build includes:
-  - ownership step 1;
-  - the Knowledge synthesis limit and retry;
-  - the "say when Knowledge gave no answer" rule;
+- HEAD is `cbb11e0` or later.
+- Agent Web runs **`db38f28`**, restarted at 18:52; its logs are `.scratch/agent-web-20261007-185232.*`. This is the stage's final build:
+  - every Knowledge fix;
+  - Knowledge Skill 1.5.0, with 1.4.0 in `skills/disabled/`;
+  - rs-knowledge 1.0.2;
   - coding Skill 1.7.0.
-- **Not yet live:** `72af226` (facet credit, supported answers kept, the tool route using the harness Skill procedure) and Knowledge Skill 1.5.0.
-  - The Skill is only in `tests/fixtures/harness_skills/knowledge-evidence-v1.5.json`.
-  - To install it, copy that file to `workspace/assets/skills/company-agent__knowledge-query__1.5.0.json` and move 1.4.0 to `skills/disabled/`.
-  - Then restart Agent Web, after the running benchmark ends.
+- `cbb11e0` adds per-person avatars to Agent Web. It is UI only (`/api/avatars`, `/api/preferences`, the page) and goes live at the next restart.
+
+**Running (chained, no GUI):**
+1. knowledge_v1 `sample-003` (`.scratch/knowledge_v1-sample-003.log`).
+2. coding_v1 `fix-run-014` (`.scratch/coding_v1-fix-run-014.log`) on the same build. It completes the phase gate if it is 20/20; lab fix-010 is already 14/16 on that build.
+
+Do not restart Agent Web until both have finished.
 
 ### Owner rule (2026-10-07): GUI tests run only while the owner is away
 
@@ -134,7 +137,9 @@ Each run folder holds a `findings.md`.
 | Lab | fix-008 | 12/16 | 13/16 under grader 1.3 (W01) |
 | Lab | fix-009 | stopped | W01–W04 PASS, D01 FAIL (it revised the Workflow on the rerun), the rest not run |
 | knowledge_v1 | sample-001 | 64/110 acceptable | baseline: direct 22/34, tool 9/58, no Knowledge 18 |
-| knowledge_v1 | sample-002 | running | build `c64a724` + rs-knowledge 1.0.2. Log: `.scratch/knowledge_v1-sample-002.log` |
+| knowledge_v1 | sample-002 | 75/110 acceptable | Knowledge used every time, no cut-offs; tool route 15/76 PASS |
+| Lab | **fix-010** | **14/16** | build `db38f28`. Every rerun reuses its Workflow, and X03 passes. C02 and X02 are Agent rule-following |
+| coding_v1 | fix-run-013 | 19/20 | build `db38f28`. T13 parsing (Agent variance) |
 
 **What changed today for the lab gaps:**
 - **Grader 1.3:** a rerun may use a version run *or installed* before the request, as long as no draft follows the request.

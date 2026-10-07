@@ -1422,8 +1422,16 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   1.0.2 purpose (live binding); facet credit from cited passages, supported
   answers kept with the gap named, tool route uses the harness Skill
   procedure, Skill 1.5.0 fixture with three market hints (`72af226`).
-- [ ] knowledge_v1 sample-002 (running: fixes up to `8e25b8b` + 1.0.2), then
-  install Skill 1.5.0 live, restart, sample-003 (all fixes), then the full 1,100.
+- [x] knowledge_v1 sample-002: 75 of 110 acceptable, Knowledge used every time,
+  no synthesis cut-offs (`db38f28`).
+- [x] Final build `db38f28` live (Skill 1.5.0 installed): lab fix-010 14 of 16
+  PASS, every rerun reuses its Workflow, X03 passes (`041c746`); coding_v1
+  fix-run-013 19 of 20 (T13 parsing, Agent variance) (`1d81472`).
+- [ ] knowledge_v1 sample-003 on `db38f28` (running), then coding_v1
+  fix-run-014 on the same build (chained), for the phase gate.
+- [x] Per-person pixel-art avatars in Agent Web (owner request; owner chose to
+  keep the One Piece sheet in the repo) (`cbb11e0`). Live after the next
+  restart.
 - [ ] Lab remaining gaps: W01/D01 reruns where the Agent revises the Workflow
   instead of reusing it; X02 overdue invoices dated before the period; X03
   depends on X01's Workflow taking project and output name as run values.
