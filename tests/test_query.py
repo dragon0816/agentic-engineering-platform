@@ -378,7 +378,7 @@ def test_synthesis_may_cite_only_what_was_retrieved(tmp_path: Path) -> None:
     assert answer.text.startswith("The front end") and len(answer.passages) == 2
     (request,) = good.requests
     assert "[1] The RF front end uses a GaN power amplifier." in request.messages[0].text
-    assert request.model_alias == "answerer" and request.max_output_tokens == 800
+    assert request.model_alias == "answerer" and request.max_output_tokens == 4000
     assert request.trace.trace_id.startswith("query-") and request.trace.request_id == "ask-1"
     guarded = Synth("The RF front end uses a GaN amplifier [1].")
     QueryEngine(vault, guarded, alias="answerer").ask(
@@ -765,3 +765,28 @@ def test_raw_grounding_admits_bounded_labeled_inferences_only_when_enabled() -> 
     assert "Uncited" not in salvaged
     assert salvaged.splitlines()[0] == fact
     assert salvaged.count("【推論】") == 3
+
+
+class CutOff(Synth):
+    """Cut off at the length limit on the first call, then answers."""
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        self.requests.append(request)
+        if len(self.requests) == 1:
+            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
+                                 failure=Failure(code="model_output_truncated", message="cut"))
+        return ModelResponse(trace=request.trace, model_alias=request.model_alias, text=self.text)
+
+
+def test_a_cut_off_synthesis_is_asked_once_more_for_a_shorter_answer(tmp_path: Path) -> None:
+    """knowledge_v1 sample-001: a reasoning model spent 800 tokens before answering."""
+    vault = make_vault(tmp_path)
+    corpus(vault)
+    model = CutOff("The front end uses a GaN amplifier [1].")
+    answer = QueryEngine(vault, model, alias="answerer").ask(
+        "What amplifier does the RF front end use?", k=2)
+    assert answer.status == "answered" and len(model.requests) == 2
+    assert "more briefly" in model.requests[1].messages[0].text
+    always = Synth("", fail=True)
+    failed = QueryEngine(vault, always, alias="answerer").ask("What amplifier?", k=2)
+    assert failed.status == "model_failed" and len(always.requests) == 1

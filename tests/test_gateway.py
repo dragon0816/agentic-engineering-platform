@@ -691,3 +691,13 @@ def test_the_system_prompt_asks_for_an_open_rule_before_working() -> None:
     assert system.role == "system"
     assert "ask that question first and do no other work in that turn" in system.text
     assert "names no filter means no filter" in system.text
+
+
+def test_the_system_prompt_says_a_failed_knowledge_lookup_out_loud() -> None:
+    """Owner 2026-10-07 (knowledge_v1 sample-001): after a failed Knowledge call the
+    model answered from memory, uncited and without saying so."""
+    built, model = _host_gateway([], [_text("ok")])
+    asyncio.run(built.converse(request("go"), (ModelMessage(role="user", text="go"),)))
+    system = model.calls[0].messages[0].text
+    assert "say first that the knowledge base gave no answer" in system
+    assert "marked as not from the knowledge base and uncited" in system

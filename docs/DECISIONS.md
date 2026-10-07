@@ -1626,3 +1626,16 @@ Rejected alternatives:
 - Deterministic checks only: they cannot say whether a conclusion follows.
 - A strict per-claim grounding audit: the first trial failed a well-supported answer for its framing sentences. That is stricter than the owner's bar.
 - Naming the knowledge base in each prompt: it would skip the Agent's own tool choice, which is part of what is tested.
+
+## 2026-10-07: Knowledge synthesis limit, and saying when Knowledge gave no answer
+
+Decision (owner approved):
+1. **Synthesis limit.** Knowledge synthesis gets 4000 output tokens when no Skill procedure sets a limit (`DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS`; the procedure default is also 4000). A synthesis cut off at the limit is asked once more, from the same evidence, for a shorter answer. Only if that also fails is it `knowledge_model_failed`.
+2. **Saying so.** The shared conversation prompt says: when a knowledge tool fails or finds no evidence, say first that the knowledge base gave no answer, and mark anything added from general knowledge as not from the knowledge base and uncited.
+
+Reason: in knowledge_v1 sample-001, 3 of the first 19 questions failed with `knowledge_model_failed`. On the conversation-tool route the limit was 800, and an offline repro showed Q0046 cut off (`model_output_truncated`) at 800 but answered at 4000. After a failed call, the conversation model answered from memory without citations and without saying so. The direct route was unaffected, because the installed Knowledge Skill 1.4.0 sets 8192.
+
+Rejected alternatives:
+- Raising the limit without a retry: a long answer could still be cut off.
+- Forbidding any answer after a failed lookup: the person would get nothing useful.
+- Leaving the behaviour and only recording it: an uncited answer presented as knowledge is misleading.

@@ -498,7 +498,10 @@ class Gateway:
             "count, which period or status, what to flag) and the request has no plain reading, "
             "ask that question first and do no other work in that turn; do not guess it. A "
             "request that names no filter means no filter, and what a screen shows from earlier "
-            "use is not the person's choice. After a "
+            "use is not the person's choice. When a knowledge tool fails or finds no "
+            "evidence, say first that the knowledge base gave no answer; anything you add "
+            "from general knowledge must be marked as not from the knowledge base and "
+            "uncited. After a "
             "tool result, explain what happened and what the user should do next."
         )
         if persona_guidance:

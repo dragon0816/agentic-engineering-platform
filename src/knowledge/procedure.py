@@ -63,7 +63,7 @@ class KnowledgeProcedure(Contract):
     extractive_fallback: bool = False
     wiki_index_first: bool = False
     wiki_index_hits: int = Field(default=8, ge=1, le=32, strict=True)
-    synthesis_max_output_tokens: int = Field(default=800, ge=256, le=8192, strict=True)
+    synthesis_max_output_tokens: int = Field(default=4000, ge=256, le=8192, strict=True)
     answer_guidance: str | None = Field(default=None, max_length=2000)
     # Opt-in: lines starting with this label are bounded, Raw-cited inferences
     # connecting separately cited facts. They never establish a direct

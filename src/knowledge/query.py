@@ -263,6 +263,14 @@ class Passage(Contract):
     score: float = Field(ge=0)
 
 
+# Knowledge synthesis output limit when no Skill procedure sets one. 800 cut a
+# reasoning model off before it answered (knowledge_v1 sample-001, owner 2026-10-07).
+DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS = 4000
+TRUNCATED = "model_output_truncated"
+TRUNCATED_NOTE = (
+    "\n\nYour previous answer was cut off at the length limit. Answer again, more "
+    "briefly: the supported points only, one short sentence each, with their citations."
+)
 AnswerStatus = Literal["retrieved", "answered", "unanswered", "no_match", "model_failed", "uncited"]
 
 
@@ -1215,7 +1223,7 @@ class QueryEngine:
         *,
         alias: Symbol | None = None,
         prompt: Text = DEFAULT_PROMPT,
-        max_output_tokens: int = 800,
+        max_output_tokens: int = DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS,
         inference_label: str | None = None,
         allow_wiki: bool = False,
     ) -> None:
@@ -1308,6 +1316,11 @@ class QueryEngine:
             )
             try:
                 response = self.model.generate(request)
+                if response.failure is not None and response.failure.code == TRUNCATED:
+                    # A reasoning model can spend the limit before it answers; ask once
+                    # more, from the same evidence, for a shorter answer (owner 2026-10-07).
+                    response = self.model.generate(request.model_copy(update={"messages": (
+                        ModelMessage(role="user", text=prompt + TRUNCATED_NOTE),)}))
             except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
                 return Answer(
                     question=question,

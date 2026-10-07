@@ -27,6 +27,7 @@ from knowledge.evolution import (
 from knowledge.market_matrix import MarketMatrixRequest, discover_market_matrix
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import (
+    DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS,
     MAX_LABELED_INFERENCES,
     Answer,
     QueryEngine,
@@ -167,7 +168,8 @@ class KnowledgeQueryHandler:
                 alias=self.alias,
                 max_output_tokens=(
                     request.procedure.synthesis_max_output_tokens
-                    if request.procedure is not None else 800
+                    if request.procedure is not None
+                    else DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS
                 ),
                 prompt=(
                     "Answer the question from the passages below and nothing else. "
