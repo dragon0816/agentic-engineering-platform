@@ -28,7 +28,9 @@ from typing import Any
 # 1.3 (2026-10-06): T13 counts the 500 page's requests during the delivered
 # program's final run (the session total is reported beside it), and T09 checks
 # data.json as the success scenario left it, before the always_fail run.
-VALIDATOR_VERSION = "1.3"
+# 1.4 (2026-10-07): T14's Overall sheet may list its statistics as name/value
+# rows; the owner's acceptance names the values, not a layout.
+VALIDATOR_VERSION = "1.4"
 
 
 @dataclass
@@ -578,6 +580,11 @@ def t14(ctx: Ctx) -> list[dict[str, Any]]:
         _close(r.get("Total"), 2000) and _close(r.get("PassCount"), 1500) and _close(r.get("FailCount"), 500)
         and _close(r.get("PassRate"), 0.75) and _close(r.get("AvgDurationSeconds"), 3.5 + i)
         for i, r in enumerate(sorted(per_model, key=lambda r: str(r.get("Device Model") or r.get("Model")))))
+    if overall and all(len(r) == 2 for r in overall):
+        # Name/value rows ("Total", 10000) become one record.
+        pivot = {str(list(r.values())[0]).replace(" ", ""): list(r.values())[1] for r in overall}
+        if "Total" in pivot:
+            overall = [pivot]
     ov = (overall or [{}])[0]
     ok_overall = overall is not None and _close(ov.get("Total"), 10000) and _close(ov.get("PassCount"), 7500) \
         and _close(ov.get("FailCount"), 2500) and _close(ov.get("PassRate"), 0.75) and _close(ov.get("AvgDurationSeconds"), 5.5)

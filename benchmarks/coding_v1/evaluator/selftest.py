@@ -246,6 +246,18 @@ def run() -> int:
         make(ws / "output", ws)
         expect(f"{task} {label}", validate(task, ctx_for(task, ws, **kw)), False)
 
+    t14_rows = workspace("T14")
+    SAMPLES["T14"](t14_rows / "output", t14_rows)
+    from openpyxl import load_workbook
+    book = load_workbook(t14_rows / "output" / "summary.xlsx")
+    del book["Overall"]
+    sheet = book.create_sheet("Overall")
+    for row in (("Metric", "Value"), ("Total", 10000), ("PassCount", 7500), ("FailCount", 2500),
+                ("PassRate", 0.75), ("AvgDurationSeconds", 5.5)):
+        sheet.append(row)
+    book.save(t14_rows / "output" / "summary.xlsx")
+    expect("T14 Overall as name/value rows", validate("T14", ctx_for("T14", t14_rows)), True)
+
     t12_csv = workspace("T12")
     with (t12_csv / "output").joinpath("merged.csv").open("w", encoding="utf-8", newline="") as handle:
         handle.write("Model,Price,Currency,MemoryGB,SourceURL\n" + "".join(
