@@ -1,0 +1,128 @@
+{
+ "run_id": "fix-run-008",
+ "task_id": "T04",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 46.89,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "8 files in the right class with the relative path",
+   "passed": true,
+   "expected": {
+    "dir1/report.PDF": "PDF",
+    "dir2/report.PDF": "PDF",
+    "budget.xls": "Excel",
+    "plan.xlsx": "Excel",
+    "logo.png": "Image",
+    "photo.JPG": "Image",
+    "notes.txt": "Other",
+    "README": "Other"
+   },
+   "actual": [
+    "Excel/budget.xls",
+    "Excel/plan.xlsx",
+    "Image/logo.png",
+    "Image/photo.JPG",
+    "Other/README",
+    "Other/notes.txt",
+    "PDF/dir1/report.PDF",
+    "PDF/dir2/report.PDF"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "no extra or overwritten copies",
+   "passed": true,
+   "expected": 8,
+   "actual": 8,
+   "evidence_path": null
+  },
+  {
+   "name": "manifest.csv maps each file with SHA-256",
+   "passed": true,
+   "expected": "8 rows with source, target, sha256",
+   "actual": 8,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\Excel\\budget.xls",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\Excel\\plan.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\Image\\logo.png",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\Image\\photo.JPG",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\Other\\README",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\Other\\notes.txt",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\PDF\\dir1\\report.PDF",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\classified\\PDF\\dir2\\report.PDF",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\workspace\\output\\manifest.csv"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T04\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-042a6dff2c7f437a9483e3c683c6278e",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-614bbe33c96646a18a938afcd9aa2601",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "befb1a341bf4365a798e0e917b5255f9bbfd63f2",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.6.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.3"
+}

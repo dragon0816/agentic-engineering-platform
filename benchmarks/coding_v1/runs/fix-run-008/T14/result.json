@@ -1,0 +1,116 @@
+{
+ "run_id": "fix-run-008",
+ "task_id": "T14",
+ "attempt": 1,
+ "status": "FAIL",
+ "task_success": false,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 34.05,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "per-model statistics",
+   "passed": true,
+   "expected": "2000/1500/500/0.75 and 3.5..7.5",
+   "actual": "[{\"Device Model\": \"M0\", \"Total\": 2000, \"PassCount\": 1500, \"FailCount\": 500, \"PassRate\": 0.75, \"AvgDurationSeconds\": 3.5}, {\"Device Model\": \"M1\", \"Total\": 2000, \"PassCount\": 1500, \"FailCount\": 500, \"PassRate\": 0.75, \"AvgDurationSeconds\": 4.5}, {\"Device Model\": \"M2\", \"Total\": 2000, \"PassCount\": 1500, \"FailCount\": 500, \"PassRate\": 0.75, \"AvgDurationSeconds\": 5.5}, {\"Device Model\": \"M3\", \"Total\": 2000, \"PassCount\": 1500, \"FailCount\": 500, \"PassRate\": 0.75, \"AvgDurationSeconds\": 6.5}, {\"Device Model\": \"M4\", \"Total\": 2000, \"PassCount\": 1500, \"FailCount\": 500, \"PassRate\": 0.75, \"AvgDurationSeconds...",
+   "evidence_path": null
+  },
+  {
+   "name": "Overall sheet",
+   "passed": false,
+   "expected": "10000/7500/2500/0.75/5.5",
+   "actual": [
+    {
+     "Metric": "Total",
+     "Value": 10000
+    },
+    {
+     "Metric": "PassCount",
+     "Value": 7500
+    },
+    {
+     "Metric": "FailCount",
+     "Value": 2500
+    },
+    {
+     "Metric": "PassRate",
+     "Value": 0.75
+    },
+    {
+     "Metric": "AvgDurationSeconds",
+     "Value": 5.5
+    }
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": "coding",
+ "failure_reason": "failed checks: Overall sheet",
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T14\\workspace\\output\\summary.xlsx"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T14\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-07189412ac064254bea8e87f598ea150",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-e9eb415b726a4ed49d6d68320753f5ed",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "befb1a341bf4365a798e0e917b5255f9bbfd63f2",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.6.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.3"
+}

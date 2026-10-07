@@ -1,0 +1,60 @@
+Wrote: output\testplan.json
+Wrote: output\warnings.json
+Input SHA256 before: 5ae34d44b6aa811e51991ca4f85abbefe45860be44005bf7019804fd70783f02
+Input SHA256 after : 5ae34d44b6aa811e51991ca4f85abbefe45860be44005bf7019804fd70783f02
+Input unchanged: True
+Warnings: 1
+ - {'path': '$.sub.nested[1].frequency', 'value': '100kHz', 'warning': 'frequency string has unknown or unsupported unit; value kept unchanged', 'unit': 'kHz'}
+Output preview:
+{
+  "name": "RF plan",
+  "description": "frequency values in GHz or MHz; keep this text",
+  "center_frequency": "2.4GHz",
+  "bands": [
+    {
+      "label": "WLAN 2G",
+      "frequency": 2400,
+      "frequency_unit": "MHz",
+      "bandwidth": "20MHz",
+      "power": 18
+    },
+    {
+      "label": "WLAN 5G",
+      "frequency": 5000,
+      "frequency_unit": "MHz",
+      "bandwidth": "80MHz",
+      "power": 17
+    },
+    {
+      "label": "ISM",
+      "frequency": 2400,
+      "frequency_unit": "MHz",
+      "timeout": 30
+    }
+  ],
+  "sub": {
+    "nested": [
+      {
+        "frequency": 915,
+        "power": 10
+      },
+      {
+        "frequency": "100kHz",
+        "note": "LF"
+      }
+    ]
+  },
+  "timeout": 120
+}
+
+Verification checks:
+PASS: input file unchanged by hash
+PASS: output JSON equals expected recursive conversion
+PASS: top-level key order unchanged
+PASS: center_frequency not changed
+PASS: bands array order unchanged by labels
+PASS: converted frequency values are numeric
+PASS: frequency_unit added only to converted string frequency objects
+PASS: numeric frequency retained with no unit added
+PASS: unknown unit frequency retained
+PASS: one warning recorded for unknown unit

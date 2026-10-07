@@ -1,0 +1,415 @@
+{
+ "session_id": "conversation-23ec75f3507e48869b4aa21d49f81131",
+ "exchanges": [
+  {
+   "sent": "從提供的列表收集五個產品資料，輸出 robust_products.xlsx，欄位為 Name、Price、Currency、CPU、URL、FetchStatus。缺價格或規格填 N/A；detail page HTTP 500 最多嘗試 3 次，仍失敗時保留列表名稱與 URL，其他未知欄位填 N/A，FetchStatus 設為 error。另輸出 warnings.json，成功頁設為 ok。\n\n產品列表 URL：http://127.0.0.1:64650/t13/list\n\n---\n工作目錄：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\n題目中的相對路徑以工作目錄為準，輸入檔在 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\input。\n請把所有輸出檔寫到 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\output。不要修改 input 下的任何檔案。\n",
+   "http_status": 200,
+   "seconds": 80.469,
+   "timed_out": false,
+   "reply": {
+    "ok": true,
+    "conversation": {
+     "session_id": "conversation-23ec75f3507e48869b4aa21d49f81131",
+     "actor": "leo.chi",
+     "title": "從提供的列表收集五個產品資料，輸出 robust_products.xlsx，欄位為 Name、Price、Currency、CPU、URL、F…",
+     "backend": "gateway",
+     "data_classification": "UNCLASSIFIED",
+     "classified_by": null,
+     "created_at": "2026-10-07T01:54:26.736820Z",
+     "updated_at": "2026-10-07T01:55:47.131265Z",
+     "messages": [
+      {
+       "message_id": "message-909c890d07b843508aa43c36b9b650f8",
+       "role": "user",
+       "text": "從提供的列表收集五個產品資料，輸出 robust_products.xlsx，欄位為 Name、Price、Currency、CPU、URL、FetchStatus。缺價格或規格填 N/A；detail page HTTP 500 最多嘗試 3 次，仍失敗時保留列表名稱與 URL，其他未知欄位填 N/A，FetchStatus 設為 error。另輸出 warnings.json，成功頁設為 ok。\n\n產品列表 URL：http://127.0.0.1:64650/t13/list\n\n---\n工作目錄：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\n題目中的相對路徑以工作目錄為準，輸入檔在 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\input。\n請把所有輸出檔寫到 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\output。不要修改 input 下的任何檔案。\n",
+       "created_at": "2026-10-07T01:54:26.767481Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null
+      },
+      {
+       "message_id": "message-dc6ff2deb459453eac2c0e66a7a2dc8c",
+       "role": "assistant",
+       "text": "已完成並寫入工作目錄的 `output`：\n\n- `output/robust_products.xlsx`\n- `output/warnings.json`\n\n已重新開啟輸出檔檢查：\n\n- `robust_products.xlsx` 欄位為 `Name、Price、Currency、CPU、URL、FetchStatus`\n- 共 5 筆產品\n- 缺價格或規格已填 `N/A`\n- 成功頁 `FetchStatus` 為 `ok`\n- `Phone E` detail page 回傳 HTTP 500，已最多嘗試 3 次；保留列表名稱與 URL，其餘未知欄位填 `N/A`，`FetchStatus` 設為 `error`\n- `warnings.json` 共 5 筆，成功頁 warning 為 `ok`，錯誤頁記錄 `HTTP 500` 與 attempts=3\n\n輸出檔未修改 `input` 目錄。",
+       "created_at": "2026-10-07T01:55:47.131265Z",
+       "status": "answered",
+       "trace": {
+        "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+        "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+        "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": "- coding__run: succeeded {\"exit_code\": 0, \"script\": \".aep-run/run-001/script.py\"}\n- coding__run: succeeded {\"exit_code\": 1, \"script\": \".aep-run/run-002/script.py\"}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/robust_products.xlsx\", \"output/warnings.json\"], \"script\": \".aep-run/run-003/script.py\"}"
+      }
+     ]
+    },
+    "answer": {
+     "tool_summary": "- coding__run: succeeded {\"exit_code\": 0, \"script\": \".aep-run/run-001/script.py\"}\n- coding__run: succeeded {\"exit_code\": 1, \"script\": \".aep-run/run-002/script.py\"}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/robust_products.xlsx\", \"output/warnings.json\"], \"script\": \".aep-run/run-003/script.py\"}",
+     "ok": true,
+     "answer": "已完成並寫入工作目錄的 `output`：\n\n- `output/robust_products.xlsx`\n- `output/warnings.json`\n\n已重新開啟輸出檔檢查：\n\n- `robust_products.xlsx` 欄位為 `Name、Price、Currency、CPU、URL、FetchStatus`\n- 共 5 筆產品\n- 缺價格或規格已填 `N/A`\n- 成功頁 `FetchStatus` 為 `ok`\n- `Phone E` detail page 回傳 HTTP 500，已最多嘗試 3 次；保留列表名稱與 URL，其餘未知欄位填 `N/A`，`FetchStatus` 設為 `error`\n- `warnings.json` 共 5 筆，成功頁 warning 為 `ok`，錯誤頁記錄 `HTTP 500` 與 attempts=3\n\n輸出檔未修改 `input` 目錄。",
+     "status": "answered",
+     "outcome": {
+      "trace": {
+       "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+       "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+       "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+       "parent_span_id": null
+      },
+      "ingress": "local",
+      "actor": "leo.chi",
+      "refusal": null,
+      "conversation": {
+       "trace": {
+        "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+        "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+        "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+        "parent_span_id": null
+       },
+       "status": "answered",
+       "text": "已完成並寫入工作目錄的 `output`：\n\n- `output/robust_products.xlsx`\n- `output/warnings.json`\n\n已重新開啟輸出檔檢查：\n\n- `robust_products.xlsx` 欄位為 `Name、Price、Currency、CPU、URL、FetchStatus`\n- 共 5 筆產品\n- 缺價格或規格已填 `N/A`\n- 成功頁 `FetchStatus` 為 `ok`\n- `Phone E` detail page 回傳 HTTP 500，已最多嘗試 3 次；保留列表名稱與 URL，其餘未知欄位填 `N/A`，`FetchStatus` 設為 `error`\n- `warnings.json` 共 5 筆，成功頁 warning 為 `ok`，錯誤頁記錄 `HTTP 500` 與 attempts=3\n\n輸出檔未修改 `input` 目錄。",
+       "model_turns": 4,
+       "tools": [
+        {
+         "call_id": "call_8ZCXlhd8QmJHny7oyIg9gIQ8",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-9b37748fe51a44b4b6a12da308a108a1",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "workspace C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\ninput_dir input files []\nlist_status 200 text/html; charset=utf-8 bytes 309\nlist_sample\n<!doctype html><html><head><meta charset=\"utf-8\"></head><body><ul id=\"products\"><li><a href=\"/t13/item/1\">Phone A</a></li><li><a href=\"/t13/item/2\">Phone B</a></li><li><a href=\"/t13/item/3\">Phone C</a></li><li><a href=\"/t13/item/4\">Phone D</a></li><li><a href=\"/t13/item/5\">Phone E</a></li></ul></body></html>\n",
+             "files": [],
+             "script_path": ".aep-run/run-001/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_lDNKGusyWwZ65KiqX8iHogzQ",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-5b0a4584ff7040de9a6851e7b07ed6b7",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 1,
+             "timed_out": false,
+             "output": "discovered_products [[\"Phone A\", \"http://127.0.0.1:64650/t13/item/1\"], [\"Phone B\", \"http://127.0.0.1:64650/t13/item/2\"], [\"Phone C\", \"http://127.0.0.1:64650/t13/item/3\"], [\"Phone D\", \"http://127.0.0.1:64650/t13/item/4\"], [\"Phone E\", \"http://127.0.0.1:64650/t13/item/5\"]]\ndetail_fetch 1 Phone A http://127.0.0.1:64650/t13/item/1 ok True status 200 attempts 1 error None\ndetail_sample 1 <!doctype html><html><head><meta charset=\"utf-8\"></head><body><h1 class=\"name\">Phone A</h1><table class=\"spec\"><tr><th>Price</th><td>NT$9,900</td></tr><tr><th>CPU</th><td>Snap 7</td></tr></table></body></html>\nTraceback (most recent call last):\n  File \"C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\.aep-run\\run-002\\script.py\", line 196, in <module>\n    fields = parse_detail(result['text'], list_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\.aep-run\\run-002\\script.py\", line 164, in parse_detail\n    price, parsed_currency = split_price_currency(price_text)\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T13\\workspace\\.aep-run\\run-002\\script.py\", line 136, in split_price_currency\n    m = re.search(r'([$€¥])\\s*([0-9][0-9,]*(?:\\.\\d+)?)\\s*\\b(USD|EUR|TWD|JPY|CNY|GBP|NTD)?\\b?', value, re.I)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\Lib\\re\\__init__.py\", line 177, in search\n    return _compile(pattern, flags).search(string)\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\Lib\\re\\__init__.py\", line 307, in _compile\n    p = _compiler.compile(pattern, flags)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\Lib\\re\\_compiler.py\", line 750, in compile\n    p = _parser.parse(p, flags)\n        ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\Lib\\re\\_parser.py\", line 979, in parse\n    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\Lib\\re\\_parser.py\", line 460, in _parse_sub\n    itemsappend(_parse(source, state, verbose, nested + 1,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\Lib\\re\\_parser.py\", line 687, in _parse\n    raise source.error(\"nothing to repeat\",\nre.error: nothing to repeat at position 71\n",
+             "files": [],
+             "script_path": ".aep-run/run-002/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_X1iB8lLqvHQNPjLfiCM0ozIb",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-69f675d6fa3b4aa9a0943c384d159ee4",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "request_id": "request-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "span_id": "span-7b6f6ffb0ef540f9a61c3cfc7737c421",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "discovered_products [[\"Phone A\", \"http://127.0.0.1:64650/t13/item/1\"], [\"Phone B\", \"http://127.0.0.1:64650/t13/item/2\"], [\"Phone C\", \"http://127.0.0.1:64650/t13/item/3\"], [\"Phone D\", \"http://127.0.0.1:64650/t13/item/4\"], [\"Phone E\", \"http://127.0.0.1:64650/t13/item/5\"]]\ndetail_fetch 1 Phone A http://127.0.0.1:64650/t13/item/1 ok True status 200 attempts 1 error None\ndetail_sample 1 <!doctype html><html><head><meta charset=\"utf-8\"></head><body><h1 class=\"name\">Phone A</h1><table class=\"spec\"><tr><th>Price</th><td>NT$9,900</td></tr><tr><th>CPU</th><td>Snap 7</td></tr></table></body></html>\ndetail_fetch 2 Phone B http://127.0.0.1:64650/t13/item/2 ok True status 200 attempts 1 error None\ndetail_sample 2 <!doctype html><html><head><meta charset=\"utf-8\"></head><body><h1 class=\"name\">Phone B</h1><table class=\"spec\"><tr><th>Price</th><td>NT$12,900</td></tr><tr><th>CPU</th><td>Snap 8</td></tr></table></body></html>\ndetail_fetch 3 Phone C http://127.0.0.1:64650/t13/item/3 ok True status 200 attempts 1 error None\ndetail_sample 3 <!doctype html><html><head><meta charset=\"utf-8\"></head><body><h1 class=\"name\">Phone C</h1><table class=\"spec\"><tr><th>CPU</th><td>Dim 9</td></tr></table></body></html>\ndetail_fetch 4 Phone D http://127.0.0.1:64650/t13/item/4 ok True status 200 attempts 1 error None\ndetail_sample 4 <!doctype html><html><head><meta charset=\"utf-8\"></head><body><h1 class=\"name\">Phone D</h1><table class=\"spec\"><tr><th>Price</th><td>NT$7,500</td></tr></table></body></html>\ndetail_fetch 5 Phone E http://127.0.0.1:64650/t13/item/5 ok False status 500 attempts 3 error HTTP 500\nwrote output\\robust_products.xlsx output\\warnings.json\nverified_headers ['Name', 'Price', 'Currency', 'CPU', 'URL', 'FetchStatus']\nverified_row_count 5\nverified_rows [{\"Name\": \"Phone A\", \"Price\": \"9,900\", \"Currency\": \"TWD\", \"CPU\": \"Snap 7\", \"URL\": \"http://127.0.0.1:64650/t13/item/1\", \"FetchStatus\": \"ok\"}, {\"Name\": \"Phone B\", \"Price\": \"12,900\", \"Currency\": \"TWD\", \"CPU\": \"Snap 8\", \"URL\": \"http://127.0.0.1:64650/t13/item/2\", \"FetchStatus\": \"ok\"}, {\"Name\": \"Phone C\", \"Price\": \"N/A\", \"Currency\": \"N/A\", \"CPU\": \"Dim 9\", \"URL\": \"http://127.0.0.1:64650/t13/item/3\", \"FetchStatus\": \"ok\"}, {\"Name\": \"Phone D\", \"Price\": \"7,500\", \"Currency\": \"TWD\", \"CPU\": \"N/A\", \"URL\": \"http://127.0.0.1:64650/t13/item/4\", \"FetchStatus\": \"ok\"}, {\"Name\": \"Phone E\", \"Price\": \"N/A\", \"Currency\": \"N/A\", \"CPU\": \"N/A\", \"URL\": \"http://127.0.0.1:64650/t13/item/5\", \"FetchStatus\": \"error\"}]\nverified_warnings {\"products\": [{\"Name\": \"Phone A\", \"URL\": \"http://127.0.0.1:64650/t13/item/1\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"warning\": \"ok\"}, {\"Name\": \"Phone B\", \"URL\": \"http://127.0.0.1:64650/t13/item/2\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"warning\": \"ok\"}, {\"Name\": \"Phone C\", \"URL\": \"http://127.0.0.1:64650/t13/item/3\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"warning\": \"ok\"}, {\"Name\": \"Phone D\", \"URL\": \"http://127.0.0.1:64650/t13/item/4\", \"FetchStatus\": \"ok\", \"attempts\": 1, \"warning\": \"ok\"}, {\"Name\": \"Phone E\", \"URL\": \"http://127.0.0.1:64650/t13/item/5\", \"FetchStatus\": \"error\", \"attempts\": 3, \"warning\": \"HTTP 500\"}]}\n",
+             "files": [
+              {
+               "path": "output/robust_products.xlsx",
+               "bytes": 5100
+              },
+              {
+               "path": "output/warnings.json",
+               "bytes": 859
+              }
+             ],
+             "script_path": ".aep-run/run-003/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        }
+       ],
+       "failure": null
+      },
+      "runs": [
+       {
+        "run_id": "run-9b37748fe51a44b4b6a12da308a108a1",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-07T01:55:47.102206Z"
+       },
+       {
+        "run_id": "run-5b0a4584ff7040de9a6851e7b07ed6b7",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-07T01:55:47.112405Z"
+       },
+       {
+        "run_id": "run-69f675d6fa3b4aa9a0943c384d159ee4",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-07T01:55:47.119401Z"
+       }
+      ],
+      "unrecorded": []
+     }
+    },
+    "draft": null,
+    "approvals": []
+   }
+  }
+ ],
+ "fixture_requests": [
+  {
+   "t": 1791338078.8769038,
+   "method": "GET",
+   "path": "/t13/list",
+   "status": 200
+  },
+  {
+   "t": 1791338114.9475074,
+   "method": "GET",
+   "path": "/t13/list",
+   "status": 200
+  },
+  {
+   "t": 1791338114.9570322,
+   "method": "GET",
+   "path": "/t13/item/1",
+   "status": 200
+  },
+  {
+   "t": 1791338143.1567333,
+   "method": "GET",
+   "path": "/t13/list",
+   "status": 200
+  },
+  {
+   "t": 1791338143.1672118,
+   "method": "GET",
+   "path": "/t13/item/1",
+   "status": 200
+  },
+  {
+   "t": 1791338143.1798217,
+   "method": "GET",
+   "path": "/t13/item/2",
+   "status": 200
+  },
+  {
+   "t": 1791338143.2370682,
+   "method": "GET",
+   "path": "/t13/item/3",
+   "status": 200
+  },
+  {
+   "t": 1791338143.2738395,
+   "method": "GET",
+   "path": "/t13/item/4",
+   "status": 200
+  },
+  {
+   "t": 1791338143.3050969,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791338143.4618692,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  },
+  {
+   "t": 1791338143.616887,
+   "method": "GET",
+   "path": "/t13/item/5",
+   "status": 500
+  }
+ ]
+}

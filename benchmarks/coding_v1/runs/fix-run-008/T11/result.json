@@ -1,0 +1,175 @@
+{
+ "run_id": "fix-run-008",
+ "task_id": "T11",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 3,
+ "duration_seconds": 59.11,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "four rows matching the detail pages",
+   "passed": true,
+   "expected": [
+    [
+     "Laptop 13",
+     32900,
+     "Intel i5-1340P",
+     16,
+     "/t11/item/1"
+    ],
+    [
+     "Laptop 15",
+     45500,
+     "Intel i7-1360P",
+     32,
+     "/t11/item/2"
+    ],
+    [
+     "Mini PC",
+     18800,
+     null,
+     16,
+     "/t11/item/3"
+    ],
+    [
+     "Tablet 11",
+     12300,
+     "ARM A78",
+     8,
+     "/t11/item/4"
+    ]
+   ],
+   "actual": [
+    {
+     "Name": "Laptop 13",
+     "Price": 32900,
+     "Currency": "TWD",
+     "CPU": "Intel i5-1340P",
+     "MemoryGB": 16,
+     "URL": "http://127.0.0.1:64650/t11/item/1"
+    },
+    {
+     "Name": "Laptop 15",
+     "Price": 45500,
+     "Currency": "TWD",
+     "CPU": "Intel i7-1360P",
+     "MemoryGB": 32,
+     "URL": "http://127.0.0.1:64650/t11/item/2"
+    },
+    {
+     "Name": "Mini PC",
+     "Price": 18800,
+     "Currency": "TWD",
+     "CPU": null,
+     "MemoryGB": 16,
+     "URL": "http://127.0.0.1:64650/t11/item/3"
+    },
+    {
+     "Name": "Tablet 11",
+     "Price": 12300,
+     "Currency": "TWD",
+     "CPU": "ARM A78",
+     "MemoryGB": 8,
+     "URL": "http://127.0.0.1:64650/t11/item/4"
+    }
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "missing CPU left blank",
+   "passed": true,
+   "expected": "blank",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "4 detail pages visited (access log)",
+   "passed": true,
+   "expected": "all >0",
+   "actual": {
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2
+   },
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T11\\workspace\\output\\details.xlsx"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-008\\T11\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-185e370bd1e64d27a8bfd26b5b21753a",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-162afe4996fa48cf87ab58c86cd3e03a",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-1aa2c70ec3474a708bd25e26bf68a3f1",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  4
+ ],
+ "repo_commit": "befb1a341bf4365a798e0e917b5255f9bbfd63f2",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.6.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.3"
+}

@@ -1,0 +1,15 @@
+discovered_products [["Phone A", "http://127.0.0.1:64650/t13/item/1"], ["Phone B", "http://127.0.0.1:64650/t13/item/2"], ["Phone C", "http://127.0.0.1:64650/t13/item/3"], ["Phone D", "http://127.0.0.1:64650/t13/item/4"], ["Phone E", "http://127.0.0.1:64650/t13/item/5"]]
+detail_fetch 1 Phone A http://127.0.0.1:64650/t13/item/1 ok True status 200 attempts 1 error None
+detail_sample 1 <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone A</h1><table class="spec"><tr><th>Price</th><td>NT$9,900</td></tr><tr><th>CPU</th><td>Snap 7</td></tr></table></body></html>
+detail_fetch 2 Phone B http://127.0.0.1:64650/t13/item/2 ok True status 200 attempts 1 error None
+detail_sample 2 <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone B</h1><table class="spec"><tr><th>Price</th><td>NT$12,900</td></tr><tr><th>CPU</th><td>Snap 8</td></tr></table></body></html>
+detail_fetch 3 Phone C http://127.0.0.1:64650/t13/item/3 ok True status 200 attempts 1 error None
+detail_sample 3 <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone C</h1><table class="spec"><tr><th>CPU</th><td>Dim 9</td></tr></table></body></html>
+detail_fetch 4 Phone D http://127.0.0.1:64650/t13/item/4 ok True status 200 attempts 1 error None
+detail_sample 4 <!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">Phone D</h1><table class="spec"><tr><th>Price</th><td>NT$7,500</td></tr></table></body></html>
+detail_fetch 5 Phone E http://127.0.0.1:64650/t13/item/5 ok False status 500 attempts 3 error HTTP 500
+wrote output\robust_products.xlsx output\warnings.json
+verified_headers ['Name', 'Price', 'Currency', 'CPU', 'URL', 'FetchStatus']
+verified_row_count 5
+verified_rows [{"Name": "Phone A", "Price": "9,900", "Currency": "TWD", "CPU": "Snap 7", "URL": "http://127.0.0.1:64650/t13/item/1", "FetchStatus": "ok"}, {"Name": "Phone B", "Price": "12,900", "Currency": "TWD", "CPU": "Snap 8", "URL": "http://127.0.0.1:64650/t13/item/2", "FetchStatus": "ok"}, {"Name": "Phone C", "Price": "N/A", "Currency": "N/A", "CPU": "Dim 9", "URL": "http://127.0.0.1:64650/t13/item/3", "FetchStatus": "ok"}, {"Name": "Phone D", "Price": "7,500", "Currency": "TWD", "CPU": "N/A", "URL": "http://127.0.0.1:64650/t13/item/4", "FetchStatus": "ok"}, {"Name": "Phone E", "Price": "N/A", "Currency": "N/A", "CPU": "N/A", "URL": "http://127.0.0.1:64650/t13/item/5", "FetchStatus": "error"}]
+verified_warnings {"products": [{"Name": "Phone A", "URL": "http://127.0.0.1:64650/t13/item/1", "FetchStatus": "ok", "attempts": 1, "warning": "ok"}, {"Name": "Phone B", "URL": "http://127.0.0.1:64650/t13/item/2", "FetchStatus": "ok", "attempts": 1, "warning": "ok"}, {"Name": "Phone C", "URL": "http://127.0.0.1:64650/t13/item/3", "FetchStatus": "ok", "attempts": 1, "warning": "ok"}, {"Name": "Phone D", "URL": "http://127.0.0.1:64650/t13/item/4", "FetchStatus": "ok", "attempts": 1, "warning": "ok"}, {"Name": "Phone E", "URL": "http://127.0.0.1:64650/t13/item/5", "FetchStatus": "error", "attempts": 3, "warning": "HTTP 500"}]}
