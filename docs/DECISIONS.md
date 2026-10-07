@@ -1691,3 +1691,14 @@ Rejected alternatives:
 - Bumping `schema_version` to 2: the previous code would refuse the database (`unsupported_schema`), so rollback would need a restore.
 - Letting the Registry rewrite the version of a submitted package: the artifact bytes and their digest would disagree with it.
 - A `DeviceAuthorization` validator for one version per name: it would fail on stored authorizations that already hold two versions.
+
+## 2026-10-08: Asset ownership step 2 design choices confirmed
+
+The owner confirmed the five choices made while implementing step 2 (`9a81382`):
+1. Deprecation is recorded beside the name, not by rewriting a published package's lifecycle. A deprecated version is no longer offered or selectable, while existing selections and installs keep working for rollback.
+2. "Automatic" versions are assigned before the package is built, and publish checks that the version is still the assigned one.
+3. Co-editors are individual people only. A transfer to a team is accepted as named.
+4. The platform's own seed publish does not enforce version order.
+5. Two active versions selected before this change are cleaned up at the member's next selection of that name.
+
+Still to do: a member publish route with artifact upload and a review queue, a publish and ownership UI, showing deprecations to Hosts, and reconciling the Host-local step 1 with the Registry record. Step 2 goes live when the Shared Platform restarts.
