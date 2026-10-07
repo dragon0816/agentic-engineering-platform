@@ -1483,3 +1483,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   owners, co-editors, ordered versions, one active version per member,
   owner operations and member routes; not live until the Shared Platform
   restarts; five design choices await owner confirmation.
+- [x] Web access (owner 2026-10-08): every http(s) page may be used,
+  `web.allowed_origins` "*" by default; non-web schemes refused (`236e1bb`);
+  live host.json uses ["*"].
+- [x] Attachments in Agent Web (owner 2026-10-08): images, PDF, CSV, HTML,
+  TXT, JSON, YAML, MD, ZIP; 25 MB / 10 files; vision on for the company
+  endpoint; checked live (CSV average and image text read correctly)
+  (`d91fc0f`).
+- [ ] Attachments in Telegram (subagent in progress).
+- [ ] Paused by the owner: phase gate decision (coding Skill 1.8.0 wording) and
+  the Knowledge tool-route choice; the owner will check the Agent by hand first.
+
