@@ -11,6 +11,27 @@ def _ps_quote(path: Path) -> str:
     return str(path).replace("'", "''")
 
 
+def _run_pwsh(command: str) -> subprocess.CompletedProcess[str]:
+    """Run ``command`` in PowerShell 7 and decode its output as UTF-8.
+
+    pwsh encodes its stdout/stderr with ``[Console]::OutputEncoding``, which
+    defaults to the console code page (cp950 on a zh-TW machine, for example).
+    Its error view also inserts non-ASCII characters such as the U+2026
+    ellipsis, so decoding with a fixed codec only works when both sides agree.
+    The child gets its own hidden console on Windows, so pinning that console
+    to UTF-8 cannot change the code page of the terminal running pytest.
+    """
+    utf8 = "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); "
+    return subprocess.run(
+        ["pwsh", "-NoProfile", "-Command", utf8 + command],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+
+
 def test_local_environment_file_is_ignored_but_the_example_is_tracked() -> None:
     ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
 
@@ -69,13 +90,7 @@ def test_loader_sets_only_allowlisted_values_without_echoing_them(tmp_path: Path
         f"if ($env:GH_TOKEN -ne '{token}') {{ exit 9 }}"
     )
 
-    result = subprocess.run(
-        ["pwsh", "-NoProfile", "-Command", command],
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    )
+    result = _run_pwsh(command)
 
     assert result.returncode == 0, result.stderr
     assert "GH_TOKEN" in result.stdout
@@ -90,13 +105,7 @@ def test_loader_rejects_unknown_names_without_setting_them(tmp_path: Path) -> No
     script = ROOT / "scripts" / "import-local-env.ps1"
     command = f". '{_ps_quote(script)}' -Path '{_ps_quote(local)}'"
 
-    result = subprocess.run(
-        ["pwsh", "-NoProfile", "-Command", command],
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    )
+    result = _run_pwsh(command)
 
     assert result.returncode != 0
     assert "Unsupported local environment variable" in result.stderr
