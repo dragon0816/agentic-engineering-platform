@@ -1,0 +1,380 @@
+{
+ "question": {
+  "id": "Q0901",
+  "text": "What are the most important signal generation capabilities for applications in Semiconductor?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-f65cf75fb6af4df3bfd2053902b5fe67",
+ "exchange": {
+  "sent": "What are the most important signal generation capabilities for applications in Semiconductor?",
+  "http_status": 200,
+  "seconds": 101.657,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-f65cf75fb6af4df3bfd2053902b5fe67",
+    "actor": "leo.chi",
+    "title": "What are the most important signal generation capabilities for applicati…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:01:27.508702Z",
+    "updated_at": "2026-10-07T09:03:00.687201Z",
+    "messages": [
+     {
+      "message_id": "message-3d2bab723c784ec6a5d40cbd64579c01",
+      "role": "user",
+      "text": "What are the most important signal generation capabilities for applications in Semiconductor?",
+      "created_at": "2026-10-07T09:01:27.543478Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-56eac7ed65d2424a831d45e23a0e3ec1",
+      "role": "assistant",
+      "text": "The most important signal-generation capabilities for semiconductor applications are usually:\n\n1. **High signal purity**\n   - Low phase noise, low spurious emissions, low harmonics, and accurate EVM.\n   - Critical for RFIC, transceiver, PLL, ADC/DAC, and mixed-signal characterization.\n\n2. **Wide frequency coverage**\n   - Semiconductor devices may operate from low-frequency control/clock domains up to RF, microwave, and mmWave.\n   - The R&S evidence highlights broad RF coverage as a core generator capability, e.g. 8 kHz to 6 GHz for SMBV100B covering key RF bands.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **Wide modulation / RF bandwidth**\n   - Needed for testing modern wireless chipsets, high-speed converters, broadband receivers, radar ICs, and complex modulated signals.\n   - The cited R&S material calls out modulation bandwidth up to 1 GHz for 4G/5G and complex pulsed-signal generation.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **Accurate output power and dynamic range**\n   - Important for receiver sensitivity, compression, blocking, linearity, gain control, and production calibration tests.\n   - High output power is specifically identified as a key vector signal generator performance characteristic in the R&S material.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n5. **Flexible arbitrary waveform generation**\n   - Semiconductor validation often needs custom waveforms, impairments, stress patterns, pulsed signals, and standard-specific test vectors.\n   - Key waveform playback limits include frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate.  \n   Source: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **Multi-carrier and standards-based signal support**\n   - Useful for cellular, Wi-Fi, Bluetooth, GNSS, UWB, satellite, and other connectivity ICs.\n   - The R&S evidence notes per-carrier configurability for carrier settings, bandwidth parts, and scheduling settings.  \n   Source: `raw/Productions/CMP180_Features_V11-9_en_09.md`, section 1827.\n\n7. **Synchronization and multi-channel coherence**\n   - Important for beamforming ICs, MIMO, phased-array, radar, and multi-lane converter testing.\n   - Key capabilities include shared references, phase coherence, trigger alignment, and deterministic timing.\n\n8. **Fast switching and automation**\n   - Especially important in semiconductor production test, where throughput matters.\n   - Fast frequency, level, waveform, and scenario switching reduce test time.\n\n9. **Impairment and stress-test generation**\n   - Ability to add AWGN, fading, phase noise, IQ imbalance, frequency offset, jitter, or nonlinear effects.\n   - Useful for margin testing and robustness validation.\n\n10. **Calibration, repeatability, and test-system integration**\n   - Semiconductor workflows require repeatable results across wafer probe, characterization, and production.\n   - SCPI/API control, calibration support, trigger I/O, and stable references are often as important as raw RF performance.\n\nIn short: for semiconductor use, the highest-value capabilities are **signal purity, bandwidth, frequency range, output accuracy, waveform flexibility, multi-channel synchronization, and automation speed**.",
+      "created_at": "2026-10-07T09:03:00.687201Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-b2d8f832e68141e5bebd94ad7c695d26",
+       "request_id": "request-b2d8f832e68141e5bebd94ad7c695d26",
+       "span_id": "span-b2d8f832e68141e5bebd94ad7c695d26",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The most important signal-generation capabilities for semiconductor applications are usually:\n\n1. **High signal purity**\n   - Low phase noise, low spurious emissions, low harmonics, and accurate EVM.\n   - Critical for RFIC, transceiver, PLL, ADC/DAC, and mixed-signal characterization.\n\n2. **Wide frequency coverage**\n   - Semiconductor devices may operate from low-frequency control/clock domains up to RF, microwave, and mmWave.\n   - The R&S evidence highlights broad RF coverage as a core generator capability, e.g. 8 kHz to 6 GHz for SMBV100B covering key RF bands.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **Wide modulation / RF bandwidth**\n   - Needed for testing modern wireless chipsets, high-speed converters, broadband receivers, radar ICs, and complex modulated signals.\n   - The cited R&S material calls out modulation bandwidth up to 1 GHz for 4G/5G and complex pulsed-signal generation.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **Accurate output power and dynamic range**\n   - Important for receiver sensitivity, compression, blocking, linearity, gain control, and production calibration tests.\n   - High output power is specifically identified as a key vector signal generator performance characteristic in the R&S material.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n5. **Flexible arbitrary waveform generation**\n   - Semiconductor validation often needs custom waveforms, impairments, stress patterns, pulsed signals, and standard-specific test vectors.\n   - Key waveform playback limits include frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate.  \n   Source: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **Multi-carrier and standards-based signal support**\n   - Useful for cellular, Wi-Fi, Bluetooth, GNSS, UWB, satellite, and other connectivity ICs.\n   - The R&S evidence notes per-carrier configurability for carrier settings, bandwidth parts, and scheduling settings.  \n   Source: `raw/Productions/CMP180_Features_V11-9_en_09.md`, section 1827.\n\n7. **Synchronization and multi-channel coherence**\n   - Important for beamforming ICs, MIMO, phased-array, radar, and multi-lane converter testing.\n   - Key capabilities include shared references, phase coherence, trigger alignment, and deterministic timing.\n\n8. **Fast switching and automation**\n   - Especially important in semiconductor production test, where throughput matters.\n   - Fast frequency, level, waveform, and scenario switching reduce test time.\n\n9. **Impairment and stress-test generation**\n   - Ability to add AWGN, fading, phase noise, IQ imbalance, frequency offset, jitter, or nonlinear effects.\n   - Useful for margin testing and robustness validation.\n\n10. **Calibration, repeatability, and test-system integration**\n   - Semiconductor workflows require repeatable results across wafer probe, characterization, and production.\n   - SCPI/API control, calibration support, trigger I/O, and stable references are often as important as raw RF performance.\n\nIn short: for semiconductor use, the highest-value capabilities are **signal purity, bandwidth, frequency range, output accuracy, waveform flexibility, multi-channel synchronization, and automation speed**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b2d8f832e68141e5bebd94ad7c695d26",
+      "request_id": "request-b2d8f832e68141e5bebd94ad7c695d26",
+      "span_id": "span-b2d8f832e68141e5bebd94ad7c695d26",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-b2d8f832e68141e5bebd94ad7c695d26",
+       "request_id": "request-b2d8f832e68141e5bebd94ad7c695d26",
+       "span_id": "span-b2d8f832e68141e5bebd94ad7c695d26",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The most important signal-generation capabilities for semiconductor applications are usually:\n\n1. **High signal purity**\n   - Low phase noise, low spurious emissions, low harmonics, and accurate EVM.\n   - Critical for RFIC, transceiver, PLL, ADC/DAC, and mixed-signal characterization.\n\n2. **Wide frequency coverage**\n   - Semiconductor devices may operate from low-frequency control/clock domains up to RF, microwave, and mmWave.\n   - The R&S evidence highlights broad RF coverage as a core generator capability, e.g. 8 kHz to 6 GHz for SMBV100B covering key RF bands.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **Wide modulation / RF bandwidth**\n   - Needed for testing modern wireless chipsets, high-speed converters, broadband receivers, radar ICs, and complex modulated signals.\n   - The cited R&S material calls out modulation bandwidth up to 1 GHz for 4G/5G and complex pulsed-signal generation.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **Accurate output power and dynamic range**\n   - Important for receiver sensitivity, compression, blocking, linearity, gain control, and production calibration tests.\n   - High output power is specifically identified as a key vector signal generator performance characteristic in the R&S material.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n5. **Flexible arbitrary waveform generation**\n   - Semiconductor validation often needs custom waveforms, impairments, stress patterns, pulsed signals, and standard-specific test vectors.\n   - Key waveform playback limits include frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate.  \n   Source: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **Multi-carrier and standards-based signal support**\n   - Useful for cellular, Wi-Fi, Bluetooth, GNSS, UWB, satellite, and other connectivity ICs.\n   - The R&S evidence notes per-carrier configurability for carrier settings, bandwidth parts, and scheduling settings.  \n   Source: `raw/Productions/CMP180_Features_V11-9_en_09.md`, section 1827.\n\n7. **Synchronization and multi-channel coherence**\n   - Important for beamforming ICs, MIMO, phased-array, radar, and multi-lane converter testing.\n   - Key capabilities include shared references, phase coherence, trigger alignment, and deterministic timing.\n\n8. **Fast switching and automation**\n   - Especially important in semiconductor production test, where throughput matters.\n   - Fast frequency, level, waveform, and scenario switching reduce test time.\n\n9. **Impairment and stress-test generation**\n   - Ability to add AWGN, fading, phase noise, IQ imbalance, frequency offset, jitter, or nonlinear effects.\n   - Useful for margin testing and robustness validation.\n\n10. **Calibration, repeatability, and test-system integration**\n   - Semiconductor workflows require repeatable results across wafer probe, characterization, and production.\n   - SCPI/API control, calibration support, trigger I/O, and stable references are often as important as raw RF performance.\n\nIn short: for semiconductor use, the highest-value capabilities are **signal purity, bandwidth, frequency range, output accuracy, waveform flexibility, multi-channel synchronization, and automation speed**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_2v3o8gBbksn85LPf1I5gu29G",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b2d8f832e68141e5bebd94ad7c695d26",
+          "request_id": "request-b2d8f832e68141e5bebd94ad7c695d26",
+          "span_id": "span-b2d8f832e68141e5bebd94ad7c695d26",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-b2d8f832e68141e5bebd94ad7c695d26",
+           "request_id": "request-b2d8f832e68141e5bebd94ad7c695d26",
+           "span_id": "span-b2d8f832e68141e5bebd94ad7c695d26",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What are the most important signal generation capabilities for semiconductor applications? Summarize generally and cite raw evidence from the RS knowledge corpus if available.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.654311
+            },
+            {
+             "text": "What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to\nknow if two CW are used?\nCross-check if there are FPGA reference sizes for TBS_LBRM",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6eaf816ecfe746af",
+               "original_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "sha256": "6eaf816ecfe746af0094c65d69bb5a2df407a5da1ff8413e3178944abc0d1762",
+               "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+              "section": 146,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.12827
+            },
+            {
+             "text": "Most signal settings are available per carrier: all carrier settings, bandwidth part set-\ntings and scheduling settings.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f3e1c0a3fb2bd5d0",
+               "original_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+               "sha256": "f3e1c0a3fb2bd5d0ed9591386f4b9de0620cb01e1e79ec44dc553d9197377668",
+               "raw_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "section": 1827,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.80681
+            },
+            {
+             "text": "Most signal settings are available per carrier: all carrier settings, bandwidth part set-\ntings and scheduling settings.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 3865,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.80681
+            },
+            {
+             "text": "Most signal settings are available per carrier: all carrier settings, bandwidth part set-\ntings and scheduling settings.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0db424c28307e318",
+               "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+               "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "section": 2407,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.80681
+            },
+            {
+             "text": "The tables list the capabilities of the R&S WinIQSIM2 software for the generation of\nwaveform files. The PVT360A hardware used to play waveform files can limit the listed\ncapabilities. Especially the following properties of the PVT360A are relevant in this\ncontext: supported frequency range, maximum signal bandwidth, ARB memory size\nand maximum sample clock rate.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0db424c28307e318",
+               "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+               "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "section": 82,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.477532
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.454461
+            },
+            {
+             "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.624967
+            }
+           ],
+           "text": "The RAW passages do not specifically discuss semiconductor applications, but they do identify generally important signal-generation capabilities: high output power, wide modulation bandwidth, excellent signal quality, and broad frequency coverage from 8 kHz to 6 GHz for important RF bands [1]. For advanced wireless and complex signal testing, wide RF modulation bandwidth up to 1 GHz is highlighted as important, including for 4G/5G requirements and complex pulsed-signal generation [1]. Flexible per-carrier configuration is also important, including carrier settings, bandwidth-part settings, and scheduling settings [3]. For waveform generation and playback, key capabilities include supported frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate [6].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.654311
+           },
+           {
+            "text": "Most signal settings are available per carrier: all carrier settings, bandwidth part set-\ntings and scheduling settings.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f3e1c0a3fb2bd5d0",
+              "original_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "sha256": "f3e1c0a3fb2bd5d0ed9591386f4b9de0620cb01e1e79ec44dc553d9197377668",
+              "raw_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+             "section": 1827,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.80681
+           },
+           {
+            "text": "The tables list the capabilities of the R&S WinIQSIM2 software for the generation of\nwaveform files. The PVT360A hardware used to play waveform files can limit the listed\ncapabilities. Especially the following properties of the PVT360A are relevant in this\ncontext: supported frequency range, maximum signal bandwidth, ARB memory size\nand maximum sample clock rate.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0db424c28307e318",
+              "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+             "section": 82,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.477532
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

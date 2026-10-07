@@ -1,0 +1,93 @@
+{
+ "question": {
+  "id": "Q0261",
+  "text": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-0ef4fd4f559b4017bcacf768e512ab70",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 23.594,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-0ef4fd4f559b4017bcacf768e512ab70",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Oscillos…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:12:03.881588Z",
+    "updated_at": "2026-10-07T08:12:27.368309Z",
+    "messages": [
+     {
+      "message_id": "message-365439ac896a4c51a601051f27bf9048",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-07T08:12:04.084068Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-e4ca74c36507468fa5303307f300cd28",
+      "role": "assistant",
+      "text": "In an aerospace/defense radar test workflow, an oscilloscope usually fits as the **time-domain debug and validation instrument**—especially around pulse timing, triggering, IF/baseband signals, high-speed digital interfaces, and system synchronization.\n\nTypical places it fits:\n\n1. **Radar transmitter pulse validation**\n   - Measure pulse width, rise/fall time, duty cycle, PRI/PRF, pulse droop, overshoot, ringing.\n   - Verify trigger timing between exciter, modulator, power amplifier, and antenna switch.\n\n2. **Receiver chain debug**\n   - Observe IF, baseband I/Q, detector outputs, AGC behavior, blanking signals, and timing gates.\n   - Check whether receive windows align correctly with transmit pulses.\n\n3. **Timing and synchronization**\n   - Validate clocks, triggers, sync pulses, GPS/1PPS timing, T/R switching, and phase-coherent timing relationships.\n   - Useful in phased-array radar where timing skew between channels matters.\n\n4. **Digital and mixed-signal validation**\n   - Debug FPGA/ADC/DAC interfaces, JESD204 links, LVDS, SPI/I²C control lines, and high-speed logic.\n   - Confirm that radar control sequencing happens in the right order.\n\n5. **Power integrity and transient behavior**\n   - Measure supply droop, switching noise, amplifier current pulses, startup sequencing, and transient load effects.\n   - Important because pulsed radar systems can create large current transients.\n\n6. **Prototype troubleshooting and integration**\n   - When something fails in the radar chain, the oscilloscope helps answer:  \n     “Did the event happen at the right time, with the right shape, and in the right sequence?”\n\n7. **Production or depot-level verification**\n   - Used for repeatable pulse-shape checks, timing checks, interface checks, and fault isolation.\n\nOne important distinction: for **RF performance**—frequency spectrum, phase noise, spurious emissions, modulation quality, occupied bandwidth, EVM, etc.—a **spectrum analyzer, signal analyzer, or vector network analyzer** is usually the primary tool. The oscilloscope complements those tools by showing what is happening in the **time domain**.\n\nSo, in short:  \n**The oscilloscope fits wherever the radar workflow needs pulse, timing, transient, synchronization, digital-interface, or waveform-shape verification.**",
+      "created_at": "2026-10-07T08:12:27.368309Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-258e00030b464b0b8a827885b046b16e",
+       "request_id": "request-258e00030b464b0b8a827885b046b16e",
+       "span_id": "span-258e00030b464b0b8a827885b046b16e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": null,
+    "ok": true,
+    "answer": "In an aerospace/defense radar test workflow, an oscilloscope usually fits as the **time-domain debug and validation instrument**—especially around pulse timing, triggering, IF/baseband signals, high-speed digital interfaces, and system synchronization.\n\nTypical places it fits:\n\n1. **Radar transmitter pulse validation**\n   - Measure pulse width, rise/fall time, duty cycle, PRI/PRF, pulse droop, overshoot, ringing.\n   - Verify trigger timing between exciter, modulator, power amplifier, and antenna switch.\n\n2. **Receiver chain debug**\n   - Observe IF, baseband I/Q, detector outputs, AGC behavior, blanking signals, and timing gates.\n   - Check whether receive windows align correctly with transmit pulses.\n\n3. **Timing and synchronization**\n   - Validate clocks, triggers, sync pulses, GPS/1PPS timing, T/R switching, and phase-coherent timing relationships.\n   - Useful in phased-array radar where timing skew between channels matters.\n\n4. **Digital and mixed-signal validation**\n   - Debug FPGA/ADC/DAC interfaces, JESD204 links, LVDS, SPI/I²C control lines, and high-speed logic.\n   - Confirm that radar control sequencing happens in the right order.\n\n5. **Power integrity and transient behavior**\n   - Measure supply droop, switching noise, amplifier current pulses, startup sequencing, and transient load effects.\n   - Important because pulsed radar systems can create large current transients.\n\n6. **Prototype troubleshooting and integration**\n   - When something fails in the radar chain, the oscilloscope helps answer:  \n     “Did the event happen at the right time, with the right shape, and in the right sequence?”\n\n7. **Production or depot-level verification**\n   - Used for repeatable pulse-shape checks, timing checks, interface checks, and fault isolation.\n\nOne important distinction: for **RF performance**—frequency spectrum, phase noise, spurious emissions, modulation quality, occupied bandwidth, EVM, etc.—a **spectrum analyzer, signal analyzer, or vector network analyzer** is usually the primary tool. The oscilloscope complements those tools by showing what is happening in the **time domain**.\n\nSo, in short:  \n**The oscilloscope fits wherever the radar workflow needs pulse, timing, transient, synchronization, digital-interface, or waveform-shape verification.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-258e00030b464b0b8a827885b046b16e",
+      "request_id": "request-258e00030b464b0b8a827885b046b16e",
+      "span_id": "span-258e00030b464b0b8a827885b046b16e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-258e00030b464b0b8a827885b046b16e",
+       "request_id": "request-258e00030b464b0b8a827885b046b16e",
+       "span_id": "span-258e00030b464b0b8a827885b046b16e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In an aerospace/defense radar test workflow, an oscilloscope usually fits as the **time-domain debug and validation instrument**—especially around pulse timing, triggering, IF/baseband signals, high-speed digital interfaces, and system synchronization.\n\nTypical places it fits:\n\n1. **Radar transmitter pulse validation**\n   - Measure pulse width, rise/fall time, duty cycle, PRI/PRF, pulse droop, overshoot, ringing.\n   - Verify trigger timing between exciter, modulator, power amplifier, and antenna switch.\n\n2. **Receiver chain debug**\n   - Observe IF, baseband I/Q, detector outputs, AGC behavior, blanking signals, and timing gates.\n   - Check whether receive windows align correctly with transmit pulses.\n\n3. **Timing and synchronization**\n   - Validate clocks, triggers, sync pulses, GPS/1PPS timing, T/R switching, and phase-coherent timing relationships.\n   - Useful in phased-array radar where timing skew between channels matters.\n\n4. **Digital and mixed-signal validation**\n   - Debug FPGA/ADC/DAC interfaces, JESD204 links, LVDS, SPI/I²C control lines, and high-speed logic.\n   - Confirm that radar control sequencing happens in the right order.\n\n5. **Power integrity and transient behavior**\n   - Measure supply droop, switching noise, amplifier current pulses, startup sequencing, and transient load effects.\n   - Important because pulsed radar systems can create large current transients.\n\n6. **Prototype troubleshooting and integration**\n   - When something fails in the radar chain, the oscilloscope helps answer:  \n     “Did the event happen at the right time, with the right shape, and in the right sequence?”\n\n7. **Production or depot-level verification**\n   - Used for repeatable pulse-shape checks, timing checks, interface checks, and fault isolation.\n\nOne important distinction: for **RF performance**—frequency spectrum, phase noise, spurious emissions, modulation quality, occupied bandwidth, EVM, etc.—a **spectrum analyzer, signal analyzer, or vector network analyzer** is usually the primary tool. The oscilloscope complements those tools by showing what is happening in the **time domain**.\n\nSo, in short:  \n**The oscilloscope fits wherever the radar workflow needs pulse, timing, transient, synchronization, digital-interface, or waveform-shape verification.**",
+      "model_turns": 1,
+      "tools": [],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,53 @@
+{
+ "id": "Q1041",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 71.765,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "An eye diagram is a signal-integrity view made by overlaying many repeated digital bit intervals on the same time axis.",
+   "Eye height → vertical noise / amplitude margin",
+   "Eye width → timing margin / jitter tolerance",
+   "Use a high-bandwidth oscilloscope / sampling oscilloscope when you need eye, jitter, mask, and serial-data compliance measurements.",
+   "NRZ links have one eye opening. PAM4 links have three stacked eyes",
+   "For compliance work, you may need specific jitter decomposition, CDR, bathtub, or BER extrapolation features.",
+   "Standards such as USB, PCIe, Ethernet, HDMI, MIPI, etc. often require defined eye-mask or jitter tests.",
+   "BERTs are better for very low BER confidence testing.",
+   "Too little bandwidth artificially closes the eye."
+  ],
+  "reason": "The cited passages only state that different operation modes, such as Spectrum or 5G NR, provide different measurements for 5G NR base-station transmitter tests, with Spectrum mode used for OBW and spurious emissions. They do not define eye diagrams or support the detailed product-measurement decisions listed, so the answer's main content goes well beyond the evidence despite its partial caveat.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages only state that different operation modes, such as Spectrum or 5G NR, provide different measurements for 5G NR base-station transmitter tests, with Spectrum mode used for OBW and spurious emissions. They do not define eye diagrams or support the detailed product-measurement decisi"
+}

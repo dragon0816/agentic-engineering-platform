@@ -1,0 +1,689 @@
+{
+ "question": {
+  "id": "Q0801",
+  "text": "What are the most important signaling test capabilities for applications in Semiconductor?",
+  "market": "Semiconductor",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-356745b5434d4bbc9f655b438190211a",
+ "exchange": {
+  "sent": "What are the most important signaling test capabilities for applications in Semiconductor?",
+  "http_status": 200,
+  "seconds": 147.75,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-356745b5434d4bbc9f655b438190211a",
+    "actor": "leo.chi",
+    "title": "What are the most important signaling test capabilities for applications…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:53:27.702025Z",
+    "updated_at": "2026-10-07T08:55:55.357231Z",
+    "messages": [
+     {
+      "message_id": "message-5723d7dd4b6642d0bc6b4f50d74576d0",
+      "role": "user",
+      "text": "What are the most important signaling test capabilities for applications in Semiconductor?",
+      "created_at": "2026-10-07T08:53:27.713727Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-0658533954d84caa84950a9b55f724a0",
+      "role": "assistant",
+      "text": "For semiconductor companies developing wireless chipsets, modems, RFICs, connectivity SoCs, and reference platforms, the most important **signaling test capabilities** are:\n\n1. **Multi-RAT cellular network emulation**\n   - Ability to emulate LTE and 5G NR in both **SA and NSA** modes is foundational for modem/chipset validation.\n   - R&S evidence: CMX500 covers “LTE and NR in SA/NSA modes.”  \n   Citation: `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.\n\n2. **Protocol validation + RF conformance in one platform**\n   - Semiconductor teams need to validate stack behavior, call/session setup, RF performance, and standards conformance before device integration.\n   - R&S evidence: CMX500 enables “one-stop testing for RF conformance, protocol validation, VoNR acoustics and carrier aggregation.”  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.\n\n3. **Carrier aggregation and FR1–FR3 / 6G-readiness**\n   - Chipset roadmaps increasingly need FR1, FR2, emerging FR3, and cross-band carrier aggregation validation.\n   - R&S evidence: CMX500 supports FR1 to FR3 up to 18 GHz and carrier aggregation; it is positioned for 5G-Advanced and 6G R&D.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.\n\n4. **High-throughput and advanced PHY validation**\n   - Important for premium modems and Wi-Fi/cellular combo chips: high data rates, high-order modulation, antenna-port scaling, and spatial multiplexing.\n   - R&S evidence: CMX500 is described as supporting data rates up to 20 Gbps, wide dynamic range, 4096QAM, and up to 16 device antenna ports.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.\n\n5. **NTN / satellite / direct-to-cell signaling**\n   - NTN is important for modem vendors targeting 3GPP Rel.17+ satellite, IoT, and direct-to-cell use cases.\n   - R&S evidence: CMX500 covers NR-NTN, NB-NTN, and Direct-to-Cell testing; R&S and MediaTek also demonstrated a 5G NTN-NR Rel.17 test setup.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.  \n   - `raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md`, section 7.\n\n6. **Wi-Fi signaling: Wi-Fi 6/6E/7 and future Wi-Fi 8**\n   - Semiconductor connectivity SoCs need signaling-mode Wi-Fi validation, especially for Wi-Fi 7 MLO and emerging Wi-Fi 8 features.\n   - R&S evidence: CMX500 supports WLAN including Wi-Fi 7 and future Wi-Fi 8; another source says Wi-Fi 6/6E/7 signaling can be integrated in every CMX500.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.  \n   - `raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md`, section 6.\n\n7. **Wi-Fi 7 MLO and multi-RF-chain testing**\n   - For Wi-Fi 7 chipsets, Multi-Link Operation requires multiple RF chains and realistic signaling conditions.\n   - R&S evidence: Wi-Fi 7 development requires antenna, RF TX/RX measurements “under real-world conditions in signaling mode”; MLO requires multiple RF chains; CMX500 provides integrated Wi-Fi 7 test functionality and embedded IP test capabilities.  \n   Citation: `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`, section 6.\n\n8. **OTA signaling and chamber integration**\n   - Semiconductor validation increasingly needs OTA behavior, antenna/RF interaction, and real-world wireless performance, not just cabled tests.\n   - R&S evidence: CMX500 and SMBV100B are integrated with ETS-Lindgren chamber technology and EMQuest software for comprehensive wireless OTA testing.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n9. **Application-level and IMS services testing**\n   - Modem platforms must prove not only RF/protocol behavior but also services such as VoNR, IMS, IP throughput, emergency calling, and user-experience flows.\n   - R&S evidence: CMX500 has a built-in IMS server and supports VoNR acoustics; it was also used for NG eCall verification including voice and data transmission.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.  \n   - `raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`, section 5.\n\n**Bottom line:** for semiconductor applications, the critical signaling capabilities are **multi-RAT cellular + Wi-Fi support, protocol/RF conformance, carrier aggregation, FR3/6G readiness, NTN/direct-to-cell, Wi-Fi 7/8 MLO, high-throughput MIMO/4096QAM, OTA chamber integration, and application/IMS service validation**. In the R&S portfolio, the evidence consistently points to the **CMX500** as the central signaling test platform for these needs.",
+      "created_at": "2026-10-07T08:55:55.357231Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+       "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+       "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "For semiconductor companies developing wireless chipsets, modems, RFICs, connectivity SoCs, and reference platforms, the most important **signaling test capabilities** are:\n\n1. **Multi-RAT cellular network emulation**\n   - Ability to emulate LTE and 5G NR in both **SA and NSA** modes is foundational for modem/chipset validation.\n   - R&S evidence: CMX500 covers “LTE and NR in SA/NSA modes.”  \n   Citation: `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.\n\n2. **Protocol validation + RF conformance in one platform**\n   - Semiconductor teams need to validate stack behavior, call/session setup, RF performance, and standards conformance before device integration.\n   - R&S evidence: CMX500 enables “one-stop testing for RF conformance, protocol validation, VoNR acoustics and carrier aggregation.”  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.\n\n3. **Carrier aggregation and FR1–FR3 / 6G-readiness**\n   - Chipset roadmaps increasingly need FR1, FR2, emerging FR3, and cross-band carrier aggregation validation.\n   - R&S evidence: CMX500 supports FR1 to FR3 up to 18 GHz and carrier aggregation; it is positioned for 5G-Advanced and 6G R&D.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.\n\n4. **High-throughput and advanced PHY validation**\n   - Important for premium modems and Wi-Fi/cellular combo chips: high data rates, high-order modulation, antenna-port scaling, and spatial multiplexing.\n   - R&S evidence: CMX500 is described as supporting data rates up to 20 Gbps, wide dynamic range, 4096QAM, and up to 16 device antenna ports.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.\n\n5. **NTN / satellite / direct-to-cell signaling**\n   - NTN is important for modem vendors targeting 3GPP Rel.17+ satellite, IoT, and direct-to-cell use cases.\n   - R&S evidence: CMX500 covers NR-NTN, NB-NTN, and Direct-to-Cell testing; R&S and MediaTek also demonstrated a 5G NTN-NR Rel.17 test setup.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.  \n   - `raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md`, section 7.\n\n6. **Wi-Fi signaling: Wi-Fi 6/6E/7 and future Wi-Fi 8**\n   - Semiconductor connectivity SoCs need signaling-mode Wi-Fi validation, especially for Wi-Fi 7 MLO and emerging Wi-Fi 8 features.\n   - R&S evidence: CMX500 supports WLAN including Wi-Fi 7 and future Wi-Fi 8; another source says Wi-Fi 6/6E/7 signaling can be integrated in every CMX500.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.  \n   - `raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md`, section 6.\n\n7. **Wi-Fi 7 MLO and multi-RF-chain testing**\n   - For Wi-Fi 7 chipsets, Multi-Link Operation requires multiple RF chains and realistic signaling conditions.\n   - R&S evidence: Wi-Fi 7 development requires antenna, RF TX/RX measurements “under real-world conditions in signaling mode”; MLO requires multiple RF chains; CMX500 provides integrated Wi-Fi 7 test functionality and embedded IP test capabilities.  \n   Citation: `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`, section 6.\n\n8. **OTA signaling and chamber integration**\n   - Semiconductor validation increasingly needs OTA behavior, antenna/RF interaction, and real-world wireless performance, not just cabled tests.\n   - R&S evidence: CMX500 and SMBV100B are integrated with ETS-Lindgren chamber technology and EMQuest software for comprehensive wireless OTA testing.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n9. **Application-level and IMS services testing**\n   - Modem platforms must prove not only RF/protocol behavior but also services such as VoNR, IMS, IP throughput, emergency calling, and user-experience flows.\n   - R&S evidence: CMX500 has a built-in IMS server and supports VoNR acoustics; it was also used for NG eCall verification including voice and data transmission.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.  \n   - `raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`, section 5.\n\n**Bottom line:** for semiconductor applications, the critical signaling capabilities are **multi-RAT cellular + Wi-Fi support, protocol/RF conformance, carrier aggregation, FR3/6G readiness, NTN/direct-to-cell, Wi-Fi 7/8 MLO, high-throughput MIMO/4096QAM, OTA chamber integration, and application/IMS service validation**. In the R&S portfolio, the evidence consistently points to the **CMX500** as the central signaling test platform for these needs.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+      "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+      "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+       "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+       "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "For semiconductor companies developing wireless chipsets, modems, RFICs, connectivity SoCs, and reference platforms, the most important **signaling test capabilities** are:\n\n1. **Multi-RAT cellular network emulation**\n   - Ability to emulate LTE and 5G NR in both **SA and NSA** modes is foundational for modem/chipset validation.\n   - R&S evidence: CMX500 covers “LTE and NR in SA/NSA modes.”  \n   Citation: `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.\n\n2. **Protocol validation + RF conformance in one platform**\n   - Semiconductor teams need to validate stack behavior, call/session setup, RF performance, and standards conformance before device integration.\n   - R&S evidence: CMX500 enables “one-stop testing for RF conformance, protocol validation, VoNR acoustics and carrier aggregation.”  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.\n\n3. **Carrier aggregation and FR1–FR3 / 6G-readiness**\n   - Chipset roadmaps increasingly need FR1, FR2, emerging FR3, and cross-band carrier aggregation validation.\n   - R&S evidence: CMX500 supports FR1 to FR3 up to 18 GHz and carrier aggregation; it is positioned for 5G-Advanced and 6G R&D.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.\n\n4. **High-throughput and advanced PHY validation**\n   - Important for premium modems and Wi-Fi/cellular combo chips: high data rates, high-order modulation, antenna-port scaling, and spatial multiplexing.\n   - R&S evidence: CMX500 is described as supporting data rates up to 20 Gbps, wide dynamic range, 4096QAM, and up to 16 device antenna ports.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.\n\n5. **NTN / satellite / direct-to-cell signaling**\n   - NTN is important for modem vendors targeting 3GPP Rel.17+ satellite, IoT, and direct-to-cell use cases.\n   - R&S evidence: CMX500 covers NR-NTN, NB-NTN, and Direct-to-Cell testing; R&S and MediaTek also demonstrated a 5G NTN-NR Rel.17 test setup.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.  \n   - `raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md`, section 7.\n\n6. **Wi-Fi signaling: Wi-Fi 6/6E/7 and future Wi-Fi 8**\n   - Semiconductor connectivity SoCs need signaling-mode Wi-Fi validation, especially for Wi-Fi 7 MLO and emerging Wi-Fi 8 features.\n   - R&S evidence: CMX500 supports WLAN including Wi-Fi 7 and future Wi-Fi 8; another source says Wi-Fi 6/6E/7 signaling can be integrated in every CMX500.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 10.  \n   - `raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md`, section 6.\n\n7. **Wi-Fi 7 MLO and multi-RF-chain testing**\n   - For Wi-Fi 7 chipsets, Multi-Link Operation requires multiple RF chains and realistic signaling conditions.\n   - R&S evidence: Wi-Fi 7 development requires antenna, RF TX/RX measurements “under real-world conditions in signaling mode”; MLO requires multiple RF chains; CMX500 provides integrated Wi-Fi 7 test functionality and embedded IP test capabilities.  \n   Citation: `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`, section 6.\n\n8. **OTA signaling and chamber integration**\n   - Semiconductor validation increasingly needs OTA behavior, antenna/RF interaction, and real-world wireless performance, not just cabled tests.\n   - R&S evidence: CMX500 and SMBV100B are integrated with ETS-Lindgren chamber technology and EMQuest software for comprehensive wireless OTA testing.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n9. **Application-level and IMS services testing**\n   - Modem platforms must prove not only RF/protocol behavior but also services such as VoNR, IMS, IP throughput, emergency calling, and user-experience flows.\n   - R&S evidence: CMX500 has a built-in IMS server and supports VoNR acoustics; it was also used for NG eCall verification including voice and data transmission.  \n   Citations:  \n   - `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 5.  \n   - `raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`, section 5.\n\n**Bottom line:** for semiconductor applications, the critical signaling capabilities are **multi-RAT cellular + Wi-Fi support, protocol/RF conformance, carrier aggregation, FR3/6G readiness, NTN/direct-to-cell, Wi-Fi 7/8 MLO, high-throughput MIMO/4096QAM, OTA chamber integration, and application/IMS service validation**. In the R&S portfolio, the evidence consistently points to the **CMX500** as the central signaling test platform for these needs.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_B2iHgKsu7SbzfjmriaoZH3TO",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+          "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+          "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+           "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+           "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What are the most important signaling test capabilities for semiconductor applications? Focus on Rohde & Schwarz solutions and cite raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Rohde & Schwarz and MediaTek will demonstrate the 5G NTN-NR test setup at Mobile World Congress 2024 at the Rohde & Schwarz booth 5A80 in hall 5 of the Fira Gran Via in Barcelona. Trade show visitors are invited to learn how cutting-edge solutions from Rohde & Schwarz can help with test and verification needs for NTN and other technologies. For further information on NTN test solutions from Rohde & Schwarz, visit: [https://www.rohde-schwarz.com/\\_256719.html](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/5g-nr/non-terrestrial-networks-ntn/non-terrestrial-networks-ntn_256719.html \"https://www.rohde-schwarz.com/_256719.html\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-aa5dceb541eab8a5",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "sha256": "aa5dceb541eab8a5363bb8e45f5605b367d3cfbdeebc9597deb795d360067ecf",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.049709
+            },
+            {
+             "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.984161
+            },
+            {
+             "text": "- [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]\n- [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]\n- [[Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies]]\n- [[Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks]]\n- [[Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation]]\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]\n- [[Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness]]\n- [[Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR]]\n- [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]\n- [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Mokry.md"
+             },
+             "score": 33.498572
+            },
+            {
+             "text": "[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 說明 [[EMITE]] 與 [[Rohde & Schwarz]] 延續合作，將 [[R&S CMX500]] multi-technology、multi-channel one-box signaling tester 的 latest test capabilities fully integrated 到 [[EMITE]] OTA measurement solutions。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/EMITE.md"
+             },
+             "score": 32.88639
+            },
+            {
+             "text": "Through this joint effort, Rohde & Schwarz and Qualcomm Technologies have successfully verified the compliance of the Snapdragon Auto 5G Modem-RF's NG eCall functionality with the most recent eCall standards. The verification process employed the Rohde & Schwarz [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") mobile radio tester, a comprehensive testing solution for NG eCall including voice and data transmission. This rigorous test, which was simulating a Public Safety Answering Point (PSAP), validated the compliance of the implementation at both ends with the EN 17240:2024 standard. Moreover, the CMX500 supports both 4G and 5G technologies, aiming to provide that the solutions are future-proof.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7ff0d627b4993a68",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.873593
+            },
+            {
+             "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.581479
+            },
+            {
+             "text": "Rohde & Schwarz will present its comprehensive test solutions for next-generation WLAN at the Mobile World Congress 2024 at the Fira Gran Via in Barcelona in hall 5, booth 5A80. For further information on WLAN test solutions from Rohde & Schwarz, visit: [https://www.rohde-schwarz.com/wlan](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wlan-solutions_77957.html \"https://www.rohde-schwarz.com/wlan\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.365006
+            },
+            {
+             "text": "## Rohde & Schwarz, a global leader in test and measurement solutions today announced its work with Qualcomm Technologies, Inc. to verify the implementation of Next Generation eCall (NG eCall) on Qualcomm Technologies’ Snapdragon® Auto 5G Modem-RF, in line with the most recent specification EN 17240:2024. Rohde & Schwarz’s work with Qualcomm Technologies aims to enhance the safety and efficiency of emergency response systems in vehicles via advanced testing solutions.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7ff0d627b4993a68",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.08223
+            }
+           ],
+           "text": "5G NTN-NR test and verification is important, with Rohde & Schwarz and MediaTek demonstrating a 5G NTN-NR test setup for NTN needs [1].  \nThe R&S CMX500 one-box signaling tester is a key signaling solution for comprehensive wireless technology testing [2].  \nOTA and chamber-based testing are important, with CMX500 and R&S SMBV100B integrated with ETS-Lindgren chamber technology and EMQuest software [2].  \nNB-IoT NTN and NR NTN test coverage is important, and these capabilities are already covered by the R&S CMW500 and R&S CMX500 [6].  \nAutomotive modem testing needs NG eCall verification, and the CMX500 provides a comprehensive NG eCall solution including voice and data transmission [5].  \nEmergency-call compliance testing can simulate a Public Safety Answering Point and validate EN 17240:2024 compliance at both ends [5].  \nMulti-RAT support is important because the CMX500 supports both 4G and 5G technologies [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Rohde & Schwarz and MediaTek will demonstrate the 5G NTN-NR test setup at Mobile World Congress 2024 at the Rohde & Schwarz booth 5A80 in hall 5 of the Fira Gran Via in Barcelona. Trade show visitors are invited to learn how cutting-edge solutions from Rohde & Schwarz can help with test and verification needs for NTN and other technologies. For further information on NTN test solutions from Rohde & Schwarz, visit: [https://www.rohde-schwarz.com/\\_256719.html](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/5g-nr/non-terrestrial-networks-ntn/non-terrestrial-networks-ntn_256719.html \"https://www.rohde-schwarz.com/_256719.html\")",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-aa5dceb541eab8a5",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "sha256": "aa5dceb541eab8a5363bb8e45f5605b367d3cfbdeebc9597deb795d360067ecf",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.049709
+           },
+           {
+            "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8180ce629a865e0b",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.984161
+           },
+           {
+            "text": "Through this joint effort, Rohde & Schwarz and Qualcomm Technologies have successfully verified the compliance of the Snapdragon Auto 5G Modem-RF's NG eCall functionality with the most recent eCall standards. The verification process employed the Rohde & Schwarz [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") mobile radio tester, a comprehensive testing solution for NG eCall including voice and data transmission. This rigorous test, which was simulating a Public Safety Answering Point (PSAP), validated the compliance of the implementation at both ends with the EN 17240:2024 standard. Moreover, the CMX500 supports both 4G and 5G technologies, aiming to provide that the solutions are future-proof.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7ff0d627b4993a68",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.873593
+           },
+           {
+            "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-756bf47cc8d552b2",
+              "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.581479
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_7MoX0YbvisNMTZi3DVMDVWB7",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+          "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+          "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+           "request_id": "request-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+           "span_id": "span-638dcaea0f3d45e69fcadc2d4c4e9a8f",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Semiconductor applications signaling test capabilities CMX500 Wi-Fi 7 Wi-Fi 8 RedCap NTN FR3 carrier aggregation IoT chipset modem validation Rohde Schwarz raw evidence",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 46.513939
+            },
+            {
+             "text": "Message: R&S offers a single-platform path to FR3 and 6G-ready features; Keysight relies\non a combination of UXM variants and separate tools.\n6) Cellular + Wi-Fi in One Platform\nR&S\n• CMX500: Wi-Fi 6 / 6E / 7 signaling possible to integrate in every CMX500",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3cd0a825d66aa879",
+               "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.279713
+            },
+            {
+             "text": "Engineered for data rates up to 20 Gbps, the CMX500 is one of the most versatile mobile device test platforms, supporting wide dynamic range, 4096QAM and up to 16 device antenna ports for advanced spatial multiplexing. With its multi-band capabilities, it covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing, and WLAN including Wi‑Fi 7 and future [Wi‑Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi‑Fi 8\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ab38a8570454352c",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 41.85865
+            },
+            {
+             "text": "At the core of this test solution is the tried and tested CMX500 5G one-box signaling tester from Rohde & Schwarz. This all-in-one test platform supports both SA and NSA architectures, covers frequency ranges from FR1 to FR3 (up to 18 GHz) and features a built-in IMS server, enabling one-stop testing for RF conformance, protocol validation, VoNR acoustics and carrier aggregation. With these capabilities, the CMX500 serves as a key test platform for 5G-Advanced and 6G research and development.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7c6ece0fac696c87",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+               "sha256": "7c6ece0fac696c873c46cba847925d05b291c84f0a0f264fbbc000add5c43d2d",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.515953
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the antennas as well as RF transmitter and receiver characteristics must be conducted under real-world conditions in signaling mode. With MLO being a key feature in Wi-Fi 7, a test environment that provides multiple RF chains is crucial. The R&S CMX500 one-box tester from Rohde & Schwarz, featuring integrated Wi-Fi 7 test functionality, is a multi-technology multi-channel signaling tester. Its flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a broad range of Wi-Fi 7-specific tests.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-54cc8cb2ee42584d",
+               "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.276692
+            },
+            {
+             "text": "- [[Rohde & Schwarz]]\n- [[R&S CMX500]]\n- [[R&S CMX500 OBT]]\n- [[R&S CMP180]]\n- [[R&S TS-PCT]]\n- [[Wi-Fi 7 R&D and production testing]]\n- [[Wi-Fi 8 RF signaling tests]]\n- [[ETS-Lindgren OTA turnkey testing solutions]]\n- [[FR3 13 GHz 5G NR connection demonstration]]\n- [[FR1-FR3 carrier aggregation demonstration]]\n- [[EEI labeling test solution]]\n- [[Viasat NB-NTN IoT test plan]]\n- [[5G NTN validation and testing]]\n- [[Search Space Set Group Switching]]\n- [[Generative AI user experience testing]]\n- [[5G NR SAR testing]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Mokry.md"
+             },
+             "score": 63.3854
+            },
+            {
+             "text": "- [[Rohde & Schwarz]]\n- [[R&S CMX500]]\n- [[R&S CMW500]]\n- [[EMITE OTA Test Systems]]\n- [[Wi-Fi 7 and 5G RedCap OTA measurements]]\n- [[5G RedCap OTA measurements]]\n- [[Wi-Fi 7 OTA MIMO stress testing]]\n- [[OTA testing]]\n- [[MIMO]]\n- [[IEEE 802.11be]]\n- [[Wi-Fi 7]]\n- [[5G RedCap]]\n- [[NB-IoT NTN]]\n- [[NR NTN]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/EMITE.md"
+             },
+             "score": 55.892982
+            },
+            {
+             "text": "- [[Qualcomm Technologies]]\n- [[Qualcomm Modem-RF System]]\n- [[Mobile Test Platform]]\n- [[Rohde & Schwarz]]\n- [[R&S CMX500 OBT]]\n- [[R&S CMX500]]\n- [[RFU18]]\n- [[FR3 13 GHz 5G NR connection demonstration]]\n- [[FR1-FR3 carrier aggregation demonstration]]\n- [[6G]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Tingfang Ji.md"
+             },
+             "score": 48.215937
+            }
+           ],
+           "text": "Rohde & Schwarz will demonstrate CMX500 Wi-Fi 8 testing by validating a Broadcom prototype Wi-Fi 8 device at MWC Barcelona 2026 [1].\nThe CMX500 supports integrated Wi-Fi 6, Wi-Fi 6E, and Wi-Fi 7 signaling [2].\nThe CMX500 covers WLAN including Wi-Fi 7 and future Wi-Fi 8 [3].\nThe CMX500 supports NR-NTN, NB-NTN, and Direct-to-Cell testing [3].\nThe CMX500 covers FR1 to FR3 up to 18 GHz and supports carrier aggregation testing [4].\nThe CMX500 supports RF conformance, protocol validation, and VoNR acoustics testing [4].\nFor Wi-Fi 7, the CMX500 provides integrated test functionality, multiple RF chains for MLO, and embedded IP test capabilities [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 46.513939
+           },
+           {
+            "text": "Message: R&S offers a single-platform path to FR3 and 6G-ready features; Keysight relies\non a combination of UXM variants and separate tools.\n6) Cellular + Wi-Fi in One Platform\nR&S\n• CMX500: Wi-Fi 6 / 6E / 7 signaling possible to integrate in every CMX500",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-3cd0a825d66aa879",
+              "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 44.279713
+           },
+           {
+            "text": "Engineered for data rates up to 20 Gbps, the CMX500 is one of the most versatile mobile device test platforms, supporting wide dynamic range, 4096QAM and up to 16 device antenna ports for advanced spatial multiplexing. With its multi-band capabilities, it covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing, and WLAN including Wi‑Fi 7 and future [Wi‑Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi‑Fi 8\").",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ab38a8570454352c",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 41.85865
+           },
+           {
+            "text": "At the core of this test solution is the tried and tested CMX500 5G one-box signaling tester from Rohde & Schwarz. This all-in-one test platform supports both SA and NSA architectures, covers frequency ranges from FR1 to FR3 (up to 18 GHz) and features a built-in IMS server, enabling one-stop testing for RF conformance, protocol validation, VoNR acoustics and carrier aggregation. With these capabilities, the CMX500 serves as a key test platform for 5G-Advanced and 6G research and development.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7c6ece0fac696c87",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "sha256": "7c6ece0fac696c873c46cba847925d05b291c84f0a0f264fbbc000add5c43d2d",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.515953
+           },
+           {
+            "text": "During the development of WLAN devices, measurements of the antennas as well as RF transmitter and receiver characteristics must be conducted under real-world conditions in signaling mode. With MLO being a key feature in Wi-Fi 7, a test environment that provides multiple RF chains is crucial. The R&S CMX500 one-box tester from Rohde & Schwarz, featuring integrated Wi-Fi 7 test functionality, is a multi-technology multi-channel signaling tester. Its flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a broad range of Wi-Fi 7-specific tests.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-54cc8cb2ee42584d",
+              "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.276692
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

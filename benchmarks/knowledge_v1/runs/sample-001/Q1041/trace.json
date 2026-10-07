@@ -1,0 +1,358 @@
+{
+ "question": {
+  "id": "Q1041",
+  "text": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "technical": "High-Speed / Signal Integrity",
+  "topic": "eye diagram",
+  "product_related": "true"
+ },
+ "session_id": "conversation-f8a069f66e2e454b95d6766567459f61",
+ "exchange": {
+  "sent": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 71.765,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-f8a069f66e2e454b95d6766567459f61",
+    "actor": "leo.chi",
+    "title": "What is eye diagram, and which product-related measurement decisions dep…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:14:17.199461Z",
+    "updated_at": "2026-10-07T09:15:28.869968Z",
+    "messages": [
+     {
+      "message_id": "message-b838058147a14493b7656ab6a9703114",
+      "role": "user",
+      "text": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T09:14:17.213319Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-e004409388f7444a846edbbda58deae3",
+      "role": "assistant",
+      "text": "An **eye diagram** is a signal-integrity view made by overlaying many repeated digital bit intervals on the same time axis. The result looks like an “eye.”\n\nHow to read it:\n\n- **Eye height** → vertical noise / amplitude margin  \n- **Eye width** → timing margin / jitter tolerance  \n- **Eye opening** → overall link quality; bigger is better  \n- **Crossing point** → duty-cycle distortion or asymmetry  \n- **Closure / fuzzy edges** → jitter, noise, intersymbol interference, bandwidth loss, reflections, equalization problems  \n- **Mask hits** → compliance failure risk for a given standard\n\nIn short: an eye diagram tells you whether a digital link can reliably distinguish 1s and 0s at the sampling instant.\n\nProduct-related measurement decisions that depend on understanding eye diagrams include:\n\n1. **Instrument class selection**\n   - Use a high-bandwidth oscilloscope / sampling oscilloscope when you need eye, jitter, mask, and serial-data compliance measurements.\n   - Use a spectrum/signal analyzer when the task is RF spectrum, OBW, ACPR, spurious, etc., not eye-diagram signal integrity.\n\n2. **Bandwidth and sample-rate choice**\n   - The oscilloscope bandwidth must be high enough for the data rate and edge speed.\n   - Too little bandwidth artificially closes the eye.\n\n3. **NRZ vs PAM4 support**\n   - NRZ links have one eye opening.\n   - PAM4 links have three stacked eyes, so the instrument and analysis software must support PAM4 eye, level separation, TDECQ, etc.\n\n4. **Clock recovery and jitter analysis options**\n   - Eye measurements depend heavily on clock recovery method.\n   - For compliance work, you may need specific jitter decomposition, CDR, bathtub, or BER extrapolation features.\n\n5. **Mask/compliance package decision**\n   - Standards such as USB, PCIe, Ethernet, HDMI, MIPI, etc. often require defined eye-mask or jitter tests.\n   - That drives which oscilloscope software option or compliance package is needed.\n\n6. **Probe, fixture, and de-embedding decision**\n   - Poor probing or fixtures can close the eye.\n   - High-speed work may require differential probes, low-loss fixtures, and de-embedding/S-parameter correction.\n\n7. **Equalization and transmitter tuning**\n   - Eye diagrams guide decisions on pre-emphasis, de-emphasis, CTLE, DFE, output swing, termination, and channel compensation.\n\n8. **BERT vs oscilloscope decision**\n   - Oscilloscopes show waveform shape and root causes.\n   - BERTs are better for very low BER confidence testing.\n   - Many high-speed designs need both.\n\nFor the Rohde & Schwarz material available here, I do **not** have sufficient raw evidence tying “eye diagram” specifically to a named R&S product or option. The available evidence does support the broader point that product/test-mode choice depends on the measurement: for 5G NR base-station transmitter tests, R&S documentation says different operation modes such as **Spectrum** or **5G NR** are required, and that available measurements depend on the selected operation mode; Spectrum mode is used for OBW and transmitter spurious emissions tests. [raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md, section 23]",
+      "created_at": "2026-10-07T09:15:28.869968Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-3514d10a94344b2f8e7ad4257e789e26",
+       "request_id": "request-3514d10a94344b2f8e7ad4257e789e26",
+       "span_id": "span-3514d10a94344b2f8e7ad4257e789e26",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "An **eye diagram** is a signal-integrity view made by overlaying many repeated digital bit intervals on the same time axis. The result looks like an “eye.”\n\nHow to read it:\n\n- **Eye height** → vertical noise / amplitude margin  \n- **Eye width** → timing margin / jitter tolerance  \n- **Eye opening** → overall link quality; bigger is better  \n- **Crossing point** → duty-cycle distortion or asymmetry  \n- **Closure / fuzzy edges** → jitter, noise, intersymbol interference, bandwidth loss, reflections, equalization problems  \n- **Mask hits** → compliance failure risk for a given standard\n\nIn short: an eye diagram tells you whether a digital link can reliably distinguish 1s and 0s at the sampling instant.\n\nProduct-related measurement decisions that depend on understanding eye diagrams include:\n\n1. **Instrument class selection**\n   - Use a high-bandwidth oscilloscope / sampling oscilloscope when you need eye, jitter, mask, and serial-data compliance measurements.\n   - Use a spectrum/signal analyzer when the task is RF spectrum, OBW, ACPR, spurious, etc., not eye-diagram signal integrity.\n\n2. **Bandwidth and sample-rate choice**\n   - The oscilloscope bandwidth must be high enough for the data rate and edge speed.\n   - Too little bandwidth artificially closes the eye.\n\n3. **NRZ vs PAM4 support**\n   - NRZ links have one eye opening.\n   - PAM4 links have three stacked eyes, so the instrument and analysis software must support PAM4 eye, level separation, TDECQ, etc.\n\n4. **Clock recovery and jitter analysis options**\n   - Eye measurements depend heavily on clock recovery method.\n   - For compliance work, you may need specific jitter decomposition, CDR, bathtub, or BER extrapolation features.\n\n5. **Mask/compliance package decision**\n   - Standards such as USB, PCIe, Ethernet, HDMI, MIPI, etc. often require defined eye-mask or jitter tests.\n   - That drives which oscilloscope software option or compliance package is needed.\n\n6. **Probe, fixture, and de-embedding decision**\n   - Poor probing or fixtures can close the eye.\n   - High-speed work may require differential probes, low-loss fixtures, and de-embedding/S-parameter correction.\n\n7. **Equalization and transmitter tuning**\n   - Eye diagrams guide decisions on pre-emphasis, de-emphasis, CTLE, DFE, output swing, termination, and channel compensation.\n\n8. **BERT vs oscilloscope decision**\n   - Oscilloscopes show waveform shape and root causes.\n   - BERTs are better for very low BER confidence testing.\n   - Many high-speed designs need both.\n\nFor the Rohde & Schwarz material available here, I do **not** have sufficient raw evidence tying “eye diagram” specifically to a named R&S product or option. The available evidence does support the broader point that product/test-mode choice depends on the measurement: for 5G NR base-station transmitter tests, R&S documentation says different operation modes such as **Spectrum** or **5G NR** are required, and that available measurements depend on the selected operation mode; Spectrum mode is used for OBW and transmitter spurious emissions tests. [raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md, section 23]",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-3514d10a94344b2f8e7ad4257e789e26",
+      "request_id": "request-3514d10a94344b2f8e7ad4257e789e26",
+      "span_id": "span-3514d10a94344b2f8e7ad4257e789e26",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-3514d10a94344b2f8e7ad4257e789e26",
+       "request_id": "request-3514d10a94344b2f8e7ad4257e789e26",
+       "span_id": "span-3514d10a94344b2f8e7ad4257e789e26",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "An **eye diagram** is a signal-integrity view made by overlaying many repeated digital bit intervals on the same time axis. The result looks like an “eye.”\n\nHow to read it:\n\n- **Eye height** → vertical noise / amplitude margin  \n- **Eye width** → timing margin / jitter tolerance  \n- **Eye opening** → overall link quality; bigger is better  \n- **Crossing point** → duty-cycle distortion or asymmetry  \n- **Closure / fuzzy edges** → jitter, noise, intersymbol interference, bandwidth loss, reflections, equalization problems  \n- **Mask hits** → compliance failure risk for a given standard\n\nIn short: an eye diagram tells you whether a digital link can reliably distinguish 1s and 0s at the sampling instant.\n\nProduct-related measurement decisions that depend on understanding eye diagrams include:\n\n1. **Instrument class selection**\n   - Use a high-bandwidth oscilloscope / sampling oscilloscope when you need eye, jitter, mask, and serial-data compliance measurements.\n   - Use a spectrum/signal analyzer when the task is RF spectrum, OBW, ACPR, spurious, etc., not eye-diagram signal integrity.\n\n2. **Bandwidth and sample-rate choice**\n   - The oscilloscope bandwidth must be high enough for the data rate and edge speed.\n   - Too little bandwidth artificially closes the eye.\n\n3. **NRZ vs PAM4 support**\n   - NRZ links have one eye opening.\n   - PAM4 links have three stacked eyes, so the instrument and analysis software must support PAM4 eye, level separation, TDECQ, etc.\n\n4. **Clock recovery and jitter analysis options**\n   - Eye measurements depend heavily on clock recovery method.\n   - For compliance work, you may need specific jitter decomposition, CDR, bathtub, or BER extrapolation features.\n\n5. **Mask/compliance package decision**\n   - Standards such as USB, PCIe, Ethernet, HDMI, MIPI, etc. often require defined eye-mask or jitter tests.\n   - That drives which oscilloscope software option or compliance package is needed.\n\n6. **Probe, fixture, and de-embedding decision**\n   - Poor probing or fixtures can close the eye.\n   - High-speed work may require differential probes, low-loss fixtures, and de-embedding/S-parameter correction.\n\n7. **Equalization and transmitter tuning**\n   - Eye diagrams guide decisions on pre-emphasis, de-emphasis, CTLE, DFE, output swing, termination, and channel compensation.\n\n8. **BERT vs oscilloscope decision**\n   - Oscilloscopes show waveform shape and root causes.\n   - BERTs are better for very low BER confidence testing.\n   - Many high-speed designs need both.\n\nFor the Rohde & Schwarz material available here, I do **not** have sufficient raw evidence tying “eye diagram” specifically to a named R&S product or option. The available evidence does support the broader point that product/test-mode choice depends on the measurement: for 5G NR base-station transmitter tests, R&S documentation says different operation modes such as **Spectrum** or **5G NR** are required, and that available measurements depend on the selected operation mode; Spectrum mode is used for OBW and transmitter spurious emissions tests. [raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md, section 23]",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_K8oH7mSnRbDNHmcpv6Q1eXok",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3514d10a94344b2f8e7ad4257e789e26",
+          "request_id": "request-3514d10a94344b2f8e7ad4257e789e26",
+          "span_id": "span-3514d10a94344b2f8e7ad4257e789e26",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-3514d10a94344b2f8e7ad4257e789e26",
+           "request_id": "request-3514d10a94344b2f8e7ad4257e789e26",
+           "span_id": "span-3514d10a94344b2f8e7ad4257e789e26",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What is an eye diagram, and which Rohde & Schwarz product-related measurement decisions depend on understanding eye diagrams? Include relevant product evidence and citations.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "1.  Which 3GPP release is relevant (Rel. 17, 18, 19)? What is the timeline here?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 18,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.92419
+            },
+            {
+             "text": "b.  What does “minimal human intervention” mean in your context—which decisions",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.0346
+            },
+            {
+             "text": "3.3.4 Changing operation and measurement modes\nFor the following base station transmitter tests different operation modes (Spectrum or 5G NR) are required.\nThe mode which is required for each test is specified in the respective sections.\nDepending on the operation mode, different measurements are available. What measurement is required for\nwhich test is specified in the respective section. Select the measurement by pressing Select measurement\nat the overview-screen or by pressing MEAS key on the front panel of the instrument.\n3.3.4.1 Measurements in Spectrum mode\n①: Used for Occupied bandwidth (OBW) (6.6.2)\n②: Used for Transmitter spurious emissions (6.6.5)\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 14\n2 a\n2 b\n2",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.576441
+            },
+            {
+             "text": "## Rohde & Schwarz has successfully passed certification testing of its hybrid eCall and Next Generation eCall test solution conducted by cetecom advanced. cetecom advanced is a leading independent test laboratory for product testing and worldwide certification for devices from various branches like communication technologies, automotive, medical technology, payment & identification. The Rohde & Schwarz solution is based on the CMX500 radio communication tester with an updated eCall option to ensure compliance with the latest eCall regulations and standards.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.232843
+            },
+            {
+             "text": "testing. Founded more than 80 years ago, the\nindependent company which is headquartered in\nMunich, Germany, has an extensive sales and service\nnetwork with locations in more than 70 countries.\nwww.rohde-schwarz.com",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 92,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.75077
+            },
+            {
+             "text": "testing. Founded more than 80 years ago, the\nindependent company which is headquartered in\nMunich, Germany, has an extensive sales and service\nnetwork with locations in more than 70 countries.\nwww.rohde-schwarz.com",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 113,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.679944
+            },
+            {
+             "text": "testing. Founded more than 80 years ago, the\nindependent company which is headquartered in\nMunich, Germany, has an extensive sales and service\nnetwork with locations in more than 70 countries.\nwww.rohde-schwarz.com",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae10296a3c004b30",
+               "original_ref": "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+               "sha256": "ae10296a3c004b30b1709175382be80455a3f78e550b911cb314ccb60c2ec360",
+               "raw_ref": "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+              "section": 63,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.609582
+            },
+            {
+             "text": "testing. Founded more than 80 years ago, the\nindependent company which is headquartered in\nMunich, Germany, has an extensive sales and service\nnetwork with locations in more than 70 countries.\nwww.rohde-schwarz.com",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-b1f51b9642754bec",
+               "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+               "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "section": 130,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.539679
+            }
+           ],
+           "text": "The RAW evidence only supports that, for Rohde & Schwarz 5G New Radio conducted base station transmitter tests, different operation modes such as Spectrum or 5G NR are required, available measurements depend on the selected operation mode, and Spectrum mode is used for Occupied Bandwidth and Transmitter Spurious Emissions tests [3].\nSeparately, Rohde & Schwarz’s eCall/Next Generation eCall test solution is based on the CMX500 radio communication tester with an updated eCall option [4].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "3.3.4 Changing operation and measurement modes\nFor the following base station transmitter tests different operation modes (Spectrum or 5G NR) are required.\nThe mode which is required for each test is specified in the respective sections.\nDepending on the operation mode, different measurements are available. What measurement is required for\nwhich test is specified in the respective section. Select the measurement by pressing Select measurement\nat the overview-screen or by pressing MEAS key on the front panel of the instrument.\n3.3.4.1 Measurements in Spectrum mode\n①: Used for Occupied bandwidth (OBW) (6.6.2)\n②: Used for Transmitter spurious emissions (6.6.5)\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 14\n2 a\n2 b\n2",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-fc3b9e0cc7a10eb5",
+              "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.576441
+           },
+           {
+            "text": "## Rohde & Schwarz has successfully passed certification testing of its hybrid eCall and Next Generation eCall test solution conducted by cetecom advanced. cetecom advanced is a leading independent test laboratory for product testing and worldwide certification for devices from various branches like communication technologies, automotive, medical technology, payment & identification. The Rohde & Schwarz solution is based on the CMX500 radio communication tester with an updated eCall option to ensure compliance with the latest eCall regulations and standards.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-556d5f1923b99787",
+              "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.232843
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

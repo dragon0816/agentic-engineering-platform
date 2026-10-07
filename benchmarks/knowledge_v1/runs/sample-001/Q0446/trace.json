@@ -1,0 +1,712 @@
+{
+ "question": {
+  "id": "Q0446",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Automotive, and what evidence supports each opportunity?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-853ef48b9a5149f79edda284dc7f35ba",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Automotive, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 157.156,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-853ef48b9a5149f79edda284dc7f35ba",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:25:35.527370Z",
+    "updated_at": "2026-10-07T08:28:12.570390Z",
+    "messages": [
+     {
+      "message_id": "message-4e0d8ca629c84016b1be41d96c19d591",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Automotive, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T08:25:35.553538Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-398283a1a64a46278f710902a23ad028",
+      "role": "assistant",
+      "text": "Based on the current vault evidence, the strongest Automotive opportunities for Signaling / Non-signaling Testers are:\n\n| Priority | Opportunity | Tester angle | Evidence strength |\n|---|---|---|---|\n| 1 | Connected-car / telematics / V2X cellular testing | Signaling tester, especially CMX500-class 5G network emulation | Strongest automotive-specific evidence |\n| 2 | Automotive eCall / Next Generation eCall validation | Signaling / protocol / conformance-style test systems | Strong automotive-specific evidence |\n| 3 | Automotive connectivity & infotainment wireless testing, including Wi-Fi evolution | Signaling tester for Wi-Fi; non-signaling tester for RF production | Good opportunity, but Wi-Fi tester evidence is not explicitly automotive-specific |\n| 4 | Production-scale RF test for automotive wireless modules | Non-signaling ATE / multi-port production test: CMP180 / CMP200 / CMW100 | Good tester evidence, automotive link is inferred from automotive lifecycle / production need |\n\n## 1. Connected-car / telematics / V2X cellular testing\n\nThis looks like the strongest opportunity because the vault directly links automotive platforms with 5G, connected vehicles, telematics, positioning, V2X, GNSS and safety.\n\n**Evidence:** The vault states that the “Snapdragon Auto 5G Modem-RF” is a “5G automotive-grade platform” for “next-generation connected vehicles,” delivering “high-speed connectivity, advanced positioning, and support for Vehicle-to-Everything (V2X) technology,” and that it is designed for “modern telematics,” “multi-band GNSS navigation,” and “enhanced safety.”  \nSource: `raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`, section 4.\n\n**Why this is an opportunity:**  \nAutomotive 5G modem/RF platforms need signaling/network-emulation test coverage for cellular behavior, mobility, positioning-related behavior, and connected-vehicle use cases. The evidence does not explicitly say “CMX500 was used for V2X automotive testing,” so that specific product mapping is an inference; but the need area is clearly supported.\n\n## 2. eCall / Next Generation eCall validation\n\neCall is a clear automotive connectivity application and likely a strong test opportunity because it has certification/conformance characteristics and sits at the intersection of cellular connectivity, emergency services, GNSS, and vehicle systems.\n\n**Evidence:** The vault includes an automotive eCall source and states that R&S supports the automotive industry in “autonomous driving, electrification, and connectivity.” It says OEMs, chip suppliers, tier 1s, engineering service providers and certification organizations rely on R&S test solutions for “connectivity including antennas,” “infotainment,” “in-vehicle networks,” and more, across the “entire automotive lifecycle from R&D to production and beyond.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Why this is an opportunity:**  \nThe buyer set is broad — OEMs, chip suppliers, tier 1s, engineering service providers, certification organizations — and the lifecycle spans R&D through production. That makes eCall / NG eCall a strong automotive test wedge, especially for signaling and conformance-style test solutions.\n\n## 3. Automotive connectivity & infotainment wireless testing, including Wi-Fi\n\nThe vault supports automotive “connectivity” and “infotainment” as R&S automotive test domains, and separately supports CMX500 Wi-Fi signaling and CMP180 WLAN non-signaling production/R&D testing. The automotive connection is plausible but less direct than eCall/5G telematics because the Wi-Fi tester passages themselves are not explicitly automotive.\n\n**Automotive-domain evidence:** R&S automotive customers rely on test solutions for “connectivity including antennas” and “infotainment.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Signaling tester evidence:** R&S and Broadcom will show the CMX500 “multi-technology multi-channel signaling tester” with “Wi-Fi 8 testing capabilities,” validating a prototype Wi-Fi 8 device.  \nSource: `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`, section 3.\n\n**Non-signaling tester evidence:** For WLAN production, “all RF measurements are performed in non-signaling mode to save time,” and R&S optimized the CMP180 for this purpose. The CMP180 supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz, with bandwidths up to 500 MHz, and is positioned as future-proof for production and R&D.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 12.\n\n**Why this is an opportunity:**  \nVehicles increasingly integrate Wi-Fi and infotainment connectivity. The vault directly supports R&S automotive infotainment/connectivity as a market and separately supports CMX500/CMP180 Wi-Fi test capabilities. I would treat this as a strong adjacent opportunity, but not as directly evidenced as automotive 5G/eCall.\n\n## 4. Production-scale RF test for automotive wireless modules\n\nThis opportunity is strongest where automotive customers move from R&D to module/device production and need fast RF test at scale.\n\n**Evidence:** The vault notes a production-scale sales trigger: “Do you need non-signaling ATE or multi-port production test?” If yes, the named R&S solutions are “CMP180 / CMP200 / CMW100.”  \nSource: `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5.\n\n**Supporting evidence:** R&S supports automotive customers “over the entire automotive lifecycle from R&D to production and beyond.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Why this is an opportunity:**  \nFor automotive wireless modules — telematics, infotainment, connectivity modules — production test needs are likely cost/time-sensitive. The vault explicitly ties non-signaling to production speed for WLAN and explicitly names CMP180/CMP200/CMW100 for non-signaling ATE / multi-port production test.\n\n## Evidence gaps / caution\n\nThe current Raw evidence is **insufficient** to strongly claim specific opportunities for:\n\n- Bluetooth automotive testing  \n- UWB digital key testing  \n- C-V2X specifically — the Raw evidence says V2X, not C-V2X  \n- ADAS wireless test using signaling/non-signaling testers  \n- Specific TCU production wins or named automotive OEM design-ins  \n\nSo the best-supported positioning is:\n\n1. **Cellular connected-car / telematics / V2X / GNSS safety testing** — strongest direct automotive need.  \n2. **eCall / NG eCall** — strongest concrete automotive application.  \n3. **Automotive infotainment/connectivity Wi-Fi test** — strong adjacent opportunity using CMX500/CMP180 evidence.  \n4. **Non-signaling production RF test for automotive wireless modules** — strong production-test angle, especially CMP180/CMP200/CMW100.",
+      "created_at": "2026-10-07T08:28:12.570390Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+       "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+       "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the current vault evidence, the strongest Automotive opportunities for Signaling / Non-signaling Testers are:\n\n| Priority | Opportunity | Tester angle | Evidence strength |\n|---|---|---|---|\n| 1 | Connected-car / telematics / V2X cellular testing | Signaling tester, especially CMX500-class 5G network emulation | Strongest automotive-specific evidence |\n| 2 | Automotive eCall / Next Generation eCall validation | Signaling / protocol / conformance-style test systems | Strong automotive-specific evidence |\n| 3 | Automotive connectivity & infotainment wireless testing, including Wi-Fi evolution | Signaling tester for Wi-Fi; non-signaling tester for RF production | Good opportunity, but Wi-Fi tester evidence is not explicitly automotive-specific |\n| 4 | Production-scale RF test for automotive wireless modules | Non-signaling ATE / multi-port production test: CMP180 / CMP200 / CMW100 | Good tester evidence, automotive link is inferred from automotive lifecycle / production need |\n\n## 1. Connected-car / telematics / V2X cellular testing\n\nThis looks like the strongest opportunity because the vault directly links automotive platforms with 5G, connected vehicles, telematics, positioning, V2X, GNSS and safety.\n\n**Evidence:** The vault states that the “Snapdragon Auto 5G Modem-RF” is a “5G automotive-grade platform” for “next-generation connected vehicles,” delivering “high-speed connectivity, advanced positioning, and support for Vehicle-to-Everything (V2X) technology,” and that it is designed for “modern telematics,” “multi-band GNSS navigation,” and “enhanced safety.”  \nSource: `raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`, section 4.\n\n**Why this is an opportunity:**  \nAutomotive 5G modem/RF platforms need signaling/network-emulation test coverage for cellular behavior, mobility, positioning-related behavior, and connected-vehicle use cases. The evidence does not explicitly say “CMX500 was used for V2X automotive testing,” so that specific product mapping is an inference; but the need area is clearly supported.\n\n## 2. eCall / Next Generation eCall validation\n\neCall is a clear automotive connectivity application and likely a strong test opportunity because it has certification/conformance characteristics and sits at the intersection of cellular connectivity, emergency services, GNSS, and vehicle systems.\n\n**Evidence:** The vault includes an automotive eCall source and states that R&S supports the automotive industry in “autonomous driving, electrification, and connectivity.” It says OEMs, chip suppliers, tier 1s, engineering service providers and certification organizations rely on R&S test solutions for “connectivity including antennas,” “infotainment,” “in-vehicle networks,” and more, across the “entire automotive lifecycle from R&D to production and beyond.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Why this is an opportunity:**  \nThe buyer set is broad — OEMs, chip suppliers, tier 1s, engineering service providers, certification organizations — and the lifecycle spans R&D through production. That makes eCall / NG eCall a strong automotive test wedge, especially for signaling and conformance-style test solutions.\n\n## 3. Automotive connectivity & infotainment wireless testing, including Wi-Fi\n\nThe vault supports automotive “connectivity” and “infotainment” as R&S automotive test domains, and separately supports CMX500 Wi-Fi signaling and CMP180 WLAN non-signaling production/R&D testing. The automotive connection is plausible but less direct than eCall/5G telematics because the Wi-Fi tester passages themselves are not explicitly automotive.\n\n**Automotive-domain evidence:** R&S automotive customers rely on test solutions for “connectivity including antennas” and “infotainment.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Signaling tester evidence:** R&S and Broadcom will show the CMX500 “multi-technology multi-channel signaling tester” with “Wi-Fi 8 testing capabilities,” validating a prototype Wi-Fi 8 device.  \nSource: `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`, section 3.\n\n**Non-signaling tester evidence:** For WLAN production, “all RF measurements are performed in non-signaling mode to save time,” and R&S optimized the CMP180 for this purpose. The CMP180 supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz, with bandwidths up to 500 MHz, and is positioned as future-proof for production and R&D.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 12.\n\n**Why this is an opportunity:**  \nVehicles increasingly integrate Wi-Fi and infotainment connectivity. The vault directly supports R&S automotive infotainment/connectivity as a market and separately supports CMX500/CMP180 Wi-Fi test capabilities. I would treat this as a strong adjacent opportunity, but not as directly evidenced as automotive 5G/eCall.\n\n## 4. Production-scale RF test for automotive wireless modules\n\nThis opportunity is strongest where automotive customers move from R&D to module/device production and need fast RF test at scale.\n\n**Evidence:** The vault notes a production-scale sales trigger: “Do you need non-signaling ATE or multi-port production test?” If yes, the named R&S solutions are “CMP180 / CMP200 / CMW100.”  \nSource: `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5.\n\n**Supporting evidence:** R&S supports automotive customers “over the entire automotive lifecycle from R&D to production and beyond.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Why this is an opportunity:**  \nFor automotive wireless modules — telematics, infotainment, connectivity modules — production test needs are likely cost/time-sensitive. The vault explicitly ties non-signaling to production speed for WLAN and explicitly names CMP180/CMP200/CMW100 for non-signaling ATE / multi-port production test.\n\n## Evidence gaps / caution\n\nThe current Raw evidence is **insufficient** to strongly claim specific opportunities for:\n\n- Bluetooth automotive testing  \n- UWB digital key testing  \n- C-V2X specifically — the Raw evidence says V2X, not C-V2X  \n- ADAS wireless test using signaling/non-signaling testers  \n- Specific TCU production wins or named automotive OEM design-ins  \n\nSo the best-supported positioning is:\n\n1. **Cellular connected-car / telematics / V2X / GNSS safety testing** — strongest direct automotive need.  \n2. **eCall / NG eCall** — strongest concrete automotive application.  \n3. **Automotive infotainment/connectivity Wi-Fi test** — strong adjacent opportunity using CMX500/CMP180 evidence.  \n4. **Non-signaling production RF test for automotive wireless modules** — strong production-test angle, especially CMP180/CMP200/CMW100.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+      "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+      "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+       "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+       "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the current vault evidence, the strongest Automotive opportunities for Signaling / Non-signaling Testers are:\n\n| Priority | Opportunity | Tester angle | Evidence strength |\n|---|---|---|---|\n| 1 | Connected-car / telematics / V2X cellular testing | Signaling tester, especially CMX500-class 5G network emulation | Strongest automotive-specific evidence |\n| 2 | Automotive eCall / Next Generation eCall validation | Signaling / protocol / conformance-style test systems | Strong automotive-specific evidence |\n| 3 | Automotive connectivity & infotainment wireless testing, including Wi-Fi evolution | Signaling tester for Wi-Fi; non-signaling tester for RF production | Good opportunity, but Wi-Fi tester evidence is not explicitly automotive-specific |\n| 4 | Production-scale RF test for automotive wireless modules | Non-signaling ATE / multi-port production test: CMP180 / CMP200 / CMW100 | Good tester evidence, automotive link is inferred from automotive lifecycle / production need |\n\n## 1. Connected-car / telematics / V2X cellular testing\n\nThis looks like the strongest opportunity because the vault directly links automotive platforms with 5G, connected vehicles, telematics, positioning, V2X, GNSS and safety.\n\n**Evidence:** The vault states that the “Snapdragon Auto 5G Modem-RF” is a “5G automotive-grade platform” for “next-generation connected vehicles,” delivering “high-speed connectivity, advanced positioning, and support for Vehicle-to-Everything (V2X) technology,” and that it is designed for “modern telematics,” “multi-band GNSS navigation,” and “enhanced safety.”  \nSource: `raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`, section 4.\n\n**Why this is an opportunity:**  \nAutomotive 5G modem/RF platforms need signaling/network-emulation test coverage for cellular behavior, mobility, positioning-related behavior, and connected-vehicle use cases. The evidence does not explicitly say “CMX500 was used for V2X automotive testing,” so that specific product mapping is an inference; but the need area is clearly supported.\n\n## 2. eCall / Next Generation eCall validation\n\neCall is a clear automotive connectivity application and likely a strong test opportunity because it has certification/conformance characteristics and sits at the intersection of cellular connectivity, emergency services, GNSS, and vehicle systems.\n\n**Evidence:** The vault includes an automotive eCall source and states that R&S supports the automotive industry in “autonomous driving, electrification, and connectivity.” It says OEMs, chip suppliers, tier 1s, engineering service providers and certification organizations rely on R&S test solutions for “connectivity including antennas,” “infotainment,” “in-vehicle networks,” and more, across the “entire automotive lifecycle from R&D to production and beyond.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Why this is an opportunity:**  \nThe buyer set is broad — OEMs, chip suppliers, tier 1s, engineering service providers, certification organizations — and the lifecycle spans R&D through production. That makes eCall / NG eCall a strong automotive test wedge, especially for signaling and conformance-style test solutions.\n\n## 3. Automotive connectivity & infotainment wireless testing, including Wi-Fi\n\nThe vault supports automotive “connectivity” and “infotainment” as R&S automotive test domains, and separately supports CMX500 Wi-Fi signaling and CMP180 WLAN non-signaling production/R&D testing. The automotive connection is plausible but less direct than eCall/5G telematics because the Wi-Fi tester passages themselves are not explicitly automotive.\n\n**Automotive-domain evidence:** R&S automotive customers rely on test solutions for “connectivity including antennas” and “infotainment.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Signaling tester evidence:** R&S and Broadcom will show the CMX500 “multi-technology multi-channel signaling tester” with “Wi-Fi 8 testing capabilities,” validating a prototype Wi-Fi 8 device.  \nSource: `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`, section 3.\n\n**Non-signaling tester evidence:** For WLAN production, “all RF measurements are performed in non-signaling mode to save time,” and R&S optimized the CMP180 for this purpose. The CMP180 supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz, with bandwidths up to 500 MHz, and is positioned as future-proof for production and R&D.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 12.\n\n**Why this is an opportunity:**  \nVehicles increasingly integrate Wi-Fi and infotainment connectivity. The vault directly supports R&S automotive infotainment/connectivity as a market and separately supports CMX500/CMP180 Wi-Fi test capabilities. I would treat this as a strong adjacent opportunity, but not as directly evidenced as automotive 5G/eCall.\n\n## 4. Production-scale RF test for automotive wireless modules\n\nThis opportunity is strongest where automotive customers move from R&D to module/device production and need fast RF test at scale.\n\n**Evidence:** The vault notes a production-scale sales trigger: “Do you need non-signaling ATE or multi-port production test?” If yes, the named R&S solutions are “CMP180 / CMP200 / CMW100.”  \nSource: `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5.\n\n**Supporting evidence:** R&S supports automotive customers “over the entire automotive lifecycle from R&D to production and beyond.”  \nSource: `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`, section 15.\n\n**Why this is an opportunity:**  \nFor automotive wireless modules — telematics, infotainment, connectivity modules — production test needs are likely cost/time-sensitive. The vault explicitly ties non-signaling to production speed for WLAN and explicitly names CMP180/CMP200/CMW100 for non-signaling ATE / multi-port production test.\n\n## Evidence gaps / caution\n\nThe current Raw evidence is **insufficient** to strongly claim specific opportunities for:\n\n- Bluetooth automotive testing  \n- UWB digital key testing  \n- C-V2X specifically — the Raw evidence says V2X, not C-V2X  \n- ADAS wireless test using signaling/non-signaling testers  \n- Specific TCU production wins or named automotive OEM design-ins  \n\nSo the best-supported positioning is:\n\n1. **Cellular connected-car / telematics / V2X / GNSS safety testing** — strongest direct automotive need.  \n2. **eCall / NG eCall** — strongest concrete automotive application.  \n3. **Automotive infotainment/connectivity Wi-Fi test** — strong adjacent opportunity using CMX500/CMP180 evidence.  \n4. **Non-signaling production RF test for automotive wireless modules** — strong production-test angle, especially CMP180/CMP200/CMW100.",
+      "model_turns": 4,
+      "tools": [
+       {
+        "call_id": "call_InS7zYhZpimIWnnD9uCVcOvu",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+          "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+          "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+           "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+           "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Automotive, and what evidence supports each opportunity? Please identify opportunities and cite Raw evidence only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.878426
+            },
+            {
+             "text": "\"The maximum number of SRS resources that can be configured for non-codebook based uplink transmission is 4.\"\n\"The UE shall use one or multiple SRS resources for SRS transmission, where, in a SRS resource set, the maximum number of SRS resources which can be configured to the UE for simultaneous transmission in\nthe same symbol and the maximum number of SRS resources are UE capabilities. The SRS resources transmitted simultaneously occupy the same RBs. Only one SRS port for each SRS resource is configured.\"",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e364b8d023da5322",
+               "original_ref": "raw/Knowledge/Multiple SRS Resources.md",
+               "sha256": "e364b8d023da53225681731828a6c46d905e28553fd370f41323d09b17428bb7",
+               "raw_ref": "raw/Knowledge/Multiple SRS Resources.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Multiple SRS Resources.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.335355
+            },
+            {
+             "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.906564
+            },
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a4192ea568814a6",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.441518
+            },
+            {
+             "text": "- DCI lengths are defined only on ASN.1 parameters。\n- Each [[BWP]] effectively has its own set of parameters。\n- Therefore, at each BWP switch, the set of parameters for the DCI size procedure changes and has to be evaluated anew。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/PDCCH size alignment.md"
+             },
+             "score": 30.30727
+            },
+            {
+             "text": "Only needed for LTE standalone. LTE anchor cells for NR NSA are included in\nthe NR signaling options.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 363,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.162342
+            },
+            {
+             "text": "At the core of the test system is the CMX500 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-34f0f3c950ccae78",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+               "sha256": "34f0f3c950ccae7897a6cd2bd4c5904f5050ae48282866e3346630d3231eb863",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.820155
+            }
+           ],
+           "text": "No RAW passage explicitly identifies automotive-specific opportunities; however, the strongest supported tester opportunities are non-signaling WLAN production/R&D testing with CMP180 [1], 5G NR FR3 signaling R&D with CMX500 OBT [5], and NTN/satellite signaling R&D with CMX500 using integrated fading, channel emulation, and satellite-constellation visualization [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 31.878426
+           },
+           {
+            "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0a4192ea568814a6",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.441518
+           },
+           {
+            "text": "At the core of the test system is the CMX500 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-34f0f3c950ccae78",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "sha256": "34f0f3c950ccae7897a6cd2bd4c5904f5050ae48282866e3346630d3231eb863",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.820155
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_fQXC233kqYLhcNvg2hjusEFv",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+          "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+          "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_sycWXfAr7etfJvziLP1Qr8B8",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+          "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+          "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-39f709ba89ef4188ba051b04ddddc22f",
+           "request_id": "request-39f709ba89ef4188ba051b04ddddc22f",
+           "span_id": "span-39f709ba89ef4188ba051b04ddddc22f",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What Raw evidence in the vault mentions automotive or vehicle wireless test opportunities for Rohde & Schwarz signaling or non-signaling testers? Include C-V2X, 5G, Wi-Fi, Bluetooth, UWB, eCall, TCUs, telematics, infotainment, ADAS, connected car. Raw citations only; if insufficient, say so.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 48.175538
+            },
+            {
+             "text": "The Snapdragon Auto 5G Modem-RF is a 5G automotive-grade platform that has paved the way for next-generation connected vehicles, delivering high-speed connectivity, advanced positioning, and support for Vehicle-to-Everything (V2X) technology. Designed to meet the demands of modern telematics, it supports reliable connectivity, precise multi-band GNSS navigation, and enhanced safety.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7ff0d627b4993a68",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 47.666184
+            },
+            {
+             "text": "More information [https://www.rohde-schwarz.com/automotive-ecall-testing/overview\\_231772.html](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html \"https://www.rohde-schwarz.com/automotive-ecall-testing/overview_231772.html\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 46.079917
+            },
+            {
+             "text": "](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 18,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.606432
+            },
+            {
+             "text": "For more information on the CMX500 for NTN testing, visit: [https://www.rohde-schwarz.com/\\_258274.html](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-communications-testers-systems/wireless-communication-testers-systems/cmx-for-non-terrestrial-networks_258274.html \"https://www.rohde-schwarz.com/_258274.html\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3d734db5747f7adf",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+               "sha256": "3d734db5747f7adfa9c648eab6d46068339923c8ae8fe2c124e66da98d5c8e6d",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.491916
+            },
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.673871
+            },
+            {
+             "text": "Landmine 5 – Production Scale\nAsk: “Do you need non-signaling ATE or multi-port production test?”\n✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.\nLandmine 6 – Wi-Fi Signaling\n(Reviewer note: keep it generic, not Wi-Fi 7)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e141f59158e470e8",
+               "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.544233
+            },
+            {
+             "text": "[https://www.rohde-schwarz.com/cmx-ntn](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-communications-testers-systems/wireless-communication-testers-systems/cmx-for-non-terrestrial-networks_258274.html \"https://www.rohde-schwarz.com/cmx-ntn\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2f52d1674ba65597",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "sha256": "2f52d1674ba6559771a562aa583b8f226233e65ee10d2d9aca7f0659f4a3254e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.073873
+            }
+           ],
+           "text": "RAW evidence supports automotive/vehicle wireless opportunities around R&S automotive connectivity and infotainment testing, including eCall: R&S says OEMs, chip suppliers, tier 1s, engineering service providers and certification organizations rely on its automotive test solutions for “connectivity including antennas” and “infotainment,” and the passage links to automotive eCall testing [1].\n\nRAW evidence supports a connected-car cellular/V2X/telematics opportunity: the Snapdragon Auto 5G Modem-RF is described as a “5G automotive-grade platform” for “next-generation connected vehicles,” with high-speed connectivity, advanced positioning, V2X support, telematics, GNSS navigation, and safety [2].\n\nRAW evidence supports an R&S signaling-tester wireless opportunity for Wi-Fi: R&S and Broadcom will demonstrate the CMX500 “multi-technology multi-channel signaling tester” with Wi-Fi 8 testing capabilities [6].\n\nRAW evidence supports R&S non-signaling production-test opportunities: the vault notes “non-signaling ATE or multi-port production test” and names CMP180, CMP200, and CMW100 [7].\n\nRAW evidence is insufficient to specifically support Bluetooth, UWB, TCUs, ADAS, or C-V2X; the RAW mentions V2X but not C-V2X [2].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-556d5f1923b99787",
+              "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+             "section": 15,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 48.175538
+           },
+           {
+            "text": "The Snapdragon Auto 5G Modem-RF is a 5G automotive-grade platform that has paved the way for next-generation connected vehicles, delivering high-speed connectivity, advanced positioning, and support for Vehicle-to-Everything (V2X) technology. Designed to meet the demands of modern telematics, it supports reliable connectivity, precise multi-band GNSS navigation, and enhanced safety.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7ff0d627b4993a68",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 47.666184
+           },
+           {
+            "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 43.673871
+           },
+           {
+            "text": "Landmine 5 – Production Scale\nAsk: “Do you need non-signaling ATE or multi-port production test?”\n✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.\nLandmine 6 – Wi-Fi Signaling\n(Reviewer note: keep it generic, not Wi-Fi 7)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e141f59158e470e8",
+              "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 43.544233
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

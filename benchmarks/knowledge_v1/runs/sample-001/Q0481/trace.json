@@ -1,0 +1,338 @@
+{
+ "question": {
+  "id": "Q0481",
+  "text": "How do changes in automotive radar technology affect the measurement capability required from Oscilloscope?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-b9f182aea32842b38f14ec98ebcf3eeb",
+ "exchange": {
+  "sent": "How do changes in automotive radar technology affect the measurement capability required from Oscilloscope?",
+  "http_status": 200,
+  "seconds": 74.937,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-b9f182aea32842b38f14ec98ebcf3eeb",
+    "actor": "leo.chi",
+    "title": "How do changes in automotive radar technology affect the measurement cap…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:26:35.913523Z",
+    "updated_at": "2026-10-07T08:27:50.739467Z",
+    "messages": [
+     {
+      "message_id": "message-40c013ec7da54fa2a6423ca64251f043",
+      "role": "user",
+      "text": "How do changes in automotive radar technology affect the measurement capability required from Oscilloscope?",
+      "created_at": "2026-10-07T08:26:35.939350Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-964a4330ac664915a8da65ae6170d5b4",
+      "role": "assistant",
+      "text": "Changes in automotive radar mainly push oscilloscopes from “simple time-domain probing” toward **wideband, high-speed, multi-channel, phase-coherent, deep-memory measurement platforms**.\n\nKey impacts:\n\n1. **Higher radar bandwidth → higher oscilloscope bandwidth and sample rate**\n   - Modern automotive radar has moved from narrowband 24 GHz systems toward **76–81 GHz radar** with several GHz of RF sweep bandwidth.\n   - Even when the oscilloscope measures IF, baseband, or control signals rather than the 77 GHz carrier directly, the relevant chirp, modulation, and converter signals can be very wideband.\n   - Required oscilloscope capability increases in:\n     - analog bandwidth\n     - sampling rate\n     - low noise floor\n     - high effective number of bits, especially for small signal errors\n\n2. **Faster FMCW chirps → better time resolution and trigger capability**\n   - Automotive radar commonly uses FMCW chirps.\n   - Shorter chirp duration and steeper frequency ramps require the oscilloscope to capture fast transient behavior, ramp linearity errors, PLL settling, glitches, and phase discontinuities.\n   - Important capabilities include:\n     - precise timing accuracy\n     - low trigger jitter\n     - segmented memory for repeated chirp captures\n     - long acquisition memory for full radar frames\n\n3. **More complex modulation → vector/baseband analysis becomes important**\n   - Radar waveforms are no longer only simple linear chirps; systems may use advanced modulation, interference mitigation, coding, or adaptive waveforms.\n   - The oscilloscope increasingly needs to support:\n     - I/Q capture\n     - frequency-versus-time analysis\n     - phase and amplitude error measurement\n     - EVM-like or modulation-quality analysis where applicable\n   - In the R&S evidence available here, the FSW-B2071 baseband I/Q recording option requires supported R&S RTO oscilloscopes with the RTO-B4 option to obtain specified performance, indicating that oscilloscope-based baseband I/Q capture is a relevant measurement path for high-performance signal analysis. Citation: `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`, section 767.\n\n4. **MIMO and cascaded radar chips → more oscilloscope channels and synchronization**\n   - Newer radar sensors use multiple transmit and receive channels for angle resolution and imaging radar.\n   - Cascaded radar chipsets increase channel count further.\n   - This drives requirements for:\n     - 4 or more high-bandwidth channels\n     - tight channel-to-channel skew matching\n     - phase-coherent acquisition\n     - external clock/reference input\n     - multi-instrument synchronization when one oscilloscope is not enough\n\n5. **Higher integration in radar SoCs → mixed-signal debug**\n   - Radar ICs combine RF, PLLs, ADCs, digital interfaces, power management, and high-speed data links.\n   - Oscilloscopes need to debug analog and digital domains together:\n     - power rail noise during chirps\n     - clock and reference spurs\n     - SPI/control timing\n     - LVDS, CSI-2, Ethernet, or other radar data interfaces\n     - trigger correlation between RF events and digital control events\n\n6. **Automotive safety and production pressure → repeatable automated measurements**\n   - ADAS radar must be reliable across temperature, voltage, interference, and manufacturing variation.\n   - Oscilloscope requirements therefore include:\n     - automated measurement scripts\n     - limit testing\n     - statistical analysis over many chirps/frames\n     - fast capture and processing\n     - good documentation/export for validation reports\n\nIn short: as automotive radar moves toward **wider bandwidth, faster chirps, more complex modulation, and larger MIMO/cascaded arrays**, the oscilloscope must provide **higher bandwidth, higher sample rate, deeper memory, lower jitter/noise, multi-channel phase coherence, I/Q/baseband capture, and automation**.",
+      "created_at": "2026-10-07T08:27:50.739467Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-46ca70cd462d465380f6f3ceec1cc034",
+       "request_id": "request-46ca70cd462d465380f6f3ceec1cc034",
+       "span_id": "span-46ca70cd462d465380f6f3ceec1cc034",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Changes in automotive radar mainly push oscilloscopes from “simple time-domain probing” toward **wideband, high-speed, multi-channel, phase-coherent, deep-memory measurement platforms**.\n\nKey impacts:\n\n1. **Higher radar bandwidth → higher oscilloscope bandwidth and sample rate**\n   - Modern automotive radar has moved from narrowband 24 GHz systems toward **76–81 GHz radar** with several GHz of RF sweep bandwidth.\n   - Even when the oscilloscope measures IF, baseband, or control signals rather than the 77 GHz carrier directly, the relevant chirp, modulation, and converter signals can be very wideband.\n   - Required oscilloscope capability increases in:\n     - analog bandwidth\n     - sampling rate\n     - low noise floor\n     - high effective number of bits, especially for small signal errors\n\n2. **Faster FMCW chirps → better time resolution and trigger capability**\n   - Automotive radar commonly uses FMCW chirps.\n   - Shorter chirp duration and steeper frequency ramps require the oscilloscope to capture fast transient behavior, ramp linearity errors, PLL settling, glitches, and phase discontinuities.\n   - Important capabilities include:\n     - precise timing accuracy\n     - low trigger jitter\n     - segmented memory for repeated chirp captures\n     - long acquisition memory for full radar frames\n\n3. **More complex modulation → vector/baseband analysis becomes important**\n   - Radar waveforms are no longer only simple linear chirps; systems may use advanced modulation, interference mitigation, coding, or adaptive waveforms.\n   - The oscilloscope increasingly needs to support:\n     - I/Q capture\n     - frequency-versus-time analysis\n     - phase and amplitude error measurement\n     - EVM-like or modulation-quality analysis where applicable\n   - In the R&S evidence available here, the FSW-B2071 baseband I/Q recording option requires supported R&S RTO oscilloscopes with the RTO-B4 option to obtain specified performance, indicating that oscilloscope-based baseband I/Q capture is a relevant measurement path for high-performance signal analysis. Citation: `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`, section 767.\n\n4. **MIMO and cascaded radar chips → more oscilloscope channels and synchronization**\n   - Newer radar sensors use multiple transmit and receive channels for angle resolution and imaging radar.\n   - Cascaded radar chipsets increase channel count further.\n   - This drives requirements for:\n     - 4 or more high-bandwidth channels\n     - tight channel-to-channel skew matching\n     - phase-coherent acquisition\n     - external clock/reference input\n     - multi-instrument synchronization when one oscilloscope is not enough\n\n5. **Higher integration in radar SoCs → mixed-signal debug**\n   - Radar ICs combine RF, PLLs, ADCs, digital interfaces, power management, and high-speed data links.\n   - Oscilloscopes need to debug analog and digital domains together:\n     - power rail noise during chirps\n     - clock and reference spurs\n     - SPI/control timing\n     - LVDS, CSI-2, Ethernet, or other radar data interfaces\n     - trigger correlation between RF events and digital control events\n\n6. **Automotive safety and production pressure → repeatable automated measurements**\n   - ADAS radar must be reliable across temperature, voltage, interference, and manufacturing variation.\n   - Oscilloscope requirements therefore include:\n     - automated measurement scripts\n     - limit testing\n     - statistical analysis over many chirps/frames\n     - fast capture and processing\n     - good documentation/export for validation reports\n\nIn short: as automotive radar moves toward **wider bandwidth, faster chirps, more complex modulation, and larger MIMO/cascaded arrays**, the oscilloscope must provide **higher bandwidth, higher sample rate, deeper memory, lower jitter/noise, multi-channel phase coherence, I/Q/baseband capture, and automation**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-46ca70cd462d465380f6f3ceec1cc034",
+      "request_id": "request-46ca70cd462d465380f6f3ceec1cc034",
+      "span_id": "span-46ca70cd462d465380f6f3ceec1cc034",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-46ca70cd462d465380f6f3ceec1cc034",
+       "request_id": "request-46ca70cd462d465380f6f3ceec1cc034",
+       "span_id": "span-46ca70cd462d465380f6f3ceec1cc034",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Changes in automotive radar mainly push oscilloscopes from “simple time-domain probing” toward **wideband, high-speed, multi-channel, phase-coherent, deep-memory measurement platforms**.\n\nKey impacts:\n\n1. **Higher radar bandwidth → higher oscilloscope bandwidth and sample rate**\n   - Modern automotive radar has moved from narrowband 24 GHz systems toward **76–81 GHz radar** with several GHz of RF sweep bandwidth.\n   - Even when the oscilloscope measures IF, baseband, or control signals rather than the 77 GHz carrier directly, the relevant chirp, modulation, and converter signals can be very wideband.\n   - Required oscilloscope capability increases in:\n     - analog bandwidth\n     - sampling rate\n     - low noise floor\n     - high effective number of bits, especially for small signal errors\n\n2. **Faster FMCW chirps → better time resolution and trigger capability**\n   - Automotive radar commonly uses FMCW chirps.\n   - Shorter chirp duration and steeper frequency ramps require the oscilloscope to capture fast transient behavior, ramp linearity errors, PLL settling, glitches, and phase discontinuities.\n   - Important capabilities include:\n     - precise timing accuracy\n     - low trigger jitter\n     - segmented memory for repeated chirp captures\n     - long acquisition memory for full radar frames\n\n3. **More complex modulation → vector/baseband analysis becomes important**\n   - Radar waveforms are no longer only simple linear chirps; systems may use advanced modulation, interference mitigation, coding, or adaptive waveforms.\n   - The oscilloscope increasingly needs to support:\n     - I/Q capture\n     - frequency-versus-time analysis\n     - phase and amplitude error measurement\n     - EVM-like or modulation-quality analysis where applicable\n   - In the R&S evidence available here, the FSW-B2071 baseband I/Q recording option requires supported R&S RTO oscilloscopes with the RTO-B4 option to obtain specified performance, indicating that oscilloscope-based baseband I/Q capture is a relevant measurement path for high-performance signal analysis. Citation: `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`, section 767.\n\n4. **MIMO and cascaded radar chips → more oscilloscope channels and synchronization**\n   - Newer radar sensors use multiple transmit and receive channels for angle resolution and imaging radar.\n   - Cascaded radar chipsets increase channel count further.\n   - This drives requirements for:\n     - 4 or more high-bandwidth channels\n     - tight channel-to-channel skew matching\n     - phase-coherent acquisition\n     - external clock/reference input\n     - multi-instrument synchronization when one oscilloscope is not enough\n\n5. **Higher integration in radar SoCs → mixed-signal debug**\n   - Radar ICs combine RF, PLLs, ADCs, digital interfaces, power management, and high-speed data links.\n   - Oscilloscopes need to debug analog and digital domains together:\n     - power rail noise during chirps\n     - clock and reference spurs\n     - SPI/control timing\n     - LVDS, CSI-2, Ethernet, or other radar data interfaces\n     - trigger correlation between RF events and digital control events\n\n6. **Automotive safety and production pressure → repeatable automated measurements**\n   - ADAS radar must be reliable across temperature, voltage, interference, and manufacturing variation.\n   - Oscilloscope requirements therefore include:\n     - automated measurement scripts\n     - limit testing\n     - statistical analysis over many chirps/frames\n     - fast capture and processing\n     - good documentation/export for validation reports\n\nIn short: as automotive radar moves toward **wider bandwidth, faster chirps, more complex modulation, and larger MIMO/cascaded arrays**, the oscilloscope must provide **higher bandwidth, higher sample rate, deeper memory, lower jitter/noise, multi-channel phase coherence, I/Q/baseband capture, and automation**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_c7z5OuVsGEWJfPNEB5tftvWB",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-46ca70cd462d465380f6f3ceec1cc034",
+          "request_id": "request-46ca70cd462d465380f6f3ceec1cc034",
+          "span_id": "span-46ca70cd462d465380f6f3ceec1cc034",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-46ca70cd462d465380f6f3ceec1cc034",
+           "request_id": "request-46ca70cd462d465380f6f3ceec1cc034",
+           "span_id": "span-46ca70cd462d465380f6f3ceec1cc034",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in automotive radar technology affect the measurement capability required from oscilloscopes? Include specific radar trends (bandwidth, modulation, MIMO/cascading) and oscilloscope requirements if available.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "3.17 6.5.2.2 Spectrum emission mask\nTo verify that the power of any UE emission shall not exceed specified level for the specified channel\nbandwidth.\nOut-of-band emissions are unwanted emissions immediately outside the nominal channel. They result from\nthe modulation process and from non-linearity in the transmitter, but they do not include spurious emissions.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae10296a3c004b30",
+               "original_ref": "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+               "sha256": "ae10296a3c004b30b1709175382be80455a3f78e550b911cb314ccb60c2ec360",
+               "raw_ref": "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+              "section": 48,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.036698
+            },
+            {
+             "text": "3.17 6.5.2.2 Spectrum emission mask\nTo verify that the power of any UE emission shall not exceed specified level for the specified channel\nbandwidth.\nOut-of-band emissions are unwanted emissions immediately outside the nominal channel. They result from\nthe modulation process and from non-linearity in the transmitter, but they do not include spurious emissions.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c4e974bb578464f0",
+               "original_ref": "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+               "sha256": "c4e974bb578464f00e4f95f11d60892adb44c15467ef0c582dfc1521f9dfb6f6",
+               "raw_ref": "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+              "section": 48,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.808057
+            },
+            {
+             "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.616589
+            },
+            {
+             "text": "R&S®FSW-B2071 oscilloscope baseband inputs\n(available for all FSW models)\nThe specifications in this section apply to I/Q data recorded using the R&S®FSW-B2071 option. An R&S®RTO1044, R&S®RTO2044 or\nR&S®RTO 2064 with R&S®RTO-B4 option is required to obtain the specified performance. For ordering information, see section\n“Oscilloscopes supported by R&S®FSW-B2071 option”.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c2f3b544bbc2af25",
+               "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+               "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "section": 767,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.568565
+            },
+            {
+             "text": "a.  How do your teams go from a new test idea to running, validated results today—\nand where do they lose the most time (scripting, environment setup, debugging\nfailures, documentation)?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.11943
+            },
+            {
+             "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.541947
+            },
+            {
+             "text": "<!-- Slide number: 58 -->\n# Calibration\nOTA measurement chamber specific calibration procedures are captured in TR 37.843\nOTA test requirements specific and OTA measurement chamber specific calibration procedures for FR2 are for further study (FFS). Potential reuse of the FR1 calibration procedures for FR2 is FFS.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-78bf3069c4d9ec56",
+               "original_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "sha256": "78bf3069c4d9ec56257898ce4889bcdb258402fa1db341a7ff4cbf02487e94f6",
+               "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+              "section": 240,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.16158
+            },
+            {
+             "text": "a MUSIM device can explicitly request SCell(s) or SCG to be released;\na MUSIM device can indicate its preference on temporary maximum MIMO layers and/or supported channel bandwidth for\nspecific serving cells for both UL/DL;\na MUSIM device can indicate its preference on the temporary maximum number of CCs per UL/DL;\na MUSIM device can indicate its preference on the concerned band(s) or band combination(s) (e.g. avoided and/or affected band\n(s) or band combination(s)) based on a band-filter list configured by network. For affected band(s) and band combination(s), this\npreference can include temporary maximum MIMO layers and/or supported channel bandwidth for both UL/DL;\na MUSIM device can indicate the measurement gap requirement changes.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3644ea3f78081694",
+               "original_ref": "raw/Knowledge/Dual Sim Dual Active.md",
+               "sha256": "3644ea3f78081694ce65201d83461dec6beb23b992839ff4332a0925817b7103",
+               "raw_ref": "raw/Knowledge/Dual Sim Dual Active.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Dual Sim Dual Active.md",
+              "section": 97,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.759345
+            }
+           ],
+           "text": "The only available oscilloscope requirement is that R&S®FSW-B2071 baseband I/Q recording requires an R&S®RTO1044, R&S®RTO2044, or R&S®RTO2064 with the R&S®RTO-B4 option to obtain specified performance [4].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "R&S®FSW-B2071 oscilloscope baseband inputs\n(available for all FSW models)\nThe specifications in this section apply to I/Q data recorded using the R&S®FSW-B2071 option. An R&S®RTO1044, R&S®RTO2044 or\nR&S®RTO 2064 with R&S®RTO-B4 option is required to obtain the specified performance. For ordering information, see section\n“Oscilloscopes supported by R&S®FSW-B2071 option”.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c2f3b544bbc2af25",
+              "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+             "section": 767,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.568565
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,401 @@
+{
+ "question": {
+  "id": "Q0296",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-3c2c8d2249994d30b6376f44e82ae78f",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 89.015,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-3c2c8d2249994d30b6376f44e82ae78f",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:12:48.910374Z",
+    "updated_at": "2026-10-07T08:14:17.773075Z",
+    "messages": [
+     {
+      "message_id": "message-7d6257897e47487f90a461625a121ead",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T08:12:48.932303Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-45be3e9195e14236aabd13233134360e",
+      "role": "assistant",
+      "text": "Based on the current vault evidence, the strongest oscilloscope opportunities in Aerospace / Defense appear to be:\n\n## 1. NTN / satellite communications validation\n\n**Opportunity:**  \nOscilloscope positioning around satellite / NTN device and subsystem validation, especially timing-sensitive measurements, beam/measurement behavior, propagation delay, shared-spectrum access, and RF/control signal correlation.\n\n**Why it looks strong:**  \nThe vault has direct NTN evidence showing active technical requirements and deployment planning. While some of this evidence is more system/protocol-focused than oscilloscope-specific, it points to test needs where oscilloscopes can support timing, synchronization, trigger correlation, and mixed-domain debug alongside RF/network testers.\n\n**Supporting evidence:**\n\n- NTN UE capability includes SSB-based RRM measurements and propagation-delay compensation for shared-spectrum access:  \n  > “Indicates whether the UE supports NTN SSB based RRM measurements… ta-BasedPDC-NTN-SharedSpectrumChAccess… propagation delay compensation…”  \n  Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57.\n\n- Beam reporting involves multiple beams/cells and UE capability constraints:  \n  > “Beam selection is performed across the L cells… M beams for each of the L cells. M x L beams are reported in a single report instance…”  \n  Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494.\n\n- There is evidence of customer/deployment planning around NTN services:  \n  > “What is the anticipated timeline for deploying your NTN services…”  \n  Citation: `raw/Productions/cmx500_ntn_customer_questionnaire.md`, section 12.\n\n**Oscilloscope angle:**  \nUse cases likely include timing verification, trigger/debug around RF front-end control, modem/baseband interfaces, synchronization signals, power sequencing, and correlation with RF/network test events in satellite/NTN terminals or payload-related equipment.\n\n---\n\n## 2. Power electronics / DC-DC converter validation for mission systems\n\n**Opportunity:**  \nOscilloscope sales into high-reliability power-conversion design and validation: gate-drive timing, duty cycle, phase shift, switching transients, bridge behavior, and converter efficiency/debug.\n\n**Why it looks strong:**  \nThe vault contains repeated technical evidence around DC-DC converter operation, MOSFET gate control, full-bridge topology, phase shift, and duty-cycle modulation — all classic oscilloscope-heavy measurements. The cited source appears to be from a data-center power context, so the Aerospace / Defense connection is indirect unless the same converter/topology requirements are being mapped into defense/aerospace power systems.\n\n**Supporting evidence:**\n\n- DC-DC converter operation depends on modulated voltage, MOSFET gate signals, full-bridge switching, phase shift, and duty cycle:  \n  > “The operating principle of the DC-DC converter is based on generating a modulated DC voltage… The current-fed full-bridge is driven by two complementary signals… with a 180° phase shift and a duty cycle… from 50 percent to 100 percent.”  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80.\n\n- Similar repeated evidence appears in related raw market files:  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md`, section 73.  \n  Citation: `raw/Market/BBU image 3.md`, section 8.  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 82.\n\n**Oscilloscope angle:**  \nThis supports opportunities for high-bandwidth probing, isolated/differential measurements, power analysis, switching-loss analysis, gate timing, dead-time verification, EMI/root-cause debug, and transient analysis.\n\n---\n\n## Evidence strength ranking\n\n1. **NTN / satellite communications** — strongest Aerospace / Defense fit because it is directly satellite/NTN-related and has evidence of technical capability and deployment planning.  \n2. **Power electronics / DC-DC converter validation** — strong oscilloscope fit, but Aerospace / Defense linkage is less direct in the current evidence.\n\n## Important limitation\n\nThe current retrieved vault evidence does **not** strongly substantiate other classic Aerospace / Defense oscilloscope opportunities such as radar, EW, avionics buses, MIL-STD-1553, ARINC, high-speed serial backplanes, or pulsed RF systems. Those may be real market opportunities, but I do not have sufficient Raw vault evidence from this query to cite them.",
+      "created_at": "2026-10-07T08:14:17.773075Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-15a54f8ea3274fdfa33d89192dd0c551",
+       "request_id": "request-15a54f8ea3274fdfa33d89192dd0c551",
+       "span_id": "span-15a54f8ea3274fdfa33d89192dd0c551",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the current vault evidence, the strongest oscilloscope opportunities in Aerospace / Defense appear to be:\n\n## 1. NTN / satellite communications validation\n\n**Opportunity:**  \nOscilloscope positioning around satellite / NTN device and subsystem validation, especially timing-sensitive measurements, beam/measurement behavior, propagation delay, shared-spectrum access, and RF/control signal correlation.\n\n**Why it looks strong:**  \nThe vault has direct NTN evidence showing active technical requirements and deployment planning. While some of this evidence is more system/protocol-focused than oscilloscope-specific, it points to test needs where oscilloscopes can support timing, synchronization, trigger correlation, and mixed-domain debug alongside RF/network testers.\n\n**Supporting evidence:**\n\n- NTN UE capability includes SSB-based RRM measurements and propagation-delay compensation for shared-spectrum access:  \n  > “Indicates whether the UE supports NTN SSB based RRM measurements… ta-BasedPDC-NTN-SharedSpectrumChAccess… propagation delay compensation…”  \n  Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57.\n\n- Beam reporting involves multiple beams/cells and UE capability constraints:  \n  > “Beam selection is performed across the L cells… M beams for each of the L cells. M x L beams are reported in a single report instance…”  \n  Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494.\n\n- There is evidence of customer/deployment planning around NTN services:  \n  > “What is the anticipated timeline for deploying your NTN services…”  \n  Citation: `raw/Productions/cmx500_ntn_customer_questionnaire.md`, section 12.\n\n**Oscilloscope angle:**  \nUse cases likely include timing verification, trigger/debug around RF front-end control, modem/baseband interfaces, synchronization signals, power sequencing, and correlation with RF/network test events in satellite/NTN terminals or payload-related equipment.\n\n---\n\n## 2. Power electronics / DC-DC converter validation for mission systems\n\n**Opportunity:**  \nOscilloscope sales into high-reliability power-conversion design and validation: gate-drive timing, duty cycle, phase shift, switching transients, bridge behavior, and converter efficiency/debug.\n\n**Why it looks strong:**  \nThe vault contains repeated technical evidence around DC-DC converter operation, MOSFET gate control, full-bridge topology, phase shift, and duty-cycle modulation — all classic oscilloscope-heavy measurements. The cited source appears to be from a data-center power context, so the Aerospace / Defense connection is indirect unless the same converter/topology requirements are being mapped into defense/aerospace power systems.\n\n**Supporting evidence:**\n\n- DC-DC converter operation depends on modulated voltage, MOSFET gate signals, full-bridge switching, phase shift, and duty cycle:  \n  > “The operating principle of the DC-DC converter is based on generating a modulated DC voltage… The current-fed full-bridge is driven by two complementary signals… with a 180° phase shift and a duty cycle… from 50 percent to 100 percent.”  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80.\n\n- Similar repeated evidence appears in related raw market files:  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md`, section 73.  \n  Citation: `raw/Market/BBU image 3.md`, section 8.  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 82.\n\n**Oscilloscope angle:**  \nThis supports opportunities for high-bandwidth probing, isolated/differential measurements, power analysis, switching-loss analysis, gate timing, dead-time verification, EMI/root-cause debug, and transient analysis.\n\n---\n\n## Evidence strength ranking\n\n1. **NTN / satellite communications** — strongest Aerospace / Defense fit because it is directly satellite/NTN-related and has evidence of technical capability and deployment planning.  \n2. **Power electronics / DC-DC converter validation** — strong oscilloscope fit, but Aerospace / Defense linkage is less direct in the current evidence.\n\n## Important limitation\n\nThe current retrieved vault evidence does **not** strongly substantiate other classic Aerospace / Defense oscilloscope opportunities such as radar, EW, avionics buses, MIL-STD-1553, ARINC, high-speed serial backplanes, or pulsed RF systems. Those may be real market opportunities, but I do not have sufficient Raw vault evidence from this query to cite them.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-15a54f8ea3274fdfa33d89192dd0c551",
+      "request_id": "request-15a54f8ea3274fdfa33d89192dd0c551",
+      "span_id": "span-15a54f8ea3274fdfa33d89192dd0c551",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-15a54f8ea3274fdfa33d89192dd0c551",
+       "request_id": "request-15a54f8ea3274fdfa33d89192dd0c551",
+       "span_id": "span-15a54f8ea3274fdfa33d89192dd0c551",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the current vault evidence, the strongest oscilloscope opportunities in Aerospace / Defense appear to be:\n\n## 1. NTN / satellite communications validation\n\n**Opportunity:**  \nOscilloscope positioning around satellite / NTN device and subsystem validation, especially timing-sensitive measurements, beam/measurement behavior, propagation delay, shared-spectrum access, and RF/control signal correlation.\n\n**Why it looks strong:**  \nThe vault has direct NTN evidence showing active technical requirements and deployment planning. While some of this evidence is more system/protocol-focused than oscilloscope-specific, it points to test needs where oscilloscopes can support timing, synchronization, trigger correlation, and mixed-domain debug alongside RF/network testers.\n\n**Supporting evidence:**\n\n- NTN UE capability includes SSB-based RRM measurements and propagation-delay compensation for shared-spectrum access:  \n  > “Indicates whether the UE supports NTN SSB based RRM measurements… ta-BasedPDC-NTN-SharedSpectrumChAccess… propagation delay compensation…”  \n  Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57.\n\n- Beam reporting involves multiple beams/cells and UE capability constraints:  \n  > “Beam selection is performed across the L cells… M beams for each of the L cells. M x L beams are reported in a single report instance…”  \n  Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494.\n\n- There is evidence of customer/deployment planning around NTN services:  \n  > “What is the anticipated timeline for deploying your NTN services…”  \n  Citation: `raw/Productions/cmx500_ntn_customer_questionnaire.md`, section 12.\n\n**Oscilloscope angle:**  \nUse cases likely include timing verification, trigger/debug around RF front-end control, modem/baseband interfaces, synchronization signals, power sequencing, and correlation with RF/network test events in satellite/NTN terminals or payload-related equipment.\n\n---\n\n## 2. Power electronics / DC-DC converter validation for mission systems\n\n**Opportunity:**  \nOscilloscope sales into high-reliability power-conversion design and validation: gate-drive timing, duty cycle, phase shift, switching transients, bridge behavior, and converter efficiency/debug.\n\n**Why it looks strong:**  \nThe vault contains repeated technical evidence around DC-DC converter operation, MOSFET gate control, full-bridge topology, phase shift, and duty-cycle modulation — all classic oscilloscope-heavy measurements. The cited source appears to be from a data-center power context, so the Aerospace / Defense connection is indirect unless the same converter/topology requirements are being mapped into defense/aerospace power systems.\n\n**Supporting evidence:**\n\n- DC-DC converter operation depends on modulated voltage, MOSFET gate signals, full-bridge switching, phase shift, and duty cycle:  \n  > “The operating principle of the DC-DC converter is based on generating a modulated DC voltage… The current-fed full-bridge is driven by two complementary signals… with a 180° phase shift and a duty cycle… from 50 percent to 100 percent.”  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80.\n\n- Similar repeated evidence appears in related raw market files:  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md`, section 73.  \n  Citation: `raw/Market/BBU image 3.md`, section 8.  \n  Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 82.\n\n**Oscilloscope angle:**  \nThis supports opportunities for high-bandwidth probing, isolated/differential measurements, power analysis, switching-loss analysis, gate timing, dead-time verification, EMI/root-cause debug, and transient analysis.\n\n---\n\n## Evidence strength ranking\n\n1. **NTN / satellite communications** — strongest Aerospace / Defense fit because it is directly satellite/NTN-related and has evidence of technical capability and deployment planning.  \n2. **Power electronics / DC-DC converter validation** — strong oscilloscope fit, but Aerospace / Defense linkage is less direct in the current evidence.\n\n## Important limitation\n\nThe current retrieved vault evidence does **not** strongly substantiate other classic Aerospace / Defense oscilloscope opportunities such as radar, EW, avionics buses, MIL-STD-1553, ARINC, high-speed serial backplanes, or pulsed RF systems. Those may be real market opportunities, but I do not have sufficient Raw vault evidence from this query to cite them.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_aFQR1qD8dNa1kapEYbAh05NY",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-15a54f8ea3274fdfa33d89192dd0c551",
+          "request_id": "request-15a54f8ea3274fdfa33d89192dd0c551",
+          "span_id": "span-15a54f8ea3274fdfa33d89192dd0c551",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-15a54f8ea3274fdfa33d89192dd0c551",
+           "request_id": "request-15a54f8ea3274fdfa33d89192dd0c551",
+           "span_id": "span-15a54f8ea3274fdfa33d89192dd0c551",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity? Please cite Raw evidence for each opportunity.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.454461
+            },
+            {
+             "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 80,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.105273
+            },
+            {
+             "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.144677
+            },
+            {
+             "text": "The B, M and X options are based on each other. To use an M option, you also need\nthe corresponding B option. To use an X option, you also need the corresponding B\nand M options (for some X options, there is no M option).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 389,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.069618
+            },
+            {
+             "text": "> The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the converter full bridge, which can vary between -VDC/N and +VDC/N depending on the duty cycle (D). The gate signals controlling this operation are illustrated in Figure 3. The current-fed full-bridge is driven by two complementary signals, each controlling a diagonal pair of MOSFETs (T1, T4 and T2, T3), with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-998a418a9fa898a5",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "sha256": "998a418a9fa898a549bac73d0843ae568ce449fd066f675a8418a5f1c71d4b00",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+              "section": 73,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.297935
+            },
+            {
+             "text": "- The operating principle of the\n  DC/DC converter is based on\n  generating a modulated DC\n  voltage (V), across the center\n  fed full-bridge, which can vary\n  between -VDC/N and +VDC/\n  N depending on the duty cycle\n  (D). The gate signals controlling\n  this operation are illustrated\n  in Figure 3. The current-fed\n  full-bridge is driven by two\n  complementary signals, each\n  controlling a diagonal pair of\n  MOSFETs (T1, T4 and T2, T3),\n  with a 180° phase shift and a\n  duty cycle (D) that can range\n  from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0e8b899a12ab4689",
+               "original_ref": "raw/Market/BBU image 3.md",
+               "sha256": "0e8b899a12ab468924c419b1b92d3162448cfbf9d8993b3e590715e0c518a98f",
+               "raw_ref": "raw/Market/BBU image 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/BBU image 3.md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.149089
+            },
+            {
+             "text": "> The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the converter’s full bridge, which can vary between -VDC/N and +VDC/N depending on the duty cycle (D). The gate signals controlling this operation are illustrated in Figure 3. The current-fed full-bridge is driven by two complementary signals, each controlling a diagonal pair of MOSFETs (T1, T4 and T2, T3), with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 82,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.149089
+            }
+           ],
+           "text": "**NTN / satellite communications test and validation** — Evidence shows active NTN-related requirements around UE measurements, propagation-delay compensation, shared-spectrum access, and beam reporting: UEs may support NTN SSB-based RRM measurements and NTN propagation-delay compensation for shared spectrum channel access [4], and beam selection/reporting spans configured cells and beams with M×L beams reported per instance [1].\nA RAW passage also references an anticipated timeline for deploying NTN services, indicating deployment planning activity [2].\n**Power electronics / DC-DC converter waveform validation** — Evidence repeatedly describes a current-fed full-bridge DC-DC converter with MOSFET gate signals, 180° phase-shifted complementary control, duty cycle variation from 50% to 100%, and modulated DC voltage behavior [3].\nThis creates an oscilloscope-relevant opportunity for validating gate timing, duty cycle, phase relationships, and switching waveforms in converter designs [3].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-484f76aad6f2ea3a",
+              "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+             "section": 494,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.647809
+           },
+           {
+            "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-3b343d1990f39b17",
+              "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.454461
+           },
+           {
+            "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 80,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.105273
+           },
+           {
+            "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 57,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.144677
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

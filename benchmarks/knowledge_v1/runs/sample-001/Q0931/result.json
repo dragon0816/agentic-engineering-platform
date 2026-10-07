@@ -1,0 +1,78 @@
+{
+ "id": "Q0931",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 62.359,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "RFIC validation increasingly needs realistic stimulus: modulated waveforms, multi-carrier cases, coexistence/interference, beam/OTA conditions, and corner-case stress tests.",
+   "Signal generators therefore need wider modulation bandwidth, better waveform fidelity, multi-carrier generation, phase-coherent channels, and automation-friendly waveform control.",
+   "RFICs are validated not only by conducted RF tests but also in system-like environments: chambers, OTA, software-controlled setups, and linked generator/analyzer workflows.",
+   "Modern RFIC validation benefits from tightly synchronized generation and capture: EVM, ACLR, spurious, compression, memory effects, group delay, phase noise, and transient behavior...",
+   "Higher frequency coverage for mmWave and future bands.",
+   "Better EVM / modulation accuracy...",
+   "Lower phase noise and jitter...",
+   "Higher dynamic range for ACPR/ACLR, blocker, intermodulation, and spurious testing.",
+   "Multi-channel phase coherence for MIMO, beamforming, phased-array, and differential RFIC tests.",
+   "as RFIC validation moves from component-level, manually configured tests toward automated, realistic, system-level validation..."
+  ],
+  "reason": "The cited passages support only limited points: some instruments are used in wireless or payload testing, one integration with chamber/software exists, a questionnaire mentions workflow pain points, and one product combines generation and analysis. The answer extrapolates broad RFIC-specific validation trends and many SG/SA specification requirements that the passages do not establish.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support only limited points: some instruments are used in wireless or payload testing, one integration with chamber/software exists, a questionnaire mentions workflow pain points, and one product combines generation and analysis. The answer extrapolates broad RFIC-specific validat"
+}

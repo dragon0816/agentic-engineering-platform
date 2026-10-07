@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q0401",
+  "text": "What are the most important signaling test capabilities for applications in Automotive?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-5fb05d35e8ad499f945eb0d08217bfe3",
+ "exchange": {
+  "sent": "What are the most important signaling test capabilities for applications in Automotive?",
+  "http_status": 200,
+  "seconds": 88.031,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-5fb05d35e8ad499f945eb0d08217bfe3",
+    "actor": "leo.chi",
+    "title": "What are the most important signaling test capabilities for applications…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:20:57.488435Z",
+    "updated_at": "2026-10-07T08:22:21.569333Z",
+    "messages": [
+     {
+      "message_id": "message-332af19400c14c44876cc15bc2e9a9da",
+      "role": "user",
+      "text": "What are the most important signaling test capabilities for applications in Automotive?",
+      "created_at": "2026-10-07T08:20:57.498332Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-09dd24affc074017bb5d3dc6ec68af8d",
+      "role": "assistant",
+      "text": "I couldn’t retrieve the local R&S knowledge source in this session, so I can’t cite that corpus. In general, the most important **signaling test capabilities for Automotive applications** are:\n\n1. **Cellular network emulation**\n   - LTE, 5G NR, and ideally 5G RedCap support.\n   - Ability to emulate real network behavior: registration, attach, bearer/session setup, mobility, handover, roaming, emergency service behavior, and operator-specific configurations.\n\n2. **C-V2X / V2X signaling**\n   - LTE-V2X PC5 sidelink and, increasingly, 5G NR-V2X.\n   - Testing of vehicle-to-vehicle, vehicle-to-infrastructure, and vehicle-to-network communication.\n   - Message timing, reliability, congestion behavior, and coexistence with cellular network operation.\n\n3. **eCall / emergency call testing**\n   - EU eCall and regional variants such as ERA-GLONASS or NG-eCall where relevant.\n   - Verification of call setup, MSD transmission, voice channel quality, fallback behavior, and GNSS/location reporting.\n\n4. **GNSS and location-related signaling**\n   - GPS, Galileo, GLONASS, BeiDou support.\n   - Assisted GNSS behavior over cellular networks.\n   - Location acquisition under weak-signal, multipath, urban canyon, spoofing/jamming, and mobility scenarios.\n\n5. **Telematics control unit testing**\n   - End-to-end validation of TCU behavior: SIM/eSIM attach, data sessions, firmware update paths, cloud connectivity, SMS/IMS, voice, diagnostics, and wake/sleep behavior.\n   - Important for production, service, and carrier certification.\n\n6. **Multi-RAT and coexistence testing**\n   - Automotive modules often combine 5G/LTE, Wi-Fi, Bluetooth, GNSS, UWB, and sometimes satellite or DSRC/C-V2X.\n   - Test systems need to verify coexistence, desense, RF blocking, and correct signaling behavior while multiple radios are active.\n\n7. **Mobility and fading simulation**\n   - Automotive devices operate at speed, so signaling must be tested under changing channel conditions.\n   - Key cases include fading, Doppler, handover between cells, tunnel loss, reconnection, cell reselection, and network outage recovery.\n\n8. **Protocol and conformance testing**\n   - 3GPP protocol stack validation for LTE/5G modules.\n   - Certification-oriented tests for operators, GCF/PTCRB, regional emergency-call rules, and OEM-specific acceptance criteria.\n\n9. **OTA and antenna-system validation**\n   - Vehicles increasingly use embedded antennas that cannot be fully validated by conducted RF testing alone.\n   - OTA signaling tests are important for complete vehicle, TCU, shark-fin antenna, smart antenna, and in-cabin connectivity validation.\n\n10. **Production-ready signaling tests**\n   - Fast, repeatable signaling checks for manufacturing: network attach, SIM/eSIM detection, RF connectivity, GNSS acquisition, Wi-Fi/Bluetooth basic signaling, and functional pass/fail criteria.\n   - Needs automation, limits, traceability, and short test time.\n\nIf prioritizing for an automotive test lab, I would rank them roughly as: **cellular network emulation, eCall, C-V2X, GNSS/location, mobility/fading, OTA antenna validation, and production automation**.",
+      "created_at": "2026-10-07T08:22:21.569333Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-6a9116753f6b44a8ae3d20a65b2e708c",
+       "request_id": "request-6a9116753f6b44a8ae3d20a65b2e708c",
+       "span_id": "span-6a9116753f6b44a8ae3d20a65b2e708c",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)",
+    "ok": true,
+    "answer": "I couldn’t retrieve the local R&S knowledge source in this session, so I can’t cite that corpus. In general, the most important **signaling test capabilities for Automotive applications** are:\n\n1. **Cellular network emulation**\n   - LTE, 5G NR, and ideally 5G RedCap support.\n   - Ability to emulate real network behavior: registration, attach, bearer/session setup, mobility, handover, roaming, emergency service behavior, and operator-specific configurations.\n\n2. **C-V2X / V2X signaling**\n   - LTE-V2X PC5 sidelink and, increasingly, 5G NR-V2X.\n   - Testing of vehicle-to-vehicle, vehicle-to-infrastructure, and vehicle-to-network communication.\n   - Message timing, reliability, congestion behavior, and coexistence with cellular network operation.\n\n3. **eCall / emergency call testing**\n   - EU eCall and regional variants such as ERA-GLONASS or NG-eCall where relevant.\n   - Verification of call setup, MSD transmission, voice channel quality, fallback behavior, and GNSS/location reporting.\n\n4. **GNSS and location-related signaling**\n   - GPS, Galileo, GLONASS, BeiDou support.\n   - Assisted GNSS behavior over cellular networks.\n   - Location acquisition under weak-signal, multipath, urban canyon, spoofing/jamming, and mobility scenarios.\n\n5. **Telematics control unit testing**\n   - End-to-end validation of TCU behavior: SIM/eSIM attach, data sessions, firmware update paths, cloud connectivity, SMS/IMS, voice, diagnostics, and wake/sleep behavior.\n   - Important for production, service, and carrier certification.\n\n6. **Multi-RAT and coexistence testing**\n   - Automotive modules often combine 5G/LTE, Wi-Fi, Bluetooth, GNSS, UWB, and sometimes satellite or DSRC/C-V2X.\n   - Test systems need to verify coexistence, desense, RF blocking, and correct signaling behavior while multiple radios are active.\n\n7. **Mobility and fading simulation**\n   - Automotive devices operate at speed, so signaling must be tested under changing channel conditions.\n   - Key cases include fading, Doppler, handover between cells, tunnel loss, reconnection, cell reselection, and network outage recovery.\n\n8. **Protocol and conformance testing**\n   - 3GPP protocol stack validation for LTE/5G modules.\n   - Certification-oriented tests for operators, GCF/PTCRB, regional emergency-call rules, and OEM-specific acceptance criteria.\n\n9. **OTA and antenna-system validation**\n   - Vehicles increasingly use embedded antennas that cannot be fully validated by conducted RF testing alone.\n   - OTA signaling tests are important for complete vehicle, TCU, shark-fin antenna, smart antenna, and in-cabin connectivity validation.\n\n10. **Production-ready signaling tests**\n   - Fast, repeatable signaling checks for manufacturing: network attach, SIM/eSIM detection, RF connectivity, GNSS acquisition, Wi-Fi/Bluetooth basic signaling, and functional pass/fail criteria.\n   - Needs automation, limits, traceability, and short test time.\n\nIf prioritizing for an automotive test lab, I would rank them roughly as: **cellular network emulation, eCall, C-V2X, GNSS/location, mobility/fading, OTA antenna validation, and production automation**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-6a9116753f6b44a8ae3d20a65b2e708c",
+      "request_id": "request-6a9116753f6b44a8ae3d20a65b2e708c",
+      "span_id": "span-6a9116753f6b44a8ae3d20a65b2e708c",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-6a9116753f6b44a8ae3d20a65b2e708c",
+       "request_id": "request-6a9116753f6b44a8ae3d20a65b2e708c",
+       "span_id": "span-6a9116753f6b44a8ae3d20a65b2e708c",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "I couldn’t retrieve the local R&S knowledge source in this session, so I can’t cite that corpus. In general, the most important **signaling test capabilities for Automotive applications** are:\n\n1. **Cellular network emulation**\n   - LTE, 5G NR, and ideally 5G RedCap support.\n   - Ability to emulate real network behavior: registration, attach, bearer/session setup, mobility, handover, roaming, emergency service behavior, and operator-specific configurations.\n\n2. **C-V2X / V2X signaling**\n   - LTE-V2X PC5 sidelink and, increasingly, 5G NR-V2X.\n   - Testing of vehicle-to-vehicle, vehicle-to-infrastructure, and vehicle-to-network communication.\n   - Message timing, reliability, congestion behavior, and coexistence with cellular network operation.\n\n3. **eCall / emergency call testing**\n   - EU eCall and regional variants such as ERA-GLONASS or NG-eCall where relevant.\n   - Verification of call setup, MSD transmission, voice channel quality, fallback behavior, and GNSS/location reporting.\n\n4. **GNSS and location-related signaling**\n   - GPS, Galileo, GLONASS, BeiDou support.\n   - Assisted GNSS behavior over cellular networks.\n   - Location acquisition under weak-signal, multipath, urban canyon, spoofing/jamming, and mobility scenarios.\n\n5. **Telematics control unit testing**\n   - End-to-end validation of TCU behavior: SIM/eSIM attach, data sessions, firmware update paths, cloud connectivity, SMS/IMS, voice, diagnostics, and wake/sleep behavior.\n   - Important for production, service, and carrier certification.\n\n6. **Multi-RAT and coexistence testing**\n   - Automotive modules often combine 5G/LTE, Wi-Fi, Bluetooth, GNSS, UWB, and sometimes satellite or DSRC/C-V2X.\n   - Test systems need to verify coexistence, desense, RF blocking, and correct signaling behavior while multiple radios are active.\n\n7. **Mobility and fading simulation**\n   - Automotive devices operate at speed, so signaling must be tested under changing channel conditions.\n   - Key cases include fading, Doppler, handover between cells, tunnel loss, reconnection, cell reselection, and network outage recovery.\n\n8. **Protocol and conformance testing**\n   - 3GPP protocol stack validation for LTE/5G modules.\n   - Certification-oriented tests for operators, GCF/PTCRB, regional emergency-call rules, and OEM-specific acceptance criteria.\n\n9. **OTA and antenna-system validation**\n   - Vehicles increasingly use embedded antennas that cannot be fully validated by conducted RF testing alone.\n   - OTA signaling tests are important for complete vehicle, TCU, shark-fin antenna, smart antenna, and in-cabin connectivity validation.\n\n10. **Production-ready signaling tests**\n   - Fast, repeatable signaling checks for manufacturing: network attach, SIM/eSIM detection, RF connectivity, GNSS acquisition, Wi-Fi/Bluetooth basic signaling, and functional pass/fail criteria.\n   - Needs automation, limits, traceability, and short test time.\n\nIf prioritizing for an automotive test lab, I would rank them roughly as: **cellular network emulation, eCall, C-V2X, GNSS/location, mobility/fading, OTA antenna validation, and production automation**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_moWTI1tvDYLrHZE7BrUHvEWS",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-6a9116753f6b44a8ae3d20a65b2e708c",
+          "request_id": "request-6a9116753f6b44a8ae3d20a65b2e708c",
+          "span_id": "span-6a9116753f6b44a8ae3d20a65b2e708c",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_model_failed",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

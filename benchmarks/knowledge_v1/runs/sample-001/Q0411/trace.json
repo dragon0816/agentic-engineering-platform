@@ -1,0 +1,650 @@
+{
+ "question": {
+  "id": "Q0411",
+  "text": "For a Automotive use case involving automotive radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-e0c4d6d6469f41818e67c1cf971fc0c4",
+ "exchange": {
+  "sent": "For a Automotive use case involving automotive radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 123.75,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-e0c4d6d6469f41818e67c1cf971fc0c4",
+    "actor": "leo.chi",
+    "title": "For a Automotive use case involving automotive radar, where would Signal…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:22:25.532294Z",
+    "updated_at": "2026-10-07T08:24:26.850230Z",
+    "messages": [
+     {
+      "message_id": "message-2b558a2985d7481e85774bb4e529327b",
+      "role": "user",
+      "text": "For a Automotive use case involving automotive radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T08:22:25.544154Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-158605038e1c4f24bd2ed1f094fff16c",
+      "role": "assistant",
+      "text": "In an **automotive radar** use case, a **Signaling / Non-signaling Tester** generally sits **outside the core radar-target simulation workflow**. It belongs more to the **vehicle connectivity / telematics / V2X / eCall / Wi-Fi / cellular test workflow**, unless you are using its RF resources for very limited non-signaling RF characterization.\n\n### Where it fits\n\nTypical automotive radar test flow:\n\n1. **Radar RF / chip / module characterization**\n   - Measure transmitter power, frequency, chirp quality, phase noise, bandwidth, receiver sensitivity, etc.\n   - Usually uses spectrum/signal analyzers, signal generators, VNAs, phase-noise tools, etc.\n\n2. **Radar sensor functional test**\n   - Simulate targets: distance, velocity, radar cross section, angle, multi-target scenes.\n   - This is where a **radar echo generator / radar target simulator** fits.\n   - In R&S evidence, the **AREG800A** is explicitly identified as an **“Automotive Radar Echo Generator”** and fits under **radar echo generation**.\n\n3. **ADAS / HIL / scenario validation**\n   - Closed-loop tests with radar sensor, ECU, perception stack, and driving scenarios.\n   - Radar target simulation is synchronized with vehicle/environment simulation.\n\n4. **Vehicle connectivity / communication validation**\n   - This is where a **Signaling Tester** fits.\n   - It emulates a cellular/Wi-Fi network and tests the device under real protocol conditions: attach, data session, handover, eCall, V2X-related connectivity, infotainment, OTA connectivity, etc.\n   - R&S evidence describes the **CMX500** as a **multi-technology, multi-channel signaling tester** for WLAN/Wi-Fi 7 RF TX/RX, coexistence, and end-to-end tests; another source calls it a radio communication tester supporting end-to-end signaling use cases.\n\n5. **Production test**\n   - **Non-signaling testers** can be used for fast RF parametric testing of communication modules, often without full protocol call/session setup.\n   - For radar production, however, the key tester is still more likely a radar echo generator or radar-specific RF test setup, not a cellular-style signaling tester.\n\n### Short answer\n\nFor **automotive radar itself**, the main workflow instrument is a **radar echo generator / target simulator**, e.g. **R&S AREG800A**, not a signaling tester.\n\nA **Signaling / Non-signaling Tester** fits when the vehicle or ECU also includes **wireless connectivity** — cellular, Wi-Fi, Bluetooth, eCall, infotainment, telematics, or possibly V2X-related communications. It validates the **communication link**, not the radar perception function.\n\n### Practical positioning\n\n| Test area | Main purpose | Signaling / Non-signaling Tester fit? |\n|---|---|---|\n| Radar chip RF characterization | Chirp, Tx/Rx, spectrum, phase noise | Only if using generic RF functions; not “signaling” |\n| Radar target simulation | Simulated range/velocity/angle/RCS | No — use radar echo generator |\n| Radar HIL / ADAS scenarios | Closed-loop driving scenes | No — use radar simulator + HIL |\n| Telematics / eCall / infotainment | Cellular/Wi-Fi protocol and RF | Yes — signaling tester |\n| Production RF test for connectivity module | Fast RF calibration/verification | Yes — non-signaling tester |\n| Coexistence testing | Radar operating near Wi-Fi/cellular/BT systems | Possibly, as the connectivity-side instrument |\n\nSo in a combined automotive test architecture, I’d place the **Signaling / Non-signaling Tester in the connectivity lane**, parallel to the **radar validation lane**. The two may meet in **system-level vehicle tests**, for example when validating ADAS plus connected services, coexistence, or OTA update behavior, but it is not the primary radar test instrument.",
+      "created_at": "2026-10-07T08:24:26.850230Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+       "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+       "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "In an **automotive radar** use case, a **Signaling / Non-signaling Tester** generally sits **outside the core radar-target simulation workflow**. It belongs more to the **vehicle connectivity / telematics / V2X / eCall / Wi-Fi / cellular test workflow**, unless you are using its RF resources for very limited non-signaling RF characterization.\n\n### Where it fits\n\nTypical automotive radar test flow:\n\n1. **Radar RF / chip / module characterization**\n   - Measure transmitter power, frequency, chirp quality, phase noise, bandwidth, receiver sensitivity, etc.\n   - Usually uses spectrum/signal analyzers, signal generators, VNAs, phase-noise tools, etc.\n\n2. **Radar sensor functional test**\n   - Simulate targets: distance, velocity, radar cross section, angle, multi-target scenes.\n   - This is where a **radar echo generator / radar target simulator** fits.\n   - In R&S evidence, the **AREG800A** is explicitly identified as an **“Automotive Radar Echo Generator”** and fits under **radar echo generation**.\n\n3. **ADAS / HIL / scenario validation**\n   - Closed-loop tests with radar sensor, ECU, perception stack, and driving scenarios.\n   - Radar target simulation is synchronized with vehicle/environment simulation.\n\n4. **Vehicle connectivity / communication validation**\n   - This is where a **Signaling Tester** fits.\n   - It emulates a cellular/Wi-Fi network and tests the device under real protocol conditions: attach, data session, handover, eCall, V2X-related connectivity, infotainment, OTA connectivity, etc.\n   - R&S evidence describes the **CMX500** as a **multi-technology, multi-channel signaling tester** for WLAN/Wi-Fi 7 RF TX/RX, coexistence, and end-to-end tests; another source calls it a radio communication tester supporting end-to-end signaling use cases.\n\n5. **Production test**\n   - **Non-signaling testers** can be used for fast RF parametric testing of communication modules, often without full protocol call/session setup.\n   - For radar production, however, the key tester is still more likely a radar echo generator or radar-specific RF test setup, not a cellular-style signaling tester.\n\n### Short answer\n\nFor **automotive radar itself**, the main workflow instrument is a **radar echo generator / target simulator**, e.g. **R&S AREG800A**, not a signaling tester.\n\nA **Signaling / Non-signaling Tester** fits when the vehicle or ECU also includes **wireless connectivity** — cellular, Wi-Fi, Bluetooth, eCall, infotainment, telematics, or possibly V2X-related communications. It validates the **communication link**, not the radar perception function.\n\n### Practical positioning\n\n| Test area | Main purpose | Signaling / Non-signaling Tester fit? |\n|---|---|---|\n| Radar chip RF characterization | Chirp, Tx/Rx, spectrum, phase noise | Only if using generic RF functions; not “signaling” |\n| Radar target simulation | Simulated range/velocity/angle/RCS | No — use radar echo generator |\n| Radar HIL / ADAS scenarios | Closed-loop driving scenes | No — use radar simulator + HIL |\n| Telematics / eCall / infotainment | Cellular/Wi-Fi protocol and RF | Yes — signaling tester |\n| Production RF test for connectivity module | Fast RF calibration/verification | Yes — non-signaling tester |\n| Coexistence testing | Radar operating near Wi-Fi/cellular/BT systems | Possibly, as the connectivity-side instrument |\n\nSo in a combined automotive test architecture, I’d place the **Signaling / Non-signaling Tester in the connectivity lane**, parallel to the **radar validation lane**. The two may meet in **system-level vehicle tests**, for example when validating ADAS plus connected services, coexistence, or OTA update behavior, but it is not the primary radar test instrument.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+      "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+      "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+       "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+       "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In an **automotive radar** use case, a **Signaling / Non-signaling Tester** generally sits **outside the core radar-target simulation workflow**. It belongs more to the **vehicle connectivity / telematics / V2X / eCall / Wi-Fi / cellular test workflow**, unless you are using its RF resources for very limited non-signaling RF characterization.\n\n### Where it fits\n\nTypical automotive radar test flow:\n\n1. **Radar RF / chip / module characterization**\n   - Measure transmitter power, frequency, chirp quality, phase noise, bandwidth, receiver sensitivity, etc.\n   - Usually uses spectrum/signal analyzers, signal generators, VNAs, phase-noise tools, etc.\n\n2. **Radar sensor functional test**\n   - Simulate targets: distance, velocity, radar cross section, angle, multi-target scenes.\n   - This is where a **radar echo generator / radar target simulator** fits.\n   - In R&S evidence, the **AREG800A** is explicitly identified as an **“Automotive Radar Echo Generator”** and fits under **radar echo generation**.\n\n3. **ADAS / HIL / scenario validation**\n   - Closed-loop tests with radar sensor, ECU, perception stack, and driving scenarios.\n   - Radar target simulation is synchronized with vehicle/environment simulation.\n\n4. **Vehicle connectivity / communication validation**\n   - This is where a **Signaling Tester** fits.\n   - It emulates a cellular/Wi-Fi network and tests the device under real protocol conditions: attach, data session, handover, eCall, V2X-related connectivity, infotainment, OTA connectivity, etc.\n   - R&S evidence describes the **CMX500** as a **multi-technology, multi-channel signaling tester** for WLAN/Wi-Fi 7 RF TX/RX, coexistence, and end-to-end tests; another source calls it a radio communication tester supporting end-to-end signaling use cases.\n\n5. **Production test**\n   - **Non-signaling testers** can be used for fast RF parametric testing of communication modules, often without full protocol call/session setup.\n   - For radar production, however, the key tester is still more likely a radar echo generator or radar-specific RF test setup, not a cellular-style signaling tester.\n\n### Short answer\n\nFor **automotive radar itself**, the main workflow instrument is a **radar echo generator / target simulator**, e.g. **R&S AREG800A**, not a signaling tester.\n\nA **Signaling / Non-signaling Tester** fits when the vehicle or ECU also includes **wireless connectivity** — cellular, Wi-Fi, Bluetooth, eCall, infotainment, telematics, or possibly V2X-related communications. It validates the **communication link**, not the radar perception function.\n\n### Practical positioning\n\n| Test area | Main purpose | Signaling / Non-signaling Tester fit? |\n|---|---|---|\n| Radar chip RF characterization | Chirp, Tx/Rx, spectrum, phase noise | Only if using generic RF functions; not “signaling” |\n| Radar target simulation | Simulated range/velocity/angle/RCS | No — use radar echo generator |\n| Radar HIL / ADAS scenarios | Closed-loop driving scenes | No — use radar simulator + HIL |\n| Telematics / eCall / infotainment | Cellular/Wi-Fi protocol and RF | Yes — signaling tester |\n| Production RF test for connectivity module | Fast RF calibration/verification | Yes — non-signaling tester |\n| Coexistence testing | Radar operating near Wi-Fi/cellular/BT systems | Possibly, as the connectivity-side instrument |\n\nSo in a combined automotive test architecture, I’d place the **Signaling / Non-signaling Tester in the connectivity lane**, parallel to the **radar validation lane**. The two may meet in **system-level vehicle tests**, for example when validating ADAS plus connected services, coexistence, or OTA update behavior, but it is not the primary radar test instrument.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_0KEIBDcBK0xZ4u4jl5LURIp9",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+          "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+          "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+           "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+           "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For an automotive use case involving automotive radar, what is the role of a Signaling / Non-signaling Tester in the test workflow? Does it test radar itself or fit elsewhere? Cite Raw evidence about R&S automotive radar test instruments and signaling/non-signaling testers if available.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 48.827211
+            },
+            {
+             "text": "## Rohde & Schwarz and SmartViser have partnered to develop a solution for testing compliance with a new regulation that will require Energy Efficiency Index (EEI) labeling for smartphones and tablets sold in the EU. At the core of the solution is the R&S CMX500, a radio communication tester that supports end-to-end testing of all signaling use cases, combined with SmartViser’s viSer test automation application – available for Android and iOS. Both companies will showcase the solution at Mobile World Congress 2024.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dd68e5dc1441065f",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.808635
+            },
+            {
+             "text": "and also a multi-static setup where the receiving and sensing satellite uses multiple transmission sources. The physical\nlayer challenges for the satellite industry are the high bandwidth demands, since due to the laws of physics in the radar\nequation, the resolution scales with the bandwidth, but also affects the power density. Transmit power influences the\nbackscattering and the RX estimation, i.e. when the backscattering is too high or the TX is unknown, which might reveal\nan ambiguity risk. Lastly, spectrum coexistence is always a topic to consider. Related to the MFSS architecture model",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 230,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.069475
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the antennas as well as RF transmitter and receiver characteristics must be conducted under real-world conditions in signaling mode. With MLO being a key feature in Wi-Fi 7, a test environment that provides multiple RF chains is crucial. The R&S CMX500 one-box tester from Rohde & Schwarz, featuring integrated Wi-Fi 7 test functionality, is a multi-technology multi-channel signaling tester. Its flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a broad range of Wi-Fi 7-specific tests.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-54cc8cb2ee42584d",
+               "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.058627
+            },
+            {
+             "text": "net and LANs\nTCV: Test Case Validation. The related .rsetcv file contains information about the\ncurrent validation status at the GCF and PTCRB. The file is regularly updated by\nRohde & Schwarz and read-in by R&S CONTEST. It is installed using the Installation\nManager.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2da4078601f6c0a3",
+               "original_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "sha256": "2da4078601f6c0a3baf385390b5787c072932f98c4bd40464406ca4678ebafca",
+               "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "section": 111,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.989762
+            },
+            {
+             "text": "testing (FTA: full type approval, PRE: pre-conformance). It contains information for\ninstallation, first operation and maintenance of the different setups of the test system\nand the included instruments.\nThe instruments included are named with their role in the test system. For details about\noperating the instruments, refer to the documentation provided with the instruments.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2da4078601f6c0a3",
+               "original_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "sha256": "2da4078601f6c0a3baf385390b5787c072932f98c4bd40464406ca4678ebafca",
+               "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.865612
+            },
+            {
+             "text": "For \"Preparing for Use\" or \"Putting into Operation\" information, see the documentation\ndelivered with the instruments. For more information about firmware installation on an\nRohde & Schwarz instrument, see in the overview in the \"R&S CONTEST Software\nInstallation on Test Systems\" documentation.\n4.9.3 Configuring instrument addresses",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2da4078601f6c0a3",
+               "original_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "sha256": "2da4078601f6c0a3baf385390b5787c072932f98c4bd40464406ca4678ebafca",
+               "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "section": 71,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.538772
+            },
+            {
+             "text": "At MWC, Rohde & Schwarz will demonstrate the R&S CMX500 and its ability to test seamless traffic offloading and interworking between cellular 5G and WLAN with a single box solution. The newly integrated Non-3GPP Interworking Function (N3IWF) gateway in the R&S CMX500 makes it an easy-to-use solution for testing WLAN offloading with Voice over WLAN, enabling device manufacturers and operators to efficiently test these applications. In addition, the integrated POLQA voice quality measurement function of the R&S CMX500 offers a comprehensive and cost-effective solution to ensure the quality of experience for voice over WLAN applications at an early stage.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 42.64454
+            }
+           ],
+           "text": "The RAW evidence instead identifies the R&S CMX500 as a radio communication/signaling tester for WLAN, Wi-Fi 7, and signaling use cases [1].\nThe RAW evidence also says the R&S CMX500 supports end-to-end testing of signaling use cases [2].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 48.827211
+           },
+           {
+            "text": "## Rohde & Schwarz and SmartViser have partnered to develop a solution for testing compliance with a new regulation that will require Energy Efficiency Index (EEI) labeling for smartphones and tablets sold in the EU. At the core of the solution is the R&S CMX500, a radio communication tester that supports end-to-end testing of all signaling use cases, combined with SmartViser’s viSer test automation application – available for Android and iOS. Both companies will showcase the solution at Mobile World Congress 2024.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dd68e5dc1441065f",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 44.808635
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_wIVcvbWuFULodgCqmF8tfr6f",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+          "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+          "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-85f68a4e154e4f5b80e5c5627df4c633",
+           "request_id": "request-85f68a4e154e4f5b80e5c5627df4c633",
+           "span_id": "span-85f68a4e154e4f5b80e5c5627df4c633",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What Rohde & Schwarz instruments are cited for automotive radar testing workflow (radar target simulation, radar echo generation, radome/OTA, radar sensor tests), and where do they fit? Cite Raw evidence only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "- [[Rohde & Schwarz]]\n- [[Automotive radar echo generation]]\n- [[FMCW radar]]\n- [[Radar cross-section]]\n- [[Doppler frequency shift]]\n- [[Hardware-in-the-loop]]\n- [[Open Simulation Interface]]\n- [[SCPI]]\n- [[R&S QAT100]]\n- [[R&S FE44S]]\n- [[R&S SGU100A]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 51.593382
+            },
+            {
+             "text": "Rohde & Schwarz AREG800A Automotive Radar Echo Generator",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ef4aac4d3faf4e63",
+               "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 45.468373
+            },
+            {
+             "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.204474
+            },
+            {
+             "text": "AREG800A\nAUTOMOTIVE RADAR ECHO GENERATOR",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ef4aac4d3faf4e63",
+               "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.930599
+            },
+            {
+             "text": "More information [https://www.rohde-schwarz.com/automotive-ecall-testing/overview\\_231772.html](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html \"https://www.rohde-schwarz.com/automotive-ecall-testing/overview_231772.html\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.482461
+            },
+            {
+             "text": "Radar echo generation",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f77e733cba92509b",
+               "original_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+               "sha256": "f77e733cba92509bcb44452d7e704af2d5e684ad62733653bf72c09ec5c489b7",
+               "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "section": 580,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.810274
+            },
+            {
+             "text": "- [[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]\n- [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 33.368597
+            },
+            {
+             "text": "# Sales strategy: target customers – where to go\nCountry / Region RSK: incl. ICR, WIC, ADT, AUT\nTarget Customer Group 2, fit for R&S (above criteria) and related Target Companies (for strategic focus)\n- industry:\t…… Bare board for SoCs(RFIC)\n- fit:\t…… VNAs\n- companies:\t…… Suppliers of Samsung Electronics\n- comments:\t…… Evaluation of socket and transmission line",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6f54737b0396e38b",
+               "original_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+               "sha256": "6f54737b0396e38b43cb6477d1a314185a2d8f32f00b29c523deec187c6c4055",
+               "raw_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+              "section": 38,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.356574
+            }
+           ],
+           "text": "The only Rohde & Schwarz instrument explicitly cited in the RAW passages is the **AREG800A Automotive Radar Echo Generator** [2][4].\nIt fits the automotive radar testing workflow under **radar echo generation** [6].\nRohde & Schwarz is also described as providing automotive test solutions for **radar** across the lifecycle from R&D to production and beyond [3].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Rohde & Schwarz AREG800A Automotive Radar Echo Generator",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ef4aac4d3faf4e63",
+              "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+              "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 45.468373
+           },
+           {
+            "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-556d5f1923b99787",
+              "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+             "section": 15,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.204474
+           },
+           {
+            "text": "AREG800A\nAUTOMOTIVE RADAR ECHO GENERATOR",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ef4aac4d3faf4e63",
+              "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+              "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.930599
+           },
+           {
+            "text": "Radar echo generation",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f77e733cba92509b",
+              "original_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "sha256": "f77e733cba92509bcb44452d7e704af2d5e684ad62733653bf72c09ec5c489b7",
+              "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+             "section": 580,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.810274
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,379 @@
+{
+ "question": {
+  "id": "Q1061",
+  "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Instrument & Measurement Principles",
+  "topic": "non-signaling tester",
+  "product_related": "true"
+ },
+ "session_id": "conversation-3b12e51218c54b73bc1b7f94dd0b9f8f",
+ "exchange": {
+  "sent": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 65.672,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-3b12e51218c54b73bc1b7f94dd0b9f8f",
+    "actor": "leo.chi",
+    "title": "What is non-signaling tester, and which product-related measurement deci…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:15:58.348221Z",
+    "updated_at": "2026-10-07T09:16:55.583928Z",
+    "messages": [
+     {
+      "message_id": "message-8677fdbd2eef4df290daff48a37e7404",
+      "role": "user",
+      "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T09:15:58.612703Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-6d63dbb5a1c64afaa7cc07c9dd05f2b9",
+      "role": "assistant",
+      "text": "A **non-signaling tester** is a wireless/RF tester that **does not emulate the full network signaling protocol** with the device under test. Instead, the DUT is usually put into a controlled test mode, loopback mode, or otherwise externally controlled state, and the tester focuses on **RF/PHY measurements** such as waveform quality, output power, spectrum, EVM, sensitivity, bandwidth, and calibration/production checks.\n\nBy contrast, a **signaling tester** behaves more like a base station/network emulator: the DUT attaches/connects through real protocol procedures, so you can test protocol behavior, mobility/RRM, service performance, conformance flows, and end-to-end scenarios.\n\nIn the Rohde & Schwarz product context, understanding this distinction affects several measurement/product decisions:\n\n1. **CMX500 vs. CMP180 type of selection**  \n   The R&S **CMX500** is repeatedly described as a **one-box signaling tester** for protocol, performance, RF, R&D, certification, and carrier acceptance tests, including NTN technologies such as NR-NTN and NB-NTN. That points to use cases where network emulation and signaling behavior matter.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`, section 5.\n\n2. **Certification/conformance vs. production RF verification**  \n   If the measurement goal includes **3GPP conformance, RF/RRM/PCT test cases, fading, channel emulation, or satellite constellation behavior**, the evidence points to the **CMX500** signaling-test environment.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`, section 7.\n\n3. **Whether protocol behavior is part of the test**  \n   For **protocol, performance, and RF test scenarios** across R&D through certification/carrier acceptance, CMX500 is positioned as the relevant signaling tester. If you only need RF waveform verification without full attach/session signaling, a non-signaling approach may be enough.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`, section 5.\n\n4. **Wi‑Fi/cellular design validation vs. loopback waveform measurement**  \n   The CMX500 is described as a multi-technology, multi-channel signaling tester for comprehensively testing wireless-device operation across cellular and non-cellular standards. In the same passage, the **CMP180** is described as verifying a **480 MHz signal waveform in loopback mode**, which is much closer to a non-signaling/RF verification decision for R&D and production.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nSo the practical rule is:\n\n- Choose a **signaling tester** when the DUT must behave as it would on a real network: attach, register, negotiate, hand over, run protocol/conformance/performance cases.\n- Choose a **non-signaling/RF tester** when the DUT can be controlled directly and the task is mainly RF parametric testing, calibration, waveform verification, or high-throughput production test.",
+      "created_at": "2026-10-07T09:16:55.583928Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-8b010a37061a4cb5a132edd05a3ea941",
+       "request_id": "request-8b010a37061a4cb5a132edd05a3ea941",
+       "span_id": "span-8b010a37061a4cb5a132edd05a3ea941",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "A **non-signaling tester** is a wireless/RF tester that **does not emulate the full network signaling protocol** with the device under test. Instead, the DUT is usually put into a controlled test mode, loopback mode, or otherwise externally controlled state, and the tester focuses on **RF/PHY measurements** such as waveform quality, output power, spectrum, EVM, sensitivity, bandwidth, and calibration/production checks.\n\nBy contrast, a **signaling tester** behaves more like a base station/network emulator: the DUT attaches/connects through real protocol procedures, so you can test protocol behavior, mobility/RRM, service performance, conformance flows, and end-to-end scenarios.\n\nIn the Rohde & Schwarz product context, understanding this distinction affects several measurement/product decisions:\n\n1. **CMX500 vs. CMP180 type of selection**  \n   The R&S **CMX500** is repeatedly described as a **one-box signaling tester** for protocol, performance, RF, R&D, certification, and carrier acceptance tests, including NTN technologies such as NR-NTN and NB-NTN. That points to use cases where network emulation and signaling behavior matter.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`, section 5.\n\n2. **Certification/conformance vs. production RF verification**  \n   If the measurement goal includes **3GPP conformance, RF/RRM/PCT test cases, fading, channel emulation, or satellite constellation behavior**, the evidence points to the **CMX500** signaling-test environment.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`, section 7.\n\n3. **Whether protocol behavior is part of the test**  \n   For **protocol, performance, and RF test scenarios** across R&D through certification/carrier acceptance, CMX500 is positioned as the relevant signaling tester. If you only need RF waveform verification without full attach/session signaling, a non-signaling approach may be enough.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`, section 5.\n\n4. **Wi‑Fi/cellular design validation vs. loopback waveform measurement**  \n   The CMX500 is described as a multi-technology, multi-channel signaling tester for comprehensively testing wireless-device operation across cellular and non-cellular standards. In the same passage, the **CMP180** is described as verifying a **480 MHz signal waveform in loopback mode**, which is much closer to a non-signaling/RF verification decision for R&D and production.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nSo the practical rule is:\n\n- Choose a **signaling tester** when the DUT must behave as it would on a real network: attach, register, negotiate, hand over, run protocol/conformance/performance cases.\n- Choose a **non-signaling/RF tester** when the DUT can be controlled directly and the task is mainly RF parametric testing, calibration, waveform verification, or high-throughput production test.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-8b010a37061a4cb5a132edd05a3ea941",
+      "request_id": "request-8b010a37061a4cb5a132edd05a3ea941",
+      "span_id": "span-8b010a37061a4cb5a132edd05a3ea941",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-8b010a37061a4cb5a132edd05a3ea941",
+       "request_id": "request-8b010a37061a4cb5a132edd05a3ea941",
+       "span_id": "span-8b010a37061a4cb5a132edd05a3ea941",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "A **non-signaling tester** is a wireless/RF tester that **does not emulate the full network signaling protocol** with the device under test. Instead, the DUT is usually put into a controlled test mode, loopback mode, or otherwise externally controlled state, and the tester focuses on **RF/PHY measurements** such as waveform quality, output power, spectrum, EVM, sensitivity, bandwidth, and calibration/production checks.\n\nBy contrast, a **signaling tester** behaves more like a base station/network emulator: the DUT attaches/connects through real protocol procedures, so you can test protocol behavior, mobility/RRM, service performance, conformance flows, and end-to-end scenarios.\n\nIn the Rohde & Schwarz product context, understanding this distinction affects several measurement/product decisions:\n\n1. **CMX500 vs. CMP180 type of selection**  \n   The R&S **CMX500** is repeatedly described as a **one-box signaling tester** for protocol, performance, RF, R&D, certification, and carrier acceptance tests, including NTN technologies such as NR-NTN and NB-NTN. That points to use cases where network emulation and signaling behavior matter.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`, section 5.\n\n2. **Certification/conformance vs. production RF verification**  \n   If the measurement goal includes **3GPP conformance, RF/RRM/PCT test cases, fading, channel emulation, or satellite constellation behavior**, the evidence points to the **CMX500** signaling-test environment.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`, section 7.\n\n3. **Whether protocol behavior is part of the test**  \n   For **protocol, performance, and RF test scenarios** across R&D through certification/carrier acceptance, CMX500 is positioned as the relevant signaling tester. If you only need RF waveform verification without full attach/session signaling, a non-signaling approach may be enough.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`, section 5.\n\n4. **Wi‑Fi/cellular design validation vs. loopback waveform measurement**  \n   The CMX500 is described as a multi-technology, multi-channel signaling tester for comprehensively testing wireless-device operation across cellular and non-cellular standards. In the same passage, the **CMP180** is described as verifying a **480 MHz signal waveform in loopback mode**, which is much closer to a non-signaling/RF verification decision for R&D and production.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nSo the practical rule is:\n\n- Choose a **signaling tester** when the DUT must behave as it would on a real network: attach, register, negotiate, hand over, run protocol/conformance/performance cases.\n- Choose a **non-signaling/RF tester** when the DUT can be controlled directly and the task is mainly RF parametric testing, calibration, waveform verification, or high-throughput production test.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_5Vs17gESBvYMv91pIZaPulLT",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-8b010a37061a4cb5a132edd05a3ea941",
+          "request_id": "request-8b010a37061a4cb5a132edd05a3ea941",
+          "span_id": "span-8b010a37061a4cb5a132edd05a3ea941",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-8b010a37061a4cb5a132edd05a3ea941",
+           "request_id": "request-8b010a37061a4cb5a132edd05a3ea941",
+           "span_id": "span-8b010a37061a4cb5a132edd05a3ea941",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What is a non-signaling tester, and which product-related measurement decisions depend on understanding it? Please answer with citations to Raw evidence, especially Rohde & Schwarz product context.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "b.  What does “minimal human intervention” mean in your context—which decisions",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.07633
+            },
+            {
+             "text": "The certification test plan with Viasat entails protocol, performance and RF test scenarios. It is based on the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz, a versatile solution designed for testing various NTN technologies, including New Radio (NR-NTN) and NB-NTN. In a single instrument, the CMX500 covers R&D through certification and carrier acceptance tests, guaranteeing reliable and repeatable results. It empowers engineers to accelerate development, ensure quality and confidently deploy reliable NTN services, safeguarding that the whole ecosystem can achieve the highest levels of performance.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3d734db5747f7adf",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+               "sha256": "3d734db5747f7adfa9c648eab6d46068339923c8ae8fe2c124e66da98d5c8e6d",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.432848
+            },
+            {
+             "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a4192ea568814a6",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.081123
+            },
+            {
+             "text": "The CMX500 AI Scripting Assistant is available from Rohde & Schwarz through various deployment options. Visitors to MWC 2025 Barcelona can experience the new tool live at the Rohde & Schwarz booth in hall 5, booth 5A80. For general information about the CMX500 5G one-box signaling tester visit: [http://www.rohde-schwarz.com/product/cmx500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8b44e0d324270514",
+               "original_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "sha256": "8b44e0d324270514830d2b3ff82c35b16cf5a58441a03941d7c14eaf71388d51",
+               "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.108839
+            },
+            {
+             "text": "## Rohde & Schwarz and MediaTek have teamed up to demonstrate a 5G non-terrestrial network (NTN) new radio (NR) connection based on the latest 3GPP Release 17 specifications. This technological advancement will be presented at this year's Mobile World Congress in Barcelona using the state-of-the-art R&S CMX500 one-box signaling tester (OBT) from Rohde & Schwarz and MediaTek's NTN-NR device as DUT. 5G NTN-NR is the next phase of NTN technology in which smartphones and other 5G devices will be directly linked with satellite-based services.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-aa5dceb541eab8a5",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "sha256": "aa5dceb541eab8a5363bb8e45f5605b367d3cfbdeebc9597deb795d360067ecf",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.776829
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.726427
+            },
+            {
+             "text": "At the core of the Rohde & Schwarz conformance test solutions is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup. In addition, the user-friendly R&S CONTEST test system software platform facilitates the seamless execution of 3GPP test cases.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f9f65126e3850d1e",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+               "sha256": "f9f65126e3850d1e3700c2c8ed45daf700054df15566d39ccdf83f655032725c",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.201511
+            },
+            {
+             "text": "Questions\nTo what is a PRS configuration bound ? BWP ?\nPRS is not bound to a BWP but to a numerology.\nIn VSE the PRS is bound to the slot configuration of a certain BWP and the BWP is bound to a numerology.\nHow many and which numerologies need to support PRS ?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1e756ed82ba721c0",
+               "original_ref": "raw/Knowledge/PRS (NR).md",
+               "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+               "raw_ref": "raw/Knowledge/PRS (NR).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.124073
+            }
+           ],
+           "text": "The RAW passages do not define a “non-signaling tester,” so that definition is not supported here; they only provide product context showing that Rohde & Schwarz positions the CMX500 as a one-box signaling tester for protocol, performance, RF, R&D, certification, carrier acceptance, NTN, conformance, fading/channel emulation, and Wi‑Fi 7 testing decisions [2][6][7], while the CMP180 is identified for verifying a 480 MHz signal waveform in loopback mode for R&D and production decisions [6].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The certification test plan with Viasat entails protocol, performance and RF test scenarios. It is based on the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz, a versatile solution designed for testing various NTN technologies, including New Radio (NR-NTN) and NB-NTN. In a single instrument, the CMX500 covers R&D through certification and carrier acceptance tests, guaranteeing reliable and repeatable results. It empowers engineers to accelerate development, ensure quality and confidently deploy reliable NTN services, safeguarding that the whole ecosystem can achieve the highest levels of performance.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-3d734db5747f7adf",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+              "sha256": "3d734db5747f7adfa9c648eab6d46068339923c8ae8fe2c124e66da98d5c8e6d",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.432848
+           },
+           {
+            "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.726427
+           },
+           {
+            "text": "At the core of the Rohde & Schwarz conformance test solutions is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup. In addition, the user-friendly R&S CONTEST test system software platform facilitates the seamless execution of 3GPP test cases.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f9f65126e3850d1e",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "sha256": "f9f65126e3850d1e3700c2c8ed45daf700054df15566d39ccdf83f655032725c",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.201511
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

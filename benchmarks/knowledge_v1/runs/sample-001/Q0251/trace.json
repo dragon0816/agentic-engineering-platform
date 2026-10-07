@@ -1,0 +1,393 @@
+{
+ "question": {
+  "id": "Q0251",
+  "text": "What are the most important signal integrity capabilities for applications in Aerospace / Defense?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-a41fd753868c42c2a29a68708ce9e905",
+ "exchange": {
+  "sent": "What are the most important signal integrity capabilities for applications in Aerospace / Defense?",
+  "http_status": 200,
+  "seconds": 74.891,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-a41fd753868c42c2a29a68708ce9e905",
+    "actor": "leo.chi",
+    "title": "What are the most important signal integrity capabilities for applicatio…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:10:38.722684Z",
+    "updated_at": "2026-10-07T08:11:50.939844Z",
+    "messages": [
+     {
+      "message_id": "message-3b03d2e2c6bb48a1a8e65d3aadd537d0",
+      "role": "user",
+      "text": "What are the most important signal integrity capabilities for applications in Aerospace / Defense?",
+      "created_at": "2026-10-07T08:10:38.909389Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-f50e1f5e7ebb4f73ae56ca8586a561f3",
+      "role": "assistant",
+      "text": "For Aerospace / Defense, the most important signal-integrity-related capabilities are:\n\n1. **Lifecycle RF communications integrity testing**  \n   Satellite and A&D communications systems need RF system and component testing that verifies reliable 24/7 operation, quality of service over the satellite lifecycle, and compatibility with current and emerging wireless technologies.  \n   Source: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 5.\n\n2. **Wideband, high-quality RF stimulus generation**  \n   A&D systems often need clean, wideband test signals. The cited R&S signal generator evidence highlights frequency coverage from **8 kHz to 6 GHz**, RF modulation bandwidth up to **1 GHz**, high output power, and excellent signal quality.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **Complex pulsed-signal generation**  \n   For radar, EW, tactical radio, and other A&D use cases, the ability to generate complex pulsed signals is critical. The evidence explicitly notes that wide bandwidth enables complex pulsed-signal generation in A&D applications.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **High-output-power signal quality for RF component verification**  \n   RF components often need to be verified at realistic or high-power stimulus levels. A strong capability is delivering high signal quality at high output power without requiring an external amplifier, simplifying the test setup and reducing uncertainty.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 12.\n\n5. **High-throughput, low-latency digital interface validation**  \n   Modern A&D systems increasingly use SDR, FPGA, MIMO, and high-rate data paths. The evidence points to PCIe support for high-throughput applications and low-latency data processing, which makes interface integrity and throughput validation important.  \n   Source: `raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md`, section 10.\n\n6. **PCB / high-speed digital signal-integrity workflow support**  \n   For boards and modules, key capabilities include material measurement, stackup selection, signal-integrity modeling/testing, sampling test, and process monitoring. This is especially relevant where A&D hardware must be robust across environmental and lifecycle conditions.  \n   Source surfaced via wiki summary of `0 Digital Test - What are SIPI and Serdes`, slide 21; raw evidence was not directly returned for this point, so treat it as less strongly grounded than the raw-cited RF/SDR items above.\n\nIn short: for A&D, prioritize **clean wideband RF generation, pulsed-signal fidelity, high-power RF component verification, satellite/RF lifecycle reliability testing, high-speed digital/PCIe throughput validation, and PCB/channel signal-integrity test coverage**.",
+      "created_at": "2026-10-07T08:11:50.939844Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-897aba86acfe41c3a8dc5472429a58d3",
+       "request_id": "request-897aba86acfe41c3a8dc5472429a58d3",
+       "span_id": "span-897aba86acfe41c3a8dc5472429a58d3",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "For Aerospace / Defense, the most important signal-integrity-related capabilities are:\n\n1. **Lifecycle RF communications integrity testing**  \n   Satellite and A&D communications systems need RF system and component testing that verifies reliable 24/7 operation, quality of service over the satellite lifecycle, and compatibility with current and emerging wireless technologies.  \n   Source: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 5.\n\n2. **Wideband, high-quality RF stimulus generation**  \n   A&D systems often need clean, wideband test signals. The cited R&S signal generator evidence highlights frequency coverage from **8 kHz to 6 GHz**, RF modulation bandwidth up to **1 GHz**, high output power, and excellent signal quality.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **Complex pulsed-signal generation**  \n   For radar, EW, tactical radio, and other A&D use cases, the ability to generate complex pulsed signals is critical. The evidence explicitly notes that wide bandwidth enables complex pulsed-signal generation in A&D applications.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **High-output-power signal quality for RF component verification**  \n   RF components often need to be verified at realistic or high-power stimulus levels. A strong capability is delivering high signal quality at high output power without requiring an external amplifier, simplifying the test setup and reducing uncertainty.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 12.\n\n5. **High-throughput, low-latency digital interface validation**  \n   Modern A&D systems increasingly use SDR, FPGA, MIMO, and high-rate data paths. The evidence points to PCIe support for high-throughput applications and low-latency data processing, which makes interface integrity and throughput validation important.  \n   Source: `raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md`, section 10.\n\n6. **PCB / high-speed digital signal-integrity workflow support**  \n   For boards and modules, key capabilities include material measurement, stackup selection, signal-integrity modeling/testing, sampling test, and process monitoring. This is especially relevant where A&D hardware must be robust across environmental and lifecycle conditions.  \n   Source surfaced via wiki summary of `0 Digital Test - What are SIPI and Serdes`, slide 21; raw evidence was not directly returned for this point, so treat it as less strongly grounded than the raw-cited RF/SDR items above.\n\nIn short: for A&D, prioritize **clean wideband RF generation, pulsed-signal fidelity, high-power RF component verification, satellite/RF lifecycle reliability testing, high-speed digital/PCIe throughput validation, and PCB/channel signal-integrity test coverage**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-897aba86acfe41c3a8dc5472429a58d3",
+      "request_id": "request-897aba86acfe41c3a8dc5472429a58d3",
+      "span_id": "span-897aba86acfe41c3a8dc5472429a58d3",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-897aba86acfe41c3a8dc5472429a58d3",
+       "request_id": "request-897aba86acfe41c3a8dc5472429a58d3",
+       "span_id": "span-897aba86acfe41c3a8dc5472429a58d3",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "For Aerospace / Defense, the most important signal-integrity-related capabilities are:\n\n1. **Lifecycle RF communications integrity testing**  \n   Satellite and A&D communications systems need RF system and component testing that verifies reliable 24/7 operation, quality of service over the satellite lifecycle, and compatibility with current and emerging wireless technologies.  \n   Source: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 5.\n\n2. **Wideband, high-quality RF stimulus generation**  \n   A&D systems often need clean, wideband test signals. The cited R&S signal generator evidence highlights frequency coverage from **8 kHz to 6 GHz**, RF modulation bandwidth up to **1 GHz**, high output power, and excellent signal quality.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **Complex pulsed-signal generation**  \n   For radar, EW, tactical radio, and other A&D use cases, the ability to generate complex pulsed signals is critical. The evidence explicitly notes that wide bandwidth enables complex pulsed-signal generation in A&D applications.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **High-output-power signal quality for RF component verification**  \n   RF components often need to be verified at realistic or high-power stimulus levels. A strong capability is delivering high signal quality at high output power without requiring an external amplifier, simplifying the test setup and reducing uncertainty.  \n   Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 12.\n\n5. **High-throughput, low-latency digital interface validation**  \n   Modern A&D systems increasingly use SDR, FPGA, MIMO, and high-rate data paths. The evidence points to PCIe support for high-throughput applications and low-latency data processing, which makes interface integrity and throughput validation important.  \n   Source: `raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md`, section 10.\n\n6. **PCB / high-speed digital signal-integrity workflow support**  \n   For boards and modules, key capabilities include material measurement, stackup selection, signal-integrity modeling/testing, sampling test, and process monitoring. This is especially relevant where A&D hardware must be robust across environmental and lifecycle conditions.  \n   Source surfaced via wiki summary of `0 Digital Test - What are SIPI and Serdes`, slide 21; raw evidence was not directly returned for this point, so treat it as less strongly grounded than the raw-cited RF/SDR items above.\n\nIn short: for A&D, prioritize **clean wideband RF generation, pulsed-signal fidelity, high-power RF component verification, satellite/RF lifecycle reliability testing, high-speed digital/PCIe throughput validation, and PCB/channel signal-integrity test coverage**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_PyZB0Z90qRz9igEPzlniXOaF",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-897aba86acfe41c3a8dc5472429a58d3",
+          "request_id": "request-897aba86acfe41c3a8dc5472429a58d3",
+          "span_id": "span-897aba86acfe41c3a8dc5472429a58d3",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-897aba86acfe41c3a8dc5472429a58d3",
+           "request_id": "request-897aba86acfe41c3a8dc5472429a58d3",
+           "span_id": "span-897aba86acfe41c3a8dc5472429a58d3",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What are the most important signal integrity capabilities for applications in Aerospace / Defense? Focus on test and measurement capabilities relevant to high-speed digital/RF aerospace and defense systems, and cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 45.2871
+            },
+            {
+             "text": "thoroughly tested to ensure a quality of service over the life cycle of the satellite.\nToday’s satellite systems need to be future-ready to be Satellite companies need to thoroughly test RF communi-\nfully compatible with both existing cellular networks and cations systems and components to ensure 24/7 operation\nemerging wireless technologies. The technology evolu- with a high quality of service. On the other hand, satellite\ntion from bent-pipe or digital transparent payloads to digi- equipment manufactures need to reduce test time and cost",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.175645
+            },
+            {
+             "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.410165
+            },
+            {
+             "text": "FIGURE4. BlockdiagramofanFPGA-integratedSDRdevicewithMIMOcapabilities.\nfurther up-converted to the desired RF frequency, amplified SDRs may also support Peripheral Component Interconnect\nto a suitable level for transmission by a Power Amplifier Express (PCIe) interfaces for high-throughput applications,\n(PA), and transmitted through the antenna. Conversely, on offering direct integration with computer systems for low-\nthe reception side, the weak incoming RF signal is captured latencydataprocessing.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-251e881a436dbb3d",
+               "original_ref": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+               "sha256": "251e881a436dbb3d27df6ae6519680f93fc8308b59113972f0db1b40a1d7c923",
+               "raw_ref": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.079165
+            },
+            {
+             "text": "In many test setups, such as for RF component verification, it is important to provide signals at high power levels. The\nR&S®SMBV100B offers best-in-class signal quality up to very high power levels. No extra amplifier is needed, which simplifies the test\nsetup.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.934915
+            },
+            {
+             "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-04ab0b80488a718c",
+               "original_ref": "raw/Market/HSD Cable test image 4.md",
+               "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.772647
+            },
+            {
+             "text": "## 副標 / 說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e73138a0365cd1e7",
+               "original_ref": "raw/Market/HSD Cable test image 1.md",
+               "sha256": "e73138a0365cd1e7b7d67a994e0f69839b084706234bf006b35b65549a84d5b6",
+               "raw_ref": "raw/Market/HSD Cable test image 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 1.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.788509
+            },
+            {
+             "text": "### 副標/說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d41b79ede600b45f",
+               "original_ref": "raw/Market/HSD Cable test image 5.md",
+               "sha256": "d41b79ede600b45f00f70aa5f45705f3b20e3d2cc43c09b6719db46baeb5443d",
+               "raw_ref": "raw/Market/HSD Cable test image 5.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 5.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.788509
+            }
+           ],
+           "text": "- Thorough RF communications-system and component testing to ensure 24/7 operation, lifecycle quality of service, and compatibility with existing cellular networks and emerging wireless technologies in satellite systems.[2]\n- Wideband, high-quality RF signal generation covering key wireless/RF bands, with frequency coverage from 8 kHz to 6 GHz and RF modulation bandwidth up to 1 GHz.[3]\n- Ability to generate complex pulsed signals for Aerospace & Defense applications.[3]\n- High-output-power stimulus with excellent signal quality for RF component verification, ideally without requiring an external amplifier to simplify the test setup.[5]\n- High-throughput, low-latency digital interface support such as PCIe integration for SDR-based systems and real-time data processing.[4]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "thoroughly tested to ensure a quality of service over the life cycle of the satellite.\nToday’s satellite systems need to be future-ready to be Satellite companies need to thoroughly test RF communi-\nfully compatible with both existing cellular networks and cations systems and components to ensure 24/7 operation\nemerging wireless technologies. The technology evolu- with a high quality of service. On the other hand, satellite\ntion from bent-pipe or digital transparent payloads to digi- equipment manufactures need to reduce test time and cost",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 43.175645
+           },
+           {
+            "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.410165
+           },
+           {
+            "text": "FIGURE4. BlockdiagramofanFPGA-integratedSDRdevicewithMIMOcapabilities.\nfurther up-converted to the desired RF frequency, amplified SDRs may also support Peripheral Component Interconnect\nto a suitable level for transmission by a Power Amplifier Express (PCIe) interfaces for high-throughput applications,\n(PA), and transmitted through the antenna. Conversely, on offering direct integration with computer systems for low-\nthe reception side, the weak incoming RF signal is captured latencydataprocessing.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-251e881a436dbb3d",
+              "original_ref": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+              "sha256": "251e881a436dbb3d27df6ae6519680f93fc8308b59113972f0db1b40a1d7c923",
+              "raw_ref": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.079165
+           },
+           {
+            "text": "In many test setups, such as for RF component verification, it is important to provide signals at high power levels. The\nR&S®SMBV100B offers best-in-class signal quality up to very high power levels. No extra amplifier is needed, which simplifies the test\nsetup.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.934915
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

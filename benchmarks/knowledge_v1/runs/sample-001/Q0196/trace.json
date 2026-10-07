@@ -1,0 +1,1325 @@
+{
+ "question": {
+  "id": "Q0196",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "market": "Wireless Communication",
+  "product": "Vector Network Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-5cf60a9f97a6438cbcce139f5f9699dd",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 311.985,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-5cf60a9f97a6438cbcce139f5f9699dd",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:05:04.838752Z",
+    "updated_at": "2026-10-07T08:10:16.738452Z",
+    "messages": [
+     {
+      "message_id": "message-de63dd39778b4f4c8e3aad9a269a3321",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T08:05:04.851829Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-ebc2cd5d7a0a4199a0b69191f6abef7c",
+      "role": "assistant",
+      "text": "I queried the current RS Knowledge vault. The evidence does **not** contain a direct RAW statement like “VNA opportunity in wireless communication = X.” The strongest opportunities below are therefore **evidence-backed inferences** from two evidence types: wireless-communication test demand signals + VNA capability/application evidence.\n\n## Strongest VNA opportunities in Wireless Communication\n\n### 1) 5G FR2 / mmWave wireless infrastructure and OTA/front-end validation  \n**Why this looks strongest:** This is the clearest place where the vault directly connects wireless infrastructure, OTA, high frequency, and a network analyzer.\n\n**Opportunity:** Position VNA/multiport VNA for RF front-end, antenna-array, module, and infrastructure validation around FR2/mmWave systems, especially where OTA and multiport behavior matter.\n\n**Supporting RAW evidence**\n- A wireless-infrastructure note explicitly lists an **“Ultra-wideband OTA power measurement solution 18 GHz – 90 GHz”** and **“Multiport network analyzer ≤ 40 GHz R&S®ZNBT”**.  \n  Citation: `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 63.\n- R&S VNA coverage supports this range: ZNB3000 ordering info includes **2-port and 4-port VNAs from 9 kHz up to 43.5 GHz**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n- Wireless platform positioning includes **cellular FR1/FR2 + Wi‑Fi 6/6E/7 + fading + NTN + RedCap** in one wireless test context, confirming FR2 is part of the current wireless opportunity space.  \n  Citation: `raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md`, section 9.\n\n---\n\n### 2) 5G NTN / satellite communication components and infrastructure  \n**Why this looks strong:** The vault has multiple RAW passages showing NTN as a strategic wireless direction, including device, infrastructure, component, and network verification. VNA evidence specifically mentions RF measurements on satellite payload components.\n\n**Opportunity:** Use VNA for satellite/NTN RF component and payload validation: filters, converters, front-end paths, payload chains, antennas/modules, and infrastructure elements supporting 5G NTN.\n\n**Supporting RAW evidence**\n- R&S/MediaTek NTN demo: CMX500 simulates a satellite base station; users can trigger voice calls alongside **RF-related measurements** to evaluate 5G NTN-NR device performance and reliability.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md`, section 4.\n- NTN test configurations include **Full Satellite Access Network emulation** for device manufacturers and **gNB + 5G core network emulation** for satellite network operators, validating satellite network components against cellular standards.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md`, section 7.\n- The NTN white paper states NTN is a key enabler of future connectivity and that test & measurement solutions are needed to verify **5G NTN devices, infrastructure entities, components and networks**.  \n  Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 246.\n- VNA fit: a satellite payload testing app note is explicitly titled **“RF measurements on payload components with the R&S®ZNA vector network analyzer”** and lists ZNA key features including **extremely high sensitivity** and **two internal LO sources**.  \n  Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 27.\n- Higher-end VNA system capability: **R&S®ZNA67EXT** consists of one ZNA67 VNA and up to four external test sets.  \n  Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23.\n\n---\n\n### 3) Converged cellular + WLAN device RF front-end validation  \n**Why this looks strong:** The vault repeatedly points to converged wireless devices and test platforms spanning LTE, 5G NR, WLAN, Wi‑Fi 7, RedCap and NTN. VNA opportunity is in the RF component layer supporting these radios.\n\n**Opportunity:** Sell VNA into R&D and production validation of RF front ends for multi-radio devices: LTE/5G NR/WLAN/Wi‑Fi 6/7 modules, filters, matching networks, antennas, switches and interconnects.\n\n**Supporting RAW evidence**\n- CMX500 supports **LTE, 5G NR and WLAN**, and its energy-efficiency solution performs power-consumption measurements in parallel with **RF measurements, protocol tests or application tests**.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md`, section 6.\n- Wi‑Fi 7 testing is presented as a current R&D/production need: CMX500 has Wi‑Fi 7 testing capabilities, and CMP180 verifies a **480 MHz bandwidth** waveform in loopback mode, positioned as future-proof beyond Wi‑Fi 7.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n- VNA product coverage supports component work across common wireless bands: ZNL VNAs are listed at **3 GHz, 4.5 GHz, 6 GHz, 14 GHz and 20 GHz**, with options for **spectrum analysis** and **extended power range**.  \n  Citation: `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`, section 574.\n- Broader VNA coverage goes up to **43.5 GHz** with 2-port and 4-port ZNB3000 models.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n\n---\n\n### 4) Multiport component/module testing for antenna arrays and wireless infrastructure  \n**Why this looks strong:** Multiport measurement is explicitly present in the wireless infrastructure evidence and aligns with modern RF modules/arrays.\n\n**Opportunity:** Push multiport VNA for parallelized S-parameter characterization of wireless infrastructure components, multi-antenna modules, array feeds, RF front-end paths, and production test efficiency.\n\n**Supporting RAW evidence**\n- Wireless infrastructure material lists **“Multiport network analyzer ≤ 40 GHz R&S®ZNBT”** in the same context as ultra-wideband OTA power measurement.  \n  Citation: `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 63.\n- ZNB3000 models include both **2-port and 4-port** configurations up to **43.5 GHz**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n- ZNA67EXT system scalability is supported by one ZNA67 VNA plus **up to four external test sets**.  \n  Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23.\n\n---\n\n## Evidence boundary / caution\n\nThe vault evidence is strongest for **mmWave/FR2, multiport infrastructure, 5G NTN/satellite, and converged LTE/5G/WLAN/Wi‑Fi 7 RF component testing**.\n\nI did **not** find sufficient RAW evidence directly supporting a VNA opportunity specifically for **6G sub-THz or D-band**. The vault does mention 6G future use cases and NTN/terrestrial integration, but the retrieved RAW evidence did not directly connect that to VNA or sub-THz/D-band measurement needs.",
+      "created_at": "2026-10-07T08:10:16.738452Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+       "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+       "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "I queried the current RS Knowledge vault. The evidence does **not** contain a direct RAW statement like “VNA opportunity in wireless communication = X.” The strongest opportunities below are therefore **evidence-backed inferences** from two evidence types: wireless-communication test demand signals + VNA capability/application evidence.\n\n## Strongest VNA opportunities in Wireless Communication\n\n### 1) 5G FR2 / mmWave wireless infrastructure and OTA/front-end validation  \n**Why this looks strongest:** This is the clearest place where the vault directly connects wireless infrastructure, OTA, high frequency, and a network analyzer.\n\n**Opportunity:** Position VNA/multiport VNA for RF front-end, antenna-array, module, and infrastructure validation around FR2/mmWave systems, especially where OTA and multiport behavior matter.\n\n**Supporting RAW evidence**\n- A wireless-infrastructure note explicitly lists an **“Ultra-wideband OTA power measurement solution 18 GHz – 90 GHz”** and **“Multiport network analyzer ≤ 40 GHz R&S®ZNBT”**.  \n  Citation: `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 63.\n- R&S VNA coverage supports this range: ZNB3000 ordering info includes **2-port and 4-port VNAs from 9 kHz up to 43.5 GHz**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n- Wireless platform positioning includes **cellular FR1/FR2 + Wi‑Fi 6/6E/7 + fading + NTN + RedCap** in one wireless test context, confirming FR2 is part of the current wireless opportunity space.  \n  Citation: `raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md`, section 9.\n\n---\n\n### 2) 5G NTN / satellite communication components and infrastructure  \n**Why this looks strong:** The vault has multiple RAW passages showing NTN as a strategic wireless direction, including device, infrastructure, component, and network verification. VNA evidence specifically mentions RF measurements on satellite payload components.\n\n**Opportunity:** Use VNA for satellite/NTN RF component and payload validation: filters, converters, front-end paths, payload chains, antennas/modules, and infrastructure elements supporting 5G NTN.\n\n**Supporting RAW evidence**\n- R&S/MediaTek NTN demo: CMX500 simulates a satellite base station; users can trigger voice calls alongside **RF-related measurements** to evaluate 5G NTN-NR device performance and reliability.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md`, section 4.\n- NTN test configurations include **Full Satellite Access Network emulation** for device manufacturers and **gNB + 5G core network emulation** for satellite network operators, validating satellite network components against cellular standards.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md`, section 7.\n- The NTN white paper states NTN is a key enabler of future connectivity and that test & measurement solutions are needed to verify **5G NTN devices, infrastructure entities, components and networks**.  \n  Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 246.\n- VNA fit: a satellite payload testing app note is explicitly titled **“RF measurements on payload components with the R&S®ZNA vector network analyzer”** and lists ZNA key features including **extremely high sensitivity** and **two internal LO sources**.  \n  Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 27.\n- Higher-end VNA system capability: **R&S®ZNA67EXT** consists of one ZNA67 VNA and up to four external test sets.  \n  Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23.\n\n---\n\n### 3) Converged cellular + WLAN device RF front-end validation  \n**Why this looks strong:** The vault repeatedly points to converged wireless devices and test platforms spanning LTE, 5G NR, WLAN, Wi‑Fi 7, RedCap and NTN. VNA opportunity is in the RF component layer supporting these radios.\n\n**Opportunity:** Sell VNA into R&D and production validation of RF front ends for multi-radio devices: LTE/5G NR/WLAN/Wi‑Fi 6/7 modules, filters, matching networks, antennas, switches and interconnects.\n\n**Supporting RAW evidence**\n- CMX500 supports **LTE, 5G NR and WLAN**, and its energy-efficiency solution performs power-consumption measurements in parallel with **RF measurements, protocol tests or application tests**.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md`, section 6.\n- Wi‑Fi 7 testing is presented as a current R&D/production need: CMX500 has Wi‑Fi 7 testing capabilities, and CMP180 verifies a **480 MHz bandwidth** waveform in loopback mode, positioned as future-proof beyond Wi‑Fi 7.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n- VNA product coverage supports component work across common wireless bands: ZNL VNAs are listed at **3 GHz, 4.5 GHz, 6 GHz, 14 GHz and 20 GHz**, with options for **spectrum analysis** and **extended power range**.  \n  Citation: `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`, section 574.\n- Broader VNA coverage goes up to **43.5 GHz** with 2-port and 4-port ZNB3000 models.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n\n---\n\n### 4) Multiport component/module testing for antenna arrays and wireless infrastructure  \n**Why this looks strong:** Multiport measurement is explicitly present in the wireless infrastructure evidence and aligns with modern RF modules/arrays.\n\n**Opportunity:** Push multiport VNA for parallelized S-parameter characterization of wireless infrastructure components, multi-antenna modules, array feeds, RF front-end paths, and production test efficiency.\n\n**Supporting RAW evidence**\n- Wireless infrastructure material lists **“Multiport network analyzer ≤ 40 GHz R&S®ZNBT”** in the same context as ultra-wideband OTA power measurement.  \n  Citation: `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 63.\n- ZNB3000 models include both **2-port and 4-port** configurations up to **43.5 GHz**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n- ZNA67EXT system scalability is supported by one ZNA67 VNA plus **up to four external test sets**.  \n  Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23.\n\n---\n\n## Evidence boundary / caution\n\nThe vault evidence is strongest for **mmWave/FR2, multiport infrastructure, 5G NTN/satellite, and converged LTE/5G/WLAN/Wi‑Fi 7 RF component testing**.\n\nI did **not** find sufficient RAW evidence directly supporting a VNA opportunity specifically for **6G sub-THz or D-band**. The vault does mention 6G future use cases and NTN/terrestrial integration, but the retrieved RAW evidence did not directly connect that to VNA or sub-THz/D-band measurement needs.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+      "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+      "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+       "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+       "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "I queried the current RS Knowledge vault. The evidence does **not** contain a direct RAW statement like “VNA opportunity in wireless communication = X.” The strongest opportunities below are therefore **evidence-backed inferences** from two evidence types: wireless-communication test demand signals + VNA capability/application evidence.\n\n## Strongest VNA opportunities in Wireless Communication\n\n### 1) 5G FR2 / mmWave wireless infrastructure and OTA/front-end validation  \n**Why this looks strongest:** This is the clearest place where the vault directly connects wireless infrastructure, OTA, high frequency, and a network analyzer.\n\n**Opportunity:** Position VNA/multiport VNA for RF front-end, antenna-array, module, and infrastructure validation around FR2/mmWave systems, especially where OTA and multiport behavior matter.\n\n**Supporting RAW evidence**\n- A wireless-infrastructure note explicitly lists an **“Ultra-wideband OTA power measurement solution 18 GHz – 90 GHz”** and **“Multiport network analyzer ≤ 40 GHz R&S®ZNBT”**.  \n  Citation: `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 63.\n- R&S VNA coverage supports this range: ZNB3000 ordering info includes **2-port and 4-port VNAs from 9 kHz up to 43.5 GHz**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n- Wireless platform positioning includes **cellular FR1/FR2 + Wi‑Fi 6/6E/7 + fading + NTN + RedCap** in one wireless test context, confirming FR2 is part of the current wireless opportunity space.  \n  Citation: `raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md`, section 9.\n\n---\n\n### 2) 5G NTN / satellite communication components and infrastructure  \n**Why this looks strong:** The vault has multiple RAW passages showing NTN as a strategic wireless direction, including device, infrastructure, component, and network verification. VNA evidence specifically mentions RF measurements on satellite payload components.\n\n**Opportunity:** Use VNA for satellite/NTN RF component and payload validation: filters, converters, front-end paths, payload chains, antennas/modules, and infrastructure elements supporting 5G NTN.\n\n**Supporting RAW evidence**\n- R&S/MediaTek NTN demo: CMX500 simulates a satellite base station; users can trigger voice calls alongside **RF-related measurements** to evaluate 5G NTN-NR device performance and reliability.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md`, section 4.\n- NTN test configurations include **Full Satellite Access Network emulation** for device manufacturers and **gNB + 5G core network emulation** for satellite network operators, validating satellite network components against cellular standards.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md`, section 7.\n- The NTN white paper states NTN is a key enabler of future connectivity and that test & measurement solutions are needed to verify **5G NTN devices, infrastructure entities, components and networks**.  \n  Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 246.\n- VNA fit: a satellite payload testing app note is explicitly titled **“RF measurements on payload components with the R&S®ZNA vector network analyzer”** and lists ZNA key features including **extremely high sensitivity** and **two internal LO sources**.  \n  Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 27.\n- Higher-end VNA system capability: **R&S®ZNA67EXT** consists of one ZNA67 VNA and up to four external test sets.  \n  Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23.\n\n---\n\n### 3) Converged cellular + WLAN device RF front-end validation  \n**Why this looks strong:** The vault repeatedly points to converged wireless devices and test platforms spanning LTE, 5G NR, WLAN, Wi‑Fi 7, RedCap and NTN. VNA opportunity is in the RF component layer supporting these radios.\n\n**Opportunity:** Sell VNA into R&D and production validation of RF front ends for multi-radio devices: LTE/5G NR/WLAN/Wi‑Fi 6/7 modules, filters, matching networks, antennas, switches and interconnects.\n\n**Supporting RAW evidence**\n- CMX500 supports **LTE, 5G NR and WLAN**, and its energy-efficiency solution performs power-consumption measurements in parallel with **RF measurements, protocol tests or application tests**.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md`, section 6.\n- Wi‑Fi 7 testing is presented as a current R&D/production need: CMX500 has Wi‑Fi 7 testing capabilities, and CMP180 verifies a **480 MHz bandwidth** waveform in loopback mode, positioned as future-proof beyond Wi‑Fi 7.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n- VNA product coverage supports component work across common wireless bands: ZNL VNAs are listed at **3 GHz, 4.5 GHz, 6 GHz, 14 GHz and 20 GHz**, with options for **spectrum analysis** and **extended power range**.  \n  Citation: `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`, section 574.\n- Broader VNA coverage goes up to **43.5 GHz** with 2-port and 4-port ZNB3000 models.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n\n---\n\n### 4) Multiport component/module testing for antenna arrays and wireless infrastructure  \n**Why this looks strong:** Multiport measurement is explicitly present in the wireless infrastructure evidence and aligns with modern RF modules/arrays.\n\n**Opportunity:** Push multiport VNA for parallelized S-parameter characterization of wireless infrastructure components, multi-antenna modules, array feeds, RF front-end paths, and production test efficiency.\n\n**Supporting RAW evidence**\n- Wireless infrastructure material lists **“Multiport network analyzer ≤ 40 GHz R&S®ZNBT”** in the same context as ultra-wideband OTA power measurement.  \n  Citation: `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 63.\n- ZNB3000 models include both **2-port and 4-port** configurations up to **43.5 GHz**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 596.\n- ZNA67EXT system scalability is supported by one ZNA67 VNA plus **up to four external test sets**.  \n  Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23.\n\n---\n\n## Evidence boundary / caution\n\nThe vault evidence is strongest for **mmWave/FR2, multiport infrastructure, 5G NTN/satellite, and converged LTE/5G/WLAN/Wi‑Fi 7 RF component testing**.\n\nI did **not** find sufficient RAW evidence directly supporting a VNA opportunity specifically for **6G sub-THz or D-band**. The vault does mention 6G future use cases and NTN/terrestrial integration, but the retrieved RAW evidence did not directly connect that to VNA or sub-THz/D-band measurement needs.",
+      "model_turns": 6,
+      "tools": [
+       {
+        "call_id": "call_vznu0elkVtoXXFtrvOCzkMsx",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+          "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+          "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_model_failed",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_QlMsbq9CLu7EAdLpwz8kkHxZ",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+          "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+          "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+           "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+           "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Vector Network Analyzer opportunities in Wireless Communication. What Raw evidence supports them? Cite Raw evidence only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4a179a13677acd8f",
+               "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "section": 175,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.029009
+            },
+            {
+             "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 596,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.789952
+            },
+            {
+             "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 3 GHz, N connectors\nVector network analyzer, 4.5 GHz, N connectors\nVector network analyzer, 6 GHz, N connectors\nVector network analyzer, 14 GHz, N connectors\nVector network analyzer, 20 GHz, 3.5 mm connectors\nOptions\nSpectrum analysis, for R&S®ZNL3\nSpectrum analysis, for R&S®ZNL4\nSpectrum analysis, for R&S®ZNL6\nSpectrum analysis, for R&S®ZNL14\nSpectrum analysis, for R&S®ZNL20\nExtended power range",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9b0b29b71d0a06d2",
+               "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "section": 574,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.701457
+            },
+            {
+             "text": ".\\vault-cli.ps1 convert          see what would be converted\n  .\\vault-cli.ps1 convert -Apply   write them into raw/ as markdown",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ea90fce69e235bab",
+               "original_ref": "raw/drop/README.md",
+               "sha256": "ea90fce69e235bab585cdb428ef3f0ff2df3b8fe757839583a4489ff5446b72d",
+               "raw_ref": "raw/drop/README.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/drop/README.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.130577
+            },
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.122201
+            },
+            {
+             "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f1351a1b7fda64ad",
+               "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.332485
+            },
+            {
+             "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9b0b29b71d0a06d2",
+               "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.332485
+            },
+            {
+             "text": "| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.44 |",
+             "citation": {
+              "kind": "wiki",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+             },
+             "score": 23.207127
+            }
+           ],
+           "text": "No RAW passage directly states Vector Network Analyzer opportunities in wireless communication; the RAW evidence only shows a wireless communication tester category [1] and available vector network analyzer products, frequency ranges, ports, options, and systems [2][3][5][6][7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4a179a13677acd8f",
+              "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+              "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+             "section": 175,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.029009
+           },
+           {
+            "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-eca8f030d797ca58",
+              "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+             "section": 596,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.789952
+           },
+           {
+            "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 3 GHz, N connectors\nVector network analyzer, 4.5 GHz, N connectors\nVector network analyzer, 6 GHz, N connectors\nVector network analyzer, 14 GHz, N connectors\nVector network analyzer, 20 GHz, 3.5 mm connectors\nOptions\nSpectrum analysis, for R&S®ZNL3\nSpectrum analysis, for R&S®ZNL4\nSpectrum analysis, for R&S®ZNL6\nSpectrum analysis, for R&S®ZNL14\nSpectrum analysis, for R&S®ZNL20\nExtended power range",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-9b0b29b71d0a06d2",
+              "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+             "section": 574,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 24.701457
+           },
+           {
+            "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 24.122201
+           },
+           {
+            "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f1351a1b7fda64ad",
+              "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 23.332485
+           },
+           {
+            "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-9b0b29b71d0a06d2",
+              "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 23.332485
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_5BwhFMdtqidmiyeUZVGF94B5",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+          "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+          "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+           "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+           "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Find RAW evidence in the vault about wireless communication market/application opportunities that could require vector network analyzer measurements: 5G, 6G, FR2/mmWave, antennas, filters, RF components, base stations, NTN/satellite. Return only RAW-cited evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "The [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") OBT radio communication tester will simulate the satellite base station in combination with the [R&S SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator, which simulates the different satellite constellations with its integrated GNSS option. The R&S CMX500 will operate in an interactive callbox mode, allowing users to trigger voice calls alongside RF-related measurements. This test mode, based on an intuitive user interface, highlights the tester’s versatility in evaluating both the performance and reliability of 5G connections under different conditions to ensure that future NTN-NR devices powered by MediaTek’s NTN test platform will work flawlessly anywhere in the world.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-aa5dceb541eab8a5",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "sha256": "aa5dceb541eab8a5363bb8e45f5605b367d3cfbdeebc9597deb795d360067ecf",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 40.034211
+            },
+            {
+             "text": "While the CMX500 is an established instrument in the 5G ecosystem, Rohde & Schwarz has recently expanded its functionalities significantly to address the specific complexities of satellite-based communication. The CMX500 supports two primary testing configurations: Full Satellite Access Network (SAN) emulation for device manufacturers, simulating the complete NTN architecture for comprehensive device testing, and gNB and 5G core network emulation for satellite network operators, validating satellite network components against standards-compliant cellular technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2f52d1674ba65597",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "sha256": "2f52d1674ba6559771a562aa583b8f226233e65ee10d2d9aca7f0659f4a3254e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.035903
+            },
+            {
+             "text": "that go beyond the possibilities of the 3GPP 5G-NTN approach by exploiting the full potential of\nflying network components.\nIn the context of this paper, the research project played an important role for all aspects as the\nauthors were part of the Rohde & Schwarz team contributing. Many years of fruitful technical\ndiscussions with other partners, several documents and also many lessons learned during the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 260,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.035026
+            },
+            {
+             "text": "To address future test requirements, SmartViser and Rohde & Schwarz have paired up and combined their solutions. The [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") wireless communication tester supports the latest wireless technologies, including LTE, 5G NR and WLAN. Its energy efficiency test solution offers seamless power consumption measurements in parallel to RF measurements, protocol tests or application tests.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dd68e5dc1441065f",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.815074
+            },
+            {
+             "text": "6. R&S Offensive Plays\nPlay 1 – “One-Box FR1 + FR2 + WLAN + Fading + IP + NTN + RedCap”\nPosition CMX500 as the only platform that delivers cellular (FR1/FR2) + Wi-Fi 6/6E/7 +\nfading + signalling + IMS + IP throughput + NTN + RedCap in one instrument.\nHighlight that Keysight requires:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3cd0a825d66aa879",
+               "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.654213
+            },
+            {
+             "text": "communications network, but will also support sensing, positioning and timing use cases.\nAt Rohde & Schwarz, we see NTN not only as a complementary technology to existing wireless communications technol-\nogies, but we also believe that NTN will be a key enabler of future connectivity. We will continue supporting the indus-\ntry ecosystem with test & measurement solutions that enable users to verify their 5G NTN devices, infrastructure entities,\ncomponents and networks. It is essential for us to stay in close contact with the leading industry players and support",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 246,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.606672
+            },
+            {
+             "text": "- [[R&S CMX500 OBT]] radio communication tester simulate the satellite base station。\n- [[R&S SMBV100B]] vector signal generator simulate different satellite constellations with its integrated GNSS option。\n- [[R&S CMX500]] operate in interactive callbox mode，讓 users trigger voice calls alongside RF-related measurements。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+             },
+             "score": 35.456638
+            },
+            {
+             "text": "respond to time-sensitive 6G applications like autonomous vehicles, industrial automation and other immersive services,\nas identified for IMT-2030.\n6G should build joint evolution/interoperability of 5G NTN and terrestrial networks to leverage the most advantageous\ncharacteristics of satellite and terrestrial systems. 6G could support and combine terrestrial networks and NTN compo-\nnents as depicted in Figure 156. 6G networks could support dynamic reconfiguration to adapt to traffic load/distribution",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 223,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.236995
+            }
+           ],
+           "text": "- 5G NTN/satellite testing includes simulating a satellite base station, triggering voice calls alongside RF-related measurements, and evaluating performance and reliability of 5G connections for NTN-NR devices [1].\n- Satellite-based communication testing includes Full Satellite Access Network emulation for device manufacturers and gNB/5G core network emulation for satellite network operators validating satellite network components [2].\n- Wireless communication testing supports LTE, 5G NR, and WLAN, with power consumption measurements performed in parallel with RF measurements, protocol tests, or application tests [4].\n- FR2 is identified alongside FR1, Wi‑Fi 6/6E/7, fading, signaling, IP throughput, NTN, and RedCap as part of a one-box wireless test platform positioning [5].\n- NTN is described as a key enabler of future connectivity, with test and measurement solutions used to verify 5G NTN devices, infrastructure entities, components, and networks [6].\n- 6G applications include autonomous vehicles, industrial automation, and immersive services, and 6G is described as combining terrestrial networks and NTN components [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") OBT radio communication tester will simulate the satellite base station in combination with the [R&S SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator, which simulates the different satellite constellations with its integrated GNSS option. The R&S CMX500 will operate in an interactive callbox mode, allowing users to trigger voice calls alongside RF-related measurements. This test mode, based on an intuitive user interface, highlights the tester’s versatility in evaluating both the performance and reliability of 5G connections under different conditions to ensure that future NTN-NR devices powered by MediaTek’s NTN test platform will work flawlessly anywhere in the world.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-aa5dceb541eab8a5",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "sha256": "aa5dceb541eab8a5363bb8e45f5605b367d3cfbdeebc9597deb795d360067ecf",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 40.034211
+           },
+           {
+            "text": "While the CMX500 is an established instrument in the 5G ecosystem, Rohde & Schwarz has recently expanded its functionalities significantly to address the specific complexities of satellite-based communication. The CMX500 supports two primary testing configurations: Full Satellite Access Network (SAN) emulation for device manufacturers, simulating the complete NTN architecture for comprehensive device testing, and gNB and 5G core network emulation for satellite network operators, validating satellite network components against standards-compliant cellular technologies.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-2f52d1674ba65597",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "sha256": "2f52d1674ba6559771a562aa583b8f226233e65ee10d2d9aca7f0659f4a3254e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.035903
+           },
+           {
+            "text": "To address future test requirements, SmartViser and Rohde & Schwarz have paired up and combined their solutions. The [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") wireless communication tester supports the latest wireless technologies, including LTE, 5G NR and WLAN. Its energy efficiency test solution offers seamless power consumption measurements in parallel to RF measurements, protocol tests or application tests.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dd68e5dc1441065f",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.815074
+           },
+           {
+            "text": "6. R&S Offensive Plays\nPlay 1 – “One-Box FR1 + FR2 + WLAN + Fading + IP + NTN + RedCap”\nPosition CMX500 as the only platform that delivers cellular (FR1/FR2) + Wi-Fi 6/6E/7 +\nfading + signalling + IMS + IP throughput + NTN + RedCap in one instrument.\nHighlight that Keysight requires:",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-3cd0a825d66aa879",
+              "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.654213
+           },
+           {
+            "text": "communications network, but will also support sensing, positioning and timing use cases.\nAt Rohde & Schwarz, we see NTN not only as a complementary technology to existing wireless communications technol-\nogies, but we also believe that NTN will be a key enabler of future connectivity. We will continue supporting the indus-\ntry ecosystem with test & measurement solutions that enable users to verify their 5G NTN devices, infrastructure entities,\ncomponents and networks. It is essential for us to stay in close contact with the leading industry players and support",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 246,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.606672
+           },
+           {
+            "text": "respond to time-sensitive 6G applications like autonomous vehicles, industrial automation and other immersive services,\nas identified for IMT-2030.\n6G should build joint evolution/interoperability of 5G NTN and terrestrial networks to leverage the most advantageous\ncharacteristics of satellite and terrestrial systems. 6G could support and combine terrestrial networks and NTN compo-\nnents as depicted in Figure 156. 6G networks could support dynamic reconfiguration to adapt to traffic load/distribution",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 223,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.236995
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_nodkkKBtcqZgltNns2xtbLcy",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+          "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+          "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+           "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+           "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Find RAW passages about Vector Network Analyzer capabilities relevant to wireless components: frequency coverage to mmWave/sub-THz, multiport, antennas, filters, mixers, amplifiers, S-parameters, material/dielectric, OTA. Cite RAW only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "![](Grafik88.jpg)\nUltra-wideband OTA power measurement solution\n18 GHz – 90 GHz\nMultiport network analyzer ≤ 40 GHz\nR&S®NRPM\nR&S®ZNBT\n6",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae261ae2c6ea49d8",
+               "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "section": 63,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.842868
+            },
+            {
+             "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 596,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.779994
+            },
+            {
+             "text": "- [[R&S ZNA]]\n- [[R&S ZNA26]]\n- [[R&S ZNA43]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67EXT]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67.md"
+             },
+             "score": 31.240457
+            },
+            {
+             "text": "- [[R&S ZNB3000]]\n- [[R&S ZNB3004]]\n- [[R&S ZNB3020]]\n- [[R&S ZNB3044]]\n- [[R&S ZNA43]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3032.md"
+             },
+             "score": 31.240457
+            },
+            {
+             "text": "- [[R&S ZNB3000]]\n- [[R&S ZNB3004]]\n- [[R&S ZNB3032]]\n- [[R&S ZNB3044]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]\n- [[Noise figure measurement]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3020.md"
+             },
+             "score": 31.079043
+            },
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.632201
+            },
+            {
+             "text": "RF MEASUREMENTS ON PAYLOAD\nCOMPONENTS\nWITH THE R&S®ZNA VECTOR NETWORK ANALYZER\nR&S®ZNA key features\n| ► Extremely high sensitivity |     | ► Two internal LO sources |     |",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 27,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.626603
+            },
+            {
+             "text": "- [[R&S ZNB3000]]\n- [[R&S ZNB3004]]\n- [[R&S ZNB3020]]\n- [[R&S ZNB3032]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3044.md"
+             },
+             "score": 30.353317
+            }
+           ],
+           "text": "Frequency coverage: OTA power measurement solution from 18 GHz to 90 GHz, and multiport network analyzer up to ≤40 GHz [1].\nFrequency coverage / ports: vector network analyzer base units include 2-port and 4-port versions from 9 kHz up to 4.5 GHz, 20 GHz, 32 GHz, and 43.5 GHz [2].\nMultiport: “Multiport network analyzer ≤ 40 GHz” is listed with R&S®ZNBT [1].\nExtended VNA system: R&S®ZNA67EXT consists of one R&S®ZNA67 vector network analyzer and up to four external test sets [6].\nRF component measurement context: R&S®ZNA is described for “RF measurements on payload components,” with key features including extremely high sensitivity and two internal LO sources [7].\nOTA: “Ultra-wideband OTA power measurement solution” is listed for 18 GHz–90 GHz [1].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "![](Grafik88.jpg)\nUltra-wideband OTA power measurement solution\n18 GHz – 90 GHz\nMultiport network analyzer ≤ 40 GHz\nR&S®NRPM\nR&S®ZNBT\n6",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ae261ae2c6ea49d8",
+              "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+             "section": 63,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.842868
+           },
+           {
+            "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-eca8f030d797ca58",
+              "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+             "section": 596,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 31.779994
+           },
+           {
+            "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.632201
+           },
+           {
+            "text": "RF MEASUREMENTS ON PAYLOAD\nCOMPONENTS\nWITH THE R&S®ZNA VECTOR NETWORK ANALYZER\nR&S®ZNA key features\n| ► Extremely high sensitivity |     | ► Two internal LO sources |     |",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 27,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.626603
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_Sp6MXr1apE69N4PhIO1rtuiv",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+          "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+          "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-3f60ced735264ab28030c42c3ae16db5",
+           "request_id": "request-3f60ced735264ab28030c42c3ae16db5",
+           "span_id": "span-3f60ced735264ab28030c42c3ae16db5",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "RAW evidence for 6G or sub-THz / D-band / mmWave wireless communication test needs and R&S vector network analyzer capabilities. Cite RAW only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.486477
+            },
+            {
+             "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 3 GHz, N connectors\nVector network analyzer, 4.5 GHz, N connectors\nVector network analyzer, 6 GHz, N connectors\nVector network analyzer, 14 GHz, N connectors\nVector network analyzer, 20 GHz, 3.5 mm connectors\nOptions\nSpectrum analysis, for R&S®ZNL3\nSpectrum analysis, for R&S®ZNL4\nSpectrum analysis, for R&S®ZNL6\nSpectrum analysis, for R&S®ZNL14\nSpectrum analysis, for R&S®ZNL20\nExtended power range",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9b0b29b71d0a06d2",
+               "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "section": 574,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.826471
+            },
+            {
+             "text": "- [[R&S ZNA]]\n- [[R&S ZNA26]]\n- [[R&S ZNA43]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67EXT]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67.md"
+             },
+             "score": 36.078293
+            },
+            {
+             "text": "- [[R&S ZNB3000]]\n- [[R&S ZNB3004]]\n- [[R&S ZNB3020]]\n- [[R&S ZNB3044]]\n- [[R&S ZNA43]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3032.md"
+             },
+             "score": 36.078293
+            },
+            {
+             "text": "- [[R&S ZNB3000]]\n- [[R&S ZNB3004]]\n- [[R&S ZNB3032]]\n- [[R&S ZNB3044]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]\n- [[Noise figure measurement]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3020.md"
+             },
+             "score": 35.74601
+            },
+            {
+             "text": "- [[R&S ZNB3000]]\n- [[R&S ZNB3004]]\n- [[R&S ZNB3020]]\n- [[R&S ZNB3032]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3044.md"
+             },
+             "score": 35.262807
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.372245
+            },
+            {
+             "text": "NR sub-6G RF analyzer (R&S®CMW-KM6000 and R&S®CMW-KM6002 options,\ncarrier aggregation)\nBandwidths",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a6d6df08c738f93",
+               "original_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "sha256": "0a6d6df08c738f93a1a77e4d5288f72d56b99f6bfc2e418ec9a4572cef95de68",
+               "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+              "section": 849,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.889427
+            }
+           ],
+           "text": "No RAW passage supports 6G, sub-THz, D-band, or mmWave wireless communication test needs; RAW evidence only supports R&S VNA capabilities: the R&S®ZNA67EXT vector network analyzer system includes one R&S®ZNA67 VNA and up to four external test sets [1], and R&S VNA base units are listed from 3 GHz to 20 GHz with options including spectrum analysis and extended power range [2].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.486477
+           },
+           {
+            "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 3 GHz, N connectors\nVector network analyzer, 4.5 GHz, N connectors\nVector network analyzer, 6 GHz, N connectors\nVector network analyzer, 14 GHz, N connectors\nVector network analyzer, 20 GHz, 3.5 mm connectors\nOptions\nSpectrum analysis, for R&S®ZNL3\nSpectrum analysis, for R&S®ZNL4\nSpectrum analysis, for R&S®ZNL6\nSpectrum analysis, for R&S®ZNL14\nSpectrum analysis, for R&S®ZNL20\nExtended power range",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-9b0b29b71d0a06d2",
+              "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+             "section": 574,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.826471
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

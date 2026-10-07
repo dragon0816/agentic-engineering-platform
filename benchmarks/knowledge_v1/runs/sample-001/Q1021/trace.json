@@ -1,0 +1,1186 @@
+{
+ "question": {
+  "id": "Q1021",
+  "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Wireless Fundamentals",
+  "topic": "OFDM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-4ef0cc09be354dd0b946ea1bde791c14",
+ "exchange": {
+  "sent": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 239.156,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4ef0cc09be354dd0b946ea1bde791c14",
+    "actor": "leo.chi",
+    "title": "What is OFDM, and which product-related measurement decisions depend on …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:11:45.067835Z",
+    "updated_at": "2026-10-07T09:15:43.353518Z",
+    "messages": [
+     {
+      "message_id": "message-fc5129ba5cd445b5a24d33b4152c107f",
+      "role": "user",
+      "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T09:11:45.097529Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-43f69237a91b46adb83e6b141b26a37e",
+      "role": "assistant",
+      "text": "OFDM — **orthogonal frequency-division multiplexing** — is a multicarrier modulation method: data is carried on many closely spaced, mathematically orthogonal subcarriers. In a practical OFDM system, the FFT size determines how many frequency-domain subcarriers exist in one OFDM symbol, and it also relates to the raw time-domain OFDM symbol length and maximum bandwidth. In 5G NR, the numerology defines the time/frequency resolution, including OFDM symbol duration and subcarrier spacing; the reference SCS is 15 kHz.  \nSource evidence: “FFT size (NFFT) defines the number [of] subcarriers … within an OFDM Symbol … indirectly the maximum bandwidth,” and NR numerology defines OFDM symbol duration and SCS. [raw/Knowledge/NR Frame Structure.md, section 2]\n\nProduct-related measurement decisions that depend on understanding OFDM include:\n\n1. **Which signal-generation option to use**  \n   If the DUT needs a custom OFDM waveform, the relevant choice can be an OFDM generation option such as **R&S®SMW-K114** on the SMW platform; R&S material describes it as “ideal for generating custom OFDM based waveforms.” [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 17]\n\n2. **Which analysis application or measurement personality to select**  \n   OFDM-based standards may require OFDM-specific analysis rather than only generic spectrum measurements. R&S specs list **OFDM signal analysis**, WLAN 802.11ay/802.11bn measurements, LTE/EUTRA, and 5G NR measurement applications on analyzers such as FSW/FSV3000/FSVA3000. [raw/Productions/FSW_specs_en_5215-6749-22_v1701.md, sections 957 and 975; raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md, section 627; raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md, section 680]\n\n3. **Numerology, subcarrier spacing, RB count, and occupied bandwidth**  \n   OFDM knowledge is needed to choose SCS, FFT size, number of resource blocks, and bandwidth. One 5G NR OTA receiver-test example distinguishes a 50 MHz DFT-s-OFDM NR signal and notes that **60 kHz SCS uses 64 RBs**, while **120 kHz SCS uses 32 RBs**. [raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md, section 92]\n\n4. **Which KPIs to measure and how to view impairments**  \n   OFDM-aware measurements include **EVM vs. OFDM symbol**, **EVM vs. subcarrier**, modulation error, phase error, in-band emissions, equalizer spectrum flatness, and constellation. These are explicitly listed in R&S CMW/CMW100 software data. [raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md, section 1489; raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md, section 855]\n\n5. **Whether to run combined conformance-style measurements**  \n   For 5G NR, OFDM understanding helps decide when to use combined measurements such as **ACLR/SEM/EVM**, including multi-carrier variants. R&S FSW and FSVA3000 specs list 5G NR downlink/uplink and combined ACLR/SEM/EVM measurement applications. [raw/Productions/FSW_specs_en_5215-6749-22_v1701.md, section 975; raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md, section 680]\n\n6. **Analyzer bandwidth and modulation-analysis capability**  \n   If the OFDM signal is very wide or uses high-order modulation, product choice depends on analysis bandwidth and modulation support. R&S material describes “up to 8 GHz signal bandwidth” and “Generic OFDM Analysis,” with flexible modulation analysis from MSK to 4096QAM. [raw/Market/OneNote/MWC2025---WIC-INFRA.md, section 124]\n\n7. **Reference-signal and resource-grid conflicts**  \n   In NR, understanding OFDM symbols is necessary for scheduling/positioning-signal decisions. The knowledge corpus states that **PRS is not allowed to overlap with SSB OFDM symbols**. [raw/Knowledge/PRS (NR).md, section 6]\n\nIn short: OFDM is the structure behind many LTE, 5G NR, WLAN, DVB-like and custom multicarrier waveforms. Once a signal is OFDM-based, product decisions are no longer just “frequency and power”; they include generator waveform option, analyzer application, FFT/SCS/RB/numerology settings, analysis bandwidth, and OFDM-specific KPIs such as EVM by symbol or subcarrier.",
+      "created_at": "2026-10-07T09:15:43.353518Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+       "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+       "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "OFDM — **orthogonal frequency-division multiplexing** — is a multicarrier modulation method: data is carried on many closely spaced, mathematically orthogonal subcarriers. In a practical OFDM system, the FFT size determines how many frequency-domain subcarriers exist in one OFDM symbol, and it also relates to the raw time-domain OFDM symbol length and maximum bandwidth. In 5G NR, the numerology defines the time/frequency resolution, including OFDM symbol duration and subcarrier spacing; the reference SCS is 15 kHz.  \nSource evidence: “FFT size (NFFT) defines the number [of] subcarriers … within an OFDM Symbol … indirectly the maximum bandwidth,” and NR numerology defines OFDM symbol duration and SCS. [raw/Knowledge/NR Frame Structure.md, section 2]\n\nProduct-related measurement decisions that depend on understanding OFDM include:\n\n1. **Which signal-generation option to use**  \n   If the DUT needs a custom OFDM waveform, the relevant choice can be an OFDM generation option such as **R&S®SMW-K114** on the SMW platform; R&S material describes it as “ideal for generating custom OFDM based waveforms.” [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 17]\n\n2. **Which analysis application or measurement personality to select**  \n   OFDM-based standards may require OFDM-specific analysis rather than only generic spectrum measurements. R&S specs list **OFDM signal analysis**, WLAN 802.11ay/802.11bn measurements, LTE/EUTRA, and 5G NR measurement applications on analyzers such as FSW/FSV3000/FSVA3000. [raw/Productions/FSW_specs_en_5215-6749-22_v1701.md, sections 957 and 975; raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md, section 627; raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md, section 680]\n\n3. **Numerology, subcarrier spacing, RB count, and occupied bandwidth**  \n   OFDM knowledge is needed to choose SCS, FFT size, number of resource blocks, and bandwidth. One 5G NR OTA receiver-test example distinguishes a 50 MHz DFT-s-OFDM NR signal and notes that **60 kHz SCS uses 64 RBs**, while **120 kHz SCS uses 32 RBs**. [raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md, section 92]\n\n4. **Which KPIs to measure and how to view impairments**  \n   OFDM-aware measurements include **EVM vs. OFDM symbol**, **EVM vs. subcarrier**, modulation error, phase error, in-band emissions, equalizer spectrum flatness, and constellation. These are explicitly listed in R&S CMW/CMW100 software data. [raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md, section 1489; raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md, section 855]\n\n5. **Whether to run combined conformance-style measurements**  \n   For 5G NR, OFDM understanding helps decide when to use combined measurements such as **ACLR/SEM/EVM**, including multi-carrier variants. R&S FSW and FSVA3000 specs list 5G NR downlink/uplink and combined ACLR/SEM/EVM measurement applications. [raw/Productions/FSW_specs_en_5215-6749-22_v1701.md, section 975; raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md, section 680]\n\n6. **Analyzer bandwidth and modulation-analysis capability**  \n   If the OFDM signal is very wide or uses high-order modulation, product choice depends on analysis bandwidth and modulation support. R&S material describes “up to 8 GHz signal bandwidth” and “Generic OFDM Analysis,” with flexible modulation analysis from MSK to 4096QAM. [raw/Market/OneNote/MWC2025---WIC-INFRA.md, section 124]\n\n7. **Reference-signal and resource-grid conflicts**  \n   In NR, understanding OFDM symbols is necessary for scheduling/positioning-signal decisions. The knowledge corpus states that **PRS is not allowed to overlap with SSB OFDM symbols**. [raw/Knowledge/PRS (NR).md, section 6]\n\nIn short: OFDM is the structure behind many LTE, 5G NR, WLAN, DVB-like and custom multicarrier waveforms. Once a signal is OFDM-based, product decisions are no longer just “frequency and power”; they include generator waveform option, analyzer application, FFT/SCS/RB/numerology settings, analysis bandwidth, and OFDM-specific KPIs such as EVM by symbol or subcarrier.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+      "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+      "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+       "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+       "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "OFDM — **orthogonal frequency-division multiplexing** — is a multicarrier modulation method: data is carried on many closely spaced, mathematically orthogonal subcarriers. In a practical OFDM system, the FFT size determines how many frequency-domain subcarriers exist in one OFDM symbol, and it also relates to the raw time-domain OFDM symbol length and maximum bandwidth. In 5G NR, the numerology defines the time/frequency resolution, including OFDM symbol duration and subcarrier spacing; the reference SCS is 15 kHz.  \nSource evidence: “FFT size (NFFT) defines the number [of] subcarriers … within an OFDM Symbol … indirectly the maximum bandwidth,” and NR numerology defines OFDM symbol duration and SCS. [raw/Knowledge/NR Frame Structure.md, section 2]\n\nProduct-related measurement decisions that depend on understanding OFDM include:\n\n1. **Which signal-generation option to use**  \n   If the DUT needs a custom OFDM waveform, the relevant choice can be an OFDM generation option such as **R&S®SMW-K114** on the SMW platform; R&S material describes it as “ideal for generating custom OFDM based waveforms.” [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 17]\n\n2. **Which analysis application or measurement personality to select**  \n   OFDM-based standards may require OFDM-specific analysis rather than only generic spectrum measurements. R&S specs list **OFDM signal analysis**, WLAN 802.11ay/802.11bn measurements, LTE/EUTRA, and 5G NR measurement applications on analyzers such as FSW/FSV3000/FSVA3000. [raw/Productions/FSW_specs_en_5215-6749-22_v1701.md, sections 957 and 975; raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md, section 627; raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md, section 680]\n\n3. **Numerology, subcarrier spacing, RB count, and occupied bandwidth**  \n   OFDM knowledge is needed to choose SCS, FFT size, number of resource blocks, and bandwidth. One 5G NR OTA receiver-test example distinguishes a 50 MHz DFT-s-OFDM NR signal and notes that **60 kHz SCS uses 64 RBs**, while **120 kHz SCS uses 32 RBs**. [raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md, section 92]\n\n4. **Which KPIs to measure and how to view impairments**  \n   OFDM-aware measurements include **EVM vs. OFDM symbol**, **EVM vs. subcarrier**, modulation error, phase error, in-band emissions, equalizer spectrum flatness, and constellation. These are explicitly listed in R&S CMW/CMW100 software data. [raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md, section 1489; raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md, section 855]\n\n5. **Whether to run combined conformance-style measurements**  \n   For 5G NR, OFDM understanding helps decide when to use combined measurements such as **ACLR/SEM/EVM**, including multi-carrier variants. R&S FSW and FSVA3000 specs list 5G NR downlink/uplink and combined ACLR/SEM/EVM measurement applications. [raw/Productions/FSW_specs_en_5215-6749-22_v1701.md, section 975; raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md, section 680]\n\n6. **Analyzer bandwidth and modulation-analysis capability**  \n   If the OFDM signal is very wide or uses high-order modulation, product choice depends on analysis bandwidth and modulation support. R&S material describes “up to 8 GHz signal bandwidth” and “Generic OFDM Analysis,” with flexible modulation analysis from MSK to 4096QAM. [raw/Market/OneNote/MWC2025---WIC-INFRA.md, section 124]\n\n7. **Reference-signal and resource-grid conflicts**  \n   In NR, understanding OFDM symbols is necessary for scheduling/positioning-signal decisions. The knowledge corpus states that **PRS is not allowed to overlap with SSB OFDM symbols**. [raw/Knowledge/PRS (NR).md, section 6]\n\nIn short: OFDM is the structure behind many LTE, 5G NR, WLAN, DVB-like and custom multicarrier waveforms. Once a signal is OFDM-based, product decisions are no longer just “frequency and power”; they include generator waveform option, analyzer application, FFT/SCS/RB/numerology settings, analysis bandwidth, and OFDM-specific KPIs such as EVM by symbol or subcarrier.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_J77LlcWPTSyTUpav1h9lilH1",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+          "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+          "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+           "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+           "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What is OFDM, and which product-related measurement decisions depend on understanding it? Please answer with citations to Raw evidence from the RS_Knowledge corpus, including relevant Rohde & Schwarz product examples and measurement choices.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Periodicity and Repetition\nTODO\nCurrent Understanding and Open questions\nCurrent Understanding\nPRS is not allowed to overlap with SSB OFDM symbols.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1e756ed82ba721c0",
+               "original_ref": "raw/Knowledge/PRS (NR).md",
+               "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+               "raw_ref": "raw/Knowledge/PRS (NR).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.139044
+            },
+            {
+             "text": "- has exclusive access to proprietary data from [[Rohde & Schwarz]]；\n- has access to specialized resources derived from the expertise of [[Rohde & Schwarz]]；\n- is trained with relevant data to optimize its performance；\n- automatically integrates updates，以確保 users always have access to the most recent information and best practices。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+             },
+             "score": 37.62951
+            },
+            {
+             "text": "The CMX500 AI Scripting Assistant has access to specialized resources derived from the expertise of Rohde & Schwarz and is trained with relevant data to optimize its performance. Moreover, Rohde & Schwarz ensures the solution stays current and accurate by automatically integrating updates. This guarantees that users always have access to the most recent information and best practices.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8b44e0d324270514",
+               "original_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "sha256": "8b44e0d324270514830d2b3ff82c35b16cf5a58441a03941d7c14eaf71388d51",
+               "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.044621
+            },
+            {
+             "text": "Products from the Rohde & Schwarz group of companies are manufactured according\nto the highest technical standards. To use the products safely, follow the instructions\nprovided here and in the product documentation. Keep the product documentation\nnearby and offer it to other users.\nUse the product only for its intended use and within its performance limits. Intended",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2da4078601f6c0a3",
+               "original_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "sha256": "2da4078601f6c0a3baf385390b5787c072932f98c4bd40464406ca4678ebafca",
+               "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.404273
+            },
+            {
+             "text": "It is possible to create to create an individual testprocedure by using drag-and-drop. Select a testmodule from\nthe block library and drop it into the Test Procedure window. Please make sure to connect the bottom port of\na block to the top port of the next block.\nTo start a test, go to the tab Testplan Editor and click on the button Single Run.\nFigure 29: Run a test\nAfter the execution, a test protocol in pdf-format can be found at tab Results Viewer.\nFigure 30: QuickStep results\nA click on <name of report>.pdf opens the report on the last run.\nExecutionProtocol_000.txt shows a protocol of the last run which includes all messages from QuickStep\nand the sent and received SCPI interactions.\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Receiver Tests 58",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 106,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.828838
+            },
+            {
+             "text": "1.  Which 3GPP release is relevant (Rel. 17, 18, 19)? What is the timeline here?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 18,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.818718
+            },
+            {
+             "text": "For LTM it is possible to allow RLC SN continuation on the target cell, which means that RRC should implement a\nnew mechanism (together with RLC layer) to retrieve the current RLC status from the old flows and resume it on\nthe  new  flows.  The  existing  approach  implemented  for  PDCP  could  be  reused  (CpdcpReestablishReq/Cnf  and\nCpdcpResumeReq/Cnf).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 616,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.768299
+            },
+            {
+             "text": "This white paper is part of a series of NTN related technology publications, ranging from product information,\nwhite papers and application notes through webinars and videos that can be viewed on demand. We have organized all\nof this information under one common page that is accessible via www.rohde-schwarz.com/ntn. Especially relevant are\nthe topics that cover UE testing for NTN with our CMX500 radio communication tester. Further information is available\nat www.rohde-schwarz.com/cmx-ntn.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.662088
+            }
+           ],
+           "text": "The only OFDM-related measurement/setup constraint stated is that PRS must not overlap with SSB OFDM symbols [1].\nRelevant Rohde & Schwarz product examples include CMX500 for NTN UE testing [8].\nRelevant Rohde & Schwarz measurement workflow evidence includes QuickStep drag-and-drop test procedures, single-run execution, and PDF plus SCPI execution protocols for 5G NR conducted base station receiver tests [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Periodicity and Repetition\nTODO\nCurrent Understanding and Open questions\nCurrent Understanding\nPRS is not allowed to overlap with SSB OFDM symbols.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-1e756ed82ba721c0",
+              "original_ref": "raw/Knowledge/PRS (NR).md",
+              "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/PRS (NR).md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.139044
+           },
+           {
+            "text": "It is possible to create to create an individual testprocedure by using drag-and-drop. Select a testmodule from\nthe block library and drop it into the Test Procedure window. Please make sure to connect the bottom port of\na block to the top port of the next block.\nTo start a test, go to the tab Testplan Editor and click on the button Single Run.\nFigure 29: Run a test\nAfter the execution, a test protocol in pdf-format can be found at tab Results Viewer.\nFigure 30: QuickStep results\nA click on <name of report>.pdf opens the report on the last run.\nExecutionProtocol_000.txt shows a protocol of the last run which includes all messages from QuickStep\nand the sent and received SCPI interactions.\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Receiver Tests 58",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 106,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.828838
+           },
+           {
+            "text": "This white paper is part of a series of NTN related technology publications, ranging from product information,\nwhite papers and application notes through webinars and videos that can be viewed on demand. We have organized all\nof this information under one common page that is accessible via www.rohde-schwarz.com/ntn. Especially relevant are\nthe topics that cover UE testing for NTN with our CMX500 radio communication tester. Further information is available\nat www.rohde-schwarz.com/cmx-ntn.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.662088
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_ODKadhfJgkuiHfO7a0S8k59b",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+          "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+          "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+           "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+           "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "OFDM definition subcarriers orthogonal frequency division multiplexing Rohde Schwarz raw evidence",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "frequency division multiplexing (OFDM) as their under-\nlying modulation. The R&S®SMW-K114 OFDM signal\ngeneration option is ideal for generating custom OFDM\nbased waveforms.\nThe R&S®SMW-K114 OFDM signal generation option",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 17,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.827524
+            },
+            {
+             "text": "Frame / subframe / slot / symbol 是 time-domain structure；[[NR resource grid]] 則把 time-domain [[OFDM symbol]] 與 frequency-domain subcarriers 組成 grid。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR frame structure.md"
+             },
+             "score": 20.104314
+            },
+            {
+             "text": "[[Jin Hailiang]] 是 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]] 中列名的 Senior Director of Products & Systems Division, [[Rohde & Schwarz China]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Jin Hailiang.md"
+             },
+             "score": 19.920775
+            },
+            {
+             "text": "DMRS antenna port. This basic building block repeats in the frequency domain until all allocated RBs of PUSCH\nare filled. The basic building block consists of 4 REs (4 consecutive subcarriers) for single-symbol DMRS antenna\nports and 8 REs (4 consecutive subcarriers over two consecutive OFDM symbols) for double-symbol DMRS\nantenna ports . Among these building-block REs, the white REs are either filled with PUSCH data (when the\nnumber of CDM groups without data =1) or are left empty (when the number of CDM groups without data = 2).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e7af8b7a969185f0",
+               "original_ref": "raw/Knowledge/DMRS.md",
+               "sha256": "e7af8b7a969185f04f4f76afffa27e6f57b59e1b67ed1e0e9b20f59f3d87a786",
+               "raw_ref": "raw/Knowledge/DMRS.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/DMRS.md",
+              "section": 21,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 19.061383
+            },
+            {
+             "text": "- [[Resource Element]] 是 one subcarrier in one OFDM symbol and on one antenna port。\n- [[Resource Block]] 是 12 consecutive subcarriers。\n- [[Point-A]] 是 resource grid starts toward higher frequencies 的 frequency-domain reference。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR frame structure.md"
+             },
+             "score": 18.587765
+            },
+            {
+             "text": "- [[Miguel Villanueva Fernandez]]\n- [[Rohde & Schwarz]]\n- [[Rohde & Schwarz Technology Center Denmark]]\n- [[Aalborg University]]\n- [[Handover frequency hopping]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Kristian Hausgaard Soerensen.md"
+             },
+             "score": 17.621832
+            },
+            {
+             "text": "In an OFDM System the FFT size (NFFT) defines the number subcarriers (in frequency-domain) within an OFDM\nSymbol, hence indirectly the maximum bandwidth. NFFT is also the number of samples (in time-domain) of an\n\"raw\" OFDM symbol. NFFT is typically a power of 2.\nThe numerology µ defines the time-frequency resolution, i.e. the OFDM symbol time duration and the Subcarrier\nSpacing (SCS). In NR the reference SCS (µ=0) is 15kHz, as in LTE. The higher µ is the higher is also the time",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-79915e59e7b1699b",
+               "original_ref": "raw/Knowledge/NR Frame Structure.md",
+               "sha256": "79915e59e7b1699b68a64e76f69bf1f85529cb6a23df16362cc7ad6262a28389",
+               "raw_ref": "raw/Knowledge/NR Frame Structure.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/NR Frame Structure.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 16.330935
+            },
+            {
+             "text": "Sidelink identity definition is different.\nIt spans less RBs in frequency, only 11 RBs or 132REs .\nIt spans more OFDM symbols in time, i.e. almost a full slot.\nS-PSS and S-SSS are repeated.\nPSBCH is larger and requires more REs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-67f129aa173b320c",
+               "original_ref": "raw/Knowledge/S-SSB.md",
+               "sha256": "67f129aa173b320cbaaf8a7ba5860cb544ff11f328ea83883cf7626cd21c2e51",
+               "raw_ref": "raw/Knowledge/S-SSB.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/S-SSB.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 15.834641
+            }
+           ],
+           "text": "In an OFDM system, the FFT size defines the number of frequency-domain subcarriers within an OFDM symbol [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "In an OFDM System the FFT size (NFFT) defines the number subcarriers (in frequency-domain) within an OFDM\nSymbol, hence indirectly the maximum bandwidth. NFFT is also the number of samples (in time-domain) of an\n\"raw\" OFDM symbol. NFFT is typically a power of 2.\nThe numerology µ defines the time-frequency resolution, i.e. the OFDM symbol time duration and the Subcarrier\nSpacing (SCS). In NR the reference SCS (µ=0) is 15kHz, as in LTE. The higher µ is the higher is also the time",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-79915e59e7b1699b",
+              "original_ref": "raw/Knowledge/NR Frame Structure.md",
+              "sha256": "79915e59e7b1699b68a64e76f69bf1f85529cb6a23df16362cc7ad6262a28389",
+              "raw_ref": "raw/Knowledge/NR Frame Structure.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/NR Frame Structure.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 16.330935
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_y40loVU9jueoOCpB2pdSVeeR",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+          "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+          "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+           "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+           "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Rohde Schwarz products OFDM measurements NR WLAN DVB signal analyzer generator OFDM raw evidence EVM ACLR subcarrier spacing bandwidth",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "- [[5G NR numerology]]\n- [[UE channel bandwidth]]\n- [[Maximum transmission bandwidth configuration]]\n- [[OFDM symbol]]\n- [[Subcarrier Spacing]]\n- [[3GPP TS 38.211]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR sample rate.md"
+             },
+             "score": 36.208052
+            },
+            {
+             "text": "WLAN 802.11bn measurements 23\nOFDM signal analysis\nEUTRA/LTE FDD base station\nEUTRA/LTE FDD UE\nEUTRA/LTE base station MIMO",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d12e714aff195b62",
+               "original_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+               "sha256": "d12e714aff195b62726a6b5520a3c376c40bf4dde661355373f991ab5174c64d",
+               "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+              "section": 627,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.129046
+            },
+            {
+             "text": "- [[3GPP TS 38.211]]\n- [[5G NR numerology]]\n- [[NR sample rate]]\n- [[NR cyclic prefix]]\n- [[NR resource grid]]\n- [[OFDM symbol]]\n- [[Subcarrier Spacing]]\n- [[UE channel bandwidth]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR frame structure.md"
+             },
+             "score": 35.083715
+            },
+            {
+             "text": "| -------- | ------ | --- | --- | --------------------------- |\n|          | ±45    |     |     | 50MHz DFT-s-OFDM NR signal  |\nNote: For the 60 kHz subcarrier spacing, the number of RBs is 64. For the 120 kHz subcarrier spacing, the\nnumber of RBs is 32.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-b1f51b9642754bec",
+               "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+               "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "section": 92,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.824395
+            },
+            {
+             "text": "- [[5G NR frame structure]]\n- [[Subcarrier Spacing]]\n- [[OFDM symbol]]\n- [[NR sample rate]]\n- [[NR cyclic prefix]]\n- [[UE channel bandwidth]]\n- [[Maximum transmission bandwidth configuration]]\n- [[SSB]]\n- [[Case E SSB occasions]]\n- [[Resource Block]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR numerology.md"
+             },
+             "score": 34.438441
+            },
+            {
+             "text": "5G NR Rel. 15 downlink measurements 59\n5G NR Rel. 15 uplink measurements 59\n5G NR combined ACLR/SEM/EVM\n5G NR multi-CC combined ACLR/SEM/EVM\n5G NR Rel. 16 extension for\nuplink/downlink 59\nHRP UWB measurements 59",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c2f3b544bbc2af25",
+               "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+               "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "section": 975,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.994265
+            },
+            {
+             "text": "OFDM signal analysis\nWLAN 802.11ay measurements 59",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c2f3b544bbc2af25",
+               "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+               "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "section": 957,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.951557
+            },
+            {
+             "text": "EUTRA/LTE TDD base station\nEUTRA/LTE TDD uplink\nEUTRA/LTE NB-IoT downlink\n5G NR Rel. 15 downlink\n5G NR Rel. 15 uplink\n5G NR combined ACLR/SEM/EVM\n5G NR combined multicarrier\nACLR/SEM/EVM measurements 29\n5G NR Rel. 16 extension for\nuplink/downlink measurements 29",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-16787de4c763a4cf",
+               "original_ref": "raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md",
+               "sha256": "16787de4c763a4cfc5b13aa10adfe4ef8e0a5552658837c00fb7a0218901756b",
+               "raw_ref": "raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md",
+              "section": 680,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.602715
+            }
+           ],
+           "text": "RAW passages list WLAN 802.11bn measurements and OFDM signal analysis [2].  \nRAW passages list OFDM signal analysis and WLAN 802.11ay measurements [7].  \nRAW passages list 5G NR Rel. 15 downlink and uplink measurements [6].  \nRAW passages list 5G NR combined ACLR/SEM/EVM and multi-CC combined ACLR/SEM/EVM [6].  \nRAW passages list 5G NR combined multicarrier ACLR/SEM/EVM measurements [8].  \nRAW passages describe a 50 MHz DFT-s-OFDM NR signal [4].  \nRAW passages state that 60 kHz subcarrier spacing uses 64 RBs and 120 kHz subcarrier spacing uses 32 RBs [4].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "WLAN 802.11bn measurements 23\nOFDM signal analysis\nEUTRA/LTE FDD base station\nEUTRA/LTE FDD UE\nEUTRA/LTE base station MIMO",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d12e714aff195b62",
+              "original_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+              "sha256": "d12e714aff195b62726a6b5520a3c376c40bf4dde661355373f991ab5174c64d",
+              "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+             "section": 627,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.129046
+           },
+           {
+            "text": "| -------- | ------ | --- | --- | --------------------------- |\n|          | ±45    |     |     | 50MHz DFT-s-OFDM NR signal  |\nNote: For the 60 kHz subcarrier spacing, the number of RBs is 64. For the 120 kHz subcarrier spacing, the\nnumber of RBs is 32.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-b1f51b9642754bec",
+              "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+              "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+             "section": 92,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.824395
+           },
+           {
+            "text": "5G NR Rel. 15 downlink measurements 59\n5G NR Rel. 15 uplink measurements 59\n5G NR combined ACLR/SEM/EVM\n5G NR multi-CC combined ACLR/SEM/EVM\n5G NR Rel. 16 extension for\nuplink/downlink 59\nHRP UWB measurements 59",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c2f3b544bbc2af25",
+              "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+             "section": 975,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.994265
+           },
+           {
+            "text": "OFDM signal analysis\nWLAN 802.11ay measurements 59",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c2f3b544bbc2af25",
+              "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+             "section": 957,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.951557
+           },
+           {
+            "text": "EUTRA/LTE TDD base station\nEUTRA/LTE TDD uplink\nEUTRA/LTE NB-IoT downlink\n5G NR Rel. 15 downlink\n5G NR Rel. 15 uplink\n5G NR combined ACLR/SEM/EVM\n5G NR combined multicarrier\nACLR/SEM/EVM measurements 29\n5G NR Rel. 16 extension for\nuplink/downlink measurements 29",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-16787de4c763a4cf",
+              "original_ref": "raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md",
+              "sha256": "16787de4c763a4cfc5b13aa10adfe4ef8e0a5552658837c00fb7a0218901756b",
+              "raw_ref": "raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/FSVA3000_specs_en_5216-1211-22_v1601.md",
+             "section": 680,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.602715
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_1OborEQaJws68YT4CyUEt6jY",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+          "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+          "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-bbf5bc265c7743d289db02c279b43ec2",
+           "request_id": "request-bbf5bc265c7743d289db02c279b43ec2",
+           "span_id": "span-bbf5bc265c7743d289db02c279b43ec2",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "FSW K18 OFDM vector signal analysis Rohde Schwarz raw evidence OFDM EVM subcarrier modulation",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+             },
+             "score": 34.170603
+            },
+            {
+             "text": "- DUT 搭配 [[R&S SMW200A]] 與 [[R&S FSW]]。\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]；signal generation software 包含 LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz；signal analysis software 包含 LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、vector signal analysis（K70）。",
+             "citation": {
+              "kind": "wiki",
+              "source": {
+               "source_id": "src-d0c9fb31e269a02c",
+               "original_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "sha256": "d0c9fb31e269a02c5d94a1f31297a3274ff1a1f1a9faa8ae8017403a1a7b4690",
+               "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+             },
+             "score": 32.495404
+            },
+            {
+             "text": "Vector signal analysis\nMulti-modulation analysis",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d9f5b6d241c1e5d8",
+               "original_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "sha256": "d9f5b6d241c1e5d834b6f0c0df762971f0c39a6fc045fc2d7db2589ee858e26f",
+               "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+              "section": 881,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.040986
+            },
+            {
+             "text": "Signal analysis SW:\tLTE, Cellular IoT\n\t\t5G NR R17/18 (K171)\n\t\tOFDM signal analysis (K96)\n\t\tVector signal analysis (K70)\n*overrange",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0c9fb31e269a02c",
+               "original_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "sha256": "d0c9fb31e269a02c5d94a1f31297a3274ff1a1f1a9faa8ae8017403a1a7b4690",
+               "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+              "section": 95,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.343808
+            },
+            {
+             "text": "Up to 8 GHz Signal Bandwidth &\nGeneric OFDM Analysis\nFlexible modulation analysis from\nMSK to 4096QAM/Multi-modulation",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae261ae2c6ea49d8",
+               "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "section": 124,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.818754
+            },
+            {
+             "text": "EVM vs. OFDM symbol,\nME vs. OFDM symbol,\nPE vs. OFDM symbol,\nEVM vs. subcarrier,\ninband emissions,\nequalizer spectrum flatness,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-84f0ccff28cb329b",
+               "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "section": 1489,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.886991
+            },
+            {
+             "text": "EVM vs OFDM symbol,\nME vs OFDM symbol,\nPE vs OFDM symbol,\nEVM vs Subcarrier,\nInband Emissions,\nEqualizer Spectrum Flatness,\nI/Q Constellation",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a6d6df08c738f93",
+               "original_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "sha256": "0a6d6df08c738f93a1a77e4d5288f72d56b99f6bfc2e418ec9a4572cef95de68",
+               "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+              "section": 855,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.183832
+            },
+            {
+             "text": "using real-world modulation and analysis. performance DPD. The Hammerstein model is also\nincluded in R&S®FSW-K18M for real-time memory DPD\nThe R&S®FSW-K18 controls the R&S®SMW200A and with Rohde & Schwarz signal generators\ntherefore knows the reference signal that is applied to the ► Polynomial/model-based DPD methods are supported\nDUT. The results are derived with a single measurement with R&S®FSW-K18 and R&S®SMW-K541",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.806219
+            }
+           ],
+           "text": "Vector signal analysis is described as multi-modulation analysis [3].\nGeneric OFDM analysis supports flexible modulation analysis from MSK to 4096QAM [5].\nsubcarrier [6].\nR&S®FSW-K18 controls the R&S®SMW200A and derives results with a single measurement [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Vector signal analysis\nMulti-modulation analysis",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d9f5b6d241c1e5d8",
+              "original_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+              "sha256": "d9f5b6d241c1e5d834b6f0c0df762971f0c39a6fc045fc2d7db2589ee858e26f",
+              "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+             "section": 881,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 31.040986
+           },
+           {
+            "text": "Up to 8 GHz Signal Bandwidth &\nGeneric OFDM Analysis\nFlexible modulation analysis from\nMSK to 4096QAM/Multi-modulation",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ae261ae2c6ea49d8",
+              "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+             "section": 124,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.818754
+           },
+           {
+            "text": "EVM vs. OFDM symbol,\nME vs. OFDM symbol,\nPE vs. OFDM symbol,\nEVM vs. subcarrier,\ninband emissions,\nequalizer spectrum flatness,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-84f0ccff28cb329b",
+              "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+              "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+             "section": 1489,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.886991
+           },
+           {
+            "text": "using real-world modulation and analysis. performance DPD. The Hammerstein model is also\nincluded in R&S®FSW-K18M for real-time memory DPD\nThe R&S®FSW-K18 controls the R&S®SMW200A and with Rohde & Schwarz signal generators\ntherefore knows the reference signal that is applied to the ► Polynomial/model-based DPD methods are supported\nDUT. The results are derived with a single measurement with R&S®FSW-K18 and R&S®SMW-K541",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.806219
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

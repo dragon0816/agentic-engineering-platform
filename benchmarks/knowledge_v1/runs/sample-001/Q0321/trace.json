@@ -1,0 +1,786 @@
+{
+ "question": {
+  "id": "Q0321",
+  "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Aerospace / Defense",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-05838299d5ee456da34b7127eeff16dd",
+ "exchange": {
+  "sent": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 133.328,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-05838299d5ee456da34b7127eeff16dd",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Aerospace / Defense market requirement to a measura…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:15:58.595104Z",
+    "updated_at": "2026-10-07T08:18:11.662882Z",
+    "messages": [
+     {
+      "message_id": "message-44ca7a9d011a42e0b98434973ad501fe",
+      "role": "user",
+      "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-07T08:15:58.607843Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-4d226ff22a63432c93d1e7baf6965f01",
+      "role": "assistant",
+      "text": "The retrieved Raw evidence does not validate the complete answer. Missing: market_segment. No cross-facet recommendation is accepted.",
+      "created_at": "2026-10-07T08:18:11.662882Z",
+      "status": "needs_input",
+      "trace": {
+       "trace_id": "trace-97308128fb0c41069ecd86739b931d32",
+       "request_id": "request-97308128fb0c41069ecd86739b931d32",
+       "span_id": "span-97308128fb0c41069ecd86739b931d32",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "The retrieved Raw evidence does not validate the complete answer. Missing: market_segment. No cross-facet recommendation is accepted.",
+    "status": "needs_input",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-97308128fb0c41069ecd86739b931d32",
+      "request_id": "request-97308128fb0c41069ecd86739b931d32",
+      "span_id": "span-97308128fb0c41069ecd86739b931d32",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-97308128fb0c41069ecd86739b931d32",
+       "request_id": "request-97308128fb0c41069ecd86739b931d32",
+       "span_id": "span-97308128fb0c41069ecd86739b931d32",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.1"
+       },
+       "trace": {
+        "trace_id": "trace-97308128fb0c41069ecd86739b931d32",
+        "request_id": "request-97308128fb0c41069ecd86739b931d32",
+        "span_id": "span-97308128fb0c41069ecd86739b931d32",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "Space Supply Chain › 與既有知識的關係\n- 與 [[4. Satellite Eco-chain in Taiwan]] 類似，本來源主要是 satellite / space supply chain link hub；兩者都含未擷取外部資料與未 OCR 圖片，不可直接當成已驗證供應鏈證據。\n- 與 [[3. Satcom market summary]] 類似，本來源列出外部新聞與文章連結；在正文未擷取前，只能作為待讀索引。\n- 與 [[0.Satcom Industry]]、[[台灣太空產業]]、[[台灣太空產業地圖]]、[[通訊衛星製造產業平台]]相關，但本來源沒有提供可直接增補的台灣太空產業地圖版本、公司名單、分類規則或政策資料。\n- 與 [[低軌衛星零組件與地面終端供應鏈]]相關，但 Yahoo 連結標題中的 [[事欣科]] / AST 訂單說法尚未取得正文或公告，不更新該供應鏈表格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Space Supply Chain.md"
+          },
+          "score": 1.643996
+         },
+         {
+          "text": "事欣科\n[[事欣科]]是 [[Space Supply Chain]] 中 Yahoo 股市文章連結標題括號內出現的公司名稱；本 vault 目前尚未擷取該新聞正文或公司公告。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/事欣科.md"
+          },
+          "score": 0.943275
+         },
+         {
+          "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 1.34812
+         },
+         {
+          "text": "VIAVI O-RU Tester › 不可推論的內容\n- 來源未提供 VIAVI O-RU Tester 或 VIAVI TM500 O-RU Tester 的正式產品名稱、料號、software release、supported O-RAN WG4 spec versions、license 或 interface option。\n- 來源未提供 VIAVI 官方 datasheet / application note；不可由 R&S 簡報推論 VIAVI product roadmap、formal specification 或 market share。\n- 來源未提供 T-BC、FTN、PTP-GM、O-RU TMA、interconnection unit、TMA / TM500 software library 的具體版本與 timing architecture。\n- March 2025 來源中的 price point、competitor comparison、test case counts 與 VAR commercial terms 屬 internal / market context，需依正式 quote、contract、software release notes 與 public material 補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+          },
+          "score": 2.580616
+         },
+         {
+          "text": "Space Supply Chain\n這份 OneNote 來源是 space / satellite supply chain 的外部資料與圖片 link hub，列出 [[Satellite Applications Catapult]] 的 Space Capabilities Catalogue、Yahoo 股市文章連結、[[PARPRO]] aerospace & defense solution 連結，以及多張未 OCR 圖片；本次 ingest 未擷取外部網頁正文，也未擷取圖片文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Space Supply Chain.md"
+          },
+          "score": 0.839992
+         },
+         {
+          "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 0.828798
+         },
+         {
+          "text": "NEC › unresolved\n- 需要擷取 NEC Technical Journal 文章正文以確認日期、技術範圍、圖表與可引用主張。\n- 需要判定該文章應歸入 [[Knowledge]] 技術背景、[[Productions]] 產品 / 模組資料，或 [[Market]] 市場線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/NEC.md"
+          },
+          "score": 1.154311
+         },
+         {
+          "text": "Space Supply Chain › References（來源原文列出但未擷取正文）\n- `https://sa.catapult.org.uk/space-capabilities-catalogue/` — [[Satellite Applications Catapult]] Space Capabilities Catalogue。\n- `![[Space Supply Chain image.png]]`\n- `202507:` + `![[Space Supply Chain image 1.png]]`\n- `2022:` + `![[Space Supply Chain image.jpg]]`\n- `2021:` + `![[Space Supply Chain image 2.png]]`\n- Yahoo 股市連結：連結文字包含「低軌衛星黑馬出列！它『拿下 AST 訂單』在手訂單突破 1.3 億美元 股價勁揚逾 8%（事欣科）」。\n- `https://www.parpro.com.tw/solutions/aerospace-defense/`\n- `![[Space Supply Chain image 1.jpg]]`\n- `![[Space Supply Chain image 2.jpg]]`\n- `![[Space Supply Chain image 3.png]]`\n- `![[Space Supply Chain image 4.png]]`\n- `https://teams.microsoft.com/v2/`\n- `![[Space Supply Chain image 5.png]]`\n- `![[Space Supply Chain image 6.png]]`\n- `![[Space Supply Chain image 7.png]]`\n- `![[Space Supply Chain image 8.png]]`\n- `![[Space Supply Chain image 9.png]]`\n- `![[Space Supply Chain image 10.png]]`",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Space Supply Chain.md"
+          },
+          "score": 0.770897
+         },
+         {
+          "text": "Tim Seyler\n[[Tim Seyler]] 是 [[Rohde & Schwarz]] 相關 customer questionnaire 與 configuration guide 中列出的 contact；[[cmx500_ntn_customer_questionnaire]] 明示其 email 為 `tim.seyler@rohde-schwarz.com`，角色為 Product Manager Mobile Radio Testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.293874
+         },
+         {
+          "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qualcomm.md"
+          },
+          "score": 0.408989
+         },
+         {
+          "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Randy Schnell.md"
+          },
+          "score": 1.393525
+         },
+         {
+          "text": "Tim Seyler › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 未提供 [[Tim Seyler]] 的職稱或部門。\n- [[cmx500_ntn_customer_questionnaire]] 提供 Product Manager Mobile Radio Testing 角色，但未提供組織層級、所在地、職責範圍或是否為該 solution 的唯一負責人。\n- [[CMX_Configuration_Guide_Audio-Testing]] 只列 contact person，未提供 contact scope、approval authority 或是否為 audio testing configuration 的 owner。\n- [[CMX_Configuration_Guide_LTE-DTC]] 只列 contact person，未提供 contact scope、approval authority 或是否為 LTE-DTC configuration 的 owner。\n- 不能只因其被列為 contact，就推論其為 sales owner、technical owner 或所有相關產品的 product owner。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.278979
+         },
+         {
+          "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Randy Schnell.md"
+          },
+          "score": 0.815498
+         },
+         {
+          "text": "Tim Seyler › 與相關主題的關係\n- 在 [[AIW_Products_Customer_Questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S AI Workplace Solutions]] customer questionnaire 的 contact 出現。\n- 在 [[cmx500_ntn_customer_questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S NTN signaling solutions]] customer questionnaire 的 contact 出現，並被標示為 Product Manager Mobile Radio Testing。\n- 在 [[CMX_Configuration_Guide_Audio-Testing]] 中，[[Tim Seyler]] 是 [[CMX500 Audio Testing configuration]] 的 contact person；來源未提供 email、職稱或 team。\n- 在 [[CMX_Configuration_Guide_LTE-DTC]] 中，[[Tim Seyler]] 是 [[CMX500 LTE-DTC configuration]] 的 contact person；來源未提供 email、職稱或 team。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.277548
+         },
+         {
+          "text": "PARPRO › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出 URL：`https://www.parpro.com.tw/solutions/aerospace-defense/`。\n- URL path 顯示 `aerospace-defense`，但本次 ingest 未擷取網頁正文、頁面標題、產品、服務、認證、客戶、產線、供應鏈位置或日期。\n- 來源在該 URL 後嵌入多張 `Space Supply Chain image 1.jpg` 到 `Space Supply Chain image 10.png` 圖片；本次 raw 未提供 OCR，不能確認圖片是否來自 [[PARPRO]] 網站或 Teams 轉貼材料。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/PARPRO.md"
+          },
+          "score": 1.318964
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- 來源更新 [[R&S portfolio for O-RU testing]]（August 2023）的 O-RU testing portfolio 視角，將重點放在 2025 年的 [[O-RU tester market and funding]]、[[R&S PVT360A O-RU testing]]、[[O-RU NES testing]]、[[VIAVI O-RU Tester]] / [[VIAVI TM500]] integration、competitor positioning 與 NTIA funding opportunities。\n- Slide 2 說 O-RU tester 客戶範圍包含 traditional TOP3 RAN vendors：[[Ericsson]]、[[Nokia]]、[[Samsung]]；O-RAN market entrants：[[Kyocera]]、[[Mavenir]]、[[Tejas]]、[[Fujitsu]]、[[NEC]]、[[ADI]]、[[Qualcomm]]、[[Battelle]]；以及 testing budget limited 的 [[Phy-tunes]]、[[GXC]]、[[Eridian]]、[[University of Georgia]]，與 DAS companies：[[Amphenol]] / Andrew、[[SOLiD]]、[[Samji]]、[[HFR]]。\n- Slide 2 說 US government 透過 [[NTIA NOFO2]] / SRFA#1 funding program 資助 O-RU commercialization；來源描述 2 years project、targeting commercially available Jan 2027、O-RU conformance testing ongoing、field testing starts 1HCY2026、mass-production EoY CY26 / BoY CY27。\n- Slide 3 把 [[Open RAN]] ecosystem 分為 traditional infrastructure providers、radio subsystem manufacturers、chipset / reference designers、industry organizations、test labs、test equipment manufacturers、network operators 與 government funding。\n- Slide 4 將 key test focus areas 從 R&D 到 field testing 分為 RF design / verification / integration、power management、digital design、production testing、regression、operator test、beamforming / Massive MIMO、fronthaul conformance、timing / sync / signal integrity、OTA、QoS / QoE、3GPP compliance、interoperability、end-to-end、functional / baseline testing、network benchmarking、site testing / troubleshooting 與 network synchronization。\n- Slide 5 列出 O-RU testing general instrumentation：[[R&S NGP800]]、[[R&S NGT3600]]、[[R&S OSP200]] / [[R&S OSP300]]、[[R&S RTO]] / [[R&S RTP]]，並標示 Q2CY2025。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 2.005827
+         },
+         {
+          "text": "PARPRO\n[[PARPRO]]是 [[Space Supply Chain]] 中 `parpro.com.tw/solutions/aerospace-defense/` 外部連結所指向的公司 / 品牌名稱線索；本 vault 目前尚未擷取該頁正文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/PARPRO.md"
+          },
+          "score": 1.201936
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 與既有知識的關係\n- 相較 [[R&S portfolio for O-RU testing]]（August 2023），本來源是 2025-03 的 short version，新增 O-RU tester market / funding、PVT360A cost-optimized positioning、NES / EE、M-MIMO with BFM、competitor positioning、VIAVI VAR agreement 與 NTIA funded labs 資訊。\n- 補強 [[O-RU testing]]：既有頁面已整理 August 2023 的 O-RAN WG4 / 3GPP / VIAVI + R&S solution；本來源新增 2025 年 portfolio segmentation、PVT360A 與 VSA/VSG 兩種 offer path、production / regression / certification 的定位差異。\n- 補強 [[Network energy saving]]：既有頁面由 [[MWC2025---WIC-INFRA]] 建立 network energy saving 概念；本來源把 NES 具體連到 O-RU、ETSI traffic models、RTO6、NGP / NGT、VIAVI TM500 O-RU Tester、ADI Titan demo 與 up to 40% energy savings claim。\n- 補強 [[VIAVI O-RU Tester]]：既有頁面只由 August 2023 portfolio 支撐；本來源新增 PVT360A setup、VSA/VSG setup、TM500 O-RU Tester、O-DU emulator、TMA、VAR agreement 與 lab adoption 線索。\n- 補強 [[O-RAN WG4 Conformance Testing]]：本來源提到 `O-RAN.WG4.CONF.0-R003-v09.00` target release Q2CY25，與既有 `ORAN-WG4.CONF-v06.00` 形成版本演進線索，但不是同一正式文件全文。\n- 補強 [[R&S PVT360A]]：本來源是 Market / sales deck，不能覆蓋 [[PVT360A_Features_V8-5-30_en_06]] 的 Productions 規格；PVT360A 的 O-RU testing positioning 另建 [[R&S PVT360A O-RU testing]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 1.77449
+         },
+         {
+          "text": "PARPRO › unresolved\n- 需要擷取 `https://www.parpro.com.tw/solutions/aerospace-defense/` 正文。\n- 需要確認 [[PARPRO]] 的正式公司名稱、所在地、產品線、產業分類與認證。\n- 需要 OCR 來源中與該 URL 相鄰的圖片，確認是否為 PARPRO aerospace & defense 內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/PARPRO.md"
+          },
+          "score": 0.328054
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- Slide 12 說 [[Analog Devices]] 的 energy-efficient [[ADI Titan O-RU platform]] enabled by [[ADRV906x]] Radio Unit SoC 在 MWC25 與 [[Rohde & Schwarz]]、[[Viavi Solutions]] 共同展示 energy efficiency；透過 Microsleep DTx during low traffic loads 可達 up to 40% energy savings。\n- Slide 13 說 R&S 與 ADI 已合作 over one year，NES test system 用於 ADI Kerberos 與 Titan reference design，並提到 Titan 是 more integrated design，使用 Samana transceiver 與 Low-Phy protocol on same Samana chip。\n- Slide 17–20 是 competitor / battle-card 型內容：主要競品為 [[Keysight]]、[[LitePoint]]、[[Anritsu]]；Keysight 被描述為 O-RU testing market majority，且 Keysight Time Sync Analyzer、MTRX、O-DU emulator 等硬體需求被列出；VIAVI / R&S 與 Keysight 在 price point、test coverage、M-MIMO / BFM、functional test、TCO 與 reusability 上被比較。\n- Slide 21 說 [[VIAVI VAR Agreement]] / R&S GPPA 允許 Viavi worldwide sell R&S products，產品包含 signal generators、spectrum analyzers、[[R&S VSE]]、[[R&S PVT360A]]、[[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]] / [[R&S MXO4]]、[[R&S OSP200]] / [[R&S OSP300]]，target markets 為 O-RAN、NTN 與 6G。\n- Slide 23、25、26 保存 NTIA / Public Wireless Supply Chain Innovation Fund funding history、NOFO1 / NOFO2 winners、ORCID / ACCoRD / VALOR labs 與 R&S received / quoted orders 的 market / sales 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 1.488903
+         },
+         {
+          "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 26,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 11.210268
+         },
+         {
+          "text": "Christian Dobmeier\n[[Christian Dobmeier]] 是 [[Rohde & Schwarz]] 的 Director of Product Group CMX500；目前本頁只由 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 支撐。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.366239
+         },
+         {
+          "text": "R&S SMA100B › Platform height options\n| Option code | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|\n| R&S®SMAB-B92 | 2 HU with 5-inch touch display | 1420.8288.04 | 2 HU model；dimensions 460 mm × 107 mm × 503 mm；without handles and feet 445 mm × 89 mm × 485 mm；weight 14.4 kg；rated current 3.5 A to 1.6 A at 50 Hz to 60 Hz、3.5 A to 2.9 A at 400 Hz；rated power fully equipped 300 W measured |\n| R&S®SMAB-B93 | 3 HU with 7-inch touch display | 1420.8388.04 | 3 HU model；dimensions 460 mm × 151 mm × 503 mm；without handles and feet 445 mm × 133 mm × 485 mm；weight 18.0 kg；rated current 7.3 A to 4.6 A；rated power fully equipped 380 W measured |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.279215
+         },
+         {
+          "text": "Christian Dobmeier › 來源中的角色\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Christian Dobmeier]] 以 Director of Product Group CMX500 at [[Rohde & Schwarz]] 身分發言。\n\n其發言重點包含：\n\n- [[Rohde & Schwarz]] 與 [[Gatehouse Satcom]] 合作，以 accelerate validation methodologies for [[5G NTN]] technologies。\n- 發言中明示包含 [[GEO]]、[[MEO]] 與 [[LEO]] satellite services。\n- 當 satellite sector converges on standardized, [[3GPP]] based solutions 時，software innovators 與 test equipment specialists 的 close collaboration 很重要。\n- 此 partnership 不只 strengthens tools and insights for today’s [[5G NTN]] rollout，也 lays a solid foundation for future [[6G NTN testing and validation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.286455
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-8ec180d5f5e4ded7",
+            "original_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "sha256": "8ec180d5f5e4ded7daf73d9a99dc85b471116e2789518fb2949545a4a27543fa",
+            "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "section": 612,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-06da2c5f1d2f72f1",
+            "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+            "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+           "section": 1202,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6ae422456b68416f",
+            "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+            "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.758653
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         }
+        ],
+        "text": "建議主軸：目前知識庫沒有直接證據把 Aerospace / Defense 需求、量測參數、Signal Generator / Signal Analyzer capability 完整串在同一來源；可支持的鏈條只能以「A&D 5G private network resilience」為市場需求，再以 AWGN C/N、Eb/N0、bandwidth 作為可量測壓力參數，最後對應到訊號產生器的 AWGN 注入能力，且此鏈條需標示為推論 [13][25]。\n### 推薦先賣\nAerospace & Defense Test 已出現的明確場景是：deployed 5G private networks 在 Smart Jamming / EW 環境下的 resilience，以及 legacy frequency hopping for 5G resilience 是否能在不修改 DUT 的前提下提升連線韌性 [13]。\n可量測參數方面，來源明示可對 wanted signal 加入 AWGN，且 AWGN 可設定 bandwidth、C/N ratio 或 Eb/N0 [25]。\n產品能力方面，知識庫明示 R&S SMA100B 有 Chirp signal generation、Power analysis、Clock synthesizer frequency extension to 6 GHz、High dynamic uninterrupted level sweep 等 options [21]。\nSignal Analyzer / Spectrum Analyzer 產品線方面，來源只明示 VIAVI VAR Agreement / R&S GPPA 涵蓋 signal generators、spectrum analyzers、R&S VSE 等產品，target markets 為 O-RAN、NTN 與 6G；未直接連到 Aerospace / Defense [20]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| Signal Generator / Noise generation capability | A&D deployed 5G private network resilience under Smart Jamming / EW | AWGN 可加到 wanted signal；AWGN bandwidth、C/N ratio、Eb/N0 可設定；使用 noise generator 時不能對 wanted signal 加 frequency offset | 【推論】若要把 Smart Jamming / EW resilience 轉成可重複測試，可先用可控 AWGN bandwidth、C/N、Eb/N0 作為壓力參數 | [13][25] | 知識庫未標示此 AWGN 功能屬於哪一台 R&S signal generator；也未直接說 AWGN 等同 Smart Jamming / EW |\n| R&S SMA100B microwave signal generator | RF stimulus / signal generation capability | R&S®SMAB-K725 Chirp signal generation；R&S®SMAB-K28 Power analysis；R&S®SMAB-K722 Clock synthesizer frequency extension to 6 GHz；R&S®SMAB-K724 High dynamic uninterrupted level sweep | 【推論】若 A&D resilience 測試需要可控 RF stimulus，SMA100B 的 chirp、sweep、power-analysis 相關 options 可作為候選能力 | [13][21] | 知識庫未直接把 SMA100B 與 Aerospace / Defense、Smart Jamming、EW 或 5G private network resilience 相連 |\n| Signal Analyzer / Spectrum Analyzer / R&S VSE | 對受測訊號或頻譜結果做分析 | 來源只確認產品範圍包含 spectrum analyzers 與 R&S VSE | 可作為分析端候選產品線，但知識庫未提供 Aerospace / Defense resilience 對應的 analyzer 指標或 option | [20] | 知識庫未標示必要 analyzer 規格、option code、頻率範圍、解調能力、jamming metric 或 pass/fail criteria |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Deployed 5G private networks under Smart Jamming / EW | Signal Generator / Noise generation capability + Signal Analyzer / Spectrum Analyzer | 以 resilience 為主軸，將測試壓力參數落到 AWGN bandwidth、C/N ratio、Eb/N0 | 未有 passage 直接證明 A&D 客戶要求 AWGN 測試；未有 passage 指定 R&S 型號與 analyzer option [13][25] |\n| Frequency hopping for 5G resilience without modifying DUT | R&S SMA100B 作為候選 RF stimulus source；Signal Analyzer / Spectrum Analyzer 作為候選觀測端 | A&D 簡報主題包含 frequency hopping for 5G resilience；SMA100B 有 high dynamic uninterrupted level sweep option | 未有 passage 直接連結 frequency hopping 測試與 SMA100B K724；不可當成已驗證方案 [13][21] |\n### 限制\nPARPRO aerospace-defense URL 僅被列為外部連結，正文、產品、服務、認證、客戶與供應鏈位置都未擷取，因此不能用來支持 A&D 測試需求 [15]。",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Randy Schnell.md"
+         },
+         "score": 0.815498
+        },
+        {
+         "text": "PARPRO › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出 URL：`https://www.parpro.com.tw/solutions/aerospace-defense/`。\n- URL path 顯示 `aerospace-defense`，但本次 ingest 未擷取網頁正文、頁面標題、產品、服務、認證、客戶、產線、供應鏈位置或日期。\n- 來源在該 URL 後嵌入多張 `Space Supply Chain image 1.jpg` 到 `Space Supply Chain image 10.png` 圖片；本次 raw 未提供 OCR，不能確認圖片是否來自 [[PARPRO]] 網站或 Teams 轉貼材料。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/PARPRO.md"
+         },
+         "score": 1.318964
+        },
+        {
+         "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- Slide 12 說 [[Analog Devices]] 的 energy-efficient [[ADI Titan O-RU platform]] enabled by [[ADRV906x]] Radio Unit SoC 在 MWC25 與 [[Rohde & Schwarz]]、[[Viavi Solutions]] 共同展示 energy efficiency；透過 Microsleep DTx during low traffic loads 可達 up to 40% energy savings。\n- Slide 13 說 R&S 與 ADI 已合作 over one year，NES test system 用於 ADI Kerberos 與 Titan reference design，並提到 Titan 是 more integrated design，使用 Samana transceiver 與 Low-Phy protocol on same Samana chip。\n- Slide 17–20 是 competitor / battle-card 型內容：主要競品為 [[Keysight]]、[[LitePoint]]、[[Anritsu]]；Keysight 被描述為 O-RU testing market majority，且 Keysight Time Sync Analyzer、MTRX、O-DU emulator 等硬體需求被列出；VIAVI / R&S 與 Keysight 在 price point、test coverage、M-MIMO / BFM、functional test、TCO 與 reusability 上被比較。\n- Slide 21 說 [[VIAVI VAR Agreement]] / R&S GPPA 允許 Viavi worldwide sell R&S products，產品包含 signal generators、spectrum analyzers、[[R&S VSE]]、[[R&S PVT360A]]、[[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]] / [[R&S MXO4]]、[[R&S OSP200]] / [[R&S OSP300]]，target markets 為 O-RAN、NTN 與 6G。\n- Slide 23、25、26 保存 NTIA / Public Wireless Supply Chain Innovation Fund funding history、NOFO1 / NOFO2 winners、ORCID / ACCoRD / VALOR labs 與 R&S received / quoted orders 的 market / sales 線索。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+         },
+         "score": 1.488903
+        },
+        {
+         "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 26,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMA100B.md"
+         },
+         "score": 11.210268
+        },
+        {
+         "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-8ec180d5f5e4ded7",
+           "original_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "sha256": "8ec180d5f5e4ded7daf73d9a99dc85b471116e2789518fb2949545a4a27543fa",
+           "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+          "section": 612,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 23.883489
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/Space Supply Chain.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/NEC.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Qualcomm.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/entities/Randy Schnell.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/PARPRO.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Satellite/Space Supply Chain.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+         "raw_refs": [
+          "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+          "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+          "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S SMA100B.md",
+         "raw_refs": [
+          "raw/Productions/SMA100B_specs_en_5215-1018-22_v1000.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-17b2cb4a3c0b4719af4af12050cf00f2",
+      "task_sha256": "578537489cd96f7e3e4b09a766208b1c8eb85e5eb25ff1d046644075942702c5",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.4.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "needs_input",
+      "retry_budget": 0
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "needs_input",
+       "evidence_ref": "bridge_facet_assessment"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": "host_check_failed"
+    },
+    "evidence": {
+     "raw_citations": 5,
+     "facet_status": "missing",
+     "missing_facets": [
+      "market_segment"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

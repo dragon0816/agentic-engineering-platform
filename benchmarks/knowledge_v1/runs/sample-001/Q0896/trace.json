@@ -1,0 +1,434 @@
+{
+ "question": {
+  "id": "Q0896",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-da56a814988b4383b41e03962ea1f524",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 125.656,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-da56a814988b4383b41e03962ea1f524",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:01:25.773814Z",
+    "updated_at": "2026-10-07T09:03:31.301183Z",
+    "messages": [
+     {
+      "message_id": "message-58c78abe37284779bc8976da7123f55f",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T09:01:25.797011Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-03c51f6eb8e9475c8abb1be7c75b3acc",
+      "role": "assistant",
+      "text": "Based on the current vault evidence, the strongest oscilloscope opportunities in Semiconductor appear to be:\n\n## 1. O-RU / RF power-amplifier power and energy-saving validation\n\n**Opportunity:** Use oscilloscopes, especially R&S®RTO6, for semiconductor/RF front-end validation around PA switching behavior, current draw, power consumption, and spectral behavior in O-RU designs.\n\n**Why it is strong:** This is the most direct oscilloscope evidence in the vault: it explicitly names R&S®RTO6 Oscilloscope and describes a measurement task.\n\n**Evidence:** The vault states that for Network Energy Saving testing, “The R&S®RTO6 Oscilloscope captures PA pulse that switch ON/OFF power and PPS pulse from Analog Devices O-RU, measures power and current consumption and FFT spectrum.”  \nCitation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 84.\n\n---\n\n## 2. Power semiconductor / MOSFET topology validation for data-center power systems\n\n**Opportunity:** Oscilloscopes can support validation of power-semiconductor switching, DC bus behavior, current sharing, losses, and thermal implications in higher-power backup/power-conversion designs for data centers.\n\n**Why it is strong:** The evidence is semiconductor-specific and tied to data-center power architecture. While the cited raw text does not explicitly say “oscilloscope,” the described problem—MOSFET voltage blocking, current flow, power loss, and heat generation—is a natural oscilloscope/power-analysis use case.\n\n**Evidence:** Infineon material in the vault describes a topology where MOSFETs T1–Q4 “must block the entire DC bus voltage,” while “only a portion of the current flows through them,” leading to “lower power loss and heat generation.”  \nCitations:  \n- `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md`, section 102.  \n- Similar duplicate evidence appears in `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 87.\n\n---\n\n## 3. Semiconductor IP validation: PLL, ADC, I/O, memory-interface related test\n\n**Opportunity:** Target semiconductor IP companies for oscilloscope-based validation of high-speed I/O, PLL behavior, ADC/temp sensor interfaces, memory compiler interfaces, SDIO/eMMC I/O, and mixed-signal IP bring-up.\n\n**Why it is strong:** The evidence identifies a semiconductor IP company and its validation-oriented business model. It does not explicitly mention oscilloscopes, so this is an inferred opportunity, but the IP categories listed are highly relevant to oscilloscope use in design validation and debug.\n\n**Evidence:** The vault says M31 Technology works with semiconductor companies to “develop and validate differentiated IP solutions” that shorten design cycles, reduce manufacturing costs, and improve competitiveness. Its portfolio includes “foundation IP, memory compilers, general-purpose I/O, high ESD I/O, SDIO & eMMC I/O, digital-PLL, analog-PLL, ADC/temp sensors, and more.”  \nCitation: `raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md`, section 3.\n\n---\n\n### Bottom line\n\nThe **best-supported direct oscilloscope opportunity** is **O-RU / PA power and energy-saving validation**, because the evidence explicitly names R&S®RTO6 and the measurements performed.\n\nThe next strongest semiconductor opportunities are **power-semiconductor validation for data-center power systems** and **semiconductor IP validation**, but those are supported by application evidence rather than explicit oscilloscope mentions.",
+      "created_at": "2026-10-07T09:03:31.301183Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-506e9add8f87496583ae5090fac99fcd",
+       "request_id": "request-506e9add8f87496583ae5090fac99fcd",
+       "span_id": "span-506e9add8f87496583ae5090fac99fcd",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the current vault evidence, the strongest oscilloscope opportunities in Semiconductor appear to be:\n\n## 1. O-RU / RF power-amplifier power and energy-saving validation\n\n**Opportunity:** Use oscilloscopes, especially R&S®RTO6, for semiconductor/RF front-end validation around PA switching behavior, current draw, power consumption, and spectral behavior in O-RU designs.\n\n**Why it is strong:** This is the most direct oscilloscope evidence in the vault: it explicitly names R&S®RTO6 Oscilloscope and describes a measurement task.\n\n**Evidence:** The vault states that for Network Energy Saving testing, “The R&S®RTO6 Oscilloscope captures PA pulse that switch ON/OFF power and PPS pulse from Analog Devices O-RU, measures power and current consumption and FFT spectrum.”  \nCitation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 84.\n\n---\n\n## 2. Power semiconductor / MOSFET topology validation for data-center power systems\n\n**Opportunity:** Oscilloscopes can support validation of power-semiconductor switching, DC bus behavior, current sharing, losses, and thermal implications in higher-power backup/power-conversion designs for data centers.\n\n**Why it is strong:** The evidence is semiconductor-specific and tied to data-center power architecture. While the cited raw text does not explicitly say “oscilloscope,” the described problem—MOSFET voltage blocking, current flow, power loss, and heat generation—is a natural oscilloscope/power-analysis use case.\n\n**Evidence:** Infineon material in the vault describes a topology where MOSFETs T1–Q4 “must block the entire DC bus voltage,” while “only a portion of the current flows through them,” leading to “lower power loss and heat generation.”  \nCitations:  \n- `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md`, section 102.  \n- Similar duplicate evidence appears in `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 87.\n\n---\n\n## 3. Semiconductor IP validation: PLL, ADC, I/O, memory-interface related test\n\n**Opportunity:** Target semiconductor IP companies for oscilloscope-based validation of high-speed I/O, PLL behavior, ADC/temp sensor interfaces, memory compiler interfaces, SDIO/eMMC I/O, and mixed-signal IP bring-up.\n\n**Why it is strong:** The evidence identifies a semiconductor IP company and its validation-oriented business model. It does not explicitly mention oscilloscopes, so this is an inferred opportunity, but the IP categories listed are highly relevant to oscilloscope use in design validation and debug.\n\n**Evidence:** The vault says M31 Technology works with semiconductor companies to “develop and validate differentiated IP solutions” that shorten design cycles, reduce manufacturing costs, and improve competitiveness. Its portfolio includes “foundation IP, memory compilers, general-purpose I/O, high ESD I/O, SDIO & eMMC I/O, digital-PLL, analog-PLL, ADC/temp sensors, and more.”  \nCitation: `raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md`, section 3.\n\n---\n\n### Bottom line\n\nThe **best-supported direct oscilloscope opportunity** is **O-RU / PA power and energy-saving validation**, because the evidence explicitly names R&S®RTO6 and the measurements performed.\n\nThe next strongest semiconductor opportunities are **power-semiconductor validation for data-center power systems** and **semiconductor IP validation**, but those are supported by application evidence rather than explicit oscilloscope mentions.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-506e9add8f87496583ae5090fac99fcd",
+      "request_id": "request-506e9add8f87496583ae5090fac99fcd",
+      "span_id": "span-506e9add8f87496583ae5090fac99fcd",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-506e9add8f87496583ae5090fac99fcd",
+       "request_id": "request-506e9add8f87496583ae5090fac99fcd",
+       "span_id": "span-506e9add8f87496583ae5090fac99fcd",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the current vault evidence, the strongest oscilloscope opportunities in Semiconductor appear to be:\n\n## 1. O-RU / RF power-amplifier power and energy-saving validation\n\n**Opportunity:** Use oscilloscopes, especially R&S®RTO6, for semiconductor/RF front-end validation around PA switching behavior, current draw, power consumption, and spectral behavior in O-RU designs.\n\n**Why it is strong:** This is the most direct oscilloscope evidence in the vault: it explicitly names R&S®RTO6 Oscilloscope and describes a measurement task.\n\n**Evidence:** The vault states that for Network Energy Saving testing, “The R&S®RTO6 Oscilloscope captures PA pulse that switch ON/OFF power and PPS pulse from Analog Devices O-RU, measures power and current consumption and FFT spectrum.”  \nCitation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 84.\n\n---\n\n## 2. Power semiconductor / MOSFET topology validation for data-center power systems\n\n**Opportunity:** Oscilloscopes can support validation of power-semiconductor switching, DC bus behavior, current sharing, losses, and thermal implications in higher-power backup/power-conversion designs for data centers.\n\n**Why it is strong:** The evidence is semiconductor-specific and tied to data-center power architecture. While the cited raw text does not explicitly say “oscilloscope,” the described problem—MOSFET voltage blocking, current flow, power loss, and heat generation—is a natural oscilloscope/power-analysis use case.\n\n**Evidence:** Infineon material in the vault describes a topology where MOSFETs T1–Q4 “must block the entire DC bus voltage,” while “only a portion of the current flows through them,” leading to “lower power loss and heat generation.”  \nCitations:  \n- `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md`, section 102.  \n- Similar duplicate evidence appears in `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 87.\n\n---\n\n## 3. Semiconductor IP validation: PLL, ADC, I/O, memory-interface related test\n\n**Opportunity:** Target semiconductor IP companies for oscilloscope-based validation of high-speed I/O, PLL behavior, ADC/temp sensor interfaces, memory compiler interfaces, SDIO/eMMC I/O, and mixed-signal IP bring-up.\n\n**Why it is strong:** The evidence identifies a semiconductor IP company and its validation-oriented business model. It does not explicitly mention oscilloscopes, so this is an inferred opportunity, but the IP categories listed are highly relevant to oscilloscope use in design validation and debug.\n\n**Evidence:** The vault says M31 Technology works with semiconductor companies to “develop and validate differentiated IP solutions” that shorten design cycles, reduce manufacturing costs, and improve competitiveness. Its portfolio includes “foundation IP, memory compilers, general-purpose I/O, high ESD I/O, SDIO & eMMC I/O, digital-PLL, analog-PLL, ADC/temp sensors, and more.”  \nCitation: `raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md`, section 3.\n\n---\n\n### Bottom line\n\nThe **best-supported direct oscilloscope opportunity** is **O-RU / PA power and energy-saving validation**, because the evidence explicitly names R&S®RTO6 and the measurements performed.\n\nThe next strongest semiconductor opportunities are **power-semiconductor validation for data-center power systems** and **semiconductor IP validation**, but those are supported by application evidence rather than explicit oscilloscope mentions.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_XfgzLNAukwacRt9rqgGzCuCi",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-506e9add8f87496583ae5090fac99fcd",
+          "request_id": "request-506e9add8f87496583ae5090fac99fcd",
+          "span_id": "span-506e9add8f87496583ae5090fac99fcd",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_model_failed",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_7mtm9fIGqaFy7H9iLcMWIHZI",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-506e9add8f87496583ae5090fac99fcd",
+          "request_id": "request-506e9add8f87496583ae5090fac99fcd",
+          "span_id": "span-506e9add8f87496583ae5090fac99fcd",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-506e9add8f87496583ae5090fac99fcd",
+           "request_id": "request-506e9add8f87496583ae5090fac99fcd",
+           "span_id": "span-506e9add8f87496583ae5090fac99fcd",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Oscilloscope semiconductor opportunities. Return only Raw-cited evidence and strongest opportunities supported by current vault evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "> resistance vs voltage dependency  \n> of semiconductor. Meanwhile,  \n> although the MOSFETs T1-Q4  \n> must block the entire DC bus  \n> voltage, only a portion of the  \n> current flows through them, as  \n> described by Equation 2, leading  \n> to lower power loss and heat  \n> generation.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 87,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.255836
+            },
+            {
+             "text": "> resistance vs voltage dependency of semiconductor. Meaningwhile, although the MOSFETs T1-Q4 must block the entire DC bus voltage, only a portion of the current flows through them, as described by Equation 2, leading to lower power loss and heat generation.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-998a418a9fa898a5",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "sha256": "998a418a9fa898a549bac73d0843ae568ce449fd066f675a8418a5f1c71d4b00",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+              "section": 82,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.255836
+            },
+            {
+             "text": "> resistance vs voltage dependency of semiconductor devices available today. Although the MOSFETs T1-Q4 must block the entire DC bus voltage, only a portion of the current flows through them, as described by Equation 2, leading to lower power loss and heat generation.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-5a1571fab72a84ac",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+               "sha256": "5a1571fab72a84ac5a956e0560027dd29560f6917fe54477b76947469a659aaa",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+              "section": 102,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.783916
+            },
+            {
+             "text": "LTM supports both intra-gNB-DU and inter-gNB-DU mobility within the same gNB-CU. LTM supports both intra-\nfrequency and inter-frequency mobility, including mobility to inter-frequency cell that is not a current serving cell.\nLTM is supported only for licensed spectrum.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 570,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 18.402198
+            },
+            {
+             "text": "![](Picture26.jpg)\nNetwork energy saving (NES) | Rohde & Schwarz\nThe R&S®RTO6 Oscilloscope captures PA pulse that switch ON/OFF power and PPS pulse from Analog Devices O-RU, measures power and current consumption and FFT spectrum",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8ea3b55008b7c337",
+               "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+               "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "section": 84,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 18.260038
+            },
+            {
+             "text": "Mixers and calibration procedure also supported by EMC32\n45",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9160602dc3f4e25c",
+               "original_ref": "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+               "sha256": "9160602dc3f4e25c04440a547178fa1a81d94a052d80a003c281cc2c3ded7027",
+               "raw_ref": "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+              "section": 169,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 18.125283
+            },
+            {
+             "text": "> Meanwhile, although the MOSFETs T1-Q4 must block the entire DC bus voltage, only a portion of the current flows through them, as described by Equation 2, leading to lower power loss and heat generation.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 90,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 17.968119
+            },
+            {
+             "text": "M31 Technology collaborates closely with world-class semiconductor companies to develop and validate differentiated IP solutions that help customers maximize market opportunities by shortening design cycles, reducing manufacturing costs, and enhancing product competitiveness [\\[1\\]](https://www.m31tech.com/company/about-m31/) [\\[2\\]](https://stockanalysis.com/quote/tpex/6643/company/). Their product portfolio includes foundation IP, memory compilers, general-purpose I/O, high ESD I/O, SDIO & eMMC I/O, digital-PLL, analog-PLL, ADC/temp sensors, and more [\\[2\\]](https://stockanalysis.com/quote/tpex/6643/company/).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e79d5eefd7496f4c",
+               "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+               "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 17.779247
+            }
+           ],
+           "text": "- O-RU / RF power-amplifier energy-saving validation: the R&S®RTO6 oscilloscope captures PA pulses that switch ON/OFF power and PPS pulses from an Analog Devices O-RU, and measures power consumption, current consumption, and FFT spectrum.[5]\n\n- Power-semiconductor / MOSFET loss-and-thermal validation: MOSFETs T1–Q4 must block the full DC bus voltage, while only part of the current flows through them, which is associated with lower power loss and heat generation.[1][3]\n\n- Semiconductor IP validation opportunity: M31 works with semiconductor companies to develop and validate differentiated IP that shortens design cycles, reduces manufacturing costs, and improves product competitiveness; its portfolio includes I/O, PLLs, ADC/temp sensors, memory compilers, and related IP.[8]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "> resistance vs voltage dependency  \n> of semiconductor. Meanwhile,  \n> although the MOSFETs T1-Q4  \n> must block the entire DC bus  \n> voltage, only a portion of the  \n> current flows through them, as  \n> described by Equation 2, leading  \n> to lower power loss and heat  \n> generation.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 87,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 24.255836
+           },
+           {
+            "text": "> resistance vs voltage dependency of semiconductor devices available today. Although the MOSFETs T1-Q4 must block the entire DC bus voltage, only a portion of the current flows through them, as described by Equation 2, leading to lower power loss and heat generation.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-5a1571fab72a84ac",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+              "sha256": "5a1571fab72a84ac5a956e0560027dd29560f6917fe54477b76947469a659aaa",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+             "section": 102,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 23.783916
+           },
+           {
+            "text": "![](Picture26.jpg)\nNetwork energy saving (NES) | Rohde & Schwarz\nThe R&S®RTO6 Oscilloscope captures PA pulse that switch ON/OFF power and PPS pulse from Analog Devices O-RU, measures power and current consumption and FFT spectrum",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8ea3b55008b7c337",
+              "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+             "section": 84,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 18.260038
+           },
+           {
+            "text": "M31 Technology collaborates closely with world-class semiconductor companies to develop and validate differentiated IP solutions that help customers maximize market opportunities by shortening design cycles, reducing manufacturing costs, and enhancing product competitiveness [\\[1\\]](https://www.m31tech.com/company/about-m31/) [\\[2\\]](https://stockanalysis.com/quote/tpex/6643/company/). Their product portfolio includes foundation IP, memory compilers, general-purpose I/O, high ESD I/O, SDIO & eMMC I/O, digital-PLL, analog-PLL, ADC/temp sensors, and more [\\[2\\]](https://stockanalysis.com/quote/tpex/6643/company/).",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e79d5eefd7496f4c",
+              "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 17.779247
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

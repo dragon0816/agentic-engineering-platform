@@ -1,0 +1,43 @@
+{
+ "id": "Q0411",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 123.75,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Signaling / Non-signaling Tester generally sits outside the core radar-target simulation workflow",
+   "belongs more to the vehicle connectivity / telematics / V2X / eCall / Wi-Fi / cellular test workflow",
+   "Measure transmitter power, frequency, chirp quality, phase noise, bandwidth, receiver sensitivity",
+   "CMX500 as a multi-technology, multi-channel signaling tester",
+   "Non-signaling testers can be used for fast RF parametric testing of communication modules",
+   "Signaling / Non-signaling Tester in the connectivity lane"
+  ],
+  "reason": "The only cited passage supports that R&S AREG800A is associated with automotive radar echo generation and related radar/HIL concepts. It does not provide evidence about signaling or non-signaling testers, CMX500, connectivity workflows, production RF testing, or where such testers fit in an automotive radar workflow.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The only cited passage supports that R&S AREG800A is associated with automotive radar echo generation and related radar/HIL concepts. It does not provide evidence about signaling or non-signaling testers, CMX500, connectivity workflows, production RF testing, or where such testers fit in an automoti"
+}

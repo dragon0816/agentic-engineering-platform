@@ -1,0 +1,401 @@
+{
+ "question": {
+  "id": "Q0831",
+  "text": "How do changes in RFIC validation technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Semiconductor",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-985e440e1f92480ab23ba6a5aaa390c9",
+ "exchange": {
+  "sent": "How do changes in RFIC validation technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 54.734,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-985e440e1f92480ab23ba6a5aaa390c9",
+    "actor": "leo.chi",
+    "title": "How do changes in RFIC validation technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:55:53.272072Z",
+    "updated_at": "2026-10-07T08:56:47.844526Z",
+    "messages": [
+     {
+      "message_id": "message-4089b457eec8496891c3f8fd4228ffcc",
+      "role": "user",
+      "text": "How do changes in RFIC validation technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-07T08:55:53.285786Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-87feb8ac05144423ad02bb83b0394bf5",
+      "role": "assistant",
+      "text": "The Raw evidence does **not directly describe “RFIC validation technology” as a named trend**, so the conclusion has to be inferred from nearby evidence on wireless validation and tester capability.\n\nIn short: as RFIC validation moves toward newer, more integrated, higher-bandwidth, multi-standard wireless designs, the required capability of Signaling / Non-signaling Testers increases in several ways.\n\n### 1. From single-standard RF tests to multi-technology validation\n\nModern RFICs are no longer validated only against one cellular standard. They increasingly need cellular plus Wi‑Fi coexistence / convergence testing.\n\nEvidence: R&S describes the CMX500 as a **“multi-technology multi-channel signaling tester”** with added Wi‑Fi 7 capability, allowing R&D engineers to test **cellular and non-cellular standards of the latest generation in a single instrument setup**.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nImplication: Signaling testers need to support more protocols, more bands, and cross-technology scenarios, not just classic 3GPP call-box behavior.\n\n### 2. Higher RF bandwidth and wider waveform validation\n\nNew RFICs must handle wider channels, especially for Wi‑Fi 7/8 and future wireless standards. That pushes non-signaling testers toward wider analysis/generation bandwidth.\n\nEvidence: the CMP180 is cited as verifying a **480 MHz bandwidth** waveform in loopback mode and positioned as future-proof beyond Wi‑Fi 7 requirements.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nImplication: non-signaling testers must provide wider instantaneous bandwidth, better EVM/ACLR/spectral measurements over wide channels, and high-quality loopback / production-style RF test capability.\n\n### 3. More channels and more complex MIMO / PHY validation\n\nRFIC validation is shifting toward multi-channel and advanced PHY features. The tester must emulate and measure these reliably.\n\nEvidence: R&S and Broadcom showcase CMX500 Wi‑Fi 8 RF signaling tests, validating a prototype Wi‑Fi 8 device and **physical-layer features unique to Wi‑Fi 8**.  \nSource: `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`, section 3.\n\nImplication: signaling testers need deeper PHY/MAC control, multi-channel support, and the ability to validate emerging standard features before final mass production.\n\n### 4. OTA / chamber integration becomes more important\n\nRFIC validation is less purely conducted-cable testing and more system-level / antenna-level validation, especially for mmWave, beamforming, and integrated modules.\n\nEvidence: the CMX500 and SMBV100B are described as integrated with ETS-Lindgren chamber technology and EMQuest software to advance **comprehensive testing capabilities for wireless technologies**.  \nSource: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\nImplication: signaling testers need OTA readiness, chamber automation, antenna / beam validation support, and synchronization with external signal generators or chamber software.\n\n### 5. Split between R&D signaling validation and production non-signaling validation becomes clearer\n\nR&D needs signaling test to validate real protocol behavior. Production needs fast, repeatable non-signaling RF measurements.\n\nEvidence: a sales battle card explicitly separates the question of integrated Wi‑Fi signaling from **“non-signaling test capability for factory lines”**, naming CMP180/200/CMW100 for that use case.  \nSource: `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5.\n\nImplication: RFIC validation technology drives two capability tracks:\n\n| Tester type | Required capability trend |\n|---|---|\n| **Signaling tester** | Real network emulation, protocol stack, multi-RAT, multi-channel, Wi‑Fi/cellular integration, pre-conformance, OTA scenarios |\n| **Non-signaling tester** | Fast RF parametric measurement, wide bandwidth, high throughput, factory automation, loopback, calibration, EVM / power / spectrum measurements |\n\n### Bottom line\n\nChanges in RFIC validation technology push Signaling / Non-signaling Testers from basic RF measurement tools toward **wideband, multi-standard, multi-channel, OTA-capable validation platforms**.\n\nSignaling testers must behave more like flexible network emulators for early R&D and protocol/PHY validation. Non-signaling testers must deliver high-speed, high-bandwidth, repeatable RF measurements for production and calibration.",
+      "created_at": "2026-10-07T08:56:47.844526Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-ab11fd2357ed433595efabb8b1cbe612",
+       "request_id": "request-ab11fd2357ed433595efabb8b1cbe612",
+       "span_id": "span-ab11fd2357ed433595efabb8b1cbe612",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The Raw evidence does **not directly describe “RFIC validation technology” as a named trend**, so the conclusion has to be inferred from nearby evidence on wireless validation and tester capability.\n\nIn short: as RFIC validation moves toward newer, more integrated, higher-bandwidth, multi-standard wireless designs, the required capability of Signaling / Non-signaling Testers increases in several ways.\n\n### 1. From single-standard RF tests to multi-technology validation\n\nModern RFICs are no longer validated only against one cellular standard. They increasingly need cellular plus Wi‑Fi coexistence / convergence testing.\n\nEvidence: R&S describes the CMX500 as a **“multi-technology multi-channel signaling tester”** with added Wi‑Fi 7 capability, allowing R&D engineers to test **cellular and non-cellular standards of the latest generation in a single instrument setup**.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nImplication: Signaling testers need to support more protocols, more bands, and cross-technology scenarios, not just classic 3GPP call-box behavior.\n\n### 2. Higher RF bandwidth and wider waveform validation\n\nNew RFICs must handle wider channels, especially for Wi‑Fi 7/8 and future wireless standards. That pushes non-signaling testers toward wider analysis/generation bandwidth.\n\nEvidence: the CMP180 is cited as verifying a **480 MHz bandwidth** waveform in loopback mode and positioned as future-proof beyond Wi‑Fi 7 requirements.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nImplication: non-signaling testers must provide wider instantaneous bandwidth, better EVM/ACLR/spectral measurements over wide channels, and high-quality loopback / production-style RF test capability.\n\n### 3. More channels and more complex MIMO / PHY validation\n\nRFIC validation is shifting toward multi-channel and advanced PHY features. The tester must emulate and measure these reliably.\n\nEvidence: R&S and Broadcom showcase CMX500 Wi‑Fi 8 RF signaling tests, validating a prototype Wi‑Fi 8 device and **physical-layer features unique to Wi‑Fi 8**.  \nSource: `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`, section 3.\n\nImplication: signaling testers need deeper PHY/MAC control, multi-channel support, and the ability to validate emerging standard features before final mass production.\n\n### 4. OTA / chamber integration becomes more important\n\nRFIC validation is less purely conducted-cable testing and more system-level / antenna-level validation, especially for mmWave, beamforming, and integrated modules.\n\nEvidence: the CMX500 and SMBV100B are described as integrated with ETS-Lindgren chamber technology and EMQuest software to advance **comprehensive testing capabilities for wireless technologies**.  \nSource: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\nImplication: signaling testers need OTA readiness, chamber automation, antenna / beam validation support, and synchronization with external signal generators or chamber software.\n\n### 5. Split between R&D signaling validation and production non-signaling validation becomes clearer\n\nR&D needs signaling test to validate real protocol behavior. Production needs fast, repeatable non-signaling RF measurements.\n\nEvidence: a sales battle card explicitly separates the question of integrated Wi‑Fi signaling from **“non-signaling test capability for factory lines”**, naming CMP180/200/CMW100 for that use case.  \nSource: `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5.\n\nImplication: RFIC validation technology drives two capability tracks:\n\n| Tester type | Required capability trend |\n|---|---|\n| **Signaling tester** | Real network emulation, protocol stack, multi-RAT, multi-channel, Wi‑Fi/cellular integration, pre-conformance, OTA scenarios |\n| **Non-signaling tester** | Fast RF parametric measurement, wide bandwidth, high throughput, factory automation, loopback, calibration, EVM / power / spectrum measurements |\n\n### Bottom line\n\nChanges in RFIC validation technology push Signaling / Non-signaling Testers from basic RF measurement tools toward **wideband, multi-standard, multi-channel, OTA-capable validation platforms**.\n\nSignaling testers must behave more like flexible network emulators for early R&D and protocol/PHY validation. Non-signaling testers must deliver high-speed, high-bandwidth, repeatable RF measurements for production and calibration.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-ab11fd2357ed433595efabb8b1cbe612",
+      "request_id": "request-ab11fd2357ed433595efabb8b1cbe612",
+      "span_id": "span-ab11fd2357ed433595efabb8b1cbe612",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-ab11fd2357ed433595efabb8b1cbe612",
+       "request_id": "request-ab11fd2357ed433595efabb8b1cbe612",
+       "span_id": "span-ab11fd2357ed433595efabb8b1cbe612",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The Raw evidence does **not directly describe “RFIC validation technology” as a named trend**, so the conclusion has to be inferred from nearby evidence on wireless validation and tester capability.\n\nIn short: as RFIC validation moves toward newer, more integrated, higher-bandwidth, multi-standard wireless designs, the required capability of Signaling / Non-signaling Testers increases in several ways.\n\n### 1. From single-standard RF tests to multi-technology validation\n\nModern RFICs are no longer validated only against one cellular standard. They increasingly need cellular plus Wi‑Fi coexistence / convergence testing.\n\nEvidence: R&S describes the CMX500 as a **“multi-technology multi-channel signaling tester”** with added Wi‑Fi 7 capability, allowing R&D engineers to test **cellular and non-cellular standards of the latest generation in a single instrument setup**.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nImplication: Signaling testers need to support more protocols, more bands, and cross-technology scenarios, not just classic 3GPP call-box behavior.\n\n### 2. Higher RF bandwidth and wider waveform validation\n\nNew RFICs must handle wider channels, especially for Wi‑Fi 7/8 and future wireless standards. That pushes non-signaling testers toward wider analysis/generation bandwidth.\n\nEvidence: the CMP180 is cited as verifying a **480 MHz bandwidth** waveform in loopback mode and positioned as future-proof beyond Wi‑Fi 7 requirements.  \nSource: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3.\n\nImplication: non-signaling testers must provide wider instantaneous bandwidth, better EVM/ACLR/spectral measurements over wide channels, and high-quality loopback / production-style RF test capability.\n\n### 3. More channels and more complex MIMO / PHY validation\n\nRFIC validation is shifting toward multi-channel and advanced PHY features. The tester must emulate and measure these reliably.\n\nEvidence: R&S and Broadcom showcase CMX500 Wi‑Fi 8 RF signaling tests, validating a prototype Wi‑Fi 8 device and **physical-layer features unique to Wi‑Fi 8**.  \nSource: `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`, section 3.\n\nImplication: signaling testers need deeper PHY/MAC control, multi-channel support, and the ability to validate emerging standard features before final mass production.\n\n### 4. OTA / chamber integration becomes more important\n\nRFIC validation is less purely conducted-cable testing and more system-level / antenna-level validation, especially for mmWave, beamforming, and integrated modules.\n\nEvidence: the CMX500 and SMBV100B are described as integrated with ETS-Lindgren chamber technology and EMQuest software to advance **comprehensive testing capabilities for wireless technologies**.  \nSource: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\nImplication: signaling testers need OTA readiness, chamber automation, antenna / beam validation support, and synchronization with external signal generators or chamber software.\n\n### 5. Split between R&D signaling validation and production non-signaling validation becomes clearer\n\nR&D needs signaling test to validate real protocol behavior. Production needs fast, repeatable non-signaling RF measurements.\n\nEvidence: a sales battle card explicitly separates the question of integrated Wi‑Fi signaling from **“non-signaling test capability for factory lines”**, naming CMP180/200/CMW100 for that use case.  \nSource: `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5.\n\nImplication: RFIC validation technology drives two capability tracks:\n\n| Tester type | Required capability trend |\n|---|---|\n| **Signaling tester** | Real network emulation, protocol stack, multi-RAT, multi-channel, Wi‑Fi/cellular integration, pre-conformance, OTA scenarios |\n| **Non-signaling tester** | Fast RF parametric measurement, wide bandwidth, high throughput, factory automation, loopback, calibration, EVM / power / spectrum measurements |\n\n### Bottom line\n\nChanges in RFIC validation technology push Signaling / Non-signaling Testers from basic RF measurement tools toward **wideband, multi-standard, multi-channel, OTA-capable validation platforms**.\n\nSignaling testers must behave more like flexible network emulators for early R&D and protocol/PHY validation. Non-signaling testers must deliver high-speed, high-bandwidth, repeatable RF measurements for production and calibration.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_SD4FtRdDRceKebwSjV0R1UTS",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ab11fd2357ed433595efabb8b1cbe612",
+          "request_id": "request-ab11fd2357ed433595efabb8b1cbe612",
+          "span_id": "span-ab11fd2357ed433595efabb8b1cbe612",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-ab11fd2357ed433595efabb8b1cbe612",
+           "request_id": "request-ab11fd2357ed433595efabb8b1cbe612",
+           "span_id": "span-ab11fd2357ed433595efabb8b1cbe612",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in RFIC validation technology affect the measurement capability required from Signaling / Non-signaling Tester? Please answer with evidence from Raw sources if available.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "## In a joint 6G AI proof-of-concept demonstration, the CMX500 one-box tester from Rohde & Schwarz shows significant downlink throughput gain in an AI-based wireless transmission compared to conventional non-AI technology. Additionally, the demonstration illustrates how this translates to an enhanced video streaming user experience. This collaboration validates the feasibility of multi-vendor AI interoperability for future 6G standardization",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c78ae7048c7db92f",
+               "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+               "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.760777
+            },
+            {
+             "text": "What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to\nknow if two CW are used?\nCross-check if there are FPGA reference sizes for TBS_LBRM",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6eaf816ecfe746af",
+               "original_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "sha256": "6eaf816ecfe746af0094c65d69bb5a2df407a5da1ff8413e3178944abc0d1762",
+               "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+              "section": 146,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.541552
+            },
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.323207
+            },
+            {
+             "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.088485
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.815573
+            },
+            {
+             "text": "The CMX500 AI Scripting Assistant is available from Rohde & Schwarz through various deployment options. Visitors to MWC 2025 Barcelona can experience the new tool live at the Rohde & Schwarz booth in hall 5, booth 5A80. For general information about the CMX500 5G one-box signaling tester visit: [http://www.rohde-schwarz.com/product/cmx500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8b44e0d324270514",
+               "original_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "sha256": "8b44e0d324270514830d2b3ff82c35b16cf5a58441a03941d7c14eaf71388d51",
+               "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.117542
+            },
+            {
+             "text": "Ask: “Do you need Wi-Fi signaling (6/6E/7) integrated?”\nLandmine 7 – Non-signaling capabilities\nAsk: “Do you need non-signaling test capability for factory lines?”\n✔ If yes → Only R&S (CMP180/200/CMW100).\nLandmine 8 – 3GPP RF Pre-Conformance",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e141f59158e470e8",
+               "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.918048
+            },
+            {
+             "text": "If multiple, how do you avoid fragmented workflows?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 51,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.5343
+            }
+           ],
+           "text": "The RAW passages do not directly discuss “RFIC validation technology” by name, but they indicate that as validation moves to newer wireless standards and features, Signaling / Non-signaling Testers need expanded measurement capability: signaling testers need multi-technology, multi-channel support with added Wi‑Fi 7/8 capabilities, including testing cellular and non-cellular standards in one setup and validating new physical-layer features [3][5]. Non-signaling testers need factory-line test capability where required [7], and higher RF bandwidth capability is implied by the CMP180 verifying a 480 MHz waveform in loopback mode as a future-proof solution beyond Wi‑Fi 7 requirements [5]. Integration with chamber and EMQuest software also indicates a need for more comprehensive wireless test setups beyond standalone instrumentation [4].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.323207
+           },
+           {
+            "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8180ce629a865e0b",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.088485
+           },
+           {
+            "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.815573
+           },
+           {
+            "text": "Ask: “Do you need Wi-Fi signaling (6/6E/7) integrated?”\nLandmine 7 – Non-signaling capabilities\nAsk: “Do you need non-signaling test capability for factory lines?”\n✔ If yes → Only R&S (CMP180/200/CMW100).\nLandmine 8 – 3GPP RF Pre-Conformance",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e141f59158e470e8",
+              "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.918048
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "id": "Q1061",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 65.672,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "does not emulate the full network signaling protocol",
+   "DUT is usually put into a controlled test mode, loopback mode, or otherwise externally controlled state",
+   "RF/PHY measurements such as waveform quality, output power, spectrum, EVM, sensitivity, bandwidth, and calibration/production checks",
+   "a signaling tester behaves more like a base station/network emulator",
+   "attach, register, negotiate, hand over",
+   "If you only need RF waveform verification without full attach/session signaling, a non-signaling approach may be enough",
+   "CMP180 is described as verifying a 480 MHz signal waveform in loopback mode, which is much closer to a non-signaling/RF verification decision"
+  ],
+  "reason": "The passages support that CMX500 is a signaling tester used for protocol/performance/RF, conformance, fading/channel emulation, and that CMP180 verifies a 480 MHz waveform in loopback mode for R&D/production. They do not define 'non-signaling tester' or establish most of the detailed contrast, protocol behaviors, RF metrics, or that CMP180 is non-signaling, so the answer’s central definition and practical rule go beyond the cited evidence.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support that CMX500 is a signaling tester used for protocol/performance/RF, conformance, fading/channel emulation, and that CMP180 verifies a 480 MHz waveform in loopback mode for R&D/production. They do not define 'non-signaling tester' or establish most of the detailed contrast, proto"
+}

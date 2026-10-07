@@ -1,0 +1,93 @@
+{
+ "question": {
+  "id": "Q0111",
+  "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-8048afbd16a34944b7a9a2899e79407f",
+ "exchange": {
+  "sent": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 18.453,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-8048afbd16a34944b7a9a2899e79407f",
+    "actor": "leo.chi",
+    "title": "For a Wireless Communication use case involving Wi-Fi 7/8, where would S…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:00:00.880802Z",
+    "updated_at": "2026-10-07T08:00:19.306476Z",
+    "messages": [
+     {
+      "message_id": "message-44a3425882d340e6831a57452ee8441d",
+      "role": "user",
+      "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-07T08:00:01.013723Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-605458db9e5147b88ad3781a7ad31657",
+      "role": "assistant",
+      "text": "In a Wi‑Fi 7/8 wireless communication test workflow, the **Signal Generator** and **Signal Analyzer** mainly sit in the **RF/PHY validation layer**—between early design simulation and higher-level protocol/application testing.\n\nA practical workflow looks like this:\n\n| Test stage | Signal Generator role | Signal Analyzer role |\n|---|---|---|\n| **RF component bring-up** | Generate clean WLAN-like waveforms to stimulate receivers, PAs, LNAs, filters, mixers | Measure output power, spectrum, harmonics, spurs, compression, linearity |\n| **Transmitter validation** | Usually not primary, except as reference/interferer source | Analyze DUT transmit quality: **EVM**, constellation, spectrum mask, center frequency error, occupied bandwidth, spectral flatness |\n| **Receiver validation** | Primary tool: generate Wi‑Fi 7/8 signals at controlled power, modulation, bandwidth, coding, impairment | Usually observes DUT response indirectly, or captures feedback/logs if available |\n| **Sensitivity / PER testing** | Sweep power level using Wi‑Fi packets to find packet error rate threshold | May monitor DUT emissions or verify test signal quality |\n| **Interference / coexistence testing** | Generate blockers, adjacent-channel signals, legacy Wi‑Fi, Bluetooth-like or other interferers | Measure DUT output under interference, check spectral behavior |\n| **MIMO / beamforming / multi-link testing** | Multiple synchronized generators can emulate spatial streams, AP/STA links, or impairments | Multi-channel analyzer captures phase/amplitude alignment, EVM per stream, MIMO performance |\n| **Wi‑Fi 7-specific validation** | Generate 802.11be waveforms: 320 MHz channels, 4096-QAM, punctured channels, multi-RU/MRU cases | Verify 4096-QAM EVM, wideband spectrum, preamble/PPDU quality, spectral mask |\n| **Wi‑Fi 8 research/pre-standard validation** | Generate candidate 802.11bn-like waveforms, latency/interference/stability scenarios | Analyze RF robustness, consistency, wideband quality, impairment tolerance |\n| **Pre-compliance / production test** | Provide repeatable golden test stimulus | Fast TX quality screening: power, EVM, mask, frequency error |\n\nIn short:\n\n- **Signal Generator = “known-good RF stimulus”**  \n  Used to test the DUT receiver, stress it with impairments, blockers, weak signals, wideband Wi‑Fi packets, or multi-link/MIMO conditions.\n\n- **Signal Analyzer = “RF truth meter”**  \n  Used to evaluate the DUT transmitter: modulation quality, spectrum, EVM, frequency accuracy, power, emissions, and compliance-style measurements.\n\nThey are especially important for Wi‑Fi 7/8 because the RF margins are tight: **320 MHz bandwidth, 4096-QAM, multi-link operation, puncturing/MRU behavior, MIMO, and coexistence** all require very clean generation and high-performance analysis.\n\nThey do **not** replace a full protocol tester or traffic tester. Instead, they answer questions like:\n\n- “Is my transmitter clean enough?”\n- “Can my receiver decode at the required sensitivity?”\n- “Does 4096-QAM EVM pass?”\n- “What happens with blockers or adjacent-channel interference?”\n- “Does the RF chain behave correctly across 320 MHz?”\n- “Are multi-link or MIMO paths aligned and stable?”",
+      "created_at": "2026-10-07T08:00:19.306476Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-296629a94f704d96933482f80a95576c",
+       "request_id": "request-296629a94f704d96933482f80a95576c",
+       "span_id": "span-296629a94f704d96933482f80a95576c",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": null,
+    "ok": true,
+    "answer": "In a Wi‑Fi 7/8 wireless communication test workflow, the **Signal Generator** and **Signal Analyzer** mainly sit in the **RF/PHY validation layer**—between early design simulation and higher-level protocol/application testing.\n\nA practical workflow looks like this:\n\n| Test stage | Signal Generator role | Signal Analyzer role |\n|---|---|---|\n| **RF component bring-up** | Generate clean WLAN-like waveforms to stimulate receivers, PAs, LNAs, filters, mixers | Measure output power, spectrum, harmonics, spurs, compression, linearity |\n| **Transmitter validation** | Usually not primary, except as reference/interferer source | Analyze DUT transmit quality: **EVM**, constellation, spectrum mask, center frequency error, occupied bandwidth, spectral flatness |\n| **Receiver validation** | Primary tool: generate Wi‑Fi 7/8 signals at controlled power, modulation, bandwidth, coding, impairment | Usually observes DUT response indirectly, or captures feedback/logs if available |\n| **Sensitivity / PER testing** | Sweep power level using Wi‑Fi packets to find packet error rate threshold | May monitor DUT emissions or verify test signal quality |\n| **Interference / coexistence testing** | Generate blockers, adjacent-channel signals, legacy Wi‑Fi, Bluetooth-like or other interferers | Measure DUT output under interference, check spectral behavior |\n| **MIMO / beamforming / multi-link testing** | Multiple synchronized generators can emulate spatial streams, AP/STA links, or impairments | Multi-channel analyzer captures phase/amplitude alignment, EVM per stream, MIMO performance |\n| **Wi‑Fi 7-specific validation** | Generate 802.11be waveforms: 320 MHz channels, 4096-QAM, punctured channels, multi-RU/MRU cases | Verify 4096-QAM EVM, wideband spectrum, preamble/PPDU quality, spectral mask |\n| **Wi‑Fi 8 research/pre-standard validation** | Generate candidate 802.11bn-like waveforms, latency/interference/stability scenarios | Analyze RF robustness, consistency, wideband quality, impairment tolerance |\n| **Pre-compliance / production test** | Provide repeatable golden test stimulus | Fast TX quality screening: power, EVM, mask, frequency error |\n\nIn short:\n\n- **Signal Generator = “known-good RF stimulus”**  \n  Used to test the DUT receiver, stress it with impairments, blockers, weak signals, wideband Wi‑Fi packets, or multi-link/MIMO conditions.\n\n- **Signal Analyzer = “RF truth meter”**  \n  Used to evaluate the DUT transmitter: modulation quality, spectrum, EVM, frequency accuracy, power, emissions, and compliance-style measurements.\n\nThey are especially important for Wi‑Fi 7/8 because the RF margins are tight: **320 MHz bandwidth, 4096-QAM, multi-link operation, puncturing/MRU behavior, MIMO, and coexistence** all require very clean generation and high-performance analysis.\n\nThey do **not** replace a full protocol tester or traffic tester. Instead, they answer questions like:\n\n- “Is my transmitter clean enough?”\n- “Can my receiver decode at the required sensitivity?”\n- “Does 4096-QAM EVM pass?”\n- “What happens with blockers or adjacent-channel interference?”\n- “Does the RF chain behave correctly across 320 MHz?”\n- “Are multi-link or MIMO paths aligned and stable?”",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-296629a94f704d96933482f80a95576c",
+      "request_id": "request-296629a94f704d96933482f80a95576c",
+      "span_id": "span-296629a94f704d96933482f80a95576c",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-296629a94f704d96933482f80a95576c",
+       "request_id": "request-296629a94f704d96933482f80a95576c",
+       "span_id": "span-296629a94f704d96933482f80a95576c",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In a Wi‑Fi 7/8 wireless communication test workflow, the **Signal Generator** and **Signal Analyzer** mainly sit in the **RF/PHY validation layer**—between early design simulation and higher-level protocol/application testing.\n\nA practical workflow looks like this:\n\n| Test stage | Signal Generator role | Signal Analyzer role |\n|---|---|---|\n| **RF component bring-up** | Generate clean WLAN-like waveforms to stimulate receivers, PAs, LNAs, filters, mixers | Measure output power, spectrum, harmonics, spurs, compression, linearity |\n| **Transmitter validation** | Usually not primary, except as reference/interferer source | Analyze DUT transmit quality: **EVM**, constellation, spectrum mask, center frequency error, occupied bandwidth, spectral flatness |\n| **Receiver validation** | Primary tool: generate Wi‑Fi 7/8 signals at controlled power, modulation, bandwidth, coding, impairment | Usually observes DUT response indirectly, or captures feedback/logs if available |\n| **Sensitivity / PER testing** | Sweep power level using Wi‑Fi packets to find packet error rate threshold | May monitor DUT emissions or verify test signal quality |\n| **Interference / coexistence testing** | Generate blockers, adjacent-channel signals, legacy Wi‑Fi, Bluetooth-like or other interferers | Measure DUT output under interference, check spectral behavior |\n| **MIMO / beamforming / multi-link testing** | Multiple synchronized generators can emulate spatial streams, AP/STA links, or impairments | Multi-channel analyzer captures phase/amplitude alignment, EVM per stream, MIMO performance |\n| **Wi‑Fi 7-specific validation** | Generate 802.11be waveforms: 320 MHz channels, 4096-QAM, punctured channels, multi-RU/MRU cases | Verify 4096-QAM EVM, wideband spectrum, preamble/PPDU quality, spectral mask |\n| **Wi‑Fi 8 research/pre-standard validation** | Generate candidate 802.11bn-like waveforms, latency/interference/stability scenarios | Analyze RF robustness, consistency, wideband quality, impairment tolerance |\n| **Pre-compliance / production test** | Provide repeatable golden test stimulus | Fast TX quality screening: power, EVM, mask, frequency error |\n\nIn short:\n\n- **Signal Generator = “known-good RF stimulus”**  \n  Used to test the DUT receiver, stress it with impairments, blockers, weak signals, wideband Wi‑Fi packets, or multi-link/MIMO conditions.\n\n- **Signal Analyzer = “RF truth meter”**  \n  Used to evaluate the DUT transmitter: modulation quality, spectrum, EVM, frequency accuracy, power, emissions, and compliance-style measurements.\n\nThey are especially important for Wi‑Fi 7/8 because the RF margins are tight: **320 MHz bandwidth, 4096-QAM, multi-link operation, puncturing/MRU behavior, MIMO, and coexistence** all require very clean generation and high-performance analysis.\n\nThey do **not** replace a full protocol tester or traffic tester. Instead, they answer questions like:\n\n- “Is my transmitter clean enough?”\n- “Can my receiver decode at the required sensitivity?”\n- “Does 4096-QAM EVM pass?”\n- “What happens with blockers or adjacent-channel interference?”\n- “Does the RF chain behave correctly across 320 MHz?”\n- “Are multi-link or MIMO paths aligned and stable?”",
+      "model_turns": 1,
+      "tools": [],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,131 @@
+{
+ "question": {
+  "id": "Q0611",
+  "text": "For a AI use case involving AI data centers, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-fca1f35e52014b79ae43fbb33f37494c",
+ "exchange": {
+  "sent": "For a AI use case involving AI data centers, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 88.938,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-fca1f35e52014b79ae43fbb33f37494c",
+    "actor": "leo.chi",
+    "title": "For a AI use case involving AI data centers, where would Signaling / Non…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:36:43.852507Z",
+    "updated_at": "2026-10-07T08:38:04.835665Z",
+    "messages": [
+     {
+      "message_id": "message-7d467fdc2b14400e8b9b4890aa704545",
+      "role": "user",
+      "text": "For a AI use case involving AI data centers, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T08:36:43.884287Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-f785869d46f44fd7945347b8176a85c0",
+      "role": "assistant",
+      "text": "The configured model could not answer this turn.",
+      "created_at": "2026-10-07T08:38:04.835665Z",
+      "status": "failed",
+      "trace": {
+       "trace_id": "trace-7d99e45b7a2e4ff98e71af708508d050",
+       "request_id": "request-7d99e45b7a2e4ff98e71af708508d050",
+       "span_id": "span-7d99e45b7a2e4ff98e71af708508d050",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)\n(turn stopped: model_http_error)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)\n(turn stopped: model_http_error)",
+    "ok": false,
+    "answer": "The configured model could not answer this turn.",
+    "status": "failed",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7d99e45b7a2e4ff98e71af708508d050",
+      "request_id": "request-7d99e45b7a2e4ff98e71af708508d050",
+      "span_id": "span-7d99e45b7a2e4ff98e71af708508d050",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7d99e45b7a2e4ff98e71af708508d050",
+       "request_id": "request-7d99e45b7a2e4ff98e71af708508d050",
+       "span_id": "span-7d99e45b7a2e4ff98e71af708508d050",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "text": "The configured model could not answer this turn.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_THP4qS9v8kelZPnl3bVHMc7f",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-7d99e45b7a2e4ff98e71af708508d050",
+          "request_id": "request-7d99e45b7a2e4ff98e71af708508d050",
+          "span_id": "span-7d99e45b7a2e4ff98e71af708508d050",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_model_failed",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": {
+       "code": "model_http_error",
+       "message": "503: {\"error\":{\"message\":\"litellm.ServiceUnavailableError: ServiceUnavailableError: Hosted_vllmException - <html>\\r\\n  <head>\\r\\n    <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\r\\n\\r\\n    <style type=\\\"text/css\\\">\\r\\n      body {\\r\\n        font-family: \\\"Helvetica Neue\\\", Helvetica, Arial, sans-serif;\\r\\n        line-height: 1.66666667;\\r\\n        font-size: 16px;\\r\\n        color: #333;\\r\\n        background-color: #fff;\\r\\n        margin: 2em 1em;\\r\\n      }\\r\\n      h",
+       "retryable": true
+      }
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

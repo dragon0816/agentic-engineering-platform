@@ -1,0 +1,44 @@
+{
+ "id": "Q0481",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 74.937,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Changes in automotive radar mainly push oscilloscopes from “simple time-domain probing” toward wideband, high-speed, multi-channel, phase-coherent, deep-memory measurement platforms",
+   "Modern automotive radar has moved from narrowband 24 GHz systems toward 76–81 GHz radar with several GHz of RF sweep bandwidth",
+   "Required oscilloscope capability increases in: analog bandwidth, sampling rate, low noise floor, high effective number of bits",
+   "Shorter chirp duration and steeper frequency ramps require the oscilloscope to capture fast transient behavior, ramp linearity errors, PLL settling, glitches, and phase discontinuities",
+   "Radar waveforms are no longer only simple linear chirps; systems may use advanced modulation, interference mitigation, coding, or adaptive waveforms",
+   "MIMO and cascaded radar chips → more oscilloscope channels and synchronization",
+   "Radar ICs combine RF, PLLs, ADCs, digital interfaces, power management, and high-speed data links",
+   "Automotive safety and production pressure → repeatable automated measurements"
+  ],
+  "reason": "The cited passage only supports that the FSW-B2071 option records I/Q data using supported R&S RTO oscilloscopes with the RTO-B4 option to obtain specified performance. The answer makes broad claims about automotive radar evolution, FMCW chirps, MIMO, SoCs, bandwidth, synchronization, memory, automation, and safety/production requirements that are not evidenced by the passage.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passage only supports that the FSW-B2071 option records I/Q data using supported R&S RTO oscilloscopes with the RTO-B4 option to obtain specified performance. The answer makes broad claims about automotive radar evolution, FMCW chirps, MIMO, SoCs, bandwidth, synchronization, memory, automa"
+}

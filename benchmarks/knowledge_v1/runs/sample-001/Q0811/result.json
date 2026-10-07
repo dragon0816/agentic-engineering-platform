@@ -1,0 +1,77 @@
+{
+ "id": "Q0811",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 82.781,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "non-signaling test comes earlier and deeper at the RF/PHY characterization level",
+   "signaling test comes later when the RFIC is integrated enough to behave like a real wireless device/system",
+   "Silicon bring-up / bench debug → Non-signaling tester",
+   "RF parametric validation → Non-signaling tester → TX power, EVM, ACLR, SEM, phase noise...",
+   "Production test → Usually non-signaling for speed/cost",
+   "For semiconductor RFIC validation, the non-signaling setup is usually the main workhorse",
+   "The DUT is not necessarily running a full protocol stack",
+   "CMP180 ... aligns more with RF/waveform-centric non-signaling or production-style validation use cases",
+   "Signaling tester fits once the RFIC is part of a larger platform — RFIC + baseband/modem + protocol stack + firmware"
+  ],
+  "reason": "The cited passages support that the CMX500 is a signaling tester for end-to-end signaling, RF conformance, protocol validation, and real-world signaling-mode RF TX/RX measurements, and that the CMP180 can verify waveform bandwidth in loopback for R&D/production. They do not substantiate the detailed RFIC validation workflow, the role and timing of non-signaling testing, production-test claims, or most listed RF measurements.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that the CMX500 is a signaling tester for end-to-end signaling, RF conformance, protocol validation, and real-world signaling-mode RF TX/RX measurements, and that the CMP180 can verify waveform bandwidth in loopback for R&D/production. They do not substantiate the detailed"
+}

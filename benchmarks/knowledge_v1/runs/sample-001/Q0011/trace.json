@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q0011",
+  "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Wireless Communication",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-1cd2e5944a89416f86c0f6f4bc959d5e",
+ "exchange": {
+  "sent": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 107.859,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-1cd2e5944a89416f86c0f6f4bc959d5e",
+    "actor": "leo.chi",
+    "title": "For a Wireless Communication use case involving Wi-Fi 7/8, where would S…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T07:51:17.125710Z",
+    "updated_at": "2026-10-07T07:53:04.885517Z",
+    "messages": [
+     {
+      "message_id": "message-b7918fd660bb4b9aa3e724fc0796d038",
+      "role": "user",
+      "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T07:51:17.167603Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-c30f541b3a51404993c2180abc763383",
+      "role": "assistant",
+      "text": "A **Signaling / Non-signaling Tester** fits mainly in the **RF, PHY/MAC validation, interoperability, and production-test parts** of a Wi‑Fi 7/8 device workflow. It is not usually the first tool for pure chipset design simulation, and it is not the only tool for certification, but it becomes central once real radios, modules, APs, clients, or chipsets are being tested over RF.\n\n## Where it fits in the Wi‑Fi 7/8 test workflow\n\n### 1. Early R&D / chipset and RF bring-up\n\n**Main goal:** Prove that the Wi‑Fi 7/8 radio works at the RF and PHY level.\n\nA tester is used to measure:\n\n- Transmit power\n- EVM\n- Spectrum mask\n- Frequency error\n- Occupied bandwidth\n- Modulation quality\n- Receiver sensitivity\n- PER/FER versus input power\n- MIMO path performance\n- 320 MHz channel behavior for Wi‑Fi 7\n- 4096-QAM performance\n- Multi-link operation-related RF behavior, if supported\n\nAt this stage, **non-signaling mode** is often preferred because engineers want direct control over the DUT.\n\nExample use:\n\n> Put the Wi‑Fi chipset or module into a test mode, force it to transmit a known waveform, then use the tester as a vector signal analyzer. Or use the tester as a signal generator to feed known Wi‑Fi packets into the receiver and measure packet error rate.\n\n### 2. PHY/RF performance validation\n\n**Main goal:** Characterize device performance across channels, bandwidths, bands, temperatures, and power levels.\n\nThe tester helps validate:\n\n- 2.4 GHz, 5 GHz, 6 GHz operation\n- 20/40/80/160/320 MHz bandwidths\n- OFDMA behavior\n- MU-MIMO-related RF performance\n- 4096-QAM margin\n- Adjacent-channel rejection\n- Blocking performance\n- Receiver sensitivity\n- Transmit linearity\n- Power control accuracy\n\nThis is where both **signaling and non-signaling** testing may be used.\n\n- **Non-signaling** is used for fast, repeatable RF measurements.\n- **Signaling** is used when real protocol behavior matters.\n\n### 3. Protocol, MAC, and feature validation\n\n**Main goal:** Verify that the device behaves correctly in realistic Wi‑Fi network conditions.\n\nThis is where a **signaling tester** fits.\n\nA signaling tester emulates or controls a real Wi‑Fi link, such as:\n\n- Acting as an access point to test a client device\n- Acting as a client to test an access point\n- Creating controlled association, authentication, traffic, and roaming scenarios\n- Testing throughput under defined RF conditions\n- Testing multi-link operation behavior\n- Testing power-save behavior\n- Testing retransmission and rate adaptation\n- Testing coexistence and link switching behavior\n\nFor Wi‑Fi 7 and Wi‑Fi 8, this becomes especially important because features are more system-level:\n\n- Multi-link operation, MLO\n- 6 GHz operation\n- 320 MHz channels\n- 4096-QAM\n- Multi-RU / puncturing\n- Latency-sensitive operation\n- Coordinated or deterministic behavior expected in Wi‑Fi 8-class use cases\n\n### 4. Pre-certification and certification preparation\n\n**Main goal:** Check that the device is likely to pass formal regulatory or Wi‑Fi Alliance-style testing.\n\nThe tester may be used for:\n\n- Pre-compliance RF measurements\n- Transmitter quality checks\n- Receiver performance checks\n- Protocol feature checks\n- Interoperability preparation\n- Automated regression testing before formal certification\n\nFor official certification, the exact required equipment and procedures depend on the certification body and test plan. But internally, a signaling/non-signaling tester is commonly used to reduce risk before entering formal testing.\n\n### 5. Manufacturing / production test\n\n**Main goal:** Fast pass/fail testing of every device or module.\n\nThis is where **non-signaling testing** is especially valuable.\n\nTypical production checks:\n\n- Transmit power\n- EVM\n- Frequency error\n- Spectrum mask\n- Receiver sensitivity\n- Antenna path check\n- Calibration verification\n- PER at defined input power\n- Fast go/no-go testing\n\nIn manufacturing, non-signaling is preferred because it is faster and easier to automate. The DUT is placed in a production test mode rather than going through full Wi‑Fi association and protocol exchange.\n\n## Signaling vs. non-signaling: simple distinction\n\n| Test type | What it does | Best used for |\n|---|---|---|\n| **Non-signaling** | Tests RF/PHY directly using controlled waveforms or DUT test modes, without building a real Wi‑Fi network connection | RF calibration, production test, EVM, power, spectrum, receiver sensitivity |\n| **Signaling** | Establishes a real or emulated Wi‑Fi connection and tests behavior through protocol exchange | Throughput, association, roaming, MLO, protocol behavior, real-use validation |\n\n## Practical placement in the workflow\n\nA simplified Wi‑Fi 7/8 workflow would look like this:\n\n1. **Simulation / design**\n   - RF simulation, baseband modeling, protocol design\n   - Tester usually not central yet\n\n2. **Chipset/module bring-up**\n   - Use **non-signaling tester**\n   - Check RF transmitter and receiver basics\n\n3. **RF/PHY characterization**\n   - Use **non-signaling tester**\n   - Add signaling where real link behavior matters\n\n4. **System and protocol validation**\n   - Use **signaling tester**\n   - Validate AP/client behavior, MLO, throughput, latency, roaming, rate adaptation\n\n5. **Pre-certification**\n   - Use both\n   - Non-signaling for RF conformance; signaling for protocol and interoperability behavior\n\n6. **Manufacturing**\n   - Mostly **non-signaling tester**\n   - Fast automated pass/fail and calibration verification\n\n## Bottom line\n\nFor a Wi‑Fi 7/8 wireless communication use case, a **Signaling / Non-signaling Tester sits between pure design tools and real-world deployment testing**.\n\n- Use **non-signaling** for fast, controlled RF and PHY measurements.\n- Use **signaling** for realistic Wi‑Fi link, protocol, throughput, MLO, and system behavior testing.\n- In R&D and validation, you often need both.\n- In manufacturing, non-signaling is usually the dominant mode.\n- In certification preparation, both are useful depending on whether the requirement is RF/PHY or protocol/system behavior.",
+      "created_at": "2026-10-07T07:53:04.885517Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7c739385203c4066b5587a754bcea692",
+       "request_id": "request-7c739385203c4066b5587a754bcea692",
+       "span_id": "span-7c739385203c4066b5587a754bcea692",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_model_failed)",
+    "ok": true,
+    "answer": "A **Signaling / Non-signaling Tester** fits mainly in the **RF, PHY/MAC validation, interoperability, and production-test parts** of a Wi‑Fi 7/8 device workflow. It is not usually the first tool for pure chipset design simulation, and it is not the only tool for certification, but it becomes central once real radios, modules, APs, clients, or chipsets are being tested over RF.\n\n## Where it fits in the Wi‑Fi 7/8 test workflow\n\n### 1. Early R&D / chipset and RF bring-up\n\n**Main goal:** Prove that the Wi‑Fi 7/8 radio works at the RF and PHY level.\n\nA tester is used to measure:\n\n- Transmit power\n- EVM\n- Spectrum mask\n- Frequency error\n- Occupied bandwidth\n- Modulation quality\n- Receiver sensitivity\n- PER/FER versus input power\n- MIMO path performance\n- 320 MHz channel behavior for Wi‑Fi 7\n- 4096-QAM performance\n- Multi-link operation-related RF behavior, if supported\n\nAt this stage, **non-signaling mode** is often preferred because engineers want direct control over the DUT.\n\nExample use:\n\n> Put the Wi‑Fi chipset or module into a test mode, force it to transmit a known waveform, then use the tester as a vector signal analyzer. Or use the tester as a signal generator to feed known Wi‑Fi packets into the receiver and measure packet error rate.\n\n### 2. PHY/RF performance validation\n\n**Main goal:** Characterize device performance across channels, bandwidths, bands, temperatures, and power levels.\n\nThe tester helps validate:\n\n- 2.4 GHz, 5 GHz, 6 GHz operation\n- 20/40/80/160/320 MHz bandwidths\n- OFDMA behavior\n- MU-MIMO-related RF performance\n- 4096-QAM margin\n- Adjacent-channel rejection\n- Blocking performance\n- Receiver sensitivity\n- Transmit linearity\n- Power control accuracy\n\nThis is where both **signaling and non-signaling** testing may be used.\n\n- **Non-signaling** is used for fast, repeatable RF measurements.\n- **Signaling** is used when real protocol behavior matters.\n\n### 3. Protocol, MAC, and feature validation\n\n**Main goal:** Verify that the device behaves correctly in realistic Wi‑Fi network conditions.\n\nThis is where a **signaling tester** fits.\n\nA signaling tester emulates or controls a real Wi‑Fi link, such as:\n\n- Acting as an access point to test a client device\n- Acting as a client to test an access point\n- Creating controlled association, authentication, traffic, and roaming scenarios\n- Testing throughput under defined RF conditions\n- Testing multi-link operation behavior\n- Testing power-save behavior\n- Testing retransmission and rate adaptation\n- Testing coexistence and link switching behavior\n\nFor Wi‑Fi 7 and Wi‑Fi 8, this becomes especially important because features are more system-level:\n\n- Multi-link operation, MLO\n- 6 GHz operation\n- 320 MHz channels\n- 4096-QAM\n- Multi-RU / puncturing\n- Latency-sensitive operation\n- Coordinated or deterministic behavior expected in Wi‑Fi 8-class use cases\n\n### 4. Pre-certification and certification preparation\n\n**Main goal:** Check that the device is likely to pass formal regulatory or Wi‑Fi Alliance-style testing.\n\nThe tester may be used for:\n\n- Pre-compliance RF measurements\n- Transmitter quality checks\n- Receiver performance checks\n- Protocol feature checks\n- Interoperability preparation\n- Automated regression testing before formal certification\n\nFor official certification, the exact required equipment and procedures depend on the certification body and test plan. But internally, a signaling/non-signaling tester is commonly used to reduce risk before entering formal testing.\n\n### 5. Manufacturing / production test\n\n**Main goal:** Fast pass/fail testing of every device or module.\n\nThis is where **non-signaling testing** is especially valuable.\n\nTypical production checks:\n\n- Transmit power\n- EVM\n- Frequency error\n- Spectrum mask\n- Receiver sensitivity\n- Antenna path check\n- Calibration verification\n- PER at defined input power\n- Fast go/no-go testing\n\nIn manufacturing, non-signaling is preferred because it is faster and easier to automate. The DUT is placed in a production test mode rather than going through full Wi‑Fi association and protocol exchange.\n\n## Signaling vs. non-signaling: simple distinction\n\n| Test type | What it does | Best used for |\n|---|---|---|\n| **Non-signaling** | Tests RF/PHY directly using controlled waveforms or DUT test modes, without building a real Wi‑Fi network connection | RF calibration, production test, EVM, power, spectrum, receiver sensitivity |\n| **Signaling** | Establishes a real or emulated Wi‑Fi connection and tests behavior through protocol exchange | Throughput, association, roaming, MLO, protocol behavior, real-use validation |\n\n## Practical placement in the workflow\n\nA simplified Wi‑Fi 7/8 workflow would look like this:\n\n1. **Simulation / design**\n   - RF simulation, baseband modeling, protocol design\n   - Tester usually not central yet\n\n2. **Chipset/module bring-up**\n   - Use **non-signaling tester**\n   - Check RF transmitter and receiver basics\n\n3. **RF/PHY characterization**\n   - Use **non-signaling tester**\n   - Add signaling where real link behavior matters\n\n4. **System and protocol validation**\n   - Use **signaling tester**\n   - Validate AP/client behavior, MLO, throughput, latency, roaming, rate adaptation\n\n5. **Pre-certification**\n   - Use both\n   - Non-signaling for RF conformance; signaling for protocol and interoperability behavior\n\n6. **Manufacturing**\n   - Mostly **non-signaling tester**\n   - Fast automated pass/fail and calibration verification\n\n## Bottom line\n\nFor a Wi‑Fi 7/8 wireless communication use case, a **Signaling / Non-signaling Tester sits between pure design tools and real-world deployment testing**.\n\n- Use **non-signaling** for fast, controlled RF and PHY measurements.\n- Use **signaling** for realistic Wi‑Fi link, protocol, throughput, MLO, and system behavior testing.\n- In R&D and validation, you often need both.\n- In manufacturing, non-signaling is usually the dominant mode.\n- In certification preparation, both are useful depending on whether the requirement is RF/PHY or protocol/system behavior.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7c739385203c4066b5587a754bcea692",
+      "request_id": "request-7c739385203c4066b5587a754bcea692",
+      "span_id": "span-7c739385203c4066b5587a754bcea692",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7c739385203c4066b5587a754bcea692",
+       "request_id": "request-7c739385203c4066b5587a754bcea692",
+       "span_id": "span-7c739385203c4066b5587a754bcea692",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "A **Signaling / Non-signaling Tester** fits mainly in the **RF, PHY/MAC validation, interoperability, and production-test parts** of a Wi‑Fi 7/8 device workflow. It is not usually the first tool for pure chipset design simulation, and it is not the only tool for certification, but it becomes central once real radios, modules, APs, clients, or chipsets are being tested over RF.\n\n## Where it fits in the Wi‑Fi 7/8 test workflow\n\n### 1. Early R&D / chipset and RF bring-up\n\n**Main goal:** Prove that the Wi‑Fi 7/8 radio works at the RF and PHY level.\n\nA tester is used to measure:\n\n- Transmit power\n- EVM\n- Spectrum mask\n- Frequency error\n- Occupied bandwidth\n- Modulation quality\n- Receiver sensitivity\n- PER/FER versus input power\n- MIMO path performance\n- 320 MHz channel behavior for Wi‑Fi 7\n- 4096-QAM performance\n- Multi-link operation-related RF behavior, if supported\n\nAt this stage, **non-signaling mode** is often preferred because engineers want direct control over the DUT.\n\nExample use:\n\n> Put the Wi‑Fi chipset or module into a test mode, force it to transmit a known waveform, then use the tester as a vector signal analyzer. Or use the tester as a signal generator to feed known Wi‑Fi packets into the receiver and measure packet error rate.\n\n### 2. PHY/RF performance validation\n\n**Main goal:** Characterize device performance across channels, bandwidths, bands, temperatures, and power levels.\n\nThe tester helps validate:\n\n- 2.4 GHz, 5 GHz, 6 GHz operation\n- 20/40/80/160/320 MHz bandwidths\n- OFDMA behavior\n- MU-MIMO-related RF performance\n- 4096-QAM margin\n- Adjacent-channel rejection\n- Blocking performance\n- Receiver sensitivity\n- Transmit linearity\n- Power control accuracy\n\nThis is where both **signaling and non-signaling** testing may be used.\n\n- **Non-signaling** is used for fast, repeatable RF measurements.\n- **Signaling** is used when real protocol behavior matters.\n\n### 3. Protocol, MAC, and feature validation\n\n**Main goal:** Verify that the device behaves correctly in realistic Wi‑Fi network conditions.\n\nThis is where a **signaling tester** fits.\n\nA signaling tester emulates or controls a real Wi‑Fi link, such as:\n\n- Acting as an access point to test a client device\n- Acting as a client to test an access point\n- Creating controlled association, authentication, traffic, and roaming scenarios\n- Testing throughput under defined RF conditions\n- Testing multi-link operation behavior\n- Testing power-save behavior\n- Testing retransmission and rate adaptation\n- Testing coexistence and link switching behavior\n\nFor Wi‑Fi 7 and Wi‑Fi 8, this becomes especially important because features are more system-level:\n\n- Multi-link operation, MLO\n- 6 GHz operation\n- 320 MHz channels\n- 4096-QAM\n- Multi-RU / puncturing\n- Latency-sensitive operation\n- Coordinated or deterministic behavior expected in Wi‑Fi 8-class use cases\n\n### 4. Pre-certification and certification preparation\n\n**Main goal:** Check that the device is likely to pass formal regulatory or Wi‑Fi Alliance-style testing.\n\nThe tester may be used for:\n\n- Pre-compliance RF measurements\n- Transmitter quality checks\n- Receiver performance checks\n- Protocol feature checks\n- Interoperability preparation\n- Automated regression testing before formal certification\n\nFor official certification, the exact required equipment and procedures depend on the certification body and test plan. But internally, a signaling/non-signaling tester is commonly used to reduce risk before entering formal testing.\n\n### 5. Manufacturing / production test\n\n**Main goal:** Fast pass/fail testing of every device or module.\n\nThis is where **non-signaling testing** is especially valuable.\n\nTypical production checks:\n\n- Transmit power\n- EVM\n- Frequency error\n- Spectrum mask\n- Receiver sensitivity\n- Antenna path check\n- Calibration verification\n- PER at defined input power\n- Fast go/no-go testing\n\nIn manufacturing, non-signaling is preferred because it is faster and easier to automate. The DUT is placed in a production test mode rather than going through full Wi‑Fi association and protocol exchange.\n\n## Signaling vs. non-signaling: simple distinction\n\n| Test type | What it does | Best used for |\n|---|---|---|\n| **Non-signaling** | Tests RF/PHY directly using controlled waveforms or DUT test modes, without building a real Wi‑Fi network connection | RF calibration, production test, EVM, power, spectrum, receiver sensitivity |\n| **Signaling** | Establishes a real or emulated Wi‑Fi connection and tests behavior through protocol exchange | Throughput, association, roaming, MLO, protocol behavior, real-use validation |\n\n## Practical placement in the workflow\n\nA simplified Wi‑Fi 7/8 workflow would look like this:\n\n1. **Simulation / design**\n   - RF simulation, baseband modeling, protocol design\n   - Tester usually not central yet\n\n2. **Chipset/module bring-up**\n   - Use **non-signaling tester**\n   - Check RF transmitter and receiver basics\n\n3. **RF/PHY characterization**\n   - Use **non-signaling tester**\n   - Add signaling where real link behavior matters\n\n4. **System and protocol validation**\n   - Use **signaling tester**\n   - Validate AP/client behavior, MLO, throughput, latency, roaming, rate adaptation\n\n5. **Pre-certification**\n   - Use both\n   - Non-signaling for RF conformance; signaling for protocol and interoperability behavior\n\n6. **Manufacturing**\n   - Mostly **non-signaling tester**\n   - Fast automated pass/fail and calibration verification\n\n## Bottom line\n\nFor a Wi‑Fi 7/8 wireless communication use case, a **Signaling / Non-signaling Tester sits between pure design tools and real-world deployment testing**.\n\n- Use **non-signaling** for fast, controlled RF and PHY measurements.\n- Use **signaling** for realistic Wi‑Fi link, protocol, throughput, MLO, and system behavior testing.\n- In R&D and validation, you often need both.\n- In manufacturing, non-signaling is usually the dominant mode.\n- In certification preparation, both are useful depending on whether the requirement is RF/PHY or protocol/system behavior.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_DCyqUpmHNxnlkQfURrPCKtWn",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-7c739385203c4066b5587a754bcea692",
+          "request_id": "request-7c739385203c4066b5587a754bcea692",
+          "span_id": "span-7c739385203c4066b5587a754bcea692",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_model_failed",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

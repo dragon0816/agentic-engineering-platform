@@ -1,0 +1,93 @@
+{
+ "question": {
+  "id": "Q0861",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Oscilloscope fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-669e3eb1fafe4b6fa29297032a4aa06c",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 12.719,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-669e3eb1fafe4b6fa29297032a4aa06c",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Osci…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T08:57:46.481606Z",
+    "updated_at": "2026-10-07T08:57:56.506456Z",
+    "messages": [
+     {
+      "message_id": "message-305c7d65064040a3ac9c17064fa1ddbe",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-07T08:57:46.509516Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-d5cf459272f5409eacb2f7a95bc2c3b8",
+      "role": "assistant",
+      "text": "In an RFIC validation workflow, an **oscilloscope fits mainly in the time-domain debug and validation portions**, complementing RF instruments like signal generators, spectrum analyzers, VNAs, and noise figure/phase-noise analyzers.\n\nTypical places it fits:\n\n1. **Bring-up / sanity check**\n   - Verify clocks, resets, enable lines, SPI/I²C control buses, GPIOs.\n   - Check that bias rails and control sequencing are correct before RF testing.\n\n2. **Power integrity and bias validation**\n   - Measure supply ripple, droop, startup behavior, transient current effects.\n   - Debug PA/LNA/mixer bias instability or oscillation.\n\n3. **Baseband / IF signal validation**\n   - Observe I/Q baseband waveforms, IF outputs, pulse envelopes, modulation timing.\n   - Check gain settling, switching transients, DC offsets, clipping, and distortion in time domain.\n\n4. **RF envelope and pulsed RF behavior**\n   - With suitable bandwidth/probes or downconversion, validate RF burst timing, envelope shape, rise/fall time, pulse droop, TDD switching behavior.\n   - Especially useful for radar, 5G, Wi-Fi, and pulsed PA validation.\n\n5. **Digital-RF interaction debug**\n   - Correlate RF behavior with digital events: SPI writes, mode switching, PLL lock signals, PA enable, antenna switch control, etc.\n   - Mixed-signal scopes are useful here because they can view analog and digital timing together.\n\n6. **Failure analysis**\n   - Capture intermittent glitches, latch-up events, supply dips, PLL lock transients, or unexpected switching artifacts.\n   - Triggering and long acquisition memory are key advantages.\n\nSo in the workflow, the oscilloscope is not usually the primary instrument for final RF metrics like EVM, ACPR, S-parameters, phase noise, or noise figure. Instead, it is the **cross-domain debug instrument** used during bring-up, timing validation, transient analysis, power integrity checks, and correlation between control signals and RF behavior.",
+      "created_at": "2026-10-07T08:57:56.506456Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-fadc05674ae5471486978cd139ba3883",
+       "request_id": "request-fadc05674ae5471486978cd139ba3883",
+       "span_id": "span-fadc05674ae5471486978cd139ba3883",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": null,
+    "ok": true,
+    "answer": "In an RFIC validation workflow, an **oscilloscope fits mainly in the time-domain debug and validation portions**, complementing RF instruments like signal generators, spectrum analyzers, VNAs, and noise figure/phase-noise analyzers.\n\nTypical places it fits:\n\n1. **Bring-up / sanity check**\n   - Verify clocks, resets, enable lines, SPI/I²C control buses, GPIOs.\n   - Check that bias rails and control sequencing are correct before RF testing.\n\n2. **Power integrity and bias validation**\n   - Measure supply ripple, droop, startup behavior, transient current effects.\n   - Debug PA/LNA/mixer bias instability or oscillation.\n\n3. **Baseband / IF signal validation**\n   - Observe I/Q baseband waveforms, IF outputs, pulse envelopes, modulation timing.\n   - Check gain settling, switching transients, DC offsets, clipping, and distortion in time domain.\n\n4. **RF envelope and pulsed RF behavior**\n   - With suitable bandwidth/probes or downconversion, validate RF burst timing, envelope shape, rise/fall time, pulse droop, TDD switching behavior.\n   - Especially useful for radar, 5G, Wi-Fi, and pulsed PA validation.\n\n5. **Digital-RF interaction debug**\n   - Correlate RF behavior with digital events: SPI writes, mode switching, PLL lock signals, PA enable, antenna switch control, etc.\n   - Mixed-signal scopes are useful here because they can view analog and digital timing together.\n\n6. **Failure analysis**\n   - Capture intermittent glitches, latch-up events, supply dips, PLL lock transients, or unexpected switching artifacts.\n   - Triggering and long acquisition memory are key advantages.\n\nSo in the workflow, the oscilloscope is not usually the primary instrument for final RF metrics like EVM, ACPR, S-parameters, phase noise, or noise figure. Instead, it is the **cross-domain debug instrument** used during bring-up, timing validation, transient analysis, power integrity checks, and correlation between control signals and RF behavior.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-fadc05674ae5471486978cd139ba3883",
+      "request_id": "request-fadc05674ae5471486978cd139ba3883",
+      "span_id": "span-fadc05674ae5471486978cd139ba3883",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-fadc05674ae5471486978cd139ba3883",
+       "request_id": "request-fadc05674ae5471486978cd139ba3883",
+       "span_id": "span-fadc05674ae5471486978cd139ba3883",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In an RFIC validation workflow, an **oscilloscope fits mainly in the time-domain debug and validation portions**, complementing RF instruments like signal generators, spectrum analyzers, VNAs, and noise figure/phase-noise analyzers.\n\nTypical places it fits:\n\n1. **Bring-up / sanity check**\n   - Verify clocks, resets, enable lines, SPI/I²C control buses, GPIOs.\n   - Check that bias rails and control sequencing are correct before RF testing.\n\n2. **Power integrity and bias validation**\n   - Measure supply ripple, droop, startup behavior, transient current effects.\n   - Debug PA/LNA/mixer bias instability or oscillation.\n\n3. **Baseband / IF signal validation**\n   - Observe I/Q baseband waveforms, IF outputs, pulse envelopes, modulation timing.\n   - Check gain settling, switching transients, DC offsets, clipping, and distortion in time domain.\n\n4. **RF envelope and pulsed RF behavior**\n   - With suitable bandwidth/probes or downconversion, validate RF burst timing, envelope shape, rise/fall time, pulse droop, TDD switching behavior.\n   - Especially useful for radar, 5G, Wi-Fi, and pulsed PA validation.\n\n5. **Digital-RF interaction debug**\n   - Correlate RF behavior with digital events: SPI writes, mode switching, PLL lock signals, PA enable, antenna switch control, etc.\n   - Mixed-signal scopes are useful here because they can view analog and digital timing together.\n\n6. **Failure analysis**\n   - Capture intermittent glitches, latch-up events, supply dips, PLL lock transients, or unexpected switching artifacts.\n   - Triggering and long acquisition memory are key advantages.\n\nSo in the workflow, the oscilloscope is not usually the primary instrument for final RF metrics like EVM, ACPR, S-parameters, phase noise, or noise figure. Instead, it is the **cross-domain debug instrument** used during bring-up, timing validation, transient analysis, power integrity checks, and correlation between control signals and RF behavior.",
+      "model_turns": 1,
+      "tools": [],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

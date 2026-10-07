@@ -1,0 +1,91 @@
+{
+ "id": "Q0296",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 89.015,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "raw",
+   "ref": "raw/Market/BBU image 3.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "raw",
+   "ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": true,
+  "overreach": [
+   "Oscilloscope positioning around satellite / NTN device and subsystem validation",
+   "active technical requirements and deployment planning",
+   "timing verification, trigger/debug around RF front-end control, modem/baseband interfaces, synchronization signals, power sequencing",
+   "high-reliability power-conversion design and validation",
+   "mission systems",
+   "Aerospace / Defense linkage",
+   "high-bandwidth probing, isolated/differential measurements, power analysis, switching-loss analysis, gate timing, dead-time verification, EMI/root-cause debug"
+  ],
+  "reason": "The cited passages support that NTN involves UE measurements, propagation-delay compensation, beam reporting, and that DC-DC converters involve gate signals, phase shift, and duty cycle. However, they do not directly support oscilloscope opportunities, Aerospace/Defense use for the DC-DC material, or many of the specific test-use claims; the answer is nonetheless fairly cautious about these limitations.",
+  "confidence": "medium"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that NTN involves UE measurements, propagation-delay compensation, beam reporting, and that DC-DC converters involve gate signals, phase shift, and duty cycle. However, they do not directly support oscilloscope opportunities, Aerospace/Defense use for the DC-DC material, o"
+}

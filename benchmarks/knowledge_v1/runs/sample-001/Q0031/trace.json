@@ -1,0 +1,464 @@
+{
+ "question": {
+  "id": "Q0031",
+  "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Wireless Communication",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-f3caddc2d8ef4ab192d88dee0dfbb394",
+ "exchange": {
+  "sent": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 61.781,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-f3caddc2d8ef4ab192d88dee0dfbb394",
+    "actor": "leo.chi",
+    "title": "How do changes in Wi-Fi 7/8 technology affect the measurement capability…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T07:53:05.011318Z",
+    "updated_at": "2026-10-07T07:54:06.684295Z",
+    "messages": [
+     {
+      "message_id": "message-7012d8df48994863b35a1e647cf7d2a7",
+      "role": "user",
+      "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-07T07:53:05.022279Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-23aa1837c92447ed9b7dcc19bc17caac",
+      "role": "assistant",
+      "text": "Wi‑Fi 7/8 push tester requirements mainly in **bandwidth, RF-chain count, signaling realism, and multi-technology integration**.\n\n### 1) Signaling tester: from “single-link RF” to realistic multi-link behavior\n\nFor Wi‑Fi 7, **Multi-Link Operation (MLO)** is a key change. R&S source material says that RF TX/RX measurements for WLAN devices must be done under **real-world signaling conditions**, and because MLO is central to Wi‑Fi 7, the test environment needs **multiple RF chains**. The cited CMX500 setup is described as a **multi-technology, multi-channel signaling tester** with integrated Wi‑Fi 7 functionality, supporting Wi‑Fi 7 tests such as **2x2 MIMO, 6 GHz with out-of-band discovery, coexistence, embedded IP, and end-to-end testing**.  \nSource: *Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024*; *Bluetest and Rohde & Schwarz collaborate to offer OTA testing of next-generation WLAN devices*.\n\n**Impact:** A signaling tester now needs to emulate realistic AP/network behavior across multiple links and bands, not just generate/analyze one RF link.\n\n### 2) Bandwidth and modulation requirements increase\n\nWi‑Fi 8 is described as retaining demanding Wi‑Fi 7 PHY parameters: **frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO**, while adding new PHY/MAC technologies that create new testing hurdles.  \nSource: *Rohde & Schwarz and Broadcom showcase first Wi‑Fi 8 RF signaling tests, paving way for next-gen connectivity*.\n\nFor non-signaling / RF production-style capability, the CMP180 is cited verifying a **480 MHz bandwidth waveform in loopback mode**, positioned as future-proof beyond Wi‑Fi 7.  \nSource: *Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024*.\n\n**Impact:** Testers need wider instantaneous bandwidth, higher modulation quality/EVM performance, and enough RF performance margin for 320 MHz / 4096QAM and beyond.\n\n### 3) Wi‑Fi 8 adds early validation needs for new PHY/MAC features\n\nR&S states that CMX500 has newly added **Wi‑Fi 8 / IEEE 802.11bn testing capabilities**, used with Broadcom to validate a prototype Wi‑Fi 8 device and showcase **physical-layer features unique to Wi‑Fi 8**. The raw source does not enumerate every new Wi‑Fi 8 feature, but it explicitly says Wi‑Fi 8 adds PHY/MAC technologies that create new testing hurdles.  \nSource: *Rohde & Schwarz and Broadcom showcase first Wi‑Fi 8 RF signaling tests, paving way for next-gen connectivity*.\n\n**Impact:** R&D signaling testers must support pre-standard/prototype validation, flexible waveform/protocol updates, and new PHY/MAC behavior before mass production test flows are stable.\n\n### 4) OTA and antenna testing become more important\n\nThe sources note that WLAN device development requires measurement of **antenna, RF transmitter, and receiver characteristics** under real-world signaling conditions, and R&S collaborations combine OTA chambers with CMX500 for Wi‑Fi 7 assessment.  \nSources: *Bluetest and Rohde & Schwarz collaborate…*; *EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi‑Fi 7 and 5G RedCap*.\n\n**Impact:** Tester capability is no longer only conducted RF. It must fit OTA workflows for MIMO/MLO, antenna performance, coexistence, and end-to-end throughput/performance validation.\n\n### 5) Non-signaling tester: production lines need speed, bandwidth, and parallelism\n\nThe raw battle-card evidence says that when factory lines need non-signaling test capability, R&S positions **CMP180 / CMP200 / CMW100** for that role.  \nSource: *2026_02_CMX500_Amarisoft_Sales_Battle_Card*.\n\n**Impact:** Non-signaling testers must prioritize fast calibration/verification, wideband waveform generation/analysis, multi-DUT or multi-port efficiency, and enough RF accuracy for Wi‑Fi 7/8 modulation and bandwidth.\n\n---\n\n### Bottom line\n\n| Technology change | Required tester capability |\n|---|---|\n| Wi‑Fi 7 MLO | Multiple synchronized RF chains; multi-channel signaling |\n| 6 GHz / up to 7.125 GHz operation | RF coverage through 6 GHz band and Wi‑Fi 6E/7/8 ranges |\n| 320 MHz channels | Wide instantaneous bandwidth and analysis bandwidth |\n| 4096QAM | Better EVM, phase noise, linearity, and RF accuracy |\n| 2x2 MIMO / coexistence / E2E IP | Integrated protocol, IP throughput, and multi-radio test |\n| Wi‑Fi 8 new PHY/MAC features | Flexible, upgradeable signaling platform for prototype validation |\n| Production scaling | Non-signaling wideband testers such as CMP180/200/CMW100 class capability |\n\nIn short: **Wi‑Fi 7 makes multi-link, multi-chain signaling essential; Wi‑Fi 8 keeps those RF demands and adds new PHY/MAC validation challenges. Non-signaling testers must keep up with bandwidth, modulation accuracy, and production throughput, while signaling testers need realistic multi-link protocol and OTA capability.**",
+      "created_at": "2026-10-07T07:54:06.684295Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-20a235685bcb4613ae1f629a47985ed6",
+       "request_id": "request-20a235685bcb4613ae1f629a47985ed6",
+       "span_id": "span-20a235685bcb4613ae1f629a47985ed6",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Wi‑Fi 7/8 push tester requirements mainly in **bandwidth, RF-chain count, signaling realism, and multi-technology integration**.\n\n### 1) Signaling tester: from “single-link RF” to realistic multi-link behavior\n\nFor Wi‑Fi 7, **Multi-Link Operation (MLO)** is a key change. R&S source material says that RF TX/RX measurements for WLAN devices must be done under **real-world signaling conditions**, and because MLO is central to Wi‑Fi 7, the test environment needs **multiple RF chains**. The cited CMX500 setup is described as a **multi-technology, multi-channel signaling tester** with integrated Wi‑Fi 7 functionality, supporting Wi‑Fi 7 tests such as **2x2 MIMO, 6 GHz with out-of-band discovery, coexistence, embedded IP, and end-to-end testing**.  \nSource: *Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024*; *Bluetest and Rohde & Schwarz collaborate to offer OTA testing of next-generation WLAN devices*.\n\n**Impact:** A signaling tester now needs to emulate realistic AP/network behavior across multiple links and bands, not just generate/analyze one RF link.\n\n### 2) Bandwidth and modulation requirements increase\n\nWi‑Fi 8 is described as retaining demanding Wi‑Fi 7 PHY parameters: **frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO**, while adding new PHY/MAC technologies that create new testing hurdles.  \nSource: *Rohde & Schwarz and Broadcom showcase first Wi‑Fi 8 RF signaling tests, paving way for next-gen connectivity*.\n\nFor non-signaling / RF production-style capability, the CMP180 is cited verifying a **480 MHz bandwidth waveform in loopback mode**, positioned as future-proof beyond Wi‑Fi 7.  \nSource: *Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024*.\n\n**Impact:** Testers need wider instantaneous bandwidth, higher modulation quality/EVM performance, and enough RF performance margin for 320 MHz / 4096QAM and beyond.\n\n### 3) Wi‑Fi 8 adds early validation needs for new PHY/MAC features\n\nR&S states that CMX500 has newly added **Wi‑Fi 8 / IEEE 802.11bn testing capabilities**, used with Broadcom to validate a prototype Wi‑Fi 8 device and showcase **physical-layer features unique to Wi‑Fi 8**. The raw source does not enumerate every new Wi‑Fi 8 feature, but it explicitly says Wi‑Fi 8 adds PHY/MAC technologies that create new testing hurdles.  \nSource: *Rohde & Schwarz and Broadcom showcase first Wi‑Fi 8 RF signaling tests, paving way for next-gen connectivity*.\n\n**Impact:** R&D signaling testers must support pre-standard/prototype validation, flexible waveform/protocol updates, and new PHY/MAC behavior before mass production test flows are stable.\n\n### 4) OTA and antenna testing become more important\n\nThe sources note that WLAN device development requires measurement of **antenna, RF transmitter, and receiver characteristics** under real-world signaling conditions, and R&S collaborations combine OTA chambers with CMX500 for Wi‑Fi 7 assessment.  \nSources: *Bluetest and Rohde & Schwarz collaborate…*; *EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi‑Fi 7 and 5G RedCap*.\n\n**Impact:** Tester capability is no longer only conducted RF. It must fit OTA workflows for MIMO/MLO, antenna performance, coexistence, and end-to-end throughput/performance validation.\n\n### 5) Non-signaling tester: production lines need speed, bandwidth, and parallelism\n\nThe raw battle-card evidence says that when factory lines need non-signaling test capability, R&S positions **CMP180 / CMP200 / CMW100** for that role.  \nSource: *2026_02_CMX500_Amarisoft_Sales_Battle_Card*.\n\n**Impact:** Non-signaling testers must prioritize fast calibration/verification, wideband waveform generation/analysis, multi-DUT or multi-port efficiency, and enough RF accuracy for Wi‑Fi 7/8 modulation and bandwidth.\n\n---\n\n### Bottom line\n\n| Technology change | Required tester capability |\n|---|---|\n| Wi‑Fi 7 MLO | Multiple synchronized RF chains; multi-channel signaling |\n| 6 GHz / up to 7.125 GHz operation | RF coverage through 6 GHz band and Wi‑Fi 6E/7/8 ranges |\n| 320 MHz channels | Wide instantaneous bandwidth and analysis bandwidth |\n| 4096QAM | Better EVM, phase noise, linearity, and RF accuracy |\n| 2x2 MIMO / coexistence / E2E IP | Integrated protocol, IP throughput, and multi-radio test |\n| Wi‑Fi 8 new PHY/MAC features | Flexible, upgradeable signaling platform for prototype validation |\n| Production scaling | Non-signaling wideband testers such as CMP180/200/CMW100 class capability |\n\nIn short: **Wi‑Fi 7 makes multi-link, multi-chain signaling essential; Wi‑Fi 8 keeps those RF demands and adds new PHY/MAC validation challenges. Non-signaling testers must keep up with bandwidth, modulation accuracy, and production throughput, while signaling testers need realistic multi-link protocol and OTA capability.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-20a235685bcb4613ae1f629a47985ed6",
+      "request_id": "request-20a235685bcb4613ae1f629a47985ed6",
+      "span_id": "span-20a235685bcb4613ae1f629a47985ed6",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-20a235685bcb4613ae1f629a47985ed6",
+       "request_id": "request-20a235685bcb4613ae1f629a47985ed6",
+       "span_id": "span-20a235685bcb4613ae1f629a47985ed6",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Wi‑Fi 7/8 push tester requirements mainly in **bandwidth, RF-chain count, signaling realism, and multi-technology integration**.\n\n### 1) Signaling tester: from “single-link RF” to realistic multi-link behavior\n\nFor Wi‑Fi 7, **Multi-Link Operation (MLO)** is a key change. R&S source material says that RF TX/RX measurements for WLAN devices must be done under **real-world signaling conditions**, and because MLO is central to Wi‑Fi 7, the test environment needs **multiple RF chains**. The cited CMX500 setup is described as a **multi-technology, multi-channel signaling tester** with integrated Wi‑Fi 7 functionality, supporting Wi‑Fi 7 tests such as **2x2 MIMO, 6 GHz with out-of-band discovery, coexistence, embedded IP, and end-to-end testing**.  \nSource: *Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024*; *Bluetest and Rohde & Schwarz collaborate to offer OTA testing of next-generation WLAN devices*.\n\n**Impact:** A signaling tester now needs to emulate realistic AP/network behavior across multiple links and bands, not just generate/analyze one RF link.\n\n### 2) Bandwidth and modulation requirements increase\n\nWi‑Fi 8 is described as retaining demanding Wi‑Fi 7 PHY parameters: **frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO**, while adding new PHY/MAC technologies that create new testing hurdles.  \nSource: *Rohde & Schwarz and Broadcom showcase first Wi‑Fi 8 RF signaling tests, paving way for next-gen connectivity*.\n\nFor non-signaling / RF production-style capability, the CMP180 is cited verifying a **480 MHz bandwidth waveform in loopback mode**, positioned as future-proof beyond Wi‑Fi 7.  \nSource: *Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024*.\n\n**Impact:** Testers need wider instantaneous bandwidth, higher modulation quality/EVM performance, and enough RF performance margin for 320 MHz / 4096QAM and beyond.\n\n### 3) Wi‑Fi 8 adds early validation needs for new PHY/MAC features\n\nR&S states that CMX500 has newly added **Wi‑Fi 8 / IEEE 802.11bn testing capabilities**, used with Broadcom to validate a prototype Wi‑Fi 8 device and showcase **physical-layer features unique to Wi‑Fi 8**. The raw source does not enumerate every new Wi‑Fi 8 feature, but it explicitly says Wi‑Fi 8 adds PHY/MAC technologies that create new testing hurdles.  \nSource: *Rohde & Schwarz and Broadcom showcase first Wi‑Fi 8 RF signaling tests, paving way for next-gen connectivity*.\n\n**Impact:** R&D signaling testers must support pre-standard/prototype validation, flexible waveform/protocol updates, and new PHY/MAC behavior before mass production test flows are stable.\n\n### 4) OTA and antenna testing become more important\n\nThe sources note that WLAN device development requires measurement of **antenna, RF transmitter, and receiver characteristics** under real-world signaling conditions, and R&S collaborations combine OTA chambers with CMX500 for Wi‑Fi 7 assessment.  \nSources: *Bluetest and Rohde & Schwarz collaborate…*; *EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi‑Fi 7 and 5G RedCap*.\n\n**Impact:** Tester capability is no longer only conducted RF. It must fit OTA workflows for MIMO/MLO, antenna performance, coexistence, and end-to-end throughput/performance validation.\n\n### 5) Non-signaling tester: production lines need speed, bandwidth, and parallelism\n\nThe raw battle-card evidence says that when factory lines need non-signaling test capability, R&S positions **CMP180 / CMP200 / CMW100** for that role.  \nSource: *2026_02_CMX500_Amarisoft_Sales_Battle_Card*.\n\n**Impact:** Non-signaling testers must prioritize fast calibration/verification, wideband waveform generation/analysis, multi-DUT or multi-port efficiency, and enough RF accuracy for Wi‑Fi 7/8 modulation and bandwidth.\n\n---\n\n### Bottom line\n\n| Technology change | Required tester capability |\n|---|---|\n| Wi‑Fi 7 MLO | Multiple synchronized RF chains; multi-channel signaling |\n| 6 GHz / up to 7.125 GHz operation | RF coverage through 6 GHz band and Wi‑Fi 6E/7/8 ranges |\n| 320 MHz channels | Wide instantaneous bandwidth and analysis bandwidth |\n| 4096QAM | Better EVM, phase noise, linearity, and RF accuracy |\n| 2x2 MIMO / coexistence / E2E IP | Integrated protocol, IP throughput, and multi-radio test |\n| Wi‑Fi 8 new PHY/MAC features | Flexible, upgradeable signaling platform for prototype validation |\n| Production scaling | Non-signaling wideband testers such as CMP180/200/CMW100 class capability |\n\nIn short: **Wi‑Fi 7 makes multi-link, multi-chain signaling essential; Wi‑Fi 8 keeps those RF demands and adds new PHY/MAC validation challenges. Non-signaling testers must keep up with bandwidth, modulation accuracy, and production throughput, while signaling testers need realistic multi-link protocol and OTA capability.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_HkRKBQFx4VuuVMgVIy0z5YKv",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-20a235685bcb4613ae1f629a47985ed6",
+          "request_id": "request-20a235685bcb4613ae1f629a47985ed6",
+          "span_id": "span-20a235685bcb4613ae1f629a47985ed6",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-20a235685bcb4613ae1f629a47985ed6",
+           "request_id": "request-20a235685bcb4613ae1f629a47985ed6",
+           "span_id": "span-20a235685bcb4613ae1f629a47985ed6",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester? Please answer with evidence from Raw sources about Wi-Fi 7/8 features and R&S signaling/non-signaling tester capabilities if available.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 58.003335
+            },
+            {
+             "text": "Ask: “Do you need Wi-Fi signaling (6/6E/7) integrated?”\nLandmine 7 – Non-signaling capabilities\nAsk: “Do you need non-signaling test capability for factory lines?”\n✔ If yes → Only R&S (CMP180/200/CMW100).\nLandmine 8 – 3GPP RF Pre-Conformance",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e141f59158e470e8",
+               "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 53.850424
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 53.350722
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 51.030267
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the antennas as well as RF transmitter and receiver characteristics must be conducted under real-world conditions in signaling mode. With MLO being a key feature in Wi-Fi 7, a test environment that provides multiple RF chains is crucial. The R&S CMX500 one-box tester from Rohde & Schwarz, featuring integrated Wi-Fi 7 test functionality, is a multi-technology multi-channel signaling tester. Its flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a broad range of Wi-Fi 7-specific tests.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-54cc8cb2ee42584d",
+               "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 50.961959
+            },
+            {
+             "text": "EMITE’s state-of-the-art over-the-air chambers can now be combined with the latest sophisticated testing features of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz. The radio communication tester offers a wide range of device testing capabilities, supporting cellular technologies such as LTE, 5G NR FR1 frequency range up to 8 GHz and FR2 millimeter wave frequency range up to 50 GHz, including the latest 5G RedCap technology. It also supports non-cellular technologies, including the latest Wi-Fi 7, all in a single instrument. As a consequence of this collaboration, EMITE’s customers obtain a comprehensive environment for accurately assessing the performance of Wi-Fi 7 as well as 5G Red Cap devices.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 50.878351
+            },
+            {
+             "text": "[Wi-Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi-Fi 8\") builds upon the foundation of Wi-Fi 7, retaining core physical layer parameters like supported frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz and 4096QAM modulation, as well as Multi-Link-Operation (MLO). However, to achieve its UHR goals, IEEE 802.11bn introduces a suite of innovative PHY and MAC layer technologies that present new testing hurdles. At MWC 2026, visitors can experience how to address key testing challenges associated with Wi-Fi 8 with the enhanced testing capabilities of the CMX500 one-box signaling tester, one of the most versatile mobile device test platforms in the market, which supports many of the demanding features of Wi-Fi 7 and Wi-Fi 8 today.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 50.309319
+            },
+            {
+             "text": "The CMX500 is a modular, powerful one-box signaling tester enabling comprehensive multi-technology testing. It covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing and WLAN including Wi‑Fi 7 and Wi‑Fi 8. Consequently, the CMX500 allows R&D engineers of wireless devices to comprehensively test their design’s operation in both cellular and non-cellular standards of the latest generation in a single instrument setup.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 47.360853
+            }
+           ],
+           "text": "Wi‑Fi 7 increases tester requirements because MLO is a key feature, and testing it under real-world signaling conditions requires a test environment with multiple RF chains; the R&S CMX500 is described as a multi-technology, multi-channel signaling tester with integrated Wi‑Fi 7 functionality for such tests.[3][5] Wi‑Fi 7 testing also needs support for measurements such as RF TX/RX and antenna characteristics in signaling mode, plus Wi‑Fi 7-specific scenarios including 2x2 MIMO, 6 GHz operation with out-of-band discovery, coexistence, embedded IP, and end-to-end testing.[3][5]\n\nWi‑Fi 8 further raises the challenge because it retains demanding Wi‑Fi 7 physical-layer parameters—frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO—while adding new PHY and MAC technologies that create new testing hurdles.[7] R&S states that the CMX500 now has Wi‑Fi 8 testing capabilities and can validate prototype Wi‑Fi 8 devices, including physical-layer features unique to Wi‑Fi 8.[1] The CMX500 is described as supporting WLAN including Wi‑Fi 7 and Wi‑Fi 8 in a single multi-technology signaling tester setup.[8]\n\nFor non-signaling production or factory testing, the RAW passages state that if non-signaling test capability is needed for factory lines, only R&S CMP180/200/CMW100 are indicated.[2] The R&S CMP180 is also shown verifying a 480 MHz signal waveform in loopback mode, described as future-proof for R&D and production beyond Wi‑Fi 7 requirements.[4]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 58.003335
+           },
+           {
+            "text": "Ask: “Do you need Wi-Fi signaling (6/6E/7) integrated?”\nLandmine 7 – Non-signaling capabilities\nAsk: “Do you need non-signaling test capability for factory lines?”\n✔ If yes → Only R&S (CMP180/200/CMW100).\nLandmine 8 – 3GPP RF Pre-Conformance",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e141f59158e470e8",
+              "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 53.850424
+           },
+           {
+            "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 53.350722
+           },
+           {
+            "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 51.030267
+           },
+           {
+            "text": "During the development of WLAN devices, measurements of the antennas as well as RF transmitter and receiver characteristics must be conducted under real-world conditions in signaling mode. With MLO being a key feature in Wi-Fi 7, a test environment that provides multiple RF chains is crucial. The R&S CMX500 one-box tester from Rohde & Schwarz, featuring integrated Wi-Fi 7 test functionality, is a multi-technology multi-channel signaling tester. Its flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a broad range of Wi-Fi 7-specific tests.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-54cc8cb2ee42584d",
+              "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 50.961959
+           },
+           {
+            "text": "[Wi-Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi-Fi 8\") builds upon the foundation of Wi-Fi 7, retaining core physical layer parameters like supported frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz and 4096QAM modulation, as well as Multi-Link-Operation (MLO). However, to achieve its UHR goals, IEEE 802.11bn introduces a suite of innovative PHY and MAC layer technologies that present new testing hurdles. At MWC 2026, visitors can experience how to address key testing challenges associated with Wi-Fi 8 with the enhanced testing capabilities of the CMX500 one-box signaling tester, one of the most versatile mobile device test platforms in the market, which supports many of the demanding features of Wi-Fi 7 and Wi-Fi 8 today.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 50.309319
+           },
+           {
+            "text": "The CMX500 is a modular, powerful one-box signaling tester enabling comprehensive multi-technology testing. It covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing and WLAN including Wi‑Fi 7 and Wi‑Fi 8. Consequently, the CMX500 allows R&D engineers of wireless devices to comprehensively test their design’s operation in both cellular and non-cellular standards of the latest generation in a single instrument setup.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 47.360853
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

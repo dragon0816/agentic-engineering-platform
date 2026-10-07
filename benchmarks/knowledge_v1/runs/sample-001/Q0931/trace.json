@@ -1,0 +1,422 @@
+{
+ "question": {
+  "id": "Q0931",
+  "text": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-29b4223ad8204da7a4d498282a895e6d",
+ "exchange": {
+  "sent": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 62.359,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-29b4223ad8204da7a4d498282a895e6d",
+    "actor": "leo.chi",
+    "title": "How do changes in RFIC validation technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:03:40.065075Z",
+    "updated_at": "2026-10-07T09:04:42.343632Z",
+    "messages": [
+     {
+      "message_id": "message-0ae171c1288f46bda65b0bbb7cc224e2",
+      "role": "user",
+      "text": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-07T09:03:40.283295Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-40bfa2d7776f45708b36eba7cd517c9c",
+      "role": "assistant",
+      "text": "The evidence I found is not RFIC-specific, but it does point to a broader validation shift: RF/wireless validation is becoming more software-driven, integrated, multi-signal, and workflow-sensitive. That changes what is required from Signal Generators and Signal/Spectrum Analyzers.\n\n### Main effect on required measurement capability\n\n1. **From static measurements to scenario-based validation**\n   - RFIC validation increasingly needs realistic stimulus: modulated waveforms, multi-carrier cases, coexistence/interference, beam/OTA conditions, and corner-case stress tests.\n   - Signal generators therefore need wider modulation bandwidth, better waveform fidelity, multi-carrier generation, phase-coherent channels, and automation-friendly waveform control.\n   - Evidence: R&S material references vector signal generators such as SMW200A/SMBV100B in wireless test setups, and multi-carrier/two-tone stimulus for phase/group-delay related measurements.  \n     Sources: `raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`, section 16; `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10.\n\n2. **From single-instrument tests to integrated test environments**\n   - RFICs are validated not only by conducted RF tests but also in system-like environments: chambers, OTA, software-controlled setups, and linked generator/analyzer workflows.\n   - Generators/analyzers must integrate with chambers, switch matrices, calibration paths, and test automation software.\n   - Evidence: R&S and ETS-Lindgren integrated the CMX500 and SMBV100B with chamber technology and EMQuest software “to advance comprehensive testing capabilities for wireless technologies.”  \n     Source: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n3. **From manual measurements to software-defined validation**\n   - Validation teams lose time in scripting, environment setup, debugging, and documentation; this implies that measurement equipment must expose stable APIs, reusable test libraries, traceable results, and easier automation.\n   - Signal generators and analyzers therefore need strong remote-control support, repeatable setups, result logging, and integration with validation frameworks.\n   - Evidence: a customer questionnaire explicitly asks where teams lose time when going “from a new test idea to running, validated results,” listing scripting, setup, debugging failures, and documentation.  \n     Source: `raw/Productions/AIW_Products_Customer_Questionnaire.md`, section 14.\n\n4. **From separate stimulus/analysis to synchronized generation and analysis**\n   - Modern RFIC validation benefits from tightly synchronized generation and capture: EVM, ACLR, spurious, compression, memory effects, group delay, phase noise, and transient behavior all depend on correlation between stimulus and response.\n   - This increases demand for combined or tightly coupled vector generation and analysis, shared references, deterministic triggering, and time-aligned capture.\n   - Evidence: the R&S portfolio material describes “flexible signal generation and analysis software” and a “combined vector signal generator and analyzer in one instrument.”  \n     Source: `raw/Market/OneNote/R&S portfolio for O-RU testing.md`, section 89.\n\n### Practical implication for Signal Generator / Signal Analyzer specs\n\nRFIC validation technology pushes SG/SA requirements toward:\n\n- **Higher frequency coverage** for mmWave and future bands.\n- **Wider RF and analysis bandwidth** for 5G/6G-class waveforms and wideband modulated signals.\n- **Better EVM / modulation accuracy** to avoid test equipment masking DUT performance.\n- **Lower phase noise and jitter** for oscillator, LO, PLL, and high-order modulation validation.\n- **Higher dynamic range** for ACPR/ACLR, blocker, intermodulation, and spurious testing.\n- **Multi-channel phase coherence** for MIMO, beamforming, phased-array, and differential RFIC tests.\n- **Real-time or fast capture analysis** for transient, pulsed, hopping, and bursty signals.\n- **Automation and software integration** for repeatable validation at scale.\n- **OTA/chamber compatibility** where RFICs are embedded in antenna modules or front-end systems.\n- **Combined stimulus/response workflows** rather than isolated generator-only or analyzer-only operation.\n\nIn short: as RFIC validation moves from component-level, manually configured tests toward automated, realistic, system-level validation, the Signal Generator and Signal Analyzer must become wider-band, cleaner, more synchronized, more software-defined, and easier to integrate into complete validation environments.",
+      "created_at": "2026-10-07T09:04:42.343632Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-5558b9a8027e4df7a7189f5caf06963e",
+       "request_id": "request-5558b9a8027e4df7a7189f5caf06963e",
+       "span_id": "span-5558b9a8027e4df7a7189f5caf06963e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The evidence I found is not RFIC-specific, but it does point to a broader validation shift: RF/wireless validation is becoming more software-driven, integrated, multi-signal, and workflow-sensitive. That changes what is required from Signal Generators and Signal/Spectrum Analyzers.\n\n### Main effect on required measurement capability\n\n1. **From static measurements to scenario-based validation**\n   - RFIC validation increasingly needs realistic stimulus: modulated waveforms, multi-carrier cases, coexistence/interference, beam/OTA conditions, and corner-case stress tests.\n   - Signal generators therefore need wider modulation bandwidth, better waveform fidelity, multi-carrier generation, phase-coherent channels, and automation-friendly waveform control.\n   - Evidence: R&S material references vector signal generators such as SMW200A/SMBV100B in wireless test setups, and multi-carrier/two-tone stimulus for phase/group-delay related measurements.  \n     Sources: `raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`, section 16; `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10.\n\n2. **From single-instrument tests to integrated test environments**\n   - RFICs are validated not only by conducted RF tests but also in system-like environments: chambers, OTA, software-controlled setups, and linked generator/analyzer workflows.\n   - Generators/analyzers must integrate with chambers, switch matrices, calibration paths, and test automation software.\n   - Evidence: R&S and ETS-Lindgren integrated the CMX500 and SMBV100B with chamber technology and EMQuest software “to advance comprehensive testing capabilities for wireless technologies.”  \n     Source: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n3. **From manual measurements to software-defined validation**\n   - Validation teams lose time in scripting, environment setup, debugging, and documentation; this implies that measurement equipment must expose stable APIs, reusable test libraries, traceable results, and easier automation.\n   - Signal generators and analyzers therefore need strong remote-control support, repeatable setups, result logging, and integration with validation frameworks.\n   - Evidence: a customer questionnaire explicitly asks where teams lose time when going “from a new test idea to running, validated results,” listing scripting, setup, debugging failures, and documentation.  \n     Source: `raw/Productions/AIW_Products_Customer_Questionnaire.md`, section 14.\n\n4. **From separate stimulus/analysis to synchronized generation and analysis**\n   - Modern RFIC validation benefits from tightly synchronized generation and capture: EVM, ACLR, spurious, compression, memory effects, group delay, phase noise, and transient behavior all depend on correlation between stimulus and response.\n   - This increases demand for combined or tightly coupled vector generation and analysis, shared references, deterministic triggering, and time-aligned capture.\n   - Evidence: the R&S portfolio material describes “flexible signal generation and analysis software” and a “combined vector signal generator and analyzer in one instrument.”  \n     Source: `raw/Market/OneNote/R&S portfolio for O-RU testing.md`, section 89.\n\n### Practical implication for Signal Generator / Signal Analyzer specs\n\nRFIC validation technology pushes SG/SA requirements toward:\n\n- **Higher frequency coverage** for mmWave and future bands.\n- **Wider RF and analysis bandwidth** for 5G/6G-class waveforms and wideband modulated signals.\n- **Better EVM / modulation accuracy** to avoid test equipment masking DUT performance.\n- **Lower phase noise and jitter** for oscillator, LO, PLL, and high-order modulation validation.\n- **Higher dynamic range** for ACPR/ACLR, blocker, intermodulation, and spurious testing.\n- **Multi-channel phase coherence** for MIMO, beamforming, phased-array, and differential RFIC tests.\n- **Real-time or fast capture analysis** for transient, pulsed, hopping, and bursty signals.\n- **Automation and software integration** for repeatable validation at scale.\n- **OTA/chamber compatibility** where RFICs are embedded in antenna modules or front-end systems.\n- **Combined stimulus/response workflows** rather than isolated generator-only or analyzer-only operation.\n\nIn short: as RFIC validation moves from component-level, manually configured tests toward automated, realistic, system-level validation, the Signal Generator and Signal Analyzer must become wider-band, cleaner, more synchronized, more software-defined, and easier to integrate into complete validation environments.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-5558b9a8027e4df7a7189f5caf06963e",
+      "request_id": "request-5558b9a8027e4df7a7189f5caf06963e",
+      "span_id": "span-5558b9a8027e4df7a7189f5caf06963e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-5558b9a8027e4df7a7189f5caf06963e",
+       "request_id": "request-5558b9a8027e4df7a7189f5caf06963e",
+       "span_id": "span-5558b9a8027e4df7a7189f5caf06963e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The evidence I found is not RFIC-specific, but it does point to a broader validation shift: RF/wireless validation is becoming more software-driven, integrated, multi-signal, and workflow-sensitive. That changes what is required from Signal Generators and Signal/Spectrum Analyzers.\n\n### Main effect on required measurement capability\n\n1. **From static measurements to scenario-based validation**\n   - RFIC validation increasingly needs realistic stimulus: modulated waveforms, multi-carrier cases, coexistence/interference, beam/OTA conditions, and corner-case stress tests.\n   - Signal generators therefore need wider modulation bandwidth, better waveform fidelity, multi-carrier generation, phase-coherent channels, and automation-friendly waveform control.\n   - Evidence: R&S material references vector signal generators such as SMW200A/SMBV100B in wireless test setups, and multi-carrier/two-tone stimulus for phase/group-delay related measurements.  \n     Sources: `raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`, section 16; `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10.\n\n2. **From single-instrument tests to integrated test environments**\n   - RFICs are validated not only by conducted RF tests but also in system-like environments: chambers, OTA, software-controlled setups, and linked generator/analyzer workflows.\n   - Generators/analyzers must integrate with chambers, switch matrices, calibration paths, and test automation software.\n   - Evidence: R&S and ETS-Lindgren integrated the CMX500 and SMBV100B with chamber technology and EMQuest software “to advance comprehensive testing capabilities for wireless technologies.”  \n     Source: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n3. **From manual measurements to software-defined validation**\n   - Validation teams lose time in scripting, environment setup, debugging, and documentation; this implies that measurement equipment must expose stable APIs, reusable test libraries, traceable results, and easier automation.\n   - Signal generators and analyzers therefore need strong remote-control support, repeatable setups, result logging, and integration with validation frameworks.\n   - Evidence: a customer questionnaire explicitly asks where teams lose time when going “from a new test idea to running, validated results,” listing scripting, setup, debugging failures, and documentation.  \n     Source: `raw/Productions/AIW_Products_Customer_Questionnaire.md`, section 14.\n\n4. **From separate stimulus/analysis to synchronized generation and analysis**\n   - Modern RFIC validation benefits from tightly synchronized generation and capture: EVM, ACLR, spurious, compression, memory effects, group delay, phase noise, and transient behavior all depend on correlation between stimulus and response.\n   - This increases demand for combined or tightly coupled vector generation and analysis, shared references, deterministic triggering, and time-aligned capture.\n   - Evidence: the R&S portfolio material describes “flexible signal generation and analysis software” and a “combined vector signal generator and analyzer in one instrument.”  \n     Source: `raw/Market/OneNote/R&S portfolio for O-RU testing.md`, section 89.\n\n### Practical implication for Signal Generator / Signal Analyzer specs\n\nRFIC validation technology pushes SG/SA requirements toward:\n\n- **Higher frequency coverage** for mmWave and future bands.\n- **Wider RF and analysis bandwidth** for 5G/6G-class waveforms and wideband modulated signals.\n- **Better EVM / modulation accuracy** to avoid test equipment masking DUT performance.\n- **Lower phase noise and jitter** for oscillator, LO, PLL, and high-order modulation validation.\n- **Higher dynamic range** for ACPR/ACLR, blocker, intermodulation, and spurious testing.\n- **Multi-channel phase coherence** for MIMO, beamforming, phased-array, and differential RFIC tests.\n- **Real-time or fast capture analysis** for transient, pulsed, hopping, and bursty signals.\n- **Automation and software integration** for repeatable validation at scale.\n- **OTA/chamber compatibility** where RFICs are embedded in antenna modules or front-end systems.\n- **Combined stimulus/response workflows** rather than isolated generator-only or analyzer-only operation.\n\nIn short: as RFIC validation moves from component-level, manually configured tests toward automated, realistic, system-level validation, the Signal Generator and Signal Analyzer must become wider-band, cleaner, more synchronized, more software-defined, and easier to integrate into complete validation environments.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_afEUxqEwB6Zo46l7PuV7DkYw",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-5558b9a8027e4df7a7189f5caf06963e",
+          "request_id": "request-5558b9a8027e4df7a7189f5caf06963e",
+          "span_id": "span-5558b9a8027e4df7a7189f5caf06963e",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.1"
+          },
+          "trace": {
+           "trace_id": "trace-5558b9a8027e4df7a7189f5caf06963e",
+           "request_id": "request-5558b9a8027e4df7a7189f5caf06963e",
+           "span_id": "span-5558b9a8027e4df7a7189f5caf06963e",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer? Please cite evidence about RFIC validation trends and signal generator/signal analyzer requirements.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "a.  How do your teams go from a new test idea to running, validated results today—\nand where do they lose the most time (scripting, environment setup, debugging\nfailures, documentation)?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.11943
+            },
+            {
+             "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.725377
+            },
+            {
+             "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.90517
+            },
+            {
+             "text": "![](Picture35.jpg)\nFlexible signal generation and analysis software\nR&S®PVT360A\nCombined Vector signal generator and analyzer in one instrument",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c478cd76758e3230",
+               "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+               "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+              "section": 89,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.895103
+            },
+            {
+             "text": "This is handled by FPGA? How do we inform FPGA about these various combinations?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6eaf816ecfe746af",
+               "original_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "sha256": "6eaf816ecfe746af0094c65d69bb5a2df407a5da1ff8413e3178944abc0d1762",
+               "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+              "section": 118,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.778269
+            },
+            {
+             "text": "How to configure the R&S®SMW200A vector signal generator",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f77e733cba92509b",
+               "original_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+               "sha256": "f77e733cba92509bcb44452d7e704af2d5e684ad62733653bf72c09ec5c489b7",
+               "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.604811
+            },
+            {
+             "text": "In  this  page,  we  show  the  changes  and  the  time  and  effort  needed  to  implement  this  feature  from  the  different\nlayers.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae370b8f18ed8fb2",
+               "original_ref": "raw/Knowledge/UL MIMO 4x4 Feature Study.md",
+               "sha256": "ae370b8f18ed8fb2a2182d98f4dc132f218c3841a8b532b8eddffbb03e54e522",
+               "raw_ref": "raw/Knowledge/UL MIMO 4x4 Feature Study.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/UL MIMO 4x4 Feature Study.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.542374
+            },
+            {
+             "text": "► R&S®SMW200A vector signal generator R&S®ZNAx-B52 and R&S®ZNAx-B212 options\nwith R&S®SMW-K61 option (x = 26/43/50/67)\nMeasuring principle\n► Multi-carrier signal from vector signal generator ► Two-tone signal from R&S®ZNA\n► Phase shift/difference between carriers is measured, then GD is ► Phase between carriers measured in reference and",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.232618
+            }
+           ],
+           "text": "The RAW passages do not provide RFIC-specific evidence, but they indicate that validation/test is becoming more integrated, software-driven, and workflow-focused: teams are concerned with moving from “a new test idea” to “running, validated results” and with time lost in scripting, setup, debugging, and documentation [1], while wireless test systems are being integrated with chamber technology and EMQuest software to “advance comprehensive testing capabilities” [3].  \n\nAccordingly, the Signal Generator / Signal Analyzer capability needs to be flexible and integrated: the evidence points to combined vector signal generation and analysis in one instrument with flexible software [4], use of vector signal generators such as the SMW200A/SMBV100B [2][3], and measurement support for multi-carrier or two-tone stimulus plus phase/group-delay-related analysis [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "a.  How do your teams go from a new test idea to running, validated results today—\nand where do they lose the most time (scripting, environment setup, debugging\nfailures, documentation)?",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c733beba88ba4b3a",
+              "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+             "section": 14,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.11943
+           },
+           {
+            "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.725377
+           },
+           {
+            "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8180ce629a865e0b",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.90517
+           },
+           {
+            "text": "![](Picture35.jpg)\nFlexible signal generation and analysis software\nR&S®PVT360A\nCombined Vector signal generator and analyzer in one instrument",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c478cd76758e3230",
+              "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+              "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+              "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+             "section": 89,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.895103
+           },
+           {
+            "text": "► R&S®SMW200A vector signal generator R&S®ZNAx-B52 and R&S®ZNAx-B212 options\nwith R&S®SMW-K61 option (x = 26/43/50/67)\nMeasuring principle\n► Multi-carrier signal from vector signal generator ► Two-tone signal from R&S®ZNA\n► Phase shift/difference between carriers is measured, then GD is ► Phase between carriers measured in reference and",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.232618
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

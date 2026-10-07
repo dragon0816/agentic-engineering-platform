@@ -1,0 +1,74 @@
+{
+ "id": "Q1031",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 132.125,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "PER is the fraction of transmitted packets that are not received correctly",
+   "low PER means the device can decode packets reliably under the tested RF conditions",
+   "PER is typically used to decide whether a device still meets a required receive quality at a given power level, modulation/coding, channel, bandwidth, or impairment condition",
+   "choosing the right wireless tester, technology option, and measurement setup for receiver verification",
+   "especially WLAN/signaling-oriented workflows"
+  ],
+  "reason": "The passages support only that PER is a named measurement/feature in CMP180 and PVT360A and that CMX500 has WLAN signaling PER settings/results. They do not define packet error rate or support the broader receiver sensitivity, pass/fail, impairment, or platform-selection claims.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support only that PER is a named measurement/feature in CMP180 and PVT360A and that CMX500 has WLAN signaling PER settings/results. They do not define packet error rate or support the broader receiver sensitivity, pass/fail, impairment, or platform-selection claims."
+}
