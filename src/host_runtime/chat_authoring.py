@@ -155,6 +155,10 @@ DRAFT_GUIDE = (
     "names so a rerun with new values neither collides with nor overwrites an earlier result. "
     "A system the person signs in to or "
     "operates is reached only through these steps, never fetched or read by a script. "
+    "A result made with conversation tools does not show the Workflow works: before saying "
+    "it is ready for reuse, run the version that will be reused (the installed one, once "
+    "installed) and check what it wrote; fix and rerun until it does the job. When asked to "
+    "rerun it with new values, run that installed version unchanged. "
     "Never put a password, token or key in a fixed value. Pass `candidate_id` to revise a "
     "candidate you drafted before. The host fills in owner, version and lifecycle."
 )
