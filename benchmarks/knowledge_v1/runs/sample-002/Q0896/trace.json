@@ -1,0 +1,413 @@
+{
+ "question": {
+  "id": "Q0896",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-aa3d49ec3e9f44f6ac9f3d080965dd4a",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 103.391,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-aa3d49ec3e9f44f6ac9f3d080965dd4a",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:35:14.310806Z",
+    "updated_at": "2026-10-07T10:36:50.159801Z",
+    "messages": [
+     {
+      "message_id": "message-30da9a175df64223a58ab888727ac3b1",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T10:35:14.321894Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-823f4f739bb3462a9aeafa59d9dbc0cb",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer to a targeted follow-up for direct “R&S oscilloscope + semiconductor application” evidence. Based on the raw evidence that did return, the strongest supported opportunities are in **power semiconductor / power electronics validation**, especially MOSFET-based DC‑DC conversion. I would treat these as **evidence-backed opportunity inferences**, not as direct vault proof of a named R&S oscilloscope solution.\n\n| Opportunity | Why it looks strong | Raw evidence supporting it |\n|---|---|---|\n| **1. Power-semiconductor DC‑DC converter validation** | Semiconductor power stages need validation around MOSFET voltage stress, device selection, conduction losses, and topology behavior. This is a natural oscilloscope opportunity because validating converter behavior typically requires observing voltage/current waveforms, switching nodes, and transient behavior. | The vault evidence describes current-fed full-bridge MOSFETs that block only **VDC/N** rather than all of VDC or Vout, enabling lower-voltage-class devices and better **RDS(on) × A** tradeoffs: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 89. |\n| **2. Gate-drive timing and switching analysis** | The strongest specific measurement hook is gate-drive timing: complementary gate signals, diagonal MOSFET pairs, 180° phase shift, and duty-cycle variation from 50% to 100%. That creates a clear need to verify timing, phase relationship, duty cycle, dead time/overlap risk, and switching behavior. | The vault states the converter generates a modulated DC voltage across a current-fed full bridge and is driven by **two complementary gate signals** controlling MOSFET pairs **T1/T4 and T2/T3**, with **180° phase shift** and duty cycle from **50% to 100%**: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n| **3. Data-center backup / high-power power-supply design validation** | The underlying article context is a topology for higher BBU ratings in data centers. That suggests an end-market opportunity around high-density power conversion, where oscilloscope value can be positioned around efficiency, switching optimization, and power-stage reliability. | The returned raw sources are Infineon market/article files on a “new topology for higher BBU ratings … for data centers,” and the cited sections discuss MOSFET voltage blocking and full-bridge gate operation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 89; `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Bottom line:** The current vault evidence most strongly supports oscilloscope opportunities in **power electronics for semiconductor devices**, specifically **MOSFET-based DC‑DC converter validation and gate-drive/switching analysis**. I would not claim the vault currently proves broader semiconductor oscilloscope opportunities such as wafer probing, memory, PCIe/SerDes, or advanced packaging; the targeted search did not return sufficient direct evidence for those.",
+      "created_at": "2026-10-07T10:36:50.159801Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-47069aac39b04111af17e22751cdba19",
+       "request_id": "request-47069aac39b04111af17e22751cdba19",
+       "span_id": "span-47069aac39b04111af17e22751cdba19",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer to a targeted follow-up for direct “R&S oscilloscope + semiconductor application” evidence. Based on the raw evidence that did return, the strongest supported opportunities are in **power semiconductor / power electronics validation**, especially MOSFET-based DC‑DC conversion. I would treat these as **evidence-backed opportunity inferences**, not as direct vault proof of a named R&S oscilloscope solution.\n\n| Opportunity | Why it looks strong | Raw evidence supporting it |\n|---|---|---|\n| **1. Power-semiconductor DC‑DC converter validation** | Semiconductor power stages need validation around MOSFET voltage stress, device selection, conduction losses, and topology behavior. This is a natural oscilloscope opportunity because validating converter behavior typically requires observing voltage/current waveforms, switching nodes, and transient behavior. | The vault evidence describes current-fed full-bridge MOSFETs that block only **VDC/N** rather than all of VDC or Vout, enabling lower-voltage-class devices and better **RDS(on) × A** tradeoffs: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 89. |\n| **2. Gate-drive timing and switching analysis** | The strongest specific measurement hook is gate-drive timing: complementary gate signals, diagonal MOSFET pairs, 180° phase shift, and duty-cycle variation from 50% to 100%. That creates a clear need to verify timing, phase relationship, duty cycle, dead time/overlap risk, and switching behavior. | The vault states the converter generates a modulated DC voltage across a current-fed full bridge and is driven by **two complementary gate signals** controlling MOSFET pairs **T1/T4 and T2/T3**, with **180° phase shift** and duty cycle from **50% to 100%**: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n| **3. Data-center backup / high-power power-supply design validation** | The underlying article context is a topology for higher BBU ratings in data centers. That suggests an end-market opportunity around high-density power conversion, where oscilloscope value can be positioned around efficiency, switching optimization, and power-stage reliability. | The returned raw sources are Infineon market/article files on a “new topology for higher BBU ratings … for data centers,” and the cited sections discuss MOSFET voltage blocking and full-bridge gate operation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 89; `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Bottom line:** The current vault evidence most strongly supports oscilloscope opportunities in **power electronics for semiconductor devices**, specifically **MOSFET-based DC‑DC converter validation and gate-drive/switching analysis**. I would not claim the vault currently proves broader semiconductor oscilloscope opportunities such as wafer probing, memory, PCIe/SerDes, or advanced packaging; the targeted search did not return sufficient direct evidence for those.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-47069aac39b04111af17e22751cdba19",
+      "request_id": "request-47069aac39b04111af17e22751cdba19",
+      "span_id": "span-47069aac39b04111af17e22751cdba19",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-47069aac39b04111af17e22751cdba19",
+       "request_id": "request-47069aac39b04111af17e22751cdba19",
+       "span_id": "span-47069aac39b04111af17e22751cdba19",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer to a targeted follow-up for direct “R&S oscilloscope + semiconductor application” evidence. Based on the raw evidence that did return, the strongest supported opportunities are in **power semiconductor / power electronics validation**, especially MOSFET-based DC‑DC conversion. I would treat these as **evidence-backed opportunity inferences**, not as direct vault proof of a named R&S oscilloscope solution.\n\n| Opportunity | Why it looks strong | Raw evidence supporting it |\n|---|---|---|\n| **1. Power-semiconductor DC‑DC converter validation** | Semiconductor power stages need validation around MOSFET voltage stress, device selection, conduction losses, and topology behavior. This is a natural oscilloscope opportunity because validating converter behavior typically requires observing voltage/current waveforms, switching nodes, and transient behavior. | The vault evidence describes current-fed full-bridge MOSFETs that block only **VDC/N** rather than all of VDC or Vout, enabling lower-voltage-class devices and better **RDS(on) × A** tradeoffs: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 89. |\n| **2. Gate-drive timing and switching analysis** | The strongest specific measurement hook is gate-drive timing: complementary gate signals, diagonal MOSFET pairs, 180° phase shift, and duty-cycle variation from 50% to 100%. That creates a clear need to verify timing, phase relationship, duty cycle, dead time/overlap risk, and switching behavior. | The vault states the converter generates a modulated DC voltage across a current-fed full bridge and is driven by **two complementary gate signals** controlling MOSFET pairs **T1/T4 and T2/T3**, with **180° phase shift** and duty cycle from **50% to 100%**: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n| **3. Data-center backup / high-power power-supply design validation** | The underlying article context is a topology for higher BBU ratings in data centers. That suggests an end-market opportunity around high-density power conversion, where oscilloscope value can be positioned around efficiency, switching optimization, and power-stage reliability. | The returned raw sources are Infineon market/article files on a “new topology for higher BBU ratings … for data centers,” and the cited sections discuss MOSFET voltage blocking and full-bridge gate operation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md`, section 89; `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Bottom line:** The current vault evidence most strongly supports oscilloscope opportunities in **power electronics for semiconductor devices**, specifically **MOSFET-based DC‑DC converter validation and gate-drive/switching analysis**. I would not claim the vault currently proves broader semiconductor oscilloscope opportunities such as wafer probing, memory, PCIe/SerDes, or advanced packaging; the targeted search did not return sufficient direct evidence for those.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_yglBzBtt75JYsoV9CNFI6IYo",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-47069aac39b04111af17e22751cdba19",
+          "request_id": "request-47069aac39b04111af17e22751cdba19",
+          "span_id": "span-47069aac39b04111af17e22751cdba19",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-47069aac39b04111af17e22751cdba19",
+           "request_id": "request-47069aac39b04111af17e22751cdba19",
+           "span_id": "span-47069aac39b04111af17e22751cdba19",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Semiconductor, and what evidence supports each opportunity? Please identify the strongest opportunities and cite the Raw evidence supporting each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "Indicates whether the UE supports location based conditional handover, i.e. CondEvent D1. A UE\nlocationBasedCondHandover-r17 supporting this feature shall also indicate the support of condHandover-r16 and the support of\nIndicates whether the UE supports time based conditional handover, i.e. CondEvent T1. A UE support-\ntimeBasedCondHandover-r17 ing this feature shall also indicate the support of condHandover-r16 for NTN bands and the support of\nThe UE indicates in addition to the supported frequency bands for NTN also the supported channel bandwidth for each",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.066369
+            },
+            {
+             "text": "> Firstly, the MOSFETs in the current-fed full-bridge (T1-T4) are required to block a voltage of VDC/[N] (Equation 1) and not all of VDC or Vout. This enables the use of lower voltage class devices, resulting in a better RDS(on)*A and more effective exploitation of the non-linear ON resistance vs voltage dependency of semiconductor MOSFETs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 89,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.942597
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.454461
+            },
+            {
+             "text": "Based on coexistence studies captured in TR 38.863, the minimum RF and performance requirements in FR1 for respectively NR User Equipment (UE) supporting satellite access operation and NR Satellite Access Node (SAN) were defined in TS 38.101-5 and TS 38.108.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0c9fb31e269a02c",
+               "original_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "sha256": "d0c9fb31e269a02c5d94a1f31297a3274ff1a1f1a9faa8ae8017403a1a7b4690",
+               "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.327139
+            },
+            {
+             "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 80,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.105273
+            },
+            {
+             "text": "The B, M and X options are based on each other. To use an M option, you also need\nthe corresponding B option. To use an X option, you also need the corresponding B\nand M options (for some X options, there is no M option).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 389,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.069618
+            },
+            {
+             "text": "support an IDLE UE context for satellite re-sync (similar as NTN rach less handover)\nreceive PRACH-based SR request or PUCCH based SR request\nschedule dynamic grant or CG\nidentify the first UL TX on the target satellite and indicate the event to RRC",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f589efa3eacfa002",
+               "original_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+               "sha256": "f589efa3eacfa0020a1dd7bb8c6212a6b074b1798ba5153db1b354c197b51aef",
+               "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "section": 234,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.41917
+            }
+           ],
+           "text": "Power-semiconductor DC-DC converter validation is a strong opportunity because current-fed full-bridge MOSFET designs depend on lower voltage-class device behavior and RDS(on)*A tradeoffs [3].  \nGate-drive timing and switching analysis is a strong opportunity because the converter uses complementary MOSFET gate signals with 180° phase shift and 50%–100% duty cycle control [6].  \nOscilloscope option expansion is a supported opportunity because M options require corresponding B options and X options require corresponding B and M options [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "> Firstly, the MOSFETs in the current-fed full-bridge (T1-T4) are required to block a voltage of VDC/[N] (Equation 1) and not all of VDC or Vout. This enables the use of lower voltage class devices, resulting in a better RDS(on)*A and more effective exploitation of the non-linear ON resistance vs voltage dependency of semiconductor MOSFETs.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-905cf97eab807e95",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+             "section": 89,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.942597
+           },
+           {
+            "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 80,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.105273
+           },
+           {
+            "text": "The B, M and X options are based on each other. To use an M option, you also need\nthe corresponding B option. To use an X option, you also need the corresponding B\nand M options (for some X options, there is no M option).",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-bc47a8ad4da77a6a",
+              "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "section": 389,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.069618
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_I04EnzpkFcLWmVw94tqk6PqQ",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-47069aac39b04111af17e22751cdba19",
+          "request_id": "request-47069aac39b04111af17e22751cdba19",
+          "span_id": "span-47069aac39b04111af17e22751cdba19",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

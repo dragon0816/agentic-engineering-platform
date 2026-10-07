@@ -1,0 +1,372 @@
+{
+ "question": {
+  "id": "Q0611",
+  "text": "For a AI use case involving AI data centers, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-5c585c62b4eb4107b1359025dc689c3b",
+ "exchange": {
+  "sent": "For a AI use case involving AI data centers, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 45.563,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-5c585c62b4eb4107b1359025dc689c3b",
+    "actor": "leo.chi",
+    "title": "For a AI use case involving AI data centers, where would Signaling / Non…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:13:50.175394Z",
+    "updated_at": "2026-10-07T10:14:35.681135Z",
+    "messages": [
+     {
+      "message_id": "message-e387f22a060e47fe92397dc439efb3ad",
+      "role": "user",
+      "text": "For a AI use case involving AI data centers, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T10:13:50.207531Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-4fe8523b0de44ace82fe24952ae55e80",
+      "role": "assistant",
+      "text": "In an **AI data center use case**, a **Signaling / Non-signaling Tester** fits mainly at the **wireless connectivity validation layer**, not in the core GPU/server/optical-compute validation flow.\n\n### Where it fits in the workflow\n\nA practical workflow would look like:\n\n1. **Implementation**\n   - AI data center architecture, edge AI device, private 5G/Wi-Fi connectivity, NTN/backhaul concept, or AI-enabled radio algorithm is designed.\n\n2. **RF / protocol / connectivity test**\n   - This is where a **Signaling Tester** such as the **CMX500** fits.\n   - It can emulate the network/base station side and test whether a device, module, private-network endpoint, or AI-enabled wireless function behaves correctly under realistic signaling conditions.\n   - R&S material describes the CMX500 as a **5G one-box signaling tester** used as the **core of the test system**, supporting early R&D with fading and channel emulation in one setup. It is also positioned as the core of conformance-test solutions.  \n   Sources: raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing… section 6; raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases… section 7.\n\n3. **Non-signaling RF performance test**\n   - A **Non-signaling Tester** fits when the device does not need a full protocol session.\n   - Typical role: fast RF TX/RX characterization, calibration, production checks, throughput-related RF quality, EVM, power, sensitivity, spectrum behavior.\n   - In an AI data center context, this would apply to wireless modules, private 5G/Wi-Fi access points, edge AI gateways, robotics/AGV links, or wireless monitoring nodes used around the data center.\n\n4. **Application / end-to-end validation**\n   - For AI workloads, the tester can help validate whether wireless performance affects the application experience: telemetry, edge inference, remote control, video analytics, or AI-assisted radio behavior.\n   - R&S cites a CMX500 setup configured as an **AI-enabled base station emulator** to demonstrate AI-enhanced radio transmission and application performance effects such as video-streaming user experience.  \n   Source: raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance, section 5.\n\n5. **Debug and validation**\n   - The tester supports the “test → debug → validation” part of the workflow. The knowledge base also references a virtual-tester concept as an agentic workflow spanning **implementation → test → debug → validation**.  \n   Source: raw/Productions/AIW_Products_Customer_Questionnaire.md, section 9.\n\n### Simple positioning\n\n| AI data center test area | Does Signaling / Non-signaling Tester fit? | Role |\n|---|---:|---|\n| GPU, CPU, memory, accelerator validation | No / indirect | Use compute and electrical validation tools instead |\n| Optical interconnect / Ethernet fabric | Usually no | Use network/optical/BER/signal integrity tools |\n| Private 5G or Wi-Fi connectivity in/around data center | Yes | Network emulation, RF, protocol, throughput, mobility/coexistence |\n| Edge AI gateway or wireless AI device | Yes | Device attach, RF performance, protocol behavior, application impact |\n| AI-enabled radio / 5G-Advanced / 6G research | Yes | Base-station emulation, channel conditions, AI radio algorithm validation |\n| Production test of wireless modules | Yes, especially non-signaling | Fast RF calibration and verification |\n\n### Bottom line\n\nFor an **AI data center**, Signaling / Non-signaling Testers are best positioned as the **wireless access and edge-connectivity test instruments**. They are not the main tools for validating the data center’s compute cluster itself, but they are highly relevant if the AI data center use case includes **private 5G, Wi-Fi 7, NTN/backhaul, edge AI devices, AI-enabled radio links, robotics, cameras, sensors, or wireless monitoring systems**.",
+      "created_at": "2026-10-07T10:14:35.681135Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-442c50e22fdd42e99e1142447fabfd42",
+       "request_id": "request-442c50e22fdd42e99e1142447fabfd42",
+       "span_id": "span-442c50e22fdd42e99e1142447fabfd42",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "In an **AI data center use case**, a **Signaling / Non-signaling Tester** fits mainly at the **wireless connectivity validation layer**, not in the core GPU/server/optical-compute validation flow.\n\n### Where it fits in the workflow\n\nA practical workflow would look like:\n\n1. **Implementation**\n   - AI data center architecture, edge AI device, private 5G/Wi-Fi connectivity, NTN/backhaul concept, or AI-enabled radio algorithm is designed.\n\n2. **RF / protocol / connectivity test**\n   - This is where a **Signaling Tester** such as the **CMX500** fits.\n   - It can emulate the network/base station side and test whether a device, module, private-network endpoint, or AI-enabled wireless function behaves correctly under realistic signaling conditions.\n   - R&S material describes the CMX500 as a **5G one-box signaling tester** used as the **core of the test system**, supporting early R&D with fading and channel emulation in one setup. It is also positioned as the core of conformance-test solutions.  \n   Sources: raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing… section 6; raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases… section 7.\n\n3. **Non-signaling RF performance test**\n   - A **Non-signaling Tester** fits when the device does not need a full protocol session.\n   - Typical role: fast RF TX/RX characterization, calibration, production checks, throughput-related RF quality, EVM, power, sensitivity, spectrum behavior.\n   - In an AI data center context, this would apply to wireless modules, private 5G/Wi-Fi access points, edge AI gateways, robotics/AGV links, or wireless monitoring nodes used around the data center.\n\n4. **Application / end-to-end validation**\n   - For AI workloads, the tester can help validate whether wireless performance affects the application experience: telemetry, edge inference, remote control, video analytics, or AI-assisted radio behavior.\n   - R&S cites a CMX500 setup configured as an **AI-enabled base station emulator** to demonstrate AI-enhanced radio transmission and application performance effects such as video-streaming user experience.  \n   Source: raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance, section 5.\n\n5. **Debug and validation**\n   - The tester supports the “test → debug → validation” part of the workflow. The knowledge base also references a virtual-tester concept as an agentic workflow spanning **implementation → test → debug → validation**.  \n   Source: raw/Productions/AIW_Products_Customer_Questionnaire.md, section 9.\n\n### Simple positioning\n\n| AI data center test area | Does Signaling / Non-signaling Tester fit? | Role |\n|---|---:|---|\n| GPU, CPU, memory, accelerator validation | No / indirect | Use compute and electrical validation tools instead |\n| Optical interconnect / Ethernet fabric | Usually no | Use network/optical/BER/signal integrity tools |\n| Private 5G or Wi-Fi connectivity in/around data center | Yes | Network emulation, RF, protocol, throughput, mobility/coexistence |\n| Edge AI gateway or wireless AI device | Yes | Device attach, RF performance, protocol behavior, application impact |\n| AI-enabled radio / 5G-Advanced / 6G research | Yes | Base-station emulation, channel conditions, AI radio algorithm validation |\n| Production test of wireless modules | Yes, especially non-signaling | Fast RF calibration and verification |\n\n### Bottom line\n\nFor an **AI data center**, Signaling / Non-signaling Testers are best positioned as the **wireless access and edge-connectivity test instruments**. They are not the main tools for validating the data center’s compute cluster itself, but they are highly relevant if the AI data center use case includes **private 5G, Wi-Fi 7, NTN/backhaul, edge AI devices, AI-enabled radio links, robotics, cameras, sensors, or wireless monitoring systems**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-442c50e22fdd42e99e1142447fabfd42",
+      "request_id": "request-442c50e22fdd42e99e1142447fabfd42",
+      "span_id": "span-442c50e22fdd42e99e1142447fabfd42",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-442c50e22fdd42e99e1142447fabfd42",
+       "request_id": "request-442c50e22fdd42e99e1142447fabfd42",
+       "span_id": "span-442c50e22fdd42e99e1142447fabfd42",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In an **AI data center use case**, a **Signaling / Non-signaling Tester** fits mainly at the **wireless connectivity validation layer**, not in the core GPU/server/optical-compute validation flow.\n\n### Where it fits in the workflow\n\nA practical workflow would look like:\n\n1. **Implementation**\n   - AI data center architecture, edge AI device, private 5G/Wi-Fi connectivity, NTN/backhaul concept, or AI-enabled radio algorithm is designed.\n\n2. **RF / protocol / connectivity test**\n   - This is where a **Signaling Tester** such as the **CMX500** fits.\n   - It can emulate the network/base station side and test whether a device, module, private-network endpoint, or AI-enabled wireless function behaves correctly under realistic signaling conditions.\n   - R&S material describes the CMX500 as a **5G one-box signaling tester** used as the **core of the test system**, supporting early R&D with fading and channel emulation in one setup. It is also positioned as the core of conformance-test solutions.  \n   Sources: raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing… section 6; raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases… section 7.\n\n3. **Non-signaling RF performance test**\n   - A **Non-signaling Tester** fits when the device does not need a full protocol session.\n   - Typical role: fast RF TX/RX characterization, calibration, production checks, throughput-related RF quality, EVM, power, sensitivity, spectrum behavior.\n   - In an AI data center context, this would apply to wireless modules, private 5G/Wi-Fi access points, edge AI gateways, robotics/AGV links, or wireless monitoring nodes used around the data center.\n\n4. **Application / end-to-end validation**\n   - For AI workloads, the tester can help validate whether wireless performance affects the application experience: telemetry, edge inference, remote control, video analytics, or AI-assisted radio behavior.\n   - R&S cites a CMX500 setup configured as an **AI-enabled base station emulator** to demonstrate AI-enhanced radio transmission and application performance effects such as video-streaming user experience.  \n   Source: raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance, section 5.\n\n5. **Debug and validation**\n   - The tester supports the “test → debug → validation” part of the workflow. The knowledge base also references a virtual-tester concept as an agentic workflow spanning **implementation → test → debug → validation**.  \n   Source: raw/Productions/AIW_Products_Customer_Questionnaire.md, section 9.\n\n### Simple positioning\n\n| AI data center test area | Does Signaling / Non-signaling Tester fit? | Role |\n|---|---:|---|\n| GPU, CPU, memory, accelerator validation | No / indirect | Use compute and electrical validation tools instead |\n| Optical interconnect / Ethernet fabric | Usually no | Use network/optical/BER/signal integrity tools |\n| Private 5G or Wi-Fi connectivity in/around data center | Yes | Network emulation, RF, protocol, throughput, mobility/coexistence |\n| Edge AI gateway or wireless AI device | Yes | Device attach, RF performance, protocol behavior, application impact |\n| AI-enabled radio / 5G-Advanced / 6G research | Yes | Base-station emulation, channel conditions, AI radio algorithm validation |\n| Production test of wireless modules | Yes, especially non-signaling | Fast RF calibration and verification |\n\n### Bottom line\n\nFor an **AI data center**, Signaling / Non-signaling Testers are best positioned as the **wireless access and edge-connectivity test instruments**. They are not the main tools for validating the data center’s compute cluster itself, but they are highly relevant if the AI data center use case includes **private 5G, Wi-Fi 7, NTN/backhaul, edge AI devices, AI-enabled radio links, robotics, cameras, sensors, or wireless monitoring systems**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_5Oj878opWQfGQiaANs5zfFHd",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-442c50e22fdd42e99e1142447fabfd42",
+          "request_id": "request-442c50e22fdd42e99e1142447fabfd42",
+          "span_id": "span-442c50e22fdd42e99e1142447fabfd42",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-442c50e22fdd42e99e1142447fabfd42",
+           "request_id": "request-442c50e22fdd42e99e1142447fabfd42",
+           "span_id": "span-442c50e22fdd42e99e1142447fabfd42",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For an AI use case involving AI data centers, where would a Signaling / Non-signaling Tester fit in the test workflow? Include AI data center context and test workflow placement.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "At the core of the test system is the CMX500 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-34f0f3c950ccae78",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+               "sha256": "34f0f3c950ccae7897a6cd2bd4c5904f5050ae48282866e3346630d3231eb863",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.006925
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.759483
+            },
+            {
+             "text": "At the core of the Rohde & Schwarz conformance test solutions is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup. In addition, the user-friendly R&S CONTEST test system software platform facilitates the seamless execution of 3GPP test cases.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f9f65126e3850d1e",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+               "sha256": "f9f65126e3850d1e3700c2c8ed45daf700054df15566d39ccdf83f655032725c",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.002603
+            },
+            {
+             "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.210067
+            },
+            {
+             "text": "RACH-less handover.\nAn interesting use case, not directly touched by 3GPP but revealed in the elaboration of possible scenarios that should\nbe tested, considers mobility between a UE in indoor operation where WLAN is available and outdoor operation\nwhen no TN coverage exists, but NTN. This might be the case in remote buildings like mountain huts or cruise ships\nor research stations. With a system simulator like the CMX500, offering a wide range flexibility in the protocol stack,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 206,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.922362
+            },
+            {
+             "text": "3GPP published initial results from a study on 6G use cases and service requirements with [TR 22.870]. Many of those\nuse cases require non-terrestrial network connectivity. During the research project [6G-TakeOff], we also discussed and\nidentified a variety of use cases during the project runtime. For brevity, we will only provide a summary of some of those\nuse cases.\nPositioning related use cases involve technologies in the context of position, navigation and timing (see section 9.2.1).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 230,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.826435
+            },
+            {
+             "text": "In the setup, Qualcomm’s AI-enabled wireless device prototype connected to the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\"), configured as an AI-enabled base station emulator, achieves an increase in downlink throughput of approximately 50% compared to conventional non-AI technology. Leveraging the advanced application testing capabilities of the CMX500, the demonstration illustrates how the increased performance translates to an enhanced user experience for video streaming applications. The improvement was achieved using a “two-sided AI model” for CSI feedback, enabling cooperative compression of wireless channel state information transferred between the device and base station. The model leverages CSI-RS-based analysis and compressed feedback, significantly enhancing radio transmission performance in massive MIMO scenarios. AI-driven CSI enhancements are expected to result in even greater efficiency, reduced overhead and improved user experience in 5G-Advanced and future 6G networks.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c78ae7048c7db92f",
+               "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+               "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.627233
+            },
+            {
+             "text": "> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 32.322054
+            }
+           ],
+           "text": "A Signaling Tester such as the CMX500 fits in the test stage of an implementation → test → debug → validation workflow, serving as the core test system/conformance-test instrument and supporting early R&D testing [1][3][4].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "At the core of the test system is the CMX500 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-34f0f3c950ccae78",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "sha256": "34f0f3c950ccae7897a6cd2bd4c5904f5050ae48282866e3346630d3231eb863",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.006925
+           },
+           {
+            "text": "At the core of the Rohde & Schwarz conformance test solutions is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup. In addition, the user-friendly R&S CONTEST test system software platform facilitates the seamless execution of 3GPP test cases.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f9f65126e3850d1e",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "sha256": "f9f65126e3850d1e3700c2c8ed45daf700054df15566d39ccdf83f655032725c",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.002603
+           },
+           {
+            "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c733beba88ba4b3a",
+              "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.210067
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

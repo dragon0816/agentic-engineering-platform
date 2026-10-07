@@ -1,0 +1,718 @@
+{
+ "question": {
+  "id": "Q0731",
+  "text": "How do changes in AI data centers technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "AI",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-a8eebfa3f49241dd94863979e9c53775",
+ "exchange": {
+  "sent": "How do changes in AI data centers technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 97.782,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-a8eebfa3f49241dd94863979e9c53775",
+    "actor": "leo.chi",
+    "title": "How do changes in AI data centers technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:20:30.128412Z",
+    "updated_at": "2026-10-07T10:22:07.077233Z",
+    "messages": [
+     {
+      "message_id": "message-3d8b90ea4d4448f6a568833b235d3b22",
+      "role": "user",
+      "text": "How do changes in AI data centers technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-07T10:20:30.137448Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-e6f8c115217f4ae6b9905af4c0942807",
+      "role": "assistant",
+      "text": "AI data centers push measurement needs for signal generators and signal analyzers from “ordinary RF stimulus/analysis” toward **high-speed interconnect stress, broadband noise/interference analysis, and RF-style signal-integrity validation**.\n\nBased on the RS knowledge evidence: AI-cluster networking is explicitly tied to **800G / 1.6T / Ethernet / InfiniBand** and optics/modules, and data-center interconnect solutions target high bandwidth, low noise, and energy-efficient transmission. The evidence also states that at high data rates, signal paths must be treated as RF elements because parasitics can cause impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and interference.  \nSources: `raw/Market/4 AI Data Center Eco-Chain image 15.md`, sections 14 and 16; `raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md`, section 174; `raw/Market/OneNote/snla426.md`, sections 9 and 16.\n\n### 1. Higher data rates mean wider bandwidth and better dynamic range\n\nAI data centers are moving to **800G and 1.6T-class networking**, often with optical modules and very high-speed electrical lanes. That means the analyzer must observe wider spectra, higher-order distortion, jitter-related sidebands, spurs, and broadband noise.\n\n**Effect on signal analyzer requirements:**\n\n- Wider RF/microwave analysis bandwidth.\n- Lower noise floor and higher dynamic range.\n- Better phase-noise and jitter-related analysis.\n- Ability to analyze crosstalk, common-mode noise, EMI, and spurious emissions.\n- Correlation with high-speed digital link behavior, not just RF carrier quality.\n\n**Effect on signal generator requirements:**\n\n- Cleaner stimulus with low phase noise and low spurious output.\n- Ability to generate stress/interference signals.\n- Accurate modulation or multi-tone stimulus for susceptibility, intermodulation, and margin testing.\n\n### 2. High-speed interconnects behave like RF channels\n\nThe knowledge base evidence says that at high data rates, “components or elements within the signal path must be treated as RF elements,” and parasitics can create impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and other interference. That directly affects AI data-center interconnect validation.\n\nSo the measurement role expands from checking “does the link work?” to checking:\n\n- Channel loss and frequency response.\n- Return loss / mismatch effects.\n- Crosstalk between lanes.\n- Common-mode conversion.\n- Connector, cable, board, and package effects.\n- Temperature and environmental sensitivity.\n\nFor signal analyzers, this means stronger demand for **spectrum, noise, spur, modulation, and interference visibility** around high-speed SerDes, clocking, and power-conversion circuits.\n\n### 3. PCIe/CXL/Ethernet/optical evolution increases stress-test complexity\n\nThe knowledge base gave direct raw evidence for 800G/1.6T Ethernet/InfiniBand and optics/modules, but it did **not** provide detailed raw evidence for PCIe/CXL/PAM4-specific generator/analyzer requirements. The following is therefore general industry interpretation, not directly cited from the knowledge base:\n\n- PCIe Gen 5/6, CXL, 800G/1.6T Ethernet, and optical module interfaces use very small electrical margins.\n- PAM4 and high-speed SerDes links are more sensitive to noise, linearity, jitter, and channel impairment than older NRZ links.\n- Testing increasingly requires stressed receiver inputs, clock jitter injection, interference injection, and precise spectral analysis around reference clocks and switching noise.\n\nThat implies signal generators need to act as **controlled aggressors or stress sources**, while signal analyzers need to detect **small impairments that can close the link eye or degrade BER**.\n\n### 4. Power density and switching noise become part of link validation\n\nAI servers consume much more power and use dense power-conversion architectures. The raw evidence notes high-power-density data-center power topologies and also warns that high-speed traces should not be routed near switching power regulators, clock generators, oscillators, magnetic devices, and similar noise sources.\n\nMeasurement impact:\n\n- More need to analyze power-converter switching noise coupling into high-speed lanes.\n- More near-field EMI/debug around accelerators, optics, NICs, and power modules.\n- Need to identify whether link degradation is caused by channel loss, clock jitter, power noise, or radiated/conducted interference.\n- Signal analyzers need good low-level spur/noise visibility over broad frequency ranges.\n\n### 5. Optical interconnects add electrical/optical co-validation needs\n\nThe evidence identifies silicon photonics, optical interconnects, and 100G/200G/400G-class transceivers for hyperscale data centers, cloud, and HPC. It also identifies optics/modules in 800G/1.6T AI-cluster networks.\n\nFor signal generator/analyzer capability, this means:\n\n- Electrical stimulus and analysis around optical module host interfaces.\n- Clock and reference-signal quality analysis.\n- EMI and spurious analysis from optical modules and high-speed cages.\n- Interference/stress generation for module and system-level robustness tests.\n- Coordination with optical-domain test equipment, even if the signal generator/analyzer itself is operating electrically/RF-wise.\n\n### 6. Practical capability shift\n\nIn short, AI data-center technology changes the required SG/SA capability like this:\n\n| Technology change in AI data centers | Measurement consequence | Required SG/SA capability |\n|---|---|---|\n| 800G / 1.6T networking | Much higher lane rates and bandwidth | Wider analysis bandwidth, better noise floor, higher dynamic range |\n| Dense SerDes / optical modules | Small margins, more crosstalk | Spur, jitter/noise, crosstalk and interference analysis |\n| High-speed PCB/package/channel effects | Interconnect behaves like RF | RF-style frequency-domain characterization and de-embedding awareness |\n| Higher power density | More switching noise and EMI | EMI/debug, conducted/radiated noise analysis, power-noise correlation |\n| PCIe/CXL/Ethernet convergence | More protocol/link stress scenarios | Clean stimulus, impairment/interference generation, multi-tone/vector generation |\n| Optical-electrical integration | Mixed-domain validation | Electrical/RF analysis around optical module interfaces and clocks |\n\n### Bottom line\n\nAI data centers make signal generators and signal analyzers more important as **margin-finding tools**. They must not only generate clean RF or modulated signals, but also create controlled stress and interference. Analyzers must not only measure spectrum power, but also expose low-level noise, spurs, crosstalk, common-mode effects, and EMI that can impair 800G/1.6T-class interconnects and dense AI-server electronics.",
+      "created_at": "2026-10-07T10:22:07.077233Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+       "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+       "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "AI data centers push measurement needs for signal generators and signal analyzers from “ordinary RF stimulus/analysis” toward **high-speed interconnect stress, broadband noise/interference analysis, and RF-style signal-integrity validation**.\n\nBased on the RS knowledge evidence: AI-cluster networking is explicitly tied to **800G / 1.6T / Ethernet / InfiniBand** and optics/modules, and data-center interconnect solutions target high bandwidth, low noise, and energy-efficient transmission. The evidence also states that at high data rates, signal paths must be treated as RF elements because parasitics can cause impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and interference.  \nSources: `raw/Market/4 AI Data Center Eco-Chain image 15.md`, sections 14 and 16; `raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md`, section 174; `raw/Market/OneNote/snla426.md`, sections 9 and 16.\n\n### 1. Higher data rates mean wider bandwidth and better dynamic range\n\nAI data centers are moving to **800G and 1.6T-class networking**, often with optical modules and very high-speed electrical lanes. That means the analyzer must observe wider spectra, higher-order distortion, jitter-related sidebands, spurs, and broadband noise.\n\n**Effect on signal analyzer requirements:**\n\n- Wider RF/microwave analysis bandwidth.\n- Lower noise floor and higher dynamic range.\n- Better phase-noise and jitter-related analysis.\n- Ability to analyze crosstalk, common-mode noise, EMI, and spurious emissions.\n- Correlation with high-speed digital link behavior, not just RF carrier quality.\n\n**Effect on signal generator requirements:**\n\n- Cleaner stimulus with low phase noise and low spurious output.\n- Ability to generate stress/interference signals.\n- Accurate modulation or multi-tone stimulus for susceptibility, intermodulation, and margin testing.\n\n### 2. High-speed interconnects behave like RF channels\n\nThe knowledge base evidence says that at high data rates, “components or elements within the signal path must be treated as RF elements,” and parasitics can create impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and other interference. That directly affects AI data-center interconnect validation.\n\nSo the measurement role expands from checking “does the link work?” to checking:\n\n- Channel loss and frequency response.\n- Return loss / mismatch effects.\n- Crosstalk between lanes.\n- Common-mode conversion.\n- Connector, cable, board, and package effects.\n- Temperature and environmental sensitivity.\n\nFor signal analyzers, this means stronger demand for **spectrum, noise, spur, modulation, and interference visibility** around high-speed SerDes, clocking, and power-conversion circuits.\n\n### 3. PCIe/CXL/Ethernet/optical evolution increases stress-test complexity\n\nThe knowledge base gave direct raw evidence for 800G/1.6T Ethernet/InfiniBand and optics/modules, but it did **not** provide detailed raw evidence for PCIe/CXL/PAM4-specific generator/analyzer requirements. The following is therefore general industry interpretation, not directly cited from the knowledge base:\n\n- PCIe Gen 5/6, CXL, 800G/1.6T Ethernet, and optical module interfaces use very small electrical margins.\n- PAM4 and high-speed SerDes links are more sensitive to noise, linearity, jitter, and channel impairment than older NRZ links.\n- Testing increasingly requires stressed receiver inputs, clock jitter injection, interference injection, and precise spectral analysis around reference clocks and switching noise.\n\nThat implies signal generators need to act as **controlled aggressors or stress sources**, while signal analyzers need to detect **small impairments that can close the link eye or degrade BER**.\n\n### 4. Power density and switching noise become part of link validation\n\nAI servers consume much more power and use dense power-conversion architectures. The raw evidence notes high-power-density data-center power topologies and also warns that high-speed traces should not be routed near switching power regulators, clock generators, oscillators, magnetic devices, and similar noise sources.\n\nMeasurement impact:\n\n- More need to analyze power-converter switching noise coupling into high-speed lanes.\n- More near-field EMI/debug around accelerators, optics, NICs, and power modules.\n- Need to identify whether link degradation is caused by channel loss, clock jitter, power noise, or radiated/conducted interference.\n- Signal analyzers need good low-level spur/noise visibility over broad frequency ranges.\n\n### 5. Optical interconnects add electrical/optical co-validation needs\n\nThe evidence identifies silicon photonics, optical interconnects, and 100G/200G/400G-class transceivers for hyperscale data centers, cloud, and HPC. It also identifies optics/modules in 800G/1.6T AI-cluster networks.\n\nFor signal generator/analyzer capability, this means:\n\n- Electrical stimulus and analysis around optical module host interfaces.\n- Clock and reference-signal quality analysis.\n- EMI and spurious analysis from optical modules and high-speed cages.\n- Interference/stress generation for module and system-level robustness tests.\n- Coordination with optical-domain test equipment, even if the signal generator/analyzer itself is operating electrically/RF-wise.\n\n### 6. Practical capability shift\n\nIn short, AI data-center technology changes the required SG/SA capability like this:\n\n| Technology change in AI data centers | Measurement consequence | Required SG/SA capability |\n|---|---|---|\n| 800G / 1.6T networking | Much higher lane rates and bandwidth | Wider analysis bandwidth, better noise floor, higher dynamic range |\n| Dense SerDes / optical modules | Small margins, more crosstalk | Spur, jitter/noise, crosstalk and interference analysis |\n| High-speed PCB/package/channel effects | Interconnect behaves like RF | RF-style frequency-domain characterization and de-embedding awareness |\n| Higher power density | More switching noise and EMI | EMI/debug, conducted/radiated noise analysis, power-noise correlation |\n| PCIe/CXL/Ethernet convergence | More protocol/link stress scenarios | Clean stimulus, impairment/interference generation, multi-tone/vector generation |\n| Optical-electrical integration | Mixed-domain validation | Electrical/RF analysis around optical module interfaces and clocks |\n\n### Bottom line\n\nAI data centers make signal generators and signal analyzers more important as **margin-finding tools**. They must not only generate clean RF or modulated signals, but also create controlled stress and interference. Analyzers must not only measure spectrum power, but also expose low-level noise, spurs, crosstalk, common-mode effects, and EMI that can impair 800G/1.6T-class interconnects and dense AI-server electronics.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+      "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+      "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+       "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+       "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "AI data centers push measurement needs for signal generators and signal analyzers from “ordinary RF stimulus/analysis” toward **high-speed interconnect stress, broadband noise/interference analysis, and RF-style signal-integrity validation**.\n\nBased on the RS knowledge evidence: AI-cluster networking is explicitly tied to **800G / 1.6T / Ethernet / InfiniBand** and optics/modules, and data-center interconnect solutions target high bandwidth, low noise, and energy-efficient transmission. The evidence also states that at high data rates, signal paths must be treated as RF elements because parasitics can cause impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and interference.  \nSources: `raw/Market/4 AI Data Center Eco-Chain image 15.md`, sections 14 and 16; `raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md`, section 174; `raw/Market/OneNote/snla426.md`, sections 9 and 16.\n\n### 1. Higher data rates mean wider bandwidth and better dynamic range\n\nAI data centers are moving to **800G and 1.6T-class networking**, often with optical modules and very high-speed electrical lanes. That means the analyzer must observe wider spectra, higher-order distortion, jitter-related sidebands, spurs, and broadband noise.\n\n**Effect on signal analyzer requirements:**\n\n- Wider RF/microwave analysis bandwidth.\n- Lower noise floor and higher dynamic range.\n- Better phase-noise and jitter-related analysis.\n- Ability to analyze crosstalk, common-mode noise, EMI, and spurious emissions.\n- Correlation with high-speed digital link behavior, not just RF carrier quality.\n\n**Effect on signal generator requirements:**\n\n- Cleaner stimulus with low phase noise and low spurious output.\n- Ability to generate stress/interference signals.\n- Accurate modulation or multi-tone stimulus for susceptibility, intermodulation, and margin testing.\n\n### 2. High-speed interconnects behave like RF channels\n\nThe knowledge base evidence says that at high data rates, “components or elements within the signal path must be treated as RF elements,” and parasitics can create impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and other interference. That directly affects AI data-center interconnect validation.\n\nSo the measurement role expands from checking “does the link work?” to checking:\n\n- Channel loss and frequency response.\n- Return loss / mismatch effects.\n- Crosstalk between lanes.\n- Common-mode conversion.\n- Connector, cable, board, and package effects.\n- Temperature and environmental sensitivity.\n\nFor signal analyzers, this means stronger demand for **spectrum, noise, spur, modulation, and interference visibility** around high-speed SerDes, clocking, and power-conversion circuits.\n\n### 3. PCIe/CXL/Ethernet/optical evolution increases stress-test complexity\n\nThe knowledge base gave direct raw evidence for 800G/1.6T Ethernet/InfiniBand and optics/modules, but it did **not** provide detailed raw evidence for PCIe/CXL/PAM4-specific generator/analyzer requirements. The following is therefore general industry interpretation, not directly cited from the knowledge base:\n\n- PCIe Gen 5/6, CXL, 800G/1.6T Ethernet, and optical module interfaces use very small electrical margins.\n- PAM4 and high-speed SerDes links are more sensitive to noise, linearity, jitter, and channel impairment than older NRZ links.\n- Testing increasingly requires stressed receiver inputs, clock jitter injection, interference injection, and precise spectral analysis around reference clocks and switching noise.\n\nThat implies signal generators need to act as **controlled aggressors or stress sources**, while signal analyzers need to detect **small impairments that can close the link eye or degrade BER**.\n\n### 4. Power density and switching noise become part of link validation\n\nAI servers consume much more power and use dense power-conversion architectures. The raw evidence notes high-power-density data-center power topologies and also warns that high-speed traces should not be routed near switching power regulators, clock generators, oscillators, magnetic devices, and similar noise sources.\n\nMeasurement impact:\n\n- More need to analyze power-converter switching noise coupling into high-speed lanes.\n- More near-field EMI/debug around accelerators, optics, NICs, and power modules.\n- Need to identify whether link degradation is caused by channel loss, clock jitter, power noise, or radiated/conducted interference.\n- Signal analyzers need good low-level spur/noise visibility over broad frequency ranges.\n\n### 5. Optical interconnects add electrical/optical co-validation needs\n\nThe evidence identifies silicon photonics, optical interconnects, and 100G/200G/400G-class transceivers for hyperscale data centers, cloud, and HPC. It also identifies optics/modules in 800G/1.6T AI-cluster networks.\n\nFor signal generator/analyzer capability, this means:\n\n- Electrical stimulus and analysis around optical module host interfaces.\n- Clock and reference-signal quality analysis.\n- EMI and spurious analysis from optical modules and high-speed cages.\n- Interference/stress generation for module and system-level robustness tests.\n- Coordination with optical-domain test equipment, even if the signal generator/analyzer itself is operating electrically/RF-wise.\n\n### 6. Practical capability shift\n\nIn short, AI data-center technology changes the required SG/SA capability like this:\n\n| Technology change in AI data centers | Measurement consequence | Required SG/SA capability |\n|---|---|---|\n| 800G / 1.6T networking | Much higher lane rates and bandwidth | Wider analysis bandwidth, better noise floor, higher dynamic range |\n| Dense SerDes / optical modules | Small margins, more crosstalk | Spur, jitter/noise, crosstalk and interference analysis |\n| High-speed PCB/package/channel effects | Interconnect behaves like RF | RF-style frequency-domain characterization and de-embedding awareness |\n| Higher power density | More switching noise and EMI | EMI/debug, conducted/radiated noise analysis, power-noise correlation |\n| PCIe/CXL/Ethernet convergence | More protocol/link stress scenarios | Clean stimulus, impairment/interference generation, multi-tone/vector generation |\n| Optical-electrical integration | Mixed-domain validation | Electrical/RF analysis around optical module interfaces and clocks |\n\n### Bottom line\n\nAI data centers make signal generators and signal analyzers more important as **margin-finding tools**. They must not only generate clean RF or modulated signals, but also create controlled stress and interference. Analyzers must not only measure spectrum power, but also expose low-level noise, spurs, crosstalk, common-mode effects, and EMI that can impair 800G/1.6T-class interconnects and dense AI-server electronics.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_Wou1uAtcSaOwkH4Qi9ZWsbbJ",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+          "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+          "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+           "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+           "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in AI data centers technology affect the measurement capability required from Signal Generator / Signal Analyzer? Focus on AI data centers, high-speed interconnects, PCIe/CXL/Ethernet/optical, power/EMI, and implications for signal generators and signal analyzers. Cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "- **Core Expertise**: Silicon photonics, optical interconnects, and wafer-level semiconductor processing.\n- **Products**: High-speed optical engines and transceivers, including 100G/200G/400G solutions.\n- **Target Markets**:\n- Hyperscale and enterprise datacenters\n- Cloud computing\n- High-performance computing (HPC)\n- Storage systems\n- Consumer electronics and home entertainment\n- **Technology Focus**: Seamless integration of optical and electrical devices on silicon for high bandwidth, low noise, and energy-efficient data transmission[\\[1\\]](https://www.centera-photonics.com/about).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e79d5eefd7496f4c",
+               "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+               "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "section": 174,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 46.030928
+            },
+            {
+             "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.742983
+            },
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.769978
+            },
+            {
+             "text": "29 Summary\nAt high data rates, components or elements within the signal path must be treated as RF elements. Parasitic\ndue to these elements can introduce impedance mismatch, return loss degradation, common mode noise, cross\ntalk, plus other interference sources. Additionally, temperature and humidity side effects must be considered.\nUsing 3D HFSS PCB simulations and close examination of previous design can facilitate and provide a more",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2355e9ce63c7116b",
+               "original_ref": "raw/Market/OneNote/snla426.md",
+               "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+               "raw_ref": "raw/Market/OneNote/snla426.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.184153
+            },
+            {
+             "text": "Figure 17-1. Serpentine Guidelines\n18 High-Speed Differential Signal Quick Rules\n• Do not place probe or test points on any high-speed differential signal.\n• Do not route high-speed traces under or near crystals, oscillators, clock signal generators, switching power\nregulators, mounting holes, magnetic devices, edge of the board, or ICs that use or duplicate clock signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2355e9ce63c7116b",
+               "original_ref": "raw/Market/OneNote/snla426.md",
+               "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+               "raw_ref": "raw/Market/OneNote/snla426.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.990581
+            },
+            {
+             "text": "DATA CENTER\nSERVER SOLUTIONS\nFueling Servers with High-Speed Interconnect\nSolutions for Scalable Performance\nAmphenol’s portfolio of connectors, cables, and high-speed\ncomponents is built for peak server performance. Designed for high-\nbandwidth efficiency, our solutions ensure seamless data flow in data\ncenters. These reliable components optimize server operations for\ncomplex data processing and high-performance computing.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-108d7b58b896a099",
+               "original_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "sha256": "108d7b58b896a0995ecc89afb9d513a04577bf496cb665f05a481edc7b27d429",
+               "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.441989
+            },
+            {
+             "text": "For further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe Transmitter Intermodulation Test Case (6.7) requires an additional interfering signal. This interferer\ncan be generated by any of the following Rohde & Schwarz vector signal generators equipped with -K144\n5G NR software option:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.962409
+            },
+            {
+             "text": "> Clearly, the new ultra-high-power density topology, from Infineon, will go a long way in increasing the ratings of the BBUs in data centers, without needing an increase in size. This results in savings on cost and space, and combined with the scalability offered. DC-DC F-SUBS0 is well placed to address the challenges of 115/125 V configurations. Click or scan the QR code to learn more about the new DC-DC F-SUBS0 or to explore all of Infineon’s offerings for data centers. Stay tuned for upcoming designs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 128,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.910417
+            }
+           ],
+           "text": "AI data centers are moving toward higher-bandwidth interconnects, including silicon-photonics optical engines and 100G/200G/400G transceivers for hyperscale data centers, cloud, and HPC, so signal generators and signal analyzers must support high-speed optical/electrical interconnect validation with high bandwidth, low-noise measurement capability.[1]\n\nAt these higher data rates, the signal path must be treated as RF, because parasitics can create impedance mismatch, return-loss degradation, common-mode noise, crosstalk, and other interference; therefore analyzers need RF/signal-integrity measurements such as spectrum, return-loss/impedance-related characterization, noise/crosstalk/interference analysis, and group-delay-type evaluation.[4][3]\n\nBecause high-speed differential signals are sensitive to loading and nearby noise sources, test methods must be minimally invasive and account for coupling from crystals, oscillators, clock generators, switching power regulators, magnetic devices, board edges, and IC clock sources; this raises requirements for fixture/probe quality, de-embedding, EMI/noise awareness, and careful analyzer connection strategy.[5]\n\nData-center servers rely on high-speed interconnects for scalable performance, seamless data flow, complex data processing, and HPC, so measurement tools must scale to validate connectors, cables, and high-speed components across complete server interconnect paths, not just isolated devices.[6]\n\nPower changes also affect measurement needs: data centers are adopting ultra-high-power-density power topologies and 115/125 V configurations, while high-speed routing guidance specifically flags switching power regulators as noise-sensitive neighbors, so analyzers need to help characterize power-related noise/interference impact on high-speed links.[8][5]\n\nFor signal generators, the required role expands from simple stimulus to vector and interference generation: RAW passages identify vector signal generators and note that an additional interfering signal can be generated for transmitter intermodulation testing, implying the need to create precise high-speed/modulated stress and interferer conditions.[2][7]\n\nFor signal analyzers, the required role expands to broadband signal/spectrum analysis and RF-style characterization, since RAW passages identify signal and spectrum analyzers used with signal generators and compare spectrum-analyzer plus generator setups against vector network analyzer setups for group-delay measurements.[2][3]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "- **Core Expertise**: Silicon photonics, optical interconnects, and wafer-level semiconductor processing.\n- **Products**: High-speed optical engines and transceivers, including 100G/200G/400G solutions.\n- **Target Markets**:\n- Hyperscale and enterprise datacenters\n- Cloud computing\n- High-performance computing (HPC)\n- Storage systems\n- Consumer electronics and home entertainment\n- **Technology Focus**: Seamless integration of optical and electrical devices on silicon for high bandwidth, low noise, and energy-efficient data transmission[\\[1\\]](https://www.centera-photonics.com/about).",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e79d5eefd7496f4c",
+              "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+             "section": 174,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 46.030928
+           },
+           {
+            "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.742983
+           },
+           {
+            "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.769978
+           },
+           {
+            "text": "29 Summary\nAt high data rates, components or elements within the signal path must be treated as RF elements. Parasitic\ndue to these elements can introduce impedance mismatch, return loss degradation, common mode noise, cross\ntalk, plus other interference sources. Additionally, temperature and humidity side effects must be considered.\nUsing 3D HFSS PCB simulations and close examination of previous design can facilitate and provide a more",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-2355e9ce63c7116b",
+              "original_ref": "raw/Market/OneNote/snla426.md",
+              "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/snla426.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.184153
+           },
+           {
+            "text": "Figure 17-1. Serpentine Guidelines\n18 High-Speed Differential Signal Quick Rules\n• Do not place probe or test points on any high-speed differential signal.\n• Do not route high-speed traces under or near crystals, oscillators, clock signal generators, switching power\nregulators, mounting holes, magnetic devices, edge of the board, or ICs that use or duplicate clock signals.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-2355e9ce63c7116b",
+              "original_ref": "raw/Market/OneNote/snla426.md",
+              "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/snla426.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.990581
+           },
+           {
+            "text": "DATA CENTER\nSERVER SOLUTIONS\nFueling Servers with High-Speed Interconnect\nSolutions for Scalable Performance\nAmphenol’s portfolio of connectors, cables, and high-speed\ncomponents is built for peak server performance. Designed for high-\nbandwidth efficiency, our solutions ensure seamless data flow in data\ncenters. These reliable components optimize server operations for\ncomplex data processing and high-performance computing.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-108d7b58b896a099",
+              "original_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "sha256": "108d7b58b896a0995ecc89afb9d513a04577bf496cb665f05a481edc7b27d429",
+              "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.441989
+           },
+           {
+            "text": "For further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe Transmitter Intermodulation Test Case (6.7) requires an additional interfering signal. This interferer\ncan be generated by any of the following Rohde & Schwarz vector signal generators equipped with -K144\n5G NR software option:",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-fc3b9e0cc7a10eb5",
+              "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+             "section": 14,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.962409
+           },
+           {
+            "text": "> Clearly, the new ultra-high-power density topology, from Infineon, will go a long way in increasing the ratings of the BBUs in data centers, without needing an increase in size. This results in savings on cost and space, and combined with the scalability offered. DC-DC F-SUBS0 is well placed to address the challenges of 115/125 V configurations. Click or scan the QR code to learn more about the new DC-DC F-SUBS0 or to explore all of Infineon’s offerings for data centers. Stay tuned for upcoming designs.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-905cf97eab807e95",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+             "section": 128,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.910417
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_JDGyDxyozgttuRffT2mq8aNj",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+          "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+          "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-a445cb055d7e483f913c78ac0a97f60e",
+           "request_id": "request-a445cb055d7e483f913c78ac0a97f60e",
+           "span_id": "span-a445cb055d7e483f913c78ac0a97f60e",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "AI data centers PCIe CXL Ethernet 800G 1.6T PAM4 SerDes signal generator signal analyzer measurement requirements. Cite Raw evidence only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "- [[Amphenol Communications Solutions]]\n- [[OSFP]]\n- [[Optical Transceivers]]\n- [[800G Ethernet]]\n- [[1.6T Ethernet]]\n- [[Amphenol XPO-LPO]]\n- [[Data center full-spectrum connectivity]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/1.6T OSFP Transceivers.md"
+             },
+             "score": 36.197502
+            },
+            {
+             "text": "- [[Mini Cool Edge IO]] — 來源列出 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0 m transmission distance、0.60 mm pitch vertical and right-angle configurations、cable and card applications with one identical connector、92Ω / 85Ω / 95Ω impedance options。\n- [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] — 來源列出 64 GT/s PAM4 PCIe Gen 6、112 GT/s PAM4 85/92Ohm for Ethernet applications、EDSFF、SFF-TA-1002、OCP NIC 3.0、DC-SCM、JEDEC、4 power pins at 27A per power pin。\n- [[Direct Attached Copper Cables]] — 來源列出 200G / 400G / 800G / 1.6T，並描述為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables for data centers、networking、HPC、telecom、server and storage solutions。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Compute tray component solutions.md"
+             },
+             "score": 30.089735
+            },
+            {
+             "text": "- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]]\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 2]]\n- [[D2D interfaces 比較]]\n- [[Die-to-Die 互連]]\n- [[Die-to-Die Adapter]]\n- [[Main Band]]\n- [[Sideband]]\n- [[PCIe]]\n- [[CXL]]\n- [[Streaming]]\n- [[Raw]]\n- [[Fwd Clock]]\n- [[Valid]]\n- [[Track]]\n- [[MB Data]]\n- [[SB Data]]\n- [[D2D Controller]]\n- [[Chiplet]]\n- [[OIF]]\n- [[BoW]]\n- [[AIB]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/UCIe.md"
+             },
+             "score": 28.589335
+            },
+            {
+             "text": "[[1.6T OSFP Transceivers]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中 [[Amphenol Communications Solutions]] 列出的 200G/lane optical module 產品類別，來源稱其面向 800G / 1.6T Ethernet applications。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/1.6T OSFP Transceivers.md"
+             },
+             "score": 28.194152
+            },
+            {
+             "text": "下方標註：\n- **Clustered Data Network**\n- **800G & 1.6T**\n- **Optics / Modules**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-a891270c89982d10",
+               "original_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+               "sha256": "a891270c89982d1022c89225a5ec29659b1d25b8ed37758350812c87ca2afad1",
+               "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.117678
+            },
+            {
+             "text": "**200G / 400G / 800G / 1.6T**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f9f4e94d1ba70df9",
+               "original_ref": "raw/Market/HSD Cable test image 2.md",
+               "sha256": "f9f4e94d1ba70df9119cb9caf9e499e6e601e1594c5ca1a630faf3640bf3c11a",
+               "raw_ref": "raw/Market/HSD Cable test image 2.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 2.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.062526
+            },
+            {
+             "text": "**200G / 400G / 800G / 1.6T**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-db79ab885f84b6b5",
+               "original_ref": "raw/Market/HSD Cable test image 6.md",
+               "sha256": "db79ab885f84b6b556d142cb871f8b8a6a6dd7a506cf98c2a3b16d77f77335eb",
+               "raw_ref": "raw/Market/HSD Cable test image 6.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 6.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.062526
+            },
+            {
+             "text": "### 4) Networking（高速互連）\n- **Networking**\n- **(高速互連)**\n- **角色：AI Cluster 高速資料傳輸**\n- **技術：800G / 1.6T / Ethernet / InfiniBand**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-a891270c89982d10",
+               "original_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+               "sha256": "a891270c89982d1022c89225a5ec29659b1d25b8ed37758350812c87ca2afad1",
+               "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.013725
+            }
+           ],
+           "text": "RAW passages support AI cluster high-speed networking using 800G/1.6T Ethernet/InfiniBand and optics/modules [5][8], but they do not provide PCIe, CXL, PAM4 SerDes, signal generator, signal analyzer, or measurement-requirement details.",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "下方標註：\n- **Clustered Data Network**\n- **800G & 1.6T**\n- **Optics / Modules**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-a891270c89982d10",
+              "original_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+              "sha256": "a891270c89982d1022c89225a5ec29659b1d25b8ed37758350812c87ca2afad1",
+              "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.117678
+           },
+           {
+            "text": "### 4) Networking（高速互連）\n- **Networking**\n- **(高速互連)**\n- **角色：AI Cluster 高速資料傳輸**\n- **技術：800G / 1.6T / Ethernet / InfiniBand**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-a891270c89982d10",
+              "original_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+              "sha256": "a891270c89982d1022c89225a5ec29659b1d25b8ed37758350812c87ca2afad1",
+              "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 15.md",
+             "section": 14,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.013725
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

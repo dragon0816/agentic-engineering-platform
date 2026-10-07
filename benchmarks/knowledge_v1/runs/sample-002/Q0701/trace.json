@@ -1,0 +1,401 @@
+{
+ "question": {
+  "id": "Q0701",
+  "text": "What are the most important signal generation capabilities for applications in AI?",
+  "market": "AI",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-6eea779bbb5c48a2bd13e6b9dc09d2e4",
+ "exchange": {
+  "sent": "What are the most important signal generation capabilities for applications in AI?",
+  "http_status": 200,
+  "seconds": 57.047,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-6eea779bbb5c48a2bd13e6b9dc09d2e4",
+    "actor": "leo.chi",
+    "title": "What are the most important signal generation capabilities for applicati…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:18:29.346905Z",
+    "updated_at": "2026-10-07T10:19:26.348783Z",
+    "messages": [
+     {
+      "message_id": "message-78ba70ad86c04cc5a42286e34da7e5ac",
+      "role": "user",
+      "text": "What are the most important signal generation capabilities for applications in AI?",
+      "created_at": "2026-10-07T10:18:29.358473Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-bbd99f25e33041a594cb53a7430dd455",
+      "role": "assistant",
+      "text": "In an AI test-and-measurement context, the most important signal-generation capabilities are:\n\n1. **Flexible waveform generation**\n   - AI-related wireless and 6G testing needs the ability to generate realistic, repeatable waveform files for many scenarios.\n   - R&S identifies WinIQSIM2 as software for generating waveform files, with playback hardware affecting what can actually be produced.  \n   - Key limiting capabilities are **frequency range, signal bandwidth, ARB memory size, and sample clock rate**.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n2. **Wide supported frequency range**\n   - AI workloads in wireless systems are often evaluated in advanced 5G/6G, NTN, OTA, radar, or sensing scenarios, so the generator must cover the relevant RF bands.\n   - The knowledge base specifically names supported frequency range as a relevant hardware property for waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n3. **High signal bandwidth**\n   - AI-enhanced communications, especially 5G-Advanced and 6G candidate systems, often depend on wideband signals to evaluate throughput, latency, scheduling, beamforming, and link adaptation behavior.\n   - R&S evidence lists maximum signal bandwidth as one of the relevant waveform-playback limits.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n4. **Large ARB memory**\n   - AI scenarios often require long, complex, or highly variable test sequences: mobility, fading, traffic bursts, multi-user cases, or user-experience scenarios.\n   - ARB memory size is explicitly identified as a capability that can limit waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n5. **High sample clock rate**\n   - A high sample clock rate is important for accurately reproducing wideband and high-fidelity modulated signals.\n   - R&S lists maximum sample clock rate as another key property affecting waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **Integration with wireless network/test environments**\n   - For AI in communications, the signal generator should not operate alone; it should integrate with signaling testers, chambers, OTA systems, and automation software.\n   - R&S notes that the **CMX500 one-box signaling tester** and **R&S SMBV100B vector signal generator** are integrated with ETS-Lindgren chamber technology and EMQuest software for comprehensive wireless testing.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n7. **Support for AI-enhanced network performance validation**\n   - R&S specifically connects AI with next-generation network testing, noting the CMX500’s ability to verify AI-enhanced radio transmission performance gains.  \n   Citation: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 7.\n\n8. **Scenario expansion for generative-AI user experience testing**\n   - For AI applications, especially generative-AI services over mobile networks, signal generation and network emulation need to support varied test scenarios and user-experience evaluation.\n   - R&S and China Mobile Research Institute describe a testbed for generative AI user experience testing and future 6G AI-era scenarios.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 7.\n\n**Bottom line:** the critical signal-generation capabilities for AI applications are **realistic waveform generation, wide frequency coverage, high bandwidth, large ARB memory, high sample rate, and tight integration with network emulation/OTA automation**. These enable repeatable testing of AI-enhanced wireless performance, generative-AI user experience, and future 6G AI scenarios.",
+      "created_at": "2026-10-07T10:19:26.348783Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7bf0aff8ec054ba696f2f43d632cf1d3",
+       "request_id": "request-7bf0aff8ec054ba696f2f43d632cf1d3",
+       "span_id": "span-7bf0aff8ec054ba696f2f43d632cf1d3",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "In an AI test-and-measurement context, the most important signal-generation capabilities are:\n\n1. **Flexible waveform generation**\n   - AI-related wireless and 6G testing needs the ability to generate realistic, repeatable waveform files for many scenarios.\n   - R&S identifies WinIQSIM2 as software for generating waveform files, with playback hardware affecting what can actually be produced.  \n   - Key limiting capabilities are **frequency range, signal bandwidth, ARB memory size, and sample clock rate**.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n2. **Wide supported frequency range**\n   - AI workloads in wireless systems are often evaluated in advanced 5G/6G, NTN, OTA, radar, or sensing scenarios, so the generator must cover the relevant RF bands.\n   - The knowledge base specifically names supported frequency range as a relevant hardware property for waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n3. **High signal bandwidth**\n   - AI-enhanced communications, especially 5G-Advanced and 6G candidate systems, often depend on wideband signals to evaluate throughput, latency, scheduling, beamforming, and link adaptation behavior.\n   - R&S evidence lists maximum signal bandwidth as one of the relevant waveform-playback limits.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n4. **Large ARB memory**\n   - AI scenarios often require long, complex, or highly variable test sequences: mobility, fading, traffic bursts, multi-user cases, or user-experience scenarios.\n   - ARB memory size is explicitly identified as a capability that can limit waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n5. **High sample clock rate**\n   - A high sample clock rate is important for accurately reproducing wideband and high-fidelity modulated signals.\n   - R&S lists maximum sample clock rate as another key property affecting waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **Integration with wireless network/test environments**\n   - For AI in communications, the signal generator should not operate alone; it should integrate with signaling testers, chambers, OTA systems, and automation software.\n   - R&S notes that the **CMX500 one-box signaling tester** and **R&S SMBV100B vector signal generator** are integrated with ETS-Lindgren chamber technology and EMQuest software for comprehensive wireless testing.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n7. **Support for AI-enhanced network performance validation**\n   - R&S specifically connects AI with next-generation network testing, noting the CMX500’s ability to verify AI-enhanced radio transmission performance gains.  \n   Citation: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 7.\n\n8. **Scenario expansion for generative-AI user experience testing**\n   - For AI applications, especially generative-AI services over mobile networks, signal generation and network emulation need to support varied test scenarios and user-experience evaluation.\n   - R&S and China Mobile Research Institute describe a testbed for generative AI user experience testing and future 6G AI-era scenarios.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 7.\n\n**Bottom line:** the critical signal-generation capabilities for AI applications are **realistic waveform generation, wide frequency coverage, high bandwidth, large ARB memory, high sample rate, and tight integration with network emulation/OTA automation**. These enable repeatable testing of AI-enhanced wireless performance, generative-AI user experience, and future 6G AI scenarios.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7bf0aff8ec054ba696f2f43d632cf1d3",
+      "request_id": "request-7bf0aff8ec054ba696f2f43d632cf1d3",
+      "span_id": "span-7bf0aff8ec054ba696f2f43d632cf1d3",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7bf0aff8ec054ba696f2f43d632cf1d3",
+       "request_id": "request-7bf0aff8ec054ba696f2f43d632cf1d3",
+       "span_id": "span-7bf0aff8ec054ba696f2f43d632cf1d3",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In an AI test-and-measurement context, the most important signal-generation capabilities are:\n\n1. **Flexible waveform generation**\n   - AI-related wireless and 6G testing needs the ability to generate realistic, repeatable waveform files for many scenarios.\n   - R&S identifies WinIQSIM2 as software for generating waveform files, with playback hardware affecting what can actually be produced.  \n   - Key limiting capabilities are **frequency range, signal bandwidth, ARB memory size, and sample clock rate**.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n2. **Wide supported frequency range**\n   - AI workloads in wireless systems are often evaluated in advanced 5G/6G, NTN, OTA, radar, or sensing scenarios, so the generator must cover the relevant RF bands.\n   - The knowledge base specifically names supported frequency range as a relevant hardware property for waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n3. **High signal bandwidth**\n   - AI-enhanced communications, especially 5G-Advanced and 6G candidate systems, often depend on wideband signals to evaluate throughput, latency, scheduling, beamforming, and link adaptation behavior.\n   - R&S evidence lists maximum signal bandwidth as one of the relevant waveform-playback limits.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n4. **Large ARB memory**\n   - AI scenarios often require long, complex, or highly variable test sequences: mobility, fading, traffic bursts, multi-user cases, or user-experience scenarios.\n   - ARB memory size is explicitly identified as a capability that can limit waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n5. **High sample clock rate**\n   - A high sample clock rate is important for accurately reproducing wideband and high-fidelity modulated signals.\n   - R&S lists maximum sample clock rate as another key property affecting waveform playback.  \n   Citation: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **Integration with wireless network/test environments**\n   - For AI in communications, the signal generator should not operate alone; it should integrate with signaling testers, chambers, OTA systems, and automation software.\n   - R&S notes that the **CMX500 one-box signaling tester** and **R&S SMBV100B vector signal generator** are integrated with ETS-Lindgren chamber technology and EMQuest software for comprehensive wireless testing.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md`, section 3.\n\n7. **Support for AI-enhanced network performance validation**\n   - R&S specifically connects AI with next-generation network testing, noting the CMX500’s ability to verify AI-enhanced radio transmission performance gains.  \n   Citation: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 7.\n\n8. **Scenario expansion for generative-AI user experience testing**\n   - For AI applications, especially generative-AI services over mobile networks, signal generation and network emulation need to support varied test scenarios and user-experience evaluation.\n   - R&S and China Mobile Research Institute describe a testbed for generative AI user experience testing and future 6G AI-era scenarios.  \n   Citation: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 7.\n\n**Bottom line:** the critical signal-generation capabilities for AI applications are **realistic waveform generation, wide frequency coverage, high bandwidth, large ARB memory, high sample rate, and tight integration with network emulation/OTA automation**. These enable repeatable testing of AI-enhanced wireless performance, generative-AI user experience, and future 6G AI scenarios.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_tKp7Fo99dUNZCxBF9zPRvG5V",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-7bf0aff8ec054ba696f2f43d632cf1d3",
+          "request_id": "request-7bf0aff8ec054ba696f2f43d632cf1d3",
+          "span_id": "span-7bf0aff8ec054ba696f2f43d632cf1d3",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-7bf0aff8ec054ba696f2f43d632cf1d3",
+           "request_id": "request-7bf0aff8ec054ba696f2f43d632cf1d3",
+           "span_id": "span-7bf0aff8ec054ba696f2f43d632cf1d3",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What are the most important signal generation capabilities for applications in AI? Focus on Rohde & Schwarz test and measurement context and cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "The successful collaboration between SPEAG and Rohde & Schwarz is testimony to the long-term strategy of both companies for leadership and innovation in test and measurement applications for the wireless industry.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-75010f6c18759b5a",
+               "original_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "sha256": "75010f6c18759b5a40842ce1fed2243990191ae6a580ab79596a571c190114db",
+               "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.60188
+            },
+            {
+             "text": "## Rohde & Schwarz, a global leader in test and measurement solutions today announced its work with Qualcomm Technologies, Inc. to verify the implementation of Next Generation eCall (NG eCall) on Qualcomm Technologies’ Snapdragon® Auto 5G Modem-RF, in line with the most recent specification EN 17240:2024. Rohde & Schwarz’s work with Qualcomm Technologies aims to enhance the safety and efficiency of emergency response systems in vehicles via advanced testing solutions.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7ff0d627b4993a68",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.777795
+            },
+            {
+             "text": "The tables list the capabilities of the R&S WinIQSIM2 software for the generation of\nwaveform files. The PVT360A hardware used to play waveform files can limit the listed\ncapabilities. Especially the following properties of the PVT360A are relevant in this\ncontext: supported frequency range, maximum signal bandwidth, ARB memory size\nand maximum sample clock rate.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0db424c28307e318",
+               "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+               "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "section": 82,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.698689
+            },
+            {
+             "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.676481
+            },
+            {
+             "text": "Alexander Pabst, Vice President of Wireless Communications at Rohde & Schwarz, said: “We are proud to collaborate with KT and Qualcomm in showcasing the immense potential of AI in next-generation networks. The CMX500’s ability to verify these performance gains underscores our commitment to providing leading-edge test and measurement solutions for the future of communication technologies.”",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c78ae7048c7db92f",
+               "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+               "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.099292
+            },
+            {
+             "text": "3.3.4 Changing operation and measurement modes\nFor the following base station transmitter tests different operation modes (Spectrum or 5G NR) are required.\nThe mode which is required for each test is specified in the respective sections.\nDepending on the operation mode, different measurements are available. What measurement is required for\nwhich test is specified in the respective section. Select the measurement by pressing Select measurement\nat the overview-screen or by pressing MEAS key on the front panel of the instrument.\n3.3.4.1 Measurements in Spectrum mode\n①: Used for Occupied bandwidth (OBW) (6.6.2)\n②: Used for Transmitter spurious emissions (6.6.5)\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 14\n2 a\n2 b\n2",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.683049
+            },
+            {
+             "text": "Jin Hailiang, Senior Director of Products & Systems Division, Rohde & Schwarz China, said: “At a time of rapid advancement in large language models, the testbed jointly developed by Rohde & Schwarz and the China Mobile Research Institute sets an important benchmark for generative AI user experience testing. We are pleased to showcase this achievement together at MWC Shanghai 2026. Building on this testing architecture, both parties aim to expand test scenarios and industry use cases, helping advance the standardization of generative AI user experience testing and laying a strong technical foundation for the 6G AI era.”",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7c6ece0fac696c87",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+               "sha256": "7c6ece0fac696c873c46cba847925d05b291c84f0a0f264fbbc000add5c43d2d",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.464135
+            },
+            {
+             "text": "Options for GNSS and avionics\nThe options are described in the GNSS and Avionics Simulation for Rohde & Schwarz Signal Generators specifications\n(PD 3607.6896.22).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 771,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.129967
+            }
+           ],
+           "text": "Waveform file generation using R&S WinIQSIM2 software [3].\nSupported frequency range, because the playback hardware can limit generated waveform capabilities [3].\nMaximum signal bandwidth, because it is explicitly identified as a relevant hardware property for waveform playback [3].\nARB memory size, because it affects the ability to play waveform files [3].\nMaximum sample clock rate, because it is another limiting property for waveform playback [3].\nVector signal generation integrated with wireless test systems, as the R&S SMBV100B vector signal generator and CMX500 signaling tester are integrated for comprehensive wireless testing capabilities [4].\nThese capabilities matter in the AI-related R&S context because R&S highlights AI in next-generation network testing with the CMX500 [5] and generative AI user experience testing in a testbed developed with China Mobile Research Institute [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The tables list the capabilities of the R&S WinIQSIM2 software for the generation of\nwaveform files. The PVT360A hardware used to play waveform files can limit the listed\ncapabilities. Especially the following properties of the PVT360A are relevant in this\ncontext: supported frequency range, maximum signal bandwidth, ARB memory size\nand maximum sample clock rate.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0db424c28307e318",
+              "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+             "section": 82,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.698689
+           },
+           {
+            "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8180ce629a865e0b",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.676481
+           },
+           {
+            "text": "Alexander Pabst, Vice President of Wireless Communications at Rohde & Schwarz, said: “We are proud to collaborate with KT and Qualcomm in showcasing the immense potential of AI in next-generation networks. The CMX500’s ability to verify these performance gains underscores our commitment to providing leading-edge test and measurement solutions for the future of communication technologies.”",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c78ae7048c7db92f",
+              "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.099292
+           },
+           {
+            "text": "Jin Hailiang, Senior Director of Products & Systems Division, Rohde & Schwarz China, said: “At a time of rapid advancement in large language models, the testbed jointly developed by Rohde & Schwarz and the China Mobile Research Institute sets an important benchmark for generative AI user experience testing. We are pleased to showcase this achievement together at MWC Shanghai 2026. Building on this testing architecture, both parties aim to expand test scenarios and industry use cases, helping advance the standardization of generative AI user experience testing and laying a strong technical foundation for the 6G AI era.”",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7c6ece0fac696c87",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "sha256": "7c6ece0fac696c873c46cba847925d05b291c84f0a0f264fbbc000add5c43d2d",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.464135
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

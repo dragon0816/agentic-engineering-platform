@@ -1,0 +1,393 @@
+{
+ "question": {
+  "id": "Q0811",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-82c8cde20e1548a793becfb28f52d328",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 55.5,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-82c8cde20e1548a793becfb28f52d328",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Sign…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:30:14.971790Z",
+    "updated_at": "2026-10-07T10:31:10.410367Z",
+    "messages": [
+     {
+      "message_id": "message-1e975c1f00014891a4ef1f8b60c66f9c",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T10:30:14.978802Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-51415536a02344f086d6ff0cf7194813",
+      "role": "assistant",
+      "text": "In an RFIC validation workflow, a **Signaling / Non-signaling Tester** fits mainly in the **test → debug → validation** stages, after the RFIC or SoC has been implemented and the evaluation board / RF path is ready.\n\nA practical placement would be:\n\n1. **Pre-RFIC / board-level characterization**\n   - Before full wireless functional validation, teams may validate the RF path, socket, package, transmission lines, matching network, and board behavior.\n   - The knowledge base specifically mentions RFIC/SoC bare-board work where **VNAs** fit for “evaluation of socket and transmission line.”\n\n2. **Non-signaling RF validation**\n   - This is where a non-signaling tester or RF communication tester fits.\n   - It is used to validate RF parametric behavior without a full protocol connection:\n     - TX power\n     - EVM\n     - frequency error\n     - ACLR / spectrum mask\n     - receiver sensitivity or PER-style tests\n     - waveform generation / analysis\n     - loopback verification\n   - The cited material notes that the **R&S CMP180** can verify wideband waveforms in loopback mode for R&D and production contexts.\n\n3. **Signaling validation**\n   - A signaling tester fits when the RFIC or wireless subsystem needs to be tested under more realistic protocol conditions.\n   - For example, the **R&S CMX500** is described as a multi-technology, multi-channel signaling tester used to measure RF TX/RX characteristics under real-world signaling mode conditions.\n   - This becomes important for features such as:\n     - cellular or Wi-Fi protocol behavior\n     - multi-band / multi-chain operation\n     - MIMO\n     - coexistence\n     - end-to-end IP/application behavior\n     - Wi-Fi 7 MLO-style multi-link scenarios\n\n4. **Debug and design validation**\n   - During debug, the tester helps correlate RF impairments with system-level behavior.\n   - Example: an RFIC may pass basic conducted RF tests but fail under signaling due to scheduling, link adaptation, MIMO calibration, coexistence, or receiver desense effects.\n\n5. **Pre-production / production test bridge**\n   - Non-signaling test is often favored for faster, repeatable production-oriented RF checks.\n   - Signaling test is usually used more in R&D, validation, conformance-like, regression, and selected production audit scenarios.\n\nSo, in short:\n\n> **Use the non-signaling tester for fast RF parametric validation of the RFIC, and the signaling tester later in the workflow to validate real-world wireless behavior at the device/system level.**\n\nCited knowledge-base evidence: CMX500 is positioned for real-world signaling-mode RF TX/RX measurements and multi-channel wireless tests; CMP180 is positioned for waveform verification in loopback mode for R&D and production; RFIC/SoC bare-board work is associated with VNA-based socket and transmission-line evaluation.",
+      "created_at": "2026-10-07T10:31:10.410367Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-11c2291b5c49451898c8966fc4925a32",
+       "request_id": "request-11c2291b5c49451898c8966fc4925a32",
+       "span_id": "span-11c2291b5c49451898c8966fc4925a32",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "In an RFIC validation workflow, a **Signaling / Non-signaling Tester** fits mainly in the **test → debug → validation** stages, after the RFIC or SoC has been implemented and the evaluation board / RF path is ready.\n\nA practical placement would be:\n\n1. **Pre-RFIC / board-level characterization**\n   - Before full wireless functional validation, teams may validate the RF path, socket, package, transmission lines, matching network, and board behavior.\n   - The knowledge base specifically mentions RFIC/SoC bare-board work where **VNAs** fit for “evaluation of socket and transmission line.”\n\n2. **Non-signaling RF validation**\n   - This is where a non-signaling tester or RF communication tester fits.\n   - It is used to validate RF parametric behavior without a full protocol connection:\n     - TX power\n     - EVM\n     - frequency error\n     - ACLR / spectrum mask\n     - receiver sensitivity or PER-style tests\n     - waveform generation / analysis\n     - loopback verification\n   - The cited material notes that the **R&S CMP180** can verify wideband waveforms in loopback mode for R&D and production contexts.\n\n3. **Signaling validation**\n   - A signaling tester fits when the RFIC or wireless subsystem needs to be tested under more realistic protocol conditions.\n   - For example, the **R&S CMX500** is described as a multi-technology, multi-channel signaling tester used to measure RF TX/RX characteristics under real-world signaling mode conditions.\n   - This becomes important for features such as:\n     - cellular or Wi-Fi protocol behavior\n     - multi-band / multi-chain operation\n     - MIMO\n     - coexistence\n     - end-to-end IP/application behavior\n     - Wi-Fi 7 MLO-style multi-link scenarios\n\n4. **Debug and design validation**\n   - During debug, the tester helps correlate RF impairments with system-level behavior.\n   - Example: an RFIC may pass basic conducted RF tests but fail under signaling due to scheduling, link adaptation, MIMO calibration, coexistence, or receiver desense effects.\n\n5. **Pre-production / production test bridge**\n   - Non-signaling test is often favored for faster, repeatable production-oriented RF checks.\n   - Signaling test is usually used more in R&D, validation, conformance-like, regression, and selected production audit scenarios.\n\nSo, in short:\n\n> **Use the non-signaling tester for fast RF parametric validation of the RFIC, and the signaling tester later in the workflow to validate real-world wireless behavior at the device/system level.**\n\nCited knowledge-base evidence: CMX500 is positioned for real-world signaling-mode RF TX/RX measurements and multi-channel wireless tests; CMP180 is positioned for waveform verification in loopback mode for R&D and production; RFIC/SoC bare-board work is associated with VNA-based socket and transmission-line evaluation.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-11c2291b5c49451898c8966fc4925a32",
+      "request_id": "request-11c2291b5c49451898c8966fc4925a32",
+      "span_id": "span-11c2291b5c49451898c8966fc4925a32",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-11c2291b5c49451898c8966fc4925a32",
+       "request_id": "request-11c2291b5c49451898c8966fc4925a32",
+       "span_id": "span-11c2291b5c49451898c8966fc4925a32",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In an RFIC validation workflow, a **Signaling / Non-signaling Tester** fits mainly in the **test → debug → validation** stages, after the RFIC or SoC has been implemented and the evaluation board / RF path is ready.\n\nA practical placement would be:\n\n1. **Pre-RFIC / board-level characterization**\n   - Before full wireless functional validation, teams may validate the RF path, socket, package, transmission lines, matching network, and board behavior.\n   - The knowledge base specifically mentions RFIC/SoC bare-board work where **VNAs** fit for “evaluation of socket and transmission line.”\n\n2. **Non-signaling RF validation**\n   - This is where a non-signaling tester or RF communication tester fits.\n   - It is used to validate RF parametric behavior without a full protocol connection:\n     - TX power\n     - EVM\n     - frequency error\n     - ACLR / spectrum mask\n     - receiver sensitivity or PER-style tests\n     - waveform generation / analysis\n     - loopback verification\n   - The cited material notes that the **R&S CMP180** can verify wideband waveforms in loopback mode for R&D and production contexts.\n\n3. **Signaling validation**\n   - A signaling tester fits when the RFIC or wireless subsystem needs to be tested under more realistic protocol conditions.\n   - For example, the **R&S CMX500** is described as a multi-technology, multi-channel signaling tester used to measure RF TX/RX characteristics under real-world signaling mode conditions.\n   - This becomes important for features such as:\n     - cellular or Wi-Fi protocol behavior\n     - multi-band / multi-chain operation\n     - MIMO\n     - coexistence\n     - end-to-end IP/application behavior\n     - Wi-Fi 7 MLO-style multi-link scenarios\n\n4. **Debug and design validation**\n   - During debug, the tester helps correlate RF impairments with system-level behavior.\n   - Example: an RFIC may pass basic conducted RF tests but fail under signaling due to scheduling, link adaptation, MIMO calibration, coexistence, or receiver desense effects.\n\n5. **Pre-production / production test bridge**\n   - Non-signaling test is often favored for faster, repeatable production-oriented RF checks.\n   - Signaling test is usually used more in R&D, validation, conformance-like, regression, and selected production audit scenarios.\n\nSo, in short:\n\n> **Use the non-signaling tester for fast RF parametric validation of the RFIC, and the signaling tester later in the workflow to validate real-world wireless behavior at the device/system level.**\n\nCited knowledge-base evidence: CMX500 is positioned for real-world signaling-mode RF TX/RX measurements and multi-channel wireless tests; CMP180 is positioned for waveform verification in loopback mode for R&D and production; RFIC/SoC bare-board work is associated with VNA-based socket and transmission-line evaluation.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_baeZLeYEJbtwM4sKoDrpfpIE",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-11c2291b5c49451898c8966fc4925a32",
+          "request_id": "request-11c2291b5c49451898c8966fc4925a32",
+          "span_id": "span-11c2291b5c49451898c8966fc4925a32",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-11c2291b5c49451898c8966fc4925a32",
+           "request_id": "request-11c2291b5c49451898c8966fc4925a32",
+           "span_id": "span-11c2291b5c49451898c8966fc4925a32",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For a Semiconductor use case involving RFIC validation, where would a Signaling / Non-signaling Tester fit in the test workflow? Explain in context of semiconductor RFIC validation workflow.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.475766
+            },
+            {
+             "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.776247
+            },
+            {
+             "text": "> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 33.846356
+            },
+            {
+             "text": "# Sales strategy: target customers – where to go\nCountry / Region RSK: incl. ICR, WIC, ADT, AUT\nTarget Customer Group 2, fit for R&S (above criteria) and related Target Companies (for strategic focus)\n- industry:\t…… Bare board for SoCs(RFIC)\n- fit:\t…… VNAs\n- companies:\t…… Suppliers of Samsung Electronics\n- comments:\t…… Evaluation of socket and transmission line",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6f54737b0396e38b",
+               "original_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+               "sha256": "6f54737b0396e38b43cb6477d1a314185a2d8f32f00b29c523deec187c6c4055",
+               "raw_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+              "section": 38,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.248282
+            },
+            {
+             "text": "> Firstly, the MOSFETs in the current-fed full-bridge (T1-T4) are required to block a voltage of VDC/[N] (Equation 1) and not all of VDC or Vout. This enables the use of lower voltage class devices, resulting in a better RDS(on)*A and more effective exploitation of the non-linear ON resistance vs voltage dependency of semiconductor MOSFETs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 89,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.679376
+            },
+            {
+             "text": "time. A use case of this scenario is given in 3GPP Release 15 for the transmission of SRS logical ports of different\nSRS resources in different OFDM symbols. In this case, antenna switching enables performing channel sounding\nfrom all physical transmit antennas of the UE. In TS 38.214, Section 6.2.1.2, different use cases are defined with\nthe notion xTyR, where x is the number of logical  SRS ports per SRS resource that need to be mapped to x out of\ny physical antennas. In this case, the logical ports of each SRS resource should be mapped to a set of physical",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-49bf386a0a800af9",
+               "original_ref": "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+               "sha256": "49bf386a0a800af9e63766d1120ee38fe24c1f0d4097fcef6552560d04b7e6fd",
+               "raw_ref": "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.31574
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.103992
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the antennas as well as RF transmitter and receiver characteristics must be conducted under real-world conditions in signaling mode. With MLO being a key feature in Wi-Fi 7, a test environment that provides multiple RF chains is crucial. The R&S CMX500 one-box tester from Rohde & Schwarz, featuring integrated Wi-Fi 7 test functionality, is a multi-technology multi-channel signaling tester. Its flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a broad range of Wi-Fi 7-specific tests.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-54cc8cb2ee42584d",
+               "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.846226
+            }
+           ],
+           "text": "A Signaling / Non-signaling Tester would fit in the RFIC workflow at the **test → debug → validation** stages after implementation, because the workflow is described as spanning “implementation → test → debug → validation” rather than being a single tool [2].  \n\nIn context, for semiconductor RFIC validation it would be used after the RFIC/SoC test board and RF path are ready: board-level RF integrity such as socket and transmission-line evaluation may be handled with VNAs for bare-board SoC/RFIC work [4], while the signaling tester validates RF transmitter/receiver behavior under real-world signaling conditions during wireless-device development [1]. A tester such as the CMX500 supports multi-technology, multi-channel signaling tests, including multiple RF chains for Wi-Fi 7 MLO and tests such as MIMO, coexistence, and end-to-end testing [1]. A non-signaling or RF communication tester role is reflected by waveform verification in loopback mode, applicable in R&D and production contexts [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.475766
+           },
+           {
+            "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c733beba88ba4b3a",
+              "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.776247
+           },
+           {
+            "text": "# Sales strategy: target customers – where to go\nCountry / Region RSK: incl. ICR, WIC, ADT, AUT\nTarget Customer Group 2, fit for R&S (above criteria) and related Target Companies (for strategic focus)\n- industry:\t…… Bare board for SoCs(RFIC)\n- fit:\t…… VNAs\n- companies:\t…… Suppliers of Samsung Electronics\n- comments:\t…… Evaluation of socket and transmission line",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-6f54737b0396e38b",
+              "original_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+              "sha256": "6f54737b0396e38b43cb6477d1a314185a2d8f32f00b29c523deec187c6c4055",
+              "raw_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+             "section": 38,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.248282
+           },
+           {
+            "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.103992
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

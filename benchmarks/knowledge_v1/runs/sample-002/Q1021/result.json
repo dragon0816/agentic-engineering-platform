@@ -1,0 +1,61 @@
+{
+ "id": "Q1021",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 59.828,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Knowledge/PRS (NR).md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "OFDM — Orthogonal Frequency Division Multiplexing — is a modulation/multiplexing method where a wideband channel is split into many narrow, mutually orthogonal subcarriers.",
+   "Data is sent in parallel across those subcarriers, usually using QPSK/QAM symbols.",
+   "It is fundamental to systems such as LTE, 5G NR, Wi‑Fi, DVB, and many broadband radio links.",
+   "OFDM signals are structured in subcarriers, symbols, slots, resource blocks, numerologies, pilots/reference signals, etc.",
+   "If you need modulation quality, resource allocation, EVM, demodulation, or 5G/Wi‑Fi conformance insight, you need a standard-aware mode such as 5G NR/WLAN analysis rather than only spectrum mode.",
+   "OFDM has high occupied bandwidth, many subcarriers, and often high PAPR.",
+   "Choosing OBW, ACLR/spurious, and emission-mask style measurements correctly",
+   "In OFDM-based standards, test models define subcarrier/resource-block loading and signal structure, so the chosen test model affects the measurement result.",
+   "the correct 5G/Wi‑Fi/DVB mode"
+  ],
+  "reason": "The cited passages support that Spectrum vs 5G NR modes expose different measurements, that OBW and transmitter spurious emissions are Spectrum-mode measurements, that PRS must not overlap SSB OFDM symbols, and that Tx ON/OFF setup includes selecting a test model, power unit, and noise cancellation. However, the OFDM definition and several asserted measurement implications such as EVM/demodulation, WLAN/DVB modes, ACLR/emission-mask, PAPR, and test-model resource-block loading are not supported by the cited passages, even though some are partly disclaimed as general knowledge.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that Spectrum vs 5G NR modes expose different measurements, that OBW and transmitter spurious emissions are Spectrum-mode measurements, that PRS must not overlap SSB OFDM symbols, and that Tx ON/OFF setup includes selecting a test model, power unit, and noise cancellation."
+}

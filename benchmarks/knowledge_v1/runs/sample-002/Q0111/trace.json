@@ -1,0 +1,401 @@
+{
+ "question": {
+  "id": "Q0111",
+  "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-76317d955db44bd895de1e8c605ae58c",
+ "exchange": {
+  "sent": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 53.797,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-76317d955db44bd895de1e8c605ae58c",
+    "actor": "leo.chi",
+    "title": "For a Wireless Communication use case involving Wi-Fi 7/8, where would S…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:39:44.682364Z",
+    "updated_at": "2026-10-07T09:40:35.817155Z",
+    "messages": [
+     {
+      "message_id": "message-9292628106b44aacba393f7476bf4faf",
+      "role": "user",
+      "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-07T09:39:44.887784Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-10789a756a8144bd887901e9a0470a7b",
+      "role": "assistant",
+      "text": "Signal Generator / Signal Analyzer fits mainly in the **RF physical-layer verification stage** of a Wi‑Fi 7/8 wireless communication test workflow.\n\nTypical workflow placement:\n\n1. **Protocol / signaling validation — CMX500-type role**\n   - Used earlier in R&D to emulate Wi‑Fi 7/8 network/device behavior and test full device operation in signaling mode.\n   - This covers features such as Wi‑Fi 7/8 operation, MLO, high-order modulation, MIMO behavior, and feature-level performance.\n\n2. **RF waveform generation and analysis — Signal Generator / Signal Analyzer role**\n   - This is where Signal Generator / Signal Analyzer fits.\n   - It generates known Wi‑Fi 7/8 waveforms and analyzes the DUT’s RF output.\n   - Key measurements include waveform quality, EVM, spectrum mask, power, bandwidth behavior, modulation quality, and receiver/transmitter RF performance.\n   - For Wi‑Fi 7/8, wide bandwidth is important: the knowledge base notes R&S CMP180 supports Wi‑Fi 7 and bandwidths up to 500 MHz, and can verify a 480 MHz WLAN waveform candidate relevant to Wi‑Fi 8.\n\n3. **Production / non-signaling RF test**\n   - In production, the Signal Generator / Analyzer role becomes even more central.\n   - The cited R&S material says WLAN production RF measurements are performed in **non-signaling mode** to save time, with CMP180 optimized for that purpose.\n   - So this stage is about fast, repeatable RF verification rather than full protocol interaction.\n\n4. **OTA / chamber validation**\n   - In OTA setups, a vector signal generator can be part of the test system to feed controlled Wi‑Fi 7 signals into the chamber while the analyzer/tester measures radiated performance.\n\nIn short: **CMX500-style signaling testers validate complete Wi‑Fi 7/8 behavior; Signal Generator / Signal Analyzer instruments validate the RF waveform itself, especially wideband PHY quality and fast non-signaling production measurements.**",
+      "created_at": "2026-10-07T09:40:35.817155Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-69013233a92040509fa344fdf488da02",
+       "request_id": "request-69013233a92040509fa344fdf488da02",
+       "span_id": "span-69013233a92040509fa344fdf488da02",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Signal Generator / Signal Analyzer fits mainly in the **RF physical-layer verification stage** of a Wi‑Fi 7/8 wireless communication test workflow.\n\nTypical workflow placement:\n\n1. **Protocol / signaling validation — CMX500-type role**\n   - Used earlier in R&D to emulate Wi‑Fi 7/8 network/device behavior and test full device operation in signaling mode.\n   - This covers features such as Wi‑Fi 7/8 operation, MLO, high-order modulation, MIMO behavior, and feature-level performance.\n\n2. **RF waveform generation and analysis — Signal Generator / Signal Analyzer role**\n   - This is where Signal Generator / Signal Analyzer fits.\n   - It generates known Wi‑Fi 7/8 waveforms and analyzes the DUT’s RF output.\n   - Key measurements include waveform quality, EVM, spectrum mask, power, bandwidth behavior, modulation quality, and receiver/transmitter RF performance.\n   - For Wi‑Fi 7/8, wide bandwidth is important: the knowledge base notes R&S CMP180 supports Wi‑Fi 7 and bandwidths up to 500 MHz, and can verify a 480 MHz WLAN waveform candidate relevant to Wi‑Fi 8.\n\n3. **Production / non-signaling RF test**\n   - In production, the Signal Generator / Analyzer role becomes even more central.\n   - The cited R&S material says WLAN production RF measurements are performed in **non-signaling mode** to save time, with CMP180 optimized for that purpose.\n   - So this stage is about fast, repeatable RF verification rather than full protocol interaction.\n\n4. **OTA / chamber validation**\n   - In OTA setups, a vector signal generator can be part of the test system to feed controlled Wi‑Fi 7 signals into the chamber while the analyzer/tester measures radiated performance.\n\nIn short: **CMX500-style signaling testers validate complete Wi‑Fi 7/8 behavior; Signal Generator / Signal Analyzer instruments validate the RF waveform itself, especially wideband PHY quality and fast non-signaling production measurements.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-69013233a92040509fa344fdf488da02",
+      "request_id": "request-69013233a92040509fa344fdf488da02",
+      "span_id": "span-69013233a92040509fa344fdf488da02",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-69013233a92040509fa344fdf488da02",
+       "request_id": "request-69013233a92040509fa344fdf488da02",
+       "span_id": "span-69013233a92040509fa344fdf488da02",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Signal Generator / Signal Analyzer fits mainly in the **RF physical-layer verification stage** of a Wi‑Fi 7/8 wireless communication test workflow.\n\nTypical workflow placement:\n\n1. **Protocol / signaling validation — CMX500-type role**\n   - Used earlier in R&D to emulate Wi‑Fi 7/8 network/device behavior and test full device operation in signaling mode.\n   - This covers features such as Wi‑Fi 7/8 operation, MLO, high-order modulation, MIMO behavior, and feature-level performance.\n\n2. **RF waveform generation and analysis — Signal Generator / Signal Analyzer role**\n   - This is where Signal Generator / Signal Analyzer fits.\n   - It generates known Wi‑Fi 7/8 waveforms and analyzes the DUT’s RF output.\n   - Key measurements include waveform quality, EVM, spectrum mask, power, bandwidth behavior, modulation quality, and receiver/transmitter RF performance.\n   - For Wi‑Fi 7/8, wide bandwidth is important: the knowledge base notes R&S CMP180 supports Wi‑Fi 7 and bandwidths up to 500 MHz, and can verify a 480 MHz WLAN waveform candidate relevant to Wi‑Fi 8.\n\n3. **Production / non-signaling RF test**\n   - In production, the Signal Generator / Analyzer role becomes even more central.\n   - The cited R&S material says WLAN production RF measurements are performed in **non-signaling mode** to save time, with CMP180 optimized for that purpose.\n   - So this stage is about fast, repeatable RF verification rather than full protocol interaction.\n\n4. **OTA / chamber validation**\n   - In OTA setups, a vector signal generator can be part of the test system to feed controlled Wi‑Fi 7 signals into the chamber while the analyzer/tester measures radiated performance.\n\nIn short: **CMX500-style signaling testers validate complete Wi‑Fi 7/8 behavior; Signal Generator / Signal Analyzer instruments validate the RF waveform itself, especially wideband PHY quality and fast non-signaling production measurements.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_MqzGwn3Jmbp5c6oEFHa1NGkT",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-69013233a92040509fa344fdf488da02",
+          "request_id": "request-69013233a92040509fa344fdf488da02",
+          "span_id": "span-69013233a92040509fa344fdf488da02",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-69013233a92040509fa344fdf488da02",
+           "request_id": "request-69013233a92040509fa344fdf488da02",
+           "span_id": "span-69013233a92040509fa344fdf488da02",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signal Generator / Signal Analyzer fit in the test workflow? Explain their role in the Wi-Fi 7/8 test workflow.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 45.970063
+            },
+            {
+             "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 42.145993
+            },
+            {
+             "text": "The CMX500 is a modular, powerful one-box signaling tester enabling comprehensive multi-technology testing. It covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing and WLAN including Wi‑Fi 7 and Wi‑Fi 8. Consequently, the CMX500 allows R&D engineers of wireless devices to comprehensively test their design’s operation in both cellular and non-cellular standards of the latest generation in a single instrument setup.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.615747
+            },
+            {
+             "text": "Engineered for data rates up to 20 Gbps, the CMX500 is one of the most versatile mobile device test platforms, supporting wide dynamic range, 4096QAM and up to 16 device antenna ports for advanced spatial multiplexing. With its multi-band capabilities, it covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing, and WLAN including Wi‑Fi 7 and future [Wi‑Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi‑Fi 8\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ab38a8570454352c",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.929594
+            },
+            {
+             "text": "[Wi-Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi-Fi 8\") builds upon the foundation of Wi-Fi 7, retaining core physical layer parameters like supported frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz and 4096QAM modulation, as well as Multi-Link-Operation (MLO). However, to achieve its UHR goals, IEEE 802.11bn introduces a suite of innovative PHY and MAC layer technologies that present new testing hurdles. At MWC 2026, visitors can experience how to address key testing challenges associated with Wi-Fi 8 with the enhanced testing capabilities of the CMX500 one-box signaling tester, one of the most versatile mobile device test platforms in the market, which supports many of the demanding features of Wi-Fi 7 and Wi-Fi 8 today.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.6505
+            },
+            {
+             "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 20,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.442667
+            },
+            {
+             "text": "For example, Wi-Fi 8 uses distributed resource units (dRU) to overcome power spectral density (PSD) limits. With dRU measurements users can validate their device’s effectiveness in boosting uplink transmit power and improving connection reliability. Another technology is unequal modulation (UEQM), where throughput is improved in difficult reception scenarios by allowing each MIMO link to use a different modulation scheme. With UEQM analysis, users can assess the ability of the test device to adapt the modulation in the correct way, using the specified modulation of coding scheme (MCS) combinations. With comprehensive signaling mode tests, covering a broad range of Wi-Fi 8 features, users can perform in-depth analysis of performance characteristics.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.005567
+            },
+            {
+             "text": "## Rohde & Schwarz and ETS-Lindgren continue their long standing partnership to deliver comprehensive over the air (OTA) testing solutions for next generation wireless technologies. ETS-Lindgren has integrated the CMX500 one box signaling tester and R&S SMBV100B vector signal generator from Rohde & Schwarz into its EMQuest™ software. This collaboration supports the latest standards, including 5G FR1, 5G FR2, Wi Fi 7 and A-GNSS.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.022249
+            }
+           ],
+           "text": "Signal Generator / Signal Analyzer fits in the RF physical-layer verification part of the Wi‑Fi 7/8 workflow, especially in non-signaling RF measurements for production, and also as a future-proof R&D tool for wideband waveform validation [2]. Its role is to generate and/or analyze Wi‑Fi waveforms, verify signal quality in loopback mode, and support very wide bandwidth testing—R&S describes the CMP180 RF analyzer/generator as supporting Wi‑Fi 7 and bandwidths up to 500 MHz, including verification of a 480 MHz WLAN waveform candidate for Wi‑Fi 8 [2].  \n\nIn the broader workflow, the CMX500 handles comprehensive signaling-mode testing of Wi‑Fi 7/8 device operation and features, while the Signal Generator / Signal Analyzer complements it by focusing on fast RF measurements, waveform verification, and production-oriented non-signaling tests [3][7][2]. For OTA workflows, a vector signal generator can also be integrated with the CMX500 in systems supporting Wi‑Fi 7 testing [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 42.145993
+           },
+           {
+            "text": "The CMX500 is a modular, powerful one-box signaling tester enabling comprehensive multi-technology testing. It covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing and WLAN including Wi‑Fi 7 and Wi‑Fi 8. Consequently, the CMX500 allows R&D engineers of wireless devices to comprehensively test their design’s operation in both cellular and non-cellular standards of the latest generation in a single instrument setup.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.615747
+           },
+           {
+            "text": "For example, Wi-Fi 8 uses distributed resource units (dRU) to overcome power spectral density (PSD) limits. With dRU measurements users can validate their device’s effectiveness in boosting uplink transmit power and improving connection reliability. Another technology is unequal modulation (UEQM), where throughput is improved in difficult reception scenarios by allowing each MIMO link to use a different modulation scheme. With UEQM analysis, users can assess the ability of the test device to adapt the modulation in the correct way, using the specified modulation of coding scheme (MCS) combinations. With comprehensive signaling mode tests, covering a broad range of Wi-Fi 8 features, users can perform in-depth analysis of performance characteristics.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.005567
+           },
+           {
+            "text": "## Rohde & Schwarz and ETS-Lindgren continue their long standing partnership to deliver comprehensive over the air (OTA) testing solutions for next generation wireless technologies. ETS-Lindgren has integrated the CMX500 one box signaling tester and R&S SMBV100B vector signal generator from Rohde & Schwarz into its EMQuest™ software. This collaboration supports the latest standards, including 5G FR1, 5G FR2, Wi Fi 7 and A-GNSS.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8180ce629a865e0b",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.022249
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

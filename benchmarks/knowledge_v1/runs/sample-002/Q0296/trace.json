@@ -1,0 +1,476 @@
+{
+ "question": {
+  "id": "Q0296",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-5f792f55d44c4f4eaba5df28269c8ec9",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 116.406,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-5f792f55d44c4f4eaba5df28269c8ec9",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:53:32.566797Z",
+    "updated_at": "2026-10-07T09:55:28.853846Z",
+    "messages": [
+     {
+      "message_id": "message-e089fe439f724a59b7054d54510039c5",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T09:53:32.581347Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-d66ee365d33d401793cf5c22853d356f",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer to a follow-up search for **direct “oscilloscope + aerospace/defense” evidence**. Using the broader Raw evidence that did return, the strongest defensible oscilloscope-related opportunities are these:\n\n| Priority | Opportunity | Why it looks strong | Raw evidence |\n|---|---|---|---|\n| 1 | **Satellite / 5G NTN RF-performance validation and system debug** | Aerospace/defense customers working on satellite communications need to validate NR satellite-access UE and satellite access node behavior. Oscilloscope opportunity is strongest around time-domain debug, control/event timing, RF front-end bring-up support, and mixed-domain troubleshooting alongside RF instruments. | The vault states that minimum RF and performance requirements for NR UE supporting satellite access and NR Satellite Access Node were defined in TS 38.101-5 and TS 38.108, based on TR 38.863 coexistence studies. Citation: `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`, section 23. It also states NTN UE support includes supported frequency bands and channel bandwidths. Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57. |\n| 2 | **NTN mobility, handover, beam-management, and synchronization debug** | This is a strong oscilloscope-adjacent opportunity because beam switching, conditional handover, satellite re-sync, and first-uplink timing create complex timing/debug problems. A scope can help correlate digital control, trigger events, timing, and RF/baseband behavior in development labs. | Beam selection is performed across configured cells and beams, with M × L beams reported in a single report instance and at least M × L = 4 supported as UE capability. Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494. The vault also identifies NTN conditional handover features including location-based, time-based, and event A4-based conditional handover. Citations: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, sections 57–58. Satellite re-sync evidence includes receiving PRACH/PUCCH scheduling requests, scheduling grants, and identifying the first uplink transmission on the target satellite. Citation: `raw/Knowledge/Satellite switch with resynchronization.md`, section 234. |\n| 3 | **Power-electronics validation for aerospace/defense platforms** | This is the clearest oscilloscope-style measurement evidence: gate-drive timing, duty cycle, phase shift, switching waveforms, converter behavior, and MOSFET control are classic scope use cases. However, the returned Raw source is about DC-DC converter topology and does **not itself prove aerospace/defense demand**; the aerospace/defense relevance is an application inference, not directly stated in the vault evidence. | The vault describes a DC-DC converter generating modulated DC voltage across a current-fed full bridge, controlled by MOSFET gate signals. It specifies complementary signals, diagonal MOSFET pairs, 180° phase shift, and duty cycle from 50% to 100%. Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Bottom line:**  \nBased strictly on current vault evidence, the best-supported aerospace/defense oscilloscope opportunity is **satellite / 5G NTN development and debug**, especially around **RF-performance validation, mobility/handover, beam management, synchronization, and first-uplink timing**.  \n\nThe **power-electronics** opportunity is technically strong for oscilloscopes, but the current retrieved evidence does not directly tie it to aerospace/defense.",
+      "created_at": "2026-10-07T09:55:28.853846Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-95ddab51cc0d41b6a69587e133cd01a8",
+       "request_id": "request-95ddab51cc0d41b6a69587e133cd01a8",
+       "span_id": "span-95ddab51cc0d41b6a69587e133cd01a8",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer to a follow-up search for **direct “oscilloscope + aerospace/defense” evidence**. Using the broader Raw evidence that did return, the strongest defensible oscilloscope-related opportunities are these:\n\n| Priority | Opportunity | Why it looks strong | Raw evidence |\n|---|---|---|---|\n| 1 | **Satellite / 5G NTN RF-performance validation and system debug** | Aerospace/defense customers working on satellite communications need to validate NR satellite-access UE and satellite access node behavior. Oscilloscope opportunity is strongest around time-domain debug, control/event timing, RF front-end bring-up support, and mixed-domain troubleshooting alongside RF instruments. | The vault states that minimum RF and performance requirements for NR UE supporting satellite access and NR Satellite Access Node were defined in TS 38.101-5 and TS 38.108, based on TR 38.863 coexistence studies. Citation: `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`, section 23. It also states NTN UE support includes supported frequency bands and channel bandwidths. Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57. |\n| 2 | **NTN mobility, handover, beam-management, and synchronization debug** | This is a strong oscilloscope-adjacent opportunity because beam switching, conditional handover, satellite re-sync, and first-uplink timing create complex timing/debug problems. A scope can help correlate digital control, trigger events, timing, and RF/baseband behavior in development labs. | Beam selection is performed across configured cells and beams, with M × L beams reported in a single report instance and at least M × L = 4 supported as UE capability. Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494. The vault also identifies NTN conditional handover features including location-based, time-based, and event A4-based conditional handover. Citations: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, sections 57–58. Satellite re-sync evidence includes receiving PRACH/PUCCH scheduling requests, scheduling grants, and identifying the first uplink transmission on the target satellite. Citation: `raw/Knowledge/Satellite switch with resynchronization.md`, section 234. |\n| 3 | **Power-electronics validation for aerospace/defense platforms** | This is the clearest oscilloscope-style measurement evidence: gate-drive timing, duty cycle, phase shift, switching waveforms, converter behavior, and MOSFET control are classic scope use cases. However, the returned Raw source is about DC-DC converter topology and does **not itself prove aerospace/defense demand**; the aerospace/defense relevance is an application inference, not directly stated in the vault evidence. | The vault describes a DC-DC converter generating modulated DC voltage across a current-fed full bridge, controlled by MOSFET gate signals. It specifies complementary signals, diagonal MOSFET pairs, 180° phase shift, and duty cycle from 50% to 100%. Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Bottom line:**  \nBased strictly on current vault evidence, the best-supported aerospace/defense oscilloscope opportunity is **satellite / 5G NTN development and debug**, especially around **RF-performance validation, mobility/handover, beam management, synchronization, and first-uplink timing**.  \n\nThe **power-electronics** opportunity is technically strong for oscilloscopes, but the current retrieved evidence does not directly tie it to aerospace/defense.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-95ddab51cc0d41b6a69587e133cd01a8",
+      "request_id": "request-95ddab51cc0d41b6a69587e133cd01a8",
+      "span_id": "span-95ddab51cc0d41b6a69587e133cd01a8",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-95ddab51cc0d41b6a69587e133cd01a8",
+       "request_id": "request-95ddab51cc0d41b6a69587e133cd01a8",
+       "span_id": "span-95ddab51cc0d41b6a69587e133cd01a8",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer to a follow-up search for **direct “oscilloscope + aerospace/defense” evidence**. Using the broader Raw evidence that did return, the strongest defensible oscilloscope-related opportunities are these:\n\n| Priority | Opportunity | Why it looks strong | Raw evidence |\n|---|---|---|---|\n| 1 | **Satellite / 5G NTN RF-performance validation and system debug** | Aerospace/defense customers working on satellite communications need to validate NR satellite-access UE and satellite access node behavior. Oscilloscope opportunity is strongest around time-domain debug, control/event timing, RF front-end bring-up support, and mixed-domain troubleshooting alongside RF instruments. | The vault states that minimum RF and performance requirements for NR UE supporting satellite access and NR Satellite Access Node were defined in TS 38.101-5 and TS 38.108, based on TR 38.863 coexistence studies. Citation: `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`, section 23. It also states NTN UE support includes supported frequency bands and channel bandwidths. Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57. |\n| 2 | **NTN mobility, handover, beam-management, and synchronization debug** | This is a strong oscilloscope-adjacent opportunity because beam switching, conditional handover, satellite re-sync, and first-uplink timing create complex timing/debug problems. A scope can help correlate digital control, trigger events, timing, and RF/baseband behavior in development labs. | Beam selection is performed across configured cells and beams, with M × L beams reported in a single report instance and at least M × L = 4 supported as UE capability. Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494. The vault also identifies NTN conditional handover features including location-based, time-based, and event A4-based conditional handover. Citations: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, sections 57–58. Satellite re-sync evidence includes receiving PRACH/PUCCH scheduling requests, scheduling grants, and identifying the first uplink transmission on the target satellite. Citation: `raw/Knowledge/Satellite switch with resynchronization.md`, section 234. |\n| 3 | **Power-electronics validation for aerospace/defense platforms** | This is the clearest oscilloscope-style measurement evidence: gate-drive timing, duty cycle, phase shift, switching waveforms, converter behavior, and MOSFET control are classic scope use cases. However, the returned Raw source is about DC-DC converter topology and does **not itself prove aerospace/defense demand**; the aerospace/defense relevance is an application inference, not directly stated in the vault evidence. | The vault describes a DC-DC converter generating modulated DC voltage across a current-fed full bridge, controlled by MOSFET gate signals. It specifies complementary signals, diagonal MOSFET pairs, 180° phase shift, and duty cycle from 50% to 100%. Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Bottom line:**  \nBased strictly on current vault evidence, the best-supported aerospace/defense oscilloscope opportunity is **satellite / 5G NTN development and debug**, especially around **RF-performance validation, mobility/handover, beam management, synchronization, and first-uplink timing**.  \n\nThe **power-electronics** opportunity is technically strong for oscilloscopes, but the current retrieved evidence does not directly tie it to aerospace/defense.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_O71qeMjioMAvLvLd1GDKbXsA",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-95ddab51cc0d41b6a69587e133cd01a8",
+          "request_id": "request-95ddab51cc0d41b6a69587e133cd01a8",
+          "span_id": "span-95ddab51cc0d41b6a69587e133cd01a8",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-95ddab51cc0d41b6a69587e133cd01a8",
+           "request_id": "request-95ddab51cc0d41b6a69587e133cd01a8",
+           "span_id": "span-95ddab51cc0d41b6a69587e133cd01a8",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity? Please identify the strongest oscilloscope opportunities in aerospace/defense and cite the supporting Raw evidence for each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "Indicates whether the UE supports location based conditional handover, i.e. CondEvent D1. A UE\nlocationBasedCondHandover-r17 supporting this feature shall also indicate the support of condHandover-r16 and the support of\nIndicates whether the UE supports time based conditional handover, i.e. CondEvent T1. A UE support-\ntimeBasedCondHandover-r17 ing this feature shall also indicate the support of condHandover-r16 for NTN bands and the support of\nThe UE indicates in addition to the supported frequency bands for NTN also the supported channel bandwidth for each",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.066369
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.454461
+            },
+            {
+             "text": "Based on coexistence studies captured in TR 38.863, the minimum RF and performance requirements in FR1 for respectively NR User Equipment (UE) supporting satellite access operation and NR Satellite Access Node (SAN) were defined in TS 38.101-5 and TS 38.108.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0c9fb31e269a02c",
+               "original_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "sha256": "d0c9fb31e269a02c5d94a1f31297a3274ff1a1f1a9faa8ae8017403a1a7b4690",
+               "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.327139
+            },
+            {
+             "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 80,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.105273
+            },
+            {
+             "text": "The B, M and X options are based on each other. To use an M option, you also need\nthe corresponding B option. To use an X option, you also need the corresponding B\nand M options (for some X options, there is no M option).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 389,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.069618
+            },
+            {
+             "text": "support an IDLE UE context for satellite re-sync (similar as NTN rach less handover)\nreceive PRACH-based SR request or PUCCH based SR request\nschedule dynamic grant or CG\nidentify the first UL TX on the target satellite and indicate the event to RRC",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f589efa3eacfa002",
+               "original_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+               "sha256": "f589efa3eacfa0020a1dd7bb8c6212a6b074b1798ba5153db1b354c197b51aef",
+               "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "section": 234,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.41917
+            },
+            {
+             "text": "for NTN and shared spectrum channel access\nFigure 32: UE capabilities related to NTN mobility\neventA4BasedCondHandover-r17: Indicates whether the UE supports event A4 based conditional handover in NTN bands,\ni.e., CondEvent A4; a UE supporting this feature shall also indicate the support of condHandover-r16 and the support of\nlocationBasedCondHandover-r17: Indicates whether the UE supports location based conditional handover,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 58,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.381256
+            }
+           ],
+           "text": "**Satellite / NTN RF and performance validation** — The evidence points to defined minimum RF and performance requirements for NR User Equipment supporting satellite access and NR Satellite Access Nodes, creating a clear test-and-validation opportunity around NTN/satellite communications systems [4].\nAdditional evidence shows NTN support involves supported frequency bands and channel bandwidths, which further supports RF/channel validation needs [2].\n**NTN mobility, handover, and beam-management testing** — NTN systems require beam selection and reporting across multiple cells and beams, with configured M × L beam reporting supported by UE capability [1].\nThe evidence also shows NTN-specific conditional handover features, including location-based, time-based, and event A4-based conditional handover [2][8].\nSatellite re-sync and identification of the first uplink transmission on the target satellite are also described, supporting debug and timing-analysis opportunities [7].\n**Aerospace / defense power-electronics validation for DC-DC converters** — The evidence describes a DC-DC converter using a current-fed full bridge, modulated DC voltage, MOSFET gate signals, 180° phase-shifted complementary drive signals, and duty-cycle variation from 50% to 100%, all of which support oscilloscope-based gate-drive, timing, duty-cycle, and switching-waveform validation opportunities [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-484f76aad6f2ea3a",
+              "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+             "section": 494,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.647809
+           },
+           {
+            "text": "Indicates whether the UE supports location based conditional handover, i.e. CondEvent D1. A UE\nlocationBasedCondHandover-r17 supporting this feature shall also indicate the support of condHandover-r16 and the support of\nIndicates whether the UE supports time based conditional handover, i.e. CondEvent T1. A UE support-\ntimeBasedCondHandover-r17 ing this feature shall also indicate the support of condHandover-r16 for NTN bands and the support of\nThe UE indicates in addition to the supported frequency bands for NTN also the supported channel bandwidth for each",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 57,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.066369
+           },
+           {
+            "text": "Based on coexistence studies captured in TR 38.863, the minimum RF and performance requirements in FR1 for respectively NR User Equipment (UE) supporting satellite access operation and NR Satellite Access Node (SAN) were defined in TS 38.101-5 and TS 38.108.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0c9fb31e269a02c",
+              "original_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+              "sha256": "d0c9fb31e269a02c5d94a1f31297a3274ff1a1f1a9faa8ae8017403a1a7b4690",
+              "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.327139
+           },
+           {
+            "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 80,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.105273
+           },
+           {
+            "text": "support an IDLE UE context for satellite re-sync (similar as NTN rach less handover)\nreceive PRACH-based SR request or PUCCH based SR request\nschedule dynamic grant or CG\nidentify the first UL TX on the target satellite and indicate the event to RRC",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f589efa3eacfa002",
+              "original_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "sha256": "f589efa3eacfa0020a1dd7bb8c6212a6b074b1798ba5153db1b354c197b51aef",
+              "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+             "section": 234,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.41917
+           },
+           {
+            "text": "for NTN and shared spectrum channel access\nFigure 32: UE capabilities related to NTN mobility\neventA4BasedCondHandover-r17: Indicates whether the UE supports event A4 based conditional handover in NTN bands,\ni.e., CondEvent A4; a UE supporting this feature shall also indicate the support of condHandover-r16 and the support of\nlocationBasedCondHandover-r17: Indicates whether the UE supports location based conditional handover,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 58,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.381256
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_6vdxZBUQpE0757Pnd5li5aXD",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-95ddab51cc0d41b6a69587e133cd01a8",
+          "request_id": "request-95ddab51cc0d41b6a69587e133cd01a8",
+          "span_id": "span-95ddab51cc0d41b6a69587e133cd01a8",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

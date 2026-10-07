@@ -1,0 +1,705 @@
+{
+ "question": {
+  "id": "Q0846",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-0485a70d3e244d7ea7d0a02914c6a90d",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 116.953,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-0485a70d3e244d7ea7d0a02914c6a90d",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:31:50.321477Z",
+    "updated_at": "2026-10-07T10:33:47.189336Z",
+    "messages": [
+     {
+      "message_id": "message-76907d6925be46e5bd464404721fceda",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T10:31:50.334033Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-a756185e66654351bd0fd95cf72ec95b",
+      "role": "assistant",
+      "text": "I queried the current RS knowledge vault. Based on the Raw evidence returned, the strongest Semiconductor opportunities for Signaling / Non-signaling Testers are:\n\n| Rank | Opportunity | Why it is strong | Supporting Raw evidence |\n|---|---|---|---|\n| 1 | **Non-signaling production / ATE / multi-port production test** using **CMP180 / CMP200 / CMW100** | This is the clearest “semiconductor production” opportunity: the evidence explicitly frames the customer need as **non-signaling ATE or multi-port production test**, and positions R&S instruments as the answer. | “Do you need non-signaling ATE or multi-port production test? ✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.” — `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5 |\n| 2 | **Modem-RF / chipset validation for FR1 + FR3 and 6G readiness** using **CMX500 + RFU18** | Strong semiconductor fit because the DUT is a **Qualcomm Mobile Test Platform powered by Qualcomm Modem-RF System**, and the stated validation targets are **RF performance and protocol behavior** across FR1/FR3 aggregation. | “CMX500… extended with the new RFU18 board to provide coverage up to 18 GHz… path to extend existing testers towards 6G… Qualcomm… Mobile Test Platform powered by the Qualcomm® Modem-RF System, enabling comprehensive validation of RF performance and protocol behavior across the aggregated FR1 and FR3 bands.” — `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 4 |\n| 3 | **5G NR / NR-NTN / RedCap / Wi‑Fi 7 signaling validation platform** using **CMX500** | Strong because it shows CMX500 as a future-proof callbox spanning cellular and non-cellular technologies in one instrument. This maps well to semiconductor modem/connectivity roadmap validation, especially where chipsets must support multiple standards. | “The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi‑Fi, all in a single instrument. The latest test feature sets, including… NR‑NTN, 5G RedCap, and Wi‑Fi 7, provides a long-term, future-proof callbox platform.” — `raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md`, section 3 |\n| 4 | **OTA performance validation for Wi‑Fi 7 and 5G RedCap devices** using **CMX500 + OTA chambers** | This is slightly less directly semiconductor-specific than production ATE or Qualcomm modem validation, but the evidence is strong for device performance validation workflows that semiconductor customers often need for reference designs, modules, and end-device enablement. | “EMITE’s… over-the-air chambers can now be combined with… R&S CMX500… supporting… LTE, 5G NR FR1… FR2… including… 5G RedCap… supports… Wi‑Fi 7… customers obtain a comprehensive environment for accurately assessing the performance of Wi‑Fi 7 as well as 5G Red Cap devices.” — `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 3 |\n| 5 | **Advanced 5G protocol/signaling validation: Release 19 MIMO, MAC/PDSCH, codeword behavior** | Opportunity is supported by evidence of unresolved signaling questions around MAC/PDSCH and high-layer MIMO behavior. This is more “R&D / protocol conformance / modem stack validation” than production. | “What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to know if two CW are used? Cross-check if there are FPGA reference sizes for TBS_LBRM.” — `raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md`, section 146 |\n\n**Bottom line:**  \nThe strongest vault-backed opportunity is **non-signaling semiconductor production test / ATE / multi-port production test** with **CMP180 / CMP200 / CMW100**. The strongest signaling-side opportunity is **CMX500-based modem-RF validation**, especially **FR1–FR3 aggregation, RF/protocol behavior validation, and 6G-readiness** with semiconductor players such as Qualcomm explicitly present in the evidence.\n\nNext, you could ask for this to be turned into a sales playbook by customer type: **chipset vendor, module maker, device OEM, test lab, or OSAT/production line**.",
+      "created_at": "2026-10-07T10:33:47.189336Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+       "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+       "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "I queried the current RS knowledge vault. Based on the Raw evidence returned, the strongest Semiconductor opportunities for Signaling / Non-signaling Testers are:\n\n| Rank | Opportunity | Why it is strong | Supporting Raw evidence |\n|---|---|---|---|\n| 1 | **Non-signaling production / ATE / multi-port production test** using **CMP180 / CMP200 / CMW100** | This is the clearest “semiconductor production” opportunity: the evidence explicitly frames the customer need as **non-signaling ATE or multi-port production test**, and positions R&S instruments as the answer. | “Do you need non-signaling ATE or multi-port production test? ✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.” — `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5 |\n| 2 | **Modem-RF / chipset validation for FR1 + FR3 and 6G readiness** using **CMX500 + RFU18** | Strong semiconductor fit because the DUT is a **Qualcomm Mobile Test Platform powered by Qualcomm Modem-RF System**, and the stated validation targets are **RF performance and protocol behavior** across FR1/FR3 aggregation. | “CMX500… extended with the new RFU18 board to provide coverage up to 18 GHz… path to extend existing testers towards 6G… Qualcomm… Mobile Test Platform powered by the Qualcomm® Modem-RF System, enabling comprehensive validation of RF performance and protocol behavior across the aggregated FR1 and FR3 bands.” — `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 4 |\n| 3 | **5G NR / NR-NTN / RedCap / Wi‑Fi 7 signaling validation platform** using **CMX500** | Strong because it shows CMX500 as a future-proof callbox spanning cellular and non-cellular technologies in one instrument. This maps well to semiconductor modem/connectivity roadmap validation, especially where chipsets must support multiple standards. | “The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi‑Fi, all in a single instrument. The latest test feature sets, including… NR‑NTN, 5G RedCap, and Wi‑Fi 7, provides a long-term, future-proof callbox platform.” — `raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md`, section 3 |\n| 4 | **OTA performance validation for Wi‑Fi 7 and 5G RedCap devices** using **CMX500 + OTA chambers** | This is slightly less directly semiconductor-specific than production ATE or Qualcomm modem validation, but the evidence is strong for device performance validation workflows that semiconductor customers often need for reference designs, modules, and end-device enablement. | “EMITE’s… over-the-air chambers can now be combined with… R&S CMX500… supporting… LTE, 5G NR FR1… FR2… including… 5G RedCap… supports… Wi‑Fi 7… customers obtain a comprehensive environment for accurately assessing the performance of Wi‑Fi 7 as well as 5G Red Cap devices.” — `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 3 |\n| 5 | **Advanced 5G protocol/signaling validation: Release 19 MIMO, MAC/PDSCH, codeword behavior** | Opportunity is supported by evidence of unresolved signaling questions around MAC/PDSCH and high-layer MIMO behavior. This is more “R&D / protocol conformance / modem stack validation” than production. | “What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to know if two CW are used? Cross-check if there are FPGA reference sizes for TBS_LBRM.” — `raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md`, section 146 |\n\n**Bottom line:**  \nThe strongest vault-backed opportunity is **non-signaling semiconductor production test / ATE / multi-port production test** with **CMP180 / CMP200 / CMW100**. The strongest signaling-side opportunity is **CMX500-based modem-RF validation**, especially **FR1–FR3 aggregation, RF/protocol behavior validation, and 6G-readiness** with semiconductor players such as Qualcomm explicitly present in the evidence.\n\nNext, you could ask for this to be turned into a sales playbook by customer type: **chipset vendor, module maker, device OEM, test lab, or OSAT/production line**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+      "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+      "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+       "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+       "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "I queried the current RS knowledge vault. Based on the Raw evidence returned, the strongest Semiconductor opportunities for Signaling / Non-signaling Testers are:\n\n| Rank | Opportunity | Why it is strong | Supporting Raw evidence |\n|---|---|---|---|\n| 1 | **Non-signaling production / ATE / multi-port production test** using **CMP180 / CMP200 / CMW100** | This is the clearest “semiconductor production” opportunity: the evidence explicitly frames the customer need as **non-signaling ATE or multi-port production test**, and positions R&S instruments as the answer. | “Do you need non-signaling ATE or multi-port production test? ✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.” — `raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`, section 5 |\n| 2 | **Modem-RF / chipset validation for FR1 + FR3 and 6G readiness** using **CMX500 + RFU18** | Strong semiconductor fit because the DUT is a **Qualcomm Mobile Test Platform powered by Qualcomm Modem-RF System**, and the stated validation targets are **RF performance and protocol behavior** across FR1/FR3 aggregation. | “CMX500… extended with the new RFU18 board to provide coverage up to 18 GHz… path to extend existing testers towards 6G… Qualcomm… Mobile Test Platform powered by the Qualcomm® Modem-RF System, enabling comprehensive validation of RF performance and protocol behavior across the aggregated FR1 and FR3 bands.” — `raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md`, section 4 |\n| 3 | **5G NR / NR-NTN / RedCap / Wi‑Fi 7 signaling validation platform** using **CMX500** | Strong because it shows CMX500 as a future-proof callbox spanning cellular and non-cellular technologies in one instrument. This maps well to semiconductor modem/connectivity roadmap validation, especially where chipsets must support multiple standards. | “The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi‑Fi, all in a single instrument. The latest test feature sets, including… NR‑NTN, 5G RedCap, and Wi‑Fi 7, provides a long-term, future-proof callbox platform.” — `raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md`, section 3 |\n| 4 | **OTA performance validation for Wi‑Fi 7 and 5G RedCap devices** using **CMX500 + OTA chambers** | This is slightly less directly semiconductor-specific than production ATE or Qualcomm modem validation, but the evidence is strong for device performance validation workflows that semiconductor customers often need for reference designs, modules, and end-device enablement. | “EMITE’s… over-the-air chambers can now be combined with… R&S CMX500… supporting… LTE, 5G NR FR1… FR2… including… 5G RedCap… supports… Wi‑Fi 7… customers obtain a comprehensive environment for accurately assessing the performance of Wi‑Fi 7 as well as 5G Red Cap devices.” — `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 3 |\n| 5 | **Advanced 5G protocol/signaling validation: Release 19 MIMO, MAC/PDSCH, codeword behavior** | Opportunity is supported by evidence of unresolved signaling questions around MAC/PDSCH and high-layer MIMO behavior. This is more “R&D / protocol conformance / modem stack validation” than production. | “What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to know if two CW are used? Cross-check if there are FPGA reference sizes for TBS_LBRM.” — `raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md`, section 146 |\n\n**Bottom line:**  \nThe strongest vault-backed opportunity is **non-signaling semiconductor production test / ATE / multi-port production test** with **CMP180 / CMP200 / CMW100**. The strongest signaling-side opportunity is **CMX500-based modem-RF validation**, especially **FR1–FR3 aggregation, RF/protocol behavior validation, and 6G-readiness** with semiconductor players such as Qualcomm explicitly present in the evidence.\n\nNext, you could ask for this to be turned into a sales playbook by customer type: **chipset vendor, module maker, device OEM, test lab, or OSAT/production line**.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_Pbu2In1rV645I5wgBrscGMP0",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+          "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+          "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+           "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+           "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity? Please identify opportunities specifically for Signaling / Non-signaling Tester in the Semiconductor market, rank strongest opportunities if evidence supports ranking, and cite Raw evidence for each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "> Firstly, the MOSFETs in the current-fed full-bridge (T1-T4) are required to block a voltage of VDC/[N] (Equation 1) and not all of VDC or Vout. This enables the use of lower voltage class devices, resulting in a better RDS(on)*A and more effective exploitation of the non-linear ON resistance vs voltage dependency of semiconductor MOSFETs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 89,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.267979
+            },
+            {
+             "text": "What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to\nknow if two CW are used?\nCross-check if there are FPGA reference sizes for TBS_LBRM",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6eaf816ecfe746af",
+               "original_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "sha256": "6eaf816ecfe746af0094c65d69bb5a2df407a5da1ff8413e3178944abc0d1762",
+               "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+              "section": 146,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.265884
+            },
+            {
+             "text": "<!-- Slide number: 10 -->\n2025 Outlook & Strategic Opportunities\nMarket Growth: 17.5% - 21.7% CAGR through 2031\nIndia Surge: Expected to drive 20-25% growth in Taiwan shipments\nProduct Evolution: Wi-Fi 7, enhanced security, multi-band CPE\nSupply Chain Opportunity: Flexible manufacturing in India for India market",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-75d3180ed93f6430",
+               "original_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+               "sha256": "75d3180ed93f6430daaae5b26ffeae196785c3c9773c826ad56622fd0323af37",
+               "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+              "section": 21,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.472195
+            },
+            {
+             "text": "<!-- Slide number: 10 -->\n2025 Outlook & Strategic Opportunities\nMarket Growth: 17.5% - 21.7% CAGR through 2031\nIndia Surge: Expected to drive 20-25% growth in Taiwan shipments\nProduct Evolution: Wi-Fi 7, enhanced security, multi-band CPE\nSupply Chain Opportunity: Flexible manufacturing in India for India market",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0438f20c93d9c027",
+               "original_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024.md",
+               "sha256": "0438f20c93d9c027333c35f07086ac16c7368e1a1912a7755c4f863723604a0c",
+               "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.472195
+            },
+            {
+             "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.873049
+            },
+            {
+             "text": "The process of selecting the carrier (either NR UL or SUL) works as follows, the information about the configured\nSUL is transmitted as part ServingCellConfigCommonSIB in SIB1. The UE selects either a normal uplink or\nsupplementary UL carrier to perform random access based on the configured RSRP threshold rsrp-ThresholdSSB-\nSUL present in RACH-ConfigCommon. In other words, before initially accessing a cell, a UE will thus know if the\ncell to be accessed is an SUL cell or not. If the cell is an SUL cell and the device supports SUL operation for the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d3da923500d21bb0",
+               "original_ref": "raw/Knowledge/Supplementary Uplink Explained.md",
+               "sha256": "d3da923500d21bb038d918dc0d40adf2491177e557c5544dcc0547e1a3aac52f",
+               "raw_ref": "raw/Knowledge/Supplementary Uplink Explained.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Supplementary Uplink Explained.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.79954
+            },
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a4192ea568814a6",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.441518
+            }
+           ],
+           "text": "**FR3 / 5G NR R&D signaling test opportunity** — strongest because the RAW evidence explicitly names a “multi-technology, multi-channel one-box signaling tester” and says its versatility supports adaptation to different NR numerologies, making it “the ideal choice for FR3 research and development” [8].\n**5G NR MAC/PDSCH signaling and modem validation opportunity** — supported by evidence of unresolved signaling/test questions around MAC signaling, PDSCH allocation structure, whether two codewords are used, and FPGA reference sizes for TBS_LBRM, indicating a need for tester support in protocol/signaling validation workflows [2].\n**NTN, shared-spectrum, and UE capability signaling test opportunity** — supported by evidence that UE capabilities must indicate NTN SSB-based RRM measurements, support for multiple SMTCs, and propagation-delay compensation for NTN and shared spectrum channel access [5].\n**SUL / random-access carrier-selection signaling test opportunity** — supported by evidence that UEs select NR UL or SUL for random access based on SIB1 and RACH configuration signaling, including the configured RSRP threshold for SUL selection [6].\n**Beam-management and multi-cell reporting test opportunity** — supported by evidence that beam selection is performed across configured cells, M × L beams are reported in a single report instance, and maximum M/L values depend on UE capability and reporting configuration [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "What does the signaling from MAC look like? Additional info in one PDSCH allocation or two PDSCH allocation, how to\nknow if two CW are used?\nCross-check if there are FPGA reference sizes for TBS_LBRM",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-6eaf816ecfe746af",
+              "original_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+              "sha256": "6eaf816ecfe746af0094c65d69bb5a2df407a5da1ff8413e3178944abc0d1762",
+              "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/Release 19 MIMO With DL greater 4 PDSCH layers (6x6, 8x8).md",
+             "section": 146,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.265884
+           },
+           {
+            "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 57,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.873049
+           },
+           {
+            "text": "The process of selecting the carrier (either NR UL or SUL) works as follows, the information about the configured\nSUL is transmitted as part ServingCellConfigCommonSIB in SIB1. The UE selects either a normal uplink or\nsupplementary UL carrier to perform random access based on the configured RSRP threshold rsrp-ThresholdSSB-\nSUL present in RACH-ConfigCommon. In other words, before initially accessing a cell, a UE will thus know if the\ncell to be accessed is an SUL cell or not. If the cell is an SUL cell and the device supports SUL operation for the",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d3da923500d21bb0",
+              "original_ref": "raw/Knowledge/Supplementary Uplink Explained.md",
+              "sha256": "d3da923500d21bb038d918dc0d40adf2491177e557c5544dcc0547e1a3aac52f",
+              "raw_ref": "raw/Knowledge/Supplementary Uplink Explained.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/Supplementary Uplink Explained.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.79954
+           },
+           {
+            "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-484f76aad6f2ea3a",
+              "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+             "section": 494,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.647809
+           },
+           {
+            "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0a4192ea568814a6",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.441518
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_HDQOoKa8QPqhRUMUxFB5gjzf",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+          "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+          "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-db0df8f9f54d47ebadacd6893cb178cd",
+           "request_id": "request-db0df8f9f54d47ebadacd6893cb178cd",
+           "span_id": "span-db0df8f9f54d47ebadacd6893cb178cd",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Find Raw evidence for Semiconductor market opportunities specifically involving Rohde & Schwarz signaling or non-signaling testers such as CMX500, CMW, CMP180/200, chipset/modem/RFIC/IC validation, production, Wi-Fi 7, 5G NR, NTN, RedCap, FR3/6G. Return strongest supported opportunities with citations.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "configuration — no separate model for Wi-Fi or wireless testing. Easy to upgrade.\n• Wi-Fi signaling available on selected UXM models:\no E7515W = dedicated Wi-Fi connectivity platform\no E7515P = 5G platform with Wi-Fi as an additional capability\nCustomers who need 5G + Wi-Fi on one unit must use E7515P or E7515W; full cellular +",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3cd0a825d66aa879",
+               "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 58.447036
+            },
+            {
+             "text": "Landmine 5 – Production Scale\nAsk: “Do you need non-signaling ATE or multi-port production test?”\n✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.\nLandmine 6 – Wi-Fi Signaling\n(Reviewer note: keep it generic, not Wi-Fi 7)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e141f59158e470e8",
+               "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 54.596017
+            },
+            {
+             "text": "SPEAG, a global leader of dosimetric test systems, has combined the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") OBT from Rohde & Schwarz with its advanced specific absorption rate (SAR) measurement system, DASY8 <sup>3D</sup>. The CMX500 OBT emulates a 5G new radio (NR) FR1 base station, fulfilling the requirements for SAR testing of 5G NR devices and providing ease of use for the test engineer. The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi-Fi, all in a single instrument. The latest test feature sets, including state-of-the-art wireless technologies like NR-NTN, 5G RedCap, and Wi-Fi 7, provides a long-term, future-proof callbox platform.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-75010f6c18759b5a",
+               "original_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "sha256": "75010f6c18759b5a40842ce1fed2243990191ae6a580ab79596a571c190114db",
+               "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 54.145949
+            },
+            {
+             "text": "EMITE’s state-of-the-art over-the-air chambers can now be combined with the latest sophisticated testing features of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz. The radio communication tester offers a wide range of device testing capabilities, supporting cellular technologies such as LTE, 5G NR FR1 frequency range up to 8 GHz and FR2 millimeter wave frequency range up to 50 GHz, including the latest 5G RedCap technology. It also supports non-cellular technologies, including the latest Wi-Fi 7, all in a single instrument. As a consequence of this collaboration, EMITE’s customers obtain a comprehensive environment for accurately assessing the performance of Wi-Fi 7 as well as 5G Red Cap devices.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 49.148206
+            },
+            {
+             "text": "At the heart of the test setup is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz, extended with the new RFU18 board to provide coverage up to 18 GHz. RFU18 is a modular hardware upgrade for the CMX500 platform, giving customers a straightforward, cost-effective path to extend existing testers towards [6G](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/6g/6g-overview_253278.html \"6G\"). As device under test (DUT), Qualcomm Technologies provided a Mobile Test Platform (MTP) powered by the Qualcomm® Modem-RF System, enabling comprehensive validation of RF performance and protocol behavior across the aggregated FR1 and FR3 bands.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ab38a8570454352c",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 48.06442
+            },
+            {
+             "text": "- [[Rohde & Schwarz]]\n- [[R&S CMX500]]\n- [[R&S CMX500 OBT]]\n- [[R&S CMP180]]\n- [[R&S TS-PCT]]\n- [[Wi-Fi 7 R&D and production testing]]\n- [[Wi-Fi 8 RF signaling tests]]\n- [[ETS-Lindgren OTA turnkey testing solutions]]\n- [[FR3 13 GHz 5G NR connection demonstration]]\n- [[FR1-FR3 carrier aggregation demonstration]]\n- [[EEI labeling test solution]]\n- [[Viasat NB-NTN IoT test plan]]\n- [[5G NTN validation and testing]]\n- [[Search Space Set Group Switching]]\n- [[Generative AI user experience testing]]\n- [[5G NR SAR testing]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Mokry.md"
+             },
+             "score": 63.526349
+            },
+            {
+             "text": "- [[Rohde & Schwarz]]\n- [[R&S CMX500]]\n- [[R&S CMW500]]\n- [[EMITE OTA Test Systems]]\n- [[Wi-Fi 7 and 5G RedCap OTA measurements]]\n- [[5G RedCap OTA measurements]]\n- [[Wi-Fi 7 OTA MIMO stress testing]]\n- [[OTA testing]]\n- [[MIMO]]\n- [[IEEE 802.11be]]\n- [[Wi-Fi 7]]\n- [[5G RedCap]]\n- [[NB-IoT NTN]]\n- [[NR NTN]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/EMITE.md"
+             },
+             "score": 57.253463
+            },
+            {
+             "text": "- [[Rohde & Schwarz]]\n- [[R&S CMX500]]\n- [[R&S NTN signaling solutions]]\n- [[5G NTN validation and testing]]\n- [[Non-Terrestrial Network]]\n- [[NR-NTN]]\n- [[5G IoT-NTN]]\n- [[Peter Mariager]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+             },
+             "score": 52.023387
+            }
+           ],
+           "text": "- **Non-signaling production / ATE / multi-port production test:** CMP180, CMP200, and CMW100 are identified for customers needing “non-signaling ATE or multi-port production test,” with the passage stating this is “Only R&S.” [2]\n\n- **CMX500 for chipset/modem/RF system validation across FR1 + FR3 and toward 6G:** The CMX500 with RFU18 extends coverage up to 18 GHz and provides a path toward 6G; Qualcomm provided a Mobile Test Platform powered by the Qualcomm Modem-RF System for validation of RF performance and protocol behavior across aggregated FR1 and FR3 bands. [5]\n\n- **CMX500 for 5G NR, NTN, RedCap, and Wi-Fi 7 device/SAR validation:** The CMX500 emulates a 5G NR FR1 base station for SAR testing of 5G NR devices, supports LTE, 5G NR, and Wi-Fi in one instrument, and includes NR-NTN, 5G RedCap, and Wi-Fi 7 feature sets. [3]\n\n- **CMX500 for OTA performance testing of Wi-Fi 7 and 5G RedCap devices:** EMITE OTA chambers combined with the CMX500 support LTE, 5G NR FR1 up to 8 GHz, FR2 mmWave up to 50 GHz, 5G RedCap, and Wi-Fi 7, creating an environment to assess Wi-Fi 7 and 5G RedCap device performance. [4]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Landmine 5 – Production Scale\nAsk: “Do you need non-signaling ATE or multi-port production test?”\n✔ If yes → CMP180 / CMP200 / CMW100 = Only R&S.\nLandmine 6 – Wi-Fi Signaling\n(Reviewer note: keep it generic, not Wi-Fi 7)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e141f59158e470e8",
+              "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 54.596017
+           },
+           {
+            "text": "SPEAG, a global leader of dosimetric test systems, has combined the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") OBT from Rohde & Schwarz with its advanced specific absorption rate (SAR) measurement system, DASY8 <sup>3D</sup>. The CMX500 OBT emulates a 5G new radio (NR) FR1 base station, fulfilling the requirements for SAR testing of 5G NR devices and providing ease of use for the test engineer. The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi-Fi, all in a single instrument. The latest test feature sets, including state-of-the-art wireless technologies like NR-NTN, 5G RedCap, and Wi-Fi 7, provides a long-term, future-proof callbox platform.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-75010f6c18759b5a",
+              "original_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "sha256": "75010f6c18759b5a40842ce1fed2243990191ae6a580ab79596a571c190114db",
+              "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 54.145949
+           },
+           {
+            "text": "EMITE’s state-of-the-art over-the-air chambers can now be combined with the latest sophisticated testing features of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz. The radio communication tester offers a wide range of device testing capabilities, supporting cellular technologies such as LTE, 5G NR FR1 frequency range up to 8 GHz and FR2 millimeter wave frequency range up to 50 GHz, including the latest 5G RedCap technology. It also supports non-cellular technologies, including the latest Wi-Fi 7, all in a single instrument. As a consequence of this collaboration, EMITE’s customers obtain a comprehensive environment for accurately assessing the performance of Wi-Fi 7 as well as 5G Red Cap devices.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-756bf47cc8d552b2",
+              "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 49.148206
+           },
+           {
+            "text": "At the heart of the test setup is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz, extended with the new RFU18 board to provide coverage up to 18 GHz. RFU18 is a modular hardware upgrade for the CMX500 platform, giving customers a straightforward, cost-effective path to extend existing testers towards [6G](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/6g/6g-overview_253278.html \"6G\"). As device under test (DUT), Qualcomm Technologies provided a Mobile Test Platform (MTP) powered by the Qualcomm® Modem-RF System, enabling comprehensive validation of RF performance and protocol behavior across the aggregated FR1 and FR3 bands.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ab38a8570454352c",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 48.06442
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

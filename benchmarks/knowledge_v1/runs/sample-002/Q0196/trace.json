@@ -1,0 +1,443 @@
+{
+ "question": {
+  "id": "Q0196",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "market": "Wireless Communication",
+  "product": "Vector Network Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-1a656b40d54145bdbbb9b54a69538d79",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 89.531,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-1a656b40d54145bdbbb9b54a69538d79",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:46:06.212550Z",
+    "updated_at": "2026-10-07T09:47:35.677774Z",
+    "messages": [
+     {
+      "message_id": "message-6a45af6976bd44ab92e66066417e9637",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T09:46:06.220571Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-9fe36bb734f64f209bd276ff6daf7aaa",
+      "role": "assistant",
+      "text": "Based on the current vault evidence, the strongest VNA opportunities in Wireless Communication are these — with an important caveat: the vault gives **direct evidence for wireless test demand** and **direct evidence for VNA capabilities**, but only some passages directly connect VNA to a specific wireless use case.\n\n## 1. Publicly funded wireless R&D / test-and-evaluation labs\n\n**Opportunity:** Position VNAs, especially ZNB/ZNA-class instruments, into wireless R&D and test labs funded by Open RAN / O-RU / wireless infrastructure programs.\n\n**Why it looks strong:** The vault shows significant public funding aimed specifically at wireless infrastructure R&D and test/evaluation. This creates budget and demand for rigorous RF test infrastructure. VNA relevance is supported by the vault’s evidence that R&S ZNB VNAs provide uncertainty models and real-time measurement uncertainty analysis, which fits formal test-and-evaluation work.\n\n**Evidence:**\n- NTIA / Public Wireless Supply Chain Innovation Fund: **$1.5B over 10 years**, NOFO 1 focused on **Research and Development** and **Testing and Evaluation**, with **17 awards totaling $140M**; R&S received about **573 kUSD** in orders.  \n  Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159.\n- R&S ZNB3020 VNA has a **VNA uncertainty model** applicable to **real-time measurement uncertainty analysis** options.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 299.\n- R&S ZNB3032/ZNB3044 likewise list a **VNA uncertainty model** for real-time uncertainty analysis.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 310.\n\n**Evidence strength:** Strong market pull; VNA fit is well supported technically, but the vault passage does not explicitly say “VNAs for O-RU testing.”\n\n---\n\n## 2. Satellite / NTN communications test, especially group-delay workflows\n\n**Opportunity:** Use VNAs for satellite communications payload and NTN-adjacent RF characterization, especially group-delay measurement and network-analysis workflows.\n\n**Why it looks strong:** This is the clearest technical VNA use case in the returned evidence. The vault directly lists an **R&S ZNA vector network analyzer** in a group-delay measurement setup for satellite payload testing. Separately, the vault shows wireless communications moving strongly into NTN / satellite-based 5G test scenarios.\n\n**Evidence:**\n- A satellite payload testing application compares group-delay measurement setups and lists a **“Vector network analyzer”** setup using **R&S ZNA vector network analyzer** with ZNA options.  \n  Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10.\n- R&S highlights CMX500 expansion for **satellite-based communication**, including **Full Satellite Access Network emulation** and **gNB / 5G core network emulation** for satellite network operators.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md`, section 7.\n\n**Evidence strength:** Strongest direct VNA application evidence among the results; the NTN market linkage is supported, though the CMX500 passage itself is not about VNA.\n\n---\n\n## 3. Precision RF component and subsystem characterization for wireless test labs\n\n**Opportunity:** Sell VNAs as precision characterization platforms for wireless RF chains where uncertainty-aware measurements are required.\n\n**Why it looks strong:** The vault has direct product evidence for VNA uncertainty models and real-time uncertainty analysis. In wireless communications, this can support lab-grade characterization and repeatable qualification work. The market need is reinforced by the broader evidence of wireless testing and evaluation demand.\n\n**Evidence:**\n- ZNB3020 includes a **Vector Network Analyzer uncertainty model** for **ZNB3-K50 / ZNB3-K50P real-time measurement uncertainty analysis**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 299.\n- ZNB3032/ZNB3044 include the same VNA uncertainty model capability.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 310.\n- Wireless infrastructure funding is explicitly aimed at **R&D** and **Testing and Evaluation**.  \n  Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159.\n\n**Evidence strength:** Strong technical VNA evidence; wireless application is inferred from adjacent wireless test/evaluation demand in the vault.\n\n---\n\n## 4. Future OTA / chamber ecosystems for Wi‑Fi 7, 5G RedCap, NB-IoT NTN and NR NTN\n\n**Opportunity:** Attach VNA-based RF characterization and calibration workflows to advanced OTA chamber ecosystems serving Wi‑Fi 7, 5G RedCap and NTN device testing.\n\n**Why it looks promising:** The vault shows OTA chambers being expanded for current and future wireless technologies, including planned NB-IoT NTN and NR NTN capabilities. However, the returned evidence does **not** directly state VNA integration into these OTA workflows, so this is more speculative than the satellite group-delay case.\n\n**Evidence:**\n- EMITE OTA chambers are described as equipped for **current and future wireless technologies**, with next-step collaboration looking at **NB-IoT NTN and NR NTN** test capabilities.  \n  Citation: `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 4.\n- ZNB-series VNAs support real-time uncertainty analysis, which is relevant to controlled measurement environments.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, sections 299 and 310.\n\n**Evidence strength:** Medium. Strong evidence for OTA wireless growth, but VNA role is not directly stated in the cited OTA passage.\n\n---\n\n## Bottom line\n\nThe best-supported VNA opportunities are:\n\n1. **Satellite / NTN and satellite payload testing**, because the vault directly cites R&S ZNA in group-delay measurement setups.  \n2. **Wireless R&D and test/evaluation labs**, especially publicly funded Open RAN / O-RU-style programs, because the vault shows major funding and test/evaluation focus.  \n3. **Uncertainty-aware precision RF characterization**, because ZNB VNA uncertainty-analysis capabilities are directly documented.  \n4. **OTA / future wireless chamber ecosystems**, promising but less directly evidenced for VNA attachment.",
+      "created_at": "2026-10-07T09:47:35.677774Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-d070c482d330476d883e40e56f43e638",
+       "request_id": "request-d070c482d330476d883e40e56f43e638",
+       "span_id": "span-d070c482d330476d883e40e56f43e638",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the current vault evidence, the strongest VNA opportunities in Wireless Communication are these — with an important caveat: the vault gives **direct evidence for wireless test demand** and **direct evidence for VNA capabilities**, but only some passages directly connect VNA to a specific wireless use case.\n\n## 1. Publicly funded wireless R&D / test-and-evaluation labs\n\n**Opportunity:** Position VNAs, especially ZNB/ZNA-class instruments, into wireless R&D and test labs funded by Open RAN / O-RU / wireless infrastructure programs.\n\n**Why it looks strong:** The vault shows significant public funding aimed specifically at wireless infrastructure R&D and test/evaluation. This creates budget and demand for rigorous RF test infrastructure. VNA relevance is supported by the vault’s evidence that R&S ZNB VNAs provide uncertainty models and real-time measurement uncertainty analysis, which fits formal test-and-evaluation work.\n\n**Evidence:**\n- NTIA / Public Wireless Supply Chain Innovation Fund: **$1.5B over 10 years**, NOFO 1 focused on **Research and Development** and **Testing and Evaluation**, with **17 awards totaling $140M**; R&S received about **573 kUSD** in orders.  \n  Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159.\n- R&S ZNB3020 VNA has a **VNA uncertainty model** applicable to **real-time measurement uncertainty analysis** options.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 299.\n- R&S ZNB3032/ZNB3044 likewise list a **VNA uncertainty model** for real-time uncertainty analysis.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 310.\n\n**Evidence strength:** Strong market pull; VNA fit is well supported technically, but the vault passage does not explicitly say “VNAs for O-RU testing.”\n\n---\n\n## 2. Satellite / NTN communications test, especially group-delay workflows\n\n**Opportunity:** Use VNAs for satellite communications payload and NTN-adjacent RF characterization, especially group-delay measurement and network-analysis workflows.\n\n**Why it looks strong:** This is the clearest technical VNA use case in the returned evidence. The vault directly lists an **R&S ZNA vector network analyzer** in a group-delay measurement setup for satellite payload testing. Separately, the vault shows wireless communications moving strongly into NTN / satellite-based 5G test scenarios.\n\n**Evidence:**\n- A satellite payload testing application compares group-delay measurement setups and lists a **“Vector network analyzer”** setup using **R&S ZNA vector network analyzer** with ZNA options.  \n  Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10.\n- R&S highlights CMX500 expansion for **satellite-based communication**, including **Full Satellite Access Network emulation** and **gNB / 5G core network emulation** for satellite network operators.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md`, section 7.\n\n**Evidence strength:** Strongest direct VNA application evidence among the results; the NTN market linkage is supported, though the CMX500 passage itself is not about VNA.\n\n---\n\n## 3. Precision RF component and subsystem characterization for wireless test labs\n\n**Opportunity:** Sell VNAs as precision characterization platforms for wireless RF chains where uncertainty-aware measurements are required.\n\n**Why it looks strong:** The vault has direct product evidence for VNA uncertainty models and real-time uncertainty analysis. In wireless communications, this can support lab-grade characterization and repeatable qualification work. The market need is reinforced by the broader evidence of wireless testing and evaluation demand.\n\n**Evidence:**\n- ZNB3020 includes a **Vector Network Analyzer uncertainty model** for **ZNB3-K50 / ZNB3-K50P real-time measurement uncertainty analysis**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 299.\n- ZNB3032/ZNB3044 include the same VNA uncertainty model capability.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 310.\n- Wireless infrastructure funding is explicitly aimed at **R&D** and **Testing and Evaluation**.  \n  Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159.\n\n**Evidence strength:** Strong technical VNA evidence; wireless application is inferred from adjacent wireless test/evaluation demand in the vault.\n\n---\n\n## 4. Future OTA / chamber ecosystems for Wi‑Fi 7, 5G RedCap, NB-IoT NTN and NR NTN\n\n**Opportunity:** Attach VNA-based RF characterization and calibration workflows to advanced OTA chamber ecosystems serving Wi‑Fi 7, 5G RedCap and NTN device testing.\n\n**Why it looks promising:** The vault shows OTA chambers being expanded for current and future wireless technologies, including planned NB-IoT NTN and NR NTN capabilities. However, the returned evidence does **not** directly state VNA integration into these OTA workflows, so this is more speculative than the satellite group-delay case.\n\n**Evidence:**\n- EMITE OTA chambers are described as equipped for **current and future wireless technologies**, with next-step collaboration looking at **NB-IoT NTN and NR NTN** test capabilities.  \n  Citation: `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 4.\n- ZNB-series VNAs support real-time uncertainty analysis, which is relevant to controlled measurement environments.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, sections 299 and 310.\n\n**Evidence strength:** Medium. Strong evidence for OTA wireless growth, but VNA role is not directly stated in the cited OTA passage.\n\n---\n\n## Bottom line\n\nThe best-supported VNA opportunities are:\n\n1. **Satellite / NTN and satellite payload testing**, because the vault directly cites R&S ZNA in group-delay measurement setups.  \n2. **Wireless R&D and test/evaluation labs**, especially publicly funded Open RAN / O-RU-style programs, because the vault shows major funding and test/evaluation focus.  \n3. **Uncertainty-aware precision RF characterization**, because ZNB VNA uncertainty-analysis capabilities are directly documented.  \n4. **OTA / future wireless chamber ecosystems**, promising but less directly evidenced for VNA attachment.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-d070c482d330476d883e40e56f43e638",
+      "request_id": "request-d070c482d330476d883e40e56f43e638",
+      "span_id": "span-d070c482d330476d883e40e56f43e638",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-d070c482d330476d883e40e56f43e638",
+       "request_id": "request-d070c482d330476d883e40e56f43e638",
+       "span_id": "span-d070c482d330476d883e40e56f43e638",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the current vault evidence, the strongest VNA opportunities in Wireless Communication are these — with an important caveat: the vault gives **direct evidence for wireless test demand** and **direct evidence for VNA capabilities**, but only some passages directly connect VNA to a specific wireless use case.\n\n## 1. Publicly funded wireless R&D / test-and-evaluation labs\n\n**Opportunity:** Position VNAs, especially ZNB/ZNA-class instruments, into wireless R&D and test labs funded by Open RAN / O-RU / wireless infrastructure programs.\n\n**Why it looks strong:** The vault shows significant public funding aimed specifically at wireless infrastructure R&D and test/evaluation. This creates budget and demand for rigorous RF test infrastructure. VNA relevance is supported by the vault’s evidence that R&S ZNB VNAs provide uncertainty models and real-time measurement uncertainty analysis, which fits formal test-and-evaluation work.\n\n**Evidence:**\n- NTIA / Public Wireless Supply Chain Innovation Fund: **$1.5B over 10 years**, NOFO 1 focused on **Research and Development** and **Testing and Evaluation**, with **17 awards totaling $140M**; R&S received about **573 kUSD** in orders.  \n  Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159.\n- R&S ZNB3020 VNA has a **VNA uncertainty model** applicable to **real-time measurement uncertainty analysis** options.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 299.\n- R&S ZNB3032/ZNB3044 likewise list a **VNA uncertainty model** for real-time uncertainty analysis.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 310.\n\n**Evidence strength:** Strong market pull; VNA fit is well supported technically, but the vault passage does not explicitly say “VNAs for O-RU testing.”\n\n---\n\n## 2. Satellite / NTN communications test, especially group-delay workflows\n\n**Opportunity:** Use VNAs for satellite communications payload and NTN-adjacent RF characterization, especially group-delay measurement and network-analysis workflows.\n\n**Why it looks strong:** This is the clearest technical VNA use case in the returned evidence. The vault directly lists an **R&S ZNA vector network analyzer** in a group-delay measurement setup for satellite payload testing. Separately, the vault shows wireless communications moving strongly into NTN / satellite-based 5G test scenarios.\n\n**Evidence:**\n- A satellite payload testing application compares group-delay measurement setups and lists a **“Vector network analyzer”** setup using **R&S ZNA vector network analyzer** with ZNA options.  \n  Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10.\n- R&S highlights CMX500 expansion for **satellite-based communication**, including **Full Satellite Access Network emulation** and **gNB / 5G core network emulation** for satellite network operators.  \n  Citation: `raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md`, section 7.\n\n**Evidence strength:** Strongest direct VNA application evidence among the results; the NTN market linkage is supported, though the CMX500 passage itself is not about VNA.\n\n---\n\n## 3. Precision RF component and subsystem characterization for wireless test labs\n\n**Opportunity:** Sell VNAs as precision characterization platforms for wireless RF chains where uncertainty-aware measurements are required.\n\n**Why it looks strong:** The vault has direct product evidence for VNA uncertainty models and real-time uncertainty analysis. In wireless communications, this can support lab-grade characterization and repeatable qualification work. The market need is reinforced by the broader evidence of wireless testing and evaluation demand.\n\n**Evidence:**\n- ZNB3020 includes a **Vector Network Analyzer uncertainty model** for **ZNB3-K50 / ZNB3-K50P real-time measurement uncertainty analysis**.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 299.\n- ZNB3032/ZNB3044 include the same VNA uncertainty model capability.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, section 310.\n- Wireless infrastructure funding is explicitly aimed at **R&D** and **Testing and Evaluation**.  \n  Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159.\n\n**Evidence strength:** Strong technical VNA evidence; wireless application is inferred from adjacent wireless test/evaluation demand in the vault.\n\n---\n\n## 4. Future OTA / chamber ecosystems for Wi‑Fi 7, 5G RedCap, NB-IoT NTN and NR NTN\n\n**Opportunity:** Attach VNA-based RF characterization and calibration workflows to advanced OTA chamber ecosystems serving Wi‑Fi 7, 5G RedCap and NTN device testing.\n\n**Why it looks promising:** The vault shows OTA chambers being expanded for current and future wireless technologies, including planned NB-IoT NTN and NR NTN capabilities. However, the returned evidence does **not** directly state VNA integration into these OTA workflows, so this is more speculative than the satellite group-delay case.\n\n**Evidence:**\n- EMITE OTA chambers are described as equipped for **current and future wireless technologies**, with next-step collaboration looking at **NB-IoT NTN and NR NTN** test capabilities.  \n  Citation: `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 4.\n- ZNB-series VNAs support real-time uncertainty analysis, which is relevant to controlled measurement environments.  \n  Citation: `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`, sections 299 and 310.\n\n**Evidence strength:** Medium. Strong evidence for OTA wireless growth, but VNA role is not directly stated in the cited OTA passage.\n\n---\n\n## Bottom line\n\nThe best-supported VNA opportunities are:\n\n1. **Satellite / NTN and satellite payload testing**, because the vault directly cites R&S ZNA in group-delay measurement setups.  \n2. **Wireless R&D and test/evaluation labs**, especially publicly funded Open RAN / O-RU-style programs, because the vault shows major funding and test/evaluation focus.  \n3. **Uncertainty-aware precision RF characterization**, because ZNB VNA uncertainty-analysis capabilities are directly documented.  \n4. **OTA / future wireless chamber ecosystems**, promising but less directly evidenced for VNA attachment.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_sRaXdckEBuDOw1zzkldWx1hX",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-d070c482d330476d883e40e56f43e638",
+          "request_id": "request-d070c482d330476d883e40e56f43e638",
+          "span_id": "span-d070c482d330476d883e40e56f43e638",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-d070c482d330476d883e40e56f43e638",
+           "request_id": "request-d070c482d330476d883e40e56f43e638",
+           "span_id": "span-d070c482d330476d883e40e56f43e638",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity? Please focus on VNA opportunities in wireless communications and cite Raw evidence for each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "![](Picture1.jpg)\nNational Telecommunications and Information Administration: $1.5B appropriated for infrastructure development over next 10 years through the CHIPS act and series of Funding opportunities administered under the Public Wireless Supply Chain Innovation Fund (Innovation Fund).\nNotice of Funding Opportunity (NOFO 1) April-August 2023:\n2 focus areas for awards: Research and Development, Testing and Evaluation\n17 awards winners\n$140M total awards\nRohde & Schwarz value of received orders: ~573 kUSD",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8ea3b55008b7c337",
+               "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+               "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "section": 159,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.233403
+            },
+            {
+             "text": "Alexander Pabst, Vice President of Wireless Communications at Rohde & Schwarz emphasizes the importance of energy-saving initiatives within the wireless communication industry: “We are excited that the R&S CMX500 has been selected to be part of the SmartViser test solution. Energy efficiency is a key issue in wireless communications, and we are confident that this collaborative effort with SmartViser will make it easier for mobile device manufacturers to test their products for compliance with this new regulation.”",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dd68e5dc1441065f",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.767713
+            },
+            {
+             "text": "While the CMX500 is an established instrument in the 5G ecosystem, Rohde & Schwarz has recently expanded its functionalities significantly to address the specific complexities of satellite-based communication. The CMX500 supports two primary testing configurations: Full Satellite Access Network (SAN) emulation for device manufacturers, simulating the complete NTN architecture for comprehensive device testing, and gNB and 5G core network emulation for satellite network operators, validating satellite network components against standards-compliant cellular technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2f52d1674ba65597",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "sha256": "2f52d1674ba6559771a562aa583b8f226233e65ee10d2d9aca7f0659f4a3254e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.348805
+            },
+            {
+             "text": "R&S®ZNB3020 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 299,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.847991
+            },
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.737166
+            },
+            {
+             "text": "R&S®ZNB3032/ZNB3044 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 310,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.473853
+            },
+            {
+             "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.398114
+            },
+            {
+             "text": "Alexander Pabst, Vice President of Wireless Communications at Rohde & Schwarz, said: “We are proud to collaborate with KT and Qualcomm in showcasing the immense potential of AI in next-generation networks. The CMX500’s ability to verify these performance gains underscores our commitment to providing leading-edge test and measurement solutions for the future of communication technologies.”",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c78ae7048c7db92f",
+               "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+               "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.644904
+            }
+           ],
+           "text": "**Publicly funded wireless R&D, testing, and evaluation programs** — The NTIA/Public Wireless Supply Chain Innovation Fund has $1.5B appropriated over 10 years, and NOFO 1 focused on “Research and Development” and “Testing and Evaluation,” with 17 awards totaling $140M and Rohde & Schwarz receiving about 573 kUSD in orders [1].\nThe VNA fit is supported by RAW evidence that R&S ZNB-series vector network analyzers have uncertainty models and real-time measurement uncertainty analysis options, which align with rigorous test-and-evaluation work [4][6].\n**Precision VNA measurement/uncertainty analysis for wireless test labs** — RAW evidence identifies R&S ZNB3020 and ZNB3032/ZNB3044 as vector network analyzers with uncertainty models applicable to real-time measurement uncertainty analysis options [4][6].\nThis is an opportunity in wireless communications because the same vault evidence shows active wireless-industry demand for testing and evaluation through the Innovation Fund awards [1].\n**VNA-based group-delay measurement workflows for communications testing** — RAW evidence directly compares group-delay test setups and lists a “Vector network analyzer” setup using an R&S ZNA vector network analyzer with related options [5].\nThis is a wireless-communications opportunity only indirectly supported by the vault, because the RAW passages establish broader wireless testing demand but do not explicitly tie group-delay VNA measurements to a named wireless use case [1][5].\n**Potential VNA attachment to satellite/NTN and future wireless OTA test ecosystems** — RAW evidence shows expanding wireless test needs around satellite-based communication, including CMX500 support for Full Satellite Access Network emulation and gNB/5G core network emulation for satellite network operators [3].\nRAW evidence also shows OTA chambers being positioned for “current and future wireless technologies” and future integration of NB-IoT NTN and NR NTN test capabilities [7].\nThe VNA angle is indirect: the vault separately supports R&S VNA uncertainty-analysis capability, but does not directly state VNA use in NTN/OTA testing [4][6][7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "![](Picture1.jpg)\nNational Telecommunications and Information Administration: $1.5B appropriated for infrastructure development over next 10 years through the CHIPS act and series of Funding opportunities administered under the Public Wireless Supply Chain Innovation Fund (Innovation Fund).\nNotice of Funding Opportunity (NOFO 1) April-August 2023:\n2 focus areas for awards: Research and Development, Testing and Evaluation\n17 awards winners\n$140M total awards\nRohde & Schwarz value of received orders: ~573 kUSD",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8ea3b55008b7c337",
+              "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+             "section": 159,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.233403
+           },
+           {
+            "text": "While the CMX500 is an established instrument in the 5G ecosystem, Rohde & Schwarz has recently expanded its functionalities significantly to address the specific complexities of satellite-based communication. The CMX500 supports two primary testing configurations: Full Satellite Access Network (SAN) emulation for device manufacturers, simulating the complete NTN architecture for comprehensive device testing, and gNB and 5G core network emulation for satellite network operators, validating satellite network components against standards-compliant cellular technologies.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-2f52d1674ba65597",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "sha256": "2f52d1674ba6559771a562aa583b8f226233e65ee10d2d9aca7f0659f4a3254e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.348805
+           },
+           {
+            "text": "R&S®ZNB3020 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-eca8f030d797ca58",
+              "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+             "section": 299,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.847991
+           },
+           {
+            "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.737166
+           },
+           {
+            "text": "R&S®ZNB3032/ZNB3044 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-eca8f030d797ca58",
+              "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+             "section": 310,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.473853
+           },
+           {
+            "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-756bf47cc8d552b2",
+              "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.398114
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

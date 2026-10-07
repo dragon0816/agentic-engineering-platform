@@ -1,0 +1,126 @@
+{
+ "question": {
+  "id": "Q1001",
+  "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "RF / Measurement Fundamentals",
+  "topic": "EVM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-153fbbe7d54546169e35a48bf8e71669",
+ "exchange": {
+  "sent": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 55.938,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-153fbbe7d54546169e35a48bf8e71669",
+    "actor": "leo.chi",
+    "title": "What is EVM, and which product-related measurement decisions depend on u…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:42:51.100091Z",
+    "updated_at": "2026-10-07T10:43:44.969030Z",
+    "messages": [
+     {
+      "message_id": "message-535c549e40ea406e86614024eef96e98",
+      "role": "user",
+      "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T10:42:51.107257Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-77ab768c26274b7e9562c04b29a4de86",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: the RS knowledge tool returned insufficient evidence. The following is general RF test-and-measurement knowledge, not from the knowledge base.\n\n**EVM — Error Vector Magnitude** — is a modulation-quality metric. It compares the **ideal constellation point** a transmitter should produce with the **actual measured symbol** after impairments such as noise, distortion, phase error, IQ imbalance, frequency error, PA compression, filtering, or synchronization error.\n\nIn simple terms:\n\n> **EVM tells you how far the measured signal is from the perfect signal.**\n\nIt is usually expressed as **%** or **dB**. Lower EVM means better modulation quality.\n\nExample:\n- Small EVM → clean QAM/OFDM signal, good transmitter quality.\n- High EVM → constellation points are smeared or shifted, indicating degraded RF/baseband performance.\n\n## Product-related measurement decisions that depend on understanding EVM\n\nUnderstanding EVM affects several product and measurement choices:\n\n### 1. Choosing the right signal analyzer\nYou need an analyzer with enough:\n- modulation-analysis support,\n- bandwidth,\n- dynamic range,\n- phase-noise performance,\n- residual EVM performance.\n\nFor example, measuring high-order modulation such as **256QAM, 1024QAM, or 4096QAM** requires a better analyzer than measuring QPSK or 16QAM.\n\n### 2. Choosing the right signal generator\nIf you are generating a reference signal to test a receiver or device, the generator’s own modulation quality must be better than the device requirement. Otherwise, the generator’s residual EVM can dominate the result.\n\nSo EVM knowledge affects whether you choose a higher-performance vector signal generator versus a lower-cost one.\n\n### 3. Deciding required analysis bandwidth\nModern signals — 5G NR, Wi-Fi 6/7, wideband radar-like waveforms — require enough instantaneous bandwidth. If the analyzer bandwidth is too narrow, the EVM result may be invalid or misleading.\n\n### 4. Selecting options for 5G, LTE, Wi-Fi, or other standards\nEVM is usually standard-specific. Different technologies define:\n- measurement bandwidth,\n- equalization method,\n- reference signal structure,\n- averaging,\n- symbol exclusions,\n- limits per modulation type.\n\nSo product options for **5G NR, LTE, WLAN/Wi-Fi, Bluetooth, satellite, or digital video** measurement can depend on what EVM standard you need to test.\n\n### 5. Deciding whether phase noise performance is sufficient\nFor high-order modulation and high carrier frequencies, phase noise can strongly affect EVM. This matters when choosing:\n- RF signal generators,\n- local oscillator sources,\n- signal analyzers,\n- frequency converters,\n- mmWave test setups.\n\n### 6. Evaluating power amplifier linearity\nEVM is often used to judge whether a power amplifier is too nonlinear. It helps decide:\n- operating output power,\n- digital predistortion settings,\n- PA backoff,\n- linearization method,\n- whether ACLR alone is enough or EVM must also be measured.\n\n### 7. Choosing conducted vs. OTA test setup\nFor wireless products, EVM can be measured:\n- conducted, through cables, or\n- OTA, through antennas and chambers.\n\nOTA EVM adds effects from antennas, chambers, alignment, path loss, and spatial behavior. This affects whether you need a conducted RF tester, an OTA chamber, antenna positioner, or channel emulator.\n\n### 8. Deciding calibration and de-embedding needs\nBad cables, fixtures, adapters, converters, or frequency extenders can worsen measured EVM. Understanding EVM helps decide whether you need:\n- fixture calibration,\n- path loss correction,\n- IQ calibration,\n- de-embedding,\n- external reference clocks,\n- improved cabling or attenuators.\n\n### 9. Setting product pass/fail limits\nEVM is often used in production testing. You need to know:\n- the standard’s EVM limit,\n- the product design margin,\n- measurement uncertainty,\n- analyzer residual EVM,\n- guard bands.\n\nThis affects production test limits and whether a device passes or fails.\n\n### 10. Deciding between debug, compliance, and production equipment\nDifferent use cases need different EVM capability:\n\n| Use case | EVM requirement |\n|---|---|\n| R&D debug | Highest accuracy, deep analysis |\n| Pre-compliance | Standard-specific measurement support |\n| Manufacturing | Fast, repeatable pass/fail |\n| Field service | Portable, adequate accuracy |\n| OTA validation | Chamber and antenna-aware measurement |\n\nSo EVM understanding helps choose between high-end lab instruments, production testers, compact analyzers, or integrated communication testers.\n\nIn short: **EVM is a key measure of modulation quality, and it directly influences choices of analyzer, generator, bandwidth, standards options, calibration setup, OTA/conducted method, PA test strategy, and production pass/fail limits.**",
+      "created_at": "2026-10-07T10:43:44.969030Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-6f2b8b3fa2924daebe7069c2d9b6a682",
+       "request_id": "request-6f2b8b3fa2924daebe7069c2d9b6a682",
+       "span_id": "span-6f2b8b3fa2924daebe7069c2d9b6a682",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: the RS knowledge tool returned insufficient evidence. The following is general RF test-and-measurement knowledge, not from the knowledge base.\n\n**EVM — Error Vector Magnitude** — is a modulation-quality metric. It compares the **ideal constellation point** a transmitter should produce with the **actual measured symbol** after impairments such as noise, distortion, phase error, IQ imbalance, frequency error, PA compression, filtering, or synchronization error.\n\nIn simple terms:\n\n> **EVM tells you how far the measured signal is from the perfect signal.**\n\nIt is usually expressed as **%** or **dB**. Lower EVM means better modulation quality.\n\nExample:\n- Small EVM → clean QAM/OFDM signal, good transmitter quality.\n- High EVM → constellation points are smeared or shifted, indicating degraded RF/baseband performance.\n\n## Product-related measurement decisions that depend on understanding EVM\n\nUnderstanding EVM affects several product and measurement choices:\n\n### 1. Choosing the right signal analyzer\nYou need an analyzer with enough:\n- modulation-analysis support,\n- bandwidth,\n- dynamic range,\n- phase-noise performance,\n- residual EVM performance.\n\nFor example, measuring high-order modulation such as **256QAM, 1024QAM, or 4096QAM** requires a better analyzer than measuring QPSK or 16QAM.\n\n### 2. Choosing the right signal generator\nIf you are generating a reference signal to test a receiver or device, the generator’s own modulation quality must be better than the device requirement. Otherwise, the generator’s residual EVM can dominate the result.\n\nSo EVM knowledge affects whether you choose a higher-performance vector signal generator versus a lower-cost one.\n\n### 3. Deciding required analysis bandwidth\nModern signals — 5G NR, Wi-Fi 6/7, wideband radar-like waveforms — require enough instantaneous bandwidth. If the analyzer bandwidth is too narrow, the EVM result may be invalid or misleading.\n\n### 4. Selecting options for 5G, LTE, Wi-Fi, or other standards\nEVM is usually standard-specific. Different technologies define:\n- measurement bandwidth,\n- equalization method,\n- reference signal structure,\n- averaging,\n- symbol exclusions,\n- limits per modulation type.\n\nSo product options for **5G NR, LTE, WLAN/Wi-Fi, Bluetooth, satellite, or digital video** measurement can depend on what EVM standard you need to test.\n\n### 5. Deciding whether phase noise performance is sufficient\nFor high-order modulation and high carrier frequencies, phase noise can strongly affect EVM. This matters when choosing:\n- RF signal generators,\n- local oscillator sources,\n- signal analyzers,\n- frequency converters,\n- mmWave test setups.\n\n### 6. Evaluating power amplifier linearity\nEVM is often used to judge whether a power amplifier is too nonlinear. It helps decide:\n- operating output power,\n- digital predistortion settings,\n- PA backoff,\n- linearization method,\n- whether ACLR alone is enough or EVM must also be measured.\n\n### 7. Choosing conducted vs. OTA test setup\nFor wireless products, EVM can be measured:\n- conducted, through cables, or\n- OTA, through antennas and chambers.\n\nOTA EVM adds effects from antennas, chambers, alignment, path loss, and spatial behavior. This affects whether you need a conducted RF tester, an OTA chamber, antenna positioner, or channel emulator.\n\n### 8. Deciding calibration and de-embedding needs\nBad cables, fixtures, adapters, converters, or frequency extenders can worsen measured EVM. Understanding EVM helps decide whether you need:\n- fixture calibration,\n- path loss correction,\n- IQ calibration,\n- de-embedding,\n- external reference clocks,\n- improved cabling or attenuators.\n\n### 9. Setting product pass/fail limits\nEVM is often used in production testing. You need to know:\n- the standard’s EVM limit,\n- the product design margin,\n- measurement uncertainty,\n- analyzer residual EVM,\n- guard bands.\n\nThis affects production test limits and whether a device passes or fails.\n\n### 10. Deciding between debug, compliance, and production equipment\nDifferent use cases need different EVM capability:\n\n| Use case | EVM requirement |\n|---|---|\n| R&D debug | Highest accuracy, deep analysis |\n| Pre-compliance | Standard-specific measurement support |\n| Manufacturing | Fast, repeatable pass/fail |\n| Field service | Portable, adequate accuracy |\n| OTA validation | Chamber and antenna-aware measurement |\n\nSo EVM understanding helps choose between high-end lab instruments, production testers, compact analyzers, or integrated communication testers.\n\nIn short: **EVM is a key measure of modulation quality, and it directly influences choices of analyzer, generator, bandwidth, standards options, calibration setup, OTA/conducted method, PA test strategy, and production pass/fail limits.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-6f2b8b3fa2924daebe7069c2d9b6a682",
+      "request_id": "request-6f2b8b3fa2924daebe7069c2d9b6a682",
+      "span_id": "span-6f2b8b3fa2924daebe7069c2d9b6a682",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-6f2b8b3fa2924daebe7069c2d9b6a682",
+       "request_id": "request-6f2b8b3fa2924daebe7069c2d9b6a682",
+       "span_id": "span-6f2b8b3fa2924daebe7069c2d9b6a682",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: the RS knowledge tool returned insufficient evidence. The following is general RF test-and-measurement knowledge, not from the knowledge base.\n\n**EVM — Error Vector Magnitude** — is a modulation-quality metric. It compares the **ideal constellation point** a transmitter should produce with the **actual measured symbol** after impairments such as noise, distortion, phase error, IQ imbalance, frequency error, PA compression, filtering, or synchronization error.\n\nIn simple terms:\n\n> **EVM tells you how far the measured signal is from the perfect signal.**\n\nIt is usually expressed as **%** or **dB**. Lower EVM means better modulation quality.\n\nExample:\n- Small EVM → clean QAM/OFDM signal, good transmitter quality.\n- High EVM → constellation points are smeared or shifted, indicating degraded RF/baseband performance.\n\n## Product-related measurement decisions that depend on understanding EVM\n\nUnderstanding EVM affects several product and measurement choices:\n\n### 1. Choosing the right signal analyzer\nYou need an analyzer with enough:\n- modulation-analysis support,\n- bandwidth,\n- dynamic range,\n- phase-noise performance,\n- residual EVM performance.\n\nFor example, measuring high-order modulation such as **256QAM, 1024QAM, or 4096QAM** requires a better analyzer than measuring QPSK or 16QAM.\n\n### 2. Choosing the right signal generator\nIf you are generating a reference signal to test a receiver or device, the generator’s own modulation quality must be better than the device requirement. Otherwise, the generator’s residual EVM can dominate the result.\n\nSo EVM knowledge affects whether you choose a higher-performance vector signal generator versus a lower-cost one.\n\n### 3. Deciding required analysis bandwidth\nModern signals — 5G NR, Wi-Fi 6/7, wideband radar-like waveforms — require enough instantaneous bandwidth. If the analyzer bandwidth is too narrow, the EVM result may be invalid or misleading.\n\n### 4. Selecting options for 5G, LTE, Wi-Fi, or other standards\nEVM is usually standard-specific. Different technologies define:\n- measurement bandwidth,\n- equalization method,\n- reference signal structure,\n- averaging,\n- symbol exclusions,\n- limits per modulation type.\n\nSo product options for **5G NR, LTE, WLAN/Wi-Fi, Bluetooth, satellite, or digital video** measurement can depend on what EVM standard you need to test.\n\n### 5. Deciding whether phase noise performance is sufficient\nFor high-order modulation and high carrier frequencies, phase noise can strongly affect EVM. This matters when choosing:\n- RF signal generators,\n- local oscillator sources,\n- signal analyzers,\n- frequency converters,\n- mmWave test setups.\n\n### 6. Evaluating power amplifier linearity\nEVM is often used to judge whether a power amplifier is too nonlinear. It helps decide:\n- operating output power,\n- digital predistortion settings,\n- PA backoff,\n- linearization method,\n- whether ACLR alone is enough or EVM must also be measured.\n\n### 7. Choosing conducted vs. OTA test setup\nFor wireless products, EVM can be measured:\n- conducted, through cables, or\n- OTA, through antennas and chambers.\n\nOTA EVM adds effects from antennas, chambers, alignment, path loss, and spatial behavior. This affects whether you need a conducted RF tester, an OTA chamber, antenna positioner, or channel emulator.\n\n### 8. Deciding calibration and de-embedding needs\nBad cables, fixtures, adapters, converters, or frequency extenders can worsen measured EVM. Understanding EVM helps decide whether you need:\n- fixture calibration,\n- path loss correction,\n- IQ calibration,\n- de-embedding,\n- external reference clocks,\n- improved cabling or attenuators.\n\n### 9. Setting product pass/fail limits\nEVM is often used in production testing. You need to know:\n- the standard’s EVM limit,\n- the product design margin,\n- measurement uncertainty,\n- analyzer residual EVM,\n- guard bands.\n\nThis affects production test limits and whether a device passes or fails.\n\n### 10. Deciding between debug, compliance, and production equipment\nDifferent use cases need different EVM capability:\n\n| Use case | EVM requirement |\n|---|---|\n| R&D debug | Highest accuracy, deep analysis |\n| Pre-compliance | Standard-specific measurement support |\n| Manufacturing | Fast, repeatable pass/fail |\n| Field service | Portable, adequate accuracy |\n| OTA validation | Chamber and antenna-aware measurement |\n\nSo EVM understanding helps choose between high-end lab instruments, production testers, compact analyzers, or integrated communication testers.\n\nIn short: **EVM is a key measure of modulation quality, and it directly influences choices of analyzer, generator, bandwidth, standards options, calibration setup, OTA/conducted method, PA test strategy, and production pass/fail limits.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_i3T7wYbAI60dDQYfxsRifd0L",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-6f2b8b3fa2924daebe7069c2d9b6a682",
+          "request_id": "request-6f2b8b3fa2924daebe7069c2d9b6a682",
+          "span_id": "span-6f2b8b3fa2924daebe7069c2d9b6a682",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

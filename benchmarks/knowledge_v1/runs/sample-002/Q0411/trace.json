@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q0411",
+  "text": "For a Automotive use case involving automotive radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-d1c62b8efe2949a18fdc3a68ab1e6000",
+ "exchange": {
+  "sent": "For a Automotive use case involving automotive radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 43.047,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-d1c62b8efe2949a18fdc3a68ab1e6000",
+    "actor": "leo.chi",
+    "title": "For a Automotive use case involving automotive radar, where would Signal…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:00:47.050516Z",
+    "updated_at": "2026-10-07T10:01:30.102079Z",
+    "messages": [
+     {
+      "message_id": "message-0c81ee3ca725433db441ad790e45a3a2",
+      "role": "user",
+      "text": "For a Automotive use case involving automotive radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T10:00:47.265013Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-28c6e232d9a7442b87a96b35ce2f2136",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it returned insufficient Raw evidence for this exact question.\n\nNot from the knowledge base: In an automotive radar test workflow, a **Signaling / Non-signaling Tester** would usually **not be the primary radar test instrument**. Automotive radar testing is mainly handled with radar target simulators / echo generators, signal generators, spectrum or signal analyzers, VNAs, chambers, and HIL setups.\n\nWhere it can fit:\n\n1. **Connected vehicle / TCU layer**\n   - If the radar sensor is part of an ADAS/ADAS-domain system that reports status, diagnostics, OTA updates, or safety events through a cellular module, a signaling tester such as a CMX/CMW-type platform would test the **cellular link**: LTE/5G, eCall, C-V2X, GNSS assistance, OTA behavior, etc.\n\n2. **End-of-line or production connectivity test**\n   - In manufacturing, a non-signaling tester can verify the vehicle’s or ECU’s wireless module quickly without running a full network protocol stack.\n   - This is adjacent to radar production test, not the radar waveform/target simulation itself.\n\n3. **System-level ADAS validation**\n   - In a HIL or vehicle-in-the-loop setup, radar perception may be tested together with telematics, V2X, cloud reporting, emergency call, or remote diagnostics.\n   - The signaling tester emulates or verifies the mobile network side while radar-specific instruments emulate targets and RF radar scenes.\n\n4. **V2X coexistence / interference scenarios**\n   - If the use case studies coexistence between radar, cellular, Wi‑Fi, or C‑V2X radios, the signaling/non-signaling tester may generate or analyze communication traffic while radar instruments measure radar performance impact.\n\nSo the short answer is: **it fits at the connectivity, telematics, V2X, diagnostics, or system-integration stage—not as the core automotive radar target/performance tester.**",
+      "created_at": "2026-10-07T10:01:30.102079Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-ba95bb7bdf7e4b75b6debcac775097c2",
+       "request_id": "request-ba95bb7bdf7e4b75b6debcac775097c2",
+       "span_id": "span-ba95bb7bdf7e4b75b6debcac775097c2",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it returned insufficient Raw evidence for this exact question.\n\nNot from the knowledge base: In an automotive radar test workflow, a **Signaling / Non-signaling Tester** would usually **not be the primary radar test instrument**. Automotive radar testing is mainly handled with radar target simulators / echo generators, signal generators, spectrum or signal analyzers, VNAs, chambers, and HIL setups.\n\nWhere it can fit:\n\n1. **Connected vehicle / TCU layer**\n   - If the radar sensor is part of an ADAS/ADAS-domain system that reports status, diagnostics, OTA updates, or safety events through a cellular module, a signaling tester such as a CMX/CMW-type platform would test the **cellular link**: LTE/5G, eCall, C-V2X, GNSS assistance, OTA behavior, etc.\n\n2. **End-of-line or production connectivity test**\n   - In manufacturing, a non-signaling tester can verify the vehicle’s or ECU’s wireless module quickly without running a full network protocol stack.\n   - This is adjacent to radar production test, not the radar waveform/target simulation itself.\n\n3. **System-level ADAS validation**\n   - In a HIL or vehicle-in-the-loop setup, radar perception may be tested together with telematics, V2X, cloud reporting, emergency call, or remote diagnostics.\n   - The signaling tester emulates or verifies the mobile network side while radar-specific instruments emulate targets and RF radar scenes.\n\n4. **V2X coexistence / interference scenarios**\n   - If the use case studies coexistence between radar, cellular, Wi‑Fi, or C‑V2X radios, the signaling/non-signaling tester may generate or analyze communication traffic while radar instruments measure radar performance impact.\n\nSo the short answer is: **it fits at the connectivity, telematics, V2X, diagnostics, or system-integration stage—not as the core automotive radar target/performance tester.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-ba95bb7bdf7e4b75b6debcac775097c2",
+      "request_id": "request-ba95bb7bdf7e4b75b6debcac775097c2",
+      "span_id": "span-ba95bb7bdf7e4b75b6debcac775097c2",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-ba95bb7bdf7e4b75b6debcac775097c2",
+       "request_id": "request-ba95bb7bdf7e4b75b6debcac775097c2",
+       "span_id": "span-ba95bb7bdf7e4b75b6debcac775097c2",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it returned insufficient Raw evidence for this exact question.\n\nNot from the knowledge base: In an automotive radar test workflow, a **Signaling / Non-signaling Tester** would usually **not be the primary radar test instrument**. Automotive radar testing is mainly handled with radar target simulators / echo generators, signal generators, spectrum or signal analyzers, VNAs, chambers, and HIL setups.\n\nWhere it can fit:\n\n1. **Connected vehicle / TCU layer**\n   - If the radar sensor is part of an ADAS/ADAS-domain system that reports status, diagnostics, OTA updates, or safety events through a cellular module, a signaling tester such as a CMX/CMW-type platform would test the **cellular link**: LTE/5G, eCall, C-V2X, GNSS assistance, OTA behavior, etc.\n\n2. **End-of-line or production connectivity test**\n   - In manufacturing, a non-signaling tester can verify the vehicle’s or ECU’s wireless module quickly without running a full network protocol stack.\n   - This is adjacent to radar production test, not the radar waveform/target simulation itself.\n\n3. **System-level ADAS validation**\n   - In a HIL or vehicle-in-the-loop setup, radar perception may be tested together with telematics, V2X, cloud reporting, emergency call, or remote diagnostics.\n   - The signaling tester emulates or verifies the mobile network side while radar-specific instruments emulate targets and RF radar scenes.\n\n4. **V2X coexistence / interference scenarios**\n   - If the use case studies coexistence between radar, cellular, Wi‑Fi, or C‑V2X radios, the signaling/non-signaling tester may generate or analyze communication traffic while radar instruments measure radar performance impact.\n\nSo the short answer is: **it fits at the connectivity, telematics, V2X, diagnostics, or system-integration stage—not as the core automotive radar target/performance tester.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_g2WcRdQUlYmvOOYjeApjyG2x",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ba95bb7bdf7e4b75b6debcac775097c2",
+          "request_id": "request-ba95bb7bdf7e4b75b6debcac775097c2",
+          "span_id": "span-ba95bb7bdf7e4b75b6debcac775097c2",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

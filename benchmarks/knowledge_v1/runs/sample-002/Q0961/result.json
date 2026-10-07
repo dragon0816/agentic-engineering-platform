@@ -1,0 +1,51 @@
+{
+ "id": "Q0961",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 52.438,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "fits early in the RFIC validation workflow",
+   "before or alongside active RF performance tests with signal generators and analyzers",
+   "RF launch, connector, probe, and fixture de-embedding",
+   "S-parameter measurements such as S11 return loss, S21 insertion loss, isolation, matching",
+   "RFIC small-signal characterization",
+   "Large-signal / modulated performance → signal generator + signal/spectrum analyzer",
+   "not mainly for demodulation or EVM"
+  ],
+  "reason": "The core answer—that a VNA fits in RFIC-related bare-board/socket/transmission-line evaluation—is directly supported by passage 2, and passage 1 supports VNA use for group-delay measurement generally. The detailed workflow ordering, de-embedding, S-parameter examples, and contrast with EVM/demodulation go beyond the cited passages, but they do not overturn the main supported conclusion.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

@@ -1,0 +1,77 @@
+{
+ "id": "Q0131",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 75.391,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Requires much lower EVM, higher modulation accuracy, better phase noise, linearity, dynamic range, and analyzer accuracy.",
+   "synchronized generation/analysis across bands or channels",
+   "Higher throughput / advanced spatial multiplexing",
+   "CMX500 as supporting up to 20 Gbps",
+   "up to 16 device antenna ports",
+   "Phase-coherent or synchronized RF outputs",
+   "Multi-channel capture / correlation",
+   "OTA/MIMO measurement support",
+   "wideband, high-EVM-accuracy, multi-link, multi-RF-chain, multi-antenna, signaling-aware measurement"
+  ],
+  "reason": "The passages support wider bandwidth requirements, 480/500 MHz future-proofing, 4096QAM/MLO as Wi-Fi 7/8 features, multiple RF chains for MLO, and signaling vs non-signaling test contexts. However, the answer adds several major measurement requirements and product capabilities—EVM/phase-noise/linearity, synchronization/phase coherence, MIMO/spatial multiplexing, 20 Gbps, and 16 antenna ports—that are not stated in the cited passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support wider bandwidth requirements, 480/500 MHz future-proofing, 4096QAM/MLO as Wi-Fi 7/8 features, multiple RF chains for MLO, and signaling vs non-signaling test contexts. However, the answer adds several major measurement requirements and product capabilities—EVM/phase-noise/linear"
+}

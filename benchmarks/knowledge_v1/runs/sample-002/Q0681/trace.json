@@ -1,0 +1,422 @@
+{
+ "question": {
+  "id": "Q0681",
+  "text": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope?",
+  "market": "AI",
+  "product": "Oscilloscope",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-8b4f1a4c246e47afb7c9e1d0800f518a",
+ "exchange": {
+  "sent": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope?",
+  "http_status": 200,
+  "seconds": 73.016,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-8b4f1a4c246e47afb7c9e1d0800f518a",
+    "actor": "leo.chi",
+    "title": "How do changes in AI data centers technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:16:57.132592Z",
+    "updated_at": "2026-10-07T10:18:08.975556Z",
+    "messages": [
+     {
+      "message_id": "message-c565dbabf8e34f12b0760b3a81a6035b",
+      "role": "user",
+      "text": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope?",
+      "created_at": "2026-10-07T10:16:57.143554Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-6ad5a47d611d450aa40716810100ac87",
+      "role": "assistant",
+      "text": "AI data centers are pushing oscilloscope requirements upward mainly because the interconnects, boards, and power systems are becoming faster, denser, and more noise-sensitive.\n\n### 1. Faster data-center interconnects require much higher bandwidth\nAI clusters are moving toward very high-speed electrical interconnects, including **224 Gb/s PAM4 per lane** in cables, connectors, and backplane/mezzanine systems for AI data infrastructure. The knowledge base cites data-center connectivity products supporting **up to 224 Gb/s PAM4** and 25G/lane NRZ to 224G/lane PAM4 channels.  \n**Implication for oscilloscopes:** higher analog bandwidth, lower intrinsic noise, better timing accuracy, and PAM4 eye/TDECQ/jitter analysis become essential.  \nCitation: raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md, section 3.\n\n### 2. PAM4 signaling increases vertical-resolution and noise requirements\nCompared with NRZ, PAM4 has four amplitude levels and only one-third the vertical eye opening. That means the oscilloscope must resolve smaller voltage margins while separating noise, jitter, inter-symbol interference, and equalization effects.  \n**Required capabilities:** high ENOB, low noise floor, accurate eye/level measurements, PAM4 decoding, jitter decomposition, equalization/de-embedding, and compliance software.\n\n*This specific PAM4 measurement detail is general engineering knowledge, not directly stated in the returned knowledge-base evidence.*\n\n### 3. Optical/electrical interfaces become more important\nAI data centers increasingly use high-speed optical engines and transceivers, including **100G/200G/400G solutions**, and the knowledge base highlights silicon photonics and “seamless integration of optical and electrical devices” for high-bandwidth, low-noise, energy-efficient data transmission.  \n**Implication for oscilloscopes:** they need to support both electrical and optical validation workflows—electrical TX/RX characterization, optical modulation analysis via optical front ends, clock/data recovery, and correlation between electrical SerDes and optical module behavior.  \nCitation: raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md, section 174.\n\n### 4. AI server PCBs demand stronger signal-integrity measurement\nThe knowledge base notes that AI/data-center/cloud systems use **high-end PCBs focused on high-speed and high-frequency applications**.  \n**Implication for oscilloscopes:** board-level validation becomes more demanding: differential probing, impedance-related waveform analysis, crosstalk analysis, skew measurement, insertion-loss/de-embedding workflows, and correlation with VNA/S-parameter models.  \nCitation: raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md, section 7.\n\n### 5. Dense high-speed differential routing makes crosstalk harder\nThe evidence specifically calls out high-speed differential-pair routing and crosstalk concerns, recommending ground-signal-ground routing and symmetric routing of high-speed differential pairs.  \n**Implication for oscilloscopes:** multi-channel phase alignment, high-performance differential probes, crosstalk measurement, aggressor/victim analysis, and simultaneous observation of multiple lanes become more important.  \nCitation: raw/Market/OneNote/snla426.md, section 10.\n\n### 6. PCB material effects create subtle distortion and skew\nThe knowledge base mentions PCB fiber-weave effects, including rotation of the signaling image plane relative to the underlying fiber weave.  \n**Implication for oscilloscopes:** scopes must detect very small timing skew, deterministic jitter, lane-to-lane variation, and waveform distortion caused by PCB materials and routing.  \nCitation: raw/Market/OneNote/snla426.md, section 6.\n\n### 7. Power integrity becomes a major oscilloscope use case\nAI accelerators and switch ASICs draw very high, fast-changing currents. This creates power-rail ripple, droop, transient response, and PDN noise issues that couple into SerDes links.  \n**Required oscilloscope capabilities:** low-noise power-rail probes, high dynamic range, offset capability, GHz-range power integrity measurement, fast transient capture, spectral analysis, and correlation between rail noise and high-speed data errors.\n\n*This power-integrity point is general engineering knowledge; the returned knowledge-base evidence did not directly cite AI data-center power-rail measurements.*\n\n---\n\n## Summary: what changes in oscilloscope capability are required?\n\n| AI data-center technology change | Oscilloscope capability required |\n|---|---|\n| 112G/224G SerDes, PAM4 links | Very high bandwidth, low jitter, PAM4 eye/jitter analysis |\n| Optical engines, silicon photonics | Optical/electrical interface test, CDR, optical front-end support |\n| Dense high-speed PCBs | Differential probing, de-embedding, S-parameter correlation |\n| More crosstalk between lanes | Multi-channel high-bandwidth capture, aggressor/victim analysis |\n| PCB fiber-weave/material effects | Precise skew, deterministic jitter, and distortion measurement |\n| High-current AI processors | Low-noise power-integrity measurement and rail-noise correlation |\n| More compliance pressure | Automated Ethernet/PCIe/CXL/optical compliance test packages |\n\nIn short: AI data centers push oscilloscopes from general waveform viewers toward **high-bandwidth, low-noise, multi-domain validation platforms** for SerDes, optical/electrical interfaces, PCB signal integrity, and power integrity.",
+      "created_at": "2026-10-07T10:18:08.975556Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-bb2306c52ad24c3cb043a02e6ea60b5a",
+       "request_id": "request-bb2306c52ad24c3cb043a02e6ea60b5a",
+       "span_id": "span-bb2306c52ad24c3cb043a02e6ea60b5a",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "AI data centers are pushing oscilloscope requirements upward mainly because the interconnects, boards, and power systems are becoming faster, denser, and more noise-sensitive.\n\n### 1. Faster data-center interconnects require much higher bandwidth\nAI clusters are moving toward very high-speed electrical interconnects, including **224 Gb/s PAM4 per lane** in cables, connectors, and backplane/mezzanine systems for AI data infrastructure. The knowledge base cites data-center connectivity products supporting **up to 224 Gb/s PAM4** and 25G/lane NRZ to 224G/lane PAM4 channels.  \n**Implication for oscilloscopes:** higher analog bandwidth, lower intrinsic noise, better timing accuracy, and PAM4 eye/TDECQ/jitter analysis become essential.  \nCitation: raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md, section 3.\n\n### 2. PAM4 signaling increases vertical-resolution and noise requirements\nCompared with NRZ, PAM4 has four amplitude levels and only one-third the vertical eye opening. That means the oscilloscope must resolve smaller voltage margins while separating noise, jitter, inter-symbol interference, and equalization effects.  \n**Required capabilities:** high ENOB, low noise floor, accurate eye/level measurements, PAM4 decoding, jitter decomposition, equalization/de-embedding, and compliance software.\n\n*This specific PAM4 measurement detail is general engineering knowledge, not directly stated in the returned knowledge-base evidence.*\n\n### 3. Optical/electrical interfaces become more important\nAI data centers increasingly use high-speed optical engines and transceivers, including **100G/200G/400G solutions**, and the knowledge base highlights silicon photonics and “seamless integration of optical and electrical devices” for high-bandwidth, low-noise, energy-efficient data transmission.  \n**Implication for oscilloscopes:** they need to support both electrical and optical validation workflows—electrical TX/RX characterization, optical modulation analysis via optical front ends, clock/data recovery, and correlation between electrical SerDes and optical module behavior.  \nCitation: raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md, section 174.\n\n### 4. AI server PCBs demand stronger signal-integrity measurement\nThe knowledge base notes that AI/data-center/cloud systems use **high-end PCBs focused on high-speed and high-frequency applications**.  \n**Implication for oscilloscopes:** board-level validation becomes more demanding: differential probing, impedance-related waveform analysis, crosstalk analysis, skew measurement, insertion-loss/de-embedding workflows, and correlation with VNA/S-parameter models.  \nCitation: raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md, section 7.\n\n### 5. Dense high-speed differential routing makes crosstalk harder\nThe evidence specifically calls out high-speed differential-pair routing and crosstalk concerns, recommending ground-signal-ground routing and symmetric routing of high-speed differential pairs.  \n**Implication for oscilloscopes:** multi-channel phase alignment, high-performance differential probes, crosstalk measurement, aggressor/victim analysis, and simultaneous observation of multiple lanes become more important.  \nCitation: raw/Market/OneNote/snla426.md, section 10.\n\n### 6. PCB material effects create subtle distortion and skew\nThe knowledge base mentions PCB fiber-weave effects, including rotation of the signaling image plane relative to the underlying fiber weave.  \n**Implication for oscilloscopes:** scopes must detect very small timing skew, deterministic jitter, lane-to-lane variation, and waveform distortion caused by PCB materials and routing.  \nCitation: raw/Market/OneNote/snla426.md, section 6.\n\n### 7. Power integrity becomes a major oscilloscope use case\nAI accelerators and switch ASICs draw very high, fast-changing currents. This creates power-rail ripple, droop, transient response, and PDN noise issues that couple into SerDes links.  \n**Required oscilloscope capabilities:** low-noise power-rail probes, high dynamic range, offset capability, GHz-range power integrity measurement, fast transient capture, spectral analysis, and correlation between rail noise and high-speed data errors.\n\n*This power-integrity point is general engineering knowledge; the returned knowledge-base evidence did not directly cite AI data-center power-rail measurements.*\n\n---\n\n## Summary: what changes in oscilloscope capability are required?\n\n| AI data-center technology change | Oscilloscope capability required |\n|---|---|\n| 112G/224G SerDes, PAM4 links | Very high bandwidth, low jitter, PAM4 eye/jitter analysis |\n| Optical engines, silicon photonics | Optical/electrical interface test, CDR, optical front-end support |\n| Dense high-speed PCBs | Differential probing, de-embedding, S-parameter correlation |\n| More crosstalk between lanes | Multi-channel high-bandwidth capture, aggressor/victim analysis |\n| PCB fiber-weave/material effects | Precise skew, deterministic jitter, and distortion measurement |\n| High-current AI processors | Low-noise power-integrity measurement and rail-noise correlation |\n| More compliance pressure | Automated Ethernet/PCIe/CXL/optical compliance test packages |\n\nIn short: AI data centers push oscilloscopes from general waveform viewers toward **high-bandwidth, low-noise, multi-domain validation platforms** for SerDes, optical/electrical interfaces, PCB signal integrity, and power integrity.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-bb2306c52ad24c3cb043a02e6ea60b5a",
+      "request_id": "request-bb2306c52ad24c3cb043a02e6ea60b5a",
+      "span_id": "span-bb2306c52ad24c3cb043a02e6ea60b5a",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-bb2306c52ad24c3cb043a02e6ea60b5a",
+       "request_id": "request-bb2306c52ad24c3cb043a02e6ea60b5a",
+       "span_id": "span-bb2306c52ad24c3cb043a02e6ea60b5a",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "AI data centers are pushing oscilloscope requirements upward mainly because the interconnects, boards, and power systems are becoming faster, denser, and more noise-sensitive.\n\n### 1. Faster data-center interconnects require much higher bandwidth\nAI clusters are moving toward very high-speed electrical interconnects, including **224 Gb/s PAM4 per lane** in cables, connectors, and backplane/mezzanine systems for AI data infrastructure. The knowledge base cites data-center connectivity products supporting **up to 224 Gb/s PAM4** and 25G/lane NRZ to 224G/lane PAM4 channels.  \n**Implication for oscilloscopes:** higher analog bandwidth, lower intrinsic noise, better timing accuracy, and PAM4 eye/TDECQ/jitter analysis become essential.  \nCitation: raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md, section 3.\n\n### 2. PAM4 signaling increases vertical-resolution and noise requirements\nCompared with NRZ, PAM4 has four amplitude levels and only one-third the vertical eye opening. That means the oscilloscope must resolve smaller voltage margins while separating noise, jitter, inter-symbol interference, and equalization effects.  \n**Required capabilities:** high ENOB, low noise floor, accurate eye/level measurements, PAM4 decoding, jitter decomposition, equalization/de-embedding, and compliance software.\n\n*This specific PAM4 measurement detail is general engineering knowledge, not directly stated in the returned knowledge-base evidence.*\n\n### 3. Optical/electrical interfaces become more important\nAI data centers increasingly use high-speed optical engines and transceivers, including **100G/200G/400G solutions**, and the knowledge base highlights silicon photonics and “seamless integration of optical and electrical devices” for high-bandwidth, low-noise, energy-efficient data transmission.  \n**Implication for oscilloscopes:** they need to support both electrical and optical validation workflows—electrical TX/RX characterization, optical modulation analysis via optical front ends, clock/data recovery, and correlation between electrical SerDes and optical module behavior.  \nCitation: raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md, section 174.\n\n### 4. AI server PCBs demand stronger signal-integrity measurement\nThe knowledge base notes that AI/data-center/cloud systems use **high-end PCBs focused on high-speed and high-frequency applications**.  \n**Implication for oscilloscopes:** board-level validation becomes more demanding: differential probing, impedance-related waveform analysis, crosstalk analysis, skew measurement, insertion-loss/de-embedding workflows, and correlation with VNA/S-parameter models.  \nCitation: raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md, section 7.\n\n### 5. Dense high-speed differential routing makes crosstalk harder\nThe evidence specifically calls out high-speed differential-pair routing and crosstalk concerns, recommending ground-signal-ground routing and symmetric routing of high-speed differential pairs.  \n**Implication for oscilloscopes:** multi-channel phase alignment, high-performance differential probes, crosstalk measurement, aggressor/victim analysis, and simultaneous observation of multiple lanes become more important.  \nCitation: raw/Market/OneNote/snla426.md, section 10.\n\n### 6. PCB material effects create subtle distortion and skew\nThe knowledge base mentions PCB fiber-weave effects, including rotation of the signaling image plane relative to the underlying fiber weave.  \n**Implication for oscilloscopes:** scopes must detect very small timing skew, deterministic jitter, lane-to-lane variation, and waveform distortion caused by PCB materials and routing.  \nCitation: raw/Market/OneNote/snla426.md, section 6.\n\n### 7. Power integrity becomes a major oscilloscope use case\nAI accelerators and switch ASICs draw very high, fast-changing currents. This creates power-rail ripple, droop, transient response, and PDN noise issues that couple into SerDes links.  \n**Required oscilloscope capabilities:** low-noise power-rail probes, high dynamic range, offset capability, GHz-range power integrity measurement, fast transient capture, spectral analysis, and correlation between rail noise and high-speed data errors.\n\n*This power-integrity point is general engineering knowledge; the returned knowledge-base evidence did not directly cite AI data-center power-rail measurements.*\n\n---\n\n## Summary: what changes in oscilloscope capability are required?\n\n| AI data-center technology change | Oscilloscope capability required |\n|---|---|\n| 112G/224G SerDes, PAM4 links | Very high bandwidth, low jitter, PAM4 eye/jitter analysis |\n| Optical engines, silicon photonics | Optical/electrical interface test, CDR, optical front-end support |\n| Dense high-speed PCBs | Differential probing, de-embedding, S-parameter correlation |\n| More crosstalk between lanes | Multi-channel high-bandwidth capture, aggressor/victim analysis |\n| PCB fiber-weave/material effects | Precise skew, deterministic jitter, and distortion measurement |\n| High-current AI processors | Low-noise power-integrity measurement and rail-noise correlation |\n| More compliance pressure | Automated Ethernet/PCIe/CXL/optical compliance test packages |\n\nIn short: AI data centers push oscilloscopes from general waveform viewers toward **high-bandwidth, low-noise, multi-domain validation platforms** for SerDes, optical/electrical interfaces, PCB signal integrity, and power integrity.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_QhBsUNN1jvR9nackCaCCzVJz",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-bb2306c52ad24c3cb043a02e6ea60b5a",
+          "request_id": "request-bb2306c52ad24c3cb043a02e6ea60b5a",
+          "span_id": "span-bb2306c52ad24c3cb043a02e6ea60b5a",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-bb2306c52ad24c3cb043a02e6ea60b5a",
+           "request_id": "request-bb2306c52ad24c3cb043a02e6ea60b5a",
+           "span_id": "span-bb2306c52ad24c3cb043a02e6ea60b5a",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope? Include trends such as faster interconnects, power integrity, high-speed serial links, optical/electrical interfaces, and what oscilloscope capabilities are required.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "- **Core Expertise**: Silicon photonics, optical interconnects, and wafer-level semiconductor processing.\n- **Products**: High-speed optical engines and transceivers, including 100G/200G/400G solutions.\n- **Target Markets**:\n- Hyperscale and enterprise datacenters\n- Cloud computing\n- High-performance computing (HPC)\n- Storage systems\n- Consumer electronics and home entertainment\n- **Technology Focus**: Seamless integration of optical and electrical devices on silicon for high bandwidth, low noise, and energy-efficient data transmission[\\[1\\]](https://www.centera-photonics.com/about).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e79d5eefd7496f4c",
+               "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+               "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "section": 174,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 41.223669
+            },
+            {
+             "text": "Delton Technology Inc has been committed to high-end PCB manufacturing with high-speed and high-frequency as the main products, which are mainly used in data center, cloud computing, industrial internet, artificial intelligence, 5G communication, automotive electronics, security and printing and other terminal fields. Delton has long served well-known customers at home and abroad. Over the years, the company's scale and technical capability have maintained continuous and rapid growth in the PCB field, and have been evaluated as excellent suppliers and long-term strategic partners by the company's main customers for many years.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-68e5c65bc97be956",
+               "original_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+               "sha256": "68e5c65bc97be956bd677453a27445cf9c9d5fa65c731dcd6ce88aa865ae093a",
+               "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.186952
+            },
+            {
+             "text": "Xn over feeder link or inter-satellite links are left to the satellite network operator. The first implementation proposals con-\nvey the 5G interface data like NGAP or F1AP over the DVB-S2X radio signal or a static 5G radio bearer. The inter-satellite\nlink (ISL) is described in the service model of NTN in Rel. 17 [TS 22.261] as a transport interface that is contained in the\narchitecture concept. Similar to the backhaul interfaces, there is no mandate of a specific radio technology to be used\nfor ISL. Real implementations use either point-to-point directional radio in space or free-space optical (FSO) links. The",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 36,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.681612
+            },
+            {
+             "text": "Direct Attached Cables and Cable Solutions\nCelerity™ and Celerity LP™ 224 Gb/s BGA\nOSFP (Octal Small Form Factor Pluggable) cable Sentry™ HD is Amphenol's next-generation Mezzanine Connectors are designed to support\nassemblies are compatible with 25G/lane high-speed backplane connector platform, data rates up to 224 Gb/s PAM4, and feature\nchannel NRZ up to 224G/lane channel PAM4 purpose-built to power the future of AI data hermaphroditic mating interfaces that simplify",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-910534c4200795f7",
+               "original_ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+               "sha256": "910534c4200795f7192cc053b40a7d656c5f9478025146d275116142a81a2765",
+               "raw_ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.22517
+            },
+            {
+             "text": "The demonstration at the Rohde & Schwarz booth at MWC Barcelona will feature a live 5G NTN-NR connection, emulating a Low Earth Orbit (LEO) satellite access node. By simulating real-world scenarios, the setup is designed to showcase the capabilities of 5G technology to provide connectivity in areas without terrestrial coverage. NTN-NR will ensure that basic mobile services such as voice, messaging and low data rate services are accessible worldwide, especially in situations where terrestrial network coverage is unavailable or impractical, such as maritime, aeronautical and rural applications.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-aa5dceb541eab8a5",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "sha256": "aa5dceb541eab8a5363bb8e45f5605b367d3cfbdeebc9597deb795d360067ecf",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.59546
+            },
+            {
+             "text": "www.ti.com PCB Grain and Fiber Weave Selection\nThe entirety of the signaling image plane is rotated 10° to 35° in relation to the underlying PCB fiber weave.\nThe PCB manufacturer can affect this rotation without making changes to the PCB layout database as shown in\nFigure 8-1.\nD+",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2355e9ce63c7116b",
+               "original_ref": "raw/Market/OneNote/snla426.md",
+               "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+               "raw_ref": "raw/Market/OneNote/snla426.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.570694
+            },
+            {
+             "text": "• To improve cross talk, follow ground-signal-ground signal routing and route all high-speed differential pairs\ntogether symmetrically and parallel to each other. Deviating from this requirement occurs naturally during\npackage escape and when routing to connector pins. Trace deviations must be as short as possible –\notherwise this can require trace width compensation. HFSS simulation can optimize trace width.\n• Crosstalk Between the Differential Signal Pairs: In devices that include multiple high-speed interfaces,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2355e9ce63c7116b",
+               "original_ref": "raw/Market/OneNote/snla426.md",
+               "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+               "raw_ref": "raw/Market/OneNote/snla426.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.978922
+            },
+            {
+             "text": "TDCP reports are aperiodic: periodic TDCP reports is not efficient..\nThe TDCP report can be multiplexed with other UCI on PUSCH.\nTDCP report has the same priority as CSI reports that do not carry RSRP or SINR. Reports with RSRP and/or SINR\nhave the highest priority as they determine which beam is to be used)\n2. Spec Changes",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-a5bcdab135c6a964",
+               "original_ref": "raw/Knowledge/TDCP Reporting.md",
+               "sha256": "a5bcdab135c6a9649f19107abc15a2c530fd56a7ffefa1ae38918f6e32e4d873",
+               "raw_ref": "raw/Knowledge/TDCP Reporting.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/TDCP Reporting.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.792483
+            }
+           ],
+           "text": "AI data-center interconnects are moving to 224 Gb/s PAM4 channels, so oscilloscope measurements must cover much faster serial data rates [4].\nAI data centers use 100G/200G/400G optical engines and transceivers, so measurements must address high-bandwidth optical links [1].\nSilicon integration of optical and electrical devices drives a need to measure optical/electrical interfaces for bandwidth, noise, and energy efficiency [1].\nHigh-speed and high-frequency PCBs are used in data center, cloud, and AI systems, so board-level signal-integrity measurement becomes more important [2].\nHigh-speed differential-pair routing and crosstalk are identified issues, so oscilloscopes must support differential-signal and crosstalk analysis [7].\nPCB fiber-weave effects can affect signaling, so measurements must detect board-induced signal distortion or skew [6].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "- **Core Expertise**: Silicon photonics, optical interconnects, and wafer-level semiconductor processing.\n- **Products**: High-speed optical engines and transceivers, including 100G/200G/400G solutions.\n- **Target Markets**:\n- Hyperscale and enterprise datacenters\n- Cloud computing\n- High-performance computing (HPC)\n- Storage systems\n- Consumer electronics and home entertainment\n- **Technology Focus**: Seamless integration of optical and electrical devices on silicon for high bandwidth, low noise, and energy-efficient data transmission[\\[1\\]](https://www.centera-photonics.com/about).",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e79d5eefd7496f4c",
+              "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+             "section": 174,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 41.223669
+           },
+           {
+            "text": "Delton Technology Inc has been committed to high-end PCB manufacturing with high-speed and high-frequency as the main products, which are mainly used in data center, cloud computing, industrial internet, artificial intelligence, 5G communication, automotive electronics, security and printing and other terminal fields. Delton has long served well-known customers at home and abroad. Over the years, the company's scale and technical capability have maintained continuous and rapid growth in the PCB field, and have been evaluated as excellent suppliers and long-term strategic partners by the company's main customers for many years.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-68e5c65bc97be956",
+              "original_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+              "sha256": "68e5c65bc97be956bd677453a27445cf9c9d5fa65c731dcd6ce88aa865ae093a",
+              "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.186952
+           },
+           {
+            "text": "Direct Attached Cables and Cable Solutions\nCelerity™ and Celerity LP™ 224 Gb/s BGA\nOSFP (Octal Small Form Factor Pluggable) cable Sentry™ HD is Amphenol's next-generation Mezzanine Connectors are designed to support\nassemblies are compatible with 25G/lane high-speed backplane connector platform, data rates up to 224 Gb/s PAM4, and feature\nchannel NRZ up to 224G/lane channel PAM4 purpose-built to power the future of AI data hermaphroditic mating interfaces that simplify",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-910534c4200795f7",
+              "original_ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+              "sha256": "910534c4200795f7192cc053b40a7d656c5f9478025146d275116142a81a2765",
+              "raw_ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.22517
+           },
+           {
+            "text": "www.ti.com PCB Grain and Fiber Weave Selection\nThe entirety of the signaling image plane is rotated 10° to 35° in relation to the underlying PCB fiber weave.\nThe PCB manufacturer can affect this rotation without making changes to the PCB layout database as shown in\nFigure 8-1.\nD+",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-2355e9ce63c7116b",
+              "original_ref": "raw/Market/OneNote/snla426.md",
+              "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/snla426.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.570694
+           },
+           {
+            "text": "• To improve cross talk, follow ground-signal-ground signal routing and route all high-speed differential pairs\ntogether symmetrically and parallel to each other. Deviating from this requirement occurs naturally during\npackage escape and when routing to connector pins. Trace deviations must be as short as possible –\notherwise this can require trace width compensation. HFSS simulation can optimize trace width.\n• Crosstalk Between the Differential Signal Pairs: In devices that include multiple high-speed interfaces,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-2355e9ce63c7116b",
+              "original_ref": "raw/Market/OneNote/snla426.md",
+              "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/snla426.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.978922
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

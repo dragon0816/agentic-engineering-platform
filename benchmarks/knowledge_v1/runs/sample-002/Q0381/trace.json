@@ -1,0 +1,464 @@
+{
+ "question": {
+  "id": "Q0381",
+  "text": "How do changes in radar technology affect the measurement capability required from Vector Network Analyzer?",
+  "market": "Aerospace / Defense",
+  "product": "Vector Network Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-2d1dee6c8d754323b18e76332ef9564c",
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Vector Network Analyzer?",
+  "http_status": 200,
+  "seconds": 65.281,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-2d1dee6c8d754323b18e76332ef9564c",
+    "actor": "leo.chi",
+    "title": "How do changes in radar technology affect the measurement capability req…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:58:36.595974Z",
+    "updated_at": "2026-10-07T09:59:41.624911Z",
+    "messages": [
+     {
+      "message_id": "message-6dc2857c7e2740feb382c9660b2c69fd",
+      "role": "user",
+      "text": "How do changes in radar technology affect the measurement capability required from Vector Network Analyzer?",
+      "created_at": "2026-10-07T09:58:36.614685Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-e82f59f8a2df46928e05ccdf058c989f",
+      "role": "assistant",
+      "text": "Radar technology is pushing VNAs from simple S‑parameter component test toward wider-band, higher-frequency, time-aware, and system-level characterization. The main effects are:\n\n1. **Higher operating frequency → wider VNA frequency coverage**\n   - Modern radar is moving to mmWave and higher microwave bands for finer range resolution, smaller antennas, and automotive/A&D applications.\n   - The VNA must cover the radar front-end frequency range directly, or support frequency extenders and calibrated measurement to the antenna/module interface.\n   - The R&S ZNA ecosystem, for example, emphasizes “entire VNA frequency range usable” for advanced RF payload/component measurements. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10]\n\n2. **Wideband chirps and complex pulses → larger IF/receiver bandwidth and pulsed measurement**\n   - FMCW, wideband pulsed radar, and high-resolution radar need characterization over broad instantaneous bandwidths.\n   - The VNA therefore needs pulsed-signal measurements, receiver bandwidth, gating, and time-domain capability—not just narrowband CW S‑parameters.\n   - The knowledge base cites VNA options such as “Measurements on pulsed signals” and “Extended time domain analysis.” [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n   - For advanced measurements, ZNB3000 references “10 MHz receiver bandwidth,” “Pulsed source measurements,” and “Extended time domain analysis.” [raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md, section 618]\n\n3. **Low-RCS targets and weak echoes → higher dynamic range and sensitivity**\n   - Radar components must handle very weak returns while coexisting with high transmit power and leakage paths.\n   - This drives VNA requirements for low noise floor, high receiver sensitivity, high dynamic range, and accurate measurement of high-isolation paths, filters, couplers, limiters, and antenna feeds.\n   - The KB specifically mentions “high dynamic range and power range” and “wideband signals with low SNR” for payload/component characterization. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10]\n   - It also lists “extremely high sensitivity” as a key VNA feature for RF payload component measurements. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 27]\n\n4. **Active electronically scanned arrays / MIMO radar → multiport and phase-coherent measurements**\n   - Phased-array and MIMO radar need many channels measured for amplitude, phase, group delay, isolation, and channel matching.\n   - The VNA must support multiport S‑parameters, phase-coherent sources/receivers, true differential modes, and efficient calibration across many ports.\n   - The KB references “phase coherent source control” and “true differential mode” among advanced ZNA capabilities. [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n\n5. **Frequency conversion in radar modules → mixer and IF/RF path measurement**\n   - Radar front ends often include mixers, converters, IF chains, and LO distribution.\n   - VNAs therefore need scalar/vector mixer measurement, arbitrary frequency-converting measurement, direct IF access, and trigger/control I/O.\n   - The KB lists “Scalar mixer measurements,” “Vector mixer measurements,” and “arbitrary frequency-converting measurements.” [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n   - ZNA capabilities also include “Direct IF access,” “Trigger and control I/O,” “Time domain analysis (TDR),” and mixer measurements. [raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md, section 1056]\n\n6. **Module integration and packaging → calibration, de-embedding, and time-domain fault location**\n   - Radar RF paths are increasingly integrated into compact modules, PCBs, antenna-in-package structures, and radomes.\n   - The VNA must remove fixture effects, characterize interconnects, and locate discontinuities using de-embedding and time-domain/TDR.\n   - The KB cites de-embedding functions such as “EaZy deembedding,” “in-situ deembedding,” “smart fixture deembedding,” and “Delta-L PCB characterization.” [raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md, section 618]\n\n7. **Antenna, radome, and material effects → time-domain and material/OTA-related measurements**\n   - Radar performance depends heavily on antennas, radomes, absorbers, dielectric materials, and scattering behavior.\n   - VNAs increasingly need time-domain transforms, gating, material characterization setups, and antenna/feed network measurements to separate reflections and evaluate transmission loss or phase distortion.\n   - The KB supports the time-domain requirement through references to VNA “time domain analysis (TDR)” and “extended time domain analysis.” [raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md, section 1056]\n\n**In short:** as radar moves to higher frequency, wider bandwidth, phased-array/MIMO architectures, pulsed/FMCW operation, and highly integrated modules, the required VNA capability shifts toward **higher frequency coverage, wider receiver bandwidth, pulsed/time-domain analysis, high dynamic range, multiport phase-coherent measurement, mixer/IF support, and stronger calibration/de-embedding workflows**.",
+      "created_at": "2026-10-07T09:59:41.624911Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7c553aa6ade647c8aaf0b410251f2067",
+       "request_id": "request-7c553aa6ade647c8aaf0b410251f2067",
+       "span_id": "span-7c553aa6ade647c8aaf0b410251f2067",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Radar technology is pushing VNAs from simple S‑parameter component test toward wider-band, higher-frequency, time-aware, and system-level characterization. The main effects are:\n\n1. **Higher operating frequency → wider VNA frequency coverage**\n   - Modern radar is moving to mmWave and higher microwave bands for finer range resolution, smaller antennas, and automotive/A&D applications.\n   - The VNA must cover the radar front-end frequency range directly, or support frequency extenders and calibrated measurement to the antenna/module interface.\n   - The R&S ZNA ecosystem, for example, emphasizes “entire VNA frequency range usable” for advanced RF payload/component measurements. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10]\n\n2. **Wideband chirps and complex pulses → larger IF/receiver bandwidth and pulsed measurement**\n   - FMCW, wideband pulsed radar, and high-resolution radar need characterization over broad instantaneous bandwidths.\n   - The VNA therefore needs pulsed-signal measurements, receiver bandwidth, gating, and time-domain capability—not just narrowband CW S‑parameters.\n   - The knowledge base cites VNA options such as “Measurements on pulsed signals” and “Extended time domain analysis.” [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n   - For advanced measurements, ZNB3000 references “10 MHz receiver bandwidth,” “Pulsed source measurements,” and “Extended time domain analysis.” [raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md, section 618]\n\n3. **Low-RCS targets and weak echoes → higher dynamic range and sensitivity**\n   - Radar components must handle very weak returns while coexisting with high transmit power and leakage paths.\n   - This drives VNA requirements for low noise floor, high receiver sensitivity, high dynamic range, and accurate measurement of high-isolation paths, filters, couplers, limiters, and antenna feeds.\n   - The KB specifically mentions “high dynamic range and power range” and “wideband signals with low SNR” for payload/component characterization. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10]\n   - It also lists “extremely high sensitivity” as a key VNA feature for RF payload component measurements. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 27]\n\n4. **Active electronically scanned arrays / MIMO radar → multiport and phase-coherent measurements**\n   - Phased-array and MIMO radar need many channels measured for amplitude, phase, group delay, isolation, and channel matching.\n   - The VNA must support multiport S‑parameters, phase-coherent sources/receivers, true differential modes, and efficient calibration across many ports.\n   - The KB references “phase coherent source control” and “true differential mode” among advanced ZNA capabilities. [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n\n5. **Frequency conversion in radar modules → mixer and IF/RF path measurement**\n   - Radar front ends often include mixers, converters, IF chains, and LO distribution.\n   - VNAs therefore need scalar/vector mixer measurement, arbitrary frequency-converting measurement, direct IF access, and trigger/control I/O.\n   - The KB lists “Scalar mixer measurements,” “Vector mixer measurements,” and “arbitrary frequency-converting measurements.” [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n   - ZNA capabilities also include “Direct IF access,” “Trigger and control I/O,” “Time domain analysis (TDR),” and mixer measurements. [raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md, section 1056]\n\n6. **Module integration and packaging → calibration, de-embedding, and time-domain fault location**\n   - Radar RF paths are increasingly integrated into compact modules, PCBs, antenna-in-package structures, and radomes.\n   - The VNA must remove fixture effects, characterize interconnects, and locate discontinuities using de-embedding and time-domain/TDR.\n   - The KB cites de-embedding functions such as “EaZy deembedding,” “in-situ deembedding,” “smart fixture deembedding,” and “Delta-L PCB characterization.” [raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md, section 618]\n\n7. **Antenna, radome, and material effects → time-domain and material/OTA-related measurements**\n   - Radar performance depends heavily on antennas, radomes, absorbers, dielectric materials, and scattering behavior.\n   - VNAs increasingly need time-domain transforms, gating, material characterization setups, and antenna/feed network measurements to separate reflections and evaluate transmission loss or phase distortion.\n   - The KB supports the time-domain requirement through references to VNA “time domain analysis (TDR)” and “extended time domain analysis.” [raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md, section 1056]\n\n**In short:** as radar moves to higher frequency, wider bandwidth, phased-array/MIMO architectures, pulsed/FMCW operation, and highly integrated modules, the required VNA capability shifts toward **higher frequency coverage, wider receiver bandwidth, pulsed/time-domain analysis, high dynamic range, multiport phase-coherent measurement, mixer/IF support, and stronger calibration/de-embedding workflows**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7c553aa6ade647c8aaf0b410251f2067",
+      "request_id": "request-7c553aa6ade647c8aaf0b410251f2067",
+      "span_id": "span-7c553aa6ade647c8aaf0b410251f2067",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7c553aa6ade647c8aaf0b410251f2067",
+       "request_id": "request-7c553aa6ade647c8aaf0b410251f2067",
+       "span_id": "span-7c553aa6ade647c8aaf0b410251f2067",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Radar technology is pushing VNAs from simple S‑parameter component test toward wider-band, higher-frequency, time-aware, and system-level characterization. The main effects are:\n\n1. **Higher operating frequency → wider VNA frequency coverage**\n   - Modern radar is moving to mmWave and higher microwave bands for finer range resolution, smaller antennas, and automotive/A&D applications.\n   - The VNA must cover the radar front-end frequency range directly, or support frequency extenders and calibrated measurement to the antenna/module interface.\n   - The R&S ZNA ecosystem, for example, emphasizes “entire VNA frequency range usable” for advanced RF payload/component measurements. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10]\n\n2. **Wideband chirps and complex pulses → larger IF/receiver bandwidth and pulsed measurement**\n   - FMCW, wideband pulsed radar, and high-resolution radar need characterization over broad instantaneous bandwidths.\n   - The VNA therefore needs pulsed-signal measurements, receiver bandwidth, gating, and time-domain capability—not just narrowband CW S‑parameters.\n   - The knowledge base cites VNA options such as “Measurements on pulsed signals” and “Extended time domain analysis.” [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n   - For advanced measurements, ZNB3000 references “10 MHz receiver bandwidth,” “Pulsed source measurements,” and “Extended time domain analysis.” [raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md, section 618]\n\n3. **Low-RCS targets and weak echoes → higher dynamic range and sensitivity**\n   - Radar components must handle very weak returns while coexisting with high transmit power and leakage paths.\n   - This drives VNA requirements for low noise floor, high receiver sensitivity, high dynamic range, and accurate measurement of high-isolation paths, filters, couplers, limiters, and antenna feeds.\n   - The KB specifically mentions “high dynamic range and power range” and “wideband signals with low SNR” for payload/component characterization. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10]\n   - It also lists “extremely high sensitivity” as a key VNA feature for RF payload component measurements. [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 27]\n\n4. **Active electronically scanned arrays / MIMO radar → multiport and phase-coherent measurements**\n   - Phased-array and MIMO radar need many channels measured for amplitude, phase, group delay, isolation, and channel matching.\n   - The VNA must support multiport S‑parameters, phase-coherent sources/receivers, true differential modes, and efficient calibration across many ports.\n   - The KB references “phase coherent source control” and “true differential mode” among advanced ZNA capabilities. [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n\n5. **Frequency conversion in radar modules → mixer and IF/RF path measurement**\n   - Radar front ends often include mixers, converters, IF chains, and LO distribution.\n   - VNAs therefore need scalar/vector mixer measurement, arbitrary frequency-converting measurement, direct IF access, and trigger/control I/O.\n   - The KB lists “Scalar mixer measurements,” “Vector mixer measurements,” and “arbitrary frequency-converting measurements.” [raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md, section 164]\n   - ZNA capabilities also include “Direct IF access,” “Trigger and control I/O,” “Time domain analysis (TDR),” and mixer measurements. [raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md, section 1056]\n\n6. **Module integration and packaging → calibration, de-embedding, and time-domain fault location**\n   - Radar RF paths are increasingly integrated into compact modules, PCBs, antenna-in-package structures, and radomes.\n   - The VNA must remove fixture effects, characterize interconnects, and locate discontinuities using de-embedding and time-domain/TDR.\n   - The KB cites de-embedding functions such as “EaZy deembedding,” “in-situ deembedding,” “smart fixture deembedding,” and “Delta-L PCB characterization.” [raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md, section 618]\n\n7. **Antenna, radome, and material effects → time-domain and material/OTA-related measurements**\n   - Radar performance depends heavily on antennas, radomes, absorbers, dielectric materials, and scattering behavior.\n   - VNAs increasingly need time-domain transforms, gating, material characterization setups, and antenna/feed network measurements to separate reflections and evaluate transmission loss or phase distortion.\n   - The KB supports the time-domain requirement through references to VNA “time domain analysis (TDR)” and “extended time domain analysis.” [raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md, section 1056]\n\n**In short:** as radar moves to higher frequency, wider bandwidth, phased-array/MIMO architectures, pulsed/FMCW operation, and highly integrated modules, the required VNA capability shifts toward **higher frequency coverage, wider receiver bandwidth, pulsed/time-domain analysis, high dynamic range, multiport phase-coherent measurement, mixer/IF support, and stronger calibration/de-embedding workflows**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_X4buAnayAy4YiKFBNSPrpOOp",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-7c553aa6ade647c8aaf0b410251f2067",
+          "request_id": "request-7c553aa6ade647c8aaf0b410251f2067",
+          "span_id": "span-7c553aa6ade647c8aaf0b410251f2067",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-7c553aa6ade647c8aaf0b410251f2067",
+           "request_id": "request-7c553aa6ade647c8aaf0b410251f2067",
+           "span_id": "span-7c553aa6ade647c8aaf0b410251f2067",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in radar technology affect the measurement capability required from Vector Network Analyzer? Focus on how radar trends drive VNA requirements such as frequency range, bandwidth, dynamic range, multiport, calibration, pulsed/time-domain, and material/antenna measurements.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "measured from IF input to IF output connector at AREG800A base unit\nmeasured by vector network analyzer in time domain:\n•  measurement bandwidth: 100 kHz span",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ef4aac4d3faf4e63",
+               "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "section": 110,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 48.124002
+            },
+            {
+             "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 45.568147
+            },
+            {
+             "text": "RF MEASUREMENTS ON PAYLOAD\nCOMPONENTS\nWITH THE R&S®ZNA VECTOR NETWORK ANALYZER\nR&S®ZNA key features\n| ► Extremely high sensitivity |     | ► Two internal LO sources |     |",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 27,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 45.104045
+            },
+            {
+             "text": "Extended time domain analysis\n(including eye diagram)\nScalar mixer measurements, arbitrary\nfrequency-converting measurements\nVector mixer measurements\nPhase coherent source control\nTrue differential mode\nMeasurements on pulsed signals",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 164,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.936934
+            },
+            {
+             "text": "- [[Signal and Spectrum Analyzer]]\n- [[Multiport signal and spectrum analyzer]]\n- [[Cross-correlation]]\n- [[Spurious free dynamic range]]\n- [[Displayed average noise level]]\n- [[YIG preselector]]\n- [[Signal analysis bandwidth]]\n- [[Vector signal analysis]]\n- [[Phase coherent receiver]]\n- [[Level measurement uncertainty]]\n- [[I-Q data]]\n- [[SCPI]]",
+             "citation": {
+              "kind": "wiki",
+              "source": {
+               "source_id": "src-929c216e7fdc00a8",
+               "original_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+               "sha256": "929c216e7fdc00a8ff87ebc25c97199cd5a35ece4535925cb340461811717f91",
+               "raw_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/FSWX_specs_en_3684-1314-22_v1200.md"
+             },
+             "score": 44.815944
+            },
+            {
+             "text": "► High dynamic range and power range\n► Compensates for Doppler effect in in-orbit measurements\n► Entire VNA frequency range usable\n► Special option for measuring wideband signals with low SNR\n► Comprehensive DUT characterization",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 44.125825
+            },
+            {
+             "text": "Intermodulation measurements 24\n10 MHz receiver bandwidth\nGain compression measurements\n1 mHz frequency resolution\nExtended time domain analysis\nPulsed source measurements\nNoise figure measurement\nReal-time measurement uncertainty analysis 25\nReal-time measurement uncertainty analysis, preinstalled 25\nSNP assistant\nEaZy deembedding\nIn-situ deembedding\nSmart fixture deembedding\nDelta-L PCB characterization\nHealth and utilization monitoring service (HUMS)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 618,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 42.958548
+            },
+            {
+             "text": "Direct IF access\nTrigger and control I/O board\nSpectrum analyzer mode\nTime domain analysis (TDR)\nExtended time domain analysis\n(including eye diagram)\nScalar mixer measurements, arbitrary\nfrequency-converting measurements\nVector mixer measurements",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f1351a1b7fda64ad",
+               "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "section": 1056,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 41.021312
+            }
+           ],
+           "text": "Wide A&D signals require up to 1 GHz modulation bandwidth for complex pulsed signals [2].\nVNA capability must include pulsed-signal measurements and extended time-domain analysis [4].\nWideband, low-SNR measurements require high dynamic range, power range, and special wideband low-SNR options [6].\nHigh-sensitivity VNA measurement is required for payload component characterization [3].\nTime-domain VNA measurements may use a 100 kHz span measurement bandwidth [1].\nReceiver bandwidth up to 10 MHz supports intermodulation and other advanced measurements [7].\nFrequency-converting radar components require scalar and vector mixer measurements [4].\nDirect IF access, trigger/control I/O, spectrum analysis, and TDR support time-domain and IF-path characterization [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "measured from IF input to IF output connector at AREG800A base unit\nmeasured by vector network analyzer in time domain:\n•  measurement bandwidth: 100 kHz span",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ef4aac4d3faf4e63",
+              "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+              "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "section": 110,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 48.124002
+           },
+           {
+            "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 45.568147
+           },
+           {
+            "text": "RF MEASUREMENTS ON PAYLOAD\nCOMPONENTS\nWITH THE R&S®ZNA VECTOR NETWORK ANALYZER\nR&S®ZNA key features\n| ► Extremely high sensitivity |     | ► Two internal LO sources |     |",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 27,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 45.104045
+           },
+           {
+            "text": "Extended time domain analysis\n(including eye diagram)\nScalar mixer measurements, arbitrary\nfrequency-converting measurements\nVector mixer measurements\nPhase coherent source control\nTrue differential mode\nMeasurements on pulsed signals",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 164,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 44.936934
+           },
+           {
+            "text": "► High dynamic range and power range\n► Compensates for Doppler effect in in-orbit measurements\n► Entire VNA frequency range usable\n► Special option for measuring wideband signals with low SNR\n► Comprehensive DUT characterization",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 44.125825
+           },
+           {
+            "text": "Intermodulation measurements 24\n10 MHz receiver bandwidth\nGain compression measurements\n1 mHz frequency resolution\nExtended time domain analysis\nPulsed source measurements\nNoise figure measurement\nReal-time measurement uncertainty analysis 25\nReal-time measurement uncertainty analysis, preinstalled 25\nSNP assistant\nEaZy deembedding\nIn-situ deembedding\nSmart fixture deembedding\nDelta-L PCB characterization\nHealth and utilization monitoring service (HUMS)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-eca8f030d797ca58",
+              "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+             "section": 618,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 42.958548
+           },
+           {
+            "text": "Direct IF access\nTrigger and control I/O board\nSpectrum analyzer mode\nTime domain analysis (TDR)\nExtended time domain analysis\n(including eye diagram)\nScalar mixer measurements, arbitrary\nfrequency-converting measurements\nVector mixer measurements",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f1351a1b7fda64ad",
+              "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+             "section": 1056,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 41.021312
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

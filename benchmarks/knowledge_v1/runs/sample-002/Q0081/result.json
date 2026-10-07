@@ -1,0 +1,68 @@
+{
+ "id": "Q0081",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 67.625,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Wi‑Fi 8 retains 4096QAM",
+   "Wi‑Fi 8 retains Multi-Link Operation from Wi‑Fi 7",
+   "Wi‑Fi 8 uses distributed resource units to overcome PSD limits",
+   "UEQM lets each MIMO link use a different modulation scheme",
+   "oscilloscope impact is mainly: more analog bandwidth, higher sample rate/memory, lower noise/jitter floor, more channels/synchronization, and stronger time/frequency-domain analysis",
+   "4096QAM has very tight constellation spacing, so measurement instruments need low noise, low distortion, high ENOB, stable timebase, and low jitter",
+   "Oscilloscope/debug setups need to observe multiple links or bands simultaneously",
+   "Deep memory and segmented acquisition become more valuable"
+  ],
+  "reason": "The passages support some Wi-Fi 7 characteristics such as 320 MHz bandwidth, 16 spatial streams, 4096QAM, low latency, and a possible 480 MHz Wi-Fi 8 waveform, but they provide no oscilloscope-specific requirements. The answer also attributes several Wi-Fi 8 features and measurement implications to the KB that are not present in the cited passages, so its main conclusions go beyond the evidence.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support some Wi-Fi 7 characteristics such as 320 MHz bandwidth, 16 spatial streams, 4096QAM, low latency, and a possible 480 MHz Wi-Fi 8 waveform, but they provide no oscilloscope-specific requirements. The answer also attributes several Wi-Fi 8 features and measurement implications to "
+}

@@ -1,0 +1,443 @@
+{
+ "question": {
+  "id": "Q0096",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Wireless Communication, and what evidence supports each opportunity?",
+  "market": "Wireless Communication",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-1b57ba64c898477ebd202f55b1674752",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Wireless Communication, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 70.985,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-1b57ba64c898477ebd202f55b1674752",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:38:23.478337Z",
+    "updated_at": "2026-10-07T09:39:33.778371Z",
+    "messages": [
+     {
+      "message_id": "message-298fbcf2f03444958b6288757c5450ea",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Wireless Communication, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T09:38:23.498093Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-a5bafcecf6dc4463aa83b5efcc6c3a45",
+      "role": "assistant",
+      "text": "Based on the current vault evidence, the strongest oscilloscope opportunities in Wireless Communication appear to be these. One caveat: the retrieved evidence mostly identifies wireless test-market needs; the oscilloscope fit is inferred from where time-domain, power, digital/control, and mixed-signal debug are required.\n\n| Opportunity | Why it is strong for Oscilloscopes | Vault evidence |\n|---|---|---|\n| **1. Open RAN / O-RU testing and evaluation programs** | O-RU development and validation typically need high-speed digital, timing/synchronization, power-rail, and RF front-end debug. Oscilloscopes can complement RF test systems in design validation, interface debug, and troubleshooting. | The vault notes NTIA’s Public Wireless Supply Chain Innovation Fund has **$1.5B appropriated over 10 years**, with NOFO 1 focused on **Research and Development** and **Testing and Evaluation**, 17 awards totaling **$140M**, and R&S already receiving about **573 kUSD** in orders. Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159. |\n| **2. NTN / mobile satellite communication device validation** | NTN creates new timing, propagation-delay, access, and RF/baseband interaction challenges. Oscilloscopes are relevant for hardware bring-up, timing correlation, control-signal verification, power integrity, and RF front-end debug around NTN-capable devices or terminals. | Regulatory evidence says EN standards and **FCC CFR47§25** apply to current Mobile Satellite Service market access, while **CE RED/ETSI and FCC are adapting regulations** for coming mobile satellite communication services. Citation: `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`, section 121. The vault also notes NTN UE capabilities such as **SSB-based RRM measurements** and **propagation-delay compensation** for NTN/shared-spectrum access. Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57. |\n| **3. 5G beam management / L1-L2 mobility validation** | Beam selection, beam reporting, and fast mobility procedures require tight timing and control behavior. Oscilloscopes can support correlation between modem/control lines, RF front-end switching, trigger events, and power behavior during beam changes. | The vault states beam selection is performed across configured cells with **M beams for each of L cells**, with **M × L beams reported in a single report instance**, and at least **M × L = 4** supported as a UE capability. Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494. |\n| **4. Satellite network and terminal resilience / continuous communication validation** | LEO/MEO satellite communications introduce dynamic link conditions and terminal control challenges. Oscilloscopes can be positioned for ground-terminal hardware validation, synchronization, link-control timing, power events, and reliability troubleshooting. | The vault describes LEO/MEO orbital tolerances and says the TeraWave system will establish **continuous communication with other operators**, supporting the need for resilient satellite communication operation. Citations: `raw/Market/OneNote/BlueOriginTerawave.md`, section 5; also duplicated in `raw/Market/OneNote/Terawave-Tech.md`, section 5. |\n| **5. Power-conversion and power-integrity testing inside wireless infrastructure** | Wireless infrastructure, O-RUs, base stations, and edge equipment depend on high-efficiency power conversion. Oscilloscopes are directly relevant for gate-drive timing, switching-node behavior, duty cycle, ripple, transient response, and EMI-related debug. | The vault describes a DC-DC converter using modulated DC voltage, complementary MOSFET gate signals, 180° phase shift, and duty cycle from **50% to 100%**—all directly oscilloscope-measurable behaviors. Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Priority view:**  \n1. **Open RAN / O-RU testing** looks strongest commercially because the vault includes explicit funding, award, and R&S order evidence.  \n2. **NTN/mobile satellite** is a strong emerging-growth opportunity because both regulatory adaptation and technical UE capability changes are evidenced.  \n3. **Beam-management and mobility validation** is technically strong but more indirect for oscilloscopes unless positioned as mixed-signal/debug support around RF and modem test setups.  \n4. **Power integrity in wireless infrastructure** is the most directly oscilloscope-native opportunity, though the retrieved evidence is broader power-electronics evidence rather than wireless-specific.",
+      "created_at": "2026-10-07T09:39:33.778371Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-e763f2510dc5441da18be20710b08fbd",
+       "request_id": "request-e763f2510dc5441da18be20710b08fbd",
+       "span_id": "span-e763f2510dc5441da18be20710b08fbd",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the current vault evidence, the strongest oscilloscope opportunities in Wireless Communication appear to be these. One caveat: the retrieved evidence mostly identifies wireless test-market needs; the oscilloscope fit is inferred from where time-domain, power, digital/control, and mixed-signal debug are required.\n\n| Opportunity | Why it is strong for Oscilloscopes | Vault evidence |\n|---|---|---|\n| **1. Open RAN / O-RU testing and evaluation programs** | O-RU development and validation typically need high-speed digital, timing/synchronization, power-rail, and RF front-end debug. Oscilloscopes can complement RF test systems in design validation, interface debug, and troubleshooting. | The vault notes NTIA’s Public Wireless Supply Chain Innovation Fund has **$1.5B appropriated over 10 years**, with NOFO 1 focused on **Research and Development** and **Testing and Evaluation**, 17 awards totaling **$140M**, and R&S already receiving about **573 kUSD** in orders. Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159. |\n| **2. NTN / mobile satellite communication device validation** | NTN creates new timing, propagation-delay, access, and RF/baseband interaction challenges. Oscilloscopes are relevant for hardware bring-up, timing correlation, control-signal verification, power integrity, and RF front-end debug around NTN-capable devices or terminals. | Regulatory evidence says EN standards and **FCC CFR47§25** apply to current Mobile Satellite Service market access, while **CE RED/ETSI and FCC are adapting regulations** for coming mobile satellite communication services. Citation: `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`, section 121. The vault also notes NTN UE capabilities such as **SSB-based RRM measurements** and **propagation-delay compensation** for NTN/shared-spectrum access. Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57. |\n| **3. 5G beam management / L1-L2 mobility validation** | Beam selection, beam reporting, and fast mobility procedures require tight timing and control behavior. Oscilloscopes can support correlation between modem/control lines, RF front-end switching, trigger events, and power behavior during beam changes. | The vault states beam selection is performed across configured cells with **M beams for each of L cells**, with **M × L beams reported in a single report instance**, and at least **M × L = 4** supported as a UE capability. Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494. |\n| **4. Satellite network and terminal resilience / continuous communication validation** | LEO/MEO satellite communications introduce dynamic link conditions and terminal control challenges. Oscilloscopes can be positioned for ground-terminal hardware validation, synchronization, link-control timing, power events, and reliability troubleshooting. | The vault describes LEO/MEO orbital tolerances and says the TeraWave system will establish **continuous communication with other operators**, supporting the need for resilient satellite communication operation. Citations: `raw/Market/OneNote/BlueOriginTerawave.md`, section 5; also duplicated in `raw/Market/OneNote/Terawave-Tech.md`, section 5. |\n| **5. Power-conversion and power-integrity testing inside wireless infrastructure** | Wireless infrastructure, O-RUs, base stations, and edge equipment depend on high-efficiency power conversion. Oscilloscopes are directly relevant for gate-drive timing, switching-node behavior, duty cycle, ripple, transient response, and EMI-related debug. | The vault describes a DC-DC converter using modulated DC voltage, complementary MOSFET gate signals, 180° phase shift, and duty cycle from **50% to 100%**—all directly oscilloscope-measurable behaviors. Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Priority view:**  \n1. **Open RAN / O-RU testing** looks strongest commercially because the vault includes explicit funding, award, and R&S order evidence.  \n2. **NTN/mobile satellite** is a strong emerging-growth opportunity because both regulatory adaptation and technical UE capability changes are evidenced.  \n3. **Beam-management and mobility validation** is technically strong but more indirect for oscilloscopes unless positioned as mixed-signal/debug support around RF and modem test setups.  \n4. **Power integrity in wireless infrastructure** is the most directly oscilloscope-native opportunity, though the retrieved evidence is broader power-electronics evidence rather than wireless-specific.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-e763f2510dc5441da18be20710b08fbd",
+      "request_id": "request-e763f2510dc5441da18be20710b08fbd",
+      "span_id": "span-e763f2510dc5441da18be20710b08fbd",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-e763f2510dc5441da18be20710b08fbd",
+       "request_id": "request-e763f2510dc5441da18be20710b08fbd",
+       "span_id": "span-e763f2510dc5441da18be20710b08fbd",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the current vault evidence, the strongest oscilloscope opportunities in Wireless Communication appear to be these. One caveat: the retrieved evidence mostly identifies wireless test-market needs; the oscilloscope fit is inferred from where time-domain, power, digital/control, and mixed-signal debug are required.\n\n| Opportunity | Why it is strong for Oscilloscopes | Vault evidence |\n|---|---|---|\n| **1. Open RAN / O-RU testing and evaluation programs** | O-RU development and validation typically need high-speed digital, timing/synchronization, power-rail, and RF front-end debug. Oscilloscopes can complement RF test systems in design validation, interface debug, and troubleshooting. | The vault notes NTIA’s Public Wireless Supply Chain Innovation Fund has **$1.5B appropriated over 10 years**, with NOFO 1 focused on **Research and Development** and **Testing and Evaluation**, 17 awards totaling **$140M**, and R&S already receiving about **573 kUSD** in orders. Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 159. |\n| **2. NTN / mobile satellite communication device validation** | NTN creates new timing, propagation-delay, access, and RF/baseband interaction challenges. Oscilloscopes are relevant for hardware bring-up, timing correlation, control-signal verification, power integrity, and RF front-end debug around NTN-capable devices or terminals. | Regulatory evidence says EN standards and **FCC CFR47§25** apply to current Mobile Satellite Service market access, while **CE RED/ETSI and FCC are adapting regulations** for coming mobile satellite communication services. Citation: `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`, section 121. The vault also notes NTN UE capabilities such as **SSB-based RRM measurements** and **propagation-delay compensation** for NTN/shared-spectrum access. Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 57. |\n| **3. 5G beam management / L1-L2 mobility validation** | Beam selection, beam reporting, and fast mobility procedures require tight timing and control behavior. Oscilloscopes can support correlation between modem/control lines, RF front-end switching, trigger events, and power behavior during beam changes. | The vault states beam selection is performed across configured cells with **M beams for each of L cells**, with **M × L beams reported in a single report instance**, and at least **M × L = 4** supported as a UE capability. Citation: `raw/Knowledge/L1_L2 Triggered Mobility (LTM).md`, section 494. |\n| **4. Satellite network and terminal resilience / continuous communication validation** | LEO/MEO satellite communications introduce dynamic link conditions and terminal control challenges. Oscilloscopes can be positioned for ground-terminal hardware validation, synchronization, link-control timing, power events, and reliability troubleshooting. | The vault describes LEO/MEO orbital tolerances and says the TeraWave system will establish **continuous communication with other operators**, supporting the need for resilient satellite communication operation. Citations: `raw/Market/OneNote/BlueOriginTerawave.md`, section 5; also duplicated in `raw/Market/OneNote/Terawave-Tech.md`, section 5. |\n| **5. Power-conversion and power-integrity testing inside wireless infrastructure** | Wireless infrastructure, O-RUs, base stations, and edge equipment depend on high-efficiency power conversion. Oscilloscopes are directly relevant for gate-drive timing, switching-node behavior, duty cycle, ripple, transient response, and EMI-related debug. | The vault describes a DC-DC converter using modulated DC voltage, complementary MOSFET gate signals, 180° phase shift, and duty cycle from **50% to 100%**—all directly oscilloscope-measurable behaviors. Citation: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. |\n\n**Priority view:**  \n1. **Open RAN / O-RU testing** looks strongest commercially because the vault includes explicit funding, award, and R&S order evidence.  \n2. **NTN/mobile satellite** is a strong emerging-growth opportunity because both regulatory adaptation and technical UE capability changes are evidenced.  \n3. **Beam-management and mobility validation** is technically strong but more indirect for oscilloscopes unless positioned as mixed-signal/debug support around RF and modem test setups.  \n4. **Power integrity in wireless infrastructure** is the most directly oscilloscope-native opportunity, though the retrieved evidence is broader power-electronics evidence rather than wireless-specific.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_OryklKgeuCtcE5BZT9Edd2Sl",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-e763f2510dc5441da18be20710b08fbd",
+          "request_id": "request-e763f2510dc5441da18be20710b08fbd",
+          "span_id": "span-e763f2510dc5441da18be20710b08fbd",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-e763f2510dc5441da18be20710b08fbd",
+           "request_id": "request-e763f2510dc5441da18be20710b08fbd",
+           "span_id": "span-e763f2510dc5441da18be20710b08fbd",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Wireless Communication, and what evidence supports each opportunity? Please identify opportunities and cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "Orbital control tolerances are defined with LEO and MEO-specific limits, once spacecraft\nare on orbit. For LEO based satellites, apogee and perigee are maintained within ±5 km of the\nnominal altitude, and inclination tolerances are limited to less than 1 degree. The MEO satellites\nwill maintain apogee and perigee within ±100 km, and inclination tolerances less than 2 degrees.\nFor each orbital shell, the right accension of the ascending node will span the full range of 0-360\ndegrees. The TeraWave system will abide by the spaceflight safety principals by establishing\ncontinuous communication with other operators.\nA-2",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-add312b939ce8915",
+               "original_ref": "raw/Market/OneNote/BlueOriginTerawave.md",
+               "sha256": "add312b939ce8915c7f357afacde55b1ba137706721d6a467c0402cb92f4661f",
+               "raw_ref": "raw/Market/OneNote/BlueOriginTerawave.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/BlueOriginTerawave.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.858519
+            },
+            {
+             "text": "Orbital control tolerances are defined with LEO and MEO-specific limits, once spacecraft\nare on orbit. For LEO based satellites, apogee and perigee are maintained within ±5 km of the\nnominal altitude, and inclination tolerances are limited to less than 1 degree. The MEO satellites\nwill maintain apogee and perigee within ±100 km, and inclination tolerances less than 2 degrees.\nFor each orbital shell, the right accension of the ascending node will span the full range of 0-360\ndegrees. The TeraWave system will abide by the spaceflight safety principals by establishing\ncontinuous communication with other operators.\nA-2",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1149ca08187eb05c",
+               "original_ref": "raw/Market/OneNote/Terawave-Tech.md",
+               "sha256": "1149ca08187eb05c735021a1480893817addb14f757cd45edec6158e409328de",
+               "raw_ref": "raw/Market/OneNote/Terawave-Tech.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Terawave-Tech.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.858519
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.454461
+            },
+            {
+             "text": "A group of EN standards and FCC CFR47§25 for Mobile Satellite Service are valid as regulations for current market access.\nCE RED/ETSI and FCC are working on regulation adaptation for coming mobile satellite communication services.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4a179a13677acd8f",
+               "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "section": 121,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.303581
+            },
+            {
+             "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 80,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.105273
+            },
+            {
+             "text": "![](Picture1.jpg)\nNational Telecommunications and Information Administration: $1.5B appropriated for infrastructure development over next 10 years through the CHIPS act and series of Funding opportunities administered under the Public Wireless Supply Chain Innovation Fund (Innovation Fund).\nNotice of Funding Opportunity (NOFO 1) April-August 2023:\n2 focus areas for awards: Research and Development, Testing and Evaluation\n17 awards winners\n$140M total awards\nRohde & Schwarz value of received orders: ~573 kUSD",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8ea3b55008b7c337",
+               "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+               "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "section": 159,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.874299
+            },
+            {
+             "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.144677
+            }
+           ],
+           "text": "1. **NTN/mobile satellite communications test and validation** — Current market access is governed by EN standards and FCC CFR47§25 for Mobile Satellite Service, and CE RED/ETSI plus FCC are adapting regulations for coming mobile satellite communication services, indicating an active compliance and validation opportunity [5]. NTN-specific UE capabilities also include SSB-based RRM measurements and propagation-delay compensation for NTN/shared-spectrum access, creating concrete areas for test coverage [8].\n\n2. **Multi-beam / multi-cell beam-management validation** — Beam selection is performed across configured cells with M beams for each of L cells, and M × L beams are reported in a single report instance; at least M × L = 4 is supported as a UE capability, making beam-reporting behavior a clear wireless test opportunity [1].\n\n3. **Public wireless R&D, testing, and evaluation funding programs** — The NTIA Public Wireless Supply Chain Innovation Fund has $1.5B appropriated over 10 years, with NOFO 1 focused on Research and Development plus Testing and Evaluation; 17 awards totaling $140M were made, and Rohde & Schwarz received about $573k in orders, supporting a near-term instrumentation opportunity [7].\n\n4. **Satellite network operations and continuous-communication validation** — LEO and MEO systems have defined orbital-control tolerances, and the TeraWave system states it will establish continuous communication with other operators, supporting opportunities around validating resilient satellite communication links and operations [2].\n\n5. **Power-conversion and signal-integrity testing for wireless hardware** — The DC-DC converter evidence describes modulated DC voltage generation, complementary MOSFET gate signals, 180° phase shift, and duty cycles from 50% to 100%, indicating an oscilloscope-relevant opportunity for validating power and gate-drive behavior in communications equipment [6].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-484f76aad6f2ea3a",
+              "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+             "section": 494,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.647809
+           },
+           {
+            "text": "Orbital control tolerances are defined with LEO and MEO-specific limits, once spacecraft\nare on orbit. For LEO based satellites, apogee and perigee are maintained within ±5 km of the\nnominal altitude, and inclination tolerances are limited to less than 1 degree. The MEO satellites\nwill maintain apogee and perigee within ±100 km, and inclination tolerances less than 2 degrees.\nFor each orbital shell, the right accension of the ascending node will span the full range of 0-360\ndegrees. The TeraWave system will abide by the spaceflight safety principals by establishing\ncontinuous communication with other operators.\nA-2",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-add312b939ce8915",
+              "original_ref": "raw/Market/OneNote/BlueOriginTerawave.md",
+              "sha256": "add312b939ce8915c7f357afacde55b1ba137706721d6a467c0402cb92f4661f",
+              "raw_ref": "raw/Market/OneNote/BlueOriginTerawave.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/BlueOriginTerawave.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.858519
+           },
+           {
+            "text": "A group of EN standards and FCC CFR47§25 for Mobile Satellite Service are valid as regulations for current market access.\nCE RED/ETSI and FCC are working on regulation adaptation for coming mobile satellite communication services.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4a179a13677acd8f",
+              "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+              "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+             "section": 121,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.303581
+           },
+           {
+            "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 80,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.105273
+           },
+           {
+            "text": "![](Picture1.jpg)\nNational Telecommunications and Information Administration: $1.5B appropriated for infrastructure development over next 10 years through the CHIPS act and series of Funding opportunities administered under the Public Wireless Supply Chain Innovation Fund (Innovation Fund).\nNotice of Funding Opportunity (NOFO 1) April-August 2023:\n2 focus areas for awards: Research and Development, Testing and Evaluation\n17 awards winners\n$140M total awards\nRohde & Schwarz value of received orders: ~573 kUSD",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8ea3b55008b7c337",
+              "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+             "section": 159,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.874299
+           },
+           {
+            "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 57,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.144677
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

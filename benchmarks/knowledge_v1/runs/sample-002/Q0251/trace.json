@@ -1,0 +1,359 @@
+{
+ "question": {
+  "id": "Q0251",
+  "text": "What are the most important signal integrity capabilities for applications in Aerospace / Defense?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-9bbfde4aa43b419997cf8f9a7e6282d4",
+ "exchange": {
+  "sent": "What are the most important signal integrity capabilities for applications in Aerospace / Defense?",
+  "http_status": 200,
+  "seconds": 66.187,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9bbfde4aa43b419997cf8f9a7e6282d4",
+    "actor": "leo.chi",
+    "title": "What are the most important signal integrity capabilities for applicatio…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:51:13.202651Z",
+    "updated_at": "2026-10-07T09:52:19.273344Z",
+    "messages": [
+     {
+      "message_id": "message-4e36978a259940e6b770d2c3317d93ed",
+      "role": "user",
+      "text": "What are the most important signal integrity capabilities for applications in Aerospace / Defense?",
+      "created_at": "2026-10-07T09:51:13.229406Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-49b408df5fed4d43b60c3ed601b4a828",
+      "role": "assistant",
+      "text": "Based on the available R&S knowledge-base evidence, the most important signal-integrity-related capabilities for Aerospace / Defense applications are:\n\n1. **Wide modulation bandwidth**\n   - A&D signals often include complex pulsed, radar-like, EW, or wideband communication waveforms. The KB specifically notes that wide bandwidth enables generation of complex pulsed signals in A&D applications, with RF modulation bandwidth up to **1 GHz** cited for SMBV100B.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n2. **Excellent signal quality**\n   - Clean signal generation is essential for validating receiver sensitivity, modulation quality, radar behavior, and link margins. The cited source highlights “excellent signal quality” as a key performance characteristic.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **High output power**\n   - Useful for stressing receivers, driving test setups with path loss, and supporting A&D RF scenarios without excessive external amplification. The KB cites high output power as a superior performance characteristic.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **Broad frequency coverage**\n   - A&D systems span many RF bands; the cited SMBV100B coverage of **8 kHz to 6 GHz** is described as covering important RF bands for digital wireless communications.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n5. **Complex waveform generation and playback capacity**\n   - For realistic radar, communications, GNSS, jamming, or threat-emulation scenarios, the key capabilities are supported frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate.  \n   - Source: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **EMC / environmental robustness testing relevance**\n   - For A&D platforms, signal integrity is not only waveform purity but also operation under harsh electromagnetic environments. The KB notes MIL‑STD‑461G as a basis for EMC testing of vehicles in unforgiving conditions, and MIL‑STD‑464 as a basis for system-level environmental testing.  \n   - Sources: `raw/Market/OneNote/2025RS Drone Solution.md`, sections 26 and 28.\n\nPractical summary: for Aerospace / Defense, prioritize **wideband clean signal generation, high dynamic RF performance, accurate pulsed-signal capability, sufficient ARB/sample-rate resources, broad frequency coverage, and compliance-oriented EMC/environmental test support**.",
+      "created_at": "2026-10-07T09:52:19.273344Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-8e94ce91fb1242e193dadb3e1374f4d0",
+       "request_id": "request-8e94ce91fb1242e193dadb3e1374f4d0",
+       "span_id": "span-8e94ce91fb1242e193dadb3e1374f4d0",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the available R&S knowledge-base evidence, the most important signal-integrity-related capabilities for Aerospace / Defense applications are:\n\n1. **Wide modulation bandwidth**\n   - A&D signals often include complex pulsed, radar-like, EW, or wideband communication waveforms. The KB specifically notes that wide bandwidth enables generation of complex pulsed signals in A&D applications, with RF modulation bandwidth up to **1 GHz** cited for SMBV100B.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n2. **Excellent signal quality**\n   - Clean signal generation is essential for validating receiver sensitivity, modulation quality, radar behavior, and link margins. The cited source highlights “excellent signal quality” as a key performance characteristic.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **High output power**\n   - Useful for stressing receivers, driving test setups with path loss, and supporting A&D RF scenarios without excessive external amplification. The KB cites high output power as a superior performance characteristic.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **Broad frequency coverage**\n   - A&D systems span many RF bands; the cited SMBV100B coverage of **8 kHz to 6 GHz** is described as covering important RF bands for digital wireless communications.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n5. **Complex waveform generation and playback capacity**\n   - For realistic radar, communications, GNSS, jamming, or threat-emulation scenarios, the key capabilities are supported frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate.  \n   - Source: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **EMC / environmental robustness testing relevance**\n   - For A&D platforms, signal integrity is not only waveform purity but also operation under harsh electromagnetic environments. The KB notes MIL‑STD‑461G as a basis for EMC testing of vehicles in unforgiving conditions, and MIL‑STD‑464 as a basis for system-level environmental testing.  \n   - Sources: `raw/Market/OneNote/2025RS Drone Solution.md`, sections 26 and 28.\n\nPractical summary: for Aerospace / Defense, prioritize **wideband clean signal generation, high dynamic RF performance, accurate pulsed-signal capability, sufficient ARB/sample-rate resources, broad frequency coverage, and compliance-oriented EMC/environmental test support**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-8e94ce91fb1242e193dadb3e1374f4d0",
+      "request_id": "request-8e94ce91fb1242e193dadb3e1374f4d0",
+      "span_id": "span-8e94ce91fb1242e193dadb3e1374f4d0",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-8e94ce91fb1242e193dadb3e1374f4d0",
+       "request_id": "request-8e94ce91fb1242e193dadb3e1374f4d0",
+       "span_id": "span-8e94ce91fb1242e193dadb3e1374f4d0",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the available R&S knowledge-base evidence, the most important signal-integrity-related capabilities for Aerospace / Defense applications are:\n\n1. **Wide modulation bandwidth**\n   - A&D signals often include complex pulsed, radar-like, EW, or wideband communication waveforms. The KB specifically notes that wide bandwidth enables generation of complex pulsed signals in A&D applications, with RF modulation bandwidth up to **1 GHz** cited for SMBV100B.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n2. **Excellent signal quality**\n   - Clean signal generation is essential for validating receiver sensitivity, modulation quality, radar behavior, and link margins. The cited source highlights “excellent signal quality” as a key performance characteristic.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n3. **High output power**\n   - Useful for stressing receivers, driving test setups with path loss, and supporting A&D RF scenarios without excessive external amplification. The KB cites high output power as a superior performance characteristic.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n4. **Broad frequency coverage**\n   - A&D systems span many RF bands; the cited SMBV100B coverage of **8 kHz to 6 GHz** is described as covering important RF bands for digital wireless communications.  \n   - Source: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n5. **Complex waveform generation and playback capacity**\n   - For realistic radar, communications, GNSS, jamming, or threat-emulation scenarios, the key capabilities are supported frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate.  \n   - Source: `raw/Productions/PVT360A_Features_V8-5-30_en_06.md`, section 82.\n\n6. **EMC / environmental robustness testing relevance**\n   - For A&D platforms, signal integrity is not only waveform purity but also operation under harsh electromagnetic environments. The KB notes MIL‑STD‑461G as a basis for EMC testing of vehicles in unforgiving conditions, and MIL‑STD‑464 as a basis for system-level environmental testing.  \n   - Sources: `raw/Market/OneNote/2025RS Drone Solution.md`, sections 26 and 28.\n\nPractical summary: for Aerospace / Defense, prioritize **wideband clean signal generation, high dynamic RF performance, accurate pulsed-signal capability, sufficient ARB/sample-rate resources, broad frequency coverage, and compliance-oriented EMC/environmental test support**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_ATGknVp6vqtKDnfMCJACgH5R",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-8e94ce91fb1242e193dadb3e1374f4d0",
+          "request_id": "request-8e94ce91fb1242e193dadb3e1374f4d0",
+          "span_id": "span-8e94ce91fb1242e193dadb3e1374f4d0",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-8e94ce91fb1242e193dadb3e1374f4d0",
+           "request_id": "request-8e94ce91fb1242e193dadb3e1374f4d0",
+           "span_id": "span-8e94ce91fb1242e193dadb3e1374f4d0",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What are the most important signal integrity capabilities for applications in Aerospace / Defense? Please answer with cited Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Most sidelink measurement settings are similar to the settings for uplink measure-\nments. Exceptions are listed in the following.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f3e1c0a3fb2bd5d0",
+               "original_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+               "sha256": "f3e1c0a3fb2bd5d0ed9591386f4b9de0620cb01e1e79ec44dc553d9197377668",
+               "raw_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "section": 2015,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.563027
+            },
+            {
+             "text": "Most sidelink measurement settings are similar to the settings for uplink measure-\nments. Exceptions are listed in the following.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 4081,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.563027
+            },
+            {
+             "text": "MIL461 Systems Category\nMIL461G is important as it provides the basis of EMC testing for vehicle(s) that have to work in the\nmost unforgiving condition.\n| Army | Navy | Air-force | Space |\n| ---- | ---- | --------- | ----- |\n27",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1cf1d4811ac080dd",
+               "original_ref": "raw/Market/OneNote/2025RS Drone Solution.md",
+               "sha256": "1cf1d4811ac080dd61546b65e54131aca4ab446896f26b1f8efb4162c86d37c8",
+               "raw_ref": "raw/Market/OneNote/2025RS Drone Solution.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/2025RS Drone Solution.md",
+              "section": 26,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.988503
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.972365
+            },
+            {
+             "text": "MIL464 Systems Level Testing\nMIL464 is important as it provides the basis of Environment testing for vehicle(s) that have to work\nin the most unforgiving condition.\n| Army | Navy | Air-force | Space |\n| ---- | ---- | --------- | ----- |\n30",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1cf1d4811ac080dd",
+               "original_ref": "raw/Market/OneNote/2025RS Drone Solution.md",
+               "sha256": "1cf1d4811ac080dd61546b65e54131aca4ab446896f26b1f8efb4162c86d37c8",
+               "raw_ref": "raw/Market/OneNote/2025RS Drone Solution.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/2025RS Drone Solution.md",
+              "section": 28,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.723252
+            },
+            {
+             "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.195827
+            },
+            {
+             "text": "The tables list the capabilities of the R&S WinIQSIM2 software for the generation of\nwaveform files. The PVT360A hardware used to play waveform files can limit the listed\ncapabilities. Especially the following properties of the PVT360A are relevant in this\ncontext: supported frequency range, maximum signal bandwidth, ARB memory size\nand maximum sample clock rate.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0db424c28307e318",
+               "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+               "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "section": 82,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.086109
+            },
+            {
+             "text": "Global cellular IoT connections grew 29% YoY to reach 2.7 billion in 2022 with 4G continuing to grow its majority share.\nChina held over two-thirds of cellular IoT connections in 2022, followed by Europe and North America.\nNB-IoT dominates in China, while LTE-M is preferred in Australia, Japan and North America; Europe supports both.\n4G and NB-IoT are the most preferred cellular IoT applications technologies.\n5G is nascent as module prices and breadth of applications reflect early-stage dynamics.\nIoT growth drivers are shifting, with the enterprise and transformation initiatives key in propelling IoT connections forward.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-930719e012588eec",
+               "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+              "section": 413,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.618133
+            }
+           ],
+           "text": "High output power, wide modulation bandwidth, and excellent signal quality in the signal generator [6].\nBroad frequency coverage, specifically 8 kHz to 6 GHz, covering important RF bands for digital wireless communications [6].\nVery wide RF modulation bandwidth, up to 1 GHz, which supports challenging modern communications requirements [6].\nWide bandwidth for generating complex pulsed signals in A&D applications [6].\nRelevant waveform-generation/playback capabilities: supported frequency range, maximum signal bandwidth, ARB memory size, and maximum sample clock rate [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.195827
+           },
+           {
+            "text": "The tables list the capabilities of the R&S WinIQSIM2 software for the generation of\nwaveform files. The PVT360A hardware used to play waveform files can limit the listed\ncapabilities. Especially the following properties of the PVT360A are relevant in this\ncontext: supported frequency range, maximum signal bandwidth, ARB memory size\nand maximum sample clock rate.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0db424c28307e318",
+              "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+             "section": 82,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.086109
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

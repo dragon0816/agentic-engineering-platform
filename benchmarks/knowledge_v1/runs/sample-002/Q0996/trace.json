@@ -1,0 +1,1240 @@
+{
+ "question": {
+  "id": "Q0996",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Vector Network Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-5db14f1486434293a8ab5136b1f557a4",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 286.047,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-5db14f1486434293a8ab5136b1f557a4",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:42:07.472857Z",
+    "updated_at": "2026-10-07T10:46:53.449565Z",
+    "messages": [
+     {
+      "message_id": "message-501d45aad8844850a698c49f9eca6bdb",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T10:42:07.488604Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-54fa38f0fe8043c197a848d696a21ac4",
+      "role": "assistant",
+      "text": "The knowledge base gave **no direct Raw evidence explicitly saying “VNA opportunity in semiconductor.”** It did return semiconductor-market evidence and separate VNA capability evidence. So the opportunities below are ranked from the **strongest evidence-supported semiconductor needs**, with the VNA fit marked as an **inference** where the vault does not explicitly connect the two.\n\n## Strongest VNA opportunities in Semiconductor\n\n| Rank | Opportunity | Why it looks strong | Vault evidence |\n|---|---|---|---|\n| 1 | **Advanced packaging / chiplet / 2.5D interposer / HBM interconnect characterization** | This is the strongest semiconductor opportunity because the vault explicitly identifies chiplet and 2.5D packaging as serving **Server/AI, Networking, High Performance IC, AI GPU, HPC/Data Center**, with “high bandwidth” and “high-density interconnect.” VNA fit is inferred: VNAs are commonly used for S-parameter / insertion-loss / return-loss characterization of high-speed interconnects. | Raw semiconductor evidence: IC carrier/packaging table says **Chiplet** combines smaller dies and targets “Server / AI; Networking; High Performance IC,” while **2.5D interposer/bridge** mounts multiple chips on an interposer for “high-density interconnect,” “high bandwidth,” “HBM,” “AI GPU,” and “HPC / Data Center.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. VNA evidence: R&S®ZNA is identified as a “VECTOR NETWORK ANALYZER.” Source: `raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md`, section 2. |\n| 2 | **High-speed server/storage/data-center interconnect signal-integrity test** | The vault directly names high-speed, high-density server/storage interconnects and “signal integrity” for next-gen enterprise server and data-center architectures. That maps very naturally to VNA-based channel/interconnect characterization, though the vault did not explicitly state the VNA connection. | Raw market evidence: “Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.” Source: `raw/Market/HSD Cable test image 4.md`, section 6; similar evidence in `raw/Market/HSD Cable test image 1.md`, section 6 and `raw/Market/HSD Cable test image 5.md`, section 6. VNA evidence: ZNL product family includes vector network analyzers from 3 GHz to 20 GHz base units. Source: `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`, section 574. |\n| 3 | **Wafer-level packaging / RF IC / PMIC package electrical-performance validation** | Fan-In WLP and Fan-Out WLP are directly semiconductor/package opportunities. The vault says Fan-In WLP involves wafer/RDL/chip and targets **PMIC, RF IC, mobile devices**; Fan-Out WLP offers **high I/O density** and “excellent electrical performance.” VNA fit is inferred for RF IC/package/RDL/interconnect electrical characterization. | Raw evidence: Fan-In WLP: “RDL … built on wafer first, then wafer is diced into chips,” with “Good electrical performance” and applications “PMIC; RF IC; Mobile Devices.” Fan-Out WLP: chip embedded in mold compound, RDL redistributes I/O, “High I/O density; Excellent electrical performance.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. |\n| 4 | **Heterogeneous integration / SiP compact-system RF and mixed-signal validation** | SiP is a semiconductor packaging opportunity with multiple active/passive chips in one package. VNA relevance is inferred for RF/microwave paths, passive components, matching networks, antennas-in-package, and interconnect characterization. | Raw evidence: SiP “integrates multiple chips (passive & active components) into one package,” with “heterogeneous integration” and “compact system.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. VNA evidence: R&S®ZNA is a vector network analyzer. Source: `raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md`, section 2. |\n| 5 | **Power semiconductor / data-center power infrastructure validation — lower confidence for VNA** | The vault has evidence around power electronics, MOSFET converter operation, and GaN/SiC data-center power infrastructure. This is semiconductor-relevant, but the VNA link is weaker from the current evidence. It may fit impedance/network characterization of power modules, parasitics, filters, or high-frequency switching behavior, but that is not explicitly supported by the vault. | Raw evidence: A DC-DC converter example describes a current-fed full bridge with MOSFET pairs driven by complementary gate signals. Source: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. Another Raw source references “Data Center Power GaN and SiC Technologies for Next-Gen 800 VDC Infrastructure.” Source: `raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md`, section 8. |\n\n## Bottom line\n\nThe **best-supported semiconductor VNA opportunity** is:\n\n> **Advanced packaging and high-speed interconnect characterization for AI/HPC/data-center semiconductors** — especially chiplet, 2.5D interposer, HBM, server/storage interconnect, and high-density packaging.\n\nWhy: the vault repeatedly supports the semiconductor-side demand for **high bandwidth, high-density interconnect, signal integrity, AI/HPC/data-center use cases**, and separately confirms R&S VNA products such as **ZNA** and **ZNL**. The missing piece is that the current Raw evidence does **not** explicitly say “use VNA for semiconductor packaging/interconnect test,” so that part should be treated as an engineering/application inference rather than a vault-proven statement.",
+      "created_at": "2026-10-07T10:46:53.449565Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+       "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+       "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave **no direct Raw evidence explicitly saying “VNA opportunity in semiconductor.”** It did return semiconductor-market evidence and separate VNA capability evidence. So the opportunities below are ranked from the **strongest evidence-supported semiconductor needs**, with the VNA fit marked as an **inference** where the vault does not explicitly connect the two.\n\n## Strongest VNA opportunities in Semiconductor\n\n| Rank | Opportunity | Why it looks strong | Vault evidence |\n|---|---|---|---|\n| 1 | **Advanced packaging / chiplet / 2.5D interposer / HBM interconnect characterization** | This is the strongest semiconductor opportunity because the vault explicitly identifies chiplet and 2.5D packaging as serving **Server/AI, Networking, High Performance IC, AI GPU, HPC/Data Center**, with “high bandwidth” and “high-density interconnect.” VNA fit is inferred: VNAs are commonly used for S-parameter / insertion-loss / return-loss characterization of high-speed interconnects. | Raw semiconductor evidence: IC carrier/packaging table says **Chiplet** combines smaller dies and targets “Server / AI; Networking; High Performance IC,” while **2.5D interposer/bridge** mounts multiple chips on an interposer for “high-density interconnect,” “high bandwidth,” “HBM,” “AI GPU,” and “HPC / Data Center.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. VNA evidence: R&S®ZNA is identified as a “VECTOR NETWORK ANALYZER.” Source: `raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md`, section 2. |\n| 2 | **High-speed server/storage/data-center interconnect signal-integrity test** | The vault directly names high-speed, high-density server/storage interconnects and “signal integrity” for next-gen enterprise server and data-center architectures. That maps very naturally to VNA-based channel/interconnect characterization, though the vault did not explicitly state the VNA connection. | Raw market evidence: “Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.” Source: `raw/Market/HSD Cable test image 4.md`, section 6; similar evidence in `raw/Market/HSD Cable test image 1.md`, section 6 and `raw/Market/HSD Cable test image 5.md`, section 6. VNA evidence: ZNL product family includes vector network analyzers from 3 GHz to 20 GHz base units. Source: `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`, section 574. |\n| 3 | **Wafer-level packaging / RF IC / PMIC package electrical-performance validation** | Fan-In WLP and Fan-Out WLP are directly semiconductor/package opportunities. The vault says Fan-In WLP involves wafer/RDL/chip and targets **PMIC, RF IC, mobile devices**; Fan-Out WLP offers **high I/O density** and “excellent electrical performance.” VNA fit is inferred for RF IC/package/RDL/interconnect electrical characterization. | Raw evidence: Fan-In WLP: “RDL … built on wafer first, then wafer is diced into chips,” with “Good electrical performance” and applications “PMIC; RF IC; Mobile Devices.” Fan-Out WLP: chip embedded in mold compound, RDL redistributes I/O, “High I/O density; Excellent electrical performance.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. |\n| 4 | **Heterogeneous integration / SiP compact-system RF and mixed-signal validation** | SiP is a semiconductor packaging opportunity with multiple active/passive chips in one package. VNA relevance is inferred for RF/microwave paths, passive components, matching networks, antennas-in-package, and interconnect characterization. | Raw evidence: SiP “integrates multiple chips (passive & active components) into one package,” with “heterogeneous integration” and “compact system.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. VNA evidence: R&S®ZNA is a vector network analyzer. Source: `raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md`, section 2. |\n| 5 | **Power semiconductor / data-center power infrastructure validation — lower confidence for VNA** | The vault has evidence around power electronics, MOSFET converter operation, and GaN/SiC data-center power infrastructure. This is semiconductor-relevant, but the VNA link is weaker from the current evidence. It may fit impedance/network characterization of power modules, parasitics, filters, or high-frequency switching behavior, but that is not explicitly supported by the vault. | Raw evidence: A DC-DC converter example describes a current-fed full bridge with MOSFET pairs driven by complementary gate signals. Source: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. Another Raw source references “Data Center Power GaN and SiC Technologies for Next-Gen 800 VDC Infrastructure.” Source: `raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md`, section 8. |\n\n## Bottom line\n\nThe **best-supported semiconductor VNA opportunity** is:\n\n> **Advanced packaging and high-speed interconnect characterization for AI/HPC/data-center semiconductors** — especially chiplet, 2.5D interposer, HBM, server/storage interconnect, and high-density packaging.\n\nWhy: the vault repeatedly supports the semiconductor-side demand for **high bandwidth, high-density interconnect, signal integrity, AI/HPC/data-center use cases**, and separately confirms R&S VNA products such as **ZNA** and **ZNL**. The missing piece is that the current Raw evidence does **not** explicitly say “use VNA for semiconductor packaging/interconnect test,” so that part should be treated as an engineering/application inference rather than a vault-proven statement.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+      "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+      "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+       "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+       "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave **no direct Raw evidence explicitly saying “VNA opportunity in semiconductor.”** It did return semiconductor-market evidence and separate VNA capability evidence. So the opportunities below are ranked from the **strongest evidence-supported semiconductor needs**, with the VNA fit marked as an **inference** where the vault does not explicitly connect the two.\n\n## Strongest VNA opportunities in Semiconductor\n\n| Rank | Opportunity | Why it looks strong | Vault evidence |\n|---|---|---|---|\n| 1 | **Advanced packaging / chiplet / 2.5D interposer / HBM interconnect characterization** | This is the strongest semiconductor opportunity because the vault explicitly identifies chiplet and 2.5D packaging as serving **Server/AI, Networking, High Performance IC, AI GPU, HPC/Data Center**, with “high bandwidth” and “high-density interconnect.” VNA fit is inferred: VNAs are commonly used for S-parameter / insertion-loss / return-loss characterization of high-speed interconnects. | Raw semiconductor evidence: IC carrier/packaging table says **Chiplet** combines smaller dies and targets “Server / AI; Networking; High Performance IC,” while **2.5D interposer/bridge** mounts multiple chips on an interposer for “high-density interconnect,” “high bandwidth,” “HBM,” “AI GPU,” and “HPC / Data Center.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. VNA evidence: R&S®ZNA is identified as a “VECTOR NETWORK ANALYZER.” Source: `raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md`, section 2. |\n| 2 | **High-speed server/storage/data-center interconnect signal-integrity test** | The vault directly names high-speed, high-density server/storage interconnects and “signal integrity” for next-gen enterprise server and data-center architectures. That maps very naturally to VNA-based channel/interconnect characterization, though the vault did not explicitly state the VNA connection. | Raw market evidence: “Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.” Source: `raw/Market/HSD Cable test image 4.md`, section 6; similar evidence in `raw/Market/HSD Cable test image 1.md`, section 6 and `raw/Market/HSD Cable test image 5.md`, section 6. VNA evidence: ZNL product family includes vector network analyzers from 3 GHz to 20 GHz base units. Source: `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`, section 574. |\n| 3 | **Wafer-level packaging / RF IC / PMIC package electrical-performance validation** | Fan-In WLP and Fan-Out WLP are directly semiconductor/package opportunities. The vault says Fan-In WLP involves wafer/RDL/chip and targets **PMIC, RF IC, mobile devices**; Fan-Out WLP offers **high I/O density** and “excellent electrical performance.” VNA fit is inferred for RF IC/package/RDL/interconnect electrical characterization. | Raw evidence: Fan-In WLP: “RDL … built on wafer first, then wafer is diced into chips,” with “Good electrical performance” and applications “PMIC; RF IC; Mobile Devices.” Fan-Out WLP: chip embedded in mold compound, RDL redistributes I/O, “High I/O density; Excellent electrical performance.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. |\n| 4 | **Heterogeneous integration / SiP compact-system RF and mixed-signal validation** | SiP is a semiconductor packaging opportunity with multiple active/passive chips in one package. VNA relevance is inferred for RF/microwave paths, passive components, matching networks, antennas-in-package, and interconnect characterization. | Raw evidence: SiP “integrates multiple chips (passive & active components) into one package,” with “heterogeneous integration” and “compact system.” Source: `raw/Market/IC Carrier 載板 image 5.md`, section 64; also `raw/Market/IC Carrier 載板 image 2.md`, section 8. VNA evidence: R&S®ZNA is a vector network analyzer. Source: `raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md`, section 2. |\n| 5 | **Power semiconductor / data-center power infrastructure validation — lower confidence for VNA** | The vault has evidence around power electronics, MOSFET converter operation, and GaN/SiC data-center power infrastructure. This is semiconductor-relevant, but the VNA link is weaker from the current evidence. It may fit impedance/network characterization of power modules, parasitics, filters, or high-frequency switching behavior, but that is not explicitly supported by the vault. | Raw evidence: A DC-DC converter example describes a current-fed full bridge with MOSFET pairs driven by complementary gate signals. Source: `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80. Another Raw source references “Data Center Power GaN and SiC Technologies for Next-Gen 800 VDC Infrastructure.” Source: `raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md`, section 8. |\n\n## Bottom line\n\nThe **best-supported semiconductor VNA opportunity** is:\n\n> **Advanced packaging and high-speed interconnect characterization for AI/HPC/data-center semiconductors** — especially chiplet, 2.5D interposer, HBM, server/storage interconnect, and high-density packaging.\n\nWhy: the vault repeatedly supports the semiconductor-side demand for **high bandwidth, high-density interconnect, signal integrity, AI/HPC/data-center use cases**, and separately confirms R&S VNA products such as **ZNA** and **ZNL**. The missing piece is that the current Raw evidence does **not** explicitly say “use VNA for semiconductor packaging/interconnect test,” so that part should be treated as an engineering/application inference rather than a vault-proven statement.",
+      "model_turns": 7,
+      "tools": [
+       {
+        "call_id": "call_Gh8PZjEG3AAdlhKaqbelUJQW",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+          "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+          "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+           "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+           "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Semiconductor, and what evidence supports each opportunity? Please focus on opportunities and supporting evidence, with citations to Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Indicates whether the UE supports location based conditional handover, i.e. CondEvent D1. A UE\nlocationBasedCondHandover-r17 supporting this feature shall also indicate the support of condHandover-r16 and the support of\nIndicates whether the UE supports time based conditional handover, i.e. CondEvent T1. A UE support-\ntimeBasedCondHandover-r17 ing this feature shall also indicate the support of condHandover-r16 for NTN bands and the support of\nThe UE indicates in addition to the supported frequency bands for NTN also the supported channel bandwidth for each",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.239334
+            },
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.518784
+            },
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.557881
+            },
+            {
+             "text": "Network slicing with delay measurements on different slices -> Show network operator how network slicing works in practice and what the benefits would be. Created using XLAPI script. Analysis in CB view",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-094dfa34f112d59b",
+               "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+              "section": 49,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.389158
+            },
+            {
+             "text": "Network slicing with delay measurements on different slices -> Show network operator how network slicing works in practice and what the benefits would be. Created using XLAPI script. Analysis in CB view",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-094dfa34f112d59b",
+               "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+              "section": 52,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.389158
+            },
+            {
+             "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 80,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.730462
+            },
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.47455
+            },
+            {
+             "text": "as intra-frequency cell reselection information other than neighboring cell related. SIB3 and SIB4 provide neighbor cell\nrelated information for intra-frequency and inter-frequency cell reselection. For the sake of brevity, we will not delve into\ndetails of the cell reselection process. The general principles are described in [Ref. 1] and [TS 38.304]. The network can\nconfigure different priorities with respect to frequencies, RAT and set in addition the criterion for reselection either being\nbased on power level (RSRP measurements) or quality (RSRQ measurements). However, also note that several of the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 78,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.372088
+            }
+           ],
+           "text": "**Group-delay measurement workflows using a Vector Network Analyzer** — RAW evidence explicitly compares spectrum-analyzer-based and VNA-based group-delay measurement setups, identifying the R&S®ZNA vector network analyzer with relevant options as the VNA instrument setup [2].\n**Scalable/high-frequency VNA system configurations** — RAW evidence identifies the R&S®ZNA67EXT vector network analyzer system as consisting of an R&S®ZNA67 VNA plus up to four external test sets, supporting an opportunity around expandable VNA test systems [3].\n**Power-semiconductor / MOSFET-based converter investigation as an adjacent opportunity** — RAW evidence describes a DC-DC converter using a current-fed full bridge driven by complementary gate signals controlling MOSFET pairs, which supports the presence of semiconductor/power-electronics content in the vault, but it does not itself link VNA to that use case [6].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.518784
+           },
+           {
+            "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.557881
+           },
+           {
+            "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 80,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.730462
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_UwmpJcbBbxpkcOTstoOAUWR5",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+          "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+          "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_3oMShTRE5HIk83A0ayM9dT22",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+          "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+          "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+           "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+           "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "semiconductor vector network analyzer VNA S-parameter on-wafer wafer ZNA ZNB ZNL Raw evidence",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9b0b29b71d0a06d2",
+               "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.943557
+            },
+            {
+             "text": "Rohde & Schwarz R&S®ZNL Vector Network Analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9b0b29b71d0a06d2",
+               "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "section": 42,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.794718
+            },
+            {
+             "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f1351a1b7fda64ad",
+               "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.898249
+            },
+            {
+             "text": "- [[R&S ZNL]]\n- [[R&S ZNL4]]\n- [[R&S ZNL6]]\n- [[R&S FPL1003]]\n- [[Vector Network Analyzer]]\n- [[Spectrum Analyzer]]\n- [[Dynamic range]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL3.md"
+             },
+             "score": 35.893422
+            },
+            {
+             "text": "- [[R&S ZNL]]\n- [[R&S ZNL3]]\n- [[R&S ZNL6]]\n- [[R&S ZNB3004]]\n- [[Vector Network Analyzer]]\n- [[Spectrum Analyzer]]\n- [[Dynamic range]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL4.md"
+             },
+             "score": 35.893422
+            },
+            {
+             "text": "Rohde & Schwarz R&S®ZNA Vector Network Analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f1351a1b7fda64ad",
+               "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.809747
+            },
+            {
+             "text": "- [[R&S ZNL]]\n- [[R&S ZNL3]]\n- [[R&S ZNL4]]\n- [[R&S ZNL14]]\n- [[R&S ZNB3004]]\n- [[Vector Network Analyzer]]\n- [[Spectrum Analyzer]]\n- [[Dynamic range]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL6.md"
+             },
+             "score": 34.948402
+            },
+            {
+             "text": "- [[R&S ZNL]]\n- [[R&S ZNL6]]\n- [[R&S ZNL20]]\n- [[R&S FPL1014]]\n- [[R&S ZNB3020]]\n- [[Vector Network Analyzer]]\n- [[Spectrum Analyzer]]\n- [[YIG preselector]]\n- [[Dynamic range]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL14.md"
+             },
+             "score": 34.254356
+            }
+           ],
+           "text": "The RAW passages identify R&S®ZNL as a vector network analyzer [1][2] and R&S®ZNA as a vector network analyzer [3][6]; they do not provide RAW evidence for semiconductor, S-parameter, on-wafer/wafer, or ZNB.",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-9b0b29b71d0a06d2",
+              "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.943557
+           },
+           {
+            "text": "Rohde & Schwarz R&S®ZNL Vector Network Analyzer",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-9b0b29b71d0a06d2",
+              "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+             "section": 42,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.794718
+           },
+           {
+            "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f1351a1b7fda64ad",
+              "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.898249
+           },
+           {
+            "text": "Rohde & Schwarz R&S®ZNA Vector Network Analyzer",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f1351a1b7fda64ad",
+              "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.809747
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_iS9TNamfanfjGUtBxtSohmPn",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+          "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+          "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+           "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+           "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Semiconductor market opportunities Raw evidence: RF front end, wafer, chip, package, AI, data center, high speed interconnect, power semiconductor, MOSFET, SiC, GaN, signal integrity. Return relevant Raw citations.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-04ab0b80488a718c",
+               "original_ref": "raw/Market/HSD Cable test image 4.md",
+               "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.56707
+            },
+            {
+             "text": "## 副標 / 說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e73138a0365cd1e7",
+               "original_ref": "raw/Market/HSD Cable test image 1.md",
+               "sha256": "e73138a0365cd1e7b7d67a994e0f69839b084706234bf006b35b65549a84d5b6",
+               "raw_ref": "raw/Market/HSD Cable test image 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 1.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.548513
+            },
+            {
+             "text": "### 副標/說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d41b79ede600b45f",
+               "original_ref": "raw/Market/HSD Cable test image 5.md",
+               "sha256": "d41b79ede600b45f00f70aa5f45705f3b20e3d2cc43c09b6719db46baeb5443d",
+               "raw_ref": "raw/Market/HSD Cable test image 5.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 5.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.548513
+            },
+            {
+             "text": "| **4 FAN-IN WLP** | RDL (redistribution layer) is built on wafer first, then wafer is diced into chips. | Die / RDL / Wafer | • Thin & small  • Good electrical performance  • Cost effective | PMIC  • RF IC  • Mobile Devices |\n| **5 FAN-OUT WLP (FO-WLP)** | Chip is embedded in mold compound and RDL redistributes I/O outside the chip area. | Mold Compound / Die / RDL | • High I/O density  • Excellent electrical performance  • Thin profile | Smartphone AP  • Wearables  • AR / VR |\n| **6 SIP (SYSTEM IN PACKAGE)** | Multiple chips (passive & active components) are integrated into one package. | Die 1 / Die 2 / Passives | • Heterogeneous integration  • Compact system  • Cost effective | AirPods  • Smart Watch  • IoT Devices |\n| **7 CHIPLET** | Multiple smaller dies (chiplets) combined in one system package. | Chiplet 1 / Chiplet 2 / I/O / … | • Modular design  • Higher yield  • Flexible mix & match | Server / AI  • Networking  • High Performance IC |\n| **8 2.5D (INTERPOSER / BRIDGE)** | Multiple chips are mounted on an interposer for high-density interconnect. | Die 1 / Die 2 / HBM / Interposer | • High bandwidth  • Integrates HBM  • Excellent performance | AI GPU  • HPC / Data Center  ",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6877983df8f4d708",
+               "original_ref": "raw/Market/IC Carrier 載板 image 2.md",
+               "sha256": "6877983df8f4d70858ae88a29da994782551c7e37c71826ded78a3fc5da11ea5",
+               "raw_ref": "raw/Market/IC Carrier 載板 image 2.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/IC Carrier 載板 image 2.md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.818445
+            },
+            {
+             "text": "| 4 | FAN-IN WLP | RDL (redistribution layer) is built on wafer first, then wafer is diced into chips. | Die / RDL / Wafer | Thin & small; Good electrical performance; Cost effective | PMIC; RF IC; Mobile Devices |\n| 5 | FAN-OUT WLP (FO-WLP) | Chip is embedded in mold compound and RDL redistributes I/O outside the chip area. | Mold Compound / Die / RDL | High I/O density; Excellent electrical performance; Thin profile | Smartphone AP; Wearables; AR / VR |\n| 6 | SIP (SYSTEM IN PACKAGE) | Multiple chips (passive & active components) are integrated into one package. | Die 1 / Die 2 / Passives | Heterogeneous integration; Compact system; Cost effective | AirPods; Smart Watch; IoT Devices |\n| 7 | CHIPLET | Multiple smaller dies (chiplets) combined in one system package. | Chiplet 1 / Chiplet 2 / I/O / ... | Modular design; Higher yield; Flexible mix & match | Server / AI; Networking; High Performance IC |\n| 8 | 2.5D (INTERPOSER / BRIDGE) | Multiple chips are mounted on an interposer for high-density interconnect. | Die 1 / Die 2 / HBM / Interposer | High bandwidth; Integrates HBM; Excellent performance | AI GPU; HPC / Data Center; High End Computing |",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-5fd5ac08d6e70f1e",
+               "original_ref": "raw/Market/IC Carrier 載板 image 5.md",
+               "sha256": "5fd5ac08d6e70f1e4aefb23dce14736f48bccede1a778272d6eb20fcf0b0df98",
+               "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+              "section": 64,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.818445
+            },
+            {
+             "text": "| # | Technology | What it is | Cross-section / structure | Key features | Main applications |\n|---|---|---|---|---|---|\n| 1 | [[Wire Bond]] (WB) | Gold or copper wires connect the chip (I/O pads) to the package substrate. | Die / Substrate | Low cost；Mature & reliable；Low I/O density；Good for high voltage | Automotive；Home Appliances；MCU / Analog IC |\n| 2 | [[Flip Chip]] (FC) | Chip is flipped and connected to substrate using solder bumps. | Die / Substrate | High speed；High I/O density；Better heat dissipation；Higher reliability | CPU / GPU；Smartphone；High Performance IC |\n| 3 | [[WLCSP]] (Wafer Level CSP) | Packaging is done at wafer level before dicing. Chip size ≈ package size. | Die / Wafer | Very small；Low profile；Low cost (high volume)；Good electrical performance | Smartphone；Wearables；MEMS / Sensors |\n| 4 | [[Fan-In WLP]] | [[RDL]] (redistribution layer) is built on wafer first, then wafer is diced into chips. | Die / RDL / Wafer | Thin & small；Good electrical performance；Cost effective | PMIC；RF IC；Mobile Devices |\n| 5 | [[Fan-Out WLP]] (FO-WLP) | Chip is embedded in mold compound and RDL redistributes I/O outside the chip area. | Mold Compound / Die / RDL | High I/O density；Excellent electrical performance；Thin profile | Smartphone AP；Wearables；AR / VR |\n| 6 | [[SiP]] (System in Package) | Multiple chips (passive & active components) are integrated into one package. | Die 1 / Die 2 / Passives | Heterogeneous integration；Compact system；Cost effective | AirPods；Smart Watch；IoT Devices |\n| 7 | [[Chiplet]] | Multiple smaller dies (chiplets) combined in one system package. | Chiplet 1 / Chiplet 2 / I/O / ... | Modular design；Higher yield；Flexible mix & match | Server / AI；Networking；High Performance IC |\n| 8 | [[2.5D 3D 封裝|2.5D]] (Interposer / Bridge) | Multiple chips are mounted on an interposer for high-density interconnect. | Die 1 / Die 2 / HBM / Interposer | High bandwidth；Integrates HBM；Excellent performance | AI GPU；HPC / Data Center；High End Computing |\n| 9 | [[3D IC]] (Die Stacking) | Dies are stacked vertically and connected through TSVs (Through Silicon Vias). | Die 3 / Die 2 / Die 1 / TSV | Short interconnect；High bandwidth；Lower power | HBM；AI Accelerators；Advanced Computing |\n| 10 | [[Hybrid Bonding]] | Direct Cu-Cu and oxide-oxide bonding connect wafers directly without solder bumps. | Die / Cu-Cu Bonding / Oxide-Oxide Bonding / Die | Ultra high density；Higher speed；Lower power | HBM4 / Next Gen Memory；3D IC / Chiplet；Future AI Chips |",
+             "citation": {
+              "kind": "wiki",
+              "source": {
+               "source_id": "src-5fd5ac08d6e70f1e",
+               "original_ref": "raw/Market/IC Carrier 載板 image 5.md",
+               "sha256": "5fd5ac08d6e70f1e4aefb23dce14736f48bccede1a778272d6eb20fcf0b0df98",
+               "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/IC Carrier 載板 image 5.md"
+             },
+             "score": 36.442144
+            },
+            {
+             "text": "### 主標題下說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e4bb3efdb206a43f",
+               "original_ref": "raw/Market/HSD Cable test image.md",
+               "sha256": "e4bb3efdb206a43f913cac17052f0ae8bfad29db53bb5313a82a97e4c9933e38",
+               "raw_ref": "raw/Market/HSD Cable test image.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.967714
+            },
+            {
+             "text": "[https://navitassemi.com/wp-content/uploads/2025/10/Redefining-Data-Center-Power-GaN-and-SiC-Technologies-for-Next-Gen-800-VDC-Infrastructure.pdf](https://navitassemi.com/wp-content/uploads/2025/10/Redefining-Data-Center-Power-GaN-and-SiC-Technologies-for-Next-Gen-800-VDC-Infrastructure.pdf)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4c3d5ccad50576cc",
+               "original_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md",
+               "sha256": "4c3d5ccad50576cc58810cc6f8737445b5b3e694eb6d708909c4b4b7d77f8317",
+               "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.667555
+            }
+           ],
+           "text": "Server and storage interconnect solutions target high-speed, high-density data center architectures with superior signal integrity [1].  \nFAN-IN WLP is a wafer-level packaging opportunity for PMIC, RF IC, and mobile devices [4].  \nFAN-OUT WLP embeds chips in mold compound for high I/O density and excellent electrical performance [5].  \nSIP integrates multiple chips into one package for compact heterogeneous systems [4].  \nChiplet packaging combines smaller dies in one system package for Server/AI, networking, and high-performance ICs [5].  \n2.5D interposer packaging supports high-density interconnect, HBM integration, AI GPU, and HPC/Data Center applications [4].  \nA RAW source references data-center power GaN and SiC technologies for next-gen 800 VDC infrastructure [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-04ab0b80488a718c",
+              "original_ref": "raw/Market/HSD Cable test image 4.md",
+              "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/HSD Cable test image 4.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.56707
+           },
+           {
+            "text": "| **4 FAN-IN WLP** | RDL (redistribution layer) is built on wafer first, then wafer is diced into chips. | Die / RDL / Wafer | • Thin & small  • Good electrical performance  • Cost effective | PMIC  • RF IC  • Mobile Devices |\n| **5 FAN-OUT WLP (FO-WLP)** | Chip is embedded in mold compound and RDL redistributes I/O outside the chip area. | Mold Compound / Die / RDL | • High I/O density  • Excellent electrical performance  • Thin profile | Smartphone AP  • Wearables  • AR / VR |\n| **6 SIP (SYSTEM IN PACKAGE)** | Multiple chips (passive & active components) are integrated into one package. | Die 1 / Die 2 / Passives | • Heterogeneous integration  • Compact system  • Cost effective | AirPods  • Smart Watch  • IoT Devices |\n| **7 CHIPLET** | Multiple smaller dies (chiplets) combined in one system package. | Chiplet 1 / Chiplet 2 / I/O / … | • Modular design  • Higher yield  • Flexible mix & match | Server / AI  • Networking  • High Performance IC |\n| **8 2.5D (INTERPOSER / BRIDGE)** | Multiple chips are mounted on an interposer for high-density interconnect. | Die 1 / Die 2 / HBM / Interposer | • High bandwidth  • Integrates HBM  • Excellent performance | AI GPU  • HPC / Data Center  ",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-6877983df8f4d708",
+              "original_ref": "raw/Market/IC Carrier 載板 image 2.md",
+              "sha256": "6877983df8f4d70858ae88a29da994782551c7e37c71826ded78a3fc5da11ea5",
+              "raw_ref": "raw/Market/IC Carrier 載板 image 2.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/IC Carrier 載板 image 2.md",
+             "section": 8,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.818445
+           },
+           {
+            "text": "| 4 | FAN-IN WLP | RDL (redistribution layer) is built on wafer first, then wafer is diced into chips. | Die / RDL / Wafer | Thin & small; Good electrical performance; Cost effective | PMIC; RF IC; Mobile Devices |\n| 5 | FAN-OUT WLP (FO-WLP) | Chip is embedded in mold compound and RDL redistributes I/O outside the chip area. | Mold Compound / Die / RDL | High I/O density; Excellent electrical performance; Thin profile | Smartphone AP; Wearables; AR / VR |\n| 6 | SIP (SYSTEM IN PACKAGE) | Multiple chips (passive & active components) are integrated into one package. | Die 1 / Die 2 / Passives | Heterogeneous integration; Compact system; Cost effective | AirPods; Smart Watch; IoT Devices |\n| 7 | CHIPLET | Multiple smaller dies (chiplets) combined in one system package. | Chiplet 1 / Chiplet 2 / I/O / ... | Modular design; Higher yield; Flexible mix & match | Server / AI; Networking; High Performance IC |\n| 8 | 2.5D (INTERPOSER / BRIDGE) | Multiple chips are mounted on an interposer for high-density interconnect. | Die 1 / Die 2 / HBM / Interposer | High bandwidth; Integrates HBM; Excellent performance | AI GPU; HPC / Data Center; High End Computing |",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-5fd5ac08d6e70f1e",
+              "original_ref": "raw/Market/IC Carrier 載板 image 5.md",
+              "sha256": "5fd5ac08d6e70f1e4aefb23dce14736f48bccede1a778272d6eb20fcf0b0df98",
+              "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+             "section": 64,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 36.818445
+           },
+           {
+            "text": "[https://navitassemi.com/wp-content/uploads/2025/10/Redefining-Data-Center-Power-GaN-and-SiC-Technologies-for-Next-Gen-800-VDC-Infrastructure.pdf](https://navitassemi.com/wp-content/uploads/2025/10/Redefining-Data-Center-Power-GaN-and-SiC-Technologies-for-Next-Gen-800-VDC-Infrastructure.pdf)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4c3d5ccad50576cc",
+              "original_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md",
+              "sha256": "4c3d5ccad50576cc58810cc6f8737445b5b3e694eb6d708909c4b4b7d77f8317",
+              "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/SST(Solid State Transformer ).md",
+             "section": 8,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.667555
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_JK8ruhPhOos22rXuR6gUoiG7",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+          "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+          "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_QnQqx8P7EoFepyto3Wi0fih3",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+          "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+          "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ac3807fc79e14fab9d5cb79891c26682",
+           "request_id": "request-ac3807fc79e14fab9d5cb79891c26682",
+           "span_id": "span-ac3807fc79e14fab9d5cb79891c26682",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "signal integrity vector network analyzer semiconductor raw evidence S-parameters R&S ZNA high speed digital interconnect",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f1351a1b7fda64ad",
+               "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 40.644463
+            },
+            {
+             "text": "Rohde & Schwarz R&S®ZNA Vector Network Analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f1351a1b7fda64ad",
+               "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.445447
+            },
+            {
+             "text": "- [[R&S ZNA]]\n- [[R&S ZNA26]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67]]\n- [[Vector Network Analyzer]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA43.md"
+             },
+             "score": 38.686284
+            },
+            {
+             "text": "- [[R&S ZNA]]\n- [[R&S ZNA26]]\n- [[R&S ZNA43]]\n- [[R&S ZNA67]]\n- [[Vector Network Analyzer]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA50.md"
+             },
+             "score": 38.686284
+            },
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.465158
+            },
+            {
+             "text": "- [[R&S ZNA]]\n- [[R&S ZNA43]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67]]\n- [[R&S ZNA67EXT]]\n- [[Vector Network Analyzer]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA26.md"
+             },
+             "score": 37.733766
+            },
+            {
+             "text": "- [[R&S ZNA]]\n- [[R&S ZNA26]]\n- [[R&S ZNA43]]\n- [[R&S ZNA50]]\n- [[R&S ZNA67EXT]]\n- [[Vector Network Analyzer]]\n- [[mmWave converter support]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67.md"
+             },
+             "score": 36.574069
+            },
+            {
+             "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 3 GHz, N connectors\nVector network analyzer, 4.5 GHz, N connectors\nVector network analyzer, 6 GHz, N connectors\nVector network analyzer, 14 GHz, N connectors\nVector network analyzer, 20 GHz, 3.5 mm connectors\nOptions\nSpectrum analysis, for R&S®ZNL3\nSpectrum analysis, for R&S®ZNL4\nSpectrum analysis, for R&S®ZNL6\nSpectrum analysis, for R&S®ZNL14\nSpectrum analysis, for R&S®ZNL20\nExtended power range",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-9b0b29b71d0a06d2",
+               "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+              "section": 574,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.413997
+            }
+           ],
+           "text": "R&S®ZNA is a vector network analyzer [1].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f1351a1b7fda64ad",
+              "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+              "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 40.644463
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

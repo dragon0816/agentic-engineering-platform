@@ -1,0 +1,126 @@
+{
+ "question": {
+  "id": "Q1011",
+  "text": "What is frequency error, and which product-related measurement decisions depend on understanding it?",
+  "technical": "RF / Measurement Fundamentals",
+  "topic": "frequency error",
+  "product_related": "true"
+ },
+ "session_id": "conversation-e62d83a4963149a297289e74919c1f53",
+ "exchange": {
+  "sent": "What is frequency error, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 58.25,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-e62d83a4963149a297289e74919c1f53",
+    "actor": "leo.chi",
+    "title": "What is frequency error, and which product-related measurement decisions…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:43:47.129756Z",
+    "updated_at": "2026-10-07T10:44:45.392178Z",
+    "messages": [
+     {
+      "message_id": "message-db1e3e0613864d219b088229fe7aa86c",
+      "role": "user",
+      "text": "What is frequency error, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T10:43:47.564257Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-3e664cd570284bdd99800addc9f64104",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it returned insufficient evidence, so I can’t cite Rohde & Schwarz Raw evidence for this question.\n\nFrom general measurement knowledge, not from the knowledge base:\n\n**Frequency error** is the difference between the frequency a device is supposed to transmit or receive at and the frequency it actually uses. It is usually expressed in **Hz**, **ppm**, or sometimes as a normalized offset relative to carrier frequency.\n\nExample:  \nIf a transmitter is configured for **3.500000 GHz** but the measured carrier is **3.500002 GHz**, the frequency error is **+2 kHz**, or about **+0.57 ppm**.\n\nUnderstanding frequency error affects several product-related measurement decisions:\n\n1. **Which instrument accuracy is required**  \n   You need a signal analyzer, spectrum analyzer, communication tester, or frequency counter with a reference accuracy better than the expected DUT error. Otherwise, the instrument’s own uncertainty may dominate the result.\n\n2. **Whether an external frequency reference is needed**  \n   For tight limits, engineers may need a high-stability 10 MHz reference, GPS-disciplined clock, rubidium reference, or shared reference between generator and analyzer.\n\n3. **Which measurement application or demodulation mode to use**  \n   In wireless testing, frequency error may be measured as part of transmitter quality, modulation accuracy, EVM, or standard-specific Tx tests. The choice depends on whether the signal is CW, modulated LTE/5G/Wi‑Fi, radar, satellite, etc.\n\n4. **Whether the DUT passes conformance or production limits**  \n   Standards often define maximum carrier frequency error. Production tests need limits that include DUT tolerance, instrument uncertainty, temperature, and aging.\n\n5. **How to configure signal generator and analyzer frequency settings**  \n   If frequency error is expected, analyzer center frequency, span, acquisition bandwidth, and tracking/demodulation settings must be chosen so the signal is captured and measured correctly.\n\n6. **Whether oscillator calibration or compensation is needed**  \n   Frequency error often indicates reference oscillator offset, PLL issue, Doppler shift, temperature drift, or calibration error. This affects whether the product needs trimming, compensation tables, or better clock hardware.\n\n7. **Whether measurements should be made conducted or over-the-air**  \n   OTA measurements can include propagation effects, Doppler, chamber uncertainty, and antenna/system behavior, while conducted measurements isolate the RF port and clock behavior more directly.\n\n8. **How to interpret EVM and demodulation failures**  \n   Excessive frequency error can degrade demodulation and increase EVM. Before blaming RF linearity or modulation quality, engineers need to check whether carrier offset is causing the impairment.\n\n9. **Which test platform is appropriate**  \n   Product decisions may involve choosing between a spectrum/signal analyzer, vector signal analyzer, wireless communication tester, VNA with frequency-offset capability, or dedicated production tester depending on the signal type and required accuracy.\n\nIn short: **frequency error tells you how far the DUT’s actual frequency is from the intended frequency**, and understanding it guides decisions about instrument selection, reference clocking, measurement setup, conformance limits, calibration strategy, and interpretation of modulation-quality results.",
+      "created_at": "2026-10-07T10:44:45.392178Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-cabd703aa84b4d3b84b64f95bfe044a0",
+       "request_id": "request-cabd703aa84b4d3b84b64f95bfe044a0",
+       "span_id": "span-cabd703aa84b4d3b84b64f95bfe044a0",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it returned insufficient evidence, so I can’t cite Rohde & Schwarz Raw evidence for this question.\n\nFrom general measurement knowledge, not from the knowledge base:\n\n**Frequency error** is the difference between the frequency a device is supposed to transmit or receive at and the frequency it actually uses. It is usually expressed in **Hz**, **ppm**, or sometimes as a normalized offset relative to carrier frequency.\n\nExample:  \nIf a transmitter is configured for **3.500000 GHz** but the measured carrier is **3.500002 GHz**, the frequency error is **+2 kHz**, or about **+0.57 ppm**.\n\nUnderstanding frequency error affects several product-related measurement decisions:\n\n1. **Which instrument accuracy is required**  \n   You need a signal analyzer, spectrum analyzer, communication tester, or frequency counter with a reference accuracy better than the expected DUT error. Otherwise, the instrument’s own uncertainty may dominate the result.\n\n2. **Whether an external frequency reference is needed**  \n   For tight limits, engineers may need a high-stability 10 MHz reference, GPS-disciplined clock, rubidium reference, or shared reference between generator and analyzer.\n\n3. **Which measurement application or demodulation mode to use**  \n   In wireless testing, frequency error may be measured as part of transmitter quality, modulation accuracy, EVM, or standard-specific Tx tests. The choice depends on whether the signal is CW, modulated LTE/5G/Wi‑Fi, radar, satellite, etc.\n\n4. **Whether the DUT passes conformance or production limits**  \n   Standards often define maximum carrier frequency error. Production tests need limits that include DUT tolerance, instrument uncertainty, temperature, and aging.\n\n5. **How to configure signal generator and analyzer frequency settings**  \n   If frequency error is expected, analyzer center frequency, span, acquisition bandwidth, and tracking/demodulation settings must be chosen so the signal is captured and measured correctly.\n\n6. **Whether oscillator calibration or compensation is needed**  \n   Frequency error often indicates reference oscillator offset, PLL issue, Doppler shift, temperature drift, or calibration error. This affects whether the product needs trimming, compensation tables, or better clock hardware.\n\n7. **Whether measurements should be made conducted or over-the-air**  \n   OTA measurements can include propagation effects, Doppler, chamber uncertainty, and antenna/system behavior, while conducted measurements isolate the RF port and clock behavior more directly.\n\n8. **How to interpret EVM and demodulation failures**  \n   Excessive frequency error can degrade demodulation and increase EVM. Before blaming RF linearity or modulation quality, engineers need to check whether carrier offset is causing the impairment.\n\n9. **Which test platform is appropriate**  \n   Product decisions may involve choosing between a spectrum/signal analyzer, vector signal analyzer, wireless communication tester, VNA with frequency-offset capability, or dedicated production tester depending on the signal type and required accuracy.\n\nIn short: **frequency error tells you how far the DUT’s actual frequency is from the intended frequency**, and understanding it guides decisions about instrument selection, reference clocking, measurement setup, conformance limits, calibration strategy, and interpretation of modulation-quality results.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-cabd703aa84b4d3b84b64f95bfe044a0",
+      "request_id": "request-cabd703aa84b4d3b84b64f95bfe044a0",
+      "span_id": "span-cabd703aa84b4d3b84b64f95bfe044a0",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-cabd703aa84b4d3b84b64f95bfe044a0",
+       "request_id": "request-cabd703aa84b4d3b84b64f95bfe044a0",
+       "span_id": "span-cabd703aa84b4d3b84b64f95bfe044a0",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it returned insufficient evidence, so I can’t cite Rohde & Schwarz Raw evidence for this question.\n\nFrom general measurement knowledge, not from the knowledge base:\n\n**Frequency error** is the difference between the frequency a device is supposed to transmit or receive at and the frequency it actually uses. It is usually expressed in **Hz**, **ppm**, or sometimes as a normalized offset relative to carrier frequency.\n\nExample:  \nIf a transmitter is configured for **3.500000 GHz** but the measured carrier is **3.500002 GHz**, the frequency error is **+2 kHz**, or about **+0.57 ppm**.\n\nUnderstanding frequency error affects several product-related measurement decisions:\n\n1. **Which instrument accuracy is required**  \n   You need a signal analyzer, spectrum analyzer, communication tester, or frequency counter with a reference accuracy better than the expected DUT error. Otherwise, the instrument’s own uncertainty may dominate the result.\n\n2. **Whether an external frequency reference is needed**  \n   For tight limits, engineers may need a high-stability 10 MHz reference, GPS-disciplined clock, rubidium reference, or shared reference between generator and analyzer.\n\n3. **Which measurement application or demodulation mode to use**  \n   In wireless testing, frequency error may be measured as part of transmitter quality, modulation accuracy, EVM, or standard-specific Tx tests. The choice depends on whether the signal is CW, modulated LTE/5G/Wi‑Fi, radar, satellite, etc.\n\n4. **Whether the DUT passes conformance or production limits**  \n   Standards often define maximum carrier frequency error. Production tests need limits that include DUT tolerance, instrument uncertainty, temperature, and aging.\n\n5. **How to configure signal generator and analyzer frequency settings**  \n   If frequency error is expected, analyzer center frequency, span, acquisition bandwidth, and tracking/demodulation settings must be chosen so the signal is captured and measured correctly.\n\n6. **Whether oscillator calibration or compensation is needed**  \n   Frequency error often indicates reference oscillator offset, PLL issue, Doppler shift, temperature drift, or calibration error. This affects whether the product needs trimming, compensation tables, or better clock hardware.\n\n7. **Whether measurements should be made conducted or over-the-air**  \n   OTA measurements can include propagation effects, Doppler, chamber uncertainty, and antenna/system behavior, while conducted measurements isolate the RF port and clock behavior more directly.\n\n8. **How to interpret EVM and demodulation failures**  \n   Excessive frequency error can degrade demodulation and increase EVM. Before blaming RF linearity or modulation quality, engineers need to check whether carrier offset is causing the impairment.\n\n9. **Which test platform is appropriate**  \n   Product decisions may involve choosing between a spectrum/signal analyzer, vector signal analyzer, wireless communication tester, VNA with frequency-offset capability, or dedicated production tester depending on the signal type and required accuracy.\n\nIn short: **frequency error tells you how far the DUT’s actual frequency is from the intended frequency**, and understanding it guides decisions about instrument selection, reference clocking, measurement setup, conformance limits, calibration strategy, and interpretation of modulation-quality results.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_eMBd4EIrcliFxN3tqTyklFav",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-cabd703aa84b4d3b84b64f95bfe044a0",
+          "request_id": "request-cabd703aa84b4d3b84b64f95bfe044a0",
+          "span_id": "span-cabd703aa84b4d3b84b64f95bfe044a0",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

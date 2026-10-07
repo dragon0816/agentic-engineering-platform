@@ -1,0 +1,422 @@
+{
+ "question": {
+  "id": "Q0646",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-bd668ffcbbed42f18584d380a4ea39ad",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 78.125,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-bd668ffcbbed42f18584d380a4ea39ad",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:15:00.547066Z",
+    "updated_at": "2026-10-07T10:16:18.047900Z",
+    "messages": [
+     {
+      "message_id": "message-521fd6e7bd0a4326821e080a3150903a",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T10:15:00.557928Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-21daafaa752d4e5e8978b2dba6d7f5ac",
+      "role": "assistant",
+      "text": "Based on current knowledge-base evidence, the strongest AI opportunities for Signaling / Non-signaling Testers are:\n\n| Opportunity | Why it is strong | Evidence from Raw sources |\n|---|---|---|\n| **1. CMX500 for generative-AI user-experience testing over real wireless conditions** | AI applications are becoming user-experience sensitive, and the CMX500 can emulate realistic RF/network conditions while measuring GenAI KPIs such as **Time to First Token** and **Tokens Per Second**. This positions the tester as a benchmark platform for cloud/server-side LLM services accessed through mobile devices. | R&S and China Mobile Research Institute demonstrated a GenAI UX testbed where the **CMX500 establishes the radio connection**, configures **network parameters, fading, latency, jitter, RF impairments**, and enables measurement of **TTFT** and **TPS** for LLM inference responses. Source: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 4. |\n| **2. CMX500 for AI-native 5G-Advanced / 6G radio validation** | AI is moving into the radio interface itself. CMX500 can act as an AI-enabled base-station emulator to validate AI-enhanced wireless transmission techniques, making it relevant for 5G-Advanced and 6G R&D. | In a KT / Qualcomm / R&S demonstration, an AI-enabled wireless device prototype connected to the **CMX500 configured as an AI-enabled base station emulator** achieved about **50% higher downlink throughput** than conventional non-AI technology. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **3. CMX500 for AI-enhanced CSI / massive-MIMO feedback testing** | AI-based channel-state feedback compression is a concrete technical area where wireless AI needs controlled, repeatable test environments. This creates a high-value R&D use case for signaling testers. | The same KT / Qualcomm / R&S demonstration used a **two-sided AI model** for CSI feedback, with CSI-RS-based analysis and compressed feedback, improving radio transmission performance in **massive MIMO** scenarios. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **4. CMX500 AI Scripting Assistant as a productivity differentiator** | Beyond testing AI-enabled devices, AI can improve the tester workflow itself. Script generation is a pain point in protocol and application testing, so an AI assistant directly increases test-engineer productivity and lowers adoption friction. | R&S presents the **CMX500 AI Scripting Assistant** as an AI-powered tool that simplifies and accelerates script generation for **5G NR protocol testing, application testing, and instrument automation**. Source: `raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`, section 2. |\n| **5. CMX500 for application-level validation of AI-driven radio gains** | AI radio improvements need to be translated into end-user application impact. CMX500’s application testing capability can connect physical-layer AI gains to UX outcomes such as video streaming performance. | The KT / Qualcomm / R&S demonstration states that CMX500’s application testing capabilities showed how AI-driven radio performance improvements translate into enhanced **video streaming** user experience. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **6. CMX500 as a future-proof multi-technology AI-device connectivity platform** | AI devices will span 5G, RedCap, NTN, Wi-Fi 7, and future 6G paths. CMX500’s broad technology coverage makes it a strong platform for validating AI terminals and edge/cloud AI services across access technologies. | CMX500 supports **LTE, 5G NR, NR-NTN, 5G RedCap, Wi-Fi, and Wi-Fi 7** in one platform. Source: `raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md`, section 3. Additional OTA evidence: EMITE + R&S combine OTA chambers with CMX500 for Wi-Fi 7 and 5G RedCap device assessment. Source: `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 3. |\n| **7. CMP180 for high-throughput non-signaling production test of AI-connected devices** | AI devices will increasingly include advanced WLAN/5G connectivity. Production test must be fast, and the evidence specifically states that WLAN production RF measurements are done in **non-signaling mode to save time**, where CMP180 is optimized. | R&S states that in WLAN device production, all RF measurements are performed in **non-signaling mode to save time**, and the **CMP180** is optimized for this purpose. It supports Wi-Fi 6E, Wi-Fi 7, and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz. Source: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 12. |\n| **8. CMP180 for next-generation WLAN / Wi-Fi 8 readiness in AI infrastructure and devices** | AI PCs, edge devices, XR, robotics, and AI gateways will rely on very high-throughput WLAN. CMP180’s bandwidth headroom and Wi-Fi 8 waveform demonstration support early R&D and production readiness. | CMP180 can verify a **480 MHz WLAN waveform** in loopback mode, described as a potential candidate for the future **Wi-Fi 8 / IEEE 802.11bn** standard, and is positioned as future-proof for R&D and production. Source: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, sections 3 and 12. |\n\n**Bottom line:**  \nThe strongest near-term AI opportunity is **CMX500 for GenAI user-experience and AI-radio validation**, because the evidence directly ties CMX500 to LLM UX metrics, AI-enabled base-station emulation, and measurable AI-driven throughput gains. The strongest production-side opportunity is **CMP180 non-signaling test for high-bandwidth WLAN / 5G devices**, because AI-enabled devices will need fast, scalable production RF validation across Wi-Fi 7 and future Wi-Fi 8-class connectivity.",
+      "created_at": "2026-10-07T10:16:18.047900Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-c2da2ce81a8c432bbe41774414715b8d",
+       "request_id": "request-c2da2ce81a8c432bbe41774414715b8d",
+       "span_id": "span-c2da2ce81a8c432bbe41774414715b8d",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on current knowledge-base evidence, the strongest AI opportunities for Signaling / Non-signaling Testers are:\n\n| Opportunity | Why it is strong | Evidence from Raw sources |\n|---|---|---|\n| **1. CMX500 for generative-AI user-experience testing over real wireless conditions** | AI applications are becoming user-experience sensitive, and the CMX500 can emulate realistic RF/network conditions while measuring GenAI KPIs such as **Time to First Token** and **Tokens Per Second**. This positions the tester as a benchmark platform for cloud/server-side LLM services accessed through mobile devices. | R&S and China Mobile Research Institute demonstrated a GenAI UX testbed where the **CMX500 establishes the radio connection**, configures **network parameters, fading, latency, jitter, RF impairments**, and enables measurement of **TTFT** and **TPS** for LLM inference responses. Source: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 4. |\n| **2. CMX500 for AI-native 5G-Advanced / 6G radio validation** | AI is moving into the radio interface itself. CMX500 can act as an AI-enabled base-station emulator to validate AI-enhanced wireless transmission techniques, making it relevant for 5G-Advanced and 6G R&D. | In a KT / Qualcomm / R&S demonstration, an AI-enabled wireless device prototype connected to the **CMX500 configured as an AI-enabled base station emulator** achieved about **50% higher downlink throughput** than conventional non-AI technology. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **3. CMX500 for AI-enhanced CSI / massive-MIMO feedback testing** | AI-based channel-state feedback compression is a concrete technical area where wireless AI needs controlled, repeatable test environments. This creates a high-value R&D use case for signaling testers. | The same KT / Qualcomm / R&S demonstration used a **two-sided AI model** for CSI feedback, with CSI-RS-based analysis and compressed feedback, improving radio transmission performance in **massive MIMO** scenarios. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **4. CMX500 AI Scripting Assistant as a productivity differentiator** | Beyond testing AI-enabled devices, AI can improve the tester workflow itself. Script generation is a pain point in protocol and application testing, so an AI assistant directly increases test-engineer productivity and lowers adoption friction. | R&S presents the **CMX500 AI Scripting Assistant** as an AI-powered tool that simplifies and accelerates script generation for **5G NR protocol testing, application testing, and instrument automation**. Source: `raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`, section 2. |\n| **5. CMX500 for application-level validation of AI-driven radio gains** | AI radio improvements need to be translated into end-user application impact. CMX500’s application testing capability can connect physical-layer AI gains to UX outcomes such as video streaming performance. | The KT / Qualcomm / R&S demonstration states that CMX500’s application testing capabilities showed how AI-driven radio performance improvements translate into enhanced **video streaming** user experience. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **6. CMX500 as a future-proof multi-technology AI-device connectivity platform** | AI devices will span 5G, RedCap, NTN, Wi-Fi 7, and future 6G paths. CMX500’s broad technology coverage makes it a strong platform for validating AI terminals and edge/cloud AI services across access technologies. | CMX500 supports **LTE, 5G NR, NR-NTN, 5G RedCap, Wi-Fi, and Wi-Fi 7** in one platform. Source: `raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md`, section 3. Additional OTA evidence: EMITE + R&S combine OTA chambers with CMX500 for Wi-Fi 7 and 5G RedCap device assessment. Source: `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 3. |\n| **7. CMP180 for high-throughput non-signaling production test of AI-connected devices** | AI devices will increasingly include advanced WLAN/5G connectivity. Production test must be fast, and the evidence specifically states that WLAN production RF measurements are done in **non-signaling mode to save time**, where CMP180 is optimized. | R&S states that in WLAN device production, all RF measurements are performed in **non-signaling mode to save time**, and the **CMP180** is optimized for this purpose. It supports Wi-Fi 6E, Wi-Fi 7, and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz. Source: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 12. |\n| **8. CMP180 for next-generation WLAN / Wi-Fi 8 readiness in AI infrastructure and devices** | AI PCs, edge devices, XR, robotics, and AI gateways will rely on very high-throughput WLAN. CMP180’s bandwidth headroom and Wi-Fi 8 waveform demonstration support early R&D and production readiness. | CMP180 can verify a **480 MHz WLAN waveform** in loopback mode, described as a potential candidate for the future **Wi-Fi 8 / IEEE 802.11bn** standard, and is positioned as future-proof for R&D and production. Source: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, sections 3 and 12. |\n\n**Bottom line:**  \nThe strongest near-term AI opportunity is **CMX500 for GenAI user-experience and AI-radio validation**, because the evidence directly ties CMX500 to LLM UX metrics, AI-enabled base-station emulation, and measurable AI-driven throughput gains. The strongest production-side opportunity is **CMP180 non-signaling test for high-bandwidth WLAN / 5G devices**, because AI-enabled devices will need fast, scalable production RF validation across Wi-Fi 7 and future Wi-Fi 8-class connectivity.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-c2da2ce81a8c432bbe41774414715b8d",
+      "request_id": "request-c2da2ce81a8c432bbe41774414715b8d",
+      "span_id": "span-c2da2ce81a8c432bbe41774414715b8d",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-c2da2ce81a8c432bbe41774414715b8d",
+       "request_id": "request-c2da2ce81a8c432bbe41774414715b8d",
+       "span_id": "span-c2da2ce81a8c432bbe41774414715b8d",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on current knowledge-base evidence, the strongest AI opportunities for Signaling / Non-signaling Testers are:\n\n| Opportunity | Why it is strong | Evidence from Raw sources |\n|---|---|---|\n| **1. CMX500 for generative-AI user-experience testing over real wireless conditions** | AI applications are becoming user-experience sensitive, and the CMX500 can emulate realistic RF/network conditions while measuring GenAI KPIs such as **Time to First Token** and **Tokens Per Second**. This positions the tester as a benchmark platform for cloud/server-side LLM services accessed through mobile devices. | R&S and China Mobile Research Institute demonstrated a GenAI UX testbed where the **CMX500 establishes the radio connection**, configures **network parameters, fading, latency, jitter, RF impairments**, and enables measurement of **TTFT** and **TPS** for LLM inference responses. Source: `raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`, section 4. |\n| **2. CMX500 for AI-native 5G-Advanced / 6G radio validation** | AI is moving into the radio interface itself. CMX500 can act as an AI-enabled base-station emulator to validate AI-enhanced wireless transmission techniques, making it relevant for 5G-Advanced and 6G R&D. | In a KT / Qualcomm / R&S demonstration, an AI-enabled wireless device prototype connected to the **CMX500 configured as an AI-enabled base station emulator** achieved about **50% higher downlink throughput** than conventional non-AI technology. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **3. CMX500 for AI-enhanced CSI / massive-MIMO feedback testing** | AI-based channel-state feedback compression is a concrete technical area where wireless AI needs controlled, repeatable test environments. This creates a high-value R&D use case for signaling testers. | The same KT / Qualcomm / R&S demonstration used a **two-sided AI model** for CSI feedback, with CSI-RS-based analysis and compressed feedback, improving radio transmission performance in **massive MIMO** scenarios. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **4. CMX500 AI Scripting Assistant as a productivity differentiator** | Beyond testing AI-enabled devices, AI can improve the tester workflow itself. Script generation is a pain point in protocol and application testing, so an AI assistant directly increases test-engineer productivity and lowers adoption friction. | R&S presents the **CMX500 AI Scripting Assistant** as an AI-powered tool that simplifies and accelerates script generation for **5G NR protocol testing, application testing, and instrument automation**. Source: `raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`, section 2. |\n| **5. CMX500 for application-level validation of AI-driven radio gains** | AI radio improvements need to be translated into end-user application impact. CMX500’s application testing capability can connect physical-layer AI gains to UX outcomes such as video streaming performance. | The KT / Qualcomm / R&S demonstration states that CMX500’s application testing capabilities showed how AI-driven radio performance improvements translate into enhanced **video streaming** user experience. Source: `raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`, section 5. |\n| **6. CMX500 as a future-proof multi-technology AI-device connectivity platform** | AI devices will span 5G, RedCap, NTN, Wi-Fi 7, and future 6G paths. CMX500’s broad technology coverage makes it a strong platform for validating AI terminals and edge/cloud AI services across access technologies. | CMX500 supports **LTE, 5G NR, NR-NTN, 5G RedCap, Wi-Fi, and Wi-Fi 7** in one platform. Source: `raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md`, section 3. Additional OTA evidence: EMITE + R&S combine OTA chambers with CMX500 for Wi-Fi 7 and 5G RedCap device assessment. Source: `raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`, section 3. |\n| **7. CMP180 for high-throughput non-signaling production test of AI-connected devices** | AI devices will increasingly include advanced WLAN/5G connectivity. Production test must be fast, and the evidence specifically states that WLAN production RF measurements are done in **non-signaling mode to save time**, where CMP180 is optimized. | R&S states that in WLAN device production, all RF measurements are performed in **non-signaling mode to save time**, and the **CMP180** is optimized for this purpose. It supports Wi-Fi 6E, Wi-Fi 7, and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz. Source: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 12. |\n| **8. CMP180 for next-generation WLAN / Wi-Fi 8 readiness in AI infrastructure and devices** | AI PCs, edge devices, XR, robotics, and AI gateways will rely on very high-throughput WLAN. CMP180’s bandwidth headroom and Wi-Fi 8 waveform demonstration support early R&D and production readiness. | CMP180 can verify a **480 MHz WLAN waveform** in loopback mode, described as a potential candidate for the future **Wi-Fi 8 / IEEE 802.11bn** standard, and is positioned as future-proof for R&D and production. Source: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, sections 3 and 12. |\n\n**Bottom line:**  \nThe strongest near-term AI opportunity is **CMX500 for GenAI user-experience and AI-radio validation**, because the evidence directly ties CMX500 to LLM UX metrics, AI-enabled base-station emulation, and measurable AI-driven throughput gains. The strongest production-side opportunity is **CMP180 non-signaling test for high-bandwidth WLAN / 5G devices**, because AI-enabled devices will need fast, scalable production RF validation across Wi-Fi 7 and future Wi-Fi 8-class connectivity.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_bkrs9IWKVzOJIOcoiPpcMnfK",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-c2da2ce81a8c432bbe41774414715b8d",
+          "request_id": "request-c2da2ce81a8c432bbe41774414715b8d",
+          "span_id": "span-c2da2ce81a8c432bbe41774414715b8d",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-c2da2ce81a8c432bbe41774414715b8d",
+           "request_id": "request-c2da2ce81a8c432bbe41774414715b8d",
+           "span_id": "span-c2da2ce81a8c432bbe41774414715b8d",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity? Focus on Signaling / Non-signaling Tester products such as CMX500, CMW, CMP180/200, and AI market/application evidence. Provide strongest opportunities and supporting evidence citations from Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "EMITE’s state-of-the-art over-the-air chambers can now be combined with the latest sophisticated testing features of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester from Rohde & Schwarz. The radio communication tester offers a wide range of device testing capabilities, supporting cellular technologies such as LTE, 5G NR FR1 frequency range up to 8 GHz and FR2 millimeter wave frequency range up to 50 GHz, including the latest 5G RedCap technology. It also supports non-cellular technologies, including the latest Wi-Fi 7, all in a single instrument. As a consequence of this collaboration, EMITE’s customers obtain a comprehensive environment for accurately assessing the performance of Wi-Fi 7 as well as 5G Red Cap devices.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 46.078763
+            },
+            {
+             "text": "SPEAG, a global leader of dosimetric test systems, has combined the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") OBT from Rohde & Schwarz with its advanced specific absorption rate (SAR) measurement system, DASY8 <sup>3D</sup>. The CMX500 OBT emulates a 5G new radio (NR) FR1 base station, fulfilling the requirements for SAR testing of 5G NR devices and providing ease of use for the test engineer. The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi-Fi, all in a single instrument. The latest test feature sets, including state-of-the-art wireless technologies like NR-NTN, 5G RedCap, and Wi-Fi 7, provides a long-term, future-proof callbox platform.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-75010f6c18759b5a",
+               "original_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "sha256": "75010f6c18759b5a40842ce1fed2243990191ae6a580ab79596a571c190114db",
+               "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 42.419412
+            },
+            {
+             "text": "## Rohde & Schwarz presents the CMX500 AI Scripting Assistant, a novel solution revolutionizing mobile device testing. The AI-powered tool for the CMX500 5G one-box signaling tester simplifies and accelerates the scripting process for test engineers who deal with the complexities of script generation from diverse sources. The assistant provides users a tailored and efficient approach for automating domain-specific applications such as R&D 5G NR protocol testing, application testing, or instrument automation.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8b44e0d324270514",
+               "original_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "sha256": "8b44e0d324270514830d2b3ff82c35b16cf5a58441a03941d7c14eaf71388d51",
+               "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 42.351713
+            },
+            {
+             "text": "The generative AI user experience testbed, jointly demonstrated at MWC Shanghai 2026, is designed to address these challenges. In the test system architecture, the large language model is deployed on the server side, or in the cloud, while the CMX500 radio communication tester establishes a radio connection with a smart terminal running a client-side test application. The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") flexibly configures network parameters, channel fading models, latency, jitter, RF impairments and other variables, enabling realistic simulation of a wide range of wireless environments, from ideal coverage to weak-signal edge conditions. By entering prompts through the terminal-side application and receiving inference responses from the large language model, users can measure key performance indicators such as Time to First Token (TTFT) and Tokens Per Second (TPS). The resulting data is collected and analyzed using host PC software, which generates corresponding charts. This approach enables quantitative evaluation and comparison of the user exper",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7c6ece0fac696c87",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+               "sha256": "7c6ece0fac696c873c46cba847925d05b291c84f0a0f264fbbc000add5c43d2d",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 41.905842
+            },
+            {
+             "text": "In the setup, Qualcomm’s AI-enabled wireless device prototype connected to the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\"), configured as an AI-enabled base station emulator, achieves an increase in downlink throughput of approximately 50% compared to conventional non-AI technology. Leveraging the advanced application testing capabilities of the CMX500, the demonstration illustrates how the increased performance translates to an enhanced user experience for video streaming applications. The improvement was achieved using a “two-sided AI model” for CSI feedback, enabling cooperative compression of wireless channel state information transferred between the device and base station. The model leverages CSI-RS-based analysis and compressed feedback, significantly enhancing radio transmission performance in massive MIMO scenarios. AI-driven CSI enhancements are expected to result in even greater efficiency, reduced overhead and improved user experience in 5G-Advanced and future 6G networks.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c78ae7048c7db92f",
+               "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+               "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 41.057582
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 40.843854
+            },
+            {
+             "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.887215
+            },
+            {
+             "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a4192ea568814a6",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.8832
+            }
+           ],
+           "text": "CMX500 opportunity: AI-assisted test automation via the CMX500 AI Scripting Assistant, which simplifies and accelerates script generation for 5G NR protocol testing, application testing, and instrument automation [3].\nCMX500 opportunity: GenAI user-experience benchmarking over realistic wireless conditions, because CMX500 can vary network parameters, fading, latency, jitter, and RF impairments while measuring TTFT and TPS for cloud LLM inference [4].\nCMX500 opportunity: AI-native 5G-Advanced and 6G radio validation, because an AI-enabled device connected to CMX500 as an AI-enabled base-station emulator achieved about 50% higher downlink throughput than conventional non-AI technology [5].\nCMX500 opportunity: Application-level AI performance testing, because CMX500 application testing showed how AI-driven radio gains improve video streaming user experience [5].\nCMX500 opportunity: Massive-MIMO AI feedback testing, because the demonstrated two-sided AI model compressed CSI feedback and improved radio transmission performance in massive MIMO scenarios [5].\nCMX500 opportunity: Future-proof AI-device connectivity testing, because CMX500 supports LTE, 5G NR, NR-NTN, 5G RedCap, Wi-Fi, and Wi-Fi 7 in one platform [2].\nCMP180 opportunity: Non-signaling production RF test for advanced wireless devices, because WLAN production RF measurements are performed in non-signaling mode to save time and CMP180 is optimized for that purpose [7].\nCMP180 opportunity: Future-proof R&D and production testing for next-generation WLAN, because CMP180 supports Wi-Fi 6E, Wi-Fi 7, 5G NR FR1 up to 8 GHz, and bandwidths up to 500 MHz [7].\nCMP180 opportunity: Early Wi-Fi 8 waveform readiness, because CMP180 can verify a 480 MHz WLAN waveform candidate for the future IEEE 802.11bn Wi-Fi 8 standard [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "SPEAG, a global leader of dosimetric test systems, has combined the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") OBT from Rohde & Schwarz with its advanced specific absorption rate (SAR) measurement system, DASY8 <sup>3D</sup>. The CMX500 OBT emulates a 5G new radio (NR) FR1 base station, fulfilling the requirements for SAR testing of 5G NR devices and providing ease of use for the test engineer. The CMX500 radio communication tester supports cellular technologies such as LTE, 5G NR, as well as non-cellular technologies like Wi-Fi, all in a single instrument. The latest test feature sets, including state-of-the-art wireless technologies like NR-NTN, 5G RedCap, and Wi-Fi 7, provides a long-term, future-proof callbox platform.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-75010f6c18759b5a",
+              "original_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "sha256": "75010f6c18759b5a40842ce1fed2243990191ae6a580ab79596a571c190114db",
+              "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 42.419412
+           },
+           {
+            "text": "## Rohde & Schwarz presents the CMX500 AI Scripting Assistant, a novel solution revolutionizing mobile device testing. The AI-powered tool for the CMX500 5G one-box signaling tester simplifies and accelerates the scripting process for test engineers who deal with the complexities of script generation from diverse sources. The assistant provides users a tailored and efficient approach for automating domain-specific applications such as R&D 5G NR protocol testing, application testing, or instrument automation.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8b44e0d324270514",
+              "original_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "sha256": "8b44e0d324270514830d2b3ff82c35b16cf5a58441a03941d7c14eaf71388d51",
+              "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 42.351713
+           },
+           {
+            "text": "The generative AI user experience testbed, jointly demonstrated at MWC Shanghai 2026, is designed to address these challenges. In the test system architecture, the large language model is deployed on the server side, or in the cloud, while the CMX500 radio communication tester establishes a radio connection with a smart terminal running a client-side test application. The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") flexibly configures network parameters, channel fading models, latency, jitter, RF impairments and other variables, enabling realistic simulation of a wide range of wireless environments, from ideal coverage to weak-signal edge conditions. By entering prompts through the terminal-side application and receiving inference responses from the large language model, users can measure key performance indicators such as Time to First Token (TTFT) and Tokens Per Second (TPS). The resulting data is collected and analyzed using host PC software, which generates corresponding charts. This approach enables quantitative evaluation and comparison of the user exper",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7c6ece0fac696c87",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "sha256": "7c6ece0fac696c873c46cba847925d05b291c84f0a0f264fbbc000add5c43d2d",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 41.905842
+           },
+           {
+            "text": "In the setup, Qualcomm’s AI-enabled wireless device prototype connected to the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\"), configured as an AI-enabled base station emulator, achieves an increase in downlink throughput of approximately 50% compared to conventional non-AI technology. Leveraging the advanced application testing capabilities of the CMX500, the demonstration illustrates how the increased performance translates to an enhanced user experience for video streaming applications. The improvement was achieved using a “two-sided AI model” for CSI feedback, enabling cooperative compression of wireless channel state information transferred between the device and base station. The model leverages CSI-RS-based analysis and compressed feedback, significantly enhancing radio transmission performance in massive MIMO scenarios. AI-driven CSI enhancements are expected to result in even greater efficiency, reduced overhead and improved user experience in 5G-Advanced and future 6G networks.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-c78ae7048c7db92f",
+              "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 41.057582
+           },
+           {
+            "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.887215
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

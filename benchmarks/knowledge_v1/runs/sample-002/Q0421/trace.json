@@ -1,0 +1,918 @@
+{
+ "question": {
+  "id": "Q0421",
+  "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-443078b323104f9e898c5daf40c1f025",
+ "exchange": {
+  "sent": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+  "http_status": 200,
+  "seconds": 109.188,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-443078b323104f9e898c5daf40c1f025",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Automotive market requirement to a measurable param…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:01:30.223330Z",
+    "updated_at": "2026-10-07T10:03:19.306226Z",
+    "messages": [
+     {
+      "message_id": "message-4d43b669e7f04c20ab1d8e696040d6a8",
+      "role": "user",
+      "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+      "created_at": "2026-10-07T10:01:30.235170Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-8afde519671a4580bede873fe8f7a5a2",
+      "role": "assistant",
+      "text": "已查到可引用的部分資料：\n\n| Automotive market requirement | Measurable parameter / test need | Required Signaling / Non-signaling Tester capability | Support level |\n|---|---|---|---|\n| Automotive connectivity and infotainment testing are part of the automotive test scope, and Rohde & Schwarz supports customers from R&D to production and beyond [27]. | For 5G NR regulatory / EMC contexts, tests require radio-enabled and radio-disabled conditions, which means a signaling solution for 5G NR is needed [19]. | A Signaling Tester should provide 5G NR network emulation / signaling capability; CMX500 is described as a universal one-box network emulation and measurement solution supporting 5G NR, LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [8]. | Direct for automotive scope; direct for 5G signaling need; cross-source mapping. |\n| Automotive EMC is explicitly listed as an automotive test-solution area [27]. | EMC tests require radio-enabled and radio-disabled conditions; mobile phones require Audio Breakthrough testing from GSM to VoLTE and VoNR by 5G [19]. | The test setup needs a 5G NR signaling solution; R&S EMC Systems are stated to cover 5G NR functionality powered by the latest R&S CMX500 [19]. | Strongest supported chain for Signaling Tester. |\n| Automotive connectivity including antennas is listed as an automotive test-solution area [27]. | Radio / antenna-related measurable items include TRP / TRS and RSE for 5G NR regulatory contexts [5], and antenna beam pointing, off/on-axis spurious radiation, carrier suppression / cessation, blocking performance, adjacent signal selectivity, image frequency rejection, WBES location / identification, control and monitoring functions, and receive antenna off-axis gain pattern for EN 303 981 contexts [12]. | A Signaling Tester should support NR FR1 / NR FR2 signaling and TX measurements; CMX500 provides NR FR1 / NR FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, BLER, CSI report, throughput measurement and PER measurement [8]. | Cross-source mapping; no passage directly says these automotive antenna tests require CMX500. |\n| Automotive eCall / emergency-call services must meet the latest eCall standards, and the cited R&S / Qualcomm collaboration is described as providing the automotive industry a robust and dependable solution for that purpose [10]. | The CMW500 knowledge base includes NGeCall over LTE, IMS eCall, IVS, PSAP, MSD, limited service, callback, clear-down and SRVCC handover as eCall test context [6]. | A Signaling Tester for this chain needs cellular/eCall signaling support; CMW500 is documented for GSM, WCDMA, LTE mobile-station test and NR Sub-6GHz chapters, and its eCall context includes NGeCall over LTE and IMS eCall [6]. | Supported as eCall signaling context; no passage states a numeric eCall measurable parameter. |\n| Automotive lifecycle coverage includes production [27]. | In WLAN device production, all RF measurements are performed in non-signaling mode to save time [21]. | A Non-signaling Tester should support production RF measurement; CMP180 is positioned as optimized for non-signaling production RF testing and supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [21]. | Cross-source mapping; no passage directly ties CMP180 production testing to automotive production. |\n| Automotive connectivity R&D is part of the automotive scope [27]. | R&D verification can include new bands, sensitivity testing, 3GPP pre-conformance, high end-to-end throughput and non-signaling verification [7]. | CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, 3GPP pre-conformance testing, high e2e throughput testing and non-signaling verification [7]. | Cross-source mapping; no passage directly states these CMX500 Callbox use cases are automotive-specific. |\n【推論】For automotive EMC with 5G connectivity, the most defensible Signaling Tester capability is CMX500-based 5G NR signaling / network emulation, because automotive EMC is in scope [27], EMC tests need radio enabled/disabled conditions and therefore 5G NR signaling [19], and CMX500 supports 5G NR, LTE, NR FR1 and NR FR2 network emulation / signaling [8].\n【推論】For automotive production of wireless connectivity devices, the likely Non-signaling Tester capability is fast RF measurement in non-signaling mode, because automotive support spans production [27] and CMP180 is optimized for production non-signaling RF testing with Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz and bandwidths up to 500 MHz [21].\n【推論】For automotive eCall validation, the signaling capability should cover LTE / IMS eCall scenarios, because the automotive requirement is to meet latest eCall standards [10] and the CMW500 eCall context includes NGeCall over LTE, IMS eCall, IVS, PSAP, MSD, limited service, callback, clear-down and SRVCC handover [6].\n\n來源：\n[5] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[6] Wiki：R&S CMW500（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`）\n[7] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[8] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：Juergen Meyer（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n[12] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[19] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[21] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[27] `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+      "created_at": "2026-10-07T10:03:19.306226Z",
+      "status": "needs_input",
+      "trace": {
+       "trace_id": "trace-bb1376e55cb248179216dcebdd03cb5e",
+       "request_id": "request-bb1376e55cb248179216dcebdd03cb5e",
+       "span_id": "span-bb1376e55cb248179216dcebdd03cb5e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "已查到可引用的部分資料：\n\n| Automotive market requirement | Measurable parameter / test need | Required Signaling / Non-signaling Tester capability | Support level |\n|---|---|---|---|\n| Automotive connectivity and infotainment testing are part of the automotive test scope, and Rohde & Schwarz supports customers from R&D to production and beyond [27]. | For 5G NR regulatory / EMC contexts, tests require radio-enabled and radio-disabled conditions, which means a signaling solution for 5G NR is needed [19]. | A Signaling Tester should provide 5G NR network emulation / signaling capability; CMX500 is described as a universal one-box network emulation and measurement solution supporting 5G NR, LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [8]. | Direct for automotive scope; direct for 5G signaling need; cross-source mapping. |\n| Automotive EMC is explicitly listed as an automotive test-solution area [27]. | EMC tests require radio-enabled and radio-disabled conditions; mobile phones require Audio Breakthrough testing from GSM to VoLTE and VoNR by 5G [19]. | The test setup needs a 5G NR signaling solution; R&S EMC Systems are stated to cover 5G NR functionality powered by the latest R&S CMX500 [19]. | Strongest supported chain for Signaling Tester. |\n| Automotive connectivity including antennas is listed as an automotive test-solution area [27]. | Radio / antenna-related measurable items include TRP / TRS and RSE for 5G NR regulatory contexts [5], and antenna beam pointing, off/on-axis spurious radiation, carrier suppression / cessation, blocking performance, adjacent signal selectivity, image frequency rejection, WBES location / identification, control and monitoring functions, and receive antenna off-axis gain pattern for EN 303 981 contexts [12]. | A Signaling Tester should support NR FR1 / NR FR2 signaling and TX measurements; CMX500 provides NR FR1 / NR FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, BLER, CSI report, throughput measurement and PER measurement [8]. | Cross-source mapping; no passage directly says these automotive antenna tests require CMX500. |\n| Automotive eCall / emergency-call services must meet the latest eCall standards, and the cited R&S / Qualcomm collaboration is described as providing the automotive industry a robust and dependable solution for that purpose [10]. | The CMW500 knowledge base includes NGeCall over LTE, IMS eCall, IVS, PSAP, MSD, limited service, callback, clear-down and SRVCC handover as eCall test context [6]. | A Signaling Tester for this chain needs cellular/eCall signaling support; CMW500 is documented for GSM, WCDMA, LTE mobile-station test and NR Sub-6GHz chapters, and its eCall context includes NGeCall over LTE and IMS eCall [6]. | Supported as eCall signaling context; no passage states a numeric eCall measurable parameter. |\n| Automotive lifecycle coverage includes production [27]. | In WLAN device production, all RF measurements are performed in non-signaling mode to save time [21]. | A Non-signaling Tester should support production RF measurement; CMP180 is positioned as optimized for non-signaling production RF testing and supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [21]. | Cross-source mapping; no passage directly ties CMP180 production testing to automotive production. |\n| Automotive connectivity R&D is part of the automotive scope [27]. | R&D verification can include new bands, sensitivity testing, 3GPP pre-conformance, high end-to-end throughput and non-signaling verification [7]. | CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, 3GPP pre-conformance testing, high e2e throughput testing and non-signaling verification [7]. | Cross-source mapping; no passage directly states these CMX500 Callbox use cases are automotive-specific. |\n【推論】For automotive EMC with 5G connectivity, the most defensible Signaling Tester capability is CMX500-based 5G NR signaling / network emulation, because automotive EMC is in scope [27], EMC tests need radio enabled/disabled conditions and therefore 5G NR signaling [19], and CMX500 supports 5G NR, LTE, NR FR1 and NR FR2 network emulation / signaling [8].\n【推論】For automotive production of wireless connectivity devices, the likely Non-signaling Tester capability is fast RF measurement in non-signaling mode, because automotive support spans production [27] and CMP180 is optimized for production non-signaling RF testing with Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz and bandwidths up to 500 MHz [21].\n【推論】For automotive eCall validation, the signaling capability should cover LTE / IMS eCall scenarios, because the automotive requirement is to meet latest eCall standards [10] and the CMW500 eCall context includes NGeCall over LTE, IMS eCall, IVS, PSAP, MSD, limited service, callback, clear-down and SRVCC handover [6].\n\n來源：\n[5] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[6] Wiki：R&S CMW500（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`）\n[7] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[8] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：Juergen Meyer（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n[12] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[19] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[21] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[27] `raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+    "status": "needs_input",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-bb1376e55cb248179216dcebdd03cb5e",
+      "request_id": "request-bb1376e55cb248179216dcebdd03cb5e",
+      "span_id": "span-bb1376e55cb248179216dcebdd03cb5e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-bb1376e55cb248179216dcebdd03cb5e",
+       "request_id": "request-bb1376e55cb248179216dcebdd03cb5e",
+       "span_id": "span-bb1376e55cb248179216dcebdd03cb5e",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-bb1376e55cb248179216dcebdd03cb5e",
+        "request_id": "request-bb1376e55cb248179216dcebdd03cb5e",
+        "span_id": "span-bb1376e55cb248179216dcebdd03cb5e",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S CMX-KS550B › 來源中的資訊\n| 來源 | 日期 / 版次 | 內容 |\n|---|---|---|\n| [[CMX500_Features_CSW9-20-0_en_32]] | Version 32；CSW 9.20.0 and higher；文件日期來源未標示 | R&S CMX-KS550B：LTE-DTC extension for direct-to-cell communication；order no. 1222.9573.xx；D2C fixed / variable delay。 |\n| [[CMX_Configuration_Guide_LTE-DTC]] | converted 2026-09-10；文件日期來源未標示 | R&S CMX-KS550B：LTE signaling — Direct-to-Cell (D2C/DTC) features (fixed and variable delay)；Golden Starlink LTE-DTC scope 中 mandatory，需 alongside [[R&S CMX-KS600B]] quote；option code 需在 CU50/ZVMM 驗證。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KS550B.md"
+          },
+          "score": 2.491414
+         },
+         {
+          "text": "R&S CMP180 › Environmental / mechanical / power\n| 項目 | 規格 |\n|---|---|\n| Operating temperature | +5 °C to +45 °C |\n| Storage temperature | –25 °C to +60 °C |\n| Damp heat | +40 °C, 80% rel. humidity, steady state, EN 60068-2-78 |\n| Power rating | 100 V to 240 V AC ±10%；50 Hz to 60 Hz ±5%；max. 7.3 A to 4.6 A |\n| Power consumption | approx. 290 W |\n| Standby power | with OCXO warm/cold max. 6 W/10 W |\n| Dimensions | 465.1 mm × 106.5 mm × 555.5 mm |\n| Rack mounting | 19 inch, 1/1, 2 HU |\n| Weight | base unit without options approx. 15.2 kg |\n| Calibration interval | 24 months |\n| Warranty | 1 year |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 21,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP180.md"
+          },
+          "score": 3.83118
+         },
+         {
+          "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 1.34812
+         },
+         {
+          "text": "VIAVI O-RU Tester › 不可推論的內容\n- 來源未提供 VIAVI O-RU Tester 或 VIAVI TM500 O-RU Tester 的正式產品名稱、料號、software release、supported O-RAN WG4 spec versions、license 或 interface option。\n- 來源未提供 VIAVI 官方 datasheet / application note；不可由 R&S 簡報推論 VIAVI product roadmap、formal specification 或 market share。\n- 來源未提供 T-BC、FTN、PTP-GM、O-RU TMA、interconnection unit、TMA / TM500 software library 的具體版本與 timing architecture。\n- March 2025 來源中的 price point、competitor comparison、test case counts 與 VAR commercial terms 屬 internal / market context，需依正式 quote、contract、software release notes 與 public material 補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+          },
+          "score": 2.580616
+         },
+         {
+          "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+          },
+          "score": 1.966112
+         },
+         {
+          "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW500.md"
+          },
+          "score": 1.865279
+         },
+         {
+          "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+          },
+          "score": 3.646489
+         },
+         {
+          "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 8.63149
+         },
+         {
+          "text": "R&S CMX-KS550B\n[[R&S CMX-KS550B]] 是 [[R&S CMX500]] 的 LTE-DTC / Direct-to-Cell signaling extension option；依 [[CMX500_Features_CSW9-20-0_en_32]] 與 [[CMX_Configuration_Guide_LTE-DTC]]，它支援 D2C/DTC fixed delay 與 variable delay features。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KS550B.md"
+          },
+          "score": 1.084624
+         },
+         {
+          "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 0.828798
+         },
+         {
+          "text": "NEC › unresolved\n- 需要擷取 NEC Technical Journal 文章正文以確認日期、技術範圍、圖表與可引用主張。\n- 需要判定該文章應歸入 [[Knowledge]] 技術背景、[[Productions]] 產品 / 模組資料，或 [[Market]] 市場線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/NEC.md"
+          },
+          "score": 1.154311
+         },
+         {
+          "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+          },
+          "score": 1.37847
+         },
+         {
+          "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+          },
+          "score": 3.371309
+         },
+         {
+          "text": "R&S CMP180 › Transmitter test functions\n- 8 input signals to be multiplexed to RF analyzer no. 1。\n- 8 input signals to be multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP180.md"
+          },
+          "score": 4.359797
+         },
+         {
+          "text": "R&S CMX-KS550B › 與 CMX500 LTE-DTC configuration 的關係\n依 [[CMX_Configuration_Guide_LTE-DTC]]：\n\n- [[R&S CMX-KS550B]] 是 [[CMX500 LTE-DTC configuration]] 的 mandatory LTE-DTC software。\n- Golden Starlink LTE-DTC xLAPI regression 的 software stack 為 [[R&S CMX-KS600B]]、[[R&S CMX-KS550B]]、[[R&S CMX-KA100]]、[[R&S CMX-KF655X]]。\n- LTE-DTC signaling lab no xLAPI scenario 仍需要 [[R&S CMX-KS550B]]，但省略 [[R&S CMX-KF655X]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KS550B.md"
+          },
+          "score": 0.113676
+         },
+         {
+          "text": "Tim Seyler\n[[Tim Seyler]] 是 [[Rohde & Schwarz]] 相關 customer questionnaire 與 configuration guide 中列出的 contact；[[cmx500_ntn_customer_questionnaire]] 明示其 email 為 `tim.seyler@rohde-schwarz.com`，角色為 Product Manager Mobile Radio Testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.293874
+         },
+         {
+          "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qualcomm.md"
+          },
+          "score": 0.408989
+         },
+         {
+          "text": "Regulatory test for wireless devices with cellular technology › 與既有知識的關係\n- 補強 [[5G NR SAR testing]]：既有頁以 [[SPEAG]] / [[DASY8-3D]] / [[R&S CMX500 OBT]] 的 SAR automation PR 為主；本來源從 CE RED Art 3.1a / FCC SAR / HAC compliance presentation 的角度補入 5G NR network emulator、multi-radio UE、average-SAR 與 CMW/CMX signaling solution。\n- 補強 [[R&S TS9975 EMI Test System]]：既有頁只由 [[2025RS Drone Solution]] 支撐 TS9975 作為 UAV EMI system；本來源新增 wireless devices Art 3.1b EMC / ABT context，並與 [[R&S TS9982 EMS Test System]] 同列。\n- 連接 [[低軌衛星終端設備檢測]]與 [[衛星地球電臺設備技術規範]]：既有頁以台灣 111年08月衛星地球電臺設備草案與 FCC Part 25 對應為主；本來源提供更泛化的 CE RED / ETSI EN 301 681 / EN 303 981 / FCC CFR47 §25 mobile satellite service 視角。\n- 與 [[R&S CMW500]] 既有頁相容：既有頁已保存 CMW500 的 NGeCall / LTE capability 與 datasheet；本來源只是簡報層級稱 latest CMW500 SW supports 3GPP R17 NB-NTN signalling，未提供 software version、license 或 test case ID，不應覆蓋正式 datasheet。\n- 與 [[R&S SMBV100B]] 既有頁相容：既有頁是 Version 13.01 specifications；本來源只是把 SMBV100B列為 EN 301 681 / EN 303 981 測試中的 signal generator solution，不新增產品規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+          },
+          "score": 1.293603
+         },
+         {
+          "text": "R&S TS9982 EMS Test System › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]] 同列於 Traditional EMC Art 3.1b tests。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements。\n- 來源指出 Art 3.1b EMC test requirements are not changed by 5G NR。\n- EMC tests need both enable radio and disable radio conditions, which means signaling solution for 5G NR。\n- Mobile phones require [[Audio Breakthrough]] test, from GSM to VoLTE and VoNR by 5G。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md"
+          },
+          "score": 2.499485
+         },
+         {
+          "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+          },
+          "score": 2.496604
+         },
+         {
+          "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+          },
+          "score": 5.128785
+         },
+         {
+          "text": "Tim Seyler › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 未提供 [[Tim Seyler]] 的職稱或部門。\n- [[cmx500_ntn_customer_questionnaire]] 提供 Product Manager Mobile Radio Testing 角色，但未提供組織層級、所在地、職責範圍或是否為該 solution 的唯一負責人。\n- [[CMX_Configuration_Guide_Audio-Testing]] 只列 contact person，未提供 contact scope、approval authority 或是否為 audio testing configuration 的 owner。\n- [[CMX_Configuration_Guide_LTE-DTC]] 只列 contact person，未提供 contact scope、approval authority 或是否為 LTE-DTC configuration 的 owner。\n- 不能只因其被列為 contact，就推論其為 sales owner、technical owner 或所有相關產品的 product owner。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.278979
+         },
+         {
+          "text": "R&S TS9975 EMI Test System › 使用限制\n- 本頁只記錄 Market 類簡報中的系統列名；不是 Productions 類 datasheet。\n- 不可由 [[2025RS Drone Solution]] 推論 [[R&S TS9975 EMI Test System]] 可覆蓋所有 drone standards 或所有 frequency ranges。\n- 不可由 [[Regulatory test for wireless devices with cellular technology]] 推論 TS9975 可覆蓋所有 CE RED Art 3.1b EMC tests、所有 5G NR bands、所有 [[Audio Breakthrough]] configurations 或所有 mobile phone categories。\n- 正式規格、可報價配置、標準 coverage、receiver / chamber / antenna / software / CMX500 option stack 需由產品手冊或 R&S configuration source 補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+          },
+          "score": 1.133361
+         },
+         {
+          "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+          },
+          "score": 2.937203
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         },
+         {
+          "text": "\"We are pleased to have joined forces with Qualcomm Technologies on the verification of their chipsets’ NG eCall implementation,\" said Juergen Meyer, Vice President Market Segment Automotive at Rohde & Schwarz. \"This collaboration sets a new benchmark for the future of emergency call services, providing the automotive industry a robust and dependable solution to meet the latest eCall standards.\"",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-7ff0d627b4993a68",
+            "original_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+            "sha256": "7ff0d627b4993a68dafde3586bde8aaa634d467923c5128eb2828087bfa2beed",
+            "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.277776
+         },
+         {
+          "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-556d5f1923b99787",
+            "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+            "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+            "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.383956
+         },
+         {
+          "text": "The following tables list the required R&S CMX-... options for a selection of signaling\nfeatures.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 393,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.0844
+         }
+        ],
+        "text": "| Automotive market requirement | Measurable parameter / test need | Required Signaling / Non-signaling Tester capability | Support level |\n|---|---|---|---|\n| Automotive connectivity and infotainment testing are part of the automotive test scope, and Rohde & Schwarz supports customers from R&D to production and beyond [27]. | For 5G NR regulatory / EMC contexts, tests require radio-enabled and radio-disabled conditions, which means a signaling solution for 5G NR is needed [19]. | A Signaling Tester should provide 5G NR network emulation / signaling capability; CMX500 is described as a universal one-box network emulation and measurement solution supporting 5G NR, LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [8]. | Direct for automotive scope; direct for 5G signaling need; cross-source mapping. |\n| Automotive EMC is explicitly listed as an automotive test-solution area [27]. | EMC tests require radio-enabled and radio-disabled conditions; mobile phones require Audio Breakthrough testing from GSM to VoLTE and VoNR by 5G [19]. | The test setup needs a 5G NR signaling solution; R&S EMC Systems are stated to cover 5G NR functionality powered by the latest R&S CMX500 [19]. | Strongest supported chain for Signaling Tester. |\n| Automotive connectivity including antennas is listed as an automotive test-solution area [27]. | Radio / antenna-related measurable items include TRP / TRS and RSE for 5G NR regulatory contexts [5], and antenna beam pointing, off/on-axis spurious radiation, carrier suppression / cessation, blocking performance, adjacent signal selectivity, image frequency rejection, WBES location / identification, control and monitoring functions, and receive antenna off-axis gain pattern for EN 303 981 contexts [12]. | A Signaling Tester should support NR FR1 / NR FR2 signaling and TX measurements; CMX500 provides NR FR1 / NR FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, BLER, CSI report, throughput measurement and PER measurement [8]. | Cross-source mapping; no passage directly says these automotive antenna tests require CMX500. |\n| Automotive eCall / emergency-call services must meet the latest eCall standards, and the cited R&S / Qualcomm collaboration is described as providing the automotive industry a robust and dependable solution for that purpose [10]. | The CMW500 knowledge base includes NGeCall over LTE, IMS eCall, IVS, PSAP, MSD, limited service, callback, clear-down and SRVCC handover as eCall test context [6]. | A Signaling Tester for this chain needs cellular/eCall signaling support; CMW500 is documented for GSM, WCDMA, LTE mobile-station test and NR Sub-6GHz chapters, and its eCall context includes NGeCall over LTE and IMS eCall [6]. | Supported as eCall signaling context; no passage states a numeric eCall measurable parameter. |\n| Automotive lifecycle coverage includes production [27]. | In WLAN device production, all RF measurements are performed in non-signaling mode to save time [21]. | A Non-signaling Tester should support production RF measurement; CMP180 is positioned as optimized for non-signaling production RF testing and supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [21]. | Cross-source mapping; no passage directly ties CMP180 production testing to automotive production. |\n| Automotive connectivity R&D is part of the automotive scope [27]. | R&D verification can include new bands, sensitivity testing, 3GPP pre-conformance, high end-to-end throughput and non-signaling verification [7]. | CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, 3GPP pre-conformance testing, high e2e throughput testing and non-signaling verification [7]. | Cross-source mapping; no passage directly states these CMX500 Callbox use cases are automotive-specific. |\n【推論】For automotive EMC with 5G connectivity, the most defensible Signaling Tester capability is CMX500-based 5G NR signaling / network emulation, because automotive EMC is in scope [27], EMC tests need radio enabled/disabled conditions and therefore 5G NR signaling [19], and CMX500 supports 5G NR, LTE, NR FR1 and NR FR2 network emulation / signaling [8].\n【推論】For automotive production of wireless connectivity devices, the likely Non-signaling Tester capability is fast RF measurement in non-signaling mode, because automotive support spans production [27] and CMP180 is optimized for production non-signaling RF testing with Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz and bandwidths up to 500 MHz [21].\n【推論】For automotive eCall validation, the signaling capability should cover LTE / IMS eCall scenarios, because the automotive requirement is to meet latest eCall standards [10] and the CMW500 eCall context includes NGeCall over LTE, IMS eCall, IVS, PSAP, MSD, limited service, callback, clear-down and SRVCC handover [6].",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+         },
+         "score": 1.966112
+        },
+        {
+         "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 14,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMW500.md"
+         },
+         "score": 1.865279
+        },
+        {
+         "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+         },
+         "score": 3.646489
+        },
+        {
+         "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX500.md"
+         },
+         "score": 8.63149
+        },
+        {
+         "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Juergen Meyer.md"
+         },
+         "score": 0.828798
+        },
+        {
+         "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+         },
+         "score": 1.37847
+        },
+        {
+         "text": "R&S TS9982 EMS Test System › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]] 同列於 Traditional EMC Art 3.1b tests。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements。\n- 來源指出 Art 3.1b EMC test requirements are not changed by 5G NR。\n- EMC tests need both enable radio and disable radio conditions, which means signaling solution for 5G NR。\n- Mobile phones require [[Audio Breakthrough]] test, from GSM to VoLTE and VoNR by 5G。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md"
+         },
+         "score": 2.499485
+        },
+        {
+         "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+         },
+         "score": 5.128785
+        },
+        {
+         "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-556d5f1923b99787",
+           "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+           "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+           "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+          "section": 15,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 22.383956
+        }
+       ],
+       "assessment": {
+        "status": "missing",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/NEC.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Qualcomm.md"
+           }
+          ],
+          "attempts": 1
+         },
+         {
+          "name": "technical_knowledge",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S CMX-KS550B.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S CMX500.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S CMX-KS550B.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/NEC.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": true,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025RS Drone Solution.md",
+          "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S CMW500.md",
+         "raw_refs": [
+          "raw/Productions/CMW-KA096_PanEUNGeCall_TC_Status.md",
+          "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/CMX500 Callbox.md",
+         "raw_refs": [
+          "raw/Market/OneNote/CMX500_Callbox.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S CMX500.md",
+         "raw_refs": [
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Juergen Meyer.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-46305337725f4feab5a679a96377b92a",
+      "task_sha256": "9aa5f2d2155d3893522fa9bb85dab3130fb7ea8d6ef088a4fe7ccc29b2ee3a16",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.4.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "needs_input",
+      "retry_budget": 0
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "needs_input",
+       "evidence_ref": "bridge_facet_assessment"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": "host_check_failed"
+    },
+    "evidence": {
+     "raw_citations": 9,
+     "facet_status": "missing",
+     "missing_facets": [],
+     "relation_status": "missing",
+     "retrieval_attempts": {
+      "market_segment": 1,
+      "technical_knowledge": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

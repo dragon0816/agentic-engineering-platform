@@ -1,0 +1,359 @@
+{
+ "question": {
+  "id": "Q0331",
+  "text": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "Aerospace / Defense",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-25d7c5e9abdf45f0b18b963cbb79d751",
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 61.89,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-25d7c5e9abdf45f0b18b963cbb79d751",
+    "actor": "leo.chi",
+    "title": "How do changes in radar technology affect the measurement capability req…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:56:13.243467Z",
+    "updated_at": "2026-10-07T09:57:15.021316Z",
+    "messages": [
+     {
+      "message_id": "message-14762f10254f40259eb8509191f7b4c0",
+      "role": "user",
+      "text": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-07T09:56:13.258586Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-593cd50c317b4f2e9cd44aabc2c1cd4a",
+      "role": "assistant",
+      "text": "The knowledge base has only limited direct evidence on “changes in radar technology,” but it does show the measurement direction: newer radar/A&D signals are becoming more complex, wider-band, lower-SNR, and more timing/phase-sensitive. That drives tougher requirements for both signal generators and signal analyzers.\n\n### 1. Wider-band, more complex radar waveforms → wider modulation bandwidth\n\nModern radar increasingly uses complex pulsed, chirped, agile, or modulated waveforms rather than simple CW or narrow pulses. That means the signal generator must reproduce wide instantaneous bandwidth and preserve signal quality.\n\nThe KB evidence notes that the R&S SMBV100B offers “wide modulation bandwidth,” “excellent signal quality,” and up to **1 GHz RF modulation bandwidth**, and that in A&D applications this wide bandwidth enables generation of **complex pulsed signals**.  \nCitation: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n**Implication for Signal Generator:**\n- Higher RF modulation bandwidth\n- Better arbitrary waveform generation\n- Accurate pulse shaping, chirp generation, phase coding, frequency hopping\n- Low EVM / high signal purity for realistic target and emitter simulation\n\n**Implication for Signal Analyzer:**\n- Wider analysis bandwidth\n- Ability to capture full pulse or chirp bandwidth without stitching artifacts\n- Time-domain and frequency-domain pulse analysis\n\n---\n\n### 2. Low-SNR and long-range scenarios → better analyzer sensitivity and processing\n\nRadar often works with weak echoes, clutter, jamming, and high path loss. The KB gives a related measurement point: wideband signals with low SNR can require analyzer functions that improve SNR and measurement speed by analyzing subspans of the overall signal.  \nCitation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 8.\n\n**Implication for Signal Analyzer:**\n- Lower displayed average noise level, better dynamic range\n- Wider bandwidth without losing sensitivity\n- Advanced triggering and capture memory\n- Analysis techniques for low-SNR wideband signals\n- Faster measurement speed for production or scenario testing\n\n**Implication for Signal Generator:**\n- Precise power control over a wide dynamic range\n- Ability to emulate weak targets, interferers, clutter, and jamming signals\n- Stable output at low levels\n\n---\n\n### 3. More timing-critical radar → better delay, phase, and group-delay measurement\n\nModern radar performance depends heavily on timing accuracy: range resolution, target separation, phase coherence, beamforming, and MIMO radar all depend on precise delay and phase behavior.\n\nThe KB evidence mentions relative group delay characterization with **1 ns measurement accuracy** in a wideband measurement context.  \nCitation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 8.\n\n**Implication for Signal Analyzer:**\n- Precise group delay and phase measurement\n- Accurate pulse timing, rise/fall time, PRI, pulse width, chirp linearity\n- Coherent multi-channel analysis for phased-array or MIMO systems\n\n**Implication for Signal Generator:**\n- Accurate timing alignment between channels\n- Phase-coherent multi-output generation\n- Deterministic trigger and synchronization capability\n\n---\n\n### 4. Frequency agility and higher carrier frequencies → broader RF coverage and cleaner sources\n\nNot directly stated in the retrieved KB passages, but from general radar knowledge: radar systems are moving toward higher frequencies, wider chirps, agile frequency plans, and electronically scanned arrays. This increases the need for signal generators and analyzers with broader frequency coverage and excellent phase noise.\n\n**Implication for Signal Generator:**\n- Higher maximum RF frequency or clean upconversion support\n- Low phase noise\n- Fast frequency switching\n- Stable phase coherence across channels\n\n**Implication for Signal Analyzer:**\n- Higher frequency coverage\n- Low phase-noise local oscillator\n- Wideband real-time capture\n- Spurious, harmonic, and phase-noise analysis\n\n---\n\n### 5. Phased-array, AESA, and MIMO radar → multi-channel coherent test\n\nFrom general radar knowledge, modern radar architectures increasingly use phased arrays, digital beamforming, and MIMO concepts. This changes measurement from “one RF path” to many synchronized RF paths.\n\n**Implication for Signal Generator:**\n- Multiple coherent RF channels\n- Controlled amplitude/phase offsets per channel\n- Scenario generation for angle-of-arrival, beam steering, and multi-target simulation\n\n**Implication for Signal Analyzer:**\n- Multi-channel phase-coherent capture\n- Channel-to-channel amplitude, phase, and delay measurement\n- Beamforming and array calibration support\n\n---\n\n### Summary\n\nAs radar evolves from simple pulsed RF toward wideband, agile, coherent, digitally modulated, and multi-channel systems, the required measurement capability increases in five main ways:\n\n| Radar technology change | Signal Generator needs | Signal Analyzer needs |\n|---|---|---|\n| Wider bandwidth / complex pulses | Wide modulation bandwidth, ARB, pulse/chirp generation | Wide analysis bandwidth, pulse/chirp analysis |\n| Weak echoes / low SNR | Accurate low-level output, target/clutter simulation | High sensitivity, dynamic range, SNR-enhancing analysis |\n| Timing and phase precision | Low jitter, phase coherence, accurate triggers | Group delay, phase, timing accuracy |\n| Higher/agile frequencies | Broad RF coverage, low phase noise, fast switching | Broad RF coverage, low phase noise, spur analysis |\n| AESA / MIMO / beamforming | Multi-channel coherent generation | Multi-channel coherent analysis |\n\nIn short: **new radar technology pushes signal generators toward wider, cleaner, more coherent, multi-channel signal creation, and pushes signal analyzers toward wider-band, lower-noise, faster, phase/timing-accurate analysis.**",
+      "created_at": "2026-10-07T09:57:15.021316Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-3748a5090eee471bb0f25e1bff63bfce",
+       "request_id": "request-3748a5090eee471bb0f25e1bff63bfce",
+       "span_id": "span-3748a5090eee471bb0f25e1bff63bfce",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base has only limited direct evidence on “changes in radar technology,” but it does show the measurement direction: newer radar/A&D signals are becoming more complex, wider-band, lower-SNR, and more timing/phase-sensitive. That drives tougher requirements for both signal generators and signal analyzers.\n\n### 1. Wider-band, more complex radar waveforms → wider modulation bandwidth\n\nModern radar increasingly uses complex pulsed, chirped, agile, or modulated waveforms rather than simple CW or narrow pulses. That means the signal generator must reproduce wide instantaneous bandwidth and preserve signal quality.\n\nThe KB evidence notes that the R&S SMBV100B offers “wide modulation bandwidth,” “excellent signal quality,” and up to **1 GHz RF modulation bandwidth**, and that in A&D applications this wide bandwidth enables generation of **complex pulsed signals**.  \nCitation: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n**Implication for Signal Generator:**\n- Higher RF modulation bandwidth\n- Better arbitrary waveform generation\n- Accurate pulse shaping, chirp generation, phase coding, frequency hopping\n- Low EVM / high signal purity for realistic target and emitter simulation\n\n**Implication for Signal Analyzer:**\n- Wider analysis bandwidth\n- Ability to capture full pulse or chirp bandwidth without stitching artifacts\n- Time-domain and frequency-domain pulse analysis\n\n---\n\n### 2. Low-SNR and long-range scenarios → better analyzer sensitivity and processing\n\nRadar often works with weak echoes, clutter, jamming, and high path loss. The KB gives a related measurement point: wideband signals with low SNR can require analyzer functions that improve SNR and measurement speed by analyzing subspans of the overall signal.  \nCitation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 8.\n\n**Implication for Signal Analyzer:**\n- Lower displayed average noise level, better dynamic range\n- Wider bandwidth without losing sensitivity\n- Advanced triggering and capture memory\n- Analysis techniques for low-SNR wideband signals\n- Faster measurement speed for production or scenario testing\n\n**Implication for Signal Generator:**\n- Precise power control over a wide dynamic range\n- Ability to emulate weak targets, interferers, clutter, and jamming signals\n- Stable output at low levels\n\n---\n\n### 3. More timing-critical radar → better delay, phase, and group-delay measurement\n\nModern radar performance depends heavily on timing accuracy: range resolution, target separation, phase coherence, beamforming, and MIMO radar all depend on precise delay and phase behavior.\n\nThe KB evidence mentions relative group delay characterization with **1 ns measurement accuracy** in a wideband measurement context.  \nCitation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 8.\n\n**Implication for Signal Analyzer:**\n- Precise group delay and phase measurement\n- Accurate pulse timing, rise/fall time, PRI, pulse width, chirp linearity\n- Coherent multi-channel analysis for phased-array or MIMO systems\n\n**Implication for Signal Generator:**\n- Accurate timing alignment between channels\n- Phase-coherent multi-output generation\n- Deterministic trigger and synchronization capability\n\n---\n\n### 4. Frequency agility and higher carrier frequencies → broader RF coverage and cleaner sources\n\nNot directly stated in the retrieved KB passages, but from general radar knowledge: radar systems are moving toward higher frequencies, wider chirps, agile frequency plans, and electronically scanned arrays. This increases the need for signal generators and analyzers with broader frequency coverage and excellent phase noise.\n\n**Implication for Signal Generator:**\n- Higher maximum RF frequency or clean upconversion support\n- Low phase noise\n- Fast frequency switching\n- Stable phase coherence across channels\n\n**Implication for Signal Analyzer:**\n- Higher frequency coverage\n- Low phase-noise local oscillator\n- Wideband real-time capture\n- Spurious, harmonic, and phase-noise analysis\n\n---\n\n### 5. Phased-array, AESA, and MIMO radar → multi-channel coherent test\n\nFrom general radar knowledge, modern radar architectures increasingly use phased arrays, digital beamforming, and MIMO concepts. This changes measurement from “one RF path” to many synchronized RF paths.\n\n**Implication for Signal Generator:**\n- Multiple coherent RF channels\n- Controlled amplitude/phase offsets per channel\n- Scenario generation for angle-of-arrival, beam steering, and multi-target simulation\n\n**Implication for Signal Analyzer:**\n- Multi-channel phase-coherent capture\n- Channel-to-channel amplitude, phase, and delay measurement\n- Beamforming and array calibration support\n\n---\n\n### Summary\n\nAs radar evolves from simple pulsed RF toward wideband, agile, coherent, digitally modulated, and multi-channel systems, the required measurement capability increases in five main ways:\n\n| Radar technology change | Signal Generator needs | Signal Analyzer needs |\n|---|---|---|\n| Wider bandwidth / complex pulses | Wide modulation bandwidth, ARB, pulse/chirp generation | Wide analysis bandwidth, pulse/chirp analysis |\n| Weak echoes / low SNR | Accurate low-level output, target/clutter simulation | High sensitivity, dynamic range, SNR-enhancing analysis |\n| Timing and phase precision | Low jitter, phase coherence, accurate triggers | Group delay, phase, timing accuracy |\n| Higher/agile frequencies | Broad RF coverage, low phase noise, fast switching | Broad RF coverage, low phase noise, spur analysis |\n| AESA / MIMO / beamforming | Multi-channel coherent generation | Multi-channel coherent analysis |\n\nIn short: **new radar technology pushes signal generators toward wider, cleaner, more coherent, multi-channel signal creation, and pushes signal analyzers toward wider-band, lower-noise, faster, phase/timing-accurate analysis.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-3748a5090eee471bb0f25e1bff63bfce",
+      "request_id": "request-3748a5090eee471bb0f25e1bff63bfce",
+      "span_id": "span-3748a5090eee471bb0f25e1bff63bfce",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-3748a5090eee471bb0f25e1bff63bfce",
+       "request_id": "request-3748a5090eee471bb0f25e1bff63bfce",
+       "span_id": "span-3748a5090eee471bb0f25e1bff63bfce",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base has only limited direct evidence on “changes in radar technology,” but it does show the measurement direction: newer radar/A&D signals are becoming more complex, wider-band, lower-SNR, and more timing/phase-sensitive. That drives tougher requirements for both signal generators and signal analyzers.\n\n### 1. Wider-band, more complex radar waveforms → wider modulation bandwidth\n\nModern radar increasingly uses complex pulsed, chirped, agile, or modulated waveforms rather than simple CW or narrow pulses. That means the signal generator must reproduce wide instantaneous bandwidth and preserve signal quality.\n\nThe KB evidence notes that the R&S SMBV100B offers “wide modulation bandwidth,” “excellent signal quality,” and up to **1 GHz RF modulation bandwidth**, and that in A&D applications this wide bandwidth enables generation of **complex pulsed signals**.  \nCitation: `raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md`, section 11.\n\n**Implication for Signal Generator:**\n- Higher RF modulation bandwidth\n- Better arbitrary waveform generation\n- Accurate pulse shaping, chirp generation, phase coding, frequency hopping\n- Low EVM / high signal purity for realistic target and emitter simulation\n\n**Implication for Signal Analyzer:**\n- Wider analysis bandwidth\n- Ability to capture full pulse or chirp bandwidth without stitching artifacts\n- Time-domain and frequency-domain pulse analysis\n\n---\n\n### 2. Low-SNR and long-range scenarios → better analyzer sensitivity and processing\n\nRadar often works with weak echoes, clutter, jamming, and high path loss. The KB gives a related measurement point: wideband signals with low SNR can require analyzer functions that improve SNR and measurement speed by analyzing subspans of the overall signal.  \nCitation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 8.\n\n**Implication for Signal Analyzer:**\n- Lower displayed average noise level, better dynamic range\n- Wider bandwidth without losing sensitivity\n- Advanced triggering and capture memory\n- Analysis techniques for low-SNR wideband signals\n- Faster measurement speed for production or scenario testing\n\n**Implication for Signal Generator:**\n- Precise power control over a wide dynamic range\n- Ability to emulate weak targets, interferers, clutter, and jamming signals\n- Stable output at low levels\n\n---\n\n### 3. More timing-critical radar → better delay, phase, and group-delay measurement\n\nModern radar performance depends heavily on timing accuracy: range resolution, target separation, phase coherence, beamforming, and MIMO radar all depend on precise delay and phase behavior.\n\nThe KB evidence mentions relative group delay characterization with **1 ns measurement accuracy** in a wideband measurement context.  \nCitation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 8.\n\n**Implication for Signal Analyzer:**\n- Precise group delay and phase measurement\n- Accurate pulse timing, rise/fall time, PRI, pulse width, chirp linearity\n- Coherent multi-channel analysis for phased-array or MIMO systems\n\n**Implication for Signal Generator:**\n- Accurate timing alignment between channels\n- Phase-coherent multi-output generation\n- Deterministic trigger and synchronization capability\n\n---\n\n### 4. Frequency agility and higher carrier frequencies → broader RF coverage and cleaner sources\n\nNot directly stated in the retrieved KB passages, but from general radar knowledge: radar systems are moving toward higher frequencies, wider chirps, agile frequency plans, and electronically scanned arrays. This increases the need for signal generators and analyzers with broader frequency coverage and excellent phase noise.\n\n**Implication for Signal Generator:**\n- Higher maximum RF frequency or clean upconversion support\n- Low phase noise\n- Fast frequency switching\n- Stable phase coherence across channels\n\n**Implication for Signal Analyzer:**\n- Higher frequency coverage\n- Low phase-noise local oscillator\n- Wideband real-time capture\n- Spurious, harmonic, and phase-noise analysis\n\n---\n\n### 5. Phased-array, AESA, and MIMO radar → multi-channel coherent test\n\nFrom general radar knowledge, modern radar architectures increasingly use phased arrays, digital beamforming, and MIMO concepts. This changes measurement from “one RF path” to many synchronized RF paths.\n\n**Implication for Signal Generator:**\n- Multiple coherent RF channels\n- Controlled amplitude/phase offsets per channel\n- Scenario generation for angle-of-arrival, beam steering, and multi-target simulation\n\n**Implication for Signal Analyzer:**\n- Multi-channel phase-coherent capture\n- Channel-to-channel amplitude, phase, and delay measurement\n- Beamforming and array calibration support\n\n---\n\n### Summary\n\nAs radar evolves from simple pulsed RF toward wideband, agile, coherent, digitally modulated, and multi-channel systems, the required measurement capability increases in five main ways:\n\n| Radar technology change | Signal Generator needs | Signal Analyzer needs |\n|---|---|---|\n| Wider bandwidth / complex pulses | Wide modulation bandwidth, ARB, pulse/chirp generation | Wide analysis bandwidth, pulse/chirp analysis |\n| Weak echoes / low SNR | Accurate low-level output, target/clutter simulation | High sensitivity, dynamic range, SNR-enhancing analysis |\n| Timing and phase precision | Low jitter, phase coherence, accurate triggers | Group delay, phase, timing accuracy |\n| Higher/agile frequencies | Broad RF coverage, low phase noise, fast switching | Broad RF coverage, low phase noise, spur analysis |\n| AESA / MIMO / beamforming | Multi-channel coherent generation | Multi-channel coherent analysis |\n\nIn short: **new radar technology pushes signal generators toward wider, cleaner, more coherent, multi-channel signal creation, and pushes signal analyzers toward wider-band, lower-noise, faster, phase/timing-accurate analysis.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_7T3zeadZunkKpBKI2nwGB2K0",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-3748a5090eee471bb0f25e1bff63bfce",
+          "request_id": "request-3748a5090eee471bb0f25e1bff63bfce",
+          "span_id": "span-3748a5090eee471bb0f25e1bff63bfce",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-3748a5090eee471bb0f25e1bff63bfce",
+           "request_id": "request-3748a5090eee471bb0f25e1bff63bfce",
+           "span_id": "span-3748a5090eee471bb0f25e1bff63bfce",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer? Explain implications for signal generator and signal analyzer requirements, with citations from Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.262773
+            },
+            {
+             "text": "The KW options in this section enable playing of CDMA2000 1xRTT and 1xEV-DO\nwaveform files with the GPRF generator for forward and reverse signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0db424c28307e318",
+               "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+               "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "section": 708,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.501891
+            },
+            {
+             "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 20,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.256098
+            },
+            {
+             "text": "The [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester and [R&S®SMBV100B](https://www.rohde-schwarz.com/us/products/test-and-measurement/vector-signal-generators/rs-smbv100b-vector-signal-generator_63493-519808.html \"R&S®SMBV100B\") vector signal generator from Rohde & Schwarz are now integrated with the chamber technology and EMQuest™ software from ETS-Lindgren. With this integration, the two companies continue their partnership to advance comprehensive testing capabilities for wireless technologies.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8180ce629a865e0b",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "sha256": "8180ce629a865e0b4cf810deb863153c4db34afebd08761005f95b2e5ad55631",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.863415
+            },
+            {
+             "text": "high signal path losses of cables and fixtures in the measurement setup\n► Automatic compensation of Doppler effects for in-orbit ► Wideband signals with a low signal-to-noise ratio (SNR)\nmeasurements can be measured with the R&S®FSW-K17S option that\n► The relative group delay of frequency converters can improves SNR and measurement speeds by analyzing\nbe characterized with 1 ns measurement accuracy; no subspans of the overall signal",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.603411
+            },
+            {
+             "text": "characteristics of carriers transmitted from an in-orbit the figure. Depending on the ground station configuration and frequency band\nsatellite or a ground station at different frequencies. used, spectrum analyzers with different frequency ranges are available.\nThe error vector magnitude (EVM) is a key parameter in\nIn-orbit\ndetermining the quality of the regenerated signal inside",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.335512
+            },
+            {
+             "text": "8.2.4 Production testing aspects for satellites and future outlook\nWith the introduction of NTN, we also expect some changes in the overall test methodologies for satellites. Especially\nLEO and VLEO satellites might be produced in large quantities on a short time scale, making a novel production test\nconcept imperative. With the R&S®PVT360 performance vector tester, Rohde & Schwarz introduces a combined vec-\ntor signal generator (ARB) and vector spectrum analyzer in a single box with a small form factor that fulfills the needs of",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 200,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.085392
+            },
+            {
+             "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.83709
+            }
+           ],
+           "text": "The RAW passages do not directly state specific “changes in radar technology,” but they do show the resulting measurement implications for complex, wideband A&D/pulsed signals: signal generators need high output power, wide modulation bandwidth, excellent signal quality, and up to 1 GHz RF modulation bandwidth to generate complex pulsed signals [8]. Signal analyzers need to handle wideband, low-SNR signals, with capabilities that improve SNR and measurement speed by analyzing subspans of the signal [5]. They may also need precise characterization capability, such as relative group delay measurement accuracy of 1 ns [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "high signal path losses of cables and fixtures in the measurement setup\n► Automatic compensation of Doppler effects for in-orbit ► Wideband signals with a low signal-to-noise ratio (SNR)\nmeasurements can be measured with the R&S®FSW-K17S option that\n► The relative group delay of frequency converters can improves SNR and measurement speeds by analyzing\nbe characterized with 1 ns measurement accuracy; no subspans of the overall signal",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 8,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.603411
+           },
+           {
+            "text": "The R&S®SMBV100B vector signal generator combines superior performance characteristics such as high output power, wide\nmodulation bandwidth and excellent signal quality. With a frequency range from 8 kHz to 6 GHz, the instrument covers all important\nRF bands for digital wireless communications. The wide RF modulation bandwidth of up to 1 GHz satisfies the challenging\nrequirements of fourth and fifth generation communications standards. In A&D applications, the wide bandwidth allows the generation\nof complex pulsed signals.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.83709
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

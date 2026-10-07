@@ -1,0 +1,79 @@
+{
+ "id": "Q0681",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 73.016,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/snla426.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/snla426.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "oscilloscope requirements upward",
+   "higher analog bandwidth, lower intrinsic noise, better timing accuracy",
+   "PAM4 has four amplitude levels and only one-third the vertical eye opening",
+   "high ENOB, low noise floor, accurate eye/level measurements, PAM4 decoding",
+   "support both electrical and optical validation workflows",
+   "differential probing, impedance-related waveform analysis, crosstalk analysis, skew measurement",
+   "multi-channel phase alignment, high-performance differential probes",
+   "detect very small timing skew, deterministic jitter, lane-to-lane variation",
+   "AI accelerators and switch ASICs draw very high, fast-changing currents",
+   "low-noise power-rail probes, high dynamic range, offset capability",
+   "Automated Ethernet/PCIe/CXL/optical compliance test packages"
+  ],
+  "reason": "The cited passages support that AI/data-center technologies involve 224 Gb/s PAM4 connectivity, optical engines, high-speed/high-frequency PCBs, crosstalk concerns, and PCB fiber-weave effects. They do not state oscilloscope measurement requirements, so most of the answer's detailed capability claims rely on outside engineering knowledge rather than the passages, despite a few caveats.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that AI/data-center technologies involve 224 Gb/s PAM4 connectivity, optical engines, high-speed/high-frequency PCBs, crosstalk concerns, and PCB fiber-weave effects. They do not state oscilloscope measurement requirements, so most of the answer's detailed capability claim"
+}

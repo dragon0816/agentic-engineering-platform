@@ -1,0 +1,68 @@
+{
+ "id": "Q0811",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 55.5,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "fits mainly in the test → debug → validation stages",
+   "after the RFIC or SoC has been implemented and the evaluation board / RF path is ready",
+   "Non-signaling RF validation",
+   "TX power; EVM; frequency error; ACLR / spectrum mask; receiver sensitivity",
+   "A signaling tester fits when the RFIC or wireless subsystem needs to be tested under more realistic protocol conditions",
+   "During debug, the tester helps correlate RF impairments with system-level behavior",
+   "Non-signaling test is often favored for faster, repeatable production-oriented RF checks",
+   "Signaling test is usually used more in R&D, validation, conformance-like, regression, and selected production audit scenarios"
+  ],
+  "reason": "The cited passages support CMX500 use for real-world signaling-mode Wi-Fi/cellular-style testing, CMP180 waveform verification in loopback for R&D/production, and VNA use for RFIC/SoC bare-board socket/transmission-line evaluation. However, the answer adds a detailed RFIC workflow, non-signaling parametric test role, debug usage, and production-vs-R&D placement that are not established by the passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support CMX500 use for real-world signaling-mode Wi-Fi/cellular-style testing, CMP180 waveform verification in loopback for R&D/production, and VNA use for RFIC/SoC bare-board socket/transmission-line evaluation. However, the answer adds a detailed RFIC workflow, non-signaling par"
+}

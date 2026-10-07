@@ -1,0 +1,78 @@
+{
+ "id": "Q0451",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 97.578,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Automotive Ethernet / high-speed SerDes readiness",
+   "Automotive networks are moving toward higher bandwidth for ADAS, sensors, infotainment, domain/zonal controllers, and central compute",
+   "For automotive, the physical channel—PCB traces, connectors, cables, harnesses, and module-to-module links—is often the SI bottleneck",
+   "frequency-domain loss/return-loss analysis",
+   "Eye diagrams are essential for judging link margin, jitter/noise closure, equalization effectiveness",
+   "TDR is critical for finding impedance discontinuities from connectors, vias, stubs, cable transitions, and PCB routing defects",
+   "For automotive wireless modules—cellular, V2X, GNSS, radar-adjacent radios",
+   "Automotive high-speed links and RF systems depend heavily on clock quality",
+   "highest-priority SI capabilities"
+  ],
+  "reason": "The passages support a generic high-speed PCB/PCBA SI flow with IL, crosstalk, eye diagram, TDR impedance, stackup planning, and TL calculation, plus separate facts about NTN interest from automotive, Ethernet variants, OBW/spurious tests, and phase-noise measurement. The answer turns these into automotive-specific priorities and adds many unsupported application details, importance rankings, and capabilities such as return loss, jitter, V2X/GNSS/radar-adjacent radios, and automotive Ethernet/ADAS context.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support a generic high-speed PCB/PCBA SI flow with IL, crosstalk, eye diagram, TDR impedance, stackup planning, and TL calculation, plus separate facts about NTN interest from automotive, Ethernet variants, OBW/spurious tests, and phase-noise measurement. The answer turns these into aut"
+}

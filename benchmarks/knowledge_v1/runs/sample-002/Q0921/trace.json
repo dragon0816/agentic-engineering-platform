@@ -1,0 +1,779 @@
+{
+ "question": {
+  "id": "Q0921",
+  "text": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-a1759ee3cfdf41de9219437d927d0ec0",
+ "exchange": {
+  "sent": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 172.562,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-a1759ee3cfdf41de9219437d927d0ec0",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Semiconductor market requirement to a measurable pa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:37:12.745448Z",
+    "updated_at": "2026-10-07T10:40:05.243256Z",
+    "messages": [
+     {
+      "message_id": "message-b1cb6f3e66f743fdb46f1b7c99ebc0a1",
+      "role": "user",
+      "text": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-07T10:37:12.762359Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-3ad425092e614c08bfab85f4af8a6864",
+      "role": "assistant",
+      "text": "建議主軸：知識庫沒有直接提供「Semiconductor market requirement → measurable parameter → Signal Generator / Signal Analyzer capability」的完整原文鏈；可支持的最接近鏈條是 5G FWA CPE upstream 的 5G SoC / RF module / IC 競爭與 advanced broadband features，對接到寬頻/多載波/功率/NPR 等 RF 量測能力 [9]。\n### 推薦先賣\n先切入 5G FWA CPE upstream：來源明確把 Qualcomm、MediaTek、RF houses 列為 upstream，涵蓋 5G SoCs、RF modules、antennas、ICs，並指出 2025 outlook 包含 chip price decline 與 intensified platform competition [9]。\n對寬頻與多載波訊號需求，可用 R&S SMCV100B arbitrary waveform generator：最高 RF bandwidth 可到 240 MHz、multicarrier waveform mode 最多 512 carriers，並有 waveform length / sample rate 擴充 option [23]。\n對功率表徵，可用 R&S SMA100B 的 R&S®SMAB-K28 Power analysis；其支援 power versus frequency、power versus power、power versus time trace mode，sweep points 為 10 to 1000，Y-axis range 為 –200 dBm to +100 dBm [7]。\n### 需求鏈對照表\n| Semiconductor / RF market requirement | Measurable parameter | Required Signal Generator capability | Required Signal Analyzer / measurement capability | 證據 | 缺口 |\n|---|---|---|---|---|---|\n| 5G FWA CPE upstream 包含 5G SoCs、RF modules、antennas、ICs；2025 outlook 有 chip price decline 與 intensified platform competition。[9] | 寬頻 / 多載波 RF stimulus 能力：RF bandwidth、sample rate、carrier count。[23] | R&S SMCV100B AWG：sample rate 最高 300 MHz、arbitrary waveform mode RF bandwidth 最高 240 MHz、multicarrier waveform mode 最多 512 carriers。[23] | 知識庫未標示對應 Signal Analyzer 型號或規格。 | [9], [23] | 來源未直接說 semiconductor 客戶必須使用 SMCV100B；此為需求與能力的接軌，不是已驗證銷售關係。 |\n| RF device / DUT 產生 intermodulation products，需要 NPR 測試。[28] | NPR notch depth up to 50 dB，flat signals over 2 GHz bandwidth。[28] | R&S SMW200A vector signal generator with R&S®SMW-K61 可產生 MCCW signal 以 simulate intermodulation products。[28] | R&S FSW analyzer 可 easy read out NPR results。[28] | [28] | RAW 來源未明示 semiconductor market segment；僅支持 DUT / intermodulation / NPR 測試鏈。 |\n| RF power behavior 需要以 frequency、power、time 方式觀察。[7] | power versus frequency、power versus power、power versus time；10 to 1000 points per sweep；Y-axis –200 dBm to +100 dBm。[7] | R&S SMA100B 搭配 R&S®SMAB-K28 Power analysis，可與支援的 R&S NRP power sensors 做 power analysis。[7] | 同一功能支援 power analysis modes；知識庫未把它標成獨立 Signal Analyzer。[7] | [7] | 來源未直接連到 semiconductor market；需另補 customer use case。 |\n| 需要加入雜訊壓力測試 wanted signal。[25] | AWGN bandwidth、C/N ratio 或 Eb/N0 可設定。[25] | Noise generator 可將 AWGN signal 加到 wanted signal；但使用 noise generator 時，wanted signal 不能加入 frequency offset。[25] | 知識庫未標示對應 Signal Analyzer 型號或量測規格。 | [25] | RAW 來源未提供產品型號，也未連到 semiconductor market。 |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S SMCV100B Signal Generator | 寬頻 / 多載波 stimulus | `R&S®SMCVB-K511` waveform length 512 Msample；`R&S®SMCVB-K512` waveform length 1 Gsample；`R&S®SMCVB-K521/K522/K523` 對應 sample rate 150/200/300 MHz；RF bandwidth 最高 240 MHz；multicarrier carriers max. 512。[23] | 可覆蓋寬頻 arbitrary waveform 與 multicarrier waveform 產生需求。[23] | [23] | 未直接證明 semiconductor 客戶需求或必選 option。 |\n| R&S SMW200A Vector Signal Generator | RF 線性度 / intermodulation / NPR stimulus | R&S®SMW-K61 可產生 MCCW signal。[28] | 來源明示 MCCW signal 用於 simulate DUT intermodulation products。[28] | [28] | RAW 來源未提供完整 datasheet、order number 或 semiconductor market linkage。 |\n| R&S FSW Signal Analyzer | NPR 結果讀取 | 可 easy read out NPR results；NPR notch depth up to 50 dB over 2 GHz bandwidth 的量測場景被明示。[28] | 可作為 NPR / intermodulation 測試鏈的 analyzer 端。[28] | [28] | RAW 來源未提供 FSW option code 或完整量測規格。 |\n| R&S SMA100B + R&S®SMAB-K28 | 功率分析 | R&S®SMAB-K28 Power analysis；modes 包含 power versus frequency、power versus power、power versus time trace mode；支援 NRP-Z81/-Z85/-Z86 與 NRP18P/40P/50P；sweep points 10 to 1000；Y-axis –200 dBm to +100 dBm。[7] | 可把 RF power behavior 轉成可掃描、可匯出的量測結果。[7] | [7] | 這是 signal generator 的 power analysis / sensor workflow，來源未標為獨立 Signal Analyzer。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| 5G FWA CPE upstream chipset / RF module / IC ecosystem | R&S SMCV100B AWG；Analyzer 型號知識庫未標示 | 以 advanced broadband device features、platform competition 為商務切入，再對接 RF bandwidth 最高 240 MHz、multicarrier 512 carriers 的訊號產生能力。[9], [23] | 未有來源直接說該 market segment 要採購 SMCV100B。 |\n| RF DUT linearity / intermodulation / NPR | R&S SMW200A + R&S®SMW-K61 + R&S FSW | 用 MCCW signal simulate intermodulation products；量測 NPR notch depth up to 50 dB over 2 GHz bandwidth，並在 FSW analyzer 讀取結果。[28] | 未有來源直接把此場景標為 semiconductor market requirement。 |\n| RF power characterization | R&S SMA100B + R&S®SMAB-K28 + supported R&S NRP power sensors | 切入 power versus frequency、power versus power、power versus time，並利用 10 to 1000 sweep points 與 –200 dBm to +100 dBm Y-axis range。[7] | 未有來源直接把此需求連到 semiconductor 客戶。 |\n### 限制\n【推論】SMW200A + SMW-K61 + FSW 是目前資料中最完整的「generator stimulus → analyzer readout」鏈，因來源同時說明 MCCW generation、DUT intermodulation products、NPR notch depth 與 FSW readout。[28]\n【推論】SMCV100B 較適合先定位為 broadband / multicarrier signal generation，而不是完整 semiconductor analyzer solution，因來源只提供 generator AWG / multicarrier 規格，未提供 analyzer 對接規格。[23]\n\n來源：\n[7] Wiki：R&S SMA100B（來源：`SMA100B_specs_en_5215-1018-22_v1000.md`）\n[9] Wiki：Qualcomm（來源：`Taiwan CPE Industry 2024.md`）\n[23] Wiki：R&S SMCV100B（來源：`SMCV100B_specs_en_3608-0627-22_v1700.md`）\n[25] `raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md`\n[28] `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-07T10:40:05.243256Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-527bcf2d74d247a386c826a718a54c6a",
+       "request_id": "request-527bcf2d74d247a386c826a718a54c6a",
+       "span_id": "span-527bcf2d74d247a386c826a718a54c6a",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "建議主軸：知識庫沒有直接提供「Semiconductor market requirement → measurable parameter → Signal Generator / Signal Analyzer capability」的完整原文鏈；可支持的最接近鏈條是 5G FWA CPE upstream 的 5G SoC / RF module / IC 競爭與 advanced broadband features，對接到寬頻/多載波/功率/NPR 等 RF 量測能力 [9]。\n### 推薦先賣\n先切入 5G FWA CPE upstream：來源明確把 Qualcomm、MediaTek、RF houses 列為 upstream，涵蓋 5G SoCs、RF modules、antennas、ICs，並指出 2025 outlook 包含 chip price decline 與 intensified platform competition [9]。\n對寬頻與多載波訊號需求，可用 R&S SMCV100B arbitrary waveform generator：最高 RF bandwidth 可到 240 MHz、multicarrier waveform mode 最多 512 carriers，並有 waveform length / sample rate 擴充 option [23]。\n對功率表徵，可用 R&S SMA100B 的 R&S®SMAB-K28 Power analysis；其支援 power versus frequency、power versus power、power versus time trace mode，sweep points 為 10 to 1000，Y-axis range 為 –200 dBm to +100 dBm [7]。\n### 需求鏈對照表\n| Semiconductor / RF market requirement | Measurable parameter | Required Signal Generator capability | Required Signal Analyzer / measurement capability | 證據 | 缺口 |\n|---|---|---|---|---|---|\n| 5G FWA CPE upstream 包含 5G SoCs、RF modules、antennas、ICs；2025 outlook 有 chip price decline 與 intensified platform competition。[9] | 寬頻 / 多載波 RF stimulus 能力：RF bandwidth、sample rate、carrier count。[23] | R&S SMCV100B AWG：sample rate 最高 300 MHz、arbitrary waveform mode RF bandwidth 最高 240 MHz、multicarrier waveform mode 最多 512 carriers。[23] | 知識庫未標示對應 Signal Analyzer 型號或規格。 | [9], [23] | 來源未直接說 semiconductor 客戶必須使用 SMCV100B；此為需求與能力的接軌，不是已驗證銷售關係。 |\n| RF device / DUT 產生 intermodulation products，需要 NPR 測試。[28] | NPR notch depth up to 50 dB，flat signals over 2 GHz bandwidth。[28] | R&S SMW200A vector signal generator with R&S®SMW-K61 可產生 MCCW signal 以 simulate intermodulation products。[28] | R&S FSW analyzer 可 easy read out NPR results。[28] | [28] | RAW 來源未明示 semiconductor market segment；僅支持 DUT / intermodulation / NPR 測試鏈。 |\n| RF power behavior 需要以 frequency、power、time 方式觀察。[7] | power versus frequency、power versus power、power versus time；10 to 1000 points per sweep；Y-axis –200 dBm to +100 dBm。[7] | R&S SMA100B 搭配 R&S®SMAB-K28 Power analysis，可與支援的 R&S NRP power sensors 做 power analysis。[7] | 同一功能支援 power analysis modes；知識庫未把它標成獨立 Signal Analyzer。[7] | [7] | 來源未直接連到 semiconductor market；需另補 customer use case。 |\n| 需要加入雜訊壓力測試 wanted signal。[25] | AWGN bandwidth、C/N ratio 或 Eb/N0 可設定。[25] | Noise generator 可將 AWGN signal 加到 wanted signal；但使用 noise generator 時，wanted signal 不能加入 frequency offset。[25] | 知識庫未標示對應 Signal Analyzer 型號或量測規格。 | [25] | RAW 來源未提供產品型號，也未連到 semiconductor market。 |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S SMCV100B Signal Generator | 寬頻 / 多載波 stimulus | `R&S®SMCVB-K511` waveform length 512 Msample；`R&S®SMCVB-K512` waveform length 1 Gsample；`R&S®SMCVB-K521/K522/K523` 對應 sample rate 150/200/300 MHz；RF bandwidth 最高 240 MHz；multicarrier carriers max. 512。[23] | 可覆蓋寬頻 arbitrary waveform 與 multicarrier waveform 產生需求。[23] | [23] | 未直接證明 semiconductor 客戶需求或必選 option。 |\n| R&S SMW200A Vector Signal Generator | RF 線性度 / intermodulation / NPR stimulus | R&S®SMW-K61 可產生 MCCW signal。[28] | 來源明示 MCCW signal 用於 simulate DUT intermodulation products。[28] | [28] | RAW 來源未提供完整 datasheet、order number 或 semiconductor market linkage。 |\n| R&S FSW Signal Analyzer | NPR 結果讀取 | 可 easy read out NPR results；NPR notch depth up to 50 dB over 2 GHz bandwidth 的量測場景被明示。[28] | 可作為 NPR / intermodulation 測試鏈的 analyzer 端。[28] | [28] | RAW 來源未提供 FSW option code 或完整量測規格。 |\n| R&S SMA100B + R&S®SMAB-K28 | 功率分析 | R&S®SMAB-K28 Power analysis；modes 包含 power versus frequency、power versus power、power versus time trace mode；支援 NRP-Z81/-Z85/-Z86 與 NRP18P/40P/50P；sweep points 10 to 1000；Y-axis –200 dBm to +100 dBm。[7] | 可把 RF power behavior 轉成可掃描、可匯出的量測結果。[7] | [7] | 這是 signal generator 的 power analysis / sensor workflow，來源未標為獨立 Signal Analyzer。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| 5G FWA CPE upstream chipset / RF module / IC ecosystem | R&S SMCV100B AWG；Analyzer 型號知識庫未標示 | 以 advanced broadband device features、platform competition 為商務切入，再對接 RF bandwidth 最高 240 MHz、multicarrier 512 carriers 的訊號產生能力。[9], [23] | 未有來源直接說該 market segment 要採購 SMCV100B。 |\n| RF DUT linearity / intermodulation / NPR | R&S SMW200A + R&S®SMW-K61 + R&S FSW | 用 MCCW signal simulate intermodulation products；量測 NPR notch depth up to 50 dB over 2 GHz bandwidth，並在 FSW analyzer 讀取結果。[28] | 未有來源直接把此場景標為 semiconductor market requirement。 |\n| RF power characterization | R&S SMA100B + R&S®SMAB-K28 + supported R&S NRP power sensors | 切入 power versus frequency、power versus power、power versus time，並利用 10 to 1000 sweep points 與 –200 dBm to +100 dBm Y-axis range。[7] | 未有來源直接把此需求連到 semiconductor 客戶。 |\n### 限制\n【推論】SMW200A + SMW-K61 + FSW 是目前資料中最完整的「generator stimulus → analyzer readout」鏈，因來源同時說明 MCCW generation、DUT intermodulation products、NPR notch depth 與 FSW readout。[28]\n【推論】SMCV100B 較適合先定位為 broadband / multicarrier signal generation，而不是完整 semiconductor analyzer solution，因來源只提供 generator AWG / multicarrier 規格，未提供 analyzer 對接規格。[23]\n\n來源：\n[7] Wiki：R&S SMA100B（來源：`SMA100B_specs_en_5215-1018-22_v1000.md`）\n[9] Wiki：Qualcomm（來源：`Taiwan CPE Industry 2024.md`）\n[23] Wiki：R&S SMCV100B（來源：`SMCV100B_specs_en_3608-0627-22_v1700.md`）\n[25] `raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md`\n[28] `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-527bcf2d74d247a386c826a718a54c6a",
+      "request_id": "request-527bcf2d74d247a386c826a718a54c6a",
+      "span_id": "span-527bcf2d74d247a386c826a718a54c6a",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-527bcf2d74d247a386c826a718a54c6a",
+       "request_id": "request-527bcf2d74d247a386c826a718a54c6a",
+       "span_id": "span-527bcf2d74d247a386c826a718a54c6a",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-527bcf2d74d247a386c826a718a54c6a",
+        "request_id": "request-527bcf2d74d247a386c826a718a54c6a",
+        "span_id": "span-527bcf2d74d247a386c826a718a54c6a",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 26,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 11.210268
+         },
+         {
+          "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 1.34812
+         },
+         {
+          "text": "VIAVI O-RU Tester › 不可推論的內容\n- 來源未提供 VIAVI O-RU Tester 或 VIAVI TM500 O-RU Tester 的正式產品名稱、料號、software release、supported O-RAN WG4 spec versions、license 或 interface option。\n- 來源未提供 VIAVI 官方 datasheet / application note；不可由 R&S 簡報推論 VIAVI product roadmap、formal specification 或 market share。\n- 來源未提供 T-BC、FTN、PTP-GM、O-RU TMA、interconnection unit、TMA / TM500 software library 的具體版本與 timing architecture。\n- March 2025 來源中的 price point、competitor comparison、test case counts 與 VAR commercial terms 屬 internal / market context，需依正式 quote、contract、software release notes 與 public material 補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+          },
+          "score": 2.580616
+         },
+         {
+          "text": "R&S SMA100B › Platform height options\n| Option code | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|\n| R&S®SMAB-B92 | 2 HU with 5-inch touch display | 1420.8288.04 | 2 HU model；dimensions 460 mm × 107 mm × 503 mm；without handles and feet 445 mm × 89 mm × 485 mm；weight 14.4 kg；rated current 3.5 A to 1.6 A at 50 Hz to 60 Hz、3.5 A to 2.9 A at 400 Hz；rated power fully equipped 300 W measured |\n| R&S®SMAB-B93 | 3 HU with 7-inch touch display | 1420.8388.04 | 3 HU model；dimensions 460 mm × 151 mm × 503 mm；without handles and feet 445 mm × 133 mm × 485 mm；weight 18.0 kg；rated current 7.3 A to 4.6 A；rated power fully equipped 380 W measured |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.279215
+         },
+         {
+          "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 0.828798
+         },
+         {
+          "text": "NEC › unresolved\n- 需要擷取 NEC Technical Journal 文章正文以確認日期、技術範圍、圖表與可引用主張。\n- 需要判定該文章應歸入 [[Knowledge]] 技術背景、[[Productions]] 產品 / 模組資料，或 [[Market]] 市場線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/NEC.md"
+          },
+          "score": 1.154311
+         },
+         {
+          "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.063615
+         },
+         {
+          "text": "Tim Seyler\n[[Tim Seyler]] 是 [[Rohde & Schwarz]] 相關 customer questionnaire 與 configuration guide 中列出的 contact；[[cmx500_ntn_customer_questionnaire]] 明示其 email 為 `tim.seyler@rohde-schwarz.com`，角色為 Product Manager Mobile Radio Testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.293874
+         },
+         {
+          "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qualcomm.md"
+          },
+          "score": 0.408989
+         },
+         {
+          "text": "Tim Seyler › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 未提供 [[Tim Seyler]] 的職稱或部門。\n- [[cmx500_ntn_customer_questionnaire]] 提供 Product Manager Mobile Radio Testing 角色，但未提供組織層級、所在地、職責範圍或是否為該 solution 的唯一負責人。\n- [[CMX_Configuration_Guide_Audio-Testing]] 只列 contact person，未提供 contact scope、approval authority 或是否為 audio testing configuration 的 owner。\n- [[CMX_Configuration_Guide_LTE-DTC]] 只列 contact person，未提供 contact scope、approval authority 或是否為 LTE-DTC configuration 的 owner。\n- 不能只因其被列為 contact，就推論其為 sales owner、technical owner 或所有相關產品的 product owner。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.278979
+         },
+         {
+          "text": "Tim Seyler › 與相關主題的關係\n- 在 [[AIW_Products_Customer_Questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S AI Workplace Solutions]] customer questionnaire 的 contact 出現。\n- 在 [[cmx500_ntn_customer_questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S NTN signaling solutions]] customer questionnaire 的 contact 出現，並被標示為 Product Manager Mobile Radio Testing。\n- 在 [[CMX_Configuration_Guide_Audio-Testing]] 中，[[Tim Seyler]] 是 [[CMX500 Audio Testing configuration]] 的 contact person；來源未提供 email、職稱或 team。\n- 在 [[CMX_Configuration_Guide_LTE-DTC]] 中，[[Tim Seyler]] 是 [[CMX500 LTE-DTC configuration]] 的 contact person；來源未提供 email、職稱或 team。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.277548
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- 來源更新 [[R&S portfolio for O-RU testing]]（August 2023）的 O-RU testing portfolio 視角，將重點放在 2025 年的 [[O-RU tester market and funding]]、[[R&S PVT360A O-RU testing]]、[[O-RU NES testing]]、[[VIAVI O-RU Tester]] / [[VIAVI TM500]] integration、competitor positioning 與 NTIA funding opportunities。\n- Slide 2 說 O-RU tester 客戶範圍包含 traditional TOP3 RAN vendors：[[Ericsson]]、[[Nokia]]、[[Samsung]]；O-RAN market entrants：[[Kyocera]]、[[Mavenir]]、[[Tejas]]、[[Fujitsu]]、[[NEC]]、[[ADI]]、[[Qualcomm]]、[[Battelle]]；以及 testing budget limited 的 [[Phy-tunes]]、[[GXC]]、[[Eridian]]、[[University of Georgia]]，與 DAS companies：[[Amphenol]] / Andrew、[[SOLiD]]、[[Samji]]、[[HFR]]。\n- Slide 2 說 US government 透過 [[NTIA NOFO2]] / SRFA#1 funding program 資助 O-RU commercialization；來源描述 2 years project、targeting commercially available Jan 2027、O-RU conformance testing ongoing、field testing starts 1HCY2026、mass-production EoY CY26 / BoY CY27。\n- Slide 3 把 [[Open RAN]] ecosystem 分為 traditional infrastructure providers、radio subsystem manufacturers、chipset / reference designers、industry organizations、test labs、test equipment manufacturers、network operators 與 government funding。\n- Slide 4 將 key test focus areas 從 R&D 到 field testing 分為 RF design / verification / integration、power management、digital design、production testing、regression、operator test、beamforming / Massive MIMO、fronthaul conformance、timing / sync / signal integrity、OTA、QoS / QoE、3GPP compliance、interoperability、end-to-end、functional / baseline testing、network benchmarking、site testing / troubleshooting 與 network synchronization。\n- Slide 5 列出 O-RU testing general instrumentation：[[R&S NGP800]]、[[R&S NGT3600]]、[[R&S OSP200]] / [[R&S OSP300]]、[[R&S RTO]] / [[R&S RTP]]，並標示 Q2CY2025。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 2.005827
+         },
+         {
+          "text": "R&S SMB100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMBB-K31 | High output power, 1/3/6 GHz | 1422.5705.02 | R&S®SMBB-B32 需要 R&S®SMBB-K31 option |\n| R&S®SMBB-K33 | High output power, 12.75/20 GHz | 1422.9946.02 | 原文未標示 requires/excludes |\n| R&S®SMBB-K35 | High output power, 31.8/40 GHz | 1422.9952.02 | 原文未標示 requires/excludes |\n| R&S®SMBB-K704 | Flexible reference input, from 1 MHz to 100 MHz | 1422.6301.02 | variable reference input frequency 1.0 MHz to 100 MHz |\n| R&S®SMBB-K22 | High performance pulse modulator | 1422.5905.02 | pulse modulation 使用此 option；standard source external |\n| R&S®SMBB-K23 | Pulse generator | 1422.6001.02 | 搭配 K23 時 pulse modulation 支援 external、internal |\n| R&S®SMBB-K24 | Multifunction generator | 1422.6053.02 | LF generator 1、LF generator 2、noise generator |\n| R&S®SMBB-K27 | Pulse train | 1422.6101.02 | 需要 R&S®SMBB-K23 option |\n| R&S®SMBB-K720 | AM/FM/M | 1422.6201.02 | 來源 ordering information 寫 AM/FM/M；規格段落為 AM/FM/φM |\n| R&S®SMBB-K980 | Health and utilization monitoring service HUMS | 1422.6347.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMBB-K986 | Remote control interface GPIB and USB，for R&S®SMBB-B112/-B120/-B131/-B140(N) | 1422.9969.02 | 提供 GPIB and USB remote control interface；RS-232 需 R&S®TS-USB1 |\n| R&S®SMBB-K554 | R&S®SZM control via USB by the R&S®SMB100B microwave signal generator | 1422.6253.02 | Recommended extra |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 30,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMB100B.md"
+          },
+          "score": 9.632985
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 與既有知識的關係\n- 相較 [[R&S portfolio for O-RU testing]]（August 2023），本來源是 2025-03 的 short version，新增 O-RU tester market / funding、PVT360A cost-optimized positioning、NES / EE、M-MIMO with BFM、competitor positioning、VIAVI VAR agreement 與 NTIA funded labs 資訊。\n- 補強 [[O-RU testing]]：既有頁面已整理 August 2023 的 O-RAN WG4 / 3GPP / VIAVI + R&S solution；本來源新增 2025 年 portfolio segmentation、PVT360A 與 VSA/VSG 兩種 offer path、production / regression / certification 的定位差異。\n- 補強 [[Network energy saving]]：既有頁面由 [[MWC2025---WIC-INFRA]] 建立 network energy saving 概念；本來源把 NES 具體連到 O-RU、ETSI traffic models、RTO6、NGP / NGT、VIAVI TM500 O-RU Tester、ADI Titan demo 與 up to 40% energy savings claim。\n- 補強 [[VIAVI O-RU Tester]]：既有頁面只由 August 2023 portfolio 支撐；本來源新增 PVT360A setup、VSA/VSG setup、TM500 O-RU Tester、O-DU emulator、TMA、VAR agreement 與 lab adoption 線索。\n- 補強 [[O-RAN WG4 Conformance Testing]]：本來源提到 `O-RAN.WG4.CONF.0-R003-v09.00` target release Q2CY25，與既有 `ORAN-WG4.CONF-v06.00` 形成版本演進線索，但不是同一正式文件全文。\n- 補強 [[R&S PVT360A]]：本來源是 Market / sales deck，不能覆蓋 [[PVT360A_Features_V8-5-30_en_06]] 的 Productions 規格；PVT360A 的 O-RU testing positioning 另建 [[R&S PVT360A O-RU testing]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 1.77449
+         },
+         {
+          "text": "R&S SMB100B › External modulation、LF 與 pulse connectors\n- MOD EXT（AM/FM/φM）：rear panel，BNC female；input impedance 可選 >100 kΩ、600 Ω 或 50 Ω nominal；input sensitivity 以 set modulation factor 或 deviation 的 peak value 為 1 V nominal；input damage voltage ±7 V。\n- PULSE EXT：rear panel，BNC female；input impedance 可選 10 kΩ 或 50 Ω nominal；input voltage TTL/CMOS compatible，threshold low 0.8 V nominal、threshold high 1.3 V nominal；input damage voltage ±6 V；polarity normal 或 inverse。\n- Internal modulation generator：signal type sine；frequency setting range 0.1 Hz to 1 MHz；setting resolution 0.01 Hz；frequency error <（0.001 Hz + reference frequency relative deviation × modulation frequency）。\n- LF output：可監測 AM、FM、φM resulting modulation signal；source 可為 LF generator 1、LF generator 2、noise generator、external；output voltage open circuit EMF 0 mV to 4 V，resolution 1 mV；setting error at 1 kHz <（1 % of reading + 1 mV）；output impedance 50 Ω 或 600 Ω nominal；DC offset –4.0 V to +4.0 V；damage voltage ±7 V。\n- Pulse modulation video feedthrough：R&S®SMBB-B101/-B103/-B106，8 kHz < f ≤ 6 GHz、level < 10 dBm 時 < 10 % of RF、< 200 mV peak-to-peak；R&S®SMBB-B112/-B120/-B131/-B140(N)，8 kHz < f ≤ 6 GHz 時 < 20 % of RF、< 400 mV peak-to-peak；6 GHz < f ≤ 40 GHz 時 < 2 mV peak-to-peak。\n- Pulse overshoot：< 10 %；pulse delay external trigger to RF，transition type fast：90 ns nominal。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 22,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMB100B.md"
+          },
+          "score": 6.934502
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- Slide 12 說 [[Analog Devices]] 的 energy-efficient [[ADI Titan O-RU platform]] enabled by [[ADRV906x]] Radio Unit SoC 在 MWC25 與 [[Rohde & Schwarz]]、[[Viavi Solutions]] 共同展示 energy efficiency；透過 Microsleep DTx during low traffic loads 可達 up to 40% energy savings。\n- Slide 13 說 R&S 與 ADI 已合作 over one year，NES test system 用於 ADI Kerberos 與 Titan reference design，並提到 Titan 是 more integrated design，使用 Samana transceiver 與 Low-Phy protocol on same Samana chip。\n- Slide 17–20 是 competitor / battle-card 型內容：主要競品為 [[Keysight]]、[[LitePoint]]、[[Anritsu]]；Keysight 被描述為 O-RU testing market majority，且 Keysight Time Sync Analyzer、MTRX、O-DU emulator 等硬體需求被列出；VIAVI / R&S 與 Keysight 在 price point、test coverage、M-MIMO / BFM、functional test、TCO 與 reusability 上被比較。\n- Slide 21 說 [[VIAVI VAR Agreement]] / R&S GPPA 允許 Viavi worldwide sell R&S products，產品包含 signal generators、spectrum analyzers、[[R&S VSE]]、[[R&S PVT360A]]、[[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]] / [[R&S MXO4]]、[[R&S OSP200]] / [[R&S OSP300]]，target markets 為 O-RAN、NTN 與 6G。\n- Slide 23、25、26 保存 NTIA / Public Wireless Supply Chain Innovation Fund funding history、NOFO1 / NOFO2 winners、ORCID / ACCoRD / VALOR labs 與 R&S received / quoted orders 的 market / sales 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 1.488903
+         },
+         {
+          "text": "R&S SMB100B › Connectors 摘錄\n| Connector | 條件 / 用途 | Type |\n|---|---|---|\n| RF 50 Ω output | R&S®SMBB-B101/-B103/-B106 | N female |\n| RF 50 Ω output | R&S®SMBB-B112/-B120/-B131/-B140(N) | test port adapter，PC 2.92 mm female，interchangeable port connector system |\n| USB front panel | external devices | USB 2.0 high speed，USB type A |\n| REF 1 GHz IN / OUT | only with R&S®SMBB-B3 | SMA female |\n| REF IN / REF OUT | reference input/output | BNC female |\n| LF | modulation generator output | BNC female |\n| MOD EXT | external analog modulation input | BNC female |\n| PULSE EXT | external pulse modulation input | BNC female |\n| PULSE VIDEO | pulse generator output | BNC female |\n| INST TRIG | trigger input，TTL 5 V compatible | BNC female |\n| SIGNAL VALID | output for triggering external devices；high state 表示 instrument 已 settled to final value | BNC female |\n| L / R / S/P DIF | Stereo/RDS coder inputs，only available with R&S®SMBB-B5 option | BNC female |\n| USB IN | remote control USB-TMC，only with R&S®SMBB-B86 | USB 2.0 high speed，USB type B |\n| USB rear panel | external devices | USB 3.0 SuperSpeed，USB type A |\n| LAN | remote control、VNC、FTP | RJ-45 |\n| IEEE 488 | GPIB remote control，only with R&S®SMBB-B86 | 24-pin Amphenol series 57 female |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 25,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMB100B.md"
+          },
+          "score": 6.583682
+         },
+         {
+          "text": "Christian Dobmeier\n[[Christian Dobmeier]] 是 [[Rohde & Schwarz]] 的 Director of Product Group CMX500；目前本頁只由 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 支撐。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.366239
+         },
+         {
+          "text": "R&S SMCV100B › General data\nEnvironmental：operating temperature `+5 °C to +45 °C`；storage temperature `–20 °C to +70 °C`；damp heat `+25 °C/+40 °C`, `90% relative humidity`, cyclic, in line with `EN 60068-2-78`；altitude operating/transport up to `4600 m`；degree of protection `IP20`。\n\nMechanical resistance：vibration sinusoidal `5 Hz to 55 Hz`, `0.15 mm amplitude const.`，`55 Hz to 150 Hz`, `0.5 g const.`；vibration random `8 Hz to 500 Hz`, acceleration `1.2 g RMS`；shock `40 g shock spectrum`，in line with `MIL-STD-810E` method no. 516.4 procedure I。\n\nPower and physical：rated connector `IEC/EN 60320-1/C14`；rated voltage `100 V to 240 V AC (±10%)`；rated frequency `50 Hz to 60 Hz`；rated current `3.6 A to 1.5 A`；rated power `360 W`、`110 W measured`（no USB load connected、fans full speed）；standby `< 2 W`；fuse `T6.3H/250 V`；acoustic noise `53 dB(A) measured`；dimensions `222 mm × 97 mm × 366 mm`，`½ 19 inch`，`2 HU`；weight `4.7 kg`；display `5 inch color display`，resolution `RGB 800 × 480 pixel`；non-volatile memory `M.2 SATA`, `128 Gbyte`；recommended calibration interval `3 years`。\n\nProduct conformity：EMC in line with EU `EMC Directive 2014/30EC` and UK `Electromagnetic Compatibility Regulations 2016`，standards `EN 61326-1 industrial environment`, `EN 55011 class A`；electrical safety in line with EU `Low Voltage Directive 2014/35/EU`, `EN 61010-1`，USA `UL 61010-1`，Canada `CAN/CSA-C22.2 No. 61010-1`；RoHS `2011/65/EC`，`EN IEC 63000`；EU legislation includes `Data Act - Regulation (EU) 2023/2854`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 27,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMCV100B.md"
+          },
+          "score": 7.944239
+         },
+         {
+          "text": "Christian Dobmeier › 來源中的角色\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Christian Dobmeier]] 以 Director of Product Group CMX500 at [[Rohde & Schwarz]] 身分發言。\n\n其發言重點包含：\n\n- [[Rohde & Schwarz]] 與 [[Gatehouse Satcom]] 合作，以 accelerate validation methodologies for [[5G NTN]] technologies。\n- 發言中明示包含 [[GEO]]、[[MEO]] 與 [[LEO]] satellite services。\n- 當 satellite sector converges on standardized, [[3GPP]] based solutions 時，software innovators 與 test equipment specialists 的 close collaboration 很重要。\n- 此 partnership 不只 strengthens tools and insights for today’s [[5G NTN]] rollout，也 lays a solid foundation for future [[6G NTN testing and validation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.286455
+         },
+         {
+          "text": "R&S SMCV100B › Basic AM/FM/φM（`R&S®SMCVB-K197`）\nBasic AM/FM/φM via baseband 需 `R&S®SMCVB-K197` option。\n\n- AM：depth `0 % to 100 %`，resolution `0.1 %`；AM depth error `fmod = 1 kHz`，`< 1 % measured`；AM distortion `< –60 dB measured`。\n- FM：maximum deviation `4 MHz`；resolution `0.01 Hz`；FM deviation error `fmod = 2 kHz`、deviation `≤ 1 MHz`、internal source，`< 1 % of setting measured`。\n- φM：maximum deviation `6 rad`；resolution `1 µrad`；φM deviation error `fmod = 1 kHz` 為 `< (2 % of setting + 0.003 rad)`。\n- Internal modulation generator：signal type sine；frequency `0.1 Hz to 100 kHz`；resolution `0.01 Hz`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 17,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMCV100B.md"
+          },
+          "score": 7.841235
+         },
+         {
+          "text": "Christian Dobmeier › 使用限制\n- 來源未提供 [[Christian Dobmeier]] 的完整履歷、任期、聯絡方式或其他職務。\n- 來源中的 title 文字為 PR 文字；本頁不推論其組織架構或產品管理權責。\n- 來源提到 future [[6G NTN testing and validation]]，但未提供任何 6G NTN product、standard version、test case 或 availability。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.240271
+         },
+         {
+          "text": "R&S SMCV100B › Arbitrary waveform generator\n| 條件 | Waveform length |\n|---|---|\n| Standard | `1 sample to 64 Msample`, one-sample steps |\n| with `R&S®SMCVB-K511` | `1 sample to 512 Msample` |\n| with `R&S®SMCVB-K512` | `1 sample to 1 Gsample` |\n\nSample rate：standard `400 Hz to 75 MHz`；with `R&S®SMCVB-K521` `400 Hz to 150 MHz`；with `R&S®SMCVB-K522` `400 Hz to 200 MHz`；with `R&S®SMCVB-K523` `400 Hz to 300 MHz`；HDD streaming standard `400 Hz to 75 MHz` 需 `R&S®SMCVB-K505`。\n\nArbitrary waveform mode RF bandwidth：standard maximum sample rate `60 MHz`；with `R&S®SMCVB-K521` `120 MHz`；with `R&S®SMCVB-K522` `160 MHz`；with `R&S®SMCVB-K523` `240 MHz`。Frequency offset setting range：standard `–30 MHz to 30 MHz`；with `K521` `–60 MHz to 60 MHz`；with `K522` `–80 MHz to 80 MHz`；with `K523` `–120 MHz to 120 MHz`。\n\nTriggering and markers：trigger source internal 或 external；trigger modes auto、retrig、armed auto、armed retrig、single；external trigger input selectable from user 1 or user 2，`BNC female`，input level `0 V to 3 V nominal`，threshold `0.1 V to 2.0 V`，input impedance selectable `1 kΩ` or `50 Ω nominal`，trigger jitter `±1.67 ns`。Marker signals number `1`，operating modes unchanged、restart、pulse、pattern、ratio，level `LVTTL`。\n\nMultisegment waveform mode：segments `1 to 1024`，changeover modes GUI、remote control、external trigger，sequencer play list length max. `1024`，segment repetitions max. `1048575`。\n\nMulticarrier waveform mode：carriers max. `512`；total RF bandwidth standard `60 MHz`，with `K521` `120 MHz`，with `K522` `160 MHz`，with `K523` `240 MHz`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMCV100B.md"
+          },
+          "score": 5.920637
+         },
+         {
+          "text": "NR-NTN LBS testing\n[[NR-NTN LBS testing]] 是 [[Q2_2026 Conformance & NetOp Updates_Customer]] 中 Location Based Services product highlight 的主題，涵蓋 OTA 5G NR GNSS FR1 on top of [[R&S TS8991]]、3rd party OTA chamber integration、GNSS record / replay 與 NR-NTN LBS E911 outlook。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+          },
+          "score": 2.235592
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-8ec180d5f5e4ded7",
+            "original_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "sha256": "8ec180d5f5e4ded7daf73d9a99dc85b471116e2789518fb2949545a4a27543fa",
+            "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "section": 612,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-06da2c5f1d2f72f1",
+            "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+            "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+           "section": 1202,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         },
+         {
+          "text": "intermodulation products the device under test produces. ► No previous calibration is needed to measure NPR\nnotch depth up to 50 dB using flat signals over a\nThe R&S®SMW200A vector signal generator equipped 2 GHz bandwidth\nwith R&S®SMW-K61 option can be used to generate a ► The test signal is easy to create and modify\nmulti-carrier c ontinuous wave (MCCW) signal to simulate ► Easy read out of the results on the R&S®FSW analyzer",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4eedd79b08d7a305",
+            "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+            "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+            "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.333577
+         }
+        ],
+        "text": "建議主軸：知識庫沒有直接提供「Semiconductor market requirement → measurable parameter → Signal Generator / Signal Analyzer capability」的完整原文鏈；可支持的最接近鏈條是 5G FWA CPE upstream 的 5G SoC / RF module / IC 競爭與 advanced broadband features，對接到寬頻/多載波/功率/NPR 等 RF 量測能力 [9]。\n### 推薦先賣\n先切入 5G FWA CPE upstream：來源明確把 Qualcomm、MediaTek、RF houses 列為 upstream，涵蓋 5G SoCs、RF modules、antennas、ICs，並指出 2025 outlook 包含 chip price decline 與 intensified platform competition [9]。\n對寬頻與多載波訊號需求，可用 R&S SMCV100B arbitrary waveform generator：最高 RF bandwidth 可到 240 MHz、multicarrier waveform mode 最多 512 carriers，並有 waveform length / sample rate 擴充 option [23]。\n對功率表徵，可用 R&S SMA100B 的 R&S®SMAB-K28 Power analysis；其支援 power versus frequency、power versus power、power versus time trace mode，sweep points 為 10 to 1000，Y-axis range 為 –200 dBm to +100 dBm [7]。\n### 需求鏈對照表\n| Semiconductor / RF market requirement | Measurable parameter | Required Signal Generator capability | Required Signal Analyzer / measurement capability | 證據 | 缺口 |\n|---|---|---|---|---|---|\n| 5G FWA CPE upstream 包含 5G SoCs、RF modules、antennas、ICs；2025 outlook 有 chip price decline 與 intensified platform competition。[9] | 寬頻 / 多載波 RF stimulus 能力：RF bandwidth、sample rate、carrier count。[23] | R&S SMCV100B AWG：sample rate 最高 300 MHz、arbitrary waveform mode RF bandwidth 最高 240 MHz、multicarrier waveform mode 最多 512 carriers。[23] | 知識庫未標示對應 Signal Analyzer 型號或規格。 | [9], [23] | 來源未直接說 semiconductor 客戶必須使用 SMCV100B；此為需求與能力的接軌，不是已驗證銷售關係。 |\n| RF device / DUT 產生 intermodulation products，需要 NPR 測試。[28] | NPR notch depth up to 50 dB，flat signals over 2 GHz bandwidth。[28] | R&S SMW200A vector signal generator with R&S®SMW-K61 可產生 MCCW signal 以 simulate intermodulation products。[28] | R&S FSW analyzer 可 easy read out NPR results。[28] | [28] | RAW 來源未明示 semiconductor market segment；僅支持 DUT / intermodulation / NPR 測試鏈。 |\n| RF power behavior 需要以 frequency、power、time 方式觀察。[7] | power versus frequency、power versus power、power versus time；10 to 1000 points per sweep；Y-axis –200 dBm to +100 dBm。[7] | R&S SMA100B 搭配 R&S®SMAB-K28 Power analysis，可與支援的 R&S NRP power sensors 做 power analysis。[7] | 同一功能支援 power analysis modes；知識庫未把它標成獨立 Signal Analyzer。[7] | [7] | 來源未直接連到 semiconductor market；需另補 customer use case。 |\n| 需要加入雜訊壓力測試 wanted signal。[25] | AWGN bandwidth、C/N ratio 或 Eb/N0 可設定。[25] | Noise generator 可將 AWGN signal 加到 wanted signal；但使用 noise generator 時，wanted signal 不能加入 frequency offset。[25] | 知識庫未標示對應 Signal Analyzer 型號或量測規格。 | [25] | RAW 來源未提供產品型號，也未連到 semiconductor market。 |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S SMCV100B Signal Generator | 寬頻 / 多載波 stimulus | `R&S®SMCVB-K511` waveform length 512 Msample；`R&S®SMCVB-K512` waveform length 1 Gsample；`R&S®SMCVB-K521/K522/K523` 對應 sample rate 150/200/300 MHz；RF bandwidth 最高 240 MHz；multicarrier carriers max. 512。[23] | 可覆蓋寬頻 arbitrary waveform 與 multicarrier waveform 產生需求。[23] | [23] | 未直接證明 semiconductor 客戶需求或必選 option。 |\n| R&S SMW200A Vector Signal Generator | RF 線性度 / intermodulation / NPR stimulus | R&S®SMW-K61 可產生 MCCW signal。[28] | 來源明示 MCCW signal 用於 simulate DUT intermodulation products。[28] | [28] | RAW 來源未提供完整 datasheet、order number 或 semiconductor market linkage。 |\n| R&S FSW Signal Analyzer | NPR 結果讀取 | 可 easy read out NPR results；NPR notch depth up to 50 dB over 2 GHz bandwidth 的量測場景被明示。[28] | 可作為 NPR / intermodulation 測試鏈的 analyzer 端。[28] | [28] | RAW 來源未提供 FSW option code 或完整量測規格。 |\n| R&S SMA100B + R&S®SMAB-K28 | 功率分析 | R&S®SMAB-K28 Power analysis；modes 包含 power versus frequency、power versus power、power versus time trace mode；支援 NRP-Z81/-Z85/-Z86 與 NRP18P/40P/50P；sweep points 10 to 1000；Y-axis –200 dBm to +100 dBm。[7] | 可把 RF power behavior 轉成可掃描、可匯出的量測結果。[7] | [7] | 這是 signal generator 的 power analysis / sensor workflow，來源未標為獨立 Signal Analyzer。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| 5G FWA CPE upstream chipset / RF module / IC ecosystem | R&S SMCV100B AWG；Analyzer 型號知識庫未標示 | 以 advanced broadband device features、platform competition 為商務切入，再對接 RF bandwidth 最高 240 MHz、multicarrier 512 carriers 的訊號產生能力。[9], [23] | 未有來源直接說該 market segment 要採購 SMCV100B。 |\n| RF DUT linearity / intermodulation / NPR | R&S SMW200A + R&S®SMW-K61 + R&S FSW | 用 MCCW signal simulate intermodulation products；量測 NPR notch depth up to 50 dB over 2 GHz bandwidth，並在 FSW analyzer 讀取結果。[28] | 未有來源直接把此場景標為 semiconductor market requirement。 |\n| RF power characterization | R&S SMA100B + R&S®SMAB-K28 + supported R&S NRP power sensors | 切入 power versus frequency、power versus power、power versus time，並利用 10 to 1000 sweep points 與 –200 dBm to +100 dBm Y-axis range。[7] | 未有來源直接把此需求連到 semiconductor 客戶。 |\n### 限制\n【推論】SMW200A + SMW-K61 + FSW 是目前資料中最完整的「generator stimulus → analyzer readout」鏈，因來源同時說明 MCCW generation、DUT intermodulation products、NPR notch depth 與 FSW readout。[28]\n【推論】SMCV100B 較適合先定位為 broadband / multicarrier signal generation，而不是完整 semiconductor analyzer solution，因來源只提供 generator AWG / multicarrier 規格，未提供 analyzer 對接規格。[23]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 19,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMA100B.md"
+         },
+         "score": 7.063615
+        },
+        {
+         "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Qualcomm.md"
+         },
+         "score": 0.408989
+        },
+        {
+         "text": "R&S SMCV100B › Arbitrary waveform generator\n| 條件 | Waveform length |\n|---|---|\n| Standard | `1 sample to 64 Msample`, one-sample steps |\n| with `R&S®SMCVB-K511` | `1 sample to 512 Msample` |\n| with `R&S®SMCVB-K512` | `1 sample to 1 Gsample` |\n\nSample rate：standard `400 Hz to 75 MHz`；with `R&S®SMCVB-K521` `400 Hz to 150 MHz`；with `R&S®SMCVB-K522` `400 Hz to 200 MHz`；with `R&S®SMCVB-K523` `400 Hz to 300 MHz`；HDD streaming standard `400 Hz to 75 MHz` 需 `R&S®SMCVB-K505`。\n\nArbitrary waveform mode RF bandwidth：standard maximum sample rate `60 MHz`；with `R&S®SMCVB-K521` `120 MHz`；with `R&S®SMCVB-K522` `160 MHz`；with `R&S®SMCVB-K523` `240 MHz`。Frequency offset setting range：standard `–30 MHz to 30 MHz`；with `K521` `–60 MHz to 60 MHz`；with `K522` `–80 MHz to 80 MHz`；with `K523` `–120 MHz to 120 MHz`。\n\nTriggering and markers：trigger source internal 或 external；trigger modes auto、retrig、armed auto、armed retrig、single；external trigger input selectable from user 1 or user 2，`BNC female`，input level `0 V to 3 V nominal`，threshold `0.1 V to 2.0 V`，input impedance selectable `1 kΩ` or `50 Ω nominal`，trigger jitter `±1.67 ns`。Marker signals number `1`，operating modes unchanged、restart、pulse、pattern、ratio，level `LVTTL`。\n\nMultisegment waveform mode：segments `1 to 1024`，changeover modes GUI、remote control、external trigger，sequencer play list length max. `1024`，segment repetitions max. `1048575`。\n\nMulticarrier waveform mode：carriers max. `512`；total RF bandwidth standard `60 MHz`，with `K521` `120 MHz`，with `K522` `160 MHz`，with `K523` `240 MHz`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 15,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMCV100B.md"
+         },
+         "score": 5.920637
+        },
+        {
+         "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-8ec180d5f5e4ded7",
+           "original_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "sha256": "8ec180d5f5e4ded7daf73d9a99dc85b471116e2789518fb2949545a4a27543fa",
+           "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+          "section": 612,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 23.883489
+        },
+        {
+         "text": "intermodulation products the device under test produces. ► No previous calibration is needed to measure NPR\nnotch depth up to 50 dB using flat signals over a\nThe R&S®SMW200A vector signal generator equipped 2 GHz bandwidth\nwith R&S®SMW-K61 option can be used to generate a ► The test signal is easy to create and modify\nmulti-carrier c ontinuous wave (MCCW) signal to simulate ► Easy read out of the results on the R&S®FSW analyzer",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-4eedd79b08d7a305",
+           "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+           "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+           "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+          "section": 13,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 23.333577
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/NEC.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Qualcomm.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/entities/R&S SMA100B.md",
+         "raw_refs": [
+          "raw/Productions/SMA100B_specs_en_5215-1018-22_v1000.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Qualcomm.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Taiwan CPE Industry 2024.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S SMCV100B.md",
+         "raw_refs": [
+          "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-4fefd2add5d049f3be4d618e31c2b217",
+      "task_sha256": "02102d58500c7549c41b766af3af6834f2ecf68106e1ade42b55d4784456d06b",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.4.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "needs_input",
+      "retry_budget": 0
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 5,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

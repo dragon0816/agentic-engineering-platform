@@ -1,0 +1,385 @@
+{
+ "question": {
+  "id": "Q0081",
+  "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Oscilloscope?",
+  "market": "Wireless Communication",
+  "product": "Oscilloscope",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-9cff252d80674d65962e6f5ccd5a28dc",
+ "exchange": {
+  "sent": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Oscilloscope?",
+  "http_status": 200,
+  "seconds": 67.625,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9cff252d80674d65962e6f5ccd5a28dc",
+    "actor": "leo.chi",
+    "title": "How do changes in Wi-Fi 7/8 technology affect the measurement capability…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:38:08.993105Z",
+    "updated_at": "2026-10-07T09:39:16.541581Z",
+    "messages": [
+     {
+      "message_id": "message-1afb35611db6409a8d03dbc552f18a95",
+      "role": "user",
+      "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Oscilloscope?",
+      "created_at": "2026-10-07T09:38:09.003111Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-f1d1dfb16e6044c5833097963ce76526",
+      "role": "assistant",
+      "text": "The knowledge base gives **no direct oscilloscope-specific requirement** for Wi‑Fi 7/8, but it does provide raw evidence about the PHY changes that drive tougher measurement needs. Based on that evidence, the oscilloscope impact is mainly: **more analog bandwidth, higher sample rate/memory, lower noise/jitter floor, more channels/synchronization, and stronger time/frequency-domain analysis.**\n\n| Wi‑Fi 7/8 change | Evidence from KB | Impact on oscilloscope capability |\n|---|---|---|\n| **Wider RF/channel bandwidth** | Wi‑Fi 7 increases channel bandwidth to **320 MHz**; Wi‑Fi 8 retains up to **320 MHz**, and wider bandwidths are under discussion. A **480 MHz WLAN waveform** is described as a potential Wi‑Fi 8 candidate. Sources: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, sections 5 and 12; `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests...md`, section 6. | The oscilloscope needs enough **analog bandwidth and sampling rate** to capture wider baseband/IF/RF-related signals without distortion. For direct RF capture, bandwidth requirements rise sharply; for baseband/IQ/debug, the scope still needs wide instantaneous capture bandwidth and deep memory. |\n| **Higher-order modulation: 4096QAM** | Wi‑Fi 7 uses **4096QAM**, and Wi‑Fi 8 retains 4096QAM. Sources: same Wi‑Fi 7 MWC 2024 PR section 5; Wi‑Fi 8 Broadcom PR section 6. | 4096QAM has very tight constellation spacing, so measurement instruments need **low noise, low distortion, high ENOB, stable timebase, and low jitter**. Any oscilloscope noise, phase error, or timing uncertainty can appear as EVM degradation. |\n| **More spatial streams / MIMO** | Wi‑Fi 7 has up to **16 spatial streams**. Source: Wi‑Fi 7 MWC 2024 PR section 5. | Debugging MIMO paths requires **more synchronized acquisition channels** or repeatable multi-instrument synchronization. The scope must compare timing, skew, amplitude, and phase relationships across RF/baseband chains. |\n| **Multi-Link Operation, MLO** | Wi‑Fi 8 retains **Multi-Link Operation** from Wi‑Fi 7. Source: Wi‑Fi 8 Broadcom PR section 6. | Oscilloscope/debug setups need to observe **multiple links or bands simultaneously**, check timing alignment, coexistence behavior, switching, and latency. This pushes channel count, trigger flexibility, and time-correlation capability. |\n| **Wi‑Fi 8 distributed resource units, dRU** | Wi‑Fi 8 uses **distributed resource units** to overcome PSD limits; dRU measurements validate uplink transmit power and reliability. Source: Wi‑Fi 8 Broadcom PR section 7. | Measurement must better correlate **time-domain burst behavior** with **frequency-domain spectral distribution/PSD**. For scopes, this means strong FFT/spectrogram tools, high dynamic range, and enough acquisition memory to capture burst sequences. |\n| **Wi‑Fi 8 unequal modulation, UEQM** | UEQM lets each MIMO link use a different modulation scheme; analysis checks whether specified MCS combinations are applied correctly. Source: Wi‑Fi 8 Broadcom PR section 7. | The scope/debug environment must handle **per-link differences** in modulation and timing. This increases need for multi-channel analysis, correlation with protocol/RF test equipment, and clean capture of each transmit chain. |\n| **Low latency / high throughput applications** | Wi‑Fi 7 targets tens of Gbit/s and low latency for UHD video, VR, and AR. Source: Wi‑Fi 7 MWC 2024 PR section 5. | Oscilloscopes need better **triggering on short, bursty, intermittent events**, protocol-related timing, power sequencing, RF enable timing, and transient impairments. Deep memory and segmented acquisition become more valuable. |\n\nIn practical oscilloscope terms, Wi‑Fi 7/8 pushes requirements toward:\n\n1. **Higher bandwidth and sample rate**  \n   To capture wider 320 MHz and possible 480 MHz-class waveforms, especially at IF/baseband or for RF-envelope/transient debug.\n\n2. **Lower noise and higher vertical resolution / ENOB**  \n   4096QAM makes small amplitude and phase errors significant, so the measurement floor of the scope matters more.\n\n3. **Lower jitter timebase**  \n   Not explicitly stated in the KB, but as a general measurement implication of high-order modulation and high-speed timing, clock jitter directly affects phase accuracy and EVM-like measurements.\n\n4. **More synchronized channels**  \n   MIMO, up to 16 spatial streams, MLO, and UEQM increase the need to compare multiple signal paths at the same time.\n\n5. **Better time/frequency-domain correlation**  \n   dRU, PSD behavior, burst timing, and wideband OFDM signals require FFT, spectrogram, gated measurements, and long acquisitions.\n\n6. **More advanced triggering and memory**  \n   To catch intermittent MLO events, burst timing issues, link switching, power transients, and packet-level anomalies.\n\nSo the short answer is: **Wi‑Fi 7/8 makes the oscilloscope less of a simple time-domain viewer and more of a wideband, low-noise, low-jitter, multi-channel, time-correlated RF/baseband debug instrument.**",
+      "created_at": "2026-10-07T09:39:16.541581Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-757dd4810a4c43c4920edeae5d9b9383",
+       "request_id": "request-757dd4810a4c43c4920edeae5d9b9383",
+       "span_id": "span-757dd4810a4c43c4920edeae5d9b9383",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gives **no direct oscilloscope-specific requirement** for Wi‑Fi 7/8, but it does provide raw evidence about the PHY changes that drive tougher measurement needs. Based on that evidence, the oscilloscope impact is mainly: **more analog bandwidth, higher sample rate/memory, lower noise/jitter floor, more channels/synchronization, and stronger time/frequency-domain analysis.**\n\n| Wi‑Fi 7/8 change | Evidence from KB | Impact on oscilloscope capability |\n|---|---|---|\n| **Wider RF/channel bandwidth** | Wi‑Fi 7 increases channel bandwidth to **320 MHz**; Wi‑Fi 8 retains up to **320 MHz**, and wider bandwidths are under discussion. A **480 MHz WLAN waveform** is described as a potential Wi‑Fi 8 candidate. Sources: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, sections 5 and 12; `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests...md`, section 6. | The oscilloscope needs enough **analog bandwidth and sampling rate** to capture wider baseband/IF/RF-related signals without distortion. For direct RF capture, bandwidth requirements rise sharply; for baseband/IQ/debug, the scope still needs wide instantaneous capture bandwidth and deep memory. |\n| **Higher-order modulation: 4096QAM** | Wi‑Fi 7 uses **4096QAM**, and Wi‑Fi 8 retains 4096QAM. Sources: same Wi‑Fi 7 MWC 2024 PR section 5; Wi‑Fi 8 Broadcom PR section 6. | 4096QAM has very tight constellation spacing, so measurement instruments need **low noise, low distortion, high ENOB, stable timebase, and low jitter**. Any oscilloscope noise, phase error, or timing uncertainty can appear as EVM degradation. |\n| **More spatial streams / MIMO** | Wi‑Fi 7 has up to **16 spatial streams**. Source: Wi‑Fi 7 MWC 2024 PR section 5. | Debugging MIMO paths requires **more synchronized acquisition channels** or repeatable multi-instrument synchronization. The scope must compare timing, skew, amplitude, and phase relationships across RF/baseband chains. |\n| **Multi-Link Operation, MLO** | Wi‑Fi 8 retains **Multi-Link Operation** from Wi‑Fi 7. Source: Wi‑Fi 8 Broadcom PR section 6. | Oscilloscope/debug setups need to observe **multiple links or bands simultaneously**, check timing alignment, coexistence behavior, switching, and latency. This pushes channel count, trigger flexibility, and time-correlation capability. |\n| **Wi‑Fi 8 distributed resource units, dRU** | Wi‑Fi 8 uses **distributed resource units** to overcome PSD limits; dRU measurements validate uplink transmit power and reliability. Source: Wi‑Fi 8 Broadcom PR section 7. | Measurement must better correlate **time-domain burst behavior** with **frequency-domain spectral distribution/PSD**. For scopes, this means strong FFT/spectrogram tools, high dynamic range, and enough acquisition memory to capture burst sequences. |\n| **Wi‑Fi 8 unequal modulation, UEQM** | UEQM lets each MIMO link use a different modulation scheme; analysis checks whether specified MCS combinations are applied correctly. Source: Wi‑Fi 8 Broadcom PR section 7. | The scope/debug environment must handle **per-link differences** in modulation and timing. This increases need for multi-channel analysis, correlation with protocol/RF test equipment, and clean capture of each transmit chain. |\n| **Low latency / high throughput applications** | Wi‑Fi 7 targets tens of Gbit/s and low latency for UHD video, VR, and AR. Source: Wi‑Fi 7 MWC 2024 PR section 5. | Oscilloscopes need better **triggering on short, bursty, intermittent events**, protocol-related timing, power sequencing, RF enable timing, and transient impairments. Deep memory and segmented acquisition become more valuable. |\n\nIn practical oscilloscope terms, Wi‑Fi 7/8 pushes requirements toward:\n\n1. **Higher bandwidth and sample rate**  \n   To capture wider 320 MHz and possible 480 MHz-class waveforms, especially at IF/baseband or for RF-envelope/transient debug.\n\n2. **Lower noise and higher vertical resolution / ENOB**  \n   4096QAM makes small amplitude and phase errors significant, so the measurement floor of the scope matters more.\n\n3. **Lower jitter timebase**  \n   Not explicitly stated in the KB, but as a general measurement implication of high-order modulation and high-speed timing, clock jitter directly affects phase accuracy and EVM-like measurements.\n\n4. **More synchronized channels**  \n   MIMO, up to 16 spatial streams, MLO, and UEQM increase the need to compare multiple signal paths at the same time.\n\n5. **Better time/frequency-domain correlation**  \n   dRU, PSD behavior, burst timing, and wideband OFDM signals require FFT, spectrogram, gated measurements, and long acquisitions.\n\n6. **More advanced triggering and memory**  \n   To catch intermittent MLO events, burst timing issues, link switching, power transients, and packet-level anomalies.\n\nSo the short answer is: **Wi‑Fi 7/8 makes the oscilloscope less of a simple time-domain viewer and more of a wideband, low-noise, low-jitter, multi-channel, time-correlated RF/baseband debug instrument.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-757dd4810a4c43c4920edeae5d9b9383",
+      "request_id": "request-757dd4810a4c43c4920edeae5d9b9383",
+      "span_id": "span-757dd4810a4c43c4920edeae5d9b9383",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-757dd4810a4c43c4920edeae5d9b9383",
+       "request_id": "request-757dd4810a4c43c4920edeae5d9b9383",
+       "span_id": "span-757dd4810a4c43c4920edeae5d9b9383",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gives **no direct oscilloscope-specific requirement** for Wi‑Fi 7/8, but it does provide raw evidence about the PHY changes that drive tougher measurement needs. Based on that evidence, the oscilloscope impact is mainly: **more analog bandwidth, higher sample rate/memory, lower noise/jitter floor, more channels/synchronization, and stronger time/frequency-domain analysis.**\n\n| Wi‑Fi 7/8 change | Evidence from KB | Impact on oscilloscope capability |\n|---|---|---|\n| **Wider RF/channel bandwidth** | Wi‑Fi 7 increases channel bandwidth to **320 MHz**; Wi‑Fi 8 retains up to **320 MHz**, and wider bandwidths are under discussion. A **480 MHz WLAN waveform** is described as a potential Wi‑Fi 8 candidate. Sources: `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, sections 5 and 12; `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests...md`, section 6. | The oscilloscope needs enough **analog bandwidth and sampling rate** to capture wider baseband/IF/RF-related signals without distortion. For direct RF capture, bandwidth requirements rise sharply; for baseband/IQ/debug, the scope still needs wide instantaneous capture bandwidth and deep memory. |\n| **Higher-order modulation: 4096QAM** | Wi‑Fi 7 uses **4096QAM**, and Wi‑Fi 8 retains 4096QAM. Sources: same Wi‑Fi 7 MWC 2024 PR section 5; Wi‑Fi 8 Broadcom PR section 6. | 4096QAM has very tight constellation spacing, so measurement instruments need **low noise, low distortion, high ENOB, stable timebase, and low jitter**. Any oscilloscope noise, phase error, or timing uncertainty can appear as EVM degradation. |\n| **More spatial streams / MIMO** | Wi‑Fi 7 has up to **16 spatial streams**. Source: Wi‑Fi 7 MWC 2024 PR section 5. | Debugging MIMO paths requires **more synchronized acquisition channels** or repeatable multi-instrument synchronization. The scope must compare timing, skew, amplitude, and phase relationships across RF/baseband chains. |\n| **Multi-Link Operation, MLO** | Wi‑Fi 8 retains **Multi-Link Operation** from Wi‑Fi 7. Source: Wi‑Fi 8 Broadcom PR section 6. | Oscilloscope/debug setups need to observe **multiple links or bands simultaneously**, check timing alignment, coexistence behavior, switching, and latency. This pushes channel count, trigger flexibility, and time-correlation capability. |\n| **Wi‑Fi 8 distributed resource units, dRU** | Wi‑Fi 8 uses **distributed resource units** to overcome PSD limits; dRU measurements validate uplink transmit power and reliability. Source: Wi‑Fi 8 Broadcom PR section 7. | Measurement must better correlate **time-domain burst behavior** with **frequency-domain spectral distribution/PSD**. For scopes, this means strong FFT/spectrogram tools, high dynamic range, and enough acquisition memory to capture burst sequences. |\n| **Wi‑Fi 8 unequal modulation, UEQM** | UEQM lets each MIMO link use a different modulation scheme; analysis checks whether specified MCS combinations are applied correctly. Source: Wi‑Fi 8 Broadcom PR section 7. | The scope/debug environment must handle **per-link differences** in modulation and timing. This increases need for multi-channel analysis, correlation with protocol/RF test equipment, and clean capture of each transmit chain. |\n| **Low latency / high throughput applications** | Wi‑Fi 7 targets tens of Gbit/s and low latency for UHD video, VR, and AR. Source: Wi‑Fi 7 MWC 2024 PR section 5. | Oscilloscopes need better **triggering on short, bursty, intermittent events**, protocol-related timing, power sequencing, RF enable timing, and transient impairments. Deep memory and segmented acquisition become more valuable. |\n\nIn practical oscilloscope terms, Wi‑Fi 7/8 pushes requirements toward:\n\n1. **Higher bandwidth and sample rate**  \n   To capture wider 320 MHz and possible 480 MHz-class waveforms, especially at IF/baseband or for RF-envelope/transient debug.\n\n2. **Lower noise and higher vertical resolution / ENOB**  \n   4096QAM makes small amplitude and phase errors significant, so the measurement floor of the scope matters more.\n\n3. **Lower jitter timebase**  \n   Not explicitly stated in the KB, but as a general measurement implication of high-order modulation and high-speed timing, clock jitter directly affects phase accuracy and EVM-like measurements.\n\n4. **More synchronized channels**  \n   MIMO, up to 16 spatial streams, MLO, and UEQM increase the need to compare multiple signal paths at the same time.\n\n5. **Better time/frequency-domain correlation**  \n   dRU, PSD behavior, burst timing, and wideband OFDM signals require FFT, spectrogram, gated measurements, and long acquisitions.\n\n6. **More advanced triggering and memory**  \n   To catch intermittent MLO events, burst timing issues, link switching, power transients, and packet-level anomalies.\n\nSo the short answer is: **Wi‑Fi 7/8 makes the oscilloscope less of a simple time-domain viewer and more of a wideband, low-noise, low-jitter, multi-channel, time-correlated RF/baseband debug instrument.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_02Gp50NggfcEYyD4T21qL3by",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-757dd4810a4c43c4920edeae5d9b9383",
+          "request_id": "request-757dd4810a4c43c4920edeae5d9b9383",
+          "span_id": "span-757dd4810a4c43c4920edeae5d9b9383",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-757dd4810a4c43c4920edeae5d9b9383",
+           "request_id": "request-757dd4810a4c43c4920edeae5d9b9383",
+           "span_id": "span-757dd4810a4c43c4920edeae5d9b9383",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Oscilloscope? Include bandwidth, modulation, MIMO/multilink, time/frequency domain, triggering, jitter/noise/EVM implications, and cite raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "[Wi-Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi-Fi 8\") builds upon the foundation of Wi-Fi 7, retaining core physical layer parameters like supported frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz and 4096QAM modulation, as well as Multi-Link-Operation (MLO). However, to achieve its UHR goals, IEEE 802.11bn introduces a suite of innovative PHY and MAC layer technologies that present new testing hurdles. At MWC 2026, visitors can experience how to address key testing challenges associated with Wi-Fi 8 with the enhanced testing capabilities of the CMX500 one-box signaling tester, one of the most versatile mobile device test platforms in the market, which supports many of the demanding features of Wi-Fi 7 and Wi-Fi 8 today.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.44896
+            },
+            {
+             "text": "While the market for the sixth generation of Wi-Fi, IEEE 802.11ax, is still growing, the development of Wi-Fi 7, or IEEE 802.11be, is in full swing. Wi-Fi 7 is the next generation of Wi-Fi technology, designed for extremely high data throughput. With tens of gigabits of data per second and low latency, it meets the growing demand for ultra-high-definition video streaming, virtual reality and augmented reality applications. Key elements to achieve higher throughput are an increased channel bandwidth of 320 MHz, up to 16 spatial streams and 4096 QAM modulation. In addition, for a yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard, even wider channel bandwidths are in discussion. Rohde & Schwarz meets these challenging characteristics with its solutions for testing Wi-Fi 7 and beyond, showcased at MWC Barcelona.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.749454
+            },
+            {
+             "text": "SSBs are used by the UE to aquire time and frequency synchronization with the cell, to detect the Cell ID and to\nreceive necessary system information for initial access.\nThe time and frequency structure of SSBs is described in TS 38.211, ch. 7.4.3.1, from which it follows that every\nSSB occupies four consecutive symbols in the time domain and 20 resource blocks in the frequency domain.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-cd6cc76c6a11d7df",
+               "original_ref": "raw/Knowledge/SSB (NR).md",
+               "sha256": "cd6cc76c6a11d7df3672b67fed33144d2d53e2fc0f77ae89e88437213afcc67b",
+               "raw_ref": "raw/Knowledge/SSB (NR).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/SSB (NR).md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.83344
+            },
+            {
+             "text": "- [[IEEE 802.11bn]]\n- [[Wi-Fi 8 RF signaling tests]]\n- [[Wi-Fi 8 外部資料清單]]\n- [[UHR]]\n- [[distributed resource units]]\n- [[unequal modulation]]\n- [[Wi-Fi 7]]\n- [[IEEE 802.11be]]\n- [[MLO]]\n- [[MIMO]]\n- [[R&S CMX500]]\n- [[R&S CMP180]]\n- [[Wi-Fi 7 R&D and production testing]]\n- [[Broadcom]]\n- [[MediaTek]]\n- [[ASUS]]\n- [[Filogic 8000]]\n- [[CES 2026]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 36.228964
+            },
+            {
+             "text": "- [[Wi-Fi 8]]\n- [[IEEE 802.11bn]]\n- [[UHR]]\n- [[distributed resource units]]\n- [[unequal modulation]]\n- [[MLO]]\n- [[R&S CMX500]]\n- [[Broadcom]]\n- [[MWC Barcelona 2026]]\n- [[Wi-Fi 7 OTA MIMO stress testing]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+             },
+             "score": 35.864517
+            },
+            {
+             "text": "For example, Wi-Fi 8 uses distributed resource units (dRU) to overcome power spectral density (PSD) limits. With dRU measurements users can validate their device’s effectiveness in boosting uplink transmit power and improving connection reliability. Another technology is unequal modulation (UEQM), where throughput is improved in difficult reception scenarios by allowing each MIMO link to use a different modulation scheme. With UEQM analysis, users can assess the ability of the test device to adapt the modulation in the correct way, using the specified modulation of coding scheme (MCS) combinations. With comprehensive signaling mode tests, covering a broad range of Wi-Fi 8 features, users can perform in-depth analysis of performance characteristics.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.973292
+            },
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.81494
+            },
+            {
+             "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.749702
+            }
+           ],
+           "text": "| Area | Measurement capability implication supported by RAW evidence |\n|---|---|\n| Bandwidth / frequency coverage | Wi-Fi 7 increases channel bandwidth to 320 MHz, and Wi-Fi 8 retains channel bandwidths up to 320 MHz while possible wider Wi-Fi 8 bandwidths are being discussed [1][2]. A 480 MHz WLAN waveform is described as a potential Wi-Fi 8 candidate, and test equipment is described supporting up to 500 MHz bandwidth and up to 8 GHz frequency coverage [8]. |\n| Modulation | Measurement must handle 4096QAM, since Wi-Fi 7 uses 4096QAM and Wi-Fi 8 retains 4096QAM as a core PHY parameter [1][2]. |\n| MIMO / multilink | Measurement must address up to 16 spatial streams for Wi-Fi 7 and Multi-Link Operation retained in Wi-Fi 8 [1][2]. Wi-Fi 8 also introduces unequal modulation, where each MIMO link can use a different modulation scheme, requiring analysis of whether the device applies the specified MCS combinations correctly [6]. |\n| Time / frequency domain | RAW evidence supports frequency-domain-related requirements through channel bandwidth, operating frequencies up to 7.125 GHz, PSD-related distributed resource unit measurements, and validation of 480 MHz WLAN waveforms [1][6][8]. The RAW passages do not provide Wi-Fi-specific oscilloscope requirements for time-domain analysis. |\n| Jitter / noise / EVM implications | No RAW passage mentions jitter, noise, or EVM; the closest supported implication is that 4096QAM, UEQM, dRU, MIMO, MLO, and wider bandwidths create new or challenging testing hurdles for Wi-Fi 7/8 measurements [1][2][6].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "[Wi-Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi-Fi 8\") builds upon the foundation of Wi-Fi 7, retaining core physical layer parameters like supported frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz and 4096QAM modulation, as well as Multi-Link-Operation (MLO). However, to achieve its UHR goals, IEEE 802.11bn introduces a suite of innovative PHY and MAC layer technologies that present new testing hurdles. At MWC 2026, visitors can experience how to address key testing challenges associated with Wi-Fi 8 with the enhanced testing capabilities of the CMX500 one-box signaling tester, one of the most versatile mobile device test platforms in the market, which supports many of the demanding features of Wi-Fi 7 and Wi-Fi 8 today.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.44896
+           },
+           {
+            "text": "While the market for the sixth generation of Wi-Fi, IEEE 802.11ax, is still growing, the development of Wi-Fi 7, or IEEE 802.11be, is in full swing. Wi-Fi 7 is the next generation of Wi-Fi technology, designed for extremely high data throughput. With tens of gigabits of data per second and low latency, it meets the growing demand for ultra-high-definition video streaming, virtual reality and augmented reality applications. Key elements to achieve higher throughput are an increased channel bandwidth of 320 MHz, up to 16 spatial streams and 4096 QAM modulation. In addition, for a yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard, even wider channel bandwidths are in discussion. Rohde & Schwarz meets these challenging characteristics with its solutions for testing Wi-Fi 7 and beyond, showcased at MWC Barcelona.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.749454
+           },
+           {
+            "text": "For example, Wi-Fi 8 uses distributed resource units (dRU) to overcome power spectral density (PSD) limits. With dRU measurements users can validate their device’s effectiveness in boosting uplink transmit power and improving connection reliability. Another technology is unequal modulation (UEQM), where throughput is improved in difficult reception scenarios by allowing each MIMO link to use a different modulation scheme. With UEQM analysis, users can assess the ability of the test device to adapt the modulation in the correct way, using the specified modulation of coding scheme (MCS) combinations. With comprehensive signaling mode tests, covering a broad range of Wi-Fi 8 features, users can perform in-depth analysis of performance characteristics.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.973292
+           },
+           {
+            "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.749702
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

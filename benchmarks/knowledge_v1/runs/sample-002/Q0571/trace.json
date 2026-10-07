@@ -1,0 +1,731 @@
+{
+ "question": {
+  "id": "Q0571",
+  "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "market": "Automotive",
+  "product": "Vector Network Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-7f48ffc496184f11908fcc9f91cf7dcb",
+ "exchange": {
+  "sent": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "http_status": 200,
+  "seconds": 92.906,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-7f48ffc496184f11908fcc9f91cf7dcb",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Automotive market requirement to a measurable param…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:11:27.825878Z",
+    "updated_at": "2026-10-07T10:13:00.605036Z",
+    "messages": [
+     {
+      "message_id": "message-47db800184f440c294aa1b177ff858ed",
+      "role": "user",
+      "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+      "created_at": "2026-10-07T10:11:27.837438Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-494b7d556a8948c380c58993766468cb",
+      "role": "assistant",
+      "text": "| Chain step | Supported content | Evidence |\n|---|---|---|\n| Automotive market requirement | Automotive requirement shown is to provide a robust and dependable NG eCall solution that meets the latest eCall standards. | [5] |\n| Measurable parameter | The VNA specifications in the passages provide measurable parameters such as frequency range and connector type; for example, R&S ZNL20 has VNA frequency range 5 kHz to 20 GHz with 3.5 mm male test-port connectors. | [4] |\n| Required VNA capability | A VNA capability supported by the passages is frequency coverage and port/connector compatibility, such as the R&S ZNL20 being a 20 GHz 2-port Vector Network Analyzer. | [1][4] |\n【推論】If the Automotive requirement is translated into RF/network-component verification, the measurable parameter that can be mapped from the available VNA evidence is frequency range, and the required VNA capability would be to cover the relevant test frequency with the proper test-port connector; however, no passage directly connects NG eCall automotive requirements to a specific VNA measurement parameter or required VNA model. [4][5]\n\n來源：\n[1] Wiki：R&S ZNL20（來源：`ZNL_specs_en_3607-1071-22_v1000.md`）\n[4] Wiki：R&S ZNL20（來源：`ZNL_specs_en_3607-1071-22_v1000.md`）\n[5] Wiki：Juergen Meyer（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-07T10:13:00.605036Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-5ca59417a84b40cd8f04a3714e75897a",
+       "request_id": "request-5ca59417a84b40cd8f04a3714e75897a",
+       "span_id": "span-5ca59417a84b40cd8f04a3714e75897a",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "| Chain step | Supported content | Evidence |\n|---|---|---|\n| Automotive market requirement | Automotive requirement shown is to provide a robust and dependable NG eCall solution that meets the latest eCall standards. | [5] |\n| Measurable parameter | The VNA specifications in the passages provide measurable parameters such as frequency range and connector type; for example, R&S ZNL20 has VNA frequency range 5 kHz to 20 GHz with 3.5 mm male test-port connectors. | [4] |\n| Required VNA capability | A VNA capability supported by the passages is frequency coverage and port/connector compatibility, such as the R&S ZNL20 being a 20 GHz 2-port Vector Network Analyzer. | [1][4] |\n【推論】If the Automotive requirement is translated into RF/network-component verification, the measurable parameter that can be mapped from the available VNA evidence is frequency range, and the required VNA capability would be to cover the relevant test frequency with the proper test-port connector; however, no passage directly connects NG eCall automotive requirements to a specific VNA measurement parameter or required VNA model. [4][5]\n\n來源：\n[1] Wiki：R&S ZNL20（來源：`ZNL_specs_en_3607-1071-22_v1000.md`）\n[4] Wiki：R&S ZNL20（來源：`ZNL_specs_en_3607-1071-22_v1000.md`）\n[5] Wiki：Juergen Meyer（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-5ca59417a84b40cd8f04a3714e75897a",
+      "request_id": "request-5ca59417a84b40cd8f04a3714e75897a",
+      "span_id": "span-5ca59417a84b40cd8f04a3714e75897a",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-5ca59417a84b40cd8f04a3714e75897a",
+       "request_id": "request-5ca59417a84b40cd8f04a3714e75897a",
+       "span_id": "span-5ca59417a84b40cd8f04a3714e75897a",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-5ca59417a84b40cd8f04a3714e75897a",
+        "request_id": "request-5ca59417a84b40cd8f04a3714e75897a",
+        "span_id": "span-5ca59417a84b40cd8f04a3714e75897a",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S ZNL20 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL20 | Vector network analyzer，20 GHz，3.5 mm connectors | 1323.0012.20 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL20.md"
+          },
+          "score": 4.984545
+         },
+         {
+          "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 1.34812
+         },
+         {
+          "text": "VIAVI O-RU Tester › 不可推論的內容\n- 來源未提供 VIAVI O-RU Tester 或 VIAVI TM500 O-RU Tester 的正式產品名稱、料號、software release、supported O-RAN WG4 spec versions、license 或 interface option。\n- 來源未提供 VIAVI 官方 datasheet / application note；不可由 R&S 簡報推論 VIAVI product roadmap、formal specification 或 market share。\n- 來源未提供 T-BC、FTN、PTP-GM、O-RU TMA、interconnection unit、TMA / TM500 software library 的具體版本與 timing architecture。\n- March 2025 來源中的 price point、competitor comparison、test case counts 與 VAR commercial terms 屬 internal / market context，需依正式 quote、contract、software release notes 與 public material 補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+          },
+          "score": 2.580616
+         },
+         {
+          "text": "R&S ZNL20\n[[R&S ZNL20]] 是 [[R&S ZNL]] 系列的 20 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 20 GHz，test port connector 為 3.5 mm, male；加裝 [[R&S ZNL20-B1]] 時 spectrum analysis frequency range 為 5 kHz to 26.5 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL20.md"
+          },
+          "score": 4.856852
+         },
+         {
+          "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 0.828798
+         },
+         {
+          "text": "NEC › unresolved\n- 需要擷取 NEC Technical Journal 文章正文以確認日期、技術範圍、圖表與可引用主張。\n- 需要判定該文章應歸入 [[Knowledge]] 技術背景、[[Productions]] 產品 / 模組資料，或 [[Market]] 市場線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/NEC.md"
+          },
+          "score": 1.154311
+         },
+         {
+          "text": "R&S ZNL20 › 文件與適用條件\n- 相關來源：[[ZNL_specs_en_3607-1071-22_v1000]]。\n- 文件：R&S®ZNL Vector Network Analyzer，PD 3607.1071.22，Version 10.00，September 2025。\n- Product data 適用條件：ambient temperature 下存放 3 小時後 warm-up operation 30 分鐘；符合 specified environmental conditions；遵守 recommended calibration interval；已執行所有 applicable internal automatic adjustments。\n- Recommended calibration interval：1 year。\n- Data without tolerance limits is not binding；內容 subject to change。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL20.md"
+          },
+          "score": 3.944176
+         },
+         {
+          "text": "Tim Seyler\n[[Tim Seyler]] 是 [[Rohde & Schwarz]] 相關 customer questionnaire 與 configuration guide 中列出的 contact；[[cmx500_ntn_customer_questionnaire]] 明示其 email 為 `tim.seyler@rohde-schwarz.com`，角色為 Product Manager Mobile Radio Testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.293874
+         },
+         {
+          "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qualcomm.md"
+          },
+          "score": 0.408989
+         },
+         {
+          "text": "R&S ZNL3\n[[R&S ZNL3]] 是 [[R&S ZNL]] 系列的 3 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 3 GHz，test port connector 為 N, female。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL3.md"
+          },
+          "score": 4.715877
+         },
+         {
+          "text": "Tim Seyler › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 未提供 [[Tim Seyler]] 的職稱或部門。\n- [[cmx500_ntn_customer_questionnaire]] 提供 Product Manager Mobile Radio Testing 角色，但未提供組織層級、所在地、職責範圍或是否為該 solution 的唯一負責人。\n- [[CMX_Configuration_Guide_Audio-Testing]] 只列 contact person，未提供 contact scope、approval authority 或是否為 audio testing configuration 的 owner。\n- [[CMX_Configuration_Guide_LTE-DTC]] 只列 contact person，未提供 contact scope、approval authority 或是否為 LTE-DTC configuration 的 owner。\n- 不能只因其被列為 contact，就推論其為 sales owner、technical owner 或所有相關產品的 product owner。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.278979
+         },
+         {
+          "text": "R&S ZNL3 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL3 | Vector network analyzer，3 GHz，N connectors | 1323.0012.03 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL3.md"
+          },
+          "score": 4.518504
+         },
+         {
+          "text": "Tim Seyler › 與相關主題的關係\n- 在 [[AIW_Products_Customer_Questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S AI Workplace Solutions]] customer questionnaire 的 contact 出現。\n- 在 [[cmx500_ntn_customer_questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S NTN signaling solutions]] customer questionnaire 的 contact 出現，並被標示為 Product Manager Mobile Radio Testing。\n- 在 [[CMX_Configuration_Guide_Audio-Testing]] 中，[[Tim Seyler]] 是 [[CMX500 Audio Testing configuration]] 的 contact person；來源未提供 email、職稱或 team。\n- 在 [[CMX_Configuration_Guide_LTE-DTC]] 中，[[Tim Seyler]] 是 [[CMX500 LTE-DTC configuration]] 的 contact person；來源未提供 email、職稱或 team。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Tim Seyler.md"
+          },
+          "score": 0.277548
+         },
+         {
+          "text": "R&S ZNL3 › 文件與適用條件\n- 相關來源：[[ZNL_specs_en_3607-1071-22_v1000]]。\n- 文件：R&S®ZNL Vector Network Analyzer，PD 3607.1071.22，Version 10.00，September 2025。\n- Product data 適用條件：ambient temperature 下存放 3 小時後 warm-up operation 30 分鐘；符合 specified environmental conditions；遵守 recommended calibration interval；已執行所有 applicable internal automatic adjustments。\n- Recommended calibration interval：1 year。\n- Data without tolerance limits is not binding；內容 subject to change。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL3.md"
+          },
+          "score": 3.480725
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- 來源更新 [[R&S portfolio for O-RU testing]]（August 2023）的 O-RU testing portfolio 視角，將重點放在 2025 年的 [[O-RU tester market and funding]]、[[R&S PVT360A O-RU testing]]、[[O-RU NES testing]]、[[VIAVI O-RU Tester]] / [[VIAVI TM500]] integration、competitor positioning 與 NTIA funding opportunities。\n- Slide 2 說 O-RU tester 客戶範圍包含 traditional TOP3 RAN vendors：[[Ericsson]]、[[Nokia]]、[[Samsung]]；O-RAN market entrants：[[Kyocera]]、[[Mavenir]]、[[Tejas]]、[[Fujitsu]]、[[NEC]]、[[ADI]]、[[Qualcomm]]、[[Battelle]]；以及 testing budget limited 的 [[Phy-tunes]]、[[GXC]]、[[Eridian]]、[[University of Georgia]]，與 DAS companies：[[Amphenol]] / Andrew、[[SOLiD]]、[[Samji]]、[[HFR]]。\n- Slide 2 說 US government 透過 [[NTIA NOFO2]] / SRFA#1 funding program 資助 O-RU commercialization；來源描述 2 years project、targeting commercially available Jan 2027、O-RU conformance testing ongoing、field testing starts 1HCY2026、mass-production EoY CY26 / BoY CY27。\n- Slide 3 把 [[Open RAN]] ecosystem 分為 traditional infrastructure providers、radio subsystem manufacturers、chipset / reference designers、industry organizations、test labs、test equipment manufacturers、network operators 與 government funding。\n- Slide 4 將 key test focus areas 從 R&D 到 field testing 分為 RF design / verification / integration、power management、digital design、production testing、regression、operator test、beamforming / Massive MIMO、fronthaul conformance、timing / sync / signal integrity、OTA、QoS / QoE、3GPP compliance、interoperability、end-to-end、functional / baseline testing、network benchmarking、site testing / troubleshooting 與 network synchronization。\n- Slide 5 列出 O-RU testing general instrumentation：[[R&S NGP800]]、[[R&S NGT3600]]、[[R&S OSP200]] / [[R&S OSP300]]、[[R&S RTO]] / [[R&S RTP]]，並標示 Q2CY2025。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 2.005827
+         },
+         {
+          "text": "R&S ZNL6 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL6 | Vector network analyzer，6 GHz，N connectors | 1323.0012.06 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL6.md"
+          },
+          "score": 4.640299
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 與既有知識的關係\n- 相較 [[R&S portfolio for O-RU testing]]（August 2023），本來源是 2025-03 的 short version，新增 O-RU tester market / funding、PVT360A cost-optimized positioning、NES / EE、M-MIMO with BFM、competitor positioning、VIAVI VAR agreement 與 NTIA funded labs 資訊。\n- 補強 [[O-RU testing]]：既有頁面已整理 August 2023 的 O-RAN WG4 / 3GPP / VIAVI + R&S solution；本來源新增 2025 年 portfolio segmentation、PVT360A 與 VSA/VSG 兩種 offer path、production / regression / certification 的定位差異。\n- 補強 [[Network energy saving]]：既有頁面由 [[MWC2025---WIC-INFRA]] 建立 network energy saving 概念；本來源把 NES 具體連到 O-RU、ETSI traffic models、RTO6、NGP / NGT、VIAVI TM500 O-RU Tester、ADI Titan demo 與 up to 40% energy savings claim。\n- 補強 [[VIAVI O-RU Tester]]：既有頁面只由 August 2023 portfolio 支撐；本來源新增 PVT360A setup、VSA/VSG setup、TM500 O-RU Tester、O-DU emulator、TMA、VAR agreement 與 lab adoption 線索。\n- 補強 [[O-RAN WG4 Conformance Testing]]：本來源提到 `O-RAN.WG4.CONF.0-R003-v09.00` target release Q2CY25，與既有 `ORAN-WG4.CONF-v06.00` 形成版本演進線索，但不是同一正式文件全文。\n- 補強 [[R&S PVT360A]]：本來源是 Market / sales deck，不能覆蓋 [[PVT360A_Features_V8-5-30_en_06]] 的 Productions 規格；PVT360A 的 O-RU testing positioning 另建 [[R&S PVT360A O-RU testing]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 1.77449
+         },
+         {
+          "text": "R&S ZNL6 › 讀圖補充\n- [[ZNL_specs_en_3607-1071-22_v1000]]（讀圖 p001）可見封面產品照片機身標示 ZNL6、Vector Network Analyzer、10 kHz to 3 GHz；此內容低於正文可信度，且與正文與 ordering information 的 5 kHz to 6 GHz 不一致。本頁不以讀圖內容改寫 frequency range。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL6.md"
+          },
+          "score": 3.86851
+         },
+         {
+          "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- Slide 12 說 [[Analog Devices]] 的 energy-efficient [[ADI Titan O-RU platform]] enabled by [[ADRV906x]] Radio Unit SoC 在 MWC25 與 [[Rohde & Schwarz]]、[[Viavi Solutions]] 共同展示 energy efficiency；透過 Microsleep DTx during low traffic loads 可達 up to 40% energy savings。\n- Slide 13 說 R&S 與 ADI 已合作 over one year，NES test system 用於 ADI Kerberos 與 Titan reference design，並提到 Titan 是 more integrated design，使用 Samana transceiver 與 Low-Phy protocol on same Samana chip。\n- Slide 17–20 是 competitor / battle-card 型內容：主要競品為 [[Keysight]]、[[LitePoint]]、[[Anritsu]]；Keysight 被描述為 O-RU testing market majority，且 Keysight Time Sync Analyzer、MTRX、O-DU emulator 等硬體需求被列出；VIAVI / R&S 與 Keysight 在 price point、test coverage、M-MIMO / BFM、functional test、TCO 與 reusability 上被比較。\n- Slide 21 說 [[VIAVI VAR Agreement]] / R&S GPPA 允許 Viavi worldwide sell R&S products，產品包含 signal generators、spectrum analyzers、[[R&S VSE]]、[[R&S PVT360A]]、[[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]] / [[R&S MXO4]]、[[R&S OSP200]] / [[R&S OSP300]]，target markets 為 O-RAN、NTN 與 6G。\n- Slide 23、25、26 保存 NTIA / Public Wireless Supply Chain Innovation Fund funding history、NOFO1 / NOFO2 winners、ORCID / ACCoRD / VALOR labs 與 R&S received / quoted orders 的 market / sales 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+          },
+          "score": 1.488903
+         },
+         {
+          "text": "R&S ZNL6 › 文件與適用條件\n- 相關來源：[[ZNL_specs_en_3607-1071-22_v1000]]。\n- 文件：R&S®ZNL Vector Network Analyzer，PD 3607.1071.22，Version 10.00，September 2025。\n- Product data 適用條件：ambient temperature 下存放 3 小時後 warm-up operation 30 分鐘；符合 specified environmental conditions；遵守 recommended calibration interval；已執行所有 applicable internal automatic adjustments。\n- Recommended calibration interval：1 year。\n- Data without tolerance limits is not binding；內容 subject to change。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNL6.md"
+          },
+          "score": 3.680716
+         },
+         {
+          "text": "Christian Dobmeier\n[[Christian Dobmeier]] 是 [[Rohde & Schwarz]] 的 Director of Product Group CMX500；目前本頁只由 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 支撐。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.366239
+         },
+         {
+          "text": "R&S ZNA67EXT › 系統構成與適用條件\n依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]]，[[R&S ZNA67EXT]] system consists of one [[R&S ZNA67]] vector network analyzer and up to four external test sets。\n\n來源明確限制：規格只適用於作為 **1.0 mm vector network analyzer system** 操作，且 system configuration 必須與 [[R&S ZNA67]] rear panel designation scheme 中的 type、serial numbers 及正確 port position 完全一致。\n\nProduct data 適用條件：\n\n- Three hours of storage at ambient temperature followed by 90 minutes of warm-up operation。\n- Specified environmental conditions met。\n- Recommended calibration interval adhered to。\n- All internal automatic adjustments performed, if applicable。\n\n資料定義依來源：specifications with limits 表示 warranted product performance；typical data、nominal values、measured values 與 non-traceable specifications with limits 不由 Rohde & Schwarz 保證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 10.733434
+         },
+         {
+          "text": "Christian Dobmeier › 來源中的角色\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Christian Dobmeier]] 以 Director of Product Group CMX500 at [[Rohde & Schwarz]] 身分發言。\n\n其發言重點包含：\n\n- [[Rohde & Schwarz]] 與 [[Gatehouse Satcom]] 合作，以 accelerate validation methodologies for [[5G NTN]] technologies。\n- 發言中明示包含 [[GEO]]、[[MEO]] 與 [[LEO]] satellite services。\n- 當 satellite sector converges on standardized, [[3GPP]] based solutions 時，software innovators 與 test equipment specialists 的 close collaboration 很重要。\n- 此 partnership 不只 strengthens tools and insights for today’s [[5G NTN]] rollout，也 lays a solid foundation for future [[6G NTN testing and validation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Christian Dobmeier.md"
+          },
+          "score": 0.286455
+         },
+         {
+          "text": "R&S ZNA67EXT › General data\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Operating temperature range | in line with IEC 60068-2-1 and IEC 60068-2-2 | +18 °C to +28 °C |\n| Permissible temperature range | same | +5 °C to +40 °C |\n| Storage temperature range | same | –40 °C to +70 °C |\n| Damp heat | in line with IEC 60068-2-30 | +40 °C at 85 % rel. humidity |\n| Maximum operating altitude | above sea level | 4600 m (approx. 15100 feet) |\n| Vibration, sinusoidal | in line with IEC 60068-2-6 | 5 Hz to 55 Hz, 0.15 mm constant amplitude；55 Hz to 150 Hz, 0.5 g constant |\n| Vibration, random | in line with IEC 60068-2-64 | 8 Hz to 500 Hz, acceleration: 1.2 g (RMS) |\n| Shock | in line with MIL-STD-810E, method no. 516.4, procedure I | 40 g shock spectrum |\n| EMC RF emission | industrial environment | CISPR 11/EN 55011 group 1 class A；EN 55011 and EN 61326-1 class A |\n| EMC immunity | industrial environment | EMC Directive 2014/30/EU including IEC/EN 61326-1, IEC/EN 61326-2-1, IEC/EN 61000-3-2, IEC/EN 61000-3-3 |\n| Safety | 來源列出標準 | IEC 61010-1, EN 61010-1, UL 61010-1, CSA C22.2 61010-1 |\n| Power supply | R&S®ZNA67 | 100 V to 240 V at 50 Hz to 60 Hz and 400 Hz, max. 7.3 A to 4.6 A respectively |\n| Power supply | each external test set consisting of R&S®ZVA-Z110D | power adapter, 100 V to 240 V AC ±10 %, 50 Hz to 60 Hz ±5 %, safety class II；output 9 V, max. 1.1 A DC；output connector DIN 45323 |\n| Power consumption | R&S®ZNA67 | ≤ 550 W (spec.), 350 W (typ.) |\n| Power consumption | each external test set consisting of R&S®ZVA-Z110D | 10 W, 7 W (typ.) |\n| Dimensions | R&S®ZNA67, W × H × D | EIA RU: 6；461.4 mm × 284.6 mm × 462.1 mm (18.2 in × 11.2 in × 18.2 in) |\n| Dimensions | each external test set consisting of R&S®ZVA-Z110D, W × H × D | 463 mm × 66 mm × 100 mm (18.2 in × 2.6 in × 3.9 in) |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 9.56922
+         },
+         {
+          "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-7e1162da3b81e67d",
+            "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+            "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+            "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+           "section": 23,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 31.556191
+         },
+         {
+          "text": "Overview\nThe R&S®ZNA67EXT is a 1.0 mm vector network analyzer system, covering the frequency range from 10 MHz to 110 GHz.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-7e1162da3b81e67d",
+            "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+            "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+            "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+           "section": 22,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 27.879503
+         },
+         {
+          "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-eca8f030d797ca58",
+            "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+            "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+            "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+           "section": 596,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 25.906238
+         },
+         {
+          "text": "When a MUSIM device is in RRC_CONNECTED state in both Network A and Network B, if Network B is NR, it is up to UE\nimplementation to select which network to request temporary UE capability restriction. If Network B is E-UTRA, the request for\ntemporary UE capability restriction can only be performed on Network A.\n UAI based signalling is also used for proactive reporting of temporary UE capability restriction.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-3644ea3f78081694",
+            "original_ref": "raw/Knowledge/Dual Sim Dual Active.md",
+            "sha256": "3644ea3f78081694ce65201d83461dec6beb23b992839ff4332a0925817b7103",
+            "raw_ref": "raw/Knowledge/Dual Sim Dual Active.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Knowledge/Dual Sim Dual Active.md",
+           "section": 167,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 24.034954
+         }
+        ],
+        "text": "| Chain step | Supported content | Evidence |\n|---|---|---|\n| Automotive market requirement | Automotive requirement shown is to provide a robust and dependable NG eCall solution that meets the latest eCall standards. | [5] |\n| Measurable parameter | The VNA specifications in the passages provide measurable parameters such as frequency range and connector type; for example, R&S ZNL20 has VNA frequency range 5 kHz to 20 GHz with 3.5 mm male test-port connectors. | [4] |\n| Required VNA capability | A VNA capability supported by the passages is frequency coverage and port/connector compatibility, such as the R&S ZNL20 being a 20 GHz 2-port Vector Network Analyzer. | [1][4] |\n【推論】If the Automotive requirement is translated into RF/network-component verification, the measurable parameter that can be mapped from the available VNA evidence is frequency range, and the required VNA capability would be to cover the relevant test frequency with the proper test-port connector; however, no passage directly connects NG eCall automotive requirements to a specific VNA measurement parameter or required VNA model. [4][5]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "R&S ZNL20 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL20 | Vector network analyzer，20 GHz，3.5 mm connectors | 1323.0012.20 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNL20.md"
+         },
+         "score": 4.984545
+        },
+        {
+         "text": "R&S ZNL20\n[[R&S ZNL20]] 是 [[R&S ZNL]] 系列的 20 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 20 GHz，test port connector 為 3.5 mm, male；加裝 [[R&S ZNL20-B1]] 時 spectrum analysis frequency range 為 5 kHz to 26.5 GHz。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNL20.md"
+         },
+         "score": 4.856852
+        },
+        {
+         "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Juergen Meyer.md"
+         },
+         "score": 0.828798
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/NEC.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Qualcomm.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/entities/R&S ZNL20.md",
+         "raw_refs": [
+          "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Juergen Meyer.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-0c466daa296d4e8080331d4a02286946",
+      "task_sha256": "0c74b2ae1813e233a56b4557f7fd9390444a53baaf348fe0e7d546c20c674c54",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.4.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "needs_input",
+      "retry_budget": 0
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 3,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

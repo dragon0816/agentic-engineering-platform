@@ -1,0 +1,57 @@
+{
+ "id": "Q1071",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 48.438,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Knowledge/PRS (NR).md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "measurement method means the specific technical approach used to obtain a measurement result",
+   "it includes the signal or reference used, configuration assumptions, bandwidth/numerology, calibration state, automation interface, and processing algorithm",
+   "Understanding the measurement method helps decide which interface better supports the needed workflow",
+   "product capability and setup decisions depend on whether the required measurement method uses DMRS/pilots or some other reference",
+   "measurement method is the “how” of the measurement"
+  ],
+  "reason": "The cited passages support the isolated facts about XLAPI/SCPI, DMRS-based phase measurement, and PRS being bound to numerology, but they do not define “measurement method” or establish that scripting-interface choice depends on understanding it. The answer is partly caveated, but it still presents unsupported extrapolations as product-related decisions driven by measurement method.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support the isolated facts about XLAPI/SCPI, DMRS-based phase measurement, and PRS being bound to numerology, but they do not define “measurement method” or establish that scripting-interface choice depends on understanding it. The answer is partly caveated, but it still presents "
+}

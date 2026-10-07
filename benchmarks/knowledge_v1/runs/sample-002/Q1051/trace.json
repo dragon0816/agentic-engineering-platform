@@ -1,0 +1,400 @@
+{
+ "question": {
+  "id": "Q1051",
+  "text": "What is PCIe, and which product-related measurement decisions depend on understanding it?",
+  "technical": "High-Speed / Signal Integrity",
+  "topic": "PCIe",
+  "product_related": "true"
+ },
+ "session_id": "conversation-60610b2534254d4599ca892947b3c7d9",
+ "exchange": {
+  "sent": "What is PCIe, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 69.734,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-60610b2534254d4599ca892947b3c7d9",
+    "actor": "leo.chi",
+    "title": "What is PCIe, and which product-related measurement decisions depend on …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:48:33.698671Z",
+    "updated_at": "2026-10-07T10:49:39.684017Z",
+    "messages": [
+     {
+      "message_id": "message-5d4c9f7a538f4e0690683276780642c0",
+      "role": "user",
+      "text": "What is PCIe, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T10:48:33.723240Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-b5e5c59b60d147cba5e2f8e817a7ac5d",
+      "role": "assistant",
+      "text": "The knowledge base gave no direct answer defining PCIe or tying PCIe-specific measurements to R&S products. It only returned related evidence about signal integrity, software/options, ordering guidance, and interface choices.\n\n**Not from the knowledge base:** PCIe, or **Peripheral Component Interconnect Express**, is a high-speed serial computer interface used to connect processors, chipsets, GPUs, SSDs, network cards, AI accelerators, and other high-bandwidth devices. Modern PCIe generations use very high data rates, differential signaling, embedded clocking, equalization, link training, and strict transmitter/receiver compliance requirements. Because the margin is small, PCIe is fundamentally a **signal-integrity measurement problem** as much as a digital-protocol problem.\n\nProduct-related measurement decisions that depend on understanding PCIe include:\n\n1. **Oscilloscope bandwidth and performance**\n   - You need enough bandwidth, sample rate, noise performance, and jitter analysis capability for the PCIe generation under test.\n   - Higher PCIe generations require more demanding eye, jitter, and transmitter measurements.\n\n2. **Compliance test software/options**\n   - PCIe testing usually requires generation-specific compliance automation, masks, presets, equalization handling, and report generation.\n   - The knowledge base has a related example that some R&S test cases require specific software options, e.g. 5G NR Rx tests needing the SMW200A/SMBV100B-K144 option, showing that product configuration depends on the test standard and use case. [raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md, section 16]\n\n3. **Signal-integrity measurement focus**\n   - PCIe decisions involve jitter, eye opening, insertion loss, return loss, crosstalk, de-embedding, equalization, and channel loss.\n   - The knowledge base supports the broader point that R&S measurement work may focus on “signal integrity” optimization, though in the cited case it is for 3GPP/mmWave rather than PCIe. [raw/Market/OneNote/R&S for JIO Project.md, section 25]\n\n4. **VNA vs. oscilloscope choice**\n   - For PCIe interconnects, a VNA is often used for S-parameters, channel loss, return loss, impedance discontinuities, and fixture characterization.\n   - An oscilloscope is used for time-domain transmitter compliance, eye diagrams, jitter, and waveform analysis.\n\n5. **Fixture, probe, and de-embedding choices**\n   - Understanding PCIe affects whether you need solder-in probes, interposers, compliance load boards, calibration kits, or de-embedding files.\n   - A poor fixture choice can dominate the measured result.\n\n6. **Protocol generation and lane count**\n   - PCIe Gen3/4/5/6, lane width, and whether the device is endpoint, root complex, add-in card, or SSD all change the required setup.\n   - PCIe 6.0 adds PAM4 signaling, which changes measurement requirements versus earlier NRZ generations.\n\n7. **Automation/interface decisions**\n   - If integrating PCIe tests into production or validation flows, the control interface matters. The knowledge base gives a related R&S example: choosing XLAPI vs. SCPI depends on use case and customer preference. [raw/Productions/CMX500_Features_CSW9-20-0_en_32.md, section 309]\n\n8. **Product configuration and ordering**\n   - PCIe measurement needs can determine which instrument model, bandwidth class, compliance option, probing accessory, and software license are required.\n   - The knowledge base gives general R&S ordering guidance that available options should be checked in the product brochure or with an R&S expert. [raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md, section 1635]\n\nIn short: **PCIe is a high-speed serial interconnect, and understanding it drives the choice of oscilloscope/VNA class, bandwidth, probes, fixtures, de-embedding method, compliance software, automation interface, and product options.**",
+      "created_at": "2026-10-07T10:49:39.684017Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-5c459ce12c5842bbbc922be25ea739dc",
+       "request_id": "request-5c459ce12c5842bbbc922be25ea739dc",
+       "span_id": "span-5c459ce12c5842bbbc922be25ea739dc",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave no direct answer defining PCIe or tying PCIe-specific measurements to R&S products. It only returned related evidence about signal integrity, software/options, ordering guidance, and interface choices.\n\n**Not from the knowledge base:** PCIe, or **Peripheral Component Interconnect Express**, is a high-speed serial computer interface used to connect processors, chipsets, GPUs, SSDs, network cards, AI accelerators, and other high-bandwidth devices. Modern PCIe generations use very high data rates, differential signaling, embedded clocking, equalization, link training, and strict transmitter/receiver compliance requirements. Because the margin is small, PCIe is fundamentally a **signal-integrity measurement problem** as much as a digital-protocol problem.\n\nProduct-related measurement decisions that depend on understanding PCIe include:\n\n1. **Oscilloscope bandwidth and performance**\n   - You need enough bandwidth, sample rate, noise performance, and jitter analysis capability for the PCIe generation under test.\n   - Higher PCIe generations require more demanding eye, jitter, and transmitter measurements.\n\n2. **Compliance test software/options**\n   - PCIe testing usually requires generation-specific compliance automation, masks, presets, equalization handling, and report generation.\n   - The knowledge base has a related example that some R&S test cases require specific software options, e.g. 5G NR Rx tests needing the SMW200A/SMBV100B-K144 option, showing that product configuration depends on the test standard and use case. [raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md, section 16]\n\n3. **Signal-integrity measurement focus**\n   - PCIe decisions involve jitter, eye opening, insertion loss, return loss, crosstalk, de-embedding, equalization, and channel loss.\n   - The knowledge base supports the broader point that R&S measurement work may focus on “signal integrity” optimization, though in the cited case it is for 3GPP/mmWave rather than PCIe. [raw/Market/OneNote/R&S for JIO Project.md, section 25]\n\n4. **VNA vs. oscilloscope choice**\n   - For PCIe interconnects, a VNA is often used for S-parameters, channel loss, return loss, impedance discontinuities, and fixture characterization.\n   - An oscilloscope is used for time-domain transmitter compliance, eye diagrams, jitter, and waveform analysis.\n\n5. **Fixture, probe, and de-embedding choices**\n   - Understanding PCIe affects whether you need solder-in probes, interposers, compliance load boards, calibration kits, or de-embedding files.\n   - A poor fixture choice can dominate the measured result.\n\n6. **Protocol generation and lane count**\n   - PCIe Gen3/4/5/6, lane width, and whether the device is endpoint, root complex, add-in card, or SSD all change the required setup.\n   - PCIe 6.0 adds PAM4 signaling, which changes measurement requirements versus earlier NRZ generations.\n\n7. **Automation/interface decisions**\n   - If integrating PCIe tests into production or validation flows, the control interface matters. The knowledge base gives a related R&S example: choosing XLAPI vs. SCPI depends on use case and customer preference. [raw/Productions/CMX500_Features_CSW9-20-0_en_32.md, section 309]\n\n8. **Product configuration and ordering**\n   - PCIe measurement needs can determine which instrument model, bandwidth class, compliance option, probing accessory, and software license are required.\n   - The knowledge base gives general R&S ordering guidance that available options should be checked in the product brochure or with an R&S expert. [raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md, section 1635]\n\nIn short: **PCIe is a high-speed serial interconnect, and understanding it drives the choice of oscilloscope/VNA class, bandwidth, probes, fixtures, de-embedding method, compliance software, automation interface, and product options.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-5c459ce12c5842bbbc922be25ea739dc",
+      "request_id": "request-5c459ce12c5842bbbc922be25ea739dc",
+      "span_id": "span-5c459ce12c5842bbbc922be25ea739dc",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-5c459ce12c5842bbbc922be25ea739dc",
+       "request_id": "request-5c459ce12c5842bbbc922be25ea739dc",
+       "span_id": "span-5c459ce12c5842bbbc922be25ea739dc",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no direct answer defining PCIe or tying PCIe-specific measurements to R&S products. It only returned related evidence about signal integrity, software/options, ordering guidance, and interface choices.\n\n**Not from the knowledge base:** PCIe, or **Peripheral Component Interconnect Express**, is a high-speed serial computer interface used to connect processors, chipsets, GPUs, SSDs, network cards, AI accelerators, and other high-bandwidth devices. Modern PCIe generations use very high data rates, differential signaling, embedded clocking, equalization, link training, and strict transmitter/receiver compliance requirements. Because the margin is small, PCIe is fundamentally a **signal-integrity measurement problem** as much as a digital-protocol problem.\n\nProduct-related measurement decisions that depend on understanding PCIe include:\n\n1. **Oscilloscope bandwidth and performance**\n   - You need enough bandwidth, sample rate, noise performance, and jitter analysis capability for the PCIe generation under test.\n   - Higher PCIe generations require more demanding eye, jitter, and transmitter measurements.\n\n2. **Compliance test software/options**\n   - PCIe testing usually requires generation-specific compliance automation, masks, presets, equalization handling, and report generation.\n   - The knowledge base has a related example that some R&S test cases require specific software options, e.g. 5G NR Rx tests needing the SMW200A/SMBV100B-K144 option, showing that product configuration depends on the test standard and use case. [raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md, section 16]\n\n3. **Signal-integrity measurement focus**\n   - PCIe decisions involve jitter, eye opening, insertion loss, return loss, crosstalk, de-embedding, equalization, and channel loss.\n   - The knowledge base supports the broader point that R&S measurement work may focus on “signal integrity” optimization, though in the cited case it is for 3GPP/mmWave rather than PCIe. [raw/Market/OneNote/R&S for JIO Project.md, section 25]\n\n4. **VNA vs. oscilloscope choice**\n   - For PCIe interconnects, a VNA is often used for S-parameters, channel loss, return loss, impedance discontinuities, and fixture characterization.\n   - An oscilloscope is used for time-domain transmitter compliance, eye diagrams, jitter, and waveform analysis.\n\n5. **Fixture, probe, and de-embedding choices**\n   - Understanding PCIe affects whether you need solder-in probes, interposers, compliance load boards, calibration kits, or de-embedding files.\n   - A poor fixture choice can dominate the measured result.\n\n6. **Protocol generation and lane count**\n   - PCIe Gen3/4/5/6, lane width, and whether the device is endpoint, root complex, add-in card, or SSD all change the required setup.\n   - PCIe 6.0 adds PAM4 signaling, which changes measurement requirements versus earlier NRZ generations.\n\n7. **Automation/interface decisions**\n   - If integrating PCIe tests into production or validation flows, the control interface matters. The knowledge base gives a related R&S example: choosing XLAPI vs. SCPI depends on use case and customer preference. [raw/Productions/CMX500_Features_CSW9-20-0_en_32.md, section 309]\n\n8. **Product configuration and ordering**\n   - PCIe measurement needs can determine which instrument model, bandwidth class, compliance option, probing accessory, and software license are required.\n   - The knowledge base gives general R&S ordering guidance that available options should be checked in the product brochure or with an R&S expert. [raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md, section 1635]\n\nIn short: **PCIe is a high-speed serial interconnect, and understanding it drives the choice of oscilloscope/VNA class, bandwidth, probes, fixtures, de-embedding method, compliance software, automation interface, and product options.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_dyfCfnkuHuxM6g1zAIeNSL3D",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-5c459ce12c5842bbbc922be25ea739dc",
+          "request_id": "request-5c459ce12c5842bbbc922be25ea739dc",
+          "span_id": "span-5c459ce12c5842bbbc922be25ea739dc",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-5c459ce12c5842bbbc922be25ea739dc",
+           "request_id": "request-5c459ce12c5842bbbc922be25ea739dc",
+           "span_id": "span-5c459ce12c5842bbbc922be25ea739dc",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What is PCIe, and which product-related measurement decisions depend on understanding it? Please answer with Raw evidence citations about PCIe, signal integrity, and Rohde & Schwarz product-related measurement choices.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Furthermore, the 5G NR software option is needed for the Rx tests:\n► R&S®SMW200A-/SMBV100B-K144 5G New Radio\nFor further information on R&S signal generators, please see:\nhttps://www.rohde-schwarz.com/signalgenerators\nThe Receiver spurious emissions test case (7.6) does not require a signal generator but it requires a",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.830204
+            },
+            {
+             "text": "b.  What does “minimal human intervention” mean in your context—which decisions",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.0346
+            },
+            {
+             "text": "For more ordering information about available options, please see our product brochure (PD 5214.2833.12) or ask your local\nRohde & Schwarz expert to find the solution that best meets your needs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-84f0ccff28cb329b",
+               "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "section": 1635,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.666819
+            },
+            {
+             "text": "► Test 6.7 Transmitter intermodulation\n─ Block name: Tx_6_7_Tx_intermod\n► Tx_DemoSMW\n─ usage optional\n─ with this block it is possible to simulate a base station but please note that not all base station\nfunctions can be simulated with a vector signal generator\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 64",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 90,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.219517
+            },
+            {
+             "text": "# R&S Key Involvement: 3GPP Related Testing\nDeep Collaboration: R&S worked with JIO and ODMs to verify 3GPP mmWave-related test items.\nOptimization Focus: Precise tuning of EVM (Modulation Quality) and signal integrity after signal up-conversion.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-600ddf3fc41d2bb2",
+               "original_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+               "sha256": "600ddf3fc41d2bb26d1bb08bbc2ea64ee64033937c66f026df48f8040dcfd7cc",
+               "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.360028
+            },
+            {
+             "text": "use and limits are described in the product documentation such as the specifications\ndocument, manuals and the printed \"Safety Instructions\" document. If you are unsure\nabout the appropriate use, contact Rohde & Schwarz customer support.\nUsing the product requires skilled persons or specially trained personnel. These users\nalso need sound knowledge of at least one of the languages in which the user interfa-",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2da4078601f6c0a3",
+               "original_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "sha256": "2da4078601f6c0a3baf385390b5787c072932f98c4bd40464406ca4678ebafca",
+               "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.778454
+            },
+            {
+             "text": "The CMX500 AI Scripting Assistant is available from Rohde & Schwarz through various deployment options. Visitors to MWC 2025 Barcelona can experience the new tool live at the Rohde & Schwarz booth in hall 5, booth 5A80. For general information about the CMX500 5G one-box signaling tester visit: [http://www.rohde-schwarz.com/product/cmx500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8b44e0d324270514",
+               "original_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "sha256": "8b44e0d324270514830d2b3ff82c35b16cf5a58441a03941d7c14eaf71388d51",
+               "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.300927
+            },
+            {
+             "text": "There are two scripting interfaces, XLAPI and SCPI. It depends on the use case and\non customer preferences, which interface is recommended.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 309,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.244903
+            }
+           ],
+           "text": "They only support related points: R&S worked on optimizing EVM and signal integrity after signal up-conversion [5]; some Rx tests need the R&S 5G NR software option, while the Receiver spurious emissions test does not require a signal generator [1]; ordering/options decisions should use the product brochure or a local Rohde & Schwarz expert [3]; and choosing between XLAPI and SCPI scripting interfaces depends on the use case and customer preferences [8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Furthermore, the 5G NR software option is needed for the Rx tests:\n► R&S®SMW200A-/SMBV100B-K144 5G New Radio\nFor further information on R&S signal generators, please see:\nhttps://www.rohde-schwarz.com/signalgenerators\nThe Receiver spurious emissions test case (7.6) does not require a signal generator but it requires a",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.830204
+           },
+           {
+            "text": "For more ordering information about available options, please see our product brochure (PD 5214.2833.12) or ask your local\nRohde & Schwarz expert to find the solution that best meets your needs.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-84f0ccff28cb329b",
+              "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+              "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+             "section": 1635,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.666819
+           },
+           {
+            "text": "# R&S Key Involvement: 3GPP Related Testing\nDeep Collaboration: R&S worked with JIO and ODMs to verify 3GPP mmWave-related test items.\nOptimization Focus: Precise tuning of EVM (Modulation Quality) and signal integrity after signal up-conversion.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-600ddf3fc41d2bb2",
+              "original_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+              "sha256": "600ddf3fc41d2bb26d1bb08bbc2ea64ee64033937c66f026df48f8040dcfd7cc",
+              "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+             "section": 25,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.360028
+           },
+           {
+            "text": "There are two scripting interfaces, XLAPI and SCPI. It depends on the use case and\non customer preferences, which interface is recommended.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-bc47a8ad4da77a6a",
+              "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "section": 309,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.244903
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

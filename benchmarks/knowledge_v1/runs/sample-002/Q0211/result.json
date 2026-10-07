@@ -1,0 +1,82 @@
+{
+ "id": "Q0211",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 62.032,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "radar-focused Aerospace / Defense test workflow",
+   "not be the core radar test instrument",
+   "fits mainly at the communications subsystem / connected-platform layer, not at the radar RF/echo simulation layer",
+   "Typical radar test flow",
+   "Radar waveform generation / scenario simulation",
+   "Radar RF/front-end validation",
+   "Antenna / OTA / chamber test",
+   "System-level radar performance",
+   "If the radar is part of a connected defense platform—UAV, aircraft, vehicle, satellite-linked system, tactical radio node, 5G/NTN-enabled platform",
+   "Command-and-control links",
+   "Telemetry / data offload",
+   "Sensor-fusion backhaul",
+   "Coexistence between radar and communications radios",
+   "Radar waveform, echo, target, EW, and antenna performance → use radar-specific signal generation, analysis, VNA/spectrum analysis, OTA, and scenario simulation tools"
+  ],
+  "reason": "The cited passages support that CMX500/CMP180 are wireless communication testers for Wi-Fi, cellular, NTN, OTA, IP/E2E, fading/channel, and waveform loopback testing. They do not discuss radar, aerospace/defense workflows, radar-specific instruments, or how these testers fit around radar systems, so the answer’s main workflow placement is an unsupported extrapolation.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that CMX500/CMP180 are wireless communication testers for Wi-Fi, cellular, NTN, OTA, IP/E2E, fading/channel, and waveform loopback testing. They do not discuss radar, aerospace/defense workflows, radar-specific instruments, or how these testers fit around radar systems, so"
+}

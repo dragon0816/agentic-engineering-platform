@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q0261",
+  "text": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-661b93ee2dad49fb95ad1c21c7f3ec1e",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 58.375,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-661b93ee2dad49fb95ad1c21c7f3ec1e",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Oscillos…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:51:25.401780Z",
+    "updated_at": "2026-10-07T09:52:23.762545Z",
+    "messages": [
+     {
+      "message_id": "message-2a09dc345fe74b9d844f55d091938f81",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-07T09:51:25.555577Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-9b9822761a314d62a415317789a5d0a1",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer — it returned insufficient evidence for this specific workflow placement.\n\nNot from the knowledge base: in an aerospace/defense radar test workflow, an oscilloscope typically fits around the **time-domain validation and debugging points**, especially where fast pulses, timing, triggering, modulation edges, or digital/control signals matter.\n\nA practical radar workflow placement looks like this:\n\n1. **Radar signal generation / stimulus**\n   - Signal generator creates radar pulses, chirps, PRI patterns, or threat scenarios.\n   - Oscilloscope may verify trigger outputs, pulse timing, gate signals, and synchronization lines.\n\n2. **Transmitter / exciter validation**\n   - Oscilloscope checks:\n     - Pulse width\n     - Rise/fall time\n     - Pulse repetition interval/frequency\n     - Timing jitter\n     - Trigger alignment\n     - Modulation envelope\n   - For high-speed RF or wideband radar, a high-bandwidth scope can inspect pulse envelope or IF/baseband behavior.\n\n3. **T/R module and power amplifier testing**\n   - Used to validate timing between control signals and RF enable paths.\n   - Checks blanking, gating, protection timing, bias sequencing, and pulsed operation.\n   - Complements spectrum/signal analyzers, which handle RF spectrum, EVM, phase noise, spurious, and modulation quality.\n\n4. **Receiver / IF / baseband chain**\n   - Oscilloscope measures transient behavior and signal integrity in IF, ADC input, DAC output, and baseband paths.\n   - Useful for debugging clipping, saturation, settling time, group delay effects, and timing skew.\n\n5. **Digital interface and synchronization**\n   - Validates clocks, triggers, LVDS/SerDes-related timing, FPGA I/O, ADC/DAC synchronization, and system timing.\n   - Especially important in phased-array radar where channel-to-channel timing and synchronization are critical.\n\n6. **System integration and troubleshooting**\n   - Oscilloscope is often the “debug microscope” for correlating events:\n     - Trigger in → RF pulse out\n     - Control command → amplifier enable\n     - Receive gate → ADC capture\n     - Timing reference → waveform event\n\nIn short: the oscilloscope fits best in the radar workflow wherever you need **time-domain visibility**—pulse timing, transient behavior, trigger relationships, synchronization, signal integrity, and debugging across RF, IF, baseband, and digital control paths.",
+      "created_at": "2026-10-07T09:52:23.762545Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-d8ebcb2006814919a78de50ce503f438",
+       "request_id": "request-d8ebcb2006814919a78de50ce503f438",
+       "span_id": "span-d8ebcb2006814919a78de50ce503f438",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer — it returned insufficient evidence for this specific workflow placement.\n\nNot from the knowledge base: in an aerospace/defense radar test workflow, an oscilloscope typically fits around the **time-domain validation and debugging points**, especially where fast pulses, timing, triggering, modulation edges, or digital/control signals matter.\n\nA practical radar workflow placement looks like this:\n\n1. **Radar signal generation / stimulus**\n   - Signal generator creates radar pulses, chirps, PRI patterns, or threat scenarios.\n   - Oscilloscope may verify trigger outputs, pulse timing, gate signals, and synchronization lines.\n\n2. **Transmitter / exciter validation**\n   - Oscilloscope checks:\n     - Pulse width\n     - Rise/fall time\n     - Pulse repetition interval/frequency\n     - Timing jitter\n     - Trigger alignment\n     - Modulation envelope\n   - For high-speed RF or wideband radar, a high-bandwidth scope can inspect pulse envelope or IF/baseband behavior.\n\n3. **T/R module and power amplifier testing**\n   - Used to validate timing between control signals and RF enable paths.\n   - Checks blanking, gating, protection timing, bias sequencing, and pulsed operation.\n   - Complements spectrum/signal analyzers, which handle RF spectrum, EVM, phase noise, spurious, and modulation quality.\n\n4. **Receiver / IF / baseband chain**\n   - Oscilloscope measures transient behavior and signal integrity in IF, ADC input, DAC output, and baseband paths.\n   - Useful for debugging clipping, saturation, settling time, group delay effects, and timing skew.\n\n5. **Digital interface and synchronization**\n   - Validates clocks, triggers, LVDS/SerDes-related timing, FPGA I/O, ADC/DAC synchronization, and system timing.\n   - Especially important in phased-array radar where channel-to-channel timing and synchronization are critical.\n\n6. **System integration and troubleshooting**\n   - Oscilloscope is often the “debug microscope” for correlating events:\n     - Trigger in → RF pulse out\n     - Control command → amplifier enable\n     - Receive gate → ADC capture\n     - Timing reference → waveform event\n\nIn short: the oscilloscope fits best in the radar workflow wherever you need **time-domain visibility**—pulse timing, transient behavior, trigger relationships, synchronization, signal integrity, and debugging across RF, IF, baseband, and digital control paths.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-d8ebcb2006814919a78de50ce503f438",
+      "request_id": "request-d8ebcb2006814919a78de50ce503f438",
+      "span_id": "span-d8ebcb2006814919a78de50ce503f438",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-d8ebcb2006814919a78de50ce503f438",
+       "request_id": "request-d8ebcb2006814919a78de50ce503f438",
+       "span_id": "span-d8ebcb2006814919a78de50ce503f438",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer — it returned insufficient evidence for this specific workflow placement.\n\nNot from the knowledge base: in an aerospace/defense radar test workflow, an oscilloscope typically fits around the **time-domain validation and debugging points**, especially where fast pulses, timing, triggering, modulation edges, or digital/control signals matter.\n\nA practical radar workflow placement looks like this:\n\n1. **Radar signal generation / stimulus**\n   - Signal generator creates radar pulses, chirps, PRI patterns, or threat scenarios.\n   - Oscilloscope may verify trigger outputs, pulse timing, gate signals, and synchronization lines.\n\n2. **Transmitter / exciter validation**\n   - Oscilloscope checks:\n     - Pulse width\n     - Rise/fall time\n     - Pulse repetition interval/frequency\n     - Timing jitter\n     - Trigger alignment\n     - Modulation envelope\n   - For high-speed RF or wideband radar, a high-bandwidth scope can inspect pulse envelope or IF/baseband behavior.\n\n3. **T/R module and power amplifier testing**\n   - Used to validate timing between control signals and RF enable paths.\n   - Checks blanking, gating, protection timing, bias sequencing, and pulsed operation.\n   - Complements spectrum/signal analyzers, which handle RF spectrum, EVM, phase noise, spurious, and modulation quality.\n\n4. **Receiver / IF / baseband chain**\n   - Oscilloscope measures transient behavior and signal integrity in IF, ADC input, DAC output, and baseband paths.\n   - Useful for debugging clipping, saturation, settling time, group delay effects, and timing skew.\n\n5. **Digital interface and synchronization**\n   - Validates clocks, triggers, LVDS/SerDes-related timing, FPGA I/O, ADC/DAC synchronization, and system timing.\n   - Especially important in phased-array radar where channel-to-channel timing and synchronization are critical.\n\n6. **System integration and troubleshooting**\n   - Oscilloscope is often the “debug microscope” for correlating events:\n     - Trigger in → RF pulse out\n     - Control command → amplifier enable\n     - Receive gate → ADC capture\n     - Timing reference → waveform event\n\nIn short: the oscilloscope fits best in the radar workflow wherever you need **time-domain visibility**—pulse timing, transient behavior, trigger relationships, synchronization, signal integrity, and debugging across RF, IF, baseband, and digital control paths.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_UBsBlvZQWWZupIoceLB9CNd4",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-d8ebcb2006814919a78de50ce503f438",
+          "request_id": "request-d8ebcb2006814919a78de50ce503f438",
+          "span_id": "span-d8ebcb2006814919a78de50ce503f438",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

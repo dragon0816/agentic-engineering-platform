@@ -1,0 +1,1091 @@
+{
+ "question": {
+  "id": "Q0696",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in AI, and what evidence supports each opportunity?",
+  "market": "AI",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-890d913f09d44534a0ab653208be3595",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in AI, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 141.563,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-890d913f09d44534a0ab653208be3595",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:18:19.022506Z",
+    "updated_at": "2026-10-07T10:20:38.815166Z",
+    "messages": [
+     {
+      "message_id": "message-7131e6f6971a485ea40409324d9680d7",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in AI, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T10:18:19.031980Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-ccca38ae19444c0082d8ba063cf59f80",
+      "role": "assistant",
+      "text": "The vault evidence points to **AI infrastructure / AI data center hardware validation** as the strongest oscilloscope opportunity, but with an important caveat: I found **limited Raw evidence that explicitly says “oscilloscope for AI.”** The strongest support is indirect but relevant: AI infrastructure needs high-speed interconnect, signal integrity, power, and high-density server validation — all oscilloscope-relevant areas.\n\n## Strongest opportunities\n\n### 1. High-speed interconnect / signal-integrity validation for AI infrastructure and GPUs  \n**Why this is strong:** This is the most directly AI-linked evidence. The Raw source explicitly names **AI infrastructure, GPU, HPC, PCIe Gen6/Gen7, 112G, 224G, high-speed, power, and sideband**. Those are classic oscilloscope-relevant validation domains: eye diagrams, jitter, timing, signal integrity, compliance/debug, and high-speed serial bring-up.\n\n**Vault evidence:**\n\n> “Support AI infrastructure, GPU, HPC, and high-density interconnections.  \n> Performs to PCIe® Gen6, Gen7, 112G, and 224G specs.  \n> … Support high speed, power, and sideband”  \n> — `raw/Market/HSD Cable test image 4.md`, section 15\n\nAdditional supporting evidence:\n\n> “Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.”  \n> — `raw/Market/HSD Cable test image 4.md`, section 6\n\n**Opportunity framing:** Position oscilloscopes for **AI server/GPU interconnect validation**, especially PCIe Gen6/Gen7, 112G/224G links, high-density connectors, cables, and board-level signal-integrity debug.\n\n---\n\n### 2. Data center server high-bandwidth / HPC validation  \n**Why this is strong:** The evidence links data centers, servers, high-speed interconnects, complex data processing, and HPC. Even when AI is not explicitly named in this passage, HPC and complex data processing are closely adjacent to AI infrastructure workloads. Oscilloscopes fit into server platform validation, high-speed link debugging, timing, and board-level SI/PI troubleshooting.\n\n**Vault evidence:**\n\n> “DATA CENTER SERVER SOLUTIONS  \n> Fueling Servers with High-Speed Interconnect Solutions for Scalable Performance  \n> Amphenol’s portfolio of connectors, cables, and high-speed components is built for peak server performance. Designed for high-bandwidth efficiency, our solutions ensure seamless data flow in data centers. These reliable components optimize server operations for complex data processing and high-performance computing.”  \n> — `raw/Market/OneNote/data-center-server-solutions-guide.md`, section 2\n\n**Opportunity framing:** Target **AI data center server OEMs, ODMs, cable/connector vendors, and validation labs** with oscilloscope workflows for high-bandwidth interconnect performance and server platform debug.\n\n---\n\n### 3. Power delivery, power supplies, and power-converter debug for AI data centers  \n**Why this is strong:** AI servers and GPU systems impose demanding power requirements. The vault has evidence tying test equipment categories to power supplies and oscilloscopes, and separate evidence describing detailed DC/DC converter behavior — gate signals, full bridge topology, phase shift, and duty cycle — which is highly oscilloscope-relevant.\n\n**Vault evidence naming oscilloscopes in a power-supply context:**\n\n> “Power Supplies, Multimeter  \n> …..  \n> Oscilloscopes  \n> Signal Source”  \n> — `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 148\n\n**Vault evidence for converter waveform/debug needs:**\n\n> “The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the current fed full-bridge… The current-fed full-bridge is driven by two complementary signals… with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.”  \n> — `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80\n\nSimilar repeated evidence appears in:  \n— `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md`, section 73  \n— `raw/Market/BBU image 3.md`, section 8\n\n**Opportunity framing:** Position oscilloscopes for **AI data center power architecture validation**: DC/DC converter debug, gate-drive timing, switching waveform analysis, ripple/noise, transient response, and power integrity around GPU/accelerator boards.\n\n---\n\n### 4. High-speed materials, PCB/channel effects, and compliance/debug ecosystem  \n**Why this is strong:** AI infrastructure uses very high-speed links where PCB material, connectors, and channel losses become critical. The vault evidence mentions PCIe and high-speed attenuation, and also notes that at high data rates signal-path elements behave like RF elements, creating mismatch, return loss degradation, common-mode noise, crosstalk, and interference.\n\n**Vault evidence:**\n\n> “Smaller values of Df result in lower signal attenuation, thus a low Df is desirable for high speed applications such as PCIe.”  \n> — `raw/Market/OneNote/snla426.md`, section 5\n\n> “At high data rates, components or elements within the signal path must be treated as RF elements. Parasitic … can introduce impedance mismatch, return loss degradation, common mode noise, cross talk, plus other interference sources.”  \n> — `raw/Market/OneNote/snla426.md`, section 16\n\n**Opportunity framing:** Use oscilloscopes in combination with SI tools/VNAs for **AI server PCB/channel debug**, especially around PCIe, SerDes, connector/cable assemblies, crosstalk, and link-margin problems.\n\n---\n\n## Bottom line ranking\n\n1. **AI infrastructure / GPU high-speed interconnect validation** — strongest because the evidence explicitly names AI infrastructure, GPU, PCIe Gen6/Gen7, 112G/224G, and high-speed/power/sideband.  \n2. **AI data center server and HPC interconnect validation** — strong because the evidence names data center servers, high-bandwidth efficiency, complex data processing, and HPC.  \n3. **AI data center power delivery and DC/DC converter debug** — strong oscilloscope fit, with evidence for both oscilloscopes in power-supply test context and detailed converter waveform behavior.  \n4. **PCB/channel signal-integrity debug for PCIe-class links** — supporting opportunity around materials, parasitics, crosstalk, common-mode noise, and attenuation.\n\nThe evidence is strongest for **oscilloscopes as an enabling test instrument for AI infrastructure hardware**, especially **GPU/server interconnect and power validation**, rather than for “AI features inside oscilloscopes.”",
+      "created_at": "2026-10-07T10:20:38.815166Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+       "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+       "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The vault evidence points to **AI infrastructure / AI data center hardware validation** as the strongest oscilloscope opportunity, but with an important caveat: I found **limited Raw evidence that explicitly says “oscilloscope for AI.”** The strongest support is indirect but relevant: AI infrastructure needs high-speed interconnect, signal integrity, power, and high-density server validation — all oscilloscope-relevant areas.\n\n## Strongest opportunities\n\n### 1. High-speed interconnect / signal-integrity validation for AI infrastructure and GPUs  \n**Why this is strong:** This is the most directly AI-linked evidence. The Raw source explicitly names **AI infrastructure, GPU, HPC, PCIe Gen6/Gen7, 112G, 224G, high-speed, power, and sideband**. Those are classic oscilloscope-relevant validation domains: eye diagrams, jitter, timing, signal integrity, compliance/debug, and high-speed serial bring-up.\n\n**Vault evidence:**\n\n> “Support AI infrastructure, GPU, HPC, and high-density interconnections.  \n> Performs to PCIe® Gen6, Gen7, 112G, and 224G specs.  \n> … Support high speed, power, and sideband”  \n> — `raw/Market/HSD Cable test image 4.md`, section 15\n\nAdditional supporting evidence:\n\n> “Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.”  \n> — `raw/Market/HSD Cable test image 4.md`, section 6\n\n**Opportunity framing:** Position oscilloscopes for **AI server/GPU interconnect validation**, especially PCIe Gen6/Gen7, 112G/224G links, high-density connectors, cables, and board-level signal-integrity debug.\n\n---\n\n### 2. Data center server high-bandwidth / HPC validation  \n**Why this is strong:** The evidence links data centers, servers, high-speed interconnects, complex data processing, and HPC. Even when AI is not explicitly named in this passage, HPC and complex data processing are closely adjacent to AI infrastructure workloads. Oscilloscopes fit into server platform validation, high-speed link debugging, timing, and board-level SI/PI troubleshooting.\n\n**Vault evidence:**\n\n> “DATA CENTER SERVER SOLUTIONS  \n> Fueling Servers with High-Speed Interconnect Solutions for Scalable Performance  \n> Amphenol’s portfolio of connectors, cables, and high-speed components is built for peak server performance. Designed for high-bandwidth efficiency, our solutions ensure seamless data flow in data centers. These reliable components optimize server operations for complex data processing and high-performance computing.”  \n> — `raw/Market/OneNote/data-center-server-solutions-guide.md`, section 2\n\n**Opportunity framing:** Target **AI data center server OEMs, ODMs, cable/connector vendors, and validation labs** with oscilloscope workflows for high-bandwidth interconnect performance and server platform debug.\n\n---\n\n### 3. Power delivery, power supplies, and power-converter debug for AI data centers  \n**Why this is strong:** AI servers and GPU systems impose demanding power requirements. The vault has evidence tying test equipment categories to power supplies and oscilloscopes, and separate evidence describing detailed DC/DC converter behavior — gate signals, full bridge topology, phase shift, and duty cycle — which is highly oscilloscope-relevant.\n\n**Vault evidence naming oscilloscopes in a power-supply context:**\n\n> “Power Supplies, Multimeter  \n> …..  \n> Oscilloscopes  \n> Signal Source”  \n> — `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 148\n\n**Vault evidence for converter waveform/debug needs:**\n\n> “The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the current fed full-bridge… The current-fed full-bridge is driven by two complementary signals… with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.”  \n> — `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80\n\nSimilar repeated evidence appears in:  \n— `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md`, section 73  \n— `raw/Market/BBU image 3.md`, section 8\n\n**Opportunity framing:** Position oscilloscopes for **AI data center power architecture validation**: DC/DC converter debug, gate-drive timing, switching waveform analysis, ripple/noise, transient response, and power integrity around GPU/accelerator boards.\n\n---\n\n### 4. High-speed materials, PCB/channel effects, and compliance/debug ecosystem  \n**Why this is strong:** AI infrastructure uses very high-speed links where PCB material, connectors, and channel losses become critical. The vault evidence mentions PCIe and high-speed attenuation, and also notes that at high data rates signal-path elements behave like RF elements, creating mismatch, return loss degradation, common-mode noise, crosstalk, and interference.\n\n**Vault evidence:**\n\n> “Smaller values of Df result in lower signal attenuation, thus a low Df is desirable for high speed applications such as PCIe.”  \n> — `raw/Market/OneNote/snla426.md`, section 5\n\n> “At high data rates, components or elements within the signal path must be treated as RF elements. Parasitic … can introduce impedance mismatch, return loss degradation, common mode noise, cross talk, plus other interference sources.”  \n> — `raw/Market/OneNote/snla426.md`, section 16\n\n**Opportunity framing:** Use oscilloscopes in combination with SI tools/VNAs for **AI server PCB/channel debug**, especially around PCIe, SerDes, connector/cable assemblies, crosstalk, and link-margin problems.\n\n---\n\n## Bottom line ranking\n\n1. **AI infrastructure / GPU high-speed interconnect validation** — strongest because the evidence explicitly names AI infrastructure, GPU, PCIe Gen6/Gen7, 112G/224G, and high-speed/power/sideband.  \n2. **AI data center server and HPC interconnect validation** — strong because the evidence names data center servers, high-bandwidth efficiency, complex data processing, and HPC.  \n3. **AI data center power delivery and DC/DC converter debug** — strong oscilloscope fit, with evidence for both oscilloscopes in power-supply test context and detailed converter waveform behavior.  \n4. **PCB/channel signal-integrity debug for PCIe-class links** — supporting opportunity around materials, parasitics, crosstalk, common-mode noise, and attenuation.\n\nThe evidence is strongest for **oscilloscopes as an enabling test instrument for AI infrastructure hardware**, especially **GPU/server interconnect and power validation**, rather than for “AI features inside oscilloscopes.”",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+      "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+      "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+       "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+       "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The vault evidence points to **AI infrastructure / AI data center hardware validation** as the strongest oscilloscope opportunity, but with an important caveat: I found **limited Raw evidence that explicitly says “oscilloscope for AI.”** The strongest support is indirect but relevant: AI infrastructure needs high-speed interconnect, signal integrity, power, and high-density server validation — all oscilloscope-relevant areas.\n\n## Strongest opportunities\n\n### 1. High-speed interconnect / signal-integrity validation for AI infrastructure and GPUs  \n**Why this is strong:** This is the most directly AI-linked evidence. The Raw source explicitly names **AI infrastructure, GPU, HPC, PCIe Gen6/Gen7, 112G, 224G, high-speed, power, and sideband**. Those are classic oscilloscope-relevant validation domains: eye diagrams, jitter, timing, signal integrity, compliance/debug, and high-speed serial bring-up.\n\n**Vault evidence:**\n\n> “Support AI infrastructure, GPU, HPC, and high-density interconnections.  \n> Performs to PCIe® Gen6, Gen7, 112G, and 224G specs.  \n> … Support high speed, power, and sideband”  \n> — `raw/Market/HSD Cable test image 4.md`, section 15\n\nAdditional supporting evidence:\n\n> “Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.”  \n> — `raw/Market/HSD Cable test image 4.md`, section 6\n\n**Opportunity framing:** Position oscilloscopes for **AI server/GPU interconnect validation**, especially PCIe Gen6/Gen7, 112G/224G links, high-density connectors, cables, and board-level signal-integrity debug.\n\n---\n\n### 2. Data center server high-bandwidth / HPC validation  \n**Why this is strong:** The evidence links data centers, servers, high-speed interconnects, complex data processing, and HPC. Even when AI is not explicitly named in this passage, HPC and complex data processing are closely adjacent to AI infrastructure workloads. Oscilloscopes fit into server platform validation, high-speed link debugging, timing, and board-level SI/PI troubleshooting.\n\n**Vault evidence:**\n\n> “DATA CENTER SERVER SOLUTIONS  \n> Fueling Servers with High-Speed Interconnect Solutions for Scalable Performance  \n> Amphenol’s portfolio of connectors, cables, and high-speed components is built for peak server performance. Designed for high-bandwidth efficiency, our solutions ensure seamless data flow in data centers. These reliable components optimize server operations for complex data processing and high-performance computing.”  \n> — `raw/Market/OneNote/data-center-server-solutions-guide.md`, section 2\n\n**Opportunity framing:** Target **AI data center server OEMs, ODMs, cable/connector vendors, and validation labs** with oscilloscope workflows for high-bandwidth interconnect performance and server platform debug.\n\n---\n\n### 3. Power delivery, power supplies, and power-converter debug for AI data centers  \n**Why this is strong:** AI servers and GPU systems impose demanding power requirements. The vault has evidence tying test equipment categories to power supplies and oscilloscopes, and separate evidence describing detailed DC/DC converter behavior — gate signals, full bridge topology, phase shift, and duty cycle — which is highly oscilloscope-relevant.\n\n**Vault evidence naming oscilloscopes in a power-supply context:**\n\n> “Power Supplies, Multimeter  \n> …..  \n> Oscilloscopes  \n> Signal Source”  \n> — `raw/Market/OneNote/MWC2025---WIC-INFRA.md`, section 148\n\n**Vault evidence for converter waveform/debug needs:**\n\n> “The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the current fed full-bridge… The current-fed full-bridge is driven by two complementary signals… with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.”  \n> — `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md`, section 80\n\nSimilar repeated evidence appears in:  \n— `raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md`, section 73  \n— `raw/Market/BBU image 3.md`, section 8\n\n**Opportunity framing:** Position oscilloscopes for **AI data center power architecture validation**: DC/DC converter debug, gate-drive timing, switching waveform analysis, ripple/noise, transient response, and power integrity around GPU/accelerator boards.\n\n---\n\n### 4. High-speed materials, PCB/channel effects, and compliance/debug ecosystem  \n**Why this is strong:** AI infrastructure uses very high-speed links where PCB material, connectors, and channel losses become critical. The vault evidence mentions PCIe and high-speed attenuation, and also notes that at high data rates signal-path elements behave like RF elements, creating mismatch, return loss degradation, common-mode noise, crosstalk, and interference.\n\n**Vault evidence:**\n\n> “Smaller values of Df result in lower signal attenuation, thus a low Df is desirable for high speed applications such as PCIe.”  \n> — `raw/Market/OneNote/snla426.md`, section 5\n\n> “At high data rates, components or elements within the signal path must be treated as RF elements. Parasitic … can introduce impedance mismatch, return loss degradation, common mode noise, cross talk, plus other interference sources.”  \n> — `raw/Market/OneNote/snla426.md`, section 16\n\n**Opportunity framing:** Use oscilloscopes in combination with SI tools/VNAs for **AI server PCB/channel debug**, especially around PCIe, SerDes, connector/cable assemblies, crosstalk, and link-margin problems.\n\n---\n\n## Bottom line ranking\n\n1. **AI infrastructure / GPU high-speed interconnect validation** — strongest because the evidence explicitly names AI infrastructure, GPU, PCIe Gen6/Gen7, 112G/224G, and high-speed/power/sideband.  \n2. **AI data center server and HPC interconnect validation** — strong because the evidence names data center servers, high-bandwidth efficiency, complex data processing, and HPC.  \n3. **AI data center power delivery and DC/DC converter debug** — strong oscilloscope fit, with evidence for both oscilloscopes in power-supply test context and detailed converter waveform behavior.  \n4. **PCB/channel signal-integrity debug for PCIe-class links** — supporting opportunity around materials, parasitics, crosstalk, common-mode noise, and attenuation.\n\nThe evidence is strongest for **oscilloscopes as an enabling test instrument for AI infrastructure hardware**, especially **GPU/server interconnect and power validation**, rather than for “AI features inside oscilloscopes.”",
+      "model_turns": 4,
+      "tools": [
+       {
+        "call_id": "call_WeHDQIcIDdbnjKh2fY9Km22c",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+          "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+          "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+           "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+           "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in AI, and what evidence supports each opportunity? Please identify the strongest opportunities and cite Raw evidence for each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.454461
+            },
+            {
+             "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dfc4ec31225c09b0",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "section": 80,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.105273
+            },
+            {
+             "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.144677
+            },
+            {
+             "text": "The B, M and X options are based on each other. To use an M option, you also need\nthe corresponding B option. To use an X option, you also need the corresponding B\nand M options (for some X options, there is no M option).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 389,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.069618
+            },
+            {
+             "text": "support an IDLE UE context for satellite re-sync (similar as NTN rach less handover)\nreceive PRACH-based SR request or PUCCH based SR request\nschedule dynamic grant or CG\nidentify the first UL TX on the target satellite and indicate the event to RRC",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f589efa3eacfa002",
+               "original_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+               "sha256": "f589efa3eacfa0020a1dd7bb8c6212a6b074b1798ba5153db1b354c197b51aef",
+               "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "section": 234,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.41917
+            },
+            {
+             "text": "> The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the converter full bridge, which can vary between -VDC/N and +VDC/N depending on the duty cycle (D). The gate signals controlling this operation are illustrated in Figure 3. The current-fed full-bridge is driven by two complementary signals, each controlling a diagonal pair of MOSFETs (T1, T4 and T2, T3), with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-998a418a9fa898a5",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "sha256": "998a418a9fa898a549bac73d0843ae568ce449fd066f675a8418a5f1c71d4b00",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+              "section": 73,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.297935
+            },
+            {
+             "text": "- The operating principle of the\n  DC/DC converter is based on\n  generating a modulated DC\n  voltage (V), across the center\n  fed full-bridge, which can vary\n  between -VDC/N and +VDC/\n  N depending on the duty cycle\n  (D). The gate signals controlling\n  this operation are illustrated\n  in Figure 3. The current-fed\n  full-bridge is driven by two\n  complementary signals, each\n  controlling a diagonal pair of\n  MOSFETs (T1, T4 and T2, T3),\n  with a 180° phase shift and a\n  duty cycle (D) that can range\n  from 50 percent to 100 percent.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0e8b899a12ab4689",
+               "original_ref": "raw/Market/BBU image 3.md",
+               "sha256": "0e8b899a12ab468924c419b1b92d3162448cfbf9d8993b3e590715e0c518a98f",
+               "raw_ref": "raw/Market/BBU image 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/BBU image 3.md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.149089
+            }
+           ],
+           "text": "**AI-assisted NTN/5G test automation and analysis** — RAW evidence shows complex NTN and cellular measurement/reporting scenarios, including beam selection across multiple cells and beams with UE-capability-dependent limits [1], NTN SSB-based RRM measurements and propagation-delay compensation for NTN/shared-spectrum access [4], and satellite re-sync workflows involving PRACH/PUCCH scheduling and uplink event identification [6].\n**AI-assisted power-converter waveform/debug analysis** — RAW evidence repeatedly describes DC-DC converter operation involving modulated bridge voltage, MOSFET gate-signal control, 180° phase shift, and duty-cycle ranges from 50% to 100% [3][7][8].\n**AI-assisted configuration/capability management for test setups** — RAW evidence shows configuration dependency and capability complexity, including M and L beam-reporting values configured by reporting configuration and constrained by UE capability [1], and option dependencies where M options require corresponding B options and X options require corresponding B and M options [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-484f76aad6f2ea3a",
+              "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+             "section": 494,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.647809
+           },
+           {
+            "text": "> The operating principle of the  \n> DC-DC converter is based on  \n> generating a modulated DC  \n> voltage (Vd) across the current  \n> fed full-bridge, which can vary  \n> between -VDC/N and +VDC/  \n> N depending on the duty cycle  \n> (D). The gate signals controlling  \n> this operation are illustrated  \n> in Figure 3. The current-fed  \n> full-bridge is driven by two  \n> complementary signals, each  \n> controlling a diagonal pair of  \n> MOSFETs (T1, T4 and T2, T3),  \n> with a 180° phase shift and a  \n> duty cycle (D) that can range  \n> from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dfc4ec31225c09b0",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "sha256": "dfc4ec31225c09b072bfae3de9ae16e99f2e9495b371713dda380ffe01a569d0",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 1.md",
+             "section": 80,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.105273
+           },
+           {
+            "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 57,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.144677
+           },
+           {
+            "text": "The B, M and X options are based on each other. To use an M option, you also need\nthe corresponding B option. To use an X option, you also need the corresponding B\nand M options (for some X options, there is no M option).",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-bc47a8ad4da77a6a",
+              "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "section": 389,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.069618
+           },
+           {
+            "text": "support an IDLE UE context for satellite re-sync (similar as NTN rach less handover)\nreceive PRACH-based SR request or PUCCH based SR request\nschedule dynamic grant or CG\nidentify the first UL TX on the target satellite and indicate the event to RRC",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f589efa3eacfa002",
+              "original_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "sha256": "f589efa3eacfa0020a1dd7bb8c6212a6b074b1798ba5153db1b354c197b51aef",
+              "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/Satellite switch with resynchronization.md",
+             "section": 234,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.41917
+           },
+           {
+            "text": "> The operating principle of the DC-DC converter is based on generating a modulated DC voltage (Vd) across the converter full bridge, which can vary between -VDC/N and +VDC/N depending on the duty cycle (D). The gate signals controlling this operation are illustrated in Figure 3. The current-fed full-bridge is driven by two complementary signals, each controlling a diagonal pair of MOSFETs (T1, T4 and T2, T3), with a 180° phase shift and a duty cycle (D) that can range from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-998a418a9fa898a5",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+              "sha256": "998a418a9fa898a549bac73d0843ae568ce449fd066f675a8418a5f1c71d4b00",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+             "section": 73,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.297935
+           },
+           {
+            "text": "- The operating principle of the\n  DC/DC converter is based on\n  generating a modulated DC\n  voltage (V), across the center\n  fed full-bridge, which can vary\n  between -VDC/N and +VDC/\n  N depending on the duty cycle\n  (D). The gate signals controlling\n  this operation are illustrated\n  in Figure 3. The current-fed\n  full-bridge is driven by two\n  complementary signals, each\n  controlling a diagonal pair of\n  MOSFETs (T1, T4 and T2, T3),\n  with a 180° phase shift and a\n  duty cycle (D) that can range\n  from 50 percent to 100 percent.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0e8b899a12ab4689",
+              "original_ref": "raw/Market/BBU image 3.md",
+              "sha256": "0e8b899a12ab468924c419b1b92d3162448cfbf9d8993b3e590715e0c518a98f",
+              "raw_ref": "raw/Market/BBU image 3.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/BBU image 3.md",
+             "section": 8,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.149089
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_TApO3jx75NKYz2i4IJtV20ep",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+          "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+          "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+           "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+           "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Find RAW evidence specifically linking oscilloscopes or oscilloscope test opportunities to AI applications, AI data centers, GPUs/AI accelerators, high-speed digital interfaces, power integrity, or power supplies. Summarize strongest opportunities with citations.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-04ab0b80488a718c",
+               "original_ref": "raw/Market/HSD Cable test image 4.md",
+               "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.125609
+            },
+            {
+             "text": "![](Grafik76.jpg)\nPower Supplies, Multimeter\n…..\nOscilloscopes\nSignal Source\n15",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae261ae2c6ea49d8",
+               "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "section": 148,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.809127
+            },
+            {
+             "text": "## 副標 / 說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e73138a0365cd1e7",
+               "original_ref": "raw/Market/HSD Cable test image 1.md",
+               "sha256": "e73138a0365cd1e7b7d67a994e0f69839b084706234bf006b35b65549a84d5b6",
+               "raw_ref": "raw/Market/HSD Cable test image 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 1.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.293227
+            },
+            {
+             "text": "### 副標/說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d41b79ede600b45f",
+               "original_ref": "raw/Market/HSD Cable test image 5.md",
+               "sha256": "d41b79ede600b45f00f70aa5f45705f3b20e3d2cc43c09b6719db46baeb5443d",
+               "raw_ref": "raw/Market/HSD Cable test image 5.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 5.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.293227
+            },
+            {
+             "text": "### 主標題下說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e4bb3efdb206a43f",
+               "original_ref": "raw/Market/HSD Cable test image.md",
+               "sha256": "e4bb3efdb206a43f913cac17052f0ae8bfad29db53bb5313a82a97e4c9933e38",
+               "raw_ref": "raw/Market/HSD Cable test image.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.999906
+            },
+            {
+             "text": "1   Assured data integrity when using a certified high speed USB cable.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bb00f7ed66cf3a5d",
+               "original_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "sha256": "bb00f7ed66cf3a5d5e0de6726bb22640f7873382a3abbbb5b905cb98d9c0c856",
+               "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+              "section": 73,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.889026
+            },
+            {
+             "text": "reference frequency input\nreference frequency output\nuser-configurable inputs or outputs,\ne.g. as trigger input or marker output\nhigh speed digital input or output,\nconnectivity in line with R&S®Digital I/Q\ninterface\nIP input for transport stream (TS) or EDI\n•  USB 3.0 (high speed) connector for external USB devices\n•  mouse and keyboard for enhanced operation\n•  R&S®NRPx power sensors (with R&S®NRP-Z4 or R&S®NRP-ZKU adapter cable) for",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1b98bb894312d3e6",
+               "original_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+               "sha256": "1b98bb894312d3e6813c57d52dabffc21b751e287059deb2e5c96c3cc101f651",
+               "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+              "section": 485,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.699995
+            },
+            {
+             "text": "Accelerator unit (R&S®CMX-B200A option)\nThe R&S®CMX-B200A option enables accelerated digital signal processing capabilities, including two high-speed digital I/Q interfaces\nto connect to other Rohde & Schwarz instruments.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-5bee12c555a55c2e",
+               "original_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+               "sha256": "5bee12c555a55c2e156bb110f89b4d24248ba6717c09abfc191c5a8683c1b23d",
+               "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "section": 66,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.263349
+            }
+           ],
+           "text": "- Power-supply-related test opportunity: RAW explicitly lists “Power Supplies” and “Oscilloscopes” in the same equipment context, supporting a direct oscilloscope-adjacent opportunity around power supplies [2].\n- High-speed data-center signal-integrity opportunity: RAW describes server/storage interconnect solutions for “high-speed, high-density applications” that ensure “superior signal integrity” for “next-gen enterprise server and data center architectures,” supporting a high-speed digital/data-center signal-integrity test opportunity, though it does not explicitly name oscilloscopes [1].\n- High-speed digital interface opportunity: RAW identifies “high speed digital input or output,” USB 3.0 high-speed connectivity, and high-speed digital I/Q interfaces, supporting high-speed digital interface test opportunities, though it does not explicitly name oscilloscopes [7][8].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-04ab0b80488a718c",
+              "original_ref": "raw/Market/HSD Cable test image 4.md",
+              "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/HSD Cable test image 4.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.125609
+           },
+           {
+            "text": "![](Grafik76.jpg)\nPower Supplies, Multimeter\n…..\nOscilloscopes\nSignal Source\n15",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ae261ae2c6ea49d8",
+              "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+             "section": 148,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 31.809127
+           },
+           {
+            "text": "reference frequency input\nreference frequency output\nuser-configurable inputs or outputs,\ne.g. as trigger input or marker output\nhigh speed digital input or output,\nconnectivity in line with R&S®Digital I/Q\ninterface\nIP input for transport stream (TS) or EDI\n•  USB 3.0 (high speed) connector for external USB devices\n•  mouse and keyboard for enhanced operation\n•  R&S®NRPx power sensors (with R&S®NRP-Z4 or R&S®NRP-ZKU adapter cable) for",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-1b98bb894312d3e6",
+              "original_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+              "sha256": "1b98bb894312d3e6813c57d52dabffc21b751e287059deb2e5c96c3cc101f651",
+              "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+             "section": 485,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.699995
+           },
+           {
+            "text": "Accelerator unit (R&S®CMX-B200A option)\nThe R&S®CMX-B200A option enables accelerated digital signal processing capabilities, including two high-speed digital I/Q interfaces\nto connect to other Rohde & Schwarz instruments.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-5bee12c555a55c2e",
+              "original_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "sha256": "5bee12c555a55c2e156bb110f89b4d24248ba6717c09abfc191c5a8683c1b23d",
+              "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+             "section": 66,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.263349
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_eCLtlHlLVbGA6HvZUS2dacaT",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+          "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+          "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-b2f94f195675430db54485b1c1f98ce8",
+           "request_id": "request-b2f94f195675430db54485b1c1f98ce8",
+           "span_id": "span-b2f94f195675430db54485b1c1f98ce8",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What RAW evidence in the vault connects AI infrastructure or AI data centers with oscilloscope-relevant measurements such as power integrity, power conversion, high-speed interconnect/signal integrity, PCIe, DDR, Ethernet, SerDes, or GPU/accelerator validation? Return passages and citations.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "### 5\n**Double & Single Density Mini Cool Edge**\n- Support AI infrastructure, GPU, HPC, and high-density interconnections.\n- Performs to PCIe® Gen6, Gen7, 112G, and 224G specs.\n- BTB, WTB, and cable receptacles are available\n- Support high speed, power, and sideband",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-04ab0b80488a718c",
+               "original_ref": "raw/Market/HSD Cable test image 4.md",
+               "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.247019
+            },
+            {
+             "text": "DATA CENTER\nSERVER SOLUTIONS\nFueling Servers with High-Speed Interconnect\nSolutions for Scalable Performance\nAmphenol’s portfolio of connectors, cables, and high-speed\ncomponents is built for peak server performance. Designed for high-\nbandwidth efficiency, our solutions ensure seamless data flow in data\ncenters. These reliable components optimize server operations for\ncomplex data processing and high-performance computing.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-108d7b58b896a099",
+               "original_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "sha256": "108d7b58b896a0995ecc89afb9d513a04577bf496cb665f05a481edc7b27d429",
+               "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.023335
+            },
+            {
+             "text": "- TDCP is a new measurement introduced in Rel-18。\n- TDCP provides CSI information on the relative mobility of the UE and the associated Doppler on the channel with the gNodeB。\n- TDCP can be used to adjust configuration parameters such as codebook type or reference signal，以 adapt to channel conditions and ensure robust transmission in high-speed scenarios。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": null,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+             },
+             "score": 38.403818
+            },
+            {
+             "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-04ab0b80488a718c",
+               "original_ref": "raw/Market/HSD Cable test image 4.md",
+               "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.084726
+            },
+            {
+             "text": "## 副標 / 說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e73138a0365cd1e7",
+               "original_ref": "raw/Market/HSD Cable test image 1.md",
+               "sha256": "e73138a0365cd1e7b7d67a994e0f69839b084706234bf006b35b65549a84d5b6",
+               "raw_ref": "raw/Market/HSD Cable test image 1.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 1.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.134942
+            },
+            {
+             "text": "### 副標/說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d41b79ede600b45f",
+               "original_ref": "raw/Market/HSD Cable test image 5.md",
+               "sha256": "d41b79ede600b45f00f70aa5f45705f3b20e3d2cc43c09b6719db46baeb5443d",
+               "raw_ref": "raw/Market/HSD Cable test image 5.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 5.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.134942
+            },
+            {
+             "text": "r f\nmeasurement of material power dissipation or the degree of signal attenuation and typically ranges from 0.02\nto 0.001 for ultra-low loss materials. Smaller values of D result in lower signal attenuation, thus a low D is\nf f\ndesirable for high speed applications such as PCIe.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2355e9ce63c7116b",
+               "original_ref": "raw/Market/OneNote/snla426.md",
+               "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+               "raw_ref": "raw/Market/OneNote/snla426.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.85914
+            },
+            {
+             "text": "29 Summary\nAt high data rates, components or elements within the signal path must be treated as RF elements. Parasitic\ndue to these elements can introduce impedance mismatch, return loss degradation, common mode noise, cross\ntalk, plus other interference sources. Additionally, temperature and humidity side effects must be considered.\nUsing 3D HFSS PCB simulations and close examination of previous design can facilitate and provide a more",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2355e9ce63c7116b",
+               "original_ref": "raw/Market/OneNote/snla426.md",
+               "sha256": "2355e9ce63c7116bf1c89431e6f6b9a5ec9164fd0e14badfb910f26a9088d4b4",
+               "raw_ref": "raw/Market/OneNote/snla426.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/snla426.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.645998
+            }
+           ],
+           "text": "Support high speed, power, and sideband.” [1]\ncomplex data processing and high-performance computing.” [2]\n“Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.” [4]\n“Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.” [5]\n“Optimized for high-speed, high-density applications, our server and storage interconnect solutions ensure superior signal integrity, reliable data transmission, and scalable performance to support next-gen enterprise server and data center architectures.” [6]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "### 5\n**Double & Single Density Mini Cool Edge**\n- Support AI infrastructure, GPU, HPC, and high-density interconnections.\n- Performs to PCIe® Gen6, Gen7, 112G, and 224G specs.\n- BTB, WTB, and cable receptacles are available\n- Support high speed, power, and sideband",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-04ab0b80488a718c",
+              "original_ref": "raw/Market/HSD Cable test image 4.md",
+              "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/HSD Cable test image 4.md",
+             "section": 15,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.247019
+           },
+           {
+            "text": "DATA CENTER\nSERVER SOLUTIONS\nFueling Servers with High-Speed Interconnect\nSolutions for Scalable Performance\nAmphenol’s portfolio of connectors, cables, and high-speed\ncomponents is built for peak server performance. Designed for high-\nbandwidth efficiency, our solutions ensure seamless data flow in data\ncenters. These reliable components optimize server operations for\ncomplex data processing and high-performance computing.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-108d7b58b896a099",
+              "original_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "sha256": "108d7b58b896a0995ecc89afb9d513a04577bf496cb665f05a481edc7b27d429",
+              "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.023335
+           },
+           {
+            "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-04ab0b80488a718c",
+              "original_ref": "raw/Market/HSD Cable test image 4.md",
+              "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/HSD Cable test image 4.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.084726
+           },
+           {
+            "text": "## 副標 / 說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e73138a0365cd1e7",
+              "original_ref": "raw/Market/HSD Cable test image 1.md",
+              "sha256": "e73138a0365cd1e7b7d67a994e0f69839b084706234bf006b35b65549a84d5b6",
+              "raw_ref": "raw/Market/HSD Cable test image 1.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/HSD Cable test image 1.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.134942
+           },
+           {
+            "text": "### 副標/說明文字\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d41b79ede600b45f",
+              "original_ref": "raw/Market/HSD Cable test image 5.md",
+              "sha256": "d41b79ede600b45f00f70aa5f45705f3b20e3d2cc43c09b6719db46baeb5443d",
+              "raw_ref": "raw/Market/HSD Cable test image 5.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/HSD Cable test image 5.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.134942
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

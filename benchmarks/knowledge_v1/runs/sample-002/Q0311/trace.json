@@ -1,0 +1,380 @@
+{
+ "question": {
+  "id": "Q0311",
+  "text": "For a Aerospace / Defense use case involving radar, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-eb5ee36bca284b728e429fa709a7fcfd",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 63.187,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-eb5ee36bca284b728e429fa709a7fcfd",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Signal G…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:55:03.248896Z",
+    "updated_at": "2026-10-07T09:56:06.328097Z",
+    "messages": [
+     {
+      "message_id": "message-a6e55053a2ce474ab48ee7341f34681a",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-07T09:55:03.434975Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-c38009faa3bf4882bdee1943c1c7a421",
+      "role": "assistant",
+      "text": "The knowledge base supports the general RF-test role of a Vector Signal Generator / Vector Signal Analyzer pair, but it did not return radar-specific aerospace/defense workflow evidence. Based on the cited RF evidence, mapped to a radar workflow:\n\n### Where they fit in a radar test workflow\n\n1. **Radar receiver / exciter stimulus**\n   - The **signal generator** sits on the stimulus side.\n   - It creates controlled RF signals that emulate radar returns, targets, clutter, Doppler shifts, or interference.\n   - The KB has analogous evidence that a signal generator can provide signals under fading or Doppler-like conditions, while the analyzer measures the response.  \n   Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 198.\n\n2. **Interference, jamming, and coexistence testing**\n   - A generator can inject CW, pulsed, modulated, or noise-like interferers into the radar receiver path.\n   - This is relevant for A&D radar robustness testing: receiver blocking, desensitization, ECCM behavior, and susceptibility to nearby emitters.\n   - The KB cites use of additional signal-generator paths for CW interference generation.  \n   Citation: `raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`, section 20.\n\n3. **Radar transmitter characterization**\n   - The **signal analyzer** sits on the measurement side.\n   - It measures the radar transmitter output: carrier frequency, pulse power, pulse width, PRI/PRF, chirp bandwidth, modulation quality, spurious emissions, harmonics, phase noise, and spectral mask behavior.\n   - The KB supports the general role of standalone vector signal analyzers and signal generators for high-accuracy signal analysis and generation.  \n   Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 69.\n\n4. **System-level radar validation**\n   - In a closed-loop or hardware-in-the-loop setup:\n     - **Signal generator** emulates the RF environment or target echo.\n     - **Radar DUT** processes/transmits/receives.\n     - **Signal analyzer** verifies what the radar produced or how it responded.\n   - This is the natural fit for design validation, production test, depot maintenance, and conformance-style performance checks.\n\n### Simple placement\n\n```text\nTest scenario / target model\n        ↓\nSignal Generator\n  Creates radar echo, Doppler, clutter, jammer, interferer\n        ↓\nRadar DUT receiver / system\n        ↓\nRadar output or transmitter path\n        ↓\nSignal Analyzer\n  Measures spectrum, pulse parameters, modulation, phase noise, spurs\n        ↓\nPass/fail, characterization, troubleshooting\n```\n\nSo, in an aerospace/defense radar workflow, the **Signal Generator is primarily the “threat/target/environment emulator,”** and the **Signal Analyzer is the “radar signal quality and compliance measurement instrument.”**",
+      "created_at": "2026-10-07T09:56:06.328097Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-617cd56f8ad8401c8b577064b0bd591a",
+       "request_id": "request-617cd56f8ad8401c8b577064b0bd591a",
+       "span_id": "span-617cd56f8ad8401c8b577064b0bd591a",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base supports the general RF-test role of a Vector Signal Generator / Vector Signal Analyzer pair, but it did not return radar-specific aerospace/defense workflow evidence. Based on the cited RF evidence, mapped to a radar workflow:\n\n### Where they fit in a radar test workflow\n\n1. **Radar receiver / exciter stimulus**\n   - The **signal generator** sits on the stimulus side.\n   - It creates controlled RF signals that emulate radar returns, targets, clutter, Doppler shifts, or interference.\n   - The KB has analogous evidence that a signal generator can provide signals under fading or Doppler-like conditions, while the analyzer measures the response.  \n   Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 198.\n\n2. **Interference, jamming, and coexistence testing**\n   - A generator can inject CW, pulsed, modulated, or noise-like interferers into the radar receiver path.\n   - This is relevant for A&D radar robustness testing: receiver blocking, desensitization, ECCM behavior, and susceptibility to nearby emitters.\n   - The KB cites use of additional signal-generator paths for CW interference generation.  \n   Citation: `raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`, section 20.\n\n3. **Radar transmitter characterization**\n   - The **signal analyzer** sits on the measurement side.\n   - It measures the radar transmitter output: carrier frequency, pulse power, pulse width, PRI/PRF, chirp bandwidth, modulation quality, spurious emissions, harmonics, phase noise, and spectral mask behavior.\n   - The KB supports the general role of standalone vector signal analyzers and signal generators for high-accuracy signal analysis and generation.  \n   Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 69.\n\n4. **System-level radar validation**\n   - In a closed-loop or hardware-in-the-loop setup:\n     - **Signal generator** emulates the RF environment or target echo.\n     - **Radar DUT** processes/transmits/receives.\n     - **Signal analyzer** verifies what the radar produced or how it responded.\n   - This is the natural fit for design validation, production test, depot maintenance, and conformance-style performance checks.\n\n### Simple placement\n\n```text\nTest scenario / target model\n        ↓\nSignal Generator\n  Creates radar echo, Doppler, clutter, jammer, interferer\n        ↓\nRadar DUT receiver / system\n        ↓\nRadar output or transmitter path\n        ↓\nSignal Analyzer\n  Measures spectrum, pulse parameters, modulation, phase noise, spurs\n        ↓\nPass/fail, characterization, troubleshooting\n```\n\nSo, in an aerospace/defense radar workflow, the **Signal Generator is primarily the “threat/target/environment emulator,”** and the **Signal Analyzer is the “radar signal quality and compliance measurement instrument.”**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-617cd56f8ad8401c8b577064b0bd591a",
+      "request_id": "request-617cd56f8ad8401c8b577064b0bd591a",
+      "span_id": "span-617cd56f8ad8401c8b577064b0bd591a",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-617cd56f8ad8401c8b577064b0bd591a",
+       "request_id": "request-617cd56f8ad8401c8b577064b0bd591a",
+       "span_id": "span-617cd56f8ad8401c8b577064b0bd591a",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base supports the general RF-test role of a Vector Signal Generator / Vector Signal Analyzer pair, but it did not return radar-specific aerospace/defense workflow evidence. Based on the cited RF evidence, mapped to a radar workflow:\n\n### Where they fit in a radar test workflow\n\n1. **Radar receiver / exciter stimulus**\n   - The **signal generator** sits on the stimulus side.\n   - It creates controlled RF signals that emulate radar returns, targets, clutter, Doppler shifts, or interference.\n   - The KB has analogous evidence that a signal generator can provide signals under fading or Doppler-like conditions, while the analyzer measures the response.  \n   Citation: `raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`, section 198.\n\n2. **Interference, jamming, and coexistence testing**\n   - A generator can inject CW, pulsed, modulated, or noise-like interferers into the radar receiver path.\n   - This is relevant for A&D radar robustness testing: receiver blocking, desensitization, ECCM behavior, and susceptibility to nearby emitters.\n   - The KB cites use of additional signal-generator paths for CW interference generation.  \n   Citation: `raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`, section 20.\n\n3. **Radar transmitter characterization**\n   - The **signal analyzer** sits on the measurement side.\n   - It measures the radar transmitter output: carrier frequency, pulse power, pulse width, PRI/PRF, chirp bandwidth, modulation quality, spurious emissions, harmonics, phase noise, and spectral mask behavior.\n   - The KB supports the general role of standalone vector signal analyzers and signal generators for high-accuracy signal analysis and generation.  \n   Citation: `raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md`, section 69.\n\n4. **System-level radar validation**\n   - In a closed-loop or hardware-in-the-loop setup:\n     - **Signal generator** emulates the RF environment or target echo.\n     - **Radar DUT** processes/transmits/receives.\n     - **Signal analyzer** verifies what the radar produced or how it responded.\n   - This is the natural fit for design validation, production test, depot maintenance, and conformance-style performance checks.\n\n### Simple placement\n\n```text\nTest scenario / target model\n        ↓\nSignal Generator\n  Creates radar echo, Doppler, clutter, jammer, interferer\n        ↓\nRadar DUT receiver / system\n        ↓\nRadar output or transmitter path\n        ↓\nSignal Analyzer\n  Measures spectrum, pulse parameters, modulation, phase noise, spurs\n        ↓\nPass/fail, characterization, troubleshooting\n```\n\nSo, in an aerospace/defense radar workflow, the **Signal Generator is primarily the “threat/target/environment emulator,”** and the **Signal Analyzer is the “radar signal quality and compliance measurement instrument.”**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_L6YElTGgO7mBZzA3P4ksCvCT",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-617cd56f8ad8401c8b577064b0bd591a",
+          "request_id": "request-617cd56f8ad8401c8b577064b0bd591a",
+          "span_id": "span-617cd56f8ad8401c8b577064b0bd591a",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-617cd56f8ad8401c8b577064b0bd591a",
+           "request_id": "request-617cd56f8ad8401c8b577064b0bd591a",
+           "span_id": "span-617cd56f8ad8401c8b577064b0bd591a",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For an Aerospace / Defense use case involving radar, where would Signal Generator / Signal Analyzer fit in the test workflow? Explain the typical radar test workflow roles for signal generator and signal analyzer.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 20,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 43.96894
+            },
+            {
+             "text": "High Precision: Utilizes a standalone Vector Signal Analyzer (VSA: R&S® FSV(A)/FSW) and Vector Signal Generator (VSG: R&S® SMW/SMM/SMBV) for high-accuracy signal analysis and generation, ideal for detailed performance assessment.\nUse Case: Primarily used for conformance and certification testing. Ensures that the O-RU meets rigorous conformance and certification requirements, facilitating seamless integration into broader network deployments.\nComprehensive Test Coverage: The setup supports conformance test suites aligned with WG4 CONF FR1/FR2 and 3GPP TS 38.141-1/2 Chapter 6 and 7 ( all test cases supported).\n9",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8ea3b55008b7c337",
+               "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+               "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "section": 69,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.507366
+            },
+            {
+             "text": "signal- and spectrum analyzer. Any of the following Rohde & Schwarz signal and spectrum analyzers can be\nused for this test case.\n► R&S®FSW\n► R&S®FSV3000 and R&S®FSVA3000\n► R&S®FSV and R&S®FSVA",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.687099
+            },
+            {
+             "text": "could be verified in an E2E scenario [Ref. 132].\nAnother example directly related to NTN for such interconnection is the verification of the UE capability to\nprecompensate the Doppler in uplink direction. In such a test setup, a signal generator may provide a downlink sig-\nnal under fading conditions, e.g. a moving LEO Doppler time-variant frequency offset as shown in Figure 141. In this\ncase, the signal analyzer will measure the uplink carrier frequency. The control routine software can calculate the per-",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 198,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.925233
+            },
+            {
+             "text": "This measurement is performed in phase noise mode with the signal source used as input signal for the frequency translating\ndevice. In this test setup, the signal source and the receiving signal path use the same internal reference frequency for the\nsynthesizers. Therefore the close in phase noise cancels if the DUT is a frequency divider, a frequency multiplier or a DDS chip\n(which uses the signal source output as clock signal). For this measurement the phase noise sensitivity depends mainly on the input\nfrequency of the R&S®FSWP.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d9f5b6d241c1e5d8",
+               "original_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "sha256": "d9f5b6d241c1e5d834b6f0c0df762971f0c39a6fc045fc2d7db2589ee858e26f",
+               "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+              "section": 745,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.87192
+            },
+            {
+             "text": "DVB-S2X signals use different modulation schemes\nfor the payload and the header sections of the frame.\nThe different modulations can be analyzed using the\nR&S®FSW multi-standard radio analyzer (MSRA) mode\nand the R&S®FSW-K70 option. With this configuration,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.672971
+            },
+            {
+             "text": "3.3.5 Settings for 5G NR signal analysis\nThe FSW spectrum analyzer provides an overview-screen where the most important common settings for\nanalyzing a 5G NR signal can be made:\n②: Select Deployment, Channel bandwidth and test model\n③: Set center-frequency, reference level and FSW attenuation\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 16\n2 3",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.096125
+            },
+            {
+             "text": "signal with QPSK modulation. [1]\nFigure 19: Test setup receiver intermodulation\n► The SMW generates a NR uplink signal with FRC and level settings (see below) which is applied to the\nBS receiver port (all parameters are implemented in the test case wizard)\n► The NR interferer is generated in baseband B (all parameters are implemented in the test case wizard)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 75,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.390674
+            }
+           ],
+           "text": "In a supported generic RF test workflow, the signal generator fits on the stimulus/emulation side: it generates test signals for high-accuracy assessment [2], can provide signals under fading or Doppler-like conditions [4], and can generate optional CW interference [1].\nThe signal analyzer fits on the measurement/verification side: it performs high-accuracy signal analysis for detailed performance assessment [2] and measures the resulting carrier/signal output in the test setup [4].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 20,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 43.96894
+           },
+           {
+            "text": "High Precision: Utilizes a standalone Vector Signal Analyzer (VSA: R&S® FSV(A)/FSW) and Vector Signal Generator (VSG: R&S® SMW/SMM/SMBV) for high-accuracy signal analysis and generation, ideal for detailed performance assessment.\nUse Case: Primarily used for conformance and certification testing. Ensures that the O-RU meets rigorous conformance and certification requirements, facilitating seamless integration into broader network deployments.\nComprehensive Test Coverage: The setup supports conformance test suites aligned with WG4 CONF FR1/FR2 and 3GPP TS 38.141-1/2 Chapter 6 and 7 ( all test cases supported).\n9",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8ea3b55008b7c337",
+              "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+             "section": 69,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.507366
+           },
+           {
+            "text": "could be verified in an E2E scenario [Ref. 132].\nAnother example directly related to NTN for such interconnection is the verification of the UE capability to\nprecompensate the Doppler in uplink direction. In such a test setup, a signal generator may provide a downlink sig-\nnal under fading conditions, e.g. a moving LEO Doppler time-variant frequency offset as shown in Figure 141. In this\ncase, the signal analyzer will measure the uplink carrier frequency. The control routine software can calculate the per-",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-96fe10490983c7f9",
+              "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+             "section": 198,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.925233
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

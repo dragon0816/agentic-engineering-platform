@@ -1,0 +1,79 @@
+{
+ "id": "Q0381",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 65.281,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Modern radar is moving to mmWave and higher microwave bands",
+   "for finer range resolution, smaller antennas, and automotive/A&D applications",
+   "support frequency extenders",
+   "FMCW, wideband pulsed radar, and high-resolution radar",
+   "Low-RCS targets and weak echoes",
+   "Active electronically scanned arrays / MIMO radar",
+   "Phased-array and MIMO radar need many channels",
+   "Radar front ends often include mixers, converters, IF chains, and LO distribution",
+   "Radar RF paths are increasingly integrated into compact modules, PCBs, antenna-in-package structures, and radomes",
+   "Antenna, radome, and material effects",
+   "material characterization setups, and antenna/feed network measurements"
+  ],
+  "reason": "The cited passages support that certain VNA features exist, such as pulsed measurements, time-domain analysis, mixer measurements, sensitivity, dynamic range, receiver bandwidth, and de-embedding. However, they do not discuss radar technology trends or establish the causal link from radar changes to those VNA requirements, so much of the answer’s radar-specific framing is invented beyond the evidence.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that certain VNA features exist, such as pulsed measurements, time-domain analysis, mixer measurements, sensitivity, dynamic range, receiver bandwidth, and de-embedding. However, they do not discuss radar technology trends or establish the causal link from radar changes to"
+}

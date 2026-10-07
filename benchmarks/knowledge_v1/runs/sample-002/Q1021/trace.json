@@ -1,0 +1,379 @@
+{
+ "question": {
+  "id": "Q1021",
+  "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Wireless Fundamentals",
+  "topic": "OFDM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-9edc4fc777b143a8a7a87b14b07c1bb4",
+ "exchange": {
+  "sent": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 59.828,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9edc4fc777b143a8a7a87b14b07c1bb4",
+    "actor": "leo.chi",
+    "title": "What is OFDM, and which product-related measurement decisions depend on …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:44:45.483725Z",
+    "updated_at": "2026-10-07T10:45:44.084701Z",
+    "messages": [
+     {
+      "message_id": "message-2c09c85e120a425a9dde69de9482a510",
+      "role": "user",
+      "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T10:44:45.492266Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-b80369ce9a8b4d09a86998d818d691b8",
+      "role": "assistant",
+      "text": "The knowledge base gave no Raw evidence defining OFDM directly. So the definition below is general technical knowledge, not from the knowledge base.\n\n**OFDM — Orthogonal Frequency Division Multiplexing** — is a modulation/multiplexing method where a wideband channel is split into many narrow, mutually orthogonal subcarriers. Data is sent in parallel across those subcarriers, usually using QPSK/QAM symbols. Because the subcarriers are orthogonal, they can overlap in frequency without ideally interfering, which makes OFDM spectrally efficient and robust against multipath fading. It is fundamental to systems such as LTE, 5G NR, Wi‑Fi, DVB, and many broadband radio links.\n\nProduct-related measurement decisions that depend on understanding OFDM include:\n\n1. **Choosing the correct instrument mode and measurement type**  \n   In R&S 5G NR base-station transmitter testing, the required operation mode can be **Spectrum** or **5G NR**, and “depending on the operation mode, different measurements are available.” The application note explicitly says the required mode and measurement are specified per test, with Spectrum mode used for measurements such as **Occupied Bandwidth (OBW)** and **Transmitter Spurious Emissions**.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n2. **Selecting waveform-aware vs. spectrum-only measurements**  \n   OFDM signals are structured in subcarriers, symbols, slots, resource blocks, numerologies, pilots/reference signals, etc. If you need modulation quality, resource allocation, EVM, demodulation, or 5G/Wi‑Fi conformance insight, you need a standard-aware mode such as 5G NR/WLAN analysis rather than only spectrum mode. The R&S evidence supports that operation mode determines which measurements are available.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n3. **Configuring standard-specific signal structure correctly**  \n   The knowledge base notes that **PRS is not allowed to overlap with SSB OFDM symbols**. That kind of decision requires understanding OFDM time-frequency resources: which OFDM symbols are occupied by synchronization/reference signals, and where other signals may be placed.  \n   Citation: `raw/Knowledge/PRS (NR).md`, section 6.\n\n4. **Choosing OBW, ACLR/spurious, and emission-mask style measurements correctly**  \n   OFDM has high occupied bandwidth, many subcarriers, and often high PAPR. Spectrum-domain decisions such as occupied bandwidth and spurious emission measurements depend on understanding how the OFDM signal fills the allocated channel. R&S material identifies **OBW** and **transmitter spurious emissions** as Spectrum-mode measurements in 5G NR conducted base station Tx testing.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n5. **Setting Tx ON/OFF power and test model conditions**  \n   For Tx ON/OFF testing, the R&S procedure includes selecting **Transmit ON/OFF Power**, selecting a **test model**, choosing the **power unit**, and enabling **Noise Cancellation** as recommended. In OFDM-based standards, test models define subcarrier/resource-block loading and signal structure, so the chosen test model affects the measurement result.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 39.\n\nIn short: OFDM is the signal structure behind many modern wireless standards, and understanding it affects whether you choose spectrum-only measurements, standard-aware demodulation measurements, the correct 5G/Wi‑Fi/DVB mode, the right test model/resource allocation, and the right power/bandwidth/emissions settings.",
+      "created_at": "2026-10-07T10:45:44.084701Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-f6bc1cffabc2404fba829fc3acd1956d",
+       "request_id": "request-f6bc1cffabc2404fba829fc3acd1956d",
+       "span_id": "span-f6bc1cffabc2404fba829fc3acd1956d",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave no Raw evidence defining OFDM directly. So the definition below is general technical knowledge, not from the knowledge base.\n\n**OFDM — Orthogonal Frequency Division Multiplexing** — is a modulation/multiplexing method where a wideband channel is split into many narrow, mutually orthogonal subcarriers. Data is sent in parallel across those subcarriers, usually using QPSK/QAM symbols. Because the subcarriers are orthogonal, they can overlap in frequency without ideally interfering, which makes OFDM spectrally efficient and robust against multipath fading. It is fundamental to systems such as LTE, 5G NR, Wi‑Fi, DVB, and many broadband radio links.\n\nProduct-related measurement decisions that depend on understanding OFDM include:\n\n1. **Choosing the correct instrument mode and measurement type**  \n   In R&S 5G NR base-station transmitter testing, the required operation mode can be **Spectrum** or **5G NR**, and “depending on the operation mode, different measurements are available.” The application note explicitly says the required mode and measurement are specified per test, with Spectrum mode used for measurements such as **Occupied Bandwidth (OBW)** and **Transmitter Spurious Emissions**.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n2. **Selecting waveform-aware vs. spectrum-only measurements**  \n   OFDM signals are structured in subcarriers, symbols, slots, resource blocks, numerologies, pilots/reference signals, etc. If you need modulation quality, resource allocation, EVM, demodulation, or 5G/Wi‑Fi conformance insight, you need a standard-aware mode such as 5G NR/WLAN analysis rather than only spectrum mode. The R&S evidence supports that operation mode determines which measurements are available.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n3. **Configuring standard-specific signal structure correctly**  \n   The knowledge base notes that **PRS is not allowed to overlap with SSB OFDM symbols**. That kind of decision requires understanding OFDM time-frequency resources: which OFDM symbols are occupied by synchronization/reference signals, and where other signals may be placed.  \n   Citation: `raw/Knowledge/PRS (NR).md`, section 6.\n\n4. **Choosing OBW, ACLR/spurious, and emission-mask style measurements correctly**  \n   OFDM has high occupied bandwidth, many subcarriers, and often high PAPR. Spectrum-domain decisions such as occupied bandwidth and spurious emission measurements depend on understanding how the OFDM signal fills the allocated channel. R&S material identifies **OBW** and **transmitter spurious emissions** as Spectrum-mode measurements in 5G NR conducted base station Tx testing.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n5. **Setting Tx ON/OFF power and test model conditions**  \n   For Tx ON/OFF testing, the R&S procedure includes selecting **Transmit ON/OFF Power**, selecting a **test model**, choosing the **power unit**, and enabling **Noise Cancellation** as recommended. In OFDM-based standards, test models define subcarrier/resource-block loading and signal structure, so the chosen test model affects the measurement result.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 39.\n\nIn short: OFDM is the signal structure behind many modern wireless standards, and understanding it affects whether you choose spectrum-only measurements, standard-aware demodulation measurements, the correct 5G/Wi‑Fi/DVB mode, the right test model/resource allocation, and the right power/bandwidth/emissions settings.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-f6bc1cffabc2404fba829fc3acd1956d",
+      "request_id": "request-f6bc1cffabc2404fba829fc3acd1956d",
+      "span_id": "span-f6bc1cffabc2404fba829fc3acd1956d",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-f6bc1cffabc2404fba829fc3acd1956d",
+       "request_id": "request-f6bc1cffabc2404fba829fc3acd1956d",
+       "span_id": "span-f6bc1cffabc2404fba829fc3acd1956d",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no Raw evidence defining OFDM directly. So the definition below is general technical knowledge, not from the knowledge base.\n\n**OFDM — Orthogonal Frequency Division Multiplexing** — is a modulation/multiplexing method where a wideband channel is split into many narrow, mutually orthogonal subcarriers. Data is sent in parallel across those subcarriers, usually using QPSK/QAM symbols. Because the subcarriers are orthogonal, they can overlap in frequency without ideally interfering, which makes OFDM spectrally efficient and robust against multipath fading. It is fundamental to systems such as LTE, 5G NR, Wi‑Fi, DVB, and many broadband radio links.\n\nProduct-related measurement decisions that depend on understanding OFDM include:\n\n1. **Choosing the correct instrument mode and measurement type**  \n   In R&S 5G NR base-station transmitter testing, the required operation mode can be **Spectrum** or **5G NR**, and “depending on the operation mode, different measurements are available.” The application note explicitly says the required mode and measurement are specified per test, with Spectrum mode used for measurements such as **Occupied Bandwidth (OBW)** and **Transmitter Spurious Emissions**.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n2. **Selecting waveform-aware vs. spectrum-only measurements**  \n   OFDM signals are structured in subcarriers, symbols, slots, resource blocks, numerologies, pilots/reference signals, etc. If you need modulation quality, resource allocation, EVM, demodulation, or 5G/Wi‑Fi conformance insight, you need a standard-aware mode such as 5G NR/WLAN analysis rather than only spectrum mode. The R&S evidence supports that operation mode determines which measurements are available.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n3. **Configuring standard-specific signal structure correctly**  \n   The knowledge base notes that **PRS is not allowed to overlap with SSB OFDM symbols**. That kind of decision requires understanding OFDM time-frequency resources: which OFDM symbols are occupied by synchronization/reference signals, and where other signals may be placed.  \n   Citation: `raw/Knowledge/PRS (NR).md`, section 6.\n\n4. **Choosing OBW, ACLR/spurious, and emission-mask style measurements correctly**  \n   OFDM has high occupied bandwidth, many subcarriers, and often high PAPR. Spectrum-domain decisions such as occupied bandwidth and spurious emission measurements depend on understanding how the OFDM signal fills the allocated channel. R&S material identifies **OBW** and **transmitter spurious emissions** as Spectrum-mode measurements in 5G NR conducted base station Tx testing.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 23.\n\n5. **Setting Tx ON/OFF power and test model conditions**  \n   For Tx ON/OFF testing, the R&S procedure includes selecting **Transmit ON/OFF Power**, selecting a **test model**, choosing the **power unit**, and enabling **Noise Cancellation** as recommended. In OFDM-based standards, test models define subcarrier/resource-block loading and signal structure, so the chosen test model affects the measurement result.  \n   Citation: `raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`, section 39.\n\nIn short: OFDM is the signal structure behind many modern wireless standards, and understanding it affects whether you choose spectrum-only measurements, standard-aware demodulation measurements, the correct 5G/Wi‑Fi/DVB mode, the right test model/resource allocation, and the right power/bandwidth/emissions settings.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_uWY3ESdCK52SsuIFU4VAeOaR",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-f6bc1cffabc2404fba829fc3acd1956d",
+          "request_id": "request-f6bc1cffabc2404fba829fc3acd1956d",
+          "span_id": "span-f6bc1cffabc2404fba829fc3acd1956d",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-f6bc1cffabc2404fba829fc3acd1956d",
+           "request_id": "request-f6bc1cffabc2404fba829fc3acd1956d",
+           "span_id": "span-f6bc1cffabc2404fba829fc3acd1956d",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What is OFDM, and which product-related measurement decisions depend on understanding it? Include Rohde & Schwarz product-related measurement context and cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "b.  What does “minimal human intervention” mean in your context—which decisions",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.07633
+            },
+            {
+             "text": "There are two scripting interfaces, XLAPI and SCPI. It depends on the use case and\non customer preferences, which interface is recommended.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 309,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.244903
+            },
+            {
+             "text": "3.3.4 Changing operation and measurement modes\nFor the following base station transmitter tests different operation modes (Spectrum or 5G NR) are required.\nThe mode which is required for each test is specified in the respective sections.\nDepending on the operation mode, different measurements are available. What measurement is required for\nwhich test is specified in the respective section. Select the measurement by pressing Select measurement\nat the overview-screen or by pressing MEAS key on the front panel of the instrument.\n3.3.4.1 Measurements in Spectrum mode\n①: Used for Occupied bandwidth (OBW) (6.6.2)\n②: Used for Transmitter spurious emissions (6.6.5)\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 14\n2 a\n2 b\n2",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.576441
+            },
+            {
+             "text": "Periodicity and Repetition\nTODO\nCurrent Understanding and Open questions\nCurrent Understanding\nPRS is not allowed to overlap with SSB OFDM symbols.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1e756ed82ba721c0",
+               "original_ref": "raw/Knowledge/PRS (NR).md",
+               "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+               "raw_ref": "raw/Knowledge/PRS (NR).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.387225
+            },
+            {
+             "text": "2. Select measurement Transmit ON/OFF Power\n4. Select Test model\n5. Select ① Power unit\n6. It is recommended to enable ② Noise Cancellation\nFigure 12: Tx ON/OFF measurement\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 25",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 39,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.916071
+            },
+            {
+             "text": "Where do I find safety information?\nSafety information is part of the product documentation. It warns you of potential dan-\ngers and gives instructions on how to prevent personal injury or damage caused by\ndangerous situations. Safety information is provided as follows:\n● In Section 2.1, \"Safety instructions\", on page 10. The same information is provi-",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2da4078601f6c0a3",
+               "original_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "sha256": "2da4078601f6c0a3baf385390b5787c072932f98c4bd40464406ca4678ebafca",
+               "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.62553
+            },
+            {
+             "text": "The document is available on https://gloris.rohde-schwarz.com/calcert. You need the\ndevice ID of your instrument, which you can find on a label on the rear panel.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 151,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.877465
+            },
+            {
+             "text": "For more information on the R&S CMX500, visit: [www.rohde-schwarz.com/product/cmx500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\"). For more information on EMITE, visit: [www.emite-ing.com](https://www.emite-ing.com/ \"www.emite-ing.com\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.067657
+            }
+           ],
+           "text": "The RAW passages do not define OFDM; they only state that PRS must not overlap with SSB OFDM symbols [4].  \n\nIn Rohde & Schwarz 5G NR conducted base station transmitter testing, product-related decisions include choosing Spectrum or 5G NR operation mode because required modes and available measurements differ by test [3].  \n\nIn Spectrum mode, measurement choices include Occupied Bandwidth and Transmitter Spurious Emissions [3].  \n\nFor Tx ON/OFF testing, product-related measurement decisions include selecting Transmit ON/OFF Power, selecting a test model and power unit, and enabling Noise Cancellation as recommended [5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "3.3.4 Changing operation and measurement modes\nFor the following base station transmitter tests different operation modes (Spectrum or 5G NR) are required.\nThe mode which is required for each test is specified in the respective sections.\nDepending on the operation mode, different measurements are available. What measurement is required for\nwhich test is specified in the respective section. Select the measurement by pressing Select measurement\nat the overview-screen or by pressing MEAS key on the front panel of the instrument.\n3.3.4.1 Measurements in Spectrum mode\n①: Used for Occupied bandwidth (OBW) (6.6.2)\n②: Used for Transmitter spurious emissions (6.6.5)\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 14\n2 a\n2 b\n2",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-fc3b9e0cc7a10eb5",
+              "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.576441
+           },
+           {
+            "text": "Periodicity and Repetition\nTODO\nCurrent Understanding and Open questions\nCurrent Understanding\nPRS is not allowed to overlap with SSB OFDM symbols.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-1e756ed82ba721c0",
+              "original_ref": "raw/Knowledge/PRS (NR).md",
+              "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/PRS (NR).md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.387225
+           },
+           {
+            "text": "2. Select measurement Transmit ON/OFF Power\n4. Select Test model\n5. Select ① Power unit\n6. It is recommended to enable ② Noise Cancellation\nFigure 12: Tx ON/OFF measurement\nRohde & Schwarz | Application Note 5G New Radio Conducted Base Station Transmitter Tests 25",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-fc3b9e0cc7a10eb5",
+              "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+             "section": 39,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.916071
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

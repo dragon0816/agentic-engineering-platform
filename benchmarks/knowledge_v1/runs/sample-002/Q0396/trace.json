@@ -1,0 +1,380 @@
+{
+ "question": {
+  "id": "Q0396",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Vector Network Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-eda066bbb40d464eb2f40514e5b60aa8",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 49.594,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-eda066bbb40d464eb2f40514e5b60aa8",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T09:59:49.804016Z",
+    "updated_at": "2026-10-07T10:00:38.015725Z",
+    "messages": [
+     {
+      "message_id": "message-63e4b96747194a378bd59ff8ba8ccef3",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T09:59:49.815035Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-8c74f6e1b9184015972020a5fb8accae",
+      "role": "assistant",
+      "text": "Based on the current vault evidence, the strongest Vector Network Analyzer opportunities in Aerospace / Defense are:\n\n| Opportunity | Why it looks strong | Vault evidence |\n|---|---|---|\n| **1. Satellite payload testing — group delay characterization** | This is the clearest Aerospace/Defense-specific VNA opportunity in the evidence. Satellite payloads require precise characterization of transmission behavior, and the vault directly references a satellite payload testing application comparing network-analyzer-based group delay measurements. | The satellite payload testing application note compares “spectrum analyzer and network analyzer group delay measurements” and identifies the **R&S®ZNA vector network analyzer** as the VNA setup, with options including **R&S®ZNA-K9** and **R&S®ZNA-K4**. Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10. |\n| **2. High-frequency / mmWave RF component and subsystem test up to 110 GHz** | Aerospace/Defense systems increasingly use high-frequency RF and mmWave front ends for radar, satellite links, seekers, EW, and advanced communications. The vault evidence supports ZNA67EXT as a 110 GHz VNA system, making it relevant for high-end A&D component and subsystem characterization. | The ZNA67EXT specs list **“Vector network analyzer system, 110 GHz”** with 2-port and 4-port configurations, millimeter-wave converter heads, and standard/high-power options. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 125. |\n| **3. Multiport / multichannel characterization of complex RF assemblies** | A&D payloads and radar/RF front ends often involve multiport modules, phased-array paths, beamforming networks, filters, couplers, and frequency-conversion chains. The vault evidence supports scalable ZNA67EXT configurations with external test sets and 4-port 110 GHz systems. | The ZNA67EXT system consists of one **R&S®ZNA67 vector network analyzer** and **up to four external test sets**. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23. The same spec also lists **4-port 110 GHz** VNA systems with four millimeter-wave converter heads. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 125. |\n\n**Bottom line:**  \nThe vault evidence most strongly supports positioning VNAs for **satellite payload testing**, especially **group delay**, followed by **110 GHz mmWave component/subsystem characterization** and **multiport testing of complex RF assemblies**. The direct A&D linkage is strongest for satellite payload testing; the broader mmWave and multiport opportunities are supported by ZNA capability evidence and are relevant to A&D use cases.",
+      "created_at": "2026-10-07T10:00:38.015725Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-847742462b04444090bcd3cc156701a7",
+       "request_id": "request-847742462b04444090bcd3cc156701a7",
+       "span_id": "span-847742462b04444090bcd3cc156701a7",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "Based on the current vault evidence, the strongest Vector Network Analyzer opportunities in Aerospace / Defense are:\n\n| Opportunity | Why it looks strong | Vault evidence |\n|---|---|---|\n| **1. Satellite payload testing — group delay characterization** | This is the clearest Aerospace/Defense-specific VNA opportunity in the evidence. Satellite payloads require precise characterization of transmission behavior, and the vault directly references a satellite payload testing application comparing network-analyzer-based group delay measurements. | The satellite payload testing application note compares “spectrum analyzer and network analyzer group delay measurements” and identifies the **R&S®ZNA vector network analyzer** as the VNA setup, with options including **R&S®ZNA-K9** and **R&S®ZNA-K4**. Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10. |\n| **2. High-frequency / mmWave RF component and subsystem test up to 110 GHz** | Aerospace/Defense systems increasingly use high-frequency RF and mmWave front ends for radar, satellite links, seekers, EW, and advanced communications. The vault evidence supports ZNA67EXT as a 110 GHz VNA system, making it relevant for high-end A&D component and subsystem characterization. | The ZNA67EXT specs list **“Vector network analyzer system, 110 GHz”** with 2-port and 4-port configurations, millimeter-wave converter heads, and standard/high-power options. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 125. |\n| **3. Multiport / multichannel characterization of complex RF assemblies** | A&D payloads and radar/RF front ends often involve multiport modules, phased-array paths, beamforming networks, filters, couplers, and frequency-conversion chains. The vault evidence supports scalable ZNA67EXT configurations with external test sets and 4-port 110 GHz systems. | The ZNA67EXT system consists of one **R&S®ZNA67 vector network analyzer** and **up to four external test sets**. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23. The same spec also lists **4-port 110 GHz** VNA systems with four millimeter-wave converter heads. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 125. |\n\n**Bottom line:**  \nThe vault evidence most strongly supports positioning VNAs for **satellite payload testing**, especially **group delay**, followed by **110 GHz mmWave component/subsystem characterization** and **multiport testing of complex RF assemblies**. The direct A&D linkage is strongest for satellite payload testing; the broader mmWave and multiport opportunities are supported by ZNA capability evidence and are relevant to A&D use cases.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-847742462b04444090bcd3cc156701a7",
+      "request_id": "request-847742462b04444090bcd3cc156701a7",
+      "span_id": "span-847742462b04444090bcd3cc156701a7",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-847742462b04444090bcd3cc156701a7",
+       "request_id": "request-847742462b04444090bcd3cc156701a7",
+       "span_id": "span-847742462b04444090bcd3cc156701a7",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Based on the current vault evidence, the strongest Vector Network Analyzer opportunities in Aerospace / Defense are:\n\n| Opportunity | Why it looks strong | Vault evidence |\n|---|---|---|\n| **1. Satellite payload testing — group delay characterization** | This is the clearest Aerospace/Defense-specific VNA opportunity in the evidence. Satellite payloads require precise characterization of transmission behavior, and the vault directly references a satellite payload testing application comparing network-analyzer-based group delay measurements. | The satellite payload testing application note compares “spectrum analyzer and network analyzer group delay measurements” and identifies the **R&S®ZNA vector network analyzer** as the VNA setup, with options including **R&S®ZNA-K9** and **R&S®ZNA-K4**. Citation: `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`, section 10. |\n| **2. High-frequency / mmWave RF component and subsystem test up to 110 GHz** | Aerospace/Defense systems increasingly use high-frequency RF and mmWave front ends for radar, satellite links, seekers, EW, and advanced communications. The vault evidence supports ZNA67EXT as a 110 GHz VNA system, making it relevant for high-end A&D component and subsystem characterization. | The ZNA67EXT specs list **“Vector network analyzer system, 110 GHz”** with 2-port and 4-port configurations, millimeter-wave converter heads, and standard/high-power options. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 125. |\n| **3. Multiport / multichannel characterization of complex RF assemblies** | A&D payloads and radar/RF front ends often involve multiport modules, phased-array paths, beamforming networks, filters, couplers, and frequency-conversion chains. The vault evidence supports scalable ZNA67EXT configurations with external test sets and 4-port 110 GHz systems. | The ZNA67EXT system consists of one **R&S®ZNA67 vector network analyzer** and **up to four external test sets**. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 23. The same spec also lists **4-port 110 GHz** VNA systems with four millimeter-wave converter heads. Citation: `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`, section 125. |\n\n**Bottom line:**  \nThe vault evidence most strongly supports positioning VNAs for **satellite payload testing**, especially **group delay**, followed by **110 GHz mmWave component/subsystem characterization** and **multiport testing of complex RF assemblies**. The direct A&D linkage is strongest for satellite payload testing; the broader mmWave and multiport opportunities are supported by ZNA capability evidence and are relevant to A&D use cases.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_nYSjitk0EXMinKpt5xQnTaxS",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-847742462b04444090bcd3cc156701a7",
+          "request_id": "request-847742462b04444090bcd3cc156701a7",
+          "span_id": "span-847742462b04444090bcd3cc156701a7",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-847742462b04444090bcd3cc156701a7",
+           "request_id": "request-847742462b04444090bcd3cc156701a7",
+           "span_id": "span-847742462b04444090bcd3cc156701a7",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Aerospace / Defense, and what evidence supports each opportunity? Please cite Raw evidence for each opportunity.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.706552
+            },
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.647809
+            },
+            {
+             "text": "Network slicing with delay measurements on different slices -> Show network operator how network slicing works in practice and what the benefits would be. Created using XLAPI script. Analysis in CB view",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-094dfa34f112d59b",
+               "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+              "section": 49,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.999878
+            },
+            {
+             "text": "Network slicing with delay measurements on different slices -> Show network operator how network slicing works in practice and what the benefits would be. Created using XLAPI script. Analysis in CB view",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-094dfa34f112d59b",
+               "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+              "section": 52,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.999878
+            },
+            {
+             "text": "Indicates whether the UE supports NTN SSB based RRM measurements on target cells belonging to\nparallelSMTC-r17 4 SMTCs on a single frequency carrier. Otherwise, 2 SMTCs are supported (see section 6.6.2.1) for\ndetails on SMTC.\nta-BasedPDC-NTN-SharedSpectrumChAccess- Indicates whether the UE supports propagation delay compensation based on legacy TA procedure for\nr17 NTN and shared spectrum channel access",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-96fe10490983c7f9",
+               "original_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "sha256": "96fe10490983c7f94ce87c7766a0949fab4f7ff497e8a86ccb861a30f79f228e",
+               "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.918459
+            },
+            {
+             "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.885625
+            },
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.730154
+            },
+            {
+             "text": "Base units\nDesignation\nVector network analyzer system, 110 GHz, 2 test ports,\ncomplete system based on R&S®ZNA67, 2-port model,\ntwo millimeterwave converter heads, standard power\ncomplete system based on R&S®ZNA67, 4-port model,\ntwo millimeterwave converter heads, standard power\nVector network analyzer system, 110 GHz, 4 test ports,\nfour millimeterwave converter heads, standard power\ncomplete system based on R&S®ZNA67, 2-port model,\ntwo millimeterwave converter heads, high power\ntwo millimeterwave converter heads, high power\nVector network analyzer system, 110 GHz, 4 test ports,\nfour millimeterwave converter heads, high power",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 125,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.471312
+            }
+           ],
+           "text": "**High-frequency/mmWave component and subsystem testing up to 110 GHz** — RAW evidence lists R&S®ZNA67-based vector network analyzer systems at **110 GHz**, with 2-port and 4-port configurations and millimeterwave converter heads, including standard- and high-power options [8].\n**Multiport/multichannel network analysis for complex RF/mmWave assemblies** — RAW evidence shows the R&S®ZNA67EXT VNA system can include one R&S®ZNA67 vector network analyzer and **up to four external test sets** [1], and also lists **4-port 110 GHz** VNA systems with four millimeterwave converter heads [8].\n**Group-delay measurement and characterization** — RAW evidence directly compares test setups for **network analyzer group delay measurements** and identifies the R&S®ZNA vector network analyzer with relevant options as the VNA-based instrument setup [7].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 23,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.706552
+           },
+           {
+            "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.730154
+           },
+           {
+            "text": "Base units\nDesignation\nVector network analyzer system, 110 GHz, 2 test ports,\ncomplete system based on R&S®ZNA67, 2-port model,\ntwo millimeterwave converter heads, standard power\ncomplete system based on R&S®ZNA67, 4-port model,\ntwo millimeterwave converter heads, standard power\nVector network analyzer system, 110 GHz, 4 test ports,\nfour millimeterwave converter heads, standard power\ncomplete system based on R&S®ZNA67, 2-port model,\ntwo millimeterwave converter heads, high power\ntwo millimeterwave converter heads, high power\nVector network analyzer system, 110 GHz, 4 test ports,\nfour millimeterwave converter heads, high power",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-7e1162da3b81e67d",
+              "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+             "section": 125,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.471312
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

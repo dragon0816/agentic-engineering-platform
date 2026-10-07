@@ -1,0 +1,53 @@
+{
+ "id": "Q0611",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 45.563,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "AI data center use case",
+   "fits mainly at the wireless connectivity validation layer, not in the core GPU/server/optical-compute validation flow",
+   "private 5G/Wi-Fi connectivity, NTN/backhaul concept",
+   "Non-signaling Tester fits when the device does not need a full protocol session",
+   "fast RF TX/RX characterization, calibration, production checks",
+   "wireless modules, private 5G/Wi-Fi access points, edge AI gateways, robotics/AGV links",
+   "GPU, CPU, memory, accelerator validation | No / indirect",
+   "Optical interconnect / Ethernet fabric | Usually no",
+   "Production test of wireless modules"
+  ],
+  "reason": "The passages support that the CMX500 can act as an AI-enabled base station emulator and support application testing for an AI-enabled wireless prototype, and that a virtual tester workflow spans implementation to validation. They do not mention AI data centers, non-signaling testers, GPU/optical workflows, private 5G/Wi-Fi deployment, production RF calibration, or most of the proposed workflow positioning.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support that the CMX500 can act as an AI-enabled base station emulator and support application testing for an AI-enabled wireless prototype, and that a virtual tester workflow spans implementation to validation. They do not mention AI data centers, non-signaling testers, GPU/optical wor"
+}

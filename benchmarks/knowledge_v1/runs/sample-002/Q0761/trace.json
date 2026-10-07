@@ -1,0 +1,359 @@
+{
+ "question": {
+  "id": "Q0761",
+  "text": "For a AI use case involving AI data centers, where would Vector Network Analyzer fit in the test workflow?",
+  "market": "AI",
+  "product": "Vector Network Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-0920b206491343fa870f228daafa34ff",
+ "exchange": {
+  "sent": "For a AI use case involving AI data centers, where would Vector Network Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 66.625,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-0920b206491343fa870f228daafa34ff",
+    "actor": "leo.chi",
+    "title": "For a AI use case involving AI data centers, where would Vector Network …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T10:24:04.114751Z",
+    "updated_at": "2026-10-07T10:25:10.723010Z",
+    "messages": [
+     {
+      "message_id": "message-58887cf45d244dcdab85f7924a592523",
+      "role": "user",
+      "text": "For a AI use case involving AI data centers, where would Vector Network Analyzer fit in the test workflow?",
+      "created_at": "2026-10-07T10:24:04.180920Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-7ccae29db2b24f11a9cf1fdfbcc86dd9",
+      "role": "assistant",
+      "text": "The knowledge base gave only limited direct evidence for **AI data centers + VNA** specifically. It does show that data-center hardware includes high-power-density BBU/power designs, and separately that an R&S®ZNA vector network analyzer is used in network-analyzer measurement setups such as group-delay measurements. So the directly supported conclusion is: a VNA fits where the AI data-center workflow needs **RF/high-speed interconnect characterization**, not AI-model or server-software validation. Sources: data-center BBU context [raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md, section 125]; R&S®ZNA VNA for network-analyzer/group-delay measurement setup [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10].\n\nNot from the knowledge base, but based on general engineering practice, a VNA would fit here:\n\n### Where VNA fits in an AI data-center test workflow\n\n**1. Early hardware design / validation**\n- Characterize **PCB traces, packages, connectors, cables, backplanes, retimers, sockets, and power-delivery interconnects**.\n- Measure **S-parameters**: insertion loss, return loss, crosstalk, impedance discontinuities.\n- Build channel models for high-speed links such as PCIe, CXL, Ethernet, InfiniBand, or chip-to-chip interconnects.\n\n**2. Signal integrity workflow**\n- Before running full protocol tests, the VNA verifies whether the physical channel can support required bandwidth.\n- Typical role: answer “Is this interconnect clean enough for 112G/224G-class signaling?”\n- It helps identify discontinuities, connector loss, cable loss, reflections, resonances, and frequency-dependent attenuation.\n\n**3. Component and supplier qualification**\n- Qualify high-speed cables, connectors, backplanes, interposers, RF materials, and test fixtures.\n- Compare vendor parts against required S-parameter masks or internal channel budgets.\n\n**4. De-embedding and fixture characterization**\n- In high-speed measurements, fixtures often distort results.\n- A VNA is used to characterize/de-embed fixtures so oscilloscope/BERT measurements reflect the device or channel, not the test setup.\n\n**5. Production or quality control, selectively**\n- Usually not every server gets full VNA testing, but VNAs may be used for:\n  - Golden sample validation\n  - Failure analysis\n  - Incoming inspection of critical interconnects\n  - Manufacturing process correlation\n\n### Simple placement in the workflow\n\n```text\nAI data-center hardware workflow\n\nArchitecture / channel budget\n        ↓\nPCB, package, connector, cable design\n        ↓\nVNA measurement:\n  - S-parameters\n  - insertion loss\n  - return loss\n  - impedance\n  - crosstalk\n  - group delay\n        ↓\nSignal-integrity simulation / correlation\n        ↓\nProtocol validation with BERT / oscilloscope / traffic generators\n        ↓\nSystem integration: GPU servers, switches, NICs, accelerators\n        ↓\nThermal, power, reliability, production QA\n```\n\n### In one sentence\n\nA **Vector Network Analyzer fits at the physical-layer hardware validation stage** of an AI data-center workflow, especially for characterizing high-speed electrical/RF channels—PCBs, packages, connectors, cables, and backplanes—before higher-level protocol, system, and workload testing.",
+      "created_at": "2026-10-07T10:25:10.723010Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-4e48a69649714d61903e2edbec212fe8",
+       "request_id": "request-4e48a69649714d61903e2edbec212fe8",
+       "span_id": "span-4e48a69649714d61903e2edbec212fe8",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave only limited direct evidence for **AI data centers + VNA** specifically. It does show that data-center hardware includes high-power-density BBU/power designs, and separately that an R&S®ZNA vector network analyzer is used in network-analyzer measurement setups such as group-delay measurements. So the directly supported conclusion is: a VNA fits where the AI data-center workflow needs **RF/high-speed interconnect characterization**, not AI-model or server-software validation. Sources: data-center BBU context [raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md, section 125]; R&S®ZNA VNA for network-analyzer/group-delay measurement setup [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10].\n\nNot from the knowledge base, but based on general engineering practice, a VNA would fit here:\n\n### Where VNA fits in an AI data-center test workflow\n\n**1. Early hardware design / validation**\n- Characterize **PCB traces, packages, connectors, cables, backplanes, retimers, sockets, and power-delivery interconnects**.\n- Measure **S-parameters**: insertion loss, return loss, crosstalk, impedance discontinuities.\n- Build channel models for high-speed links such as PCIe, CXL, Ethernet, InfiniBand, or chip-to-chip interconnects.\n\n**2. Signal integrity workflow**\n- Before running full protocol tests, the VNA verifies whether the physical channel can support required bandwidth.\n- Typical role: answer “Is this interconnect clean enough for 112G/224G-class signaling?”\n- It helps identify discontinuities, connector loss, cable loss, reflections, resonances, and frequency-dependent attenuation.\n\n**3. Component and supplier qualification**\n- Qualify high-speed cables, connectors, backplanes, interposers, RF materials, and test fixtures.\n- Compare vendor parts against required S-parameter masks or internal channel budgets.\n\n**4. De-embedding and fixture characterization**\n- In high-speed measurements, fixtures often distort results.\n- A VNA is used to characterize/de-embed fixtures so oscilloscope/BERT measurements reflect the device or channel, not the test setup.\n\n**5. Production or quality control, selectively**\n- Usually not every server gets full VNA testing, but VNAs may be used for:\n  - Golden sample validation\n  - Failure analysis\n  - Incoming inspection of critical interconnects\n  - Manufacturing process correlation\n\n### Simple placement in the workflow\n\n```text\nAI data-center hardware workflow\n\nArchitecture / channel budget\n        ↓\nPCB, package, connector, cable design\n        ↓\nVNA measurement:\n  - S-parameters\n  - insertion loss\n  - return loss\n  - impedance\n  - crosstalk\n  - group delay\n        ↓\nSignal-integrity simulation / correlation\n        ↓\nProtocol validation with BERT / oscilloscope / traffic generators\n        ↓\nSystem integration: GPU servers, switches, NICs, accelerators\n        ↓\nThermal, power, reliability, production QA\n```\n\n### In one sentence\n\nA **Vector Network Analyzer fits at the physical-layer hardware validation stage** of an AI data-center workflow, especially for characterizing high-speed electrical/RF channels—PCBs, packages, connectors, cables, and backplanes—before higher-level protocol, system, and workload testing.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-4e48a69649714d61903e2edbec212fe8",
+      "request_id": "request-4e48a69649714d61903e2edbec212fe8",
+      "span_id": "span-4e48a69649714d61903e2edbec212fe8",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-4e48a69649714d61903e2edbec212fe8",
+       "request_id": "request-4e48a69649714d61903e2edbec212fe8",
+       "span_id": "span-4e48a69649714d61903e2edbec212fe8",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave only limited direct evidence for **AI data centers + VNA** specifically. It does show that data-center hardware includes high-power-density BBU/power designs, and separately that an R&S®ZNA vector network analyzer is used in network-analyzer measurement setups such as group-delay measurements. So the directly supported conclusion is: a VNA fits where the AI data-center workflow needs **RF/high-speed interconnect characterization**, not AI-model or server-software validation. Sources: data-center BBU context [raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md, section 125]; R&S®ZNA VNA for network-analyzer/group-delay measurement setup [raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md, section 10].\n\nNot from the knowledge base, but based on general engineering practice, a VNA would fit here:\n\n### Where VNA fits in an AI data-center test workflow\n\n**1. Early hardware design / validation**\n- Characterize **PCB traces, packages, connectors, cables, backplanes, retimers, sockets, and power-delivery interconnects**.\n- Measure **S-parameters**: insertion loss, return loss, crosstalk, impedance discontinuities.\n- Build channel models for high-speed links such as PCIe, CXL, Ethernet, InfiniBand, or chip-to-chip interconnects.\n\n**2. Signal integrity workflow**\n- Before running full protocol tests, the VNA verifies whether the physical channel can support required bandwidth.\n- Typical role: answer “Is this interconnect clean enough for 112G/224G-class signaling?”\n- It helps identify discontinuities, connector loss, cable loss, reflections, resonances, and frequency-dependent attenuation.\n\n**3. Component and supplier qualification**\n- Qualify high-speed cables, connectors, backplanes, interposers, RF materials, and test fixtures.\n- Compare vendor parts against required S-parameter masks or internal channel budgets.\n\n**4. De-embedding and fixture characterization**\n- In high-speed measurements, fixtures often distort results.\n- A VNA is used to characterize/de-embed fixtures so oscilloscope/BERT measurements reflect the device or channel, not the test setup.\n\n**5. Production or quality control, selectively**\n- Usually not every server gets full VNA testing, but VNAs may be used for:\n  - Golden sample validation\n  - Failure analysis\n  - Incoming inspection of critical interconnects\n  - Manufacturing process correlation\n\n### Simple placement in the workflow\n\n```text\nAI data-center hardware workflow\n\nArchitecture / channel budget\n        ↓\nPCB, package, connector, cable design\n        ↓\nVNA measurement:\n  - S-parameters\n  - insertion loss\n  - return loss\n  - impedance\n  - crosstalk\n  - group delay\n        ↓\nSignal-integrity simulation / correlation\n        ↓\nProtocol validation with BERT / oscilloscope / traffic generators\n        ↓\nSystem integration: GPU servers, switches, NICs, accelerators\n        ↓\nThermal, power, reliability, production QA\n```\n\n### In one sentence\n\nA **Vector Network Analyzer fits at the physical-layer hardware validation stage** of an AI data-center workflow, especially for characterizing high-speed electrical/RF channels—PCBs, packages, connectors, cables, and backplanes—before higher-level protocol, system, and workload testing.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_Js9eYfWse45gDPM7hbloRTcu",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-4e48a69649714d61903e2edbec212fe8",
+          "request_id": "request-4e48a69649714d61903e2edbec212fe8",
+          "span_id": "span-4e48a69649714d61903e2edbec212fe8",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-4e48a69649714d61903e2edbec212fe8",
+           "request_id": "request-4e48a69649714d61903e2edbec212fe8",
+           "span_id": "span-4e48a69649714d61903e2edbec212fe8",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For an AI use case involving AI data centers, where would a Vector Network Analyzer fit in the test workflow? Explain the role of VNA in AI data center test workflows with citations from Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "> Clearly, the new ultra-high-power density topology, from Infineon will go a long way in increasing the ratings of the BBUs in data centers, without needing an increase in size. This results in savings on cost and space, and combined with the scalability offered. DC-DC-SUSB is well placed to address the challenges of U1s/12s configurations. Click or scan the QR code to learn more about the new DC-DC-SUSB or to explore all of Infineon’s offerings for data center. Stay tuned for upcoming designs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-5a1571fab72a84ac",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+               "sha256": "5a1571fab72a84ac5a956e0560027dd29560f6917fe54477b76947469a659aaa",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+              "section": 125,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.162878
+            },
+            {
+             "text": "> Clearly, the new ultra-high-power density topology, from Infineon will go a long way in increasing the ratings of the BBU’s in data centers, without needing an increase in size. This results in savings in cost and space, and combined with the scalability offered. DC-F-SUSB is well placed to address the challenges of 1/1.25/2.5 configurations. Click or scan the QR code to learn more about the new DC-F-SUSB or to explore all of Infineon’s offerings for data center. Stay tuned for upcoming designs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-998a418a9fa898a5",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "sha256": "998a418a9fa898a549bac73d0843ae568ce449fd066f675a8418a5f1c71d4b00",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 2.md",
+              "section": 119,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 36.759367
+            },
+            {
+             "text": "> Clearly, the new ultra-high-power density topology, from Infineon, will go a long way in increasing the ratings of the BBUs in data centers, without needing an increase in size. This results in savings on cost and space, and combined with the scalability offered. DC-DC F-SUBS0 is well placed to address the challenges of 115/125 V configurations. Click or scan the QR code to learn more about the new DC-DC F-SUBS0 or to explore all of Infineon’s offerings for data centers. Stay tuned for upcoming designs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-905cf97eab807e95",
+               "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "sha256": "905cf97eab807e952daea5f2132f7587569ff2eda30cff2e285e5e3da3200bd0",
+               "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en 3.md",
+              "section": 128,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.855812
+            },
+            {
+             "text": "time. A use case of this scenario is given in 3GPP Release 15 for the transmission of SRS logical ports of different\nSRS resources in different OFDM symbols. In this case, antenna switching enables performing channel sounding\nfrom all physical transmit antennas of the UE. In TS 38.214, Section 6.2.1.2, different use cases are defined with\nthe notion xTyR, where x is the number of logical  SRS ports per SRS resource that need to be mapped to x out of\ny physical antennas. In this case, the logical ports of each SRS resource should be mapped to a set of physical",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-49bf386a0a800af9",
+               "original_ref": "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+               "sha256": "49bf386a0a800af9e63766d1120ee38fe24c1f0d4097fcef6552560d04b7e6fd",
+               "raw_ref": "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.763686
+            },
+            {
+             "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.121334
+            },
+            {
+             "text": "The following specifications apply for operation as a 1.0 mm vector network analyzer system. The specified data is only valid for a\nsystem configuration identical to the designation scheme at the rear panel of the R&S®ZNA67, with respect to the type and serial\nnumbers as well as the correct position (i.e. port) of the system.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 24,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.075674
+            },
+            {
+             "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 20,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.958533
+            },
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.697038
+            }
+           ],
+           "text": "The RAW evidence only supports that data-center testing context here concerns BBUs/power-density designs in data centers [1], while a Vector Network Analyzer fits in a test workflow where network-analyzer group-delay measurements are needed, using an instrument such as the R&S®ZNA vector network analyzer [5].\nThus, for an AI data-center use case, the VNA would fit in the measurement/characterization step only if the workflow includes group-delay or vector-network measurements; the RAW passages do not support tying it directly to BBU power-density validation or AI-specific data-center testing [1][5].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "> Clearly, the new ultra-high-power density topology, from Infineon will go a long way in increasing the ratings of the BBUs in data centers, without needing an increase in size. This results in savings on cost and space, and combined with the scalability offered. DC-DC-SUSB is well placed to address the challenges of U1s/12s configurations. Click or scan the QR code to learn more about the new DC-DC-SUSB or to explore all of Infineon’s offerings for data center. Stay tuned for upcoming designs.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-5a1571fab72a84ac",
+              "original_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+              "sha256": "5a1571fab72a84ac5a956e0560027dd29560f6917fe54477b76947469a659aaa",
+              "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/infineon-new-topology-for-higher-bbu-ratings-at-old-dimensions-for-data-centers-article-en.md",
+             "section": 125,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.162878
+           },
+           {
+            "text": "Comparison of test setups for spectrum analyzer and network analyzer group delay measurements\nSpectrum analyzer and signal generator Vector network analyzer\nInstruments\n► R&S®FSW signal and spectrum analyzer ► R&S®ZNA vector network analyzer\nwith R&S®FSW-K17 option with R&S®ZNA-K9, R&S®ZNA-K4,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4eedd79b08d7a305",
+              "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.121334
+           }
+          ],
+          "assessment": null,
+          "citation_policy": "raw_only",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
