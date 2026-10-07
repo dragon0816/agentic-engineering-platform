@@ -1,0 +1,124 @@
+{
+ "run_id": "fix-run-010",
+ "task_id": "T01",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 30.59,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "sections a, b, empty in order",
+   "passed": true,
+   "expected": [
+    "a",
+    "b",
+    "empty"
+   ],
+   "actual": [
+    "a",
+    "b",
+    "empty"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "a.txt kept",
+   "passed": true,
+   "expected": "第一行中文內容\\n第二行：測試資料",
+   "actual": "第一行中文內容\n第二行：測試資料",
+   "evidence_path": null
+  },
+  {
+   "name": "b.txt kept with blank line",
+   "passed": true,
+   "expected": "Hello world\\n\\nThe line above is blank.",
+   "actual": "Hello world\n\nThe line above is blank.",
+   "evidence_path": null
+  },
+  {
+   "name": "empty.txt has a heading and no body",
+   "passed": true,
+   "expected": "",
+   "actual": "",
+   "evidence_path": null
+  },
+  {
+   "name": "csv and nested file excluded",
+   "passed": true,
+   "expected": "absent",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-010\\T01\\workspace\\output\\combined.md"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-010\\T01\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-b5cfdb63789644c8ac7866fd0fa34596",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-6db9018be57a4322bc5298fb9b40e570",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "c87508a99483086c622a2e1ccae9c523e241ec18",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.4.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.6.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}
