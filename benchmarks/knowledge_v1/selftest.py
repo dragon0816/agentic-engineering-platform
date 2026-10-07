@@ -39,6 +39,13 @@ def direct(text: str, passages: list[dict[str, Any]], status: str = "succeeded",
         "answer": text, "harness": {"phase": "validated"}, "outcome": {"capability": capability}}}}
 
 
+def partial(text: str, passages: list[dict[str, Any]]) -> dict[str, Any]:
+    """The harness stopped at needs_input but answered what the evidence supports."""
+    exchange = direct(text, passages)
+    exchange["reply"]["answer"]["harness"] = {"phase": "needs_input"}
+    return exchange
+
+
 def plain(text: str) -> dict[str, Any]:
     return {"http_status": 200, "timed_out": False, "seconds": 1.0, "reply": {"answer": {
         "answer": text, "outcome": {"conversation": {"status": "answered", "text": text, "tools": []}}}}}
@@ -68,6 +75,8 @@ def main() -> int:
             ("INSUFFICIENT_KNOWLEDGE", direct("Not in the Vault.", [], "failed",
                                               "knowledge_insufficient_evidence"), Reviewer(True)),
             ("SYSTEM_ERROR", {"http_status": 500, "timed_out": False, "reply": {}}, Reviewer(True)),
+            ("PASS", partial("Supported part [1]. Missing: competitor.", [PASSAGE]), Reviewer(True)),
+            ("FAIL", partial("Supported part [1]. Missing: competitor.", [PASSAGE]), Reviewer(False)),
         ]
         wrong = 0
         for want, exchange, reviewer in cases:

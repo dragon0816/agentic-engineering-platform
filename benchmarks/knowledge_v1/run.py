@@ -38,7 +38,10 @@ from adapters.aep_web import AgentWebSession, agent_web  # noqa: E402
 from evidence import INSUFFICIENT, cited_passages, knowledge_use, verify  # noqa: E402
 from questions import SOURCE_SHA256, load, sample  # noqa: E402
 
-GRADER_VERSION = "1.0"
+# 1.1 (2026-10-07): a gap reply that still cites evidence (a partial answer
+# naming what is missing) is checked and reviewed like an answer; only a gap
+# reply with no citations is INSUFFICIENT_KNOWLEDGE.
+GRADER_VERSION = "1.1"
 TIMEOUT_S = 600.0
 HOST_JSON = Path(os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json"))
 STATUSES = ("PASS", "INSUFFICIENT_KNOWLEDGE", "FAIL", "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR")
@@ -66,13 +69,15 @@ def grade(question: dict[str, Any], exchange: dict[str, Any], vault: Path,
                     "why": f"the conversation failed ({use['failure']})"}
         return {**base, "status": "FAIL", "gap": "EXECUTION_GAP",
                 "why": "answered without using Knowledge"}
-    if use["failure"] in INSUFFICIENT or use["phase"] == "needs_input":
-        return {**base, "status": "INSUFFICIENT_KNOWLEDGE", "gap": "SOURCE_GAP or RETRIEVAL_GAP",
-                "why": f"the harness ran and reported a gap ({use['failure'] or use['phase']})"}
-    if use["status"] != "succeeded":
+    gap = use["failure"] in INSUFFICIENT or use["phase"] == "needs_input"
+    if not gap and use["status"] != "succeeded":
         return {**base, "status": "SYSTEM_ERROR", "gap": "EXECUTION_GAP",
                 "why": f"Knowledge did not complete ({use['failure'] or use['status']})"}
-    passages = cited_passages(use)
+    passages = cited_passages(use) if use["status"] == "succeeded" else []
+    base["partial"] = bool(gap and passages)
+    if gap and not passages:
+        return {**base, "status": "INSUFFICIENT_KNOWLEDGE", "gap": "SOURCE_GAP or RETRIEVAL_GAP",
+                "why": f"the harness ran and reported a gap ({use['failure'] or use['phase']})"}
     if not passages:
         return {**base, "status": "FAIL", "gap": "VALIDATION_GAP", "why": "the answer cites no evidence"}
     checks = [verify(p, vault) for p in passages]

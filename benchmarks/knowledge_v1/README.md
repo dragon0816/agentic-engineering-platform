@@ -30,12 +30,12 @@ The runner works as follows:
 
 The benchmark uses no GUI, so it can run during working hours.
 
-## Grading (grader 1.0, reviewer 1.0)
+## Grading (grader 1.1, reviewer 1.0)
 
 | Status | When |
 |---|---|
 | PASS | The Knowledge loop ran (the direct harness or the `knowledge__*` tool), the answer cites evidence, every cited file exists in the Vault with the passage text in it, and the reviewer finds the main points supported and the conclusion reasonable |
-| INSUFFICIENT_KNOWLEDGE | The loop ran and reported that the Vault lacks the evidence. The question file counts this as acceptable |
+| INSUFFICIENT_KNOWLEDGE | The loop ran and reported that the Vault lacks the evidence, with no citations. The question file counts this as acceptable. A gap reply that still cites evidence (a partial answer naming what is missing) is checked and reviewed like any answer (grader 1.1) |
 | FAIL | Knowledge was not used (`EXECUTION_GAP`), no or unverifiable citations (`VALIDATION_GAP`), or the reviewer found the answer unsupported or unreasonable (`REASONING_GAP`) |
 | NEEDS_HUMAN_REVIEW | The reviewer gave no verdict, or gave one with low confidence |
 | SYSTEM_ERROR | A timeout, an HTTP error, or the conversation or Knowledge call failed |
