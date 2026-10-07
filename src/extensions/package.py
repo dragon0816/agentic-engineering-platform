@@ -6,7 +6,6 @@ import base64
 import binascii
 import hashlib
 import json
-import os
 import re
 import shutil
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -17,6 +16,7 @@ from pydantic import Field, ValidationError, field_validator, model_validator
 
 from common.assets import AssetIdentity, RegistryContract
 from common.base import Contract, Sha256, Symbol, Text
+from common.filesystem import publish_directory
 from extensions.contracts import BridgeExtensionManifest, ExtensionCompatibility
 
 _DRIVE = re.compile(r"^[A-Za-z]:")
@@ -263,7 +263,7 @@ def stage_extension_package(
             written = stage / PurePosixPath(item.path)
             if hashlib.sha256(written.read_bytes()).hexdigest() != item.sha256:
                 raise ValueError("staged extension file digest does not match")
-        os.replace(stage, target)
+        publish_directory(stage, target)
     except (OSError, ValidationError, ValueError):
         if stage.exists():
             shutil.rmtree(stage)

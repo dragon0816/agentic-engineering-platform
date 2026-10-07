@@ -5,7 +5,6 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
-import os
 import re
 import shutil
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -16,6 +15,7 @@ from pydantic import Field, ValidationError, field_validator, model_validator
 
 from common.assets import AssetIdentity, RegistryContract, reject_embedded_secrets
 from common.base import Contract, Sha256, Text
+from common.filesystem import publish_directory
 from knowledge.evolution import (
     KnowledgeManifest,
     decision_digest,
@@ -209,7 +209,7 @@ def install_knowledge_package(payload: bytes, target_root: Path) -> KnowledgeMan
             or knowledge_digest(vault) != package.manifest.content_sha256
         ):
             raise ValueError("invalid Knowledge package")
-        os.replace(stage, target)
+        publish_directory(stage, target)
     except (OSError, VaultError, ValueError):
         if stage.exists():
             shutil.rmtree(stage)

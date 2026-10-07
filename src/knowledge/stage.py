@@ -19,6 +19,7 @@ from uuid import uuid4
 from pydantic import Field
 
 from common.base import Contract, Sha256, Text
+from common.filesystem import publish_directory
 from knowledge.conflicts import DECISIONS_HEADER
 from knowledge.evolution import decision_digest, knowledge_digest, raw_digest
 from knowledge.migrate import adopt
@@ -141,7 +142,7 @@ def stage_legacy_query_vault(
             decisions_sha256=decision_digest(vault),
             content_sha256=knowledge_digest(vault),
         )
-        os.replace(stage, target)
+        publish_directory(stage, target)
         return report
     except BaseException:
         if stage.exists() and stage.resolve().parent == target.parent.resolve():
