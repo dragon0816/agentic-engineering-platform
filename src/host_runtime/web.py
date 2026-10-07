@@ -2390,10 +2390,24 @@ class AgentWeb:
             gaps = list(missing) if isinstance(missing, list) else []
             if facet_report["relation_status"] == "missing":
                 gaps.append("direct_relationship")
-            visible_answer = (
-                "The retrieved Raw evidence does not validate the complete answer. "
-                f"Missing: {', '.join(gaps)}. No cross-facet recommendation is accepted."
-            )
+            record = base.get("record") or {}
+            record_answer = ((record.get("answer") or {}).get("text") or "").strip()
+            if record_answer and facet_report.get("claim_status") == "supported":
+                # Keep what the evidence supports and name the gap, rather than
+                # discarding a verified answer (owner 2026-10-07).
+                sources = knowledge_source_lines(record)
+                visible_answer = (
+                    "已查到可引用的部分資料：\n\n" + record_answer
+                    + ("\n\n來源：\n" + "\n".join(sources) if sources else "")
+                    + "\n\n未能以證據支持：" + ", ".join(gaps)
+                    + "。因此不能把上列資料當成完整的推薦或比較。"
+                )
+            else:
+                kind = "Knowledge" if record.get("citation_policy") == "wiki_primary" else "Raw"
+                visible_answer = (
+                    f"The retrieved {kind} evidence does not validate the complete answer. "
+                    f"Missing: {', '.join(gaps)}. No cross-facet recommendation is accepted."
+                )
         elif run.phase == "needs_input" and required_facets and not base["ok"]:
             visible_answer = (
                 "The Knowledge query did not produce a validated answer. "
@@ -2537,10 +2551,10 @@ class AgentWeb:
             return readable(outcome)
         explanations = {
             "knowledge_insufficient_evidence": (
-                "No sufficient Raw evidence was found in the selected Knowledge asset."
+                "No sufficient evidence was found in the selected Knowledge asset."
             ),
             "knowledge_not_grounded": (
-                "The model answer could not be verified against Raw citations."
+                "The model answer could not be verified against its citations."
             ),
             "knowledge_model_failed": (
                 "The configured LLM Gateway could not synthesize an answer from the "

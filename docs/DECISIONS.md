@@ -1639,3 +1639,20 @@ Rejected alternatives:
 - Raising the limit without a retry: a long answer could still be cut off.
 - Forbidding any answer after a failed lookup: the person would get nothing useful.
 - Leaving the behaviour and only recording it: an uncited answer presented as knowledge is misleading.
+
+## 2026-10-07: Knowledge harness credits cited facets, keeps supported answers, and the tool route uses the Skill procedure
+
+Decision (owner approved, from knowledge_v1 sample-001 and an offline study):
+
+1. **Facet credit.** A requested facet is covered when any cited passage meets the installed Skill's own rule for that facet (`knowledge.evidence.facet_supported_by`, used by `KnowledgeBridgeActions.facet_report`), under the Skill's citation policy. Before, only the first few passages retrieval listed for the facet counted. In 5 of 7 discarded answers, the answer had cited a passage that met the rule but sat outside that list.
+2. **No discarding.** When the claims are supported but a facet is still uncited, Agent Web shows the supported answer with its sources and `未能以證據支持：<facet>`, instead of a one-line refusal. `ok` stays false and the phase stays `needs_input`. Under `wiki_primary`, messages no longer say "Raw evidence".
+3. **Skill `company-agent/knowledge-query@1.5.0`.** It adds focus hints for Aerospace / Defense, Automotive and AI.
+   - In an offline retrieval study, the share of market evidence on topic rose from 0–33% to 83–100% with no regressions.
+   - The Semiconductor hint was left out: it cut competitor retrieval from 4/4 to 1/4.
+   - Adding "radar" to the A&D pattern was left out: it captured automotive radar questions.
+4. **Tool route uses the harness procedure.** The live vault tool comes from `engineering/knowledge-query@1.0.0`, which has no procedure, so tool-route questions ran raw-only, without facets and with an 800-token limit. They passed 9 of 58, against 22 of 34 on the direct route. The host now binds the procedure of the one Knowledge Skill the direct route uses (`_harness_knowledge_procedure`) into vault tools offered by a Skill without one. The model cannot set or change it. If there is not exactly one such Skill, none is bound.
+
+Rejected alternatives:
+- One targeted re-synthesis asking the model to cite the uncited facet's passages. In 4 of 5 offline trials it passed the check only by citing irrelevant passages, sometimes to say they did not apply. That is a false validation.
+- Copying the procedure into the engineering Skill: two sources of truth.
+- Routing every Knowledge question to the direct route: it cannot handle questions that mix Knowledge with other work.

@@ -833,3 +833,92 @@ def test_host_checks_labeled_inference_without_upgrading_the_relationship() -> N
     assert claim.status == "passed"
     invented = answer.model_copy(update={"text": text.replace("KM352 802", "KM999 802")})
     assert not answer_claims_overlap_raw(invented, inference_label=procedure.inference_label)
+
+
+def _uncredited_record(vault: Vault, question: str, cite: str) -> dict:
+    """A record whose answer cites one passage, with every facet's listed
+    passages emptied: retrieval lists only its first few per facet."""
+    assessment = assess_knowledge_evidence(vault, question, _procedure())
+    passages = assessment.selected_passages()
+    number = next(i for i, p in enumerate(passages, 1) if cite in p.text)
+    answer = Answer(question=question, status="answered", passages=passages,
+                    text=f"{cite} [{number}].")
+    record = grounded_record(
+        AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
+        TraceIdentifiers(trace_id="trace-cite", request_id="request-cite", span_id="answer"),
+        answer, assessment=assessment.summary(),
+    ).model_dump(mode="json")
+    for facet in record["assessment"]["facets"]:
+        facet["citations"] = []
+    return record
+
+
+def test_a_cited_passage_meeting_the_facet_rule_covers_it_outside_the_listed_ones(
+    tmp_path: Path,
+) -> None:
+    """knowledge_v1 sample-001 Q0071: the answer cited a passage meeting the facet
+    rule that retrieval had not listed, and the whole answer was discarded."""
+    vault = make_vault(tmp_path)
+    _write(vault, "technical", TEXTS[2])
+    record = _uncredited_record(vault, "CMP180 technical", "CMP180 technical test method")
+    unguided = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
+                                      required_facets=("technical_knowledge",))
+    unguided.result = {"ok": True, "record": record}
+    assert unguided.facet_report()["facet_status"] == "missing"
+    guided = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
+                                    required_facets=("technical_knowledge",),
+                                    procedure=_procedure())
+    guided.result = {"ok": True, "record": record}
+    assert guided.facet_report()["facet_status"] == "covered"
+
+
+def test_a_cited_passage_failing_the_facet_rule_does_not_cover_it(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    _write(vault, "product", TEXTS[1])
+    _write(vault, "technical", TEXTS[2])
+    record = _uncredited_record(vault, "CMP180 technical product", "CMP180 product option K123")
+    actions = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
+                                     required_facets=("technical_knowledge",),
+                                     procedure=_procedure())
+    actions.result = {"ok": True, "record": record}
+    report = actions.facet_report()
+    assert report["facet_status"] == "missing"
+    assert report["missing_facets"] == ["technical_knowledge"]
+
+
+def test_facet_credit_keeps_the_skills_citation_policy(tmp_path: Path) -> None:
+    """A record claiming another citation policy than the Skill's earns no credit."""
+    vault = make_vault(tmp_path)
+    _write(vault, "technical", TEXTS[2])
+    record = _uncredited_record(vault, "CMP180 technical", "CMP180 technical test method")
+    record["citation_policy"] = "wiki_primary"
+    actions = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
+                                     required_facets=("technical_knowledge",),
+                                     procedure=_procedure())
+    actions.result = {"ok": True, "record": record}
+    assert actions.facet_report()["facet_status"] == "missing"
+
+
+@pytest.mark.parametrize(("question", "focus"), [
+    ("For a Aerospace / Defense use case involving radar, where would Oscilloscope fit?",
+     "航太國防 aerospace defense"),
+    ("What are the most important S-parameters capabilities for applications in Automotive?",
+     "車用 automotive"),
+    ("How do changes in automotive radar technology affect Vector Network Analyzer needs?",
+     "車用 automotive"),
+    ("Which measurement parameters matter for Oscilloscope in AI?", "AI 資料中心 AI data center"),
+    ("What are the most important signaling test capabilities in Wireless Communication?",
+     "無線通訊 wireless communications"),
+    ("Which specifications of Signal Generator matter most for Semiconductor?", None),
+])
+def test_knowledge_skill_1_5_0_reads_the_market_a_question_names(
+    question: str, focus: str | None,
+) -> None:
+    """Owner 2026-10-07: market hints for Aerospace / Defense, Automotive and AI;
+    none for Semiconductor, whose hint pulled competitor searches off target."""
+    path = Path(__file__).parent / "fixtures/harness_skills/knowledge-evidence-v1.5.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["metadata"]["identity"]["version"] == "1.5.0"
+    procedure = KnowledgeProcedure.model_validate(payload["procedure"])
+    found = procedure.focus(question)
+    assert (found.query if found else None) == focus

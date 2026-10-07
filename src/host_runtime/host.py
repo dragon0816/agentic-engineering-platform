@@ -975,8 +975,34 @@ def build_gateway(
             None if knowledge_catalog is None else _vault_tools(knowledge_catalog)
         ),
         knowledge_capability=KNOWLEDGE_QUERY_SPEC.identity,
+        knowledge_procedure=_harness_knowledge_procedure(router.commands.skills),
         accelerator_excluded_aliases=frozenset({coding_skill().alias}),
     )
+
+
+def _harness_knowledge_procedure(
+    skills: SkillRegistry,
+) -> Callable[[], dict[str, JsonValue] | None]:
+    """The procedure of the one Knowledge Skill the direct Knowledge route uses
+    (validated or published, a knowledge harness domain, a command on the
+    Knowledge query capability), so the conversation tool route asks the vault
+    the same way. None when there is not exactly one."""
+
+    def procedure() -> dict[str, JsonValue] | None:
+        found = [
+            item for item in skills.manifests()
+            if item.procedure
+            and item.metadata.lifecycle in {"validated", "published"}
+            and item.harness_guidance is not None
+            and "knowledge" in item.harness_guidance.domains
+            and any(
+                command.kind == "capability" and command.target == KNOWLEDGE_QUERY_SPEC.identity
+                for command in item.commands
+            )
+        ]
+        return found[0].procedure if len(found) == 1 else None
+
+    return procedure
 
 
 def _vault_tools(catalog: KnowledgeCatalog) -> Callable[[], list[KnowledgeVaultTool]]:

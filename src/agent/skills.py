@@ -121,6 +121,12 @@ class SkillRegistry:
         payload = self._skills.get((namespace, alias))
         return SkillManifest.model_validate_json(payload) if payload is not None else None
 
+    def manifests(self) -> tuple[SkillManifest, ...]:
+        """Every installed Skill, in registration order."""
+        return tuple(
+            SkillManifest.model_validate_json(payload) for payload in self._skills.values()
+        )
+
     def discover(self, namespace: str) -> tuple[SkillManifest, ...]:
         return tuple(
             SkillManifest.model_validate_json(payload)

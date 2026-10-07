@@ -311,6 +311,7 @@ class Gateway:
         conversation_observer: Callable[[GatewayConversationResult], None] | None = None,
         knowledge_vaults: Callable[[], Sequence[KnowledgeVaultTool]] | None = None,
         knowledge_capability: AssetIdentity | None = None,
+        knowledge_procedure: Callable[[], dict[str, JsonValue] | None] | None = None,
         accelerator_excluded_aliases: frozenset[str] = frozenset(),
         host_tools: Callable[[], Sequence[HostTool]] | None = None,
     ):
@@ -347,6 +348,9 @@ class Gateway:
         # vault bound by the host and only the question left to the model.
         self._knowledge_vaults = knowledge_vaults
         self._knowledge_capability = knowledge_capability
+        # The procedure of the Knowledge Skill the host's direct route uses, for
+        # vault tools offered by a Skill that has none (owner 2026-10-07).
+        self._knowledge_procedure = knowledge_procedure
 
     def _vault_tools(
         self,
@@ -357,6 +361,7 @@ class Gateway:
         bound: dict[str, dict[str, JsonValue]],
         tools: list[ModelTool],
         hints: dict[str, str],
+        procedure: dict[str, JsonValue] | None = None,
     ) -> None:
         assert self._knowledge_vaults is not None
         for vault in self._knowledge_vaults():
@@ -369,6 +374,11 @@ class Gateway:
             outside = f" It does not cover: {vault.boundaries}" if vault.boundaries else ""
             bindings[name] = command
             bound[name] = {"asset": asset.model_dump(mode="json")}
+            # The installed Knowledge Skill's procedure (wiki-first retrieval,
+            # facets, synthesis limit, answer guidance) applies here as on the
+            # direct route; the host binds it, the model cannot (owner 2026-10-07).
+            if procedure and procedure.get("kind", "knowledge_query_v1") == "knowledge_query_v1":
+                bound[name]["procedure"] = procedure
             hints[name] = vault.purpose[:240]
             tools.append(ModelTool(
                 name=name,
@@ -456,8 +466,10 @@ class Gateway:
                     and self._knowledge_vaults is not None
                     and command.target == self._knowledge_capability
                 ):
+                    procedure = skill.procedure or (
+                        self._knowledge_procedure() if self._knowledge_procedure else None)
                     self._vault_tools(skill.alias, skill.instructions, command,
-                                      bindings, bound, tools, hints)
+                                      bindings, bound, tools, hints, procedure)
                     continue
                 name = f"{skill.alias}__{command.name}"
                 bindings[name] = command

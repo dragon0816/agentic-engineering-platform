@@ -13,6 +13,7 @@ from knowledge.evidence import (
     answer_claims_overlap_raw,
     answer_concerns_subject,
     connected_facets,
+    facet_supported_by,
     unsupported_product_recommendations,
 )
 from knowledge.evolution import KnowledgeAnswerRecord
@@ -165,18 +166,38 @@ class KnowledgeBridgeActions:
             item for item in assessment.relations
             if item.citation.model_dump_json() in cited
         )
+        allow_wiki = checked.citation_policy == "wiki_primary"
+
+        def cited_support(facet: str) -> bool:
+            # Any cited passage that meets the Skill's own facet rule counts,
+            # under the citation policy the Skill declared (owner 2026-10-07).
+            return (
+                self.procedure is not None
+                and checked.citation_policy == self._citation_policy()
+                and any(
+                    facet_supported_by(
+                        passage, facet, self.procedure, checked.answer.question,
+                        allow_wiki=allow_wiki,
+                    )
+                    for passage in checked.cited_passages
+                )
+            )
+
         missing = [
             facet for facet in self.required_facets
-            if facet not in observations
-            or not (
-                any(
-                    citation.model_dump_json() in cited
-                    for citation in observations[facet].citations
+            if not (
+                (
+                    facet in observations
+                    and any(
+                        citation.model_dump_json() in cited
+                        for citation in observations[facet].citations
+                    )
                 )
                 or any(
                     facet in (relation.left, relation.right)
                     for relation in cited_relations
                 )
+                or cited_support(facet)
             )
         ]
         linked = connected_facets(

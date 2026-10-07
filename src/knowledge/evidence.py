@@ -607,6 +607,25 @@ def _supports_facet(
     )
 
 
+def facet_supported_by(
+    passage: Passage, facet_name: str, procedure: KnowledgeProcedure, question: str,
+    *, allow_wiki: bool = False,
+) -> bool:
+    """Whether one passage meets the Skill's own rule for a facet.
+
+    The Host credits a facet from any cited passage this accepts, not only
+    from the few passages retrieval listed for it: in knowledge_v1 sample-001
+    answers cited a passage meeting the rule that sat outside that list, and
+    the whole answer was discarded."""
+    facet = next((item for item in procedure.facets if item.name == facet_name), None)
+    if facet is None:
+        return False
+    return _supports_facet(
+        passage, facet, procedure.subject(question), procedure.focus(question), question,
+        allow_wiki=allow_wiki,
+    )
+
+
 def _relation_pairs(
     passage: Passage,
     facets: tuple[KnowledgeFacetInstruction, ...],

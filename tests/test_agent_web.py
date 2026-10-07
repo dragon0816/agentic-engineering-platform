@@ -2151,3 +2151,45 @@ def test_a_host_with_no_namespace_says_what_to_set(tmp_path: Path) -> None:
         answer = AgentWeb(runtime).ask("files.read x")
     assert answer["ok"] is False
     assert "No namespace is configured" in answer["answer"]
+
+
+def test_a_supported_answer_with_an_uncited_facet_is_shown_with_its_gap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """knowledge_v1 sample-001 Q0071: retrieval covered every facet but the answer
+    cited none for one; the verified answer was replaced by a one-line refusal."""
+    from datetime import date
+
+    from host_runtime.knowledge_observation import KnowledgeBridgeActions
+    from knowledge.raw import RawDocument, RawSection, render, source_for
+    from knowledge.vault import Vault
+
+    original = KnowledgeBridgeActions.facet_report
+
+    def uncited_market(self: KnowledgeBridgeActions) -> dict[str, object]:
+        report = dict(original(self))
+        report.update(facet_status="missing", missing_facets=["market_trend"],
+                      claim_status="supported")
+        return report
+
+    monkeypatch.setattr(KnowledgeBridgeActions, "facet_report", uncited_market)
+    skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
+    with knowledge_runtime(tmp_path, harness_skill=True,
+                           harness_skill_file="knowledge-evidence-v1.2.json") as runtime:
+        vault = Vault(Path(runtime.config.knowledge[0].vault_root))
+        for name, content in (
+            ("market", "CMP180 wireless market demand for production testing is increasing."),
+            ("option", "CMP180 product option K123 has a specification for production testing."),
+            ("link", "CMP180 product option K123 supports wireless market demand for testing."),
+        ):
+            source = source_for(content.encode(), f"drop/{name}.txt").model_copy(
+                update={"raw_ref": f"raw/{name}.md"})
+            vault.write_raw(f"raw/{name}.md", render(RawDocument(
+                source=source, extractor="txt.v1", created=date(2026, 10, 4),
+                sections=(RawSection(text=content),))))
+        result = AgentWeb(runtime).ask_knowledge(KnowledgeAskRequest(
+            asset=V1, question="CMP180 market product", skill=skill))
+    assert result["ok"] is False
+    assert "未能以證據支持：market_trend" in result["answer"]
+    assert "已查到可引用的部分資料" in result["answer"]
+    assert "does not validate the complete answer" not in result["answer"]
