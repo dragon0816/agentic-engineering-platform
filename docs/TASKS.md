@@ -1475,3 +1475,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   2026-10-05): direction and owner decisions in
   `docs/phases/NL_WORKFLOW_AUTHORING.md`; P1 building blocks are extracted
   during the rs_workflow_system migration, P2-P4 follow the migration.
+- [x] Test stability (subagent, 2026-10-08): cp950 pwsh decoding, Windows
+  rename locks retried narrowly (`common/filesystem.py`), SOP PDF wait, Agent
+  Web refused-POST reset, marketplace snapshot line endings. Full pytest
+  2318 passed, 0 failed (`3a102e3`).
+- [x] Asset ownership step 2 merged (`9a81382`, `9d875d7`): Registry name
+  owners, co-editors, ordered versions, one active version per member,
+  owner operations and member routes; not live until the Shared Platform
+  restarts; five design choices await owner confirmation.
