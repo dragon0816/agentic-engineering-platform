@@ -86,19 +86,16 @@ E2E-01/03/04). Live doctor `inspect_coding` reports only the missing rule.
 **Phase gate (owner):** this stage is done only when the lab tasks pass *and* coding_v1 passes all 20 on the same build.
 
 **Build state:**
-- HEAD is `cbb11e0` or later.
-- Agent Web runs **`db38f28`**, restarted at 18:52; its logs are `.scratch/agent-web-20261007-185232.*`. This is the stage's final build:
-  - every Knowledge fix;
-  - Knowledge Skill 1.5.0, with 1.4.0 in `skills/disabled/`;
-  - rs-knowledge 1.0.2;
-  - coding Skill 1.7.0.
-- `cbb11e0` adds per-person avatars to Agent Web. It is UI only (`/api/avatars`, `/api/preferences`, the page) and goes live at the next restart.
+- HEAD is `9eefe75` or later.
+- Agent Web was restarted at 23:01 on HEAD, so the avatars are live. Its logs are `.scratch/agent-web-20261007-230122.*`.
+- The Shared Platform was not restarted. Asset ownership step 2 (`9a81382`, control plane) is merged, but it is not live until the platform restarts. The owner still has to confirm its design choices (see `docs/DECISIONS.md`, 2026-10-07).
+- Nothing is running except the test-stability subagent (#3), which works in its own git worktree.
 
-**Running (chained, no GUI):**
-1. knowledge_v1 `sample-003` (`.scratch/knowledge_v1-sample-003.log`).
-2. coding_v1 `fix-run-014` (`.scratch/coding_v1-fix-run-014.log`) on the same build. It completes the phase gate if it is 20/20; lab fix-010 is already 14/16 on that build.
+**Phase gate status, build `db38f28`:**
+- Lab fix-010: 14/16.
+- coding_v1 fix-run-013 and fix-run-014: 19/20 each, with a different task failing each time (Agent diligence).
 
-Do not restart Agent Web until both have finished.
+The owner decides whether to accept these, or to try coding Skill 1.8.0 first. Its wording comes from the rule-following analysis; a summary is in `docs/TASKS.md`.
 
 ### Owner rule (2026-10-07): GUI tests run only while the owner is away
 
@@ -140,6 +137,8 @@ Each run folder holds a `findings.md`.
 | knowledge_v1 | sample-002 | 75/110 acceptable | Knowledge used every time, no cut-offs; tool route 15/76 PASS |
 | Lab | **fix-010** | **14/16** | build `db38f28`. Every rerun reuses its Workflow, and X03 passes. C02 and X02 are Agent rule-following |
 | coding_v1 | fix-run-013 | 19/20 | build `db38f28`. T13 parsing (Agent variance) |
+| coding_v1 | fix-run-014 | 19/20 | build `db38f28`. T16 read only the top of `input/` |
+| knowledge_v1 | sample-003 | 68/110 acceptable | direct 25/34 PASS (was 19/34), tool 10/74 (was 15/76) |
 
 **What changed today for the lab gaps:**
 - **Grader 1.3:** a rerun may use a version run *or installed* before the request, as long as no draft follows the request.

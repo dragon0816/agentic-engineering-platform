@@ -1439,8 +1439,19 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Final build `db38f28` live (Skill 1.5.0 installed): lab fix-010 14 of 16
   PASS, every rerun reuses its Workflow, X03 passes (`041c746`); coding_v1
   fix-run-013 19 of 20 (T13 parsing, Agent variance) (`1d81472`).
-- [ ] knowledge_v1 sample-003 on `db38f28` (running), then coding_v1
-  fix-run-014 on the same build (chained), for the phase gate.
+- [x] knowledge_v1 sample-003 on `db38f28`: 68 of 110 acceptable; direct route
+  25/34 PASS (was 19), tool route 10/74 (was 15) (`9eefe75`). knowledge_v1
+  `compare.py` for cross-run comparison (`3ce2b8a`).
+- [x] coding_v1 fix-run-014 on `db38f28`: 19 of 20 (T16: read only the top of
+  input/ and "verified" empty outputs). Two runs on this build: 19, 19, each
+  failing a different task (Agent diligence variance).
+- [ ] Phase gate decision (owner): coding_v1 has 20/20 on `4becd6b` and
+  `967249b` but 19/20 twice on the lab's build `db38f28`; the rule-following
+  analysis proposes coding Skill 1.8.0 wording (read rules in full, missing
+  values follow the request/template, keep template formulas, check outputs
+  against inputs) plus a separately tested X02 wording.
+- [ ] Knowledge tool route (owner decision): return the harness's validated
+  answer as is, or route more Knowledge questions to the direct harness.
 - [x] Per-person pixel-art avatars in Agent Web (owner request; owner chose to
   keep the One Piece sheet in the repo) (`cbb11e0`). Live after the next
   restart.
