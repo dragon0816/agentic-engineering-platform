@@ -171,3 +171,15 @@ def test_install_needs_approval_and_a_rerun_keeps_the_same_digest(tmp_path: Path
                    {"candidate_id": candidate_id, "arguments": {"month": month}})
         chat.decide(run.data["approval_id"], "owner", approve=True)
     assert recorder.calls == ["2026-09", "2026-10"]
+
+
+def test_the_agent_can_read_back_its_own_draft(tmp_path: Path) -> None:
+    """Lab fix-007 W01: the Agent could not see the steps of the draft it had to fix."""
+    chat, _ = studio(tmp_path)
+    drafted = draft(chat, "write-it")
+    shown = call(chat, "authoring__get_workflow", {"candidate_id": drafted.data["candidate_id"]})
+    assert shown.status == "succeeded"
+    assert shown.data["steps"][0]["capability"]["name"] == "write-it"
+    assert [p["name"] for p in shown.data["parameters"]] == ["month"]
+    missing = call(chat, "authoring__get_workflow", {"candidate_id": "wf-nope"})
+    assert missing.status == "failed" and missing.failure.code == "candidate_unknown"

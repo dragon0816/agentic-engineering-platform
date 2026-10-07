@@ -76,15 +76,14 @@ class BridgeExecutor:
         unavailable: bool = False,
         retryable: bool = False,
         invoked: bool = False,
+        message: str = "Capability invocation did not complete",
     ) -> CapabilityResult:
         return self._finish(
             call,
             CapabilityResult(
                 trace=call.context.trace,
                 status="unavailable" if unavailable else "failed",
-                failure=Failure(
-                    code=code, message="Capability invocation did not complete", retryable=retryable
-                ),
+                failure=Failure(code=code, message=message, retryable=retryable),
                 handler_invoked=invoked,
             ),
         )
@@ -114,7 +113,12 @@ class BridgeExecutor:
             inputs = binding.input_model.model_validate_json(
                 json.dumps(call.arguments), strict=True
             )
-        except (ValidationError, TypeError, ValueError):
+        except ValidationError as error:
+            # Where and what kind, never the value: the caller (often a model
+            # drafting a Workflow) can fix its input without the input being
+            # echoed into traces.
+            return self._failure(call, "invalid_input", message=_where_invalid(error))
+        except (TypeError, ValueError):
             return self._failure(call, "invalid_input")
         guard = nullcontext() if binding.spec.side_effect == "read" else self.exclusive
         try:
@@ -153,3 +157,11 @@ class BridgeExecutor:
         except (ValidationError, TypeError, ValueError):
             return self._failure(call, "invalid_output", invoked=True)
         return self._finish(call, result)
+
+
+def _where_invalid(error: ValidationError) -> str:
+    places = [
+        f"{'.'.join(str(part) for part in item['loc']) or 'input'}: {item['type']}"
+        for item in error.errors()[:6]
+    ]
+    return "Invalid input at " + "; ".join(places)

@@ -295,3 +295,15 @@ def test_end_to_end_route_then_authorized_bridge_dispatch() -> None:
     result = asyncio.run(bridge.execute(call))
     assert result.data == {"count": 1}
     assert result.trace == route.trace
+
+
+def test_invalid_input_says_where_and_what_kind_but_never_the_value() -> None:
+    """A model drafting a Workflow can fix its step input (lab fix-007 W01)."""
+    bridge = BridgeExecutor(installed(Handler()), LocalPolicy((grant(),)))
+    call = CapabilityInvocation.model_validate(
+        {**invocation().model_dump(), "arguments": {"count": "secret-looking-1", "extra": "x9"}}
+    )
+    result = asyncio.run(bridge.execute(call))
+    assert result.failure is not None and result.failure.code == "invalid_input"
+    assert "count" in result.failure.message and "extra" in result.failure.message
+    assert "secret-looking-1" not in result.failure.message and "x9" not in result.failure.message

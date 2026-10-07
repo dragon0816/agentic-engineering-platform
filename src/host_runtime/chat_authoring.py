@@ -45,6 +45,8 @@ CandidateStatus = Literal["draft", "previewed", "installed"]
 ApprovalKind = Literal["run", "install"]
 ApprovalStatus = Literal["pending", "approved", "rejected", "failed"]
 MAX_DATA_CHARS = 4_000
+MAX_DRAFT_CHARS = 14_000
+GENERIC_FAILURE = "Capability invocation did not complete"
 RUN_TIMEOUT_SECONDS = 900.0
 
 
@@ -100,11 +102,11 @@ def digest(manifest: WorkflowManifest) -> str:
     return hashlib.sha256(manifest.model_dump_json().encode("utf-8")).hexdigest()
 
 
-def _excerpt(value: JsonValue) -> JsonValue:
+def _excerpt(value: JsonValue, limit: int = MAX_DATA_CHARS) -> JsonValue:
     text = json.dumps(value, ensure_ascii=False)
-    if len(text) <= MAX_DATA_CHARS:
+    if len(text) <= limit:
         return value
-    return {"truncated": True, "preview": text[:MAX_DATA_CHARS]}
+    return {"truncated": True, "preview": text[:limit]}
 
 
 def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
@@ -113,7 +115,9 @@ def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
     for index, step in enumerate(snapshot.step_results):
         steps.append({
             "index": index, "status": step.status,
-            "failure": None if step.failure is None else step.failure.code,
+            "failure": None if step.failure is None else (
+                step.failure.code if step.failure.message == GENERIC_FAILURE
+                else f"{step.failure.code}: {step.failure.message}"),
             "data": _excerpt(step.data),
         })
     return {
@@ -515,6 +519,18 @@ class ChatAuthoring:
                 })
             return await run_sync(work)
 
+        async def get_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
+                body: dict[str, JsonValue] = {
+                        "candidate_id": item.candidate_id,
+                        "workflow": _key(item.draft.metadata.identity),
+                        "status": item.status, "digest": digest(item.draft),
+                        "parameters": [p.model_dump(mode="json") for p in item.draft.parameters],
+                        "steps": [step.model_dump(mode="json") for step in item.draft.steps]}
+                return HostToolOutcome(status="succeeded", data=_excerpt(body, MAX_DRAFT_CHARS))
+            return await run_sync(work)
+
         async def list_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
                 return HostToolOutcome(status="succeeded", data=[
@@ -573,6 +589,14 @@ class ChatAuthoring:
                 input_schema={"type": "object", "properties": candidate,
                               "required": ["candidate_id"]},
             ), guarded(install_tool)),
+            HostTool(ModelTool(
+                name="authoring__get_workflow",
+                description="Show a drafted or installed Workflow in full (parameters and steps "
+                            "with their inputs), to check or revise it.",
+                input_contract="host.authoring.get.v1",
+                input_schema={"type": "object", "properties": candidate,
+                              "required": ["candidate_id"]},
+            ), guarded(get_tool)),
             HostTool(ModelTool(
                 name="authoring__list_workflows",
                 description="List the Workflows this person drafted or installed from "
